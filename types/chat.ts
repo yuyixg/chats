@@ -2,14 +2,22 @@ import { Model } from './model';
 
 export type Role = 'assistant' | 'user';
 
-export interface Content {
-  text: string | undefined;
-  image: string | undefined;
+export interface LingJiContent {
+  text?: string | undefined;
+  image?: string;
+}
+
+export interface GPTContent {
+  type: 'text' | 'image_url';
+  image_url?: {
+    url: string;
+  };
+  text?: string;
 }
 
 export interface Message {
   role: Role;
-  content: string;
+  content: LingJiContent | GPTContent | string;
 }
 
 export interface ChatBody {
