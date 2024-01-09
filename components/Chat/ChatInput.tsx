@@ -111,53 +111,58 @@ export const ChatInput = ({
         textareaRef?.current?.scrollHeight > 400 ? 'auto' : 'hidden'
       }`;
     }
-    console.log(content);
+    console.log('Current Content \n', content);
   }, [content]);
 
   const changeFile = async (event: any) => {
-    setUploading(true);
+    // setUploading(true);
+    setContent({
+      ...content,
+      image:
+        'https://images.pexels.com/photos/1212693/pexels-photo-1212693.jpeg?auto=compress&cs=tinysrgb&dpr=1&w=500',
+    });
     const file = event?.target?.files[0];
-    if (file) {
-      const fileType = file.name.substring(
-        file.name.lastIndexOf('.'),
-        file.name.length
-      );
-      const res = await fetch('/api/aws', {
-        method: 'POST',
-        body: JSON.stringify({
-          fileName: file.name.replace(fileType, ''),
-          fileType: fileType.replace('.', ''),
-        }),
-      });
-      const { putUrl, getUrl } = await res.json();
+    // if (file) {
+    //   const fileType = file.name.substring(
+    //     file.name.lastIndexOf('.'),
+    //     file.name.length
+    //   );
+    //   const res = await fetch('/api/aws', {
+    //     method: 'POST',
+    //     body: JSON.stringify({
+    //       fileName: file.name.replace(fileType, ''),
+    //       fileType: fileType.replace('.', ''),
+    //     }),
+    //   });
+    //   const { putUrl, getUrl } = await res.json();
 
-      fetch(putUrl, {
-        method: 'PUT',
-        body: file,
-        headers: {
-          'Content-Type': '',
-        },
-      })
-        .then((response) => {
-          if (response.ok) {
-            setContent({ ...content, image: getUrl });
-            console.log(getUrl, content);
-            console.log('文件上传成功！');
-          } else {
-            console.log(response);
-            console.error('文件上传失败。');
-          }
-        })
-        .catch((error) => console.error('发生错误：', error));
-    }
+    //   fetch(putUrl, {
+    //     method: 'PUT',
+    //     body: file,
+    //     headers: {
+    //       'Content-Type': '',
+    //     },
+    //   })
+    //     .then((response) => {
+    //       if (response.ok) {
+    //         setContent({ ...content, image: getUrl });
+    //         console.log(getUrl, content);
+    //         console.log('文件上传成功！');
+    //       } else {
+    //         console.log(response);
+    //         console.error('文件上传失败。');
+    //       }
+    //     })
+    //     .catch((error) => console.error('发生错误：', error));
+    // }
   };
 
   useEffect(() => {
-    // const fileInput = document.getElementById('upload')!;
-    // fileInput.addEventListener('change', changeFile);
-    // return () => {
-    //   fileInput.removeEventListener('change', changeFile);
-    // };
+    const fileInput = document.getElementById('upload')!;
+    fileInput.addEventListener('change', changeFile);
+    return () => {
+      fileInput.removeEventListener('change', changeFile);
+    };
   }, []);
 
   return (
@@ -223,13 +228,13 @@ export const ChatInput = ({
                 <IconSend size={18} />
               )}
             </button>
-            {/* <input
+            <input
               disabled={uploading}
               id='upload'
               className='absolute right-8 top-2 rounded-sm p-1 text-neutral-800 opacity-60 hover:bg-neutral-200 hover:text-neutral-900 dark:bg-opacity-50 dark:text-neutral-100 dark:hover:text-neutral-200'
               type='file'
               accept='image/*'
-            ></input> */}
+            ></input>
           </div>
 
           {showScrollDownButton && (

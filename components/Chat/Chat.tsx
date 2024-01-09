@@ -171,7 +171,6 @@ export const Chat = memo(({ stopConversationRef }: Props) => {
                 ...updatedConversation.messages,
                 { role: 'assistant', content: { text: chunkValue } },
               ];
-              console.log(updatedMessages);
               updatedConversation = {
                 ...updatedConversation,
                 messages: updatedMessages,
