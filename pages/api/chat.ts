@@ -1,13 +1,20 @@
 import { DEFAULT_SYSTEM_PROMPT, DEFAULT_TEMPERATURE } from '@/utils/app/const';
 import { OpenAIError, OpenAIStream } from '@/utils/server/openai';
 
-import { ChatBody, Message } from '@/types/chat';
+import {
+  ChatBody,
+  GPT4Message,
+  GPT4VisionMessage,
+  GPT4VisionMessageContent,
+  Message,
+} from '@/types/chat';
 
 // @ts-expect-error
 import wasm from '../../node_modules/@dqbd/tiktoken/lite/tiktoken_bg.wasm?module';
 
 import tiktokenModel from '@dqbd/tiktoken/encoders/cl100k_base.json';
 import { Tiktoken, init } from '@dqbd/tiktoken/lite/init';
+import { ModelIds } from '@/types/model';
 
 export const config = {
   runtime: 'edge',
@@ -40,20 +47,44 @@ const handler = async (req: Request): Promise<Response> => {
     const prompt_tokens = encoding.encode(promptToSend);
 
     let tokenCount = prompt_tokens.length;
-    let messagesToSend: Message[] = [];
+    let messagesToSend: GPT4Message[] | GPT4VisionMessage[] = [];
 
     for (let i = messages.length - 1; i >= 0; i--) {
       const message = messages[i];
-      const tokens = encoding.encode(message.content);
+      const tokens = encoding.encode(message.content.text!);
 
       if (tokenCount + tokens.length + 1000 > model.tokenLimit) {
         break;
       }
       tokenCount += tokens.length;
-      messagesToSend = [message, ...messagesToSend];
+    }
+    if (model.id === ModelIds.GPT_4_VISION) {
+      messagesToSend = messages.map((message) => {
+        const messageContent = message.content;
+        let content = [] as GPT4VisionMessageContent[];
+        if (messageContent?.text) {
+          content.push({ type: 'text', text: messageContent.text });
+        }
+        if (messageContent?.image) {
+          content.push({
+            type: 'image',
+            image: { url: messageContent.image },
+          });
+        }
+        return { role: message.role, content };
+      });
+    } else {
+      messagesToSend = messages.map((message) => {
+        return {
+          role: message.role,
+          content: message.content.text,
+        } as GPT4Message;
+      });
     }
 
     encoding.free();
+
+    console.log('Send messages \n', messagesToSend);
 
     const stream = await OpenAIStream(
       model,

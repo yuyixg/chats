@@ -14,7 +14,7 @@ import {
 
 import { useTranslation } from 'next-i18next';
 
-import { Message } from '@/types/chat';
+import { Content, Message } from '@/types/chat';
 
 import HomeContext from '@/pages/api/home/home.context';
 
@@ -38,11 +38,11 @@ export const ChatInput = ({
   const { t } = useTranslation('chat');
 
   const {
-    state: { selectedConversation, messageIsStreaming, prompts },
+    state: { selectedConversation, messageIsStreaming },
     dispatch: homeDispatch,
   } = useContext(HomeContext);
 
-  const [content, setContent] = useState<string>();
+  const [content, setContent] = useState<Content>();
   const [isTyping, setIsTyping] = useState<boolean>(false);
   const [uploading, setUploading] = useState<boolean>(false);
 
@@ -59,7 +59,7 @@ export const ChatInput = ({
       return;
     }
 
-    setContent(value);
+    setContent({ ...content, text: value });
   };
 
   const handleSend = () => {
@@ -72,7 +72,7 @@ export const ChatInput = ({
       return;
     }
     onSend({ role: 'user', content });
-    setContent('');
+    setContent({ text: '' });
 
     if (window.innerWidth < 640 && textareaRef && textareaRef.current) {
       textareaRef.current.blur();
@@ -140,7 +140,7 @@ export const ChatInput = ({
       })
         .then((response) => {
           if (response.ok) {
-            setContent('');
+            setContent({ ...content, image: getUrl });
             console.log(getUrl, content);
             console.log('文件上传成功！');
           } else {
@@ -204,7 +204,7 @@ export const ChatInput = ({
             placeholder={
               t('Type a message or type "/" to select a prompt...') || ''
             }
-            value={content}
+            value={content?.text}
             rows={1}
             onCompositionStart={() => setIsTyping(true)}
             onCompositionEnd={() => setIsTyping(false)}

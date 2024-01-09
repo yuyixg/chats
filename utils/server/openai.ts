@@ -1,4 +1,4 @@
-import { Message } from '@/types/chat';
+import { GPT4Message, GPT4VisionMessage, Message } from '@/types/chat';
 
 import {
   OPENAI_API_HOST,
@@ -32,7 +32,7 @@ export const OpenAIStream = async (
   model: Model,
   systemPrompt: string,
   temperature: number,
-  messages: Message[]
+  messages: GPT4Message[] | GPT4VisionMessage[]
 ) => {
   let url = `${OPENAI_API_HOST}/v1/chat/completions`;
   if (OPENAI_API_TYPE === 'azure') {

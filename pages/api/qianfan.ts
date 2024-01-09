@@ -1,7 +1,8 @@
+import { Message, QFMessage } from '@/types/chat';
 import { Model } from '@/types/model';
 import { QIANFAN_API_KEY, QIANFAN_SECRET_KEY } from '@/utils/app/const';
-import { QianfanClient } from '@/utils/qianfan/client';
-import { Models } from '@/utils/qianfan/type';
+import { QFClient } from '@/utils/qianfan/client';
+import { IChatMessage, Models } from '@/utils/qianfan/type';
 import {
   ParsedEvent,
   ReconnectInterval,
@@ -16,13 +17,21 @@ export default async function handler(req: any) {
   const body = await req.json();
   const { model, messages } = body as {
     model: Model;
-    messages: [];
+    messages: Message[];
     uid: string;
     parameters: object;
   };
-  let client = new QianfanClient(QIANFAN_API_KEY, QIANFAN_SECRET_KEY);
+  let client = new QFClient(QIANFAN_API_KEY, QIANFAN_SECRET_KEY);
   await client.createAuthTokenAsync();
-  let res = await client.chatAsStreamAsync(model.id as Models, messages, {
+  let messageToSend: IChatMessage[] = [];
+  messageToSend = messages.map((message) => {
+    return {
+      role: message.role,
+      content: message.content.text,
+    } as IChatMessage;
+  });
+  console.log('Send messages \n', messageToSend);
+  let res = await client.chatAsStreamAsync(model.id as Models, messageToSend, {
     request_timeout: 60000,
   });
 

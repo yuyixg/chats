@@ -15,9 +15,37 @@ export interface GPTContent {
   text?: string;
 }
 
+export interface Content {
+  text?: string;
+  image?: string;
+}
+
 export interface Message {
   role: Role;
+  content: Content;
+}
+
+export interface QFMessage {
+  role: Role;
   content: string;
+}
+
+export interface GPT4Message {
+  role: Role;
+  content: string;
+}
+
+export interface GPT4VisionMessageContent {
+  type?: 'text' | 'image';
+  text?: string;
+  image?: {
+    url: string;
+  };
+}
+
+export interface GPT4VisionMessage {
+  role: Role;
+  content: GPT4VisionMessageContent[];
 }
 
 export interface ChatBody {

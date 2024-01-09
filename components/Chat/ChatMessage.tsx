@@ -57,7 +57,7 @@ export const ChatMessage: FC<Props> = memo(
     const handleInputChange = (
       event: React.ChangeEvent<HTMLTextAreaElement>
     ) => {
-      setMessageContent(event.target.value);
+      setMessageContent({ text: event.target.value });
       if (textareaRef.current) {
         textareaRef.current.style.height = 'inherit';
         textareaRef.current.style.height = `${textareaRef.current.scrollHeight}px`;
@@ -112,7 +112,7 @@ export const ChatMessage: FC<Props> = memo(
     const copyOnClick = () => {
       if (!navigator.clipboard) return;
 
-      navigator.clipboard.writeText(message.content).then(() => {
+      navigator.clipboard.writeText(message.content.text || '').then(() => {
         setMessageCopied(true);
         setTimeout(() => {
           setMessageCopied(false);
@@ -157,7 +157,7 @@ export const ChatMessage: FC<Props> = memo(
                     <textarea
                       ref={textareaRef}
                       className='w-full resize-none whitespace-pre-wrap border-none dark:bg-[#343541]'
-                      value={messageContent}
+                      value={messageContent.text}
                       onChange={handleInputChange}
                       onKeyDown={handlePressEnter}
                       onCompositionStart={() => setIsTyping(true)}
@@ -176,7 +176,9 @@ export const ChatMessage: FC<Props> = memo(
                       <button
                         className='h-[40px] rounded-md bg-blue-500 px-4 py-1 text-sm font-medium text-white enabled:hover:bg-blue-600 disabled:opacity-50'
                         onClick={handleEditMessage}
-                        disabled={messageContent.trim().length <= 0}
+                        disabled={
+                          (messageContent.text || '')?.trim().length <= 0
+                        }
                       >
                         {t('Save & Submit')}
                       </button>
@@ -193,7 +195,7 @@ export const ChatMessage: FC<Props> = memo(
                   </div>
                 ) : (
                   <div className='prose whitespace-pre-wrap dark:prose-invert flex-1'>
-                    {message.content}
+                    {message.content.text}
                   </div>
                 )}
 
@@ -275,7 +277,7 @@ export const ChatMessage: FC<Props> = memo(
                     },
                   }}
                 >
-                  {`${message.content}${
+                  {`${message.content.text}${
                     messageIsStreaming &&
                     messageIndex ==
                       (selectedConversation?.messages.length ?? 0) - 1

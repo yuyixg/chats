@@ -1,13 +1,12 @@
 import {
   IAuth,
   IChatMessage,
-  IChatResponse,
   ModelEndpoint,
   Models,
 } from './type';
 import { ChatRequestParameters } from './chatRequestParameters';
 
-export class QianfanClient {
+export class QFClient {
   private apiKey: string;
   private secretKey: string;
   private auth!: IAuth;
@@ -34,24 +33,6 @@ export class QianfanClient {
       return data;
     } else {
       throw new Error(JSON.stringify(data));
-    }
-  }
-
-  async chatAsync(
-    model: Models = Models.ERNIE_Bot_turbo,
-    messages: IChatMessage[],
-    callback: (result: IChatResponse) => void,
-    parameters?: ChatRequestParameters,
-    abortController?: AbortController
-  ) {
-    const generator = await this.chatAsStreamAsync(
-      model,
-      messages,
-      parameters,
-      abortController
-    );
-    for await (const message of generator) {
-      callback(message);
     }
   }
 

@@ -102,8 +102,8 @@ export const Chat = memo(({ stopConversationRef }: Props) => {
         ) {
           chatBody.messages = [
             // {
-            //   role: 'user',
-            //   content: '系统提示:' + updatedConversation.prompt,
+            //   role: 'assistant',
+            //   content: { text: '系统提示:' + updatedConversation.prompt },
             // },
             ...chatBody.messages,
           ];
@@ -135,7 +135,7 @@ export const Chat = memo(({ stopConversationRef }: Props) => {
         }
         if (updatedConversation.messages.length === 1) {
           const { content } = message;
-          const contentText = content;
+          const contentText = content.text || '';
           const customName =
             contentText.length > 30
               ? contentText.substring(0, 30) + '...'
@@ -169,7 +169,7 @@ export const Chat = memo(({ stopConversationRef }: Props) => {
               isFirst = false;
               const updatedMessages: Message[] = [
                 ...updatedConversation.messages,
-                { role: 'assistant', content: chunkValue },
+                { role: 'assistant', content: { text: chunkValue } },
               ];
               console.log(updatedMessages);
               updatedConversation = {
@@ -186,7 +186,7 @@ export const Chat = memo(({ stopConversationRef }: Props) => {
                   if (index === updatedConversation.messages.length - 1) {
                     return {
                       ...message,
-                      content: text,
+                      content: { text },
                     };
                   }
                   return message;
@@ -391,7 +391,7 @@ export const Chat = memo(({ stopConversationRef }: Props) => {
                   </div>
                 </div>
               )}
-              
+
               {selectedConversation?.messages.map((message, index) => (
                 <MemoizedChatMessage
                   key={index}
