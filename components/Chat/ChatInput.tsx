@@ -14,7 +14,7 @@ import {
 
 import { useTranslation } from 'next-i18next';
 
-import { GPTContent, LingJiContent, Message } from '@/types/chat';
+import { Message } from '@/types/chat';
 
 import HomeContext from '@/pages/api/home/home.context';
 
@@ -42,7 +42,7 @@ export const ChatInput = ({
     dispatch: homeDispatch,
   } = useContext(HomeContext);
 
-  const [content, setContent] = useState<GPTContent | LingJiContent | string>();
+  const [content, setContent] = useState<string>();
   const [isTyping, setIsTyping] = useState<boolean>(false);
   const [uploading, setUploading] = useState<boolean>(false);
 
@@ -59,40 +59,8 @@ export const ChatInput = ({
       return;
     }
 
-    setContentText(value);
+    setContent(value);
   };
-
-  function isGPTContent(
-    object: GPTContent | LingJiContent | undefined | string
-  ) {
-    return typeof object === 'object' && object !== null && 'type' in object;
-  }
-
-  function isLingJiContent(
-    object: GPTContent | LingJiContent | undefined | string
-  ) {
-    return typeof object === 'object' && object !== null && 'image' in object;
-  }
-
-  function setContentText(value: string) {
-    if (selectedConversation?.model?.id.toUpperCase().includes('GPT')) {
-      setContent({ text: value });
-    } else if (selectedConversation?.model?.id.toUpperCase().includes('LingJi')) {
-      setContent({ text: value });
-    } else {
-      setContent(value);
-    }
-  }
-
-  function getContentText() {
-    if (typeof content === 'string') {
-      return content;
-    } else if (isGPTContent(content)) {
-      return content?.text;
-    } else if (isLingJiContent(content)) {
-      return content?.text;
-    }
-  }
 
   const handleSend = () => {
     if (messageIsStreaming) {
@@ -172,7 +140,7 @@ export const ChatInput = ({
       })
         .then((response) => {
           if (response.ok) {
-            setContent('这是哪里？');
+            setContent('');
             console.log(getUrl, content);
             console.log('文件上传成功！');
           } else {
@@ -183,12 +151,13 @@ export const ChatInput = ({
         .catch((error) => console.error('发生错误：', error));
     }
   };
+
   useEffect(() => {
-    const fileInput = document.getElementById('upload')!;
-    fileInput.addEventListener('change', changeFile);
-    return () => {
-      fileInput.removeEventListener('change', changeFile);
-    };
+    // const fileInput = document.getElementById('upload')!;
+    // fileInput.addEventListener('change', changeFile);
+    // return () => {
+    //   fileInput.removeEventListener('change', changeFile);
+    // };
   }, []);
 
   return (
@@ -235,7 +204,7 @@ export const ChatInput = ({
             placeholder={
               t('Type a message or type "/" to select a prompt...') || ''
             }
-            value={getContentText()}
+            value={content}
             rows={1}
             onCompositionStart={() => setIsTyping(true)}
             onCompositionEnd={() => setIsTyping(false)}
@@ -254,13 +223,13 @@ export const ChatInput = ({
                 <IconSend size={18} />
               )}
             </button>
-            <input
+            {/* <input
               disabled={uploading}
               id='upload'
               className='absolute right-8 top-2 rounded-sm p-1 text-neutral-800 opacity-60 hover:bg-neutral-200 hover:text-neutral-900 dark:bg-opacity-50 dark:text-neutral-100 dark:hover:text-neutral-200'
               type='file'
               accept='image/*'
-            ></input>
+            ></input> */}
           </div>
 
           {showScrollDownButton && (

@@ -3,7 +3,7 @@ import HomeContext from './home.context';
 import { HomeInitialState, initialState } from './home.state';
 import { Conversation } from '@/types/chat';
 import { v4 as uuidv4 } from 'uuid';
-import { ModelIds, ModelMaps } from '@/types/model';
+import { Model, ModelIds, ModelMaps } from '@/types/model';
 import { DEFAULT_SYSTEM_PROMPT, DEFAULT_TEMPERATURE } from '@/utils/app/const';
 import {
   cleanConversationHistory,
@@ -112,8 +112,15 @@ const Home = ({ defaultModelId }: Props) => {
   );
 
   useEffect(() => {
-    if (data) dispatch({ field: 'models', value: data });
-  }, [data, dispatch]);
+    if (data) {
+      dispatch({ field: 'models', value: data });
+      if (data && data.length > 0)
+        dispatch({
+          field: 'defaultModelId',
+          value: data[0].id,
+        });
+    }
+  }, [data]);
 
   useEffect(() => {
     const conversationHistory = localStorage.getItem('conversationHistory');
@@ -143,7 +150,7 @@ const Home = ({ defaultModelId }: Props) => {
           id: uuidv4(),
           name: 'New Conversation',
           messages: [],
-          model: {},
+          model: lastConversation?.model || ModelMaps[defaultModelId],
           prompt: DEFAULT_SYSTEM_PROMPT,
           temperature: lastConversation?.temperature ?? DEFAULT_TEMPERATURE,
         },
@@ -182,12 +189,9 @@ const Home = ({ defaultModelId }: Props) => {
 
           <div className='flex h-full w-full pt-[48px] sm:pt-0'>
             <Chatbar />
-
             <div className='flex flex-1'>
               <Chat stopConversationRef={stopConversationRef} />
             </div>
-
-            {/* <Promptbar /> */}
           </div>
         </main>
       )}

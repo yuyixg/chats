@@ -22,3 +22,7 @@ export const SPARK_API_SECRET = process.env.SPARK_API_SECRET || '';
 
 export const QIANFAN_API_KEY = process.env.QIANFAN_API_KEY || '';
 export const QIANFAN_SECRET_KEY = process.env.QIANFAN_SECRET_KEY || '';
+
+export const AWS_ACCESS_KEY = process.env.AWS_ACCESS_KEY || '';
+export const AWS_SECRET = process.env.AWS_SECRET || '';
+export const AWS_BUCKET_NAME = process.env.AWS_BUCKET_NAME || '';

@@ -17,7 +17,7 @@ export interface GPTContent {
 
 export interface Message {
   role: Role;
-  content: LingJiContent | GPTContent | string;
+  content: string;
 }
 
 export interface ChatBody {

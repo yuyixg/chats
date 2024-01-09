@@ -135,8 +135,11 @@ export const Chat = memo(({ stopConversationRef }: Props) => {
         }
         if (updatedConversation.messages.length === 1) {
           const { content } = message;
+          const contentText = content;
           const customName =
-            content.length > 30 ? content.substring(0, 30) + '...' : content;
+            contentText.length > 30
+              ? contentText.substring(0, 30) + '...'
+              : contentText;
           updatedConversation = {
             ...updatedConversation,
             name: customName,
@@ -388,7 +391,7 @@ export const Chat = memo(({ stopConversationRef }: Props) => {
                   </div>
                 </div>
               )}
-
+              
               {selectedConversation?.messages.map((message, index) => (
                 <MemoizedChatMessage
                   key={index}

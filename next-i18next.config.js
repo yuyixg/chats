@@ -2,10 +2,11 @@ module.exports = {
     i18n: {
         defaultLocale: 'zh',
         locales: [
+            'zh',
             "en",
-            'zh'
         ],
     },
+    react: { useSuspense: false },
     localePath:
         typeof window === 'undefined'
             ? require('path').resolve('./public/locales')
