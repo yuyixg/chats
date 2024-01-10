@@ -117,7 +117,11 @@ export const OpenAIStream = async (
           const data = event.data;
 
           try {
-            console.log('data', data);
+            console.log(data);
+            if (data === '[DONE]') {
+              controller.close();
+              return;
+            }
             const json = JSON.parse(data);
             if (
               json.choices[0]?.finish_details != null ||

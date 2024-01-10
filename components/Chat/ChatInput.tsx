@@ -182,7 +182,7 @@ export const ChatInput = ({
             {selectedConversation?.model.id === ModelIds.GPT_4_VISION && (
               <UploadButton
                 onSuccessful={(url: string) => {
-                  setContent({ ...content, image: url });
+                  setContent({ text: content?.text, image: url });
                 }}
                 children={
                   content?.image ? (
