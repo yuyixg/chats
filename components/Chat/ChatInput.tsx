@@ -179,7 +179,7 @@ export const ChatInput = ({
                 <IconSend size={18} />
               )}
             </button>
-            {selectedConversation?.model.id === ModelIds.GPT_4_VISION && (
+            {selectedConversation?.model?.id === ModelIds.GPT_4_VISION && (
               <UploadButton
                 onSuccessful={(url: string) => {
                   setContent({ text: content?.text, image: url });
