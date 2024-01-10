@@ -36,9 +36,9 @@ export interface GPT4Message {
 }
 
 export interface GPT4VisionMessageContent {
-  type?: 'text' | 'image';
+  type?: 'text' | 'image_url';
   text?: string;
-  image?: {
+  image_url?: {
     url: string;
   };
 }

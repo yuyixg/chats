@@ -115,46 +115,49 @@ export const ChatInput = ({
   }, [content]);
 
   const changeFile = async (event: any) => {
-    // setUploading(true);
-    setContent({
-      ...content,
-      image:
-        'https://images.pexels.com/photos/1212693/pexels-photo-1212693.jpeg?auto=compress&cs=tinysrgb&dpr=1&w=500',
-    });
+    setUploading(true);
+    // setContent({
+    //   ...content,
+    //   text: '这是俩张图片有什么区别?',
+    //   image:
+    //     'https://github-production-user-asset-6210df.s3.amazonaws.com/92853915/295436062-2a8b91a2-c27c-42a4-8e36-45362ee4777a.jpg?X-Amz-Algorithm=AWS4-HMAC-SHA256&X-Amz-Credential=AKIAVCODYLSA53PQK4ZA%2F20240110%2Fus-east-1%2Fs3%2Faws4_request&X-Amz-Date=20240110T032717Z&X-Amz-Expires=300&X-Amz-Signature=1cdf5c73a652e43b5c56a5d224fa125c701861e950f89419556b89891e0f1567&X-Amz-SignedHeaders=host&actor_id=92853915&key_id=0&repo_id=246221497',
+    //   // 'https://dashscope.oss-cn-beijing.aliyuncs.com/images/dog_and_girl.jpeg',
+    // });
     const file = event?.target?.files[0];
-    // if (file) {
-    //   const fileType = file.name.substring(
-    //     file.name.lastIndexOf('.'),
-    //     file.name.length
-    //   );
-    //   const res = await fetch('/api/aws', {
-    //     method: 'POST',
-    //     body: JSON.stringify({
-    //       fileName: file.name.replace(fileType, ''),
-    //       fileType: fileType.replace('.', ''),
-    //     }),
-    //   });
-    //   const { putUrl, getUrl } = await res.json();
+    if (file) {
+      const fileType = file.name.substring(
+        file.name.lastIndexOf('.'),
+        file.name.length
+      );
+      const res = await fetch('/api/aws', {
+        method: 'POST',
+        body: JSON.stringify({
+          fileName: file.name.replace(fileType, ''),
+          fileType: fileType.replace('.', ''),
+        }),
+      });
+      const { putUrl, getUrl } = await res.json();
 
-    //   fetch(putUrl, {
-    //     method: 'PUT',
-    //     body: file,
-    //     headers: {
-    //       'Content-Type': '',
-    //     },
-    //   })
-    //     .then((response) => {
-    //       if (response.ok) {
-    //         setContent({ ...content, image: getUrl });
-    //         console.log(getUrl, content);
-    //         console.log('文件上传成功！');
-    //       } else {
-    //         console.log(response);
-    //         console.error('文件上传失败。');
-    //       }
-    //     })
-    //     .catch((error) => console.error('发生错误：', error));
-    // }
+      fetch(putUrl, {
+        method: 'PUT',
+        body: file,
+        headers: {
+          'Content-Type': '',
+        },
+      })
+        .then((response) => {
+          if (response.ok) {
+            setUploading(false);
+            setContent({ ...content, image: getUrl });
+            console.log(getUrl, content);
+            console.log('文件上传成功！');
+          } else {
+            console.log(response);
+            console.error('文件上传失败。');
+          }
+        })
+        .catch((error) => console.error('发生错误：', error));
+    }
   };
 
   useEffect(() => {

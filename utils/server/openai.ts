@@ -61,17 +61,21 @@ export const OpenAIStream = async (
       messages: [
         {
           role: 'system',
-          content: systemPrompt,
+          content:
+            systemPrompt ||
+            "You are ChatGPT, a large language model trained by OpenAI. Follow the user's instructions carefully. Respond using markdown.",
         },
         ...messages,
       ],
+      max_tokens: 4096,
       temperature: temperature,
       stream: true,
     }),
   };
+  console.log('body', body);
   const res = await fetch(url, body);
   const contentType = res.headers.get('content-type');
-
+  console.log('status', res.status);
   const encoder = new TextEncoder();
   const decoder = new TextDecoder();
   if (res.status !== 200) {
@@ -105,16 +109,16 @@ export const OpenAIStream = async (
           const data = event.data;
 
           try {
-            if (data === '[DONE]') {
-              controller.close();
-              return;
-            }
             const json = JSON.parse(data);
-            if (json.choices[0].finish_reason != null) {
+            if (
+              json.choices[0]?.finish_details != null ||
+              json.choices[0]?.finish_reason != null
+            ) {
               controller.close();
               return;
             }
-            const text = json.choices[0].delta.content;
+            const text =
+              (json.choices.length > 0 && json.choices[0].delta?.content) || '';
             const queue = encoder.encode(text);
             controller.enqueue(queue);
           } catch (e) {

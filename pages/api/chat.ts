@@ -67,8 +67,8 @@ const handler = async (req: Request): Promise<Response> => {
         }
         if (messageContent?.image) {
           content.push({
-            type: 'image',
-            image: { url: messageContent.image },
+            type: 'image_url',
+            image_url: { url: messageContent.image },
           });
         }
         return { role: message.role, content };
