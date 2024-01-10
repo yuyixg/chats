@@ -28,12 +28,6 @@ export const Models = [
     tokenLimit: 8000,
   },
   {
-    id: ModelIds.GPT_4_32K,
-    name: 'GPT-4-32K',
-    maxLength: 96000,
-    tokenLimit: 32000,
-  },
-  {
     id: ModelIds.GPT_4_VISION,
     name: 'GPT-4-VISION',
     maxLength: 96000,

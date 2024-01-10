@@ -1,4 +1,5 @@
-import { Models } from "@/types/model";
+import { Models } from '@/types/model';
+import { QIANFAN_API_KEY } from '@/utils/app/const';
 
 export const config = {
   runtime: 'edge',
@@ -6,7 +7,11 @@ export const config = {
 
 const handler = async (req: Request): Promise<Response> => {
   try {
-    return new Response(JSON.stringify(Models), { status: 200 });
+    let models = Models;
+    if (!QIANFAN_API_KEY) {
+      models = Models.filter((x) => !x.id.includes('ERNIE'));
+    }
+    return new Response(JSON.stringify(models), { status: 200 });
   } catch (error) {
     console.error(error);
     return new Response('Error', { status: 500 });
