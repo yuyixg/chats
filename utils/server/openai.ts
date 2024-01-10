@@ -1,7 +1,8 @@
-import { GPT4Message, GPT4VisionMessage, Message } from '@/types/chat';
+import { GPT4Message, GPT4VisionMessage } from '@/types/chat';
 
 import {
   OPENAI_API_HOST,
+  OPENAI_API_HOST_VISION,
   OPENAI_API_TYPE,
   OPENAI_API_VERSION,
   OPENAI_ORGANIZATION,
@@ -12,7 +13,7 @@ import {
   ReconnectInterval,
   createParser,
 } from 'eventsource-parser';
-import { Model } from '@/types/model';
+import { Model, ModelIds } from '@/types/model';
 
 export class OpenAIError extends Error {
   type: string;
@@ -36,7 +37,11 @@ export const OpenAIStream = async (
 ) => {
   let url = `${OPENAI_API_HOST}/v1/chat/completions`;
   if (OPENAI_API_TYPE === 'azure') {
-    url = `${OPENAI_API_HOST}/openai/deployments/${model.id.replaceAll(
+    const host =
+      model.id === ModelIds.GPT_4_VISION
+        ? OPENAI_API_HOST_VISION
+        : OPENAI_API_HOST;
+    url = `${host}/openai/deployments/${model.id.replaceAll(
       '.',
       ''
     )}/chat/completions?api-version=${OPENAI_API_VERSION}`;
@@ -48,7 +53,10 @@ export const OpenAIStream = async (
         Authorization: `Bearer ${process.env.OPENAI_API_KEY}`,
       }),
       ...(OPENAI_API_TYPE === 'azure' && {
-        'api-key': `${process.env.OPENAI_API_KEY}`,
+        'api-key':
+          model.id === ModelIds.GPT_4_VISION
+            ? `${process.env.OPENAI_API_KEY_VISION}`
+            : `${process.env.OPENAI_API_KEY}`,
       }),
       ...(OPENAI_API_TYPE === 'openai' &&
         OPENAI_ORGANIZATION && {
@@ -67,7 +75,7 @@ export const OpenAIStream = async (
         },
         ...messages,
       ],
-      max_tokens: 4096,
+      ...(model.id === ModelIds.GPT_4_VISION ? { max_tokens: 4096 } : {}),
       temperature: temperature,
       stream: true,
     }),
@@ -75,7 +83,7 @@ export const OpenAIStream = async (
   console.log('body', body);
   const res = await fetch(url, body);
   const contentType = res.headers.get('content-type');
-  console.log('status', res.status);
+
   const encoder = new TextEncoder();
   const decoder = new TextDecoder();
   if (res.status !== 200) {
@@ -109,6 +117,7 @@ export const OpenAIStream = async (
           const data = event.data;
 
           try {
+            console.log('data', data);
             const json = JSON.parse(data);
             if (
               json.choices[0]?.finish_details != null ||

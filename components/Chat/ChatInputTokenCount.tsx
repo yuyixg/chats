@@ -5,8 +5,9 @@ import HomeContext from '@/pages/api/home/home.context';
 
 import cl100k_base from '@dqbd/tiktoken/encoders/cl100k_base.json';
 import { Tiktoken } from '@dqbd/tiktoken/lite';
+import { Content } from '@/types/chat';
 
-export function ChatInputTokenCount(props: { content: string }) {
+export function ChatInputTokenCount(props: { content: Content }) {
   const { t } = useTranslation('chat');
   const {
     state: { selectedConversation },
@@ -30,10 +31,10 @@ export function ChatInputTokenCount(props: { content: string }) {
     return () => model?.free();
   }, []);
 
-  const messages: Array<{ role: string; content: string }> = [
-    { role: 'system', content: selectedConversation?.prompt ?? '' },
+  const messages: Array<{ role: string; content: Content }> = [
+    { role: 'system', content: { text: selectedConversation?.prompt ?? '' } },
     ...(selectedConversation?.messages ?? []),
-    { role: 'user', content: props.content ?? '' },
+    { role: 'user', content: props.content },
   ];
 
   const isGpt3 = selectedConversation?.model?.id?.startsWith('gpt-3.5-turbo');
@@ -43,7 +44,7 @@ export function ChatInputTokenCount(props: { content: string }) {
   const serialized = [
     messages
       .map(({ role, content }) => {
-        return `<|im_start|>${role}${roleSep}${content}<|im_end|>`;
+        return `<|im_start|>${role}${roleSep}${content.text}<|im_end|>`;
       })
       .join(msgSep),
     `<|im_start|>assistant${roleSep}`,

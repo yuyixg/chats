@@ -18,3 +18,20 @@ body {
   color: rgb(var(--foreground-rgb));
   background: var(--background-rgb);
 }
+
+::-webkit-scrollbar {
+  background-color: rgba(27, 27, 27, 0.4);
+  border-radius: 10px;
+  width: 3px;
+  height: 3px;
+}
+
+::-webkit-scrollbar-thumb {
+  border-radius: 10px;
+  background: rgba(27, 27, 27, 0.4);
+}
+
+::-webkit-scrollbar-track {
+  border-radius: 10px;
+  background: #fff;
+}

@@ -1,8 +1,10 @@
 import {
   IconArrowDown,
+  IconLoader2,
   IconPlayerStop,
   IconRepeat,
   IconSend,
+  IconUpload,
 } from '@tabler/icons-react';
 import {
   KeyboardEvent,
@@ -17,6 +19,9 @@ import { useTranslation } from 'next-i18next';
 import { Content, Message } from '@/types/chat';
 
 import HomeContext from '@/pages/api/home/home.context';
+import UploadButton from '../UploadButton';
+import { ChatInputTokenCount } from './ChatInputTokenCount';
+import { ModelIds } from '@/types/model';
 
 interface Props {
   onSend: (message: Message) => void;
@@ -44,7 +49,6 @@ export const ChatInput = ({
 
   const [content, setContent] = useState<Content>();
   const [isTyping, setIsTyping] = useState<boolean>(false);
-  const [uploading, setUploading] = useState<boolean>(false);
 
   const handleChange = (e: React.ChangeEvent<HTMLTextAreaElement>) => {
     const value = e.target.value;
@@ -114,60 +118,6 @@ export const ChatInput = ({
     console.log('Current Content \n', content);
   }, [content]);
 
-  const changeFile = async (event: any) => {
-    setUploading(true);
-    // setContent({
-    //   ...content,
-    //   text: '这是俩张图片有什么区别?',
-    //   image:
-    //     'https://github-production-user-asset-6210df.s3.amazonaws.com/92853915/295436062-2a8b91a2-c27c-42a4-8e36-45362ee4777a.jpg?X-Amz-Algorithm=AWS4-HMAC-SHA256&X-Amz-Credential=AKIAVCODYLSA53PQK4ZA%2F20240110%2Fus-east-1%2Fs3%2Faws4_request&X-Amz-Date=20240110T032717Z&X-Amz-Expires=300&X-Amz-Signature=1cdf5c73a652e43b5c56a5d224fa125c701861e950f89419556b89891e0f1567&X-Amz-SignedHeaders=host&actor_id=92853915&key_id=0&repo_id=246221497',
-    //   // 'https://dashscope.oss-cn-beijing.aliyuncs.com/images/dog_and_girl.jpeg',
-    // });
-    const file = event?.target?.files[0];
-    if (file) {
-      const fileType = file.name.substring(
-        file.name.lastIndexOf('.'),
-        file.name.length
-      );
-      const res = await fetch('/api/aws', {
-        method: 'POST',
-        body: JSON.stringify({
-          fileName: file.name.replace(fileType, ''),
-          fileType: fileType.replace('.', ''),
-        }),
-      });
-      const { putUrl, getUrl } = await res.json();
-
-      fetch(putUrl, {
-        method: 'PUT',
-        body: file,
-        headers: {
-          'Content-Type': '',
-        },
-      })
-        .then((response) => {
-          if (response.ok) {
-            setUploading(false);
-            setContent({ ...content, image: getUrl });
-            console.log(getUrl, content);
-            console.log('文件上传成功！');
-          } else {
-            console.log(response);
-            console.error('文件上传失败。');
-          }
-        })
-        .catch((error) => console.error('发生错误：', error));
-    }
-  };
-
-  useEffect(() => {
-    const fileInput = document.getElementById('upload')!;
-    fileInput.addEventListener('change', changeFile);
-    return () => {
-      fileInput.removeEventListener('change', changeFile);
-    };
-  }, []);
-
   return (
     <div className='absolute bottom-0 left-0 w-full border-transparent bg-gradient-to-b from-transparent via-white to-white pt-6 dark:border-white/20 dark:via-[#343541] dark:to-[#343541] md:pt-2'>
       <div className='stretch mx-2 mt-4 flex flex-row gap-3 last:mb-2 md:mx-4 md:mt-[52px] md:last:mb-6 lg:mx-auto lg:max-w-3xl'>
@@ -193,12 +143,12 @@ export const ChatInput = ({
 
         <div className='relative mx-2 flex w-full flex-grow flex-col rounded-md border border-black/10 bg-white shadow-[0_0_10px_rgba(0,0,0,0.10)] dark:border-gray-900/50 dark:bg-[#40414F] dark:text-white dark:shadow-[0_0_15px_rgba(0,0,0,0.10)] sm:mx-4'>
           {/* <div className='absolute bottom-full md:mb-4 mb-12 mx-auto flex w-full justify-center md:justify-end pointer-events-none'>
-            <ChatInputTokenCount content={content} />
+            <ChatInputTokenCount content={content!} />
           </div> */}
 
           <textarea
             ref={textareaRef}
-            className='m-0 w-full resize-none border-0 bg-transparent p-0 py-2 pr-8 pl-10 text-black dark:bg-transparent dark:text-white md:py-3 md:pl-10'
+            className='m-0 w-full resize-none border-0 bg-transparent p-0 py-2 pr-16 pl-4 text-black dark:bg-transparent dark:text-white md:py-3 md:pl-4'
             style={{
               resize: 'none',
               bottom: `${textareaRef?.current?.scrollHeight}px`,
@@ -209,9 +159,7 @@ export const ChatInput = ({
                   : 'hidden'
               }`,
             }}
-            placeholder={
-              t('Type a message or type "/" to select a prompt...') || ''
-            }
+            placeholder={t('Type a message...') || ''}
             value={content?.text}
             rows={1}
             onCompositionStart={() => setIsTyping(true)}
@@ -226,18 +174,25 @@ export const ChatInput = ({
               onClick={handleSend}
             >
               {messageIsStreaming ? (
-                <div className='h-4 w-4 animate-spin rounded-full border-t-2 border-neutral-800 opacity-60 dark:border-neutral-100'></div>
+                <IconLoader2 className='h-4 w-4 animate-spin' />
               ) : (
                 <IconSend size={18} />
               )}
             </button>
-            <input
-              disabled={uploading}
-              id='upload'
-              className='absolute right-8 top-2 rounded-sm p-1 text-neutral-800 opacity-60 hover:bg-neutral-200 hover:text-neutral-900 dark:bg-opacity-50 dark:text-neutral-100 dark:hover:text-neutral-200'
-              type='file'
-              accept='image/*'
-            ></input>
+            {selectedConversation?.model.id === ModelIds.GPT_4_VISION && (
+              <UploadButton
+                onSuccessful={(url: string) => {
+                  setContent({ ...content, image: url });
+                }}
+                children={
+                  content?.image ? (
+                    <img className='h-[18px] w-[18px]' src={content?.image} />
+                  ) : (
+                    <IconUpload className='animate-bounce' size={18} />
+                  )
+                }
+              />
+            )}
           </div>
 
           {showScrollDownButton && (
