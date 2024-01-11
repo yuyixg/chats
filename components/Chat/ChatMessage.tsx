@@ -7,7 +7,6 @@ import {
   IconUser,
 } from '@tabler/icons-react';
 import { FC, memo, useContext, useEffect, useRef, useState } from 'react';
-import Image from 'next/image';
 import { useTranslation } from 'next-i18next';
 import { updateConversation } from '@/utils/app/conversation';
 import { Message } from '@/types/chat';
@@ -191,7 +190,7 @@ export const ChatMessage: FC<Props> = memo(
                 ) : (
                   <div className='prose whitespace-pre-wrap dark:prose-invert flex-1'>
                     {message.content?.image && (
-                      <Image
+                      <img
                         style={{ maxWidth: 320, maxHeight: 200 }}
                         src={message.content.image}
                         alt=''

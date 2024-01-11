@@ -13,7 +13,6 @@ import {
   useEffect,
   useState,
 } from 'react';
-import Image from 'next/image';
 
 import { useTranslation } from 'next-i18next';
 
@@ -186,7 +185,7 @@ export const ChatInput = ({
                 }}
               >
                 {content?.image ? (
-                  <Image
+                  <img
                     alt=''
                     className='h-[18px] w-[18px]'
                     src={content?.image}

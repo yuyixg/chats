@@ -119,21 +119,22 @@ export const OpenAIStream = async (
           try {
             console.log(data);
             if (data === '[DONE]') {
-              controller.close();
               return;
+            } else {
+              const json = JSON.parse(data);
+              if (
+                json.choices[0]?.finish_details != null ||
+                json.choices[0]?.finish_reason != null
+              ) {
+                controller.close();
+                return;
+              }
+              const text =
+                (json.choices.length > 0 && json.choices[0].delta?.content) ||
+                '';
+              const queue = encoder.encode(text);
+              controller.enqueue(queue);
             }
-            const json = JSON.parse(data);
-            if (
-              json.choices[0]?.finish_details != null ||
-              json.choices[0]?.finish_reason != null
-            ) {
-              controller.close();
-              return;
-            }
-            const text =
-              (json.choices.length > 0 && json.choices[0].delta?.content) || '';
-            const queue = encoder.encode(text);
-            controller.enqueue(queue);
           } catch (e) {
             controller.error(e);
           }

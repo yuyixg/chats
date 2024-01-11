@@ -17,7 +17,10 @@ export default async function handler(req: NextApiRequest, res: any) {
     s3ForcePathStyle: true,
   });
 
-  const key = new Date().toLocaleDateString();
+  const date = new Date();
+  const key = `${date.getFullYear()}/${(date.getMonth() + 1)
+    .toString()
+    .padStart(2, '0')}/${date.getDate().toString().padStart(2, '0')}`;
 
   const params = {
     Bucket: AWS_BUCKET_NAME,
