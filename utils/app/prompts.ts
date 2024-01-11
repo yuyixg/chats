@@ -22,11 +22,9 @@ export const savePrompts = (prompts: Prompt[]) => {
 };
 
 export const getDefaultPrompt = (modeName?: string) => {
-  if (modeName?.includes('SPARK'))
-    return 'Your name is iFLYTEK Spark Cognitive Model, Please follow the instructions of users carefully, Respond in Markdown format.';
-  else if (modeName?.includes('GPT')) {
-    return "You are ChatGPT, a large language model trained by OpenAI. Follow the user's instructions carefully. Respond using markdown.";
-  } else if (modeName?.includes('ERNIE-Bot')) {
-    return "You are a virtual language chat model. Please carefully follow the user's instructions. Use markdown to respond.";
+  if (modeName === 'GPT-4-VISION') {
+      return "你是具有图片理解能力的AI助理，请仔细遵循用户指令，使用markdown回复";
+  } else {
+    return "你是AI助理，请仔细遵循用户指令，使用markdown回复";
   }
 };
