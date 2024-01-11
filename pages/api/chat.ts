@@ -58,7 +58,7 @@ const handler = async (req: Request): Promise<Response> => {
       }
       tokenCount += tokens.length;
     }
-    if (model.id === ModelIds.GPT_4_VISION) {
+    if (model.id === ModelIds.GPT_4_Vision) {
       messagesToSend = messages.map((message) => {
         const messageContent = message.content;
         let content = [] as GPT4VisionMessageContent[];

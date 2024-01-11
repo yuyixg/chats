@@ -7,6 +7,11 @@ export interface LingJiContent {
   image?: string;
 }
 
+export interface QianWenContent {
+  text?: string;
+  image?: string;
+}
+
 export interface GPTContent {
   type: 'text' | 'image_url';
   image_url?: {
@@ -46,6 +51,11 @@ export interface GPT4VisionMessageContent {
 export interface GPT4VisionMessage {
   role: Role;
   content: GPT4VisionMessageContent[];
+}
+
+export interface QianWenMessage {
+  role: Role;
+  content: QianWenContent[];
 }
 
 export interface ChatBody {

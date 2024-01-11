@@ -9,9 +9,11 @@ export enum ModelIds {
   GPT_3_5 = 'gpt-3.5-turbo',
   GPT_4 = 'gpt-4',
   GPT_4_32K = 'gpt-4-32k',
-  GPT_4_VISION = 'gpt-4-vision',
+  GPT_4_Vision = 'gpt-4-vision',
   ERNIE_Bot_4 = 'ERNIE-Bot-4',
   ERNIE_Bot_8K = 'ERNIE-Bot-8K',
+  QWen_VL_Chat_V1 = 'qwen-vl-chat-v1',
+  QWen_Vl_Plus = 'qwen-vl-plus',
 }
 
 export const Models = [
@@ -28,7 +30,7 @@ export const Models = [
     tokenLimit: 8000,
   },
   {
-    id: ModelIds.GPT_4_VISION,
+    id: ModelIds.GPT_4_Vision,
     name: 'GPT-4-VISION',
     maxLength: 96000,
     tokenLimit: 32000,
@@ -42,6 +44,18 @@ export const Models = [
   {
     id: ModelIds.ERNIE_Bot_8K,
     name: 'ERNIE-Bot-8K',
+    maxLength: 512,
+    tokenLimit: 8192,
+  },
+  {
+    id: ModelIds.QWen_VL_Chat_V1,
+    name: 'QianWen-VL-Chat-V1',
+    maxLength: 512,
+    tokenLimit: 8192,
+  },
+  {
+    id: ModelIds.QWen_Vl_Plus,
+    name: 'QianWen-VL-Plus',
     maxLength: 512,
     tokenLimit: 8192,
   },

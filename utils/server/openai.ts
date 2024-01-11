@@ -38,7 +38,7 @@ export const OpenAIStream = async (
   let url = `${OPENAI_API_HOST}/v1/chat/completions`;
   if (OPENAI_API_TYPE === 'azure') {
     const host =
-      model.id === ModelIds.GPT_4_VISION
+      model.id === ModelIds.GPT_4_Vision
         ? OPENAI_API_HOST_VISION
         : OPENAI_API_HOST;
     url = `${host}/openai/deployments/${model.id.replaceAll(
@@ -54,7 +54,7 @@ export const OpenAIStream = async (
       }),
       ...(OPENAI_API_TYPE === 'azure' && {
         'api-key':
-          model.id === ModelIds.GPT_4_VISION
+          model.id === ModelIds.GPT_4_Vision
             ? `${process.env.OPENAI_API_KEY_VISION}`
             : `${process.env.OPENAI_API_KEY}`,
       }),
@@ -75,7 +75,7 @@ export const OpenAIStream = async (
         },
         ...messages,
       ],
-      ...(model.id === ModelIds.GPT_4_VISION ? { max_tokens: 4096 } : {}),
+      ...(model.id === ModelIds.GPT_4_Vision ? { max_tokens: 4096 } : {}),
       temperature: temperature,
       stream: true,
     }),

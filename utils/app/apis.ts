@@ -13,5 +13,9 @@ export const getEndpoint = (model: Model) => {
     return 'api/qianfan';
   }
 
+  if (model.name.includes('QianWen')) {
+    return 'api/qianwen';
+  }
+
   throw 'Not endpoint!';
 };
