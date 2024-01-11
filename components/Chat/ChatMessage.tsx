@@ -7,18 +7,13 @@ import {
   IconUser,
 } from '@tabler/icons-react';
 import { FC, memo, useContext, useEffect, useRef, useState } from 'react';
-
+import Image from 'next/image';
 import { useTranslation } from 'next-i18next';
-
 import { updateConversation } from '@/utils/app/conversation';
-
 import { Message } from '@/types/chat';
-
 import HomeContext from '@/pages/api/home/home.context';
-
 import { CodeBlock } from '../Markdown/CodeBlock';
 import { MemoizedReactMarkdown } from '../Markdown/MemoizedReactMarkdown';
-
 import rehypeMathjax from 'rehype-mathjax';
 import remarkGfm from 'remark-gfm';
 import remarkMath from 'remark-math';
@@ -196,9 +191,10 @@ export const ChatMessage: FC<Props> = memo(
                 ) : (
                   <div className='prose whitespace-pre-wrap dark:prose-invert flex-1'>
                     {message.content?.image && (
-                      <img
+                      <Image
                         style={{ maxWidth: 320, maxHeight: 200 }}
                         src={message.content.image}
+                        alt=''
                       />
                     )}
                     {message.content.text}
@@ -229,7 +225,7 @@ export const ChatMessage: FC<Props> = memo(
                   remarkPlugins={[remarkGfm, remarkMath]}
                   rehypePlugins={[rehypeMathjax]}
                   components={{
-                    code({ node, inline, className, children, ...props }: any) {
+                    code({ node, className, inline, children, ...props }: any) {
                       if (children.length) {
                         if (children[0] == '▍') {
                           return (

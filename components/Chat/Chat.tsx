@@ -13,11 +13,7 @@ import toast from 'react-hot-toast';
 import { useTranslation } from 'next-i18next';
 
 import { getEndpoint } from '@/utils/app/apis';
-import {
-  saveConversation,
-  saveConversations,
-  updateConversation,
-} from '@/utils/app/conversation';
+import { saveConversation, saveConversations } from '@/utils/app/conversation';
 import { throttle } from '@/utils/app/throttle';
 
 import { ChatBody, Conversation, Message } from '@/types/chat';
@@ -259,7 +255,7 @@ export const Chat = memo(({ stopConversationRef }: Props) => {
 
   const onClearAll = () => {
     if (
-      confirm(t('Are you sure you want to clear all messages?')) &&
+      confirm(t('Are you sure you want to clear all messages?')!) &&
       selectedConversation
     ) {
       handleUpdateConversation(selectedConversation, {

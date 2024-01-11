@@ -13,6 +13,7 @@ import {
   useEffect,
   useState,
 } from 'react';
+import Image from 'next/image';
 
 import { useTranslation } from 'next-i18next';
 
@@ -20,7 +21,6 @@ import { Content, Message } from '@/types/chat';
 
 import HomeContext from '@/pages/api/home/home.context';
 import UploadButton from '../UploadButton';
-import { ChatInputTokenCount } from './ChatInputTokenCount';
 import { ModelIds } from '@/types/model';
 
 interface Props {
@@ -184,14 +184,17 @@ export const ChatInput = ({
                 onSuccessful={(url: string) => {
                   setContent({ text: content?.text, image: url });
                 }}
-                children={
-                  content?.image ? (
-                    <img className='h-[18px] w-[18px]' src={content?.image} />
-                  ) : (
-                    <IconUpload className='animate-bounce' size={18} />
-                  )
-                }
-              />
+              >
+                {content?.image ? (
+                  <Image
+                    alt=''
+                    className='h-[18px] w-[18px]'
+                    src={content?.image}
+                  />
+                ) : (
+                  <IconUpload className='animate-bounce' size={18} />
+                )}
+              </UploadButton>
             )}
           </div>
 
