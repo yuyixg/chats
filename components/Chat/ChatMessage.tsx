@@ -229,7 +229,7 @@ export const ChatMessage: FC<Props> = memo(
                   remarkPlugins={[remarkGfm, remarkMath]}
                   rehypePlugins={[rehypeMathjax]}
                   components={{
-                    code({ node, inline, className, children, ...props }) {
+                    code({ node, inline, className, children, ...props }: any) {
                       if (children.length) {
                         if (children[0] == '▍') {
                           return (
