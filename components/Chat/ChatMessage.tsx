@@ -28,12 +28,7 @@ export const ChatMessage: FC<Props> = memo(
     const { t } = useTranslation('chat');
 
     const {
-      state: {
-        selectedConversation,
-        conversations,
-        currentMessage,
-        messageIsStreaming,
-      },
+      state: { selectedConversation, conversations, messageIsStreaming },
       dispatch: homeDispatch,
     } = useContext(HomeContext);
 
@@ -51,7 +46,10 @@ export const ChatMessage: FC<Props> = memo(
     const handleInputChange = (
       event: React.ChangeEvent<HTMLTextAreaElement>
     ) => {
-      setMessageContent({ text: event.target.value });
+      setMessageContent({
+        text: event.target.value,
+        image: message.content.image,
+      });
       if (textareaRef.current) {
         textareaRef.current.style.height = 'inherit';
         textareaRef.current.style.height = `${textareaRef.current.scrollHeight}px`;
@@ -188,17 +186,22 @@ export const ChatMessage: FC<Props> = memo(
                     </div>
                   </div>
                 ) : (
-                  <div className='prose whitespace-pre-wrap dark:prose-invert flex-1'>
-                    {message.content?.image &&
-                      message.content.image.map((img, index) => (
-                        <img
-                          key={index}
-                          style={{ maxWidth: 320, maxHeight: 200 }}
-                          src={img}
-                          alt=''
-                        />
-                      ))}
-                    {message.content.text}
+                  <div>
+                    <div className='flex'>
+                      {message.content?.image &&
+                        message.content.image.map((img, index) => (
+                          <img
+                            className='mr-2'
+                            key={index}
+                            style={{ maxWidth: 320, maxHeight: 200 }}
+                            src={img}
+                            alt=''
+                          />
+                        ))}
+                    </div>
+                    <div className='prose whitespace-pre-wrap dark:prose-invert'>
+                      {message.content.text}
+                    </div>
                   </div>
                 )}
 

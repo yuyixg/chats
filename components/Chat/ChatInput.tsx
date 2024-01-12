@@ -1,5 +1,6 @@
 import {
   IconArrowDown,
+  IconCircleX,
   IconLoader2,
   IconPlayerStop,
   IconRepeat,
@@ -51,6 +52,7 @@ export const ChatInput = ({
     image: [],
   });
   const [isTyping, setIsTyping] = useState<boolean>(false);
+  const [uploading, setUploading] = useState<boolean>(false);
 
   const handleChange = (e: React.ChangeEvent<HTMLTextAreaElement>) => {
     const value = e.target.value;
@@ -73,12 +75,12 @@ export const ChatInput = ({
       return;
     }
 
-    if (!content) {
+    if (!content.text) {
       alert(t('Please enter a message'));
       return;
     }
     onSend({ role: 'user', content });
-    setContent({ text: '' });
+    setContent({ text: '', image: [] });
 
     if (window.innerWidth < 640 && textareaRef && textareaRef.current) {
       textareaRef.current.blur();
@@ -120,6 +122,10 @@ export const ChatInput = ({
     console.log('Current Content \n', content);
   }, [content]);
 
+  useEffect(() => {
+    setContent({ text: '', image: [] });
+  }, [selectedConversation?.model]);
+
   return (
     <div className='absolute bottom-0 left-0 w-full border-transparent bg-gradient-to-b from-transparent via-white to-white pt-6 dark:border-white/20 dark:via-[#343541] dark:to-[#343541] md:pt-2'>
       <div className='stretch mx-2 mt-4 flex flex-row gap-3 last:mb-2 md:mx-4 md:mt-[52px] md:last:mb-6 lg:mx-auto lg:max-w-3xl'>
@@ -144,24 +150,39 @@ export const ChatInput = ({
           )}
 
         <div className='relative mx-2 flex w-full flex-grow flex-col rounded-md border border-black/10 bg-white shadow-[0_0_10px_rgba(0,0,0,0.10)] dark:border-gray-900/50 dark:bg-[#40414F] dark:text-white dark:shadow-[0_0_15px_rgba(0,0,0,0.10)] sm:mx-4'>
-          <div className='absolute bottom-full md:mb-4 mb-12 mx-auto flex w-full justify-center md:justify-end pointer-events-none z-10'>
+          <div className='absolute bottom-full md:mb-4 mb-12 mx-auto flex w-full justify-center md:justify-start z-10'>
             {/* <ChatInputTokenCount content={content!} /> */}
             {content?.image &&
               content.image.map((img, index) => (
-                <div
-                  key={index}
-                  onClick={() => {
-                    setContent((pre) => {
-                      const image = pre.image?.filter((x) => x !== img);
-                      console.log(image);
-                      return {
-                        ...pre,
-                        image,
-                      };
-                    });
-                  }}
-                >
-                  <img className='h-[18px] w-[18px] mr-1' src={img} alt='' />
+                <div className='relative group'>
+                  <img
+                    key={index}
+                    className='h-[18px] w-[18px] mr-1'
+                    src={img}
+                    alt=''
+                  />
+
+                  <div className='absolute w-[80px] h-[80px] left-1/2 top-1/2 transform -translate-x-1/2 -translate-y-1/2 hidden group-hover:block z-10'>
+                    <img
+                      src={img}
+                      alt=''
+                      className='w-full h-full object-cover shadow-lg'
+                    />
+                    <button
+                      onClick={() => {
+                        setContent((pre) => {
+                          const image = pre.image?.filter((x) => x !== img);
+                          return {
+                            ...pre,
+                            image,
+                          };
+                        });
+                      }}
+                      className='absolute top-[-6px] right-[-6px]'
+                    >
+                      <IconCircleX className='text-black/50' size={18} />
+                    </button>
+                  </div>
                 </div>
               ))}
           </div>
@@ -193,7 +214,7 @@ export const ChatInput = ({
               className='absolute right-2 top-2 rounded-sm p-1 text-neutral-800 opacity-60 hover:bg-neutral-200 hover:text-neutral-900 dark:bg-opacity-50 dark:text-neutral-100 dark:hover:text-neutral-200'
               onClick={handleSend}
             >
-              {messageIsStreaming ? (
+              {messageIsStreaming || uploading ? (
                 <IconLoader2 className='h-4 w-4 animate-spin' />
               ) : (
                 <IconSend size={18} />
@@ -201,20 +222,25 @@ export const ChatInput = ({
             </button>
             {[ModelIds.GPT_4_Vision, ModelIds.QWen_Vl_Plus].includes(
               selectedConversation?.model?.id as ModelIds
-            ) && (
-              <UploadButton
-                onSuccessful={(url: string) => {
-                  setContent((pre) => {
-                    return {
-                      text: content?.text,
-                      image: [...pre?.image!, url],
-                    };
-                  });
-                }}
-              >
-                <IconUpload className='animate-bounce' size={18} />
-              </UploadButton>
-            )}
+            ) &&
+              !uploading && (
+                <UploadButton
+                  onUploading={() => setUploading(true)}
+                  onFailed={() => setUploading(false)}
+                  onSuccessful={(url: string) => {
+                    setContent((pre) => {
+                      const image = pre?.image!.concat(url);
+                      return {
+                        text: content?.text,
+                        image,
+                      };
+                    });
+                    setUploading(false);
+                  }}
+                >
+                  <IconUpload size={18} />
+                </UploadButton>
+              )}
           </div>
 
           {showScrollDownButton && (

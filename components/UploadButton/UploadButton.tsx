@@ -3,21 +3,24 @@ import { useEffect, useRef, useState } from 'react';
 import toast from 'react-hot-toast';
 
 interface Props {
-  onSuccessful: (url: string) => void;
+  onSuccessful?: (url: string) => void;
+  onUploading?: () => void;
+  onFailed?: () => void;
   children?: React.ReactNode;
 }
 
 const UploadButton: React.FunctionComponent<Props> = ({
   onSuccessful,
+  onUploading,
+  onFailed,
   children,
 }: Props) => {
   const uploadRef = useRef<HTMLInputElement>(null);
-  const [loading, setLoading] = useState(false);
 
   const changeFile = async (event: any) => {
     const file = event?.target?.files[0];
     if (file) {
-      setLoading(true);
+      onUploading && onUploading();
       const fileType = file.name.substring(
         file.name.lastIndexOf('.'),
         file.name.length
@@ -40,17 +43,15 @@ const UploadButton: React.FunctionComponent<Props> = ({
       })
         .then((response) => {
           if (response.ok) {
-            onSuccessful(getUrl);
+            onSuccessful && onSuccessful(getUrl);
           } else {
             toast.error(response?.statusText);
           }
         })
         .catch((error) => {
+          onFailed && onFailed();
           toast.error('文件上传失败');
           console.error(error);
-        })
-        .finally(() => {
-          setLoading(false);
         });
     }
   };
@@ -65,20 +66,14 @@ const UploadButton: React.FunctionComponent<Props> = ({
 
   return (
     <div>
-      {loading ? (
-        <div className='absolute right-9 top-2 rounded-sm p-1 text-neutral-800 opacity-60'>
-          <IconLoader2 className='h-4 w-4 animate-spin' />
-        </div>
-      ) : (
-        <div
-          onClick={() => {
-            uploadRef.current?.click();
-          }}
-          className='absolute right-9 top-2 rounded-sm p-1 text-neutral-800 opacity-60 hover:bg-neutral-200 hover:text-neutral-900 dark:bg-opacity-50 dark:text-neutral-100 dark:hover:text-neutral-200'
-        >
-          {children}
-        </div>
-      )}
+      <div
+        onClick={() => {
+          uploadRef.current?.click();
+        }}
+        className='absolute right-9 top-2 rounded-sm p-1 text-neutral-800 opacity-60 hover:bg-neutral-200 hover:text-neutral-900 dark:bg-opacity-50 dark:text-neutral-100 dark:hover:text-neutral-200'
+      >
+        {children}
+      </div>
 
       <input
         ref={uploadRef}
