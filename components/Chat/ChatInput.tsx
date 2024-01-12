@@ -46,7 +46,10 @@ export const ChatInput = ({
     dispatch: homeDispatch,
   } = useContext(HomeContext);
 
-  const [content, setContent] = useState<Content>();
+  const [content, setContent] = useState<Content>({
+    text: '',
+    image: [],
+  });
   const [isTyping, setIsTyping] = useState<boolean>(false);
 
   const handleChange = (e: React.ChangeEvent<HTMLTextAreaElement>) => {
@@ -141,9 +144,27 @@ export const ChatInput = ({
           )}
 
         <div className='relative mx-2 flex w-full flex-grow flex-col rounded-md border border-black/10 bg-white shadow-[0_0_10px_rgba(0,0,0,0.10)] dark:border-gray-900/50 dark:bg-[#40414F] dark:text-white dark:shadow-[0_0_15px_rgba(0,0,0,0.10)] sm:mx-4'>
-          {/* <div className='absolute bottom-full md:mb-4 mb-12 mx-auto flex w-full justify-center md:justify-end pointer-events-none'>
-            <ChatInputTokenCount content={content!} />
-          </div> */}
+          <div className='absolute bottom-full md:mb-4 mb-12 mx-auto flex w-full justify-center md:justify-end pointer-events-none z-10'>
+            {/* <ChatInputTokenCount content={content!} /> */}
+            {content?.image &&
+              content.image.map((img, index) => (
+                <div
+                  key={index}
+                  onClick={() => {
+                    setContent((pre) => {
+                      const image = pre.image?.filter((x) => x !== img);
+                      console.log(image);
+                      return {
+                        ...pre,
+                        image,
+                      };
+                    });
+                  }}
+                >
+                  <img className='h-[18px] w-[18px] mr-1' src={img} alt='' />
+                </div>
+              ))}
+          </div>
 
           <textarea
             ref={textareaRef}
@@ -178,25 +199,20 @@ export const ChatInput = ({
                 <IconSend size={18} />
               )}
             </button>
-            {[
-              ModelIds.GPT_4_Vision,
-              ModelIds.QWen_VL_Chat_V1,
-              ModelIds.QWen_Vl_Plus,
-            ].includes(selectedConversation?.model?.id as ModelIds) && (
+            {[ModelIds.GPT_4_Vision, ModelIds.QWen_Vl_Plus].includes(
+              selectedConversation?.model?.id as ModelIds
+            ) && (
               <UploadButton
                 onSuccessful={(url: string) => {
-                  setContent({ text: content?.text, image: url });
+                  setContent((pre) => {
+                    return {
+                      text: content?.text,
+                      image: [...pre?.image!, url],
+                    };
+                  });
                 }}
               >
-                {content?.image ? (
-                  <img
-                    alt=''
-                    className='h-[18px] w-[18px]'
-                    src={content?.image}
-                  />
-                ) : (
-                  <IconUpload className='animate-bounce' size={18} />
-                )}
+                <IconUpload className='animate-bounce' size={18} />
               </UploadButton>
             )}
           </div>

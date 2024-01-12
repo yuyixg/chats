@@ -1,4 +1,4 @@
-import { ChatBody, QianWenMessage } from '@/types/chat';
+import { ChatBody, QianWenContent, QianWenMessage } from '@/types/chat';
 import { QianWenError, QianWenStream } from '@/utils/server/qianwen';
 
 export const config = {
@@ -14,17 +14,19 @@ const handler = async (req: Request): Promise<Response> => {
 
     messagesToSend = messages.map((message) => {
       const messageContent = message.content;
-      return {
-        role: message.role,
-        content: [
-          messageContent.image && {
-            image: messageContent.image,
-          },
-          messageContent.text && {
-            text: messageContent.text,
-          },
-        ],
-      } as QianWenMessage;
+      let content = [] as QianWenContent[];
+      if (messageContent?.image) {
+        messageContent.image.forEach((url) => {
+          content.push({
+            image: url,
+          });
+        });
+      }
+      if (messageContent?.text) {
+        content.push({ text: messageContent.text });
+      }
+
+      return { role: message.role, content };
     });
 
     console.log('Send messages \n', messagesToSend);

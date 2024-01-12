@@ -62,14 +62,16 @@ const handler = async (req: Request): Promise<Response> => {
       messagesToSend = messages.map((message) => {
         const messageContent = message.content;
         let content = [] as GPT4VisionMessageContent[];
+        if (messageContent?.image) {
+          messageContent.image.forEach((url) => {
+            content.push({
+              type: 'image_url',
+              image_url: { url },
+            });
+          });
+        }
         if (messageContent?.text) {
           content.push({ type: 'text', text: messageContent.text });
-        }
-        if (messageContent?.image) {
-          content.push({
-            type: 'image_url',
-            image_url: { url: messageContent.image },
-          });
         }
         return { role: message.role, content };
       });

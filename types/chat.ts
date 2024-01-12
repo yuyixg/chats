@@ -22,7 +22,7 @@ export interface GPTContent {
 
 export interface Content {
   text?: string;
-  image?: string;
+  image?: string[];
 }
 
 export interface Message {

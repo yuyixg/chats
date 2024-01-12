@@ -189,13 +189,15 @@ export const ChatMessage: FC<Props> = memo(
                   </div>
                 ) : (
                   <div className='prose whitespace-pre-wrap dark:prose-invert flex-1'>
-                    {message.content?.image && (
-                      <img
-                        style={{ maxWidth: 320, maxHeight: 200 }}
-                        src={message.content.image}
-                        alt=''
-                      />
-                    )}
+                    {message.content?.image &&
+                      message.content.image.map((img, index) => (
+                        <img
+                          key={index}
+                          style={{ maxWidth: 320, maxHeight: 200 }}
+                          src={img}
+                          alt=''
+                        />
+                      ))}
                     {message.content.text}
                   </div>
                 )}
