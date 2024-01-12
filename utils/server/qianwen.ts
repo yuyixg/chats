@@ -27,7 +27,7 @@ export const QianWenStream = async (
   const body = {
     headers: {
       'Content-Type': 'application/json',
-      Authorization: `Bearer ${process.env.QIANWEN_VL_API_KEY}`,
+      Authorization: `Bearer ${process.env.DASHSCOPE_API_KEY}`,
       Accept: 'text/event-stream',
     },
     method: 'POST',
@@ -46,6 +46,7 @@ export const QianWenStream = async (
         top_p: 0.8,
         top_k: 50,
         seed: 1234,
+        incremental_output: true
       },
     }),
   };
