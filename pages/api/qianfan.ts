@@ -45,6 +45,7 @@ export default async function handler(req: any) {
           const data = event.data;
           try {
             const json = JSON.parse(data);
+            console.log('json', json);
             const text = json.result;
             const queue = encoder.encode(text);
             controller.enqueue(queue);

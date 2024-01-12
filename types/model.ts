@@ -12,7 +12,6 @@ export enum ModelIds {
   GPT_4_Vision = 'gpt-4-vision',
   ERNIE_Bot_4 = 'ERNIE-Bot-4',
   ERNIE_Bot_8K = 'ERNIE-Bot-8K',
-  QWen_VL_Chat_V1 = 'qwen-vl-chat-v1',
   QWen_Vl_Plus = 'qwen-vl-plus',
 }
 
@@ -44,12 +43,6 @@ export const Models = [
   {
     id: ModelIds.ERNIE_Bot_8K,
     name: 'ERNIE-Bot-8K',
-    maxLength: 512,
-    tokenLimit: 8192,
-  },
-  {
-    id: ModelIds.QWen_VL_Chat_V1,
-    name: 'QianWen-VL-Chat-V1',
     maxLength: 512,
     tokenLimit: 8192,
   },

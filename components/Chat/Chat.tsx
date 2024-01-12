@@ -92,18 +92,18 @@ export const Chat = memo(({ stopConversationRef }: Props) => {
           temperature: updatedConversation.temperature,
         };
 
-        if (
-          updatedConversation?.model.id?.includes('ERNIE-Bot') &&
-          updatedConversation.prompt.length > 0
-        ) {
-          chatBody.messages = [
-            // {
-            //   role: 'assistant',
-            //   content: { text: '系统提示:' + updatedConversation.prompt },
-            // },
-            ...chatBody.messages,
-          ];
-        }
+        // if (
+        //   updatedConversation?.model?.id?.includes('ERNIE-Bot') &&
+        //   updatedConversation.prompt.length > 0
+        // ) {
+        //   chatBody.messages = [
+        //     // {
+        //     //   role: 'assistant',
+        //     //   content: { text: '系统提示:' + updatedConversation.prompt },
+        //     // },
+        //     ...chatBody.messages,
+        //   ];
+        // }
 
         const endpoint = getEndpoint(chatBody.model);
         let body = JSON.stringify(chatBody);
@@ -117,6 +117,7 @@ export const Chat = memo(({ stopConversationRef }: Props) => {
           signal: controller.signal,
           body,
         });
+        console.log('response', response);
         if (!response.ok) {
           homeDispatch({ field: 'loading', value: false });
           homeDispatch({ field: 'messageIsStreaming', value: false });
@@ -145,59 +146,54 @@ export const Chat = memo(({ stopConversationRef }: Props) => {
         let done = false;
         let isFirst = true;
         let text = '';
-        if (
-          chatBody?.model.id?.toUpperCase().includes('GPT') ||
-          chatBody?.model.id?.toUpperCase().includes('ERNIE')
-        ) {
-          const reader = data.getReader();
-          const decoder = new TextDecoder();
-          while (!done) {
-            if (stopConversationRef.current === true) {
-              controller.abort();
-              done = true;
-              break;
-            }
-            const { value, done: doneReading } = await reader.read();
-            done = doneReading;
-            const chunkValue = decoder.decode(value);
-            text += chunkValue;
-            if (isFirst) {
-              isFirst = false;
-              const updatedMessages: Message[] = [
-                ...updatedConversation.messages,
-                { role: 'assistant', content: { text: chunkValue } },
-              ];
-              updatedConversation = {
-                ...updatedConversation,
-                messages: updatedMessages,
-              };
-              homeDispatch({
-                field: 'selectedConversation',
-                value: updatedConversation,
-              });
-            } else {
-              const updatedMessages: Message[] =
-                updatedConversation.messages.map((message, index) => {
-                  if (index === updatedConversation.messages.length - 1) {
-                    return {
-                      ...message,
-                      content: { text },
-                    };
-                  }
-                  return message;
-                });
-              updatedConversation = {
-                ...updatedConversation,
-                messages: updatedMessages,
-              };
-              homeDispatch({
-                field: 'selectedConversation',
-                value: updatedConversation,
-              });
-            }
+        const reader = data.getReader();
+        const decoder = new TextDecoder();
+        
+        while (!done) {
+          if (stopConversationRef.current === true) {
+            controller.abort();
+            done = true;
+            break;
           }
-        } else {
-          console.log(response);
+          const { value, done: doneReading } = await reader.read();
+          done = doneReading;
+          const chunkValue = decoder.decode(value);
+          text += chunkValue;
+          if (isFirst) {
+            isFirst = false;
+            const updatedMessages: Message[] = [
+              ...updatedConversation.messages,
+              { role: 'assistant', content: { text: chunkValue } },
+            ];
+            updatedConversation = {
+              ...updatedConversation,
+              messages: updatedMessages,
+            };
+            homeDispatch({
+              field: 'selectedConversation',
+              value: updatedConversation,
+            });
+          } else {
+            const updatedMessages: Message[] = updatedConversation.messages.map(
+              (message, index) => {
+                if (index === updatedConversation.messages.length - 1) {
+                  return {
+                    ...message,
+                    content: { text },
+                  };
+                }
+                return message;
+              }
+            );
+            updatedConversation = {
+              ...updatedConversation,
+              messages: updatedMessages,
+            };
+            homeDispatch({
+              field: 'selectedConversation',
+              value: updatedConversation,
+            });
+          }
         }
         saveConversation(updatedConversation);
         const updatedConversations: Conversation[] = conversations.map(

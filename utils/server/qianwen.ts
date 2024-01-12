@@ -28,25 +28,27 @@ export const QianWenStream = async (
     headers: {
       'Content-Type': 'application/json',
       Authorization: `Bearer ${process.env.DASHSCOPE_API_KEY}`,
-      Accept: 'text/event-stream',
+      'X-DashScope-SSE': 'enable',
     },
     method: 'POST',
     body: JSON.stringify({
       model: model.id,
       input: {
         messages: [
-          // {
-          //   role: 'assistant',
-          //   content: 'You are a helpful assistant. Respond using markdown.',
-          // },
+          {
+            role: 'system',
+            content: [
+              {
+                text: '你是智能AI助理,可以帮用户识别图像,并仔细遵循用户的问题,使用markdown回复。',
+              },
+            ],
+          },
           ...messages,
         ],
       },
       parameters: {
-        top_p: 0.8,
-        top_k: 50,
-        seed: 1234,
-        incremental_output: true
+        seed: 1646251034,
+        incremental_output: true,
       },
     }),
   };
@@ -55,11 +57,10 @@ export const QianWenStream = async (
 
   const encoder = new TextEncoder();
   const decoder = new TextDecoder();
-  console.log('status', res.status);
+
   if (res.status !== 200) {
     let result = {} as any;
     result = await res.json();
-    console.log('result', result);
     if (result.code) {
       throw new QianWenError(result.message, result.code);
     }
@@ -70,16 +71,18 @@ export const QianWenStream = async (
         if (event.type === 'event') {
           const data = event.data;
           try {
-            console.log('data', data);
             const json = JSON.parse(data);
-            console.log('json', json);
+            if (json?.code) {
+              throw new QianWenError(json.message, json.code);
+            }
             if (json.output?.finish_reason === 'stop') {
               controller.close();
               return;
             }
             const text =
               (json.output.choices.length > 0 &&
-                json.choices[0].message?.content) ||
+                json.output.choices[0].message?.content.length > 0 &&
+                json.output.choices[0].message?.content[0].text) ||
               '';
             const queue = encoder.encode(text);
             controller.enqueue(queue);

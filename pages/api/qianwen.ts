@@ -17,9 +17,11 @@ const handler = async (req: Request): Promise<Response> => {
       return {
         role: message.role,
         content: [
-          {
-            ...(messageContent.text && { text: messageContent.text }),
-            ...(messageContent.image && { image: messageContent.image }),
+          messageContent.image && {
+            image: messageContent.image,
+          },
+          messageContent.text && {
+            text: messageContent.text,
           },
         ],
       } as QianWenMessage;
