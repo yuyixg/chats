@@ -80,13 +80,13 @@ export const OpenAIStream = async (
       stream: true,
     }),
   };
-  console.log('body', body);
   const res = await fetch(url, body);
   const contentType = res.headers.get('content-type');
 
   const encoder = new TextEncoder();
   const decoder = new TextDecoder();
   if (res.status !== 200) {
+    console.log('error body', body);
     let result = {} as any;
     if (contentType?.includes('application/json')) {
       result = await res.json();
@@ -117,7 +117,6 @@ export const OpenAIStream = async (
           const data = event.data;
 
           try {
-            console.log(data);
             if (data === '[DONE]') {
               return;
             } else {
@@ -144,6 +143,7 @@ export const OpenAIStream = async (
       const parser = createParser(onParse);
 
       for await (const chunk of res.body as any) {
+        console.log('chunk', decoder.decode(chunk));
         parser.feed(decoder.decode(chunk));
       }
     },

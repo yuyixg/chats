@@ -5,8 +5,7 @@ import {
   ChatBody,
   GPT4Message,
   GPT4VisionMessage,
-  GPT4VisionMessageContent,
-  Message,
+  GPT4VisionContent,
 } from '@/types/chat';
 
 // @ts-expect-error
@@ -61,7 +60,7 @@ const handler = async (req: Request): Promise<Response> => {
     if (model.id === ModelIds.GPT_4_Vision) {
       messagesToSend = messages.map((message) => {
         const messageContent = message.content;
-        let content = [] as GPT4VisionMessageContent[];
+        let content = [] as GPT4VisionContent[];
         if (messageContent?.image) {
           messageContent.image.forEach((url) => {
             content.push({

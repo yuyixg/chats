@@ -154,14 +154,8 @@ export const ChatInput = ({
             {/* <ChatInputTokenCount content={content!} /> */}
             {content?.image &&
               content.image.map((img, index) => (
-                <div className='relative group'>
-                  <img
-                    key={index}
-                    className='h-[18px] w-[18px] mr-1'
-                    src={img}
-                    alt=''
-                  />
-
+                <div className='relative group' key={index}>
+                  <img className='h-[18px] w-[18px] mr-1' src={img} alt='' />
                   <div className='absolute w-[80px] h-[80px] left-1/2 top-1/2 transform -translate-x-1/2 -translate-y-1/2 hidden group-hover:block z-10'>
                     <img
                       src={img}

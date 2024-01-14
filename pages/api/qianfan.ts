@@ -1,13 +1,6 @@
-import { Message, QFMessage } from '@/types/chat';
+import { Message, QianFanMessage } from '@/types/chat';
 import { Model } from '@/types/model';
-import { QIANFAN_API_KEY, QIANFAN_SECRET_KEY } from '@/utils/app/const';
-import { QFClient } from '@/utils/qianfan/client';
-import { IChatMessage, Models } from '@/utils/qianfan/type';
-import {
-  ParsedEvent,
-  ReconnectInterval,
-  createParser,
-} from 'eventsource-parser';
+import { QianFanStream } from '@/utils/server/qianfan';
 
 export const config = {
   runtime: 'edge',
@@ -21,49 +14,21 @@ export default async function handler(req: any) {
     uid: string;
     parameters: object;
   };
-  let client = new QFClient(QIANFAN_API_KEY, QIANFAN_SECRET_KEY);
-  await client.createAuthTokenAsync();
-  let messageToSend: IChatMessage[] = [];
+
+  let messageToSend: QianFanMessage[] = [];
   messageToSend = messages.map((message) => {
     return {
       role: message.role,
       content: message.content.text,
-    } as IChatMessage;
+    } as QianFanMessage;
   });
-  console.log('Send messages \n', messageToSend);
-  let res = await client.chatAsStreamAsync(model.id as Models, messageToSend, {
+
+  const stream = await QianFanStream(model, messageToSend, {
+    temperature: 0.8,
+    top_p: 0.7,
+    penalty_socre: 1,
+    user_id: undefined,
     request_timeout: 60000,
-  });
-
-  const encoder = new TextEncoder();
-  const decoder = new TextDecoder();
-
-  const stream = new ReadableStream({
-    async start(controller) {
-      const onParse = (event: ParsedEvent | ReconnectInterval) => {
-        if (event.type === 'event') {
-          const data = event.data;
-          try {
-            const json = JSON.parse(data);
-            console.log('json', json);
-            const text = json.result;
-            const queue = encoder.encode(text);
-            controller.enqueue(queue);
-            if (json.is_end) {
-              controller.close();
-              return;
-            }
-          } catch (e) {
-            controller.error(e);
-          }
-        }
-      };
-
-      const parser = createParser(onParse);
-      for await (const chunk of res.body as any) {
-        parser.feed(decoder.decode(chunk));
-      }
-    },
   });
 
   return new Response(stream);

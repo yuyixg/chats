@@ -52,19 +52,19 @@ export const QianWenStream = async (
       },
     }),
   };
-  console.log('body', body);
   const res = await fetch(url, body);
-
   const encoder = new TextEncoder();
   const decoder = new TextDecoder();
 
   if (res.status !== 200) {
+    console.log('error body', body);
     let result = {} as any;
     result = await res.json();
     if (result.code) {
       throw new QianWenError(result.message, result.code);
     }
   }
+
   const stream = new ReadableStream({
     async start(controller) {
       const onParse = (event: ParsedEvent | ReconnectInterval) => {
@@ -95,6 +95,7 @@ export const QianWenStream = async (
       const parser = createParser(onParse);
 
       for await (const chunk of res.body as any) {
+        console.log('chunk', decoder.decode(chunk));
         parser.feed(decoder.decode(chunk));
       }
     },
