@@ -230,6 +230,7 @@ export const ChatMessage: FC<Props> = memo(
                   rehypePlugins={[rehypeMathjax]}
                   components={{
                     code({ node, className, inline, children, ...props }: any) {
+                      console.log('children', children);
                       if (children.length) {
                         if (children[0] == '▍') {
                           return (

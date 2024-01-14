@@ -148,7 +148,7 @@ export const Chat = memo(({ stopConversationRef }: Props) => {
         let text = '';
         const reader = data.getReader();
         const decoder = new TextDecoder();
-        
+
         while (!done) {
           if (stopConversationRef.current === true) {
             controller.abort();
@@ -325,7 +325,7 @@ export const Chat = memo(({ stopConversationRef }: Props) => {
                       <Spinner size='16px' className='mx-auto' />
                     </div>
                   ) : (
-                    'Chatbot UI'
+                    ''
                   )}
                 </div>
 

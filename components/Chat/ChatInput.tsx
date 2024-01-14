@@ -150,13 +150,12 @@ export const ChatInput = ({
           )}
 
         <div className='relative mx-2 flex w-full flex-grow flex-col rounded-md border border-black/10 bg-white shadow-[0_0_10px_rgba(0,0,0,0.10)] dark:border-gray-900/50 dark:bg-[#40414F] dark:text-white dark:shadow-[0_0_15px_rgba(0,0,0,0.10)] sm:mx-4'>
-          <div className='absolute bottom-full md:mb-4 mb-12 mx-auto flex w-full justify-center md:justify-start z-10'>
+          <div className='absolute mb-1 bottom-full mx-auto flex w-full justify-start z-10'>
             {/* <ChatInputTokenCount content={content!} /> */}
             {content?.image &&
               content.image.map((img, index) => (
                 <div className='relative group' key={index}>
-                  <img className='h-[18px] w-[18px] mr-1' src={img} alt='' />
-                  <div className='absolute w-[80px] h-[80px] left-1/2 top-1/2 transform -translate-x-1/2 -translate-y-1/2 hidden group-hover:block z-10'>
+                  <div className='mr-1 w-[32px] h-[32px] rounded-sm overflow-hidden'>
                     <img
                       src={img}
                       alt=''
@@ -172,9 +171,12 @@ export const ChatInput = ({
                           };
                         });
                       }}
-                      className='absolute top-[-6px] right-[-6px]'
+                      className='absolute top-[-5px] right-[-1px]'
                     >
-                      <IconCircleX className='text-black/50' size={18} />
+                      <IconCircleX
+                        className='text-black/50 dark:text-white/50'
+                        size={12}
+                      />
                     </button>
                   </div>
                 </div>
@@ -205,7 +207,7 @@ export const ChatInput = ({
 
           <div className='flex'>
             <button
-              className='absolute right-2 top-2 rounded-sm p-1 text-neutral-800 opacity-60 hover:bg-neutral-200 hover:text-neutral-900 dark:bg-opacity-50 dark:text-neutral-100 dark:hover:text-neutral-200'
+              className='absolute right-2 md:top-2 top-1.5 rounded-sm p-1 text-neutral-800 opacity-60 hover:bg-neutral-200 hover:text-neutral-900 dark:bg-opacity-50 dark:text-neutral-100 dark:hover:text-neutral-200'
               onClick={handleSend}
             >
               {messageIsStreaming || uploading ? (
@@ -250,10 +252,10 @@ export const ChatInput = ({
         </div>
       </div>
       <div className='px-3 pt-2 pb-3 text-center text-[12px] text-black/50 dark:text-white/50 md:px-4 md:pt-3 md:pb-6'>
-        .
+        {/* .
         {t(
-          "Chatbot UI is an advanced chatbot kit for OpenAI's chat models aiming to mimic ChatGPT's interface and functionality."
-        )}
+          "Copyright."
+        )} */}
       </div>
     </div>
   );

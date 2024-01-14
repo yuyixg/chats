@@ -49,7 +49,7 @@ const Home = ({ defaultModelId }: Props) => {
       id: uuidv4(),
       name: 'New Conversation',
       messages: [],
-      model: lastConversation?.model ?? null,
+      model: lastConversation?.model || ModelMaps[defaultModelId],
       prompt: DEFAULT_SYSTEM_PROMPT,
       temperature: lastConversation?.temperature ?? DEFAULT_TEMPERATURE,
     };
