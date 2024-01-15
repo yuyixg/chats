@@ -167,11 +167,11 @@ const Home = ({ defaultModelId }: Props) => {
         value: data[0].id,
       });
       dispatch({ field: 'models', value: data });
-      dispatch({
-        field: 'modelsLoading',
-        value: false,
-      });
     }
+    dispatch({
+      field: 'modelsLoading',
+      value: false,
+    });
   }, [data, dispatch]);
 
   return (
