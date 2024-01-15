@@ -41,12 +41,14 @@ export const Chat = memo(({ stopConversationRef }: Props) => {
       selectedConversation,
       conversations,
       models,
+      modelsLoading,
       messageIsStreaming,
       modelError,
       loading,
       prompts,
     },
     handleUpdateConversation,
+    hasModel,
     dispatch: homeDispatch,
   } = useContext(HomeContext);
 
@@ -320,16 +322,18 @@ export const Chat = memo(({ stopConversationRef }: Props) => {
             <>
               <div className='mx-auto flex flex-col space-y-5 md:space-y-10 px-3 pt-5 md:pt-12 sm:max-w-[600px]'>
                 <div className='text-center text-3xl font-semibold text-gray-800 dark:text-gray-100'>
-                  {models.length === 0 ? (
+                  {modelsLoading ? (
                     <div>
                       <Spinner size='16px' className='mx-auto' />
                     </div>
-                  ) : (
+                  ) : hasModel() ? (
                     ''
+                  ) : (
+                    t('No model data.')
                   )}
                 </div>
 
-                {models.length > 0 && (
+                {hasModel() && (
                   <div className='flex h-full flex-col space-y-4 rounded-lg border border-neutral-200 p-4 dark:border-neutral-600'>
                     <ModelSelect />
 
@@ -408,22 +412,23 @@ export const Chat = memo(({ stopConversationRef }: Props) => {
             </>
           )}
         </div>
-
-        <ChatInput
-          stopConversationRef={stopConversationRef}
-          textareaRef={textareaRef}
-          onSend={(message) => {
-            setCurrentMessage(message);
-            handleSend(message, 0);
-          }}
-          onScrollDownClick={handleScrollDown}
-          onRegenerate={() => {
-            if (currentMessage) {
-              handleSend(currentMessage, 2);
-            }
-          }}
-          showScrollDownButton={showScrollDownButton}
-        />
+        {hasModel() && (
+          <ChatInput
+            stopConversationRef={stopConversationRef}
+            textareaRef={textareaRef}
+            onSend={(message) => {
+              setCurrentMessage(message);
+              handleSend(message, 0);
+            }}
+            onScrollDownClick={handleScrollDown}
+            onRegenerate={() => {
+              if (currentMessage) {
+                handleSend(currentMessage, 2);
+              }
+            }}
+            showScrollDownButton={showScrollDownButton}
+          />
+        )}
       </>
     </div>
   );

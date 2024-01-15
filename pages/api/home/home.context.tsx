@@ -15,6 +15,7 @@ export interface HomeContextProps {
     conversation: Conversation,
     data: KeyValuePair | KeyValuePair[]
   ) => void;
+  hasModel: () => boolean;
 }
 
 const HomeContext = createContext<HomeContextProps>(undefined!);

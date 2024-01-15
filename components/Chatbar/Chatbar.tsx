@@ -30,6 +30,7 @@ export const Chatbar = () => {
     dispatch: homeDispatch,
     handleNewConversation,
     handleUpdateConversation,
+    hasModel,
   } = useContext(HomeContext);
 
   const {
@@ -141,6 +142,7 @@ export const Chatbar = () => {
         side={'left'}
         isOpen={showChatbar}
         addItemButtonTitle={t('New chat')}
+        hasModel={hasModel}
         itemComponent={<Conversations conversations={filteredConversations} />}
         items={filteredConversations}
         searchTerm={searchTerm}

@@ -187,7 +187,7 @@ export const ChatMessage: FC<Props> = memo(
                   </div>
                 ) : (
                   <div>
-                    <div className='flex'>
+                    <div className='flex flex-wrap gap-2'>
                       {message.content?.image &&
                         message.content.image.map((img, index) => (
                           <img
@@ -229,8 +229,7 @@ export const ChatMessage: FC<Props> = memo(
                   remarkPlugins={[remarkGfm, remarkMath]}
                   rehypePlugins={[rehypeMathjax]}
                   components={{
-                    code({ node, className, inline, children, ...props }: any) {
-                      console.log('children', children);
+                    code({ node, className, inline, children, ...props }) {
                       if (children.length) {
                         if (children[0] == '▍') {
                           return (

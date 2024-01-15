@@ -219,7 +219,8 @@ export const ChatInput = ({
             {[ModelIds.GPT_4_Vision, ModelIds.QWen_Vl_Plus].includes(
               selectedConversation?.model?.id as ModelIds
             ) &&
-              !uploading && (
+              !uploading &&
+              content?.image?.length !== 5 && (
                 <UploadButton
                   onUploading={() => setUploading(true)}
                   onFailed={() => setUploading(false)}

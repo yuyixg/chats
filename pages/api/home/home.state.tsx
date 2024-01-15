@@ -8,6 +8,7 @@ export interface HomeInitialState {
   lightMode: 'light' | 'dark';
   messageIsStreaming: boolean;
   modelError: ErrorMessage | null;
+  modelsLoading: boolean;
   models: Model[];
   conversations: Conversation[];
   selectedConversation: Conversation | undefined;
@@ -18,7 +19,7 @@ export interface HomeInitialState {
   showPromptbar: boolean;
   messageError: boolean;
   searchTerm: string;
-  defaultModelId: ModelIds | undefined;
+  defaultModelId: ModelIds | null;
 }
 
 export const initialState: HomeInitialState = {
@@ -26,6 +27,7 @@ export const initialState: HomeInitialState = {
   lightMode: 'light',
   messageIsStreaming: false,
   modelError: null,
+  modelsLoading: false,
   models: [],
   conversations: [],
   selectedConversation: undefined,
@@ -36,5 +38,5 @@ export const initialState: HomeInitialState = {
   showChatbar: true,
   messageError: false,
   searchTerm: '',
-  defaultModelId: undefined,
+  defaultModelId: null,
 };

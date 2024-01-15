@@ -6,11 +6,13 @@ import { Conversation } from '@/types/chat';
 interface Props {
   selectedConversation: Conversation;
   onNewConversation: () => void;
+  hasModel: () => boolean;
 }
 
 export const Navbar: FC<Props> = ({
   selectedConversation,
   onNewConversation,
+  hasModel,
 }) => {
   return (
     <nav className='flex w-full justify-between bg-[#202123] py-3 px-4'>
@@ -20,10 +22,12 @@ export const Navbar: FC<Props> = ({
         {selectedConversation.name}
       </div>
 
-      <IconPlus
-        className='cursor-pointer hover:text-neutral-400'
-        onClick={onNewConversation}
-      />
+      {hasModel() && (
+        <IconPlus
+          className='cursor-pointer hover:text-neutral-400'
+          onClick={onNewConversation}
+        />
+      )}
     </nav>
   );
 };

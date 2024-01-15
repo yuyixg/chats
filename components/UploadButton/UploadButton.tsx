@@ -1,5 +1,4 @@
-import { IconLoader2 } from '@tabler/icons-react';
-import { useEffect, useRef, useState } from 'react';
+import { useEffect, useRef } from 'react';
 import toast from 'react-hot-toast';
 
 interface Props {

@@ -3,7 +3,7 @@ import HomeContext from './home.context';
 import { HomeInitialState, initialState } from './home.state';
 import { Conversation } from '@/types/chat';
 import { v4 as uuidv4 } from 'uuid';
-import { Model, ModelIds, ModelMaps } from '@/types/model';
+import { ModelIds, ModelMaps } from '@/types/model';
 import { DEFAULT_SYSTEM_PROMPT, DEFAULT_TEMPERATURE } from '@/utils/app/const';
 import {
   cleanConversationHistory,
@@ -19,6 +19,7 @@ import { Chatbar } from '@/components/Chatbar/Chatbar';
 import { Chat } from '@/components/Chat/Chat';
 import { useQuery } from 'react-query';
 import useApiService from '@/services/useApiService';
+import { serverSideTranslations } from 'next-i18next/serverSideTranslations';
 
 interface Props {
   serverSideApiKeyIsSet: boolean;
@@ -36,6 +37,7 @@ const Home = ({ defaultModelId }: Props) => {
       conversations,
       selectedConversation,
       lightMode,
+      models,
       prompts,
       temperature,
     },
@@ -43,13 +45,15 @@ const Home = ({ defaultModelId }: Props) => {
   } = contextValue;
   const { getModels } = useApiService();
   const stopConversationRef = useRef<boolean>(false);
+
   const handleNewConversation = () => {
     const lastConversation = conversations[conversations.length - 1];
+    const _defaultModelId = defaultModelId ?? models[0].id;
     const newConversation: Conversation = {
       id: uuidv4(),
       name: 'New Conversation',
       messages: [],
-      model: lastConversation?.model || ModelMaps[defaultModelId],
+      model: lastConversation?.model || ModelMaps[_defaultModelId],
       prompt: DEFAULT_SYSTEM_PROMPT,
       temperature: lastConversation?.temperature ?? DEFAULT_TEMPERATURE,
     };
@@ -103,24 +107,9 @@ const Home = ({ defaultModelId }: Props) => {
     dispatch({ field: 'conversations', value: all });
   };
 
-  const { data, error, refetch } = useQuery(
-    ['GetModels'],
-    ({ signal }) => {
-      return getModels({}, signal);
-    },
-    { enabled: true, refetchOnMount: false }
-  );
-
-  useEffect(() => {
-    if (data) {
-      dispatch({ field: 'models', value: data });
-      if (data && data.length > 0)
-        dispatch({
-          field: 'defaultModelId',
-          value: data[0].id,
-        });
-    }
-  }, [data]);
+  const hasModel = () => {
+    return models.length > 0;
+  };
 
   useEffect(() => {
     const conversationHistory = localStorage.getItem('conversationHistory');
@@ -144,19 +133,46 @@ const Home = ({ defaultModelId }: Props) => {
       });
     } else {
       const lastConversation = conversations[conversations.length - 1];
+      const _defaultModelId = defaultModelId ? defaultModelId : models[0]?.id;
       dispatch({
         field: 'selectedConversation',
         value: {
           id: uuidv4(),
           name: 'New Conversation',
           messages: [],
-          model: lastConversation?.model || ModelMaps[defaultModelId],
+          model: lastConversation?.model || ModelMaps[_defaultModelId],
           prompt: DEFAULT_SYSTEM_PROMPT,
           temperature: lastConversation?.temperature ?? DEFAULT_TEMPERATURE,
         },
       });
     }
-  }, [defaultModelId, dispatch]);
+  }, [defaultModelId, models, dispatch]);
+
+  const { data } = useQuery(
+    ['GetModels'],
+    ({ signal }) => {
+      return getModels({}, signal);
+    },
+    { enabled: true, refetchOnMount: false }
+  );
+
+  useEffect(() => {
+    dispatch({
+      field: 'modelsLoading',
+      value: true,
+    });
+    if (data && data.length > 0) {
+      dispatch({
+        field: 'defaultModelId',
+        value: data[0].id,
+      });
+      dispatch({ field: 'models', value: data });
+      dispatch({
+        field: 'modelsLoading',
+        value: false,
+      });
+    }
+  }, [data, dispatch]);
 
   return (
     <HomeContext.Provider
@@ -165,6 +181,7 @@ const Home = ({ defaultModelId }: Props) => {
         handleNewConversation,
         handleSelectConversation,
         handleUpdateConversation,
+        hasModel,
       }}
     >
       <Head>
@@ -184,6 +201,7 @@ const Home = ({ defaultModelId }: Props) => {
             <Navbar
               selectedConversation={selectedConversation}
               onNewConversation={handleNewConversation}
+              hasModel={hasModel}
             />
           </div>
 
@@ -201,11 +219,18 @@ const Home = ({ defaultModelId }: Props) => {
 
 export default Home;
 
-export const getServerSideProps = async ({}) => {
-  const defaultModelId = ModelIds.GPT_3_5;
+export const getServerSideProps = async ({ locale }: { locale: string }) => {
   return {
     props: {
-      defaultModelId,
+      defaultModelId: null,
+      ...(await serverSideTranslations(locale ?? 'en', [
+        'common',
+        'chat',
+        'sidebar',
+        'markdown',
+        'promptbar',
+        'settings',
+      ])),
     },
   };
 };

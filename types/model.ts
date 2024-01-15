@@ -1,5 +1,5 @@
 export interface Model {
-  id: string;
+  id: ModelIds;
   name: string;
   maxLength: number;
   tokenLimit: number;

@@ -12,12 +12,12 @@ const handler = async (req: Request): Promise<Response> => {
       models = models.filter((x) => !x.name.includes('ERNIE'));
     }
     if (!process.env.OPENAI_API_KEY_VISION) {
-      models = models.filter((x) => x.name !== 'GPT-4-VISION');
+      models = models.filter((x) => x.name.toUpperCase() !== 'GPT-4-VISION');
     }
     if (!process.env.OPENAI_API_KEY) {
-      models = models.filter((x) => x.name !== 'GPT-4' && x.name !== 'GPT-3.5');
+      models = models.filter((x) => x.name.toUpperCase() !== 'GPT-4' && x.name.toUpperCase() !== 'GPT-3.5');
     }
-    return new Response(JSON.stringify(models), { status: 200 });
+    return new Response(JSON.stringify(Models), { status: 200 });
   } catch (error) {
     console.error(error);
     return new Response('Error', { status: 500 });
