@@ -35,5 +35,7 @@
   "Precise": "保守",
   "Neutral": "中立",
   "Creative": "随性",
-  "Type a message...": "输入一条消息..."
+  "Type a message...": "输入一条消息...",
+  "File upload failed": "文件上传失败",
+  "The file size limit is {{fileSize}}": "文件大小限制为 {{fileSize}}"
 }

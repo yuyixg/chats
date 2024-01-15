@@ -3,6 +3,8 @@ export interface Model {
   name: string;
   maxLength: number;
   tokenLimit: number;
+  type: ModelType;
+  fileSizeLimit?: number;
 }
 
 export enum ModelIds {
@@ -15,42 +17,57 @@ export enum ModelIds {
   QWen_Vl_Plus = 'qwen-vl-plus',
 }
 
+export enum ModelType {
+  GPT = 'GPT',
+  QianWen = 'QianWen',
+  QianFan = 'QianFan',
+  Spark = 'Spark',
+}
+
 export const Models = [
   {
     id: ModelIds.GPT_3_5,
     name: 'GPT-3.5',
     maxLength: 12000,
     tokenLimit: 4000,
+    type: ModelType.GPT,
   },
   {
     id: ModelIds.GPT_4,
     name: 'GPT-4',
     maxLength: 24000,
     tokenLimit: 8000,
+    type: ModelType.GPT,
   },
   {
     id: ModelIds.GPT_4_Vision,
     name: 'GPT-4-VISION',
     maxLength: 96000,
     tokenLimit: 32000,
+    type: ModelType.GPT,
+    fileSizeLimit: 10240,
   },
   {
     id: ModelIds.ERNIE_Bot_4,
     name: 'ERNIE-Bot-4',
-    maxLength: 128,
-    tokenLimit: 4096,
+    maxLength: 20000,
+    tokenLimit: 5000,
+    type: ModelType.QianFan,
   },
   {
     id: ModelIds.ERNIE_Bot_8K,
     name: 'ERNIE-Bot-8K',
-    maxLength: 512,
-    tokenLimit: 8192,
+    maxLength: 20000,
+    tokenLimit: 5000,
+    type: ModelType.QianFan,
   },
   {
     id: ModelIds.QWen_Vl_Plus,
     name: 'QianWen-VL-Plus',
     maxLength: 512,
     tokenLimit: 8192,
+    type: ModelType.QianWen,
+    fileSizeLimit: 10240,
   },
 ];
 

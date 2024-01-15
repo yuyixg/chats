@@ -1,21 +1,11 @@
-import { Model } from '@/types/model';
+import { Model, ModelType } from '@/types/model';
 
 export const getEndpoint = (model: Model) => {
-  if (model.name.includes('GPT')) {
-    return 'api/chat';
-  }
-
-  if (model.name.includes('SPARK')) {
-    return 'api/spark';
-  }
-
-  if (model.name.includes('ERNIE-Bot')) {
-    return 'api/qianfan';
-  }
-
-  if (model.name.includes('QianWen')) {
-    return 'api/qianwen';
-  }
-
-  throw 'Not endpoint!';
+  const Endpoints = {
+    [ModelType.GPT]: 'api/openai',
+    [ModelType.QianFan]: 'api/qianfan',
+    [ModelType.QianWen]: 'api/qianwen',
+    [ModelType.Spark]: 'api/spark',
+  };
+  return Endpoints[model.type];
 };

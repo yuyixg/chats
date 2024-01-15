@@ -85,8 +85,6 @@ const handler = async (req: Request): Promise<Response> => {
 
     encoding.free();
 
-    console.log('Send messages \n', messagesToSend);
-
     const stream = await OpenAIStream(
       model,
       promptToSend,

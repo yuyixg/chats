@@ -1,23 +1,36 @@
 import { useEffect, useRef } from 'react';
 import toast from 'react-hot-toast';
+import { useTranslation } from 'next-i18next';
 
 interface Props {
   onSuccessful?: (url: string) => void;
   onUploading?: () => void;
   onFailed?: () => void;
   children?: React.ReactNode;
+  maxFileSize?: number;
 }
 
 const UploadButton: React.FunctionComponent<Props> = ({
   onSuccessful,
   onUploading,
   onFailed,
+  maxFileSize,
   children,
 }: Props) => {
+  const { t } = useTranslation('chat');
   const uploadRef = useRef<HTMLInputElement>(null);
 
   const changeFile = async (event: any) => {
     const file = event?.target?.files[0];
+    if (maxFileSize && file?.size / 1024 > maxFileSize) {
+      toast.error(
+        t(`The file size limit is {{fileSize}}`, {
+          fileSize: maxFileSize / 1024 + 'MB',
+        })
+      );
+      onFailed && onFailed();
+      return;
+    }
     if (file) {
       onUploading && onUploading();
       const fileType = file.name.substring(
@@ -49,7 +62,7 @@ const UploadButton: React.FunctionComponent<Props> = ({
         })
         .catch((error) => {
           onFailed && onFailed();
-          toast.error('文件上传失败');
+          toast.error(t('File upload failed'));
           console.error(error);
         });
     }

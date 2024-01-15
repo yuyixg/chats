@@ -222,6 +222,7 @@ export const ChatInput = ({
               !uploading &&
               content?.image?.length !== 5 && (
                 <UploadButton
+                  maxFileSize={selectedConversation?.model?.fileSizeLimit}
                   onUploading={() => setUploading(true)}
                   onFailed={() => setUploading(false)}
                   onSuccessful={(url: string) => {
