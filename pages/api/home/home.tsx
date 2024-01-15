@@ -20,6 +20,7 @@ import { Chat } from '@/components/Chat/Chat';
 import { useQuery } from 'react-query';
 import useApiService from '@/services/useApiService';
 import { serverSideTranslations } from 'next-i18next/serverSideTranslations';
+import { useTranslation } from 'react-i18next';
 
 interface Props {
   serverSideApiKeyIsSet: boolean;
@@ -28,6 +29,7 @@ interface Props {
 }
 
 const Home = ({ defaultModelId }: Props) => {
+  const { t } = useTranslation('sidebar');
   const contextValue = useCreateReducer<HomeInitialState>({
     initialState,
   });
