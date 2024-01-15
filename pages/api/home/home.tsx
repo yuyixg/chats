@@ -51,7 +51,7 @@ const Home = ({ defaultModelId }: Props) => {
     const _defaultModelId = defaultModelId ?? models[0].id;
     const newConversation: Conversation = {
       id: uuidv4(),
-      name: 'New Conversation',
+      name: t('New Conversation'),
       messages: [],
       model: lastConversation?.model || ModelMaps[_defaultModelId],
       prompt: DEFAULT_SYSTEM_PROMPT,
@@ -138,7 +138,7 @@ const Home = ({ defaultModelId }: Props) => {
         field: 'selectedConversation',
         value: {
           id: uuidv4(),
-          name: 'New Conversation',
+          name: t('New Conversation'),
           messages: [],
           model: lastConversation?.model || ModelMaps[_defaultModelId],
           prompt: DEFAULT_SYSTEM_PROMPT,
