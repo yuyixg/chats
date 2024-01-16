@@ -216,9 +216,7 @@ export const ChatInput = ({
                 <IconSend size={18} />
               )}
             </button>
-            {[ModelIds.GPT_4_Vision, ModelIds.QWen_Vl_Plus].includes(
-              selectedConversation?.model?.id as ModelIds
-            ) &&
+            {!!selectedConversation?.model?.fileSizeLimit &&
               !uploading &&
               content?.image?.length !== 5 && (
                 <UploadButton
