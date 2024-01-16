@@ -1,7 +1,7 @@
 // Next.js API route support: https://nextjs.org/docs/api-routes/introduction
 import { NextApiRequest } from 'next';
 
-import { AWS_ACCESS_KEY, AWS_BUCKET_NAME, AWS_SECRET } from '@/utils/app/const';
+import { AWS_ACCESS_KEY, AWS_BUCKET_NAME, AWS_ENDPOINT, AWS_SECRET } from '@/utils/app/const';
 
 import * as AWS from 'aws-sdk';
 
@@ -13,7 +13,7 @@ export default async function handler(req: NextApiRequest, res: any) {
   const s3 = new AWS.S3({
     accessKeyId: AWS_ACCESS_KEY,
     secretAccessKey: AWS_SECRET,
-    endpoint: 'https://io.starworks.cc:88',
+    endpoint: AWS_ENDPOINT,
     s3ForcePathStyle: true,
   });
 
