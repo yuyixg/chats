@@ -1,3 +1,4 @@
+import { connection } from '@/models';
 import { useRouter } from 'next/router';
 
 interface Props {}
@@ -14,7 +15,14 @@ const Admin = ({}: Props) => {
 
 export default Admin;
 
-export const getServerSideProps = async ({ locale }: { locale: string }) => {
+export const getServerSideProps = async () => {
+  // try {
+  //   console.log('connection', connection);
+  //   await connection.authenticate();
+  //   await connection.sync({ force: true });
+  // } catch (error) {
+  //   console.log(error);
+  // }
   return {
     props: {},
   };

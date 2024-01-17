@@ -16,7 +16,6 @@ import { ChatbarInitialState, initialState } from './Chatbar.state';
 
 import { v4 as uuidv4 } from 'uuid';
 import { Conversations } from './Conversations';
-import { ModelMaps } from '@/types/model';
 
 export const Chatbar = () => {
   const { t } = useTranslation('sidebar');
@@ -31,6 +30,7 @@ export const Chatbar = () => {
     handleNewConversation,
     handleUpdateConversation,
     hasModel,
+    getModel,
   } = useContext(HomeContext);
 
   const {
@@ -46,7 +46,7 @@ export const Chatbar = () => {
           id: uuidv4(),
           name: t('New Conversation'),
           messages: [],
-          model: ModelMaps[defaultModelId],
+          model: getModel(defaultModelId),
           prompt: DEFAULT_SYSTEM_PROMPT,
           temperature: DEFAULT_TEMPERATURE,
           folderId: null,
@@ -83,7 +83,7 @@ export const Chatbar = () => {
             id: uuidv4(),
             name: t('New Conversation'),
             messages: [],
-            model: ModelMaps[defaultModelId],
+            model: getModel(defaultModelId),
             prompt: DEFAULT_SYSTEM_PROMPT,
             temperature: DEFAULT_TEMPERATURE,
             folderId: null,

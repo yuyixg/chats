@@ -32,7 +32,7 @@ export const QianWenStream = async (
     },
     method: 'POST',
     body: JSON.stringify({
-      model: model.id,
+      model: model.modelId,
       input: {
         messages: [
           {

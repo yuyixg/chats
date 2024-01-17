@@ -14,6 +14,7 @@ import {
   createParser,
 } from 'eventsource-parser';
 import { Model, ModelIds } from '@/types/model';
+import { ChatModels } from '@/models';
 
 export class OpenAIError extends Error {
   type: string;
@@ -30,42 +31,37 @@ export class OpenAIError extends Error {
 }
 
 export const OpenAIStream = async (
-  model: Model,
+  chatModel: ChatModels,
   systemPrompt: string,
   temperature: number,
   messages: GPT4Message[] | GPT4VisionMessage[]
 ) => {
-  let url = `${OPENAI_API_HOST}/v1/chat/completions`;
-  if (OPENAI_API_TYPE === 'azure') {
-    const host =
-      model.id === ModelIds.GPT_4_Vision
-        ? OPENAI_API_HOST_VISION
-        : OPENAI_API_HOST;
-    url = `${host}/openai/deployments/${model.id.replaceAll(
+  const { modelId, apiHost, apiType, apiVersion, apiKey } = chatModel;
+  let url = `${apiHost}/v1/chat/completions`;
+  if (apiType === 'azure') {
+    const host = apiHost;
+    url = `${host}/openai/deployments/${modelId.replaceAll(
       '.',
       ''
-    )}/chat/completions?api-version=${OPENAI_API_VERSION}`;
+    )}/chat/completions?api-version=${apiVersion}`;
   }
   const body = {
     headers: {
       'Content-Type': 'application/json',
-      ...(OPENAI_API_TYPE === 'openai' && {
-        Authorization: `Bearer ${process.env.OPENAI_API_KEY}`,
+      ...(apiType === 'openai' && {
+        Authorization: `Bearer ${apiKey}`,
       }),
-      ...(OPENAI_API_TYPE === 'azure' && {
-        'api-key':
-          model.id === ModelIds.GPT_4_Vision
-            ? `${process.env.OPENAI_API_KEY_VISION}`
-            : `${process.env.OPENAI_API_KEY}`,
+      ...(apiType === 'azure' && {
+        'api-key': apiKey,
       }),
-      ...(OPENAI_API_TYPE === 'openai' &&
+      ...(apiType === 'openai' &&
         OPENAI_ORGANIZATION && {
           'OpenAI-Organization': OPENAI_ORGANIZATION,
         }),
     },
     method: 'POST',
     body: JSON.stringify({
-      ...(OPENAI_API_TYPE === 'openai' && { model: model.id }),
+      ...(OPENAI_API_TYPE === 'openai' && { model: modelId }),
       messages: [
         {
           role: 'system',
@@ -75,7 +71,7 @@ export const OpenAIStream = async (
         },
         ...messages,
       ],
-      ...(model.id === ModelIds.GPT_4_Vision ? { max_tokens: 4096 } : {}),
+      ...(modelId === ModelIds.GPT_4_Vision ? { max_tokens: 4096 } : {}),
       temperature: temperature,
       stream: true,
     }),

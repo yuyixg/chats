@@ -17,7 +17,7 @@ export const ModelSelect = () => {
   } = useContext(HomeContext);
 
   const handleChange = (e: React.ChangeEvent<HTMLSelectElement>) => {
-    const model = models.find((m) => m.id == e.target.value);
+    const model = models.find((m) => m.modelId == e.target.value);
     selectedConversation &&
       handleUpdateConversation(selectedConversation, [
         {
@@ -40,16 +40,16 @@ export const ModelSelect = () => {
         <select
           className='w-full bg-transparent p-2'
           placeholder={t('Select a model') || ''}
-          value={selectedConversation?.model?.id || defaultModelId?.toString()}
+          value={selectedConversation?.model?.modelId || defaultModelId?.toString()}
           onChange={handleChange}
         >
           {models.map((model) => (
             <option
-              key={model.id}
-              value={model.id}
+              key={model.modelId}
+              value={model.modelId}
               className='dark:bg-[#343541] dark:text-white'
             >
-              {model.id === defaultModelId
+              {model.modelId === defaultModelId
                 ? `Default (${model.name})`
                 : model.name}
             </option>

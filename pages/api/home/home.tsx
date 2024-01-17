@@ -3,7 +3,7 @@ import HomeContext from './home.context';
 import { HomeInitialState, initialState } from './home.state';
 import { Conversation } from '@/types/chat';
 import { v4 as uuidv4 } from 'uuid';
-import { ModelIds, ModelMaps } from '@/types/model';
+import { ModelIds } from '@/types/model';
 import { DEFAULT_SYSTEM_PROMPT, DEFAULT_TEMPERATURE } from '@/utils/app/const';
 import {
   cleanConversationHistory,
@@ -50,12 +50,12 @@ const Home = ({ defaultModelId }: Props) => {
 
   const handleNewConversation = () => {
     const lastConversation = conversations[conversations.length - 1];
-    const _defaultModelId = defaultModelId ?? models[0].id;
+    const _defaultModelId = defaultModelId ?? models[0].modelId;
     const newConversation: Conversation = {
       id: uuidv4(),
       name: t('New Conversation'),
       messages: [],
-      model: lastConversation?.model || ModelMaps[_defaultModelId],
+      model: lastConversation?.model || getModel(_defaultModelId),
       prompt: DEFAULT_SYSTEM_PROMPT,
       temperature: lastConversation?.temperature ?? DEFAULT_TEMPERATURE,
     };
@@ -113,6 +113,10 @@ const Home = ({ defaultModelId }: Props) => {
     return models.length > 0;
   };
 
+  const getModel = (modelId: string) => {
+    return models.find((x) => x.modelId === modelId)!;
+  };
+
   useEffect(() => {
     const conversationHistory = localStorage.getItem('conversationHistory');
     if (conversationHistory) {
@@ -135,14 +139,16 @@ const Home = ({ defaultModelId }: Props) => {
       });
     } else {
       const lastConversation = conversations[conversations.length - 1];
-      const _defaultModelId = defaultModelId ? defaultModelId : models[0]?.id;
+      const _defaultModelId = defaultModelId
+        ? defaultModelId
+        : models[0]?.modelId;
       dispatch({
         field: 'selectedConversation',
         value: {
           id: uuidv4(),
           name: t('New Conversation'),
           messages: [],
-          model: lastConversation?.model || ModelMaps[_defaultModelId],
+          model: lastConversation?.model || getModel(_defaultModelId),
           prompt: DEFAULT_SYSTEM_PROMPT,
           temperature: lastConversation?.temperature ?? DEFAULT_TEMPERATURE,
         },
@@ -166,7 +172,7 @@ const Home = ({ defaultModelId }: Props) => {
     if (data && data.length > 0) {
       dispatch({
         field: 'defaultModelId',
-        value: data[0].id,
+        value: data[0].modelId,
       });
       dispatch({ field: 'models', value: data });
     }
@@ -184,6 +190,7 @@ const Home = ({ defaultModelId }: Props) => {
         handleSelectConversation,
         handleUpdateConversation,
         hasModel,
+        getModel,
       }}
     >
       <Head>

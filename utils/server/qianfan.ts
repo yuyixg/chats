@@ -42,7 +42,7 @@ export const QianFanStream = async (
   parameters: any
 ) => {
   const accessToken = await getAccessTokenAsync();
-  const modelId = (model.id as ModelIds.ERNIE_Bot_4) || ModelIds.ERNIE_Bot_8K;
+  const modelId = (model.modelId as ModelIds.ERNIE_Bot_4) || ModelIds.ERNIE_Bot_8K;
   const url = `https://aip.baidubce.com/rpc/2.0/ai_custom/v1/wenxinworkshop/chat/${ModelEndpoint[modelId]}?access_token=${accessToken}`;
   const body = {
     headers: {
@@ -51,7 +51,7 @@ export const QianFanStream = async (
     },
     method: 'POST',
     body: JSON.stringify({
-      model: model.id,
+      model: model.modelId,
       messages: [...messages],
       stream: true,
       ...parameters,

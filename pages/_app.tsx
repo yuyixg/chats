@@ -4,7 +4,7 @@ import './globals.css';
 import { QueryClient, QueryClientProvider } from 'react-query';
 import { appWithTranslation } from 'next-i18next';
 import { useRouter } from 'next/router';
-import AdminLayout from './admin/layout';
+import AdminLayout from './admin/layout/layout';
 
 function App({ Component, pageProps }: AppProps<{}>) {
   const route = useRouter();

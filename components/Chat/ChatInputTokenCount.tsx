@@ -37,7 +37,7 @@ export function ChatInputTokenCount(props: { content: Content }) {
     { role: 'user', content: props.content },
   ];
 
-  const isGpt3 = selectedConversation?.model?.id?.startsWith('gpt-3.5-turbo');
+  const isGpt3 = selectedConversation?.model?.modelId?.startsWith('gpt-3.5-turbo');
   const msgSep = isGpt3 ? '\n' : '';
   const roleSep = isGpt3 ? '\n' : '<|im_sep|>';
 

@@ -8,30 +8,46 @@ import {
   GPT4VisionContent,
 } from '@/types/chat';
 
-// @ts-expect-error
-import wasm from '../../node_modules/@dqbd/tiktoken/lite/tiktoken_bg.wasm?module';
+// import wasm from '../../node_modules/@dqbd/tiktoken/lite/tiktoken_bg.wasm?module';
 
-import tiktokenModel from '@dqbd/tiktoken/encoders/cl100k_base.json';
-import { Tiktoken, init } from '@dqbd/tiktoken/lite/init';
+// import tiktokenModel from '@dqbd/tiktoken/encoders/cl100k_base.json';
+// import { Tiktoken, init } from '@dqbd/tiktoken/lite/init';
 import { ModelIds } from '@/types/model';
+import { ChatModels } from '@/models';
+import type { NextApiRequest, NextApiResponse } from 'next';
 
 export const config = {
-  runtime: 'edge',
+  // runtime: 'edge',
+  api: {
+    bodyParser: {
+      sizeLimit: '1mb',
+    },
+  },
+  // Specifies the maximum allowed duration for this function to execute (in seconds)
+  maxDuration: 5,
 };
 
-const handler = async (req: Request): Promise<Response> => {
+const handler = async (req: NextApiRequest, res: NextApiResponse) => {
   try {
     const { model, messages, prompt, temperature } =
-      (await req.json()) as ChatBody;
+      (await req.body) as ChatBody;
 
-    await init((imports: WebAssembly.Imports) =>
-      WebAssembly.instantiate(wasm, imports)
-    );
-    const encoding = new Tiktoken(
-      tiktokenModel.bpe_ranks,
-      tiktokenModel.special_tokens,
-      tiktokenModel.pat_str
-    );
+    const chatModel = await ChatModels.findOne({
+      where: { modelId: model.modelId },
+    });
+
+    if (chatModel === null) {
+      throw '';
+    }
+
+    // await init((imports: WebAssembly.Imports) =>
+    //   WebAssembly.instantiate(wasm, imports)
+    // );
+    // const encoding = new Tiktoken(
+    //   tiktokenModel.bpe_ranks,
+    //   tiktokenModel.special_tokens,
+    //   tiktokenModel.pat_str
+    // );
 
     let promptToSend = prompt;
     if (!promptToSend) {
@@ -43,21 +59,22 @@ const handler = async (req: Request): Promise<Response> => {
       temperatureToUse = DEFAULT_TEMPERATURE;
     }
 
-    const prompt_tokens = encoding.encode(promptToSend);
+    // const prompt_tokens = encoding.encode(promptToSend);
 
-    let tokenCount = prompt_tokens.length;
+    // let tokenCount = prompt_tokens.length;
     let messagesToSend: GPT4Message[] | GPT4VisionMessage[] = [];
 
-    for (let i = messages.length - 1; i >= 0; i--) {
-      const message = messages[i];
-      const tokens = encoding.encode(message.content.text!);
+    // for (let i = messages.length - 1; i >= 0; i--) {
+    //   const message = messages[i];
+    //   const tokens = encoding.encode(message.content.text!);
 
-      if (tokenCount + tokens.length + 1000 > model.tokenLimit) {
-        break;
-      }
-      tokenCount += tokens.length;
-    }
-    if (model.id === ModelIds.GPT_4_Vision) {
+    //   if (tokenCount + tokens.length + 1000 > chatModel.tokenLimit!) {
+    //     break;
+    //   }
+    //   tokenCount += tokens.length;
+    // }
+
+    if (chatModel.modelId === ModelIds.GPT_4_Vision) {
       messagesToSend = messages.map((message) => {
         const messageContent = message.content;
         let content = [] as GPT4VisionContent[];
@@ -83,23 +100,47 @@ const handler = async (req: Request): Promise<Response> => {
       });
     }
 
-    encoding.free();
+    // encoding.free();
 
     const stream = await OpenAIStream(
-      model,
+      chatModel,
       promptToSend,
       temperatureToUse,
       messagesToSend
     );
 
-    return new Response(stream);
+    try {
+      res.setHeader('Content-Type', 'application/octet-stream');
+      if (stream.getReader) {
+        const reader = stream.getReader();
+        const streamResponse = async () => {
+          while (true) {
+            const { done, value } = await reader.read();
+            if (done) {
+              res.end();
+              break;
+            }
+            res.write(Buffer.from(value));
+          }
+        };
+
+        streamResponse().catch((error) => {
+          console.error('Stream reading error:', error);
+          res.status(500).end();
+        });
+      } else {
+        res.status(500).end('Stream is not readable.');
+      }
+    } catch (error) {
+      res.status(500).end(`Server Error: ${error}`);
+    }
   } catch (error: any) {
     if (error instanceof OpenAIError) {
       console.log(error);
-      return new Response('Error', { status: 500, statusText: error.message });
+      res.status(500).send({ statusText: error.message });
     } else {
       console.log(error);
-      return new Response('Error', { status: 500 });
+      res.status(500).send('');
     }
   }
 };

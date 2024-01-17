@@ -5,6 +5,7 @@ import { ActionType } from '@/hooks/useCreateReducer';
 import { KeyValuePair } from '@/types/data';
 import { HomeInitialState } from './home.state';
 import { Conversation } from '@/types/chat';
+import { Model } from '@/types/model';
 
 export interface HomeContextProps {
   state: HomeInitialState;
@@ -16,6 +17,7 @@ export interface HomeContextProps {
     data: KeyValuePair | KeyValuePair[]
   ) => void;
   hasModel: () => boolean;
+  getModel: (modeId: string) => Model;
 }
 
 const HomeContext = createContext<HomeContextProps>(undefined!);

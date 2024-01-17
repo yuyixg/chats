@@ -1,6 +1,6 @@
 import { Sequelize } from 'sequelize';
 
-const connection = new Sequelize('wxpay', 'root', 'Passw0rd!', {
+const connection = new Sequelize('Chats', 'postgres', 'Passw0rd!', {
   host: 'localhost',
   dialect: 'postgres',
 });
