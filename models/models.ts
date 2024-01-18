@@ -3,6 +3,7 @@ import {
   InferAttributes,
   InferCreationAttributes,
   Model,
+  UUIDV4,
 } from 'sequelize';
 import connection from './connection';
 import { ModelIds } from '@/types/model';
@@ -12,6 +13,7 @@ class ChatModels extends Model<
   InferAttributes<ChatModels>,
   InferCreationAttributes<ChatModels>
 > {
+  declare id?: string;
   declare modelId: ModelIds;
   declare name: string;
   declare type: ModelType;
@@ -31,6 +33,11 @@ class ChatModels extends Model<
 
 ChatModels.init(
   {
+    id: {
+      type: DataTypes.UUID,
+      primaryKey: true,
+      defaultValue: UUIDV4,
+    },
     modelId: { type: DataTypes.STRING },
     name: { type: DataTypes.STRING },
     type: { type: DataTypes.STRING },

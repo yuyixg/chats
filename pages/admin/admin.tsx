@@ -17,7 +17,6 @@ export default Admin;
 
 export const getServerSideProps = async () => {
   // try {
-  //   console.log('connection', connection);
   //   await connection.authenticate();
   //   await connection.sync({ force: true });
   // } catch (error) {

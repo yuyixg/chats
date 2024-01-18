@@ -10,8 +10,7 @@ import {
 } from '@/types/chat';
 import { get_encoding } from 'tiktoken';
 import { ModelIds } from '@/types/model';
-import { ChatModels } from '@/models';
-
+import { ChatMessages, ChatModels } from '@/models';
 
 export const config = {
   // runtime: 'edge',
@@ -53,7 +52,6 @@ const handler = async (req: NextApiRequest, res: NextApiResponse) => {
     const prompt_tokens = encoding.encode(promptToSend);
 
     let tokenCount = prompt_tokens.length;
-    console.log(promptToSend, prompt_tokens.length);
     let messagesToSend: GPT4Message[] | GPT4VisionMessage[] = [];
 
     for (let i = messages.length - 1; i >= 0; i--) {
@@ -109,8 +107,14 @@ const handler = async (req: NextApiRequest, res: NextApiResponse) => {
           if (done) {
             var tokens = encoding.encode(assistantMessage);
             tokenCount += tokens.length;
-            console.log('tokenCount', tokenCount);
             encoding.free();
+            await ChatMessages.create({
+              messages: messages,
+              modelId: chatModel.id!,
+              name: messages[0].content.text!,
+              userId: '5fec360a-4f32-49b6-bb93-d36c8ca2b9e1',
+              prompt: promptToSend,
+            });
             res.end();
             break;
           }
