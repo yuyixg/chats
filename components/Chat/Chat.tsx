@@ -12,9 +12,9 @@ import toast from 'react-hot-toast';
 
 import { useTranslation } from 'next-i18next';
 
-import { getEndpoint } from '@/utils/app/apis';
-import { saveConversation, saveConversations } from '@/utils/app/conversation';
-import { throttle } from '@/utils/app/throttle';
+import { getEndpoint } from '@/utils/apis';
+import { saveConversation, saveConversations } from '@/utils/conversation';
+import { throttle } from '@/utils/throttle';
 
 import { ChatBody, Conversation, Message } from '@/types/chat';
 

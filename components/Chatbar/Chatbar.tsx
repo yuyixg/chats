@@ -4,8 +4,8 @@ import { useTranslation } from 'next-i18next';
 
 import { useCreateReducer } from '@/hooks/useCreateReducer';
 
-import { DEFAULT_SYSTEM_PROMPT, DEFAULT_TEMPERATURE } from '@/utils/app/const';
-import { saveConversation, saveConversations } from '@/utils/app/conversation';
+import { DEFAULT_SYSTEM_PROMPT, DEFAULT_TEMPERATURE } from '@/utils/const';
+import { saveConversation, saveConversations } from '@/utils/conversation';
 
 import { Conversation } from '@/types/chat';
 import HomeContext from '@/pages/api/home/home.context';

@@ -3,7 +3,7 @@ import { useContext } from 'react';
 
 import { useTranslation } from 'next-i18next';
 
-import { getDefaultPrompt } from '@/utils/app/prompts';
+import { getDefaultPrompt } from '@/utils/prompts';
 
 import HomeContext from '@/pages/api/home/home.context';
 

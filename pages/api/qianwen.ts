@@ -1,14 +1,19 @@
+import type { NextApiRequest, NextApiResponse } from 'next';
 import { ChatBody, QianWenContent, QianWenMessage } from '@/types/chat';
-import { QianWenError, QianWenStream } from '@/utils/server/qianwen';
+import { QianWenStream } from '@/services/qianwen';
 
 export const config = {
-  runtime: 'edge',
+  // runtime: 'edge',
+  api: {
+    bodyParser: {
+      sizeLimit: '1mb',
+    },
+  },
+  maxDuration: 5,
 };
-
-const handler = async (req: Request): Promise<Response> => {
+const handler = async (req: NextApiRequest, res: NextApiResponse) => {
   try {
-    const { model, messages, prompt, temperature } =
-      (await req.json()) as ChatBody;
+    const { model, messages, prompt, temperature } = req.body as ChatBody;
 
     let messagesToSend: QianWenMessage[] = [];
 
@@ -38,15 +43,32 @@ const handler = async (req: Request): Promise<Response> => {
       messagesToSend
     );
 
-    return new Response(stream);
-  } catch (error: any) {
-    if (error instanceof QianWenError) {
-      console.log(error);
-      return new Response('Error', { status: 500, statusText: error.message });
-    } else {
-      console.log(error);
-      return new Response('Error', { status: 500 });
+    let assistantMessage = '';
+    if (stream.getReader) {
+      const reader = stream.getReader();
+      const streamResponse = async () => {
+        while (true) {
+          const { done, value } = await reader.read();
+          if (value) {
+            assistantMessage += value;
+          }
+          if (done) {
+            res.end();
+            break;
+          }
+          res.write(Buffer.from(value));
+        }
+      };
+
+      streamResponse().catch((error) => {
+        console.error(error);
+        res.status(500).end();
+      });
     }
+  } catch (error) {
+    console.error(error);
+    res.status(500).end();
+  } finally {
   }
 };
 

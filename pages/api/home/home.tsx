@@ -4,13 +4,13 @@ import { HomeInitialState, initialState } from './home.state';
 import { Conversation } from '@/types/chat';
 import { v4 as uuidv4 } from 'uuid';
 import { ModelIds } from '@/types/model';
-import { DEFAULT_SYSTEM_PROMPT, DEFAULT_TEMPERATURE } from '@/utils/app/const';
+import { DEFAULT_SYSTEM_PROMPT, DEFAULT_TEMPERATURE } from '@/utils/const';
 import {
   cleanConversationHistory,
   saveConversation,
   saveConversations,
   updateConversation,
-} from '@/utils/app/conversation';
+} from '@/utils/conversation';
 import { KeyValuePair } from '@/types/data';
 import { useEffect, useRef } from 'react';
 import Head from 'next/head';
@@ -18,7 +18,7 @@ import { Navbar } from '@/components/Navbar/Navbar';
 import { Chatbar } from '@/components/Chatbar/Chatbar';
 import { Chat } from '@/components/Chat/Chat';
 import { useQuery } from 'react-query';
-import useApiService from '@/services/useApiService';
+import useApiService from '@/apis/useApiService';
 import { serverSideTranslations } from 'next-i18next/serverSideTranslations';
 import { useTranslation } from 'react-i18next';
 

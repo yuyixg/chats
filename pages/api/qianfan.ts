@@ -1,35 +1,71 @@
+import type { NextApiRequest, NextApiResponse } from 'next';
 import { Message, QianFanMessage } from '@/types/chat';
 import { Model } from '@/types/model';
-import { QianFanStream } from '@/utils/server/qianfan';
+import { QianFanStream } from '@/services/qianfan';
 
 export const config = {
-  runtime: 'edge',
+  // runtime: 'edge',
+  api: {
+    bodyParser: {
+      sizeLimit: '1mb',
+    },
+  },
+  maxDuration: 5,
 };
 
-export default async function handler(req: any) {
-  const body = await req.json();
-  const { model, messages } = body as {
-    model: Model;
-    messages: Message[];
-    uid: string;
-    parameters: object;
-  };
+export default async function handler(
+  req: NextApiRequest,
+  res: NextApiResponse
+) {
+  try {
+    const { model, messages } = req.body as {
+      model: Model;
+      messages: Message[];
+      uid: string;
+      parameters: object;
+    };
 
-  let messageToSend: QianFanMessage[] = [];
-  messageToSend = messages.map((message) => {
-    return {
-      role: message.role,
-      content: message.content.text,
-    } as QianFanMessage;
-  });
+    let messageToSend: QianFanMessage[] = [];
+    messageToSend = messages.map((message) => {
+      return {
+        role: message.role,
+        content: message.content.text,
+      } as QianFanMessage;
+    });
 
-  const stream = await QianFanStream(model, messageToSend, {
-    temperature: 0.8,
-    top_p: 0.7,
-    penalty_socre: 1,
-    user_id: undefined,
-    request_timeout: 60000,
-  });
+    const stream = await QianFanStream(model, messageToSend, {
+      temperature: 0.8,
+      top_p: 0.7,
+      penalty_socre: 1,
+      user_id: undefined,
+      request_timeout: 60000,
+    });
 
-  return new Response(stream);
+    let assistantMessage = '';
+    if (stream.getReader) {
+      const reader = stream.getReader();
+      const streamResponse = async () => {
+        while (true) {
+          const { done, value } = await reader.read();
+          if (value) {
+            assistantMessage += value;
+          }
+          if (done) {
+            res.end();
+            break;
+          }
+          res.write(Buffer.from(value));
+        }
+      };
+
+      streamResponse().catch((error) => {
+        console.error(error);
+        res.status(500).end();
+      });
+    }
+  } catch (error) {
+    console.error(error);
+    res.status(500).end();
+  } finally {
+  }
 }

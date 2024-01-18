@@ -1,5 +1,6 @@
-import { DEFAULT_SYSTEM_PROMPT, DEFAULT_TEMPERATURE } from '@/utils/app/const';
-import { OpenAIError, OpenAIStream } from '@/utils/server/openai';
+import type { NextApiRequest, NextApiResponse } from 'next';
+import { DEFAULT_TEMPERATURE } from '@/utils/const';
+import { OpenAIStream } from '@/services/openai';
 
 import {
   ChatBody,
@@ -7,14 +8,10 @@ import {
   GPT4VisionMessage,
   GPT4VisionContent,
 } from '@/types/chat';
-
-// import wasm from '../../node_modules/@dqbd/tiktoken/lite/tiktoken_bg.wasm?module';
-
-// import tiktokenModel from '@dqbd/tiktoken/encoders/cl100k_base.json';
-// import { Tiktoken, init } from '@dqbd/tiktoken/lite/init';
+import { get_encoding } from 'tiktoken';
 import { ModelIds } from '@/types/model';
 import { ChatModels } from '@/models';
-import type { NextApiRequest, NextApiResponse } from 'next';
+
 
 export const config = {
   // runtime: 'edge',
@@ -23,15 +20,12 @@ export const config = {
       sizeLimit: '1mb',
     },
   },
-  // Specifies the maximum allowed duration for this function to execute (in seconds)
   maxDuration: 5,
 };
 
 const handler = async (req: NextApiRequest, res: NextApiResponse) => {
   try {
-    const { model, messages, prompt, temperature } =
-      (await req.body) as ChatBody;
-
+    const { model, messages, prompt, temperature } = req.body as ChatBody;
     const chatModel = await ChatModels.findOne({
       where: { modelId: model.modelId },
     });
@@ -40,18 +34,9 @@ const handler = async (req: NextApiRequest, res: NextApiResponse) => {
       throw '';
     }
 
-    // await init((imports: WebAssembly.Imports) =>
-    //   WebAssembly.instantiate(wasm, imports)
-    // );
-    // const encoding = new Tiktoken(
-    //   tiktokenModel.bpe_ranks,
-    //   tiktokenModel.special_tokens,
-    //   tiktokenModel.pat_str
-    // );
-
     let promptToSend = prompt;
     if (!promptToSend) {
-      promptToSend = DEFAULT_SYSTEM_PROMPT;
+      promptToSend = chatModel.systemPrompt!;
     }
 
     let temperatureToUse = temperature;
@@ -59,20 +44,26 @@ const handler = async (req: NextApiRequest, res: NextApiResponse) => {
       temperatureToUse = DEFAULT_TEMPERATURE;
     }
 
-    // const prompt_tokens = encoding.encode(promptToSend);
+    const encoding = get_encoding('cl100k_base', {
+      '<|im_start|>': 100264,
+      '<|im_end|>': 100265,
+      '<|im_sep|>': 100266,
+    });
 
-    // let tokenCount = prompt_tokens.length;
+    const prompt_tokens = encoding.encode(promptToSend);
+
+    let tokenCount = prompt_tokens.length;
+    console.log(promptToSend, prompt_tokens.length);
     let messagesToSend: GPT4Message[] | GPT4VisionMessage[] = [];
 
-    // for (let i = messages.length - 1; i >= 0; i--) {
-    //   const message = messages[i];
-    //   const tokens = encoding.encode(message.content.text!);
-
-    //   if (tokenCount + tokens.length + 1000 > chatModel.tokenLimit!) {
-    //     break;
-    //   }
-    //   tokenCount += tokens.length;
-    // }
+    for (let i = messages.length - 1; i >= 0; i--) {
+      const message = messages[i];
+      const tokens = encoding.encode(message.content.text!);
+      if (tokenCount + tokens.length + 1000 > chatModel.tokenLimit!) {
+        break;
+      }
+      tokenCount += tokens.length;
+    }
 
     if (chatModel.modelId === ModelIds.GPT_4_Vision) {
       messagesToSend = messages.map((message) => {
@@ -99,49 +90,43 @@ const handler = async (req: NextApiRequest, res: NextApiResponse) => {
         } as GPT4Message;
       });
     }
-
-    // encoding.free();
-
     const stream = await OpenAIStream(
       chatModel,
       promptToSend,
       temperatureToUse,
       messagesToSend
     );
-
-    try {
-      res.setHeader('Content-Type', 'application/octet-stream');
-      if (stream.getReader) {
-        const reader = stream.getReader();
-        const streamResponse = async () => {
-          while (true) {
-            const { done, value } = await reader.read();
-            if (done) {
-              res.end();
-              break;
-            }
-            res.write(Buffer.from(value));
+    let assistantMessage = '';
+    res.setHeader('Content-Type', 'application/octet-stream');
+    if (stream.getReader) {
+      const reader = stream.getReader();
+      const streamResponse = async () => {
+        while (true) {
+          const { done, value } = await reader.read();
+          if (value) {
+            assistantMessage += value;
           }
-        };
+          if (done) {
+            var tokens = encoding.encode(assistantMessage);
+            tokenCount += tokens.length;
+            console.log('tokenCount', tokenCount);
+            encoding.free();
+            res.end();
+            break;
+          }
+          res.write(Buffer.from(value));
+        }
+      };
 
-        streamResponse().catch((error) => {
-          console.error('Stream reading error:', error);
-          res.status(500).end();
-        });
-      } else {
-        res.status(500).end('Stream is not readable.');
-      }
-    } catch (error) {
-      res.status(500).end(`Server Error: ${error}`);
+      streamResponse().catch((error) => {
+        console.error(error);
+        res.status(500).end();
+      });
     }
-  } catch (error: any) {
-    if (error instanceof OpenAIError) {
-      console.log(error);
-      res.status(500).send({ statusText: error.message });
-    } else {
-      console.log(error);
-      res.status(500).send('');
-    }
+  } catch (error) {
+    console.error(error);
+    res.status(500).end();
+  } finally {
   }
 };
 
