@@ -21,7 +21,7 @@ const handler = async (req: NextApiRequest, res: NextApiResponse) => {
     });
 
     if (!chatModel) {
-      return;
+      throw 'Model is not Found!';
     }
 
     let messagesToSend: QianWenMessage[] = [];

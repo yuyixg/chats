@@ -143,7 +143,7 @@ export const ChatMessage: FC<Props> = memo(
 
           <div className='prose mt-[-2px] w-full dark:prose-invert'>
             {message.role === 'user' ? (
-              <div className='flex w-full'>
+              <div className='flex w-full justify-between'>
                 {isEditing ? (
                   <div className='flex w-full flex-col'>
                     <textarea
@@ -191,7 +191,7 @@ export const ChatMessage: FC<Props> = memo(
                       {message.content?.image &&
                         message.content.image.map((img, index) => (
                           <img
-                            className='mr-2'
+                            className='rounded-lg mr-2'
                             key={index}
                             style={{ maxWidth: 320, maxHeight: 200 }}
                             src={img}

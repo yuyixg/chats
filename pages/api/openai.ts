@@ -24,14 +24,24 @@ export const config = {
 
 const handler = async (req: NextApiRequest, res: NextApiResponse) => {
   try {
-    const { model, messages, prompt, temperature } = req.body as ChatBody;
+    const { messageId, model, messages, prompt, temperature } =
+      req.body as ChatBody;
     const chatModel = await ChatModels.findOne({
       where: { modelId: model.modelId },
     });
 
+    const userId = '5fec360a-4f32-49b6-bb93-d36c8ca2b9e1';
+
     if (chatModel === null) {
-      throw '';
+      throw 'Model is not Found!';
     }
+
+    const chatMessages = await ChatMessages.findOne({
+      where: {
+        id: messageId,
+        userId: userId,
+      },
+    });
 
     let promptToSend = prompt;
     if (!promptToSend) {
@@ -43,11 +53,7 @@ const handler = async (req: NextApiRequest, res: NextApiResponse) => {
       temperatureToUse = DEFAULT_TEMPERATURE;
     }
 
-    const encoding = get_encoding('cl100k_base', {
-      '<|im_start|>': 100264,
-      '<|im_end|>': 100265,
-      '<|im_sep|>': 100266,
-    });
+    const encoding = get_encoding('cl100k_base');
 
     const prompt_tokens = encoding.encode(promptToSend);
 
@@ -108,13 +114,36 @@ const handler = async (req: NextApiRequest, res: NextApiResponse) => {
             var tokens = encoding.encode(assistantMessage);
             tokenCount += tokens.length;
             encoding.free();
-            await ChatMessages.create({
-              messages: messages,
-              modelId: chatModel.id!,
-              name: messages[0].content.text!,
-              userId: '5fec360a-4f32-49b6-bb93-d36c8ca2b9e1',
-              prompt: promptToSend,
+            messages.push({
+              role: 'assistant',
+              content: { text: assistantMessage },
             });
+            if (chatMessages) {
+              await ChatMessages.update(
+                {
+                  messages,
+                  tokenCount: tokenCount + chatMessages.tokenCount,
+                  chatCount: chatMessages.chatCount + 1,
+                },
+                {
+                  where: {
+                    id: chatMessages.id,
+                    userId: userId,
+                  },
+                }
+              );
+            } else {
+              await ChatMessages.create({
+                id: messageId,
+                messages,
+                modelId: chatModel.id!,
+                name: messages[0].content.text!.substring(0, 30),
+                userId: userId,
+                prompt: promptToSend,
+                tokenCount,
+                chatCount: 1,
+              });
+            }
             res.end();
             break;
           }

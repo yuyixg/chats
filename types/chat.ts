@@ -46,6 +46,7 @@ export interface GPT4Message {
 }
 
 export interface ChatBody {
+  messageId: string;
   model: Model;
   messages: Message[];
   prompt: string;

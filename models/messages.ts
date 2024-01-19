@@ -18,6 +18,8 @@ class ChatMessages extends Model<
   declare messages: Message[];
   declare name: string;
   declare prompt: string;
+  declare tokenCount: number;
+  declare chatCount: number;
 }
 
 ChatMessages.init(
@@ -32,6 +34,8 @@ ChatMessages.init(
     messages: { type: DataTypes.JSON },
     name: { type: DataTypes.STRING },
     prompt: { type: DataTypes.STRING },
+    tokenCount: { type: DataTypes.INTEGER, defaultValue: 0 },
+    chatCount: { type: DataTypes.INTEGER, defaultValue: 0 },
   },
   {
     sequelize: connection,

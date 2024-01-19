@@ -31,7 +31,7 @@ export default async function handler(
     });
 
     if (!chatModel) {
-      return;
+      throw 'Model is not Found!';
     }
 
     let messageToSend: QianFanMessage[] = [];
