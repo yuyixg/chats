@@ -193,13 +193,20 @@ export const ChatMessage: FC<Props> = memo(
                           <img
                             className='rounded-lg mr-2'
                             key={index}
-                            style={{ maxWidth: 320, maxHeight: 200 }}
+                            style={{ maxWidth: 268, maxHeight: 168 }}
                             src={img}
                             alt=''
                           />
                         ))}
                     </div>
-                    <div className='prose whitespace-pre-wrap dark:prose-invert'>
+                    <div
+                      className={`prose whitespace-pre-wrap dark:prose-invert ${
+                        message.content?.image &&
+                        message.content.image.length > 0
+                          ? 'mt-2'
+                          : ''
+                      }`}
+                    >
                       {message.content.text}
                     </div>
                   </div>

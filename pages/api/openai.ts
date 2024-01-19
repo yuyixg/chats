@@ -45,7 +45,7 @@ const handler = async (req: NextApiRequest, res: NextApiResponse) => {
 
     let promptToSend = prompt;
     if (!promptToSend) {
-      promptToSend = chatModel.systemPrompt!;
+      promptToSend = chatModel.systemPrompt;
     }
 
     let temperatureToUse = temperature;
@@ -94,6 +94,7 @@ const handler = async (req: NextApiRequest, res: NextApiResponse) => {
         } as GPT4Message;
       });
     }
+    
     const stream = await OpenAIStream(
       chatModel,
       promptToSend,

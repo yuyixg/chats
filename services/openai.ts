@@ -10,12 +10,19 @@ import { ChatModels } from '@/models';
 
 export const OpenAIStream = async (
   chatModel: ChatModels,
-  systemPrompt: string,
+  prompt: string,
   temperature: number,
   messages: GPT4Message[] | GPT4VisionMessage[]
 ) => {
-  const { modelId, apiHost, apiType, apiVersion, apiKey, apiOrganization } =
-    chatModel;
+  const {
+    modelId,
+    apiHost,
+    apiType,
+    apiVersion,
+    apiKey,
+    apiOrganization,
+    systemPrompt,
+  } = chatModel;
   let url = `${apiHost}/v1/chat/completions`;
   if (apiType === 'azure') {
     const host = apiHost;
@@ -44,9 +51,7 @@ export const OpenAIStream = async (
       messages: [
         {
           role: 'system',
-          content:
-            systemPrompt ||
-            "You are ChatGPT, a large language model trained by OpenAI. Follow the user's instructions carefully. Respond using markdown.",
+          content: prompt || systemPrompt,
         },
         ...messages,
       ],

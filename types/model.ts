@@ -2,7 +2,7 @@ export interface Model {
   modelId: ModelIds;
   name: string;
   type: ModelType;
-  systemPrompt?: string;
+  systemPrompt: string;
   maxLength?: number;
   tokenLimit?: number;
   fileSizeLimit?: number;

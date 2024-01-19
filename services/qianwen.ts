@@ -9,11 +9,11 @@ import { ChatModels } from '@/models';
 
 export const QianWenStream = async (
   chatModel: ChatModels,
-  systemPrompt: string,
+  prompt: string,
   temperature: number,
   messages: QianWenMessage[]
 ) => {
-  const { modelId, apiHost, apiKey } = chatModel;
+  const { modelId, apiHost, apiKey, systemPrompt } = chatModel;
   let url = `${apiHost}/services/aigc/multimodal-generation/generation`;
   const body = {
     headers: {
@@ -30,7 +30,7 @@ export const QianWenStream = async (
             role: 'system',
             content: [
               {
-                text: '你是智能AI助理,可以帮用户识别图像,并仔细遵循用户的问题,使用markdown回复。',
+                text: prompt || systemPrompt,
               },
             ],
           },

@@ -4,7 +4,7 @@ import { useTranslation } from 'next-i18next';
 
 import { useCreateReducer } from '@/hooks/useCreateReducer';
 
-import { DEFAULT_SYSTEM_PROMPT, DEFAULT_TEMPERATURE } from '@/utils/const';
+import { DEFAULT_TEMPERATURE } from '@/utils/const';
 import { saveConversation, saveConversations } from '@/utils/conversation';
 
 import { Conversation } from '@/types/chat';
@@ -18,7 +18,7 @@ import { v4 as uuidv4 } from 'uuid';
 import { Conversations } from './Conversations';
 
 export const Chatbar = () => {
-  const { t } = useTranslation('sidebar');
+  const { t } = useTranslation('chat');
 
   const chatBarContextValue = useCreateReducer<ChatbarInitialState>({
     initialState,
@@ -39,19 +39,21 @@ export const Chatbar = () => {
   } = chatBarContextValue;
 
   const handleClearConversations = () => {
-    defaultModelId &&
+    if (defaultModelId) {
+      const model = getModel(defaultModelId);
       homeDispatch({
         field: 'selectedConversation',
         value: {
           id: uuidv4(),
           name: t('New Conversation'),
           messages: [],
-          model: getModel(defaultModelId),
-          prompt: DEFAULT_SYSTEM_PROMPT,
+          model: model,
+          prompt: t(model.systemPrompt),
           temperature: DEFAULT_TEMPERATURE,
           folderId: null,
         },
       });
+    }
 
     homeDispatch({ field: 'conversations', value: [] });
 
@@ -76,20 +78,21 @@ export const Chatbar = () => {
 
       saveConversation(updatedConversations[updatedConversations.length - 1]);
     } else {
-      defaultModelId &&
+      if (defaultModelId) {
+        const model = getModel(defaultModelId);
         homeDispatch({
           field: 'selectedConversation',
           value: {
             id: uuidv4(),
             name: t('New Conversation'),
             messages: [],
-            model: getModel(defaultModelId),
-            prompt: DEFAULT_SYSTEM_PROMPT,
+            model: model,
+            prompt: t(model.systemPrompt),
             temperature: DEFAULT_TEMPERATURE,
             folderId: null,
           },
         });
-
+      }
       localStorage.removeItem('selectedConversation');
     }
   };

@@ -1,10 +1,5 @@
-import { IconExternalLink } from '@tabler/icons-react';
 import { useContext } from 'react';
-
 import { useTranslation } from 'next-i18next';
-
-import { getDefaultPrompt } from '@/utils/prompts';
-
 import HomeContext from '@/pages/api/home/home.context';
 
 export const ModelSelect = () => {
@@ -26,7 +21,7 @@ export const ModelSelect = () => {
         },
         {
           key: 'prompt',
-          value: t(getDefaultPrompt(model!.name)!),
+          value: t(model!.systemPrompt),
         },
       ]);
   };

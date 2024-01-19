@@ -17,7 +17,7 @@ class ChatModels extends Model<
   declare modelId: ModelIds;
   declare name: string;
   declare type: ModelType;
-  declare systemPrompt?: string;
+  declare systemPrompt: string;
   declare maxLength?: number;
   declare tokenLimit?: number;
   declare fileSizeLimit?: number;

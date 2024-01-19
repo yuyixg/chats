@@ -4,7 +4,7 @@ import { HomeInitialState, initialState } from './home.state';
 import { Conversation } from '@/types/chat';
 import { v4 as uuidv4 } from 'uuid';
 import { ModelIds } from '@/types/model';
-import { DEFAULT_SYSTEM_PROMPT, DEFAULT_TEMPERATURE } from '@/utils/const';
+import { DEFAULT_TEMPERATURE } from '@/utils/const';
 import {
   cleanConversationHistory,
   saveConversation,
@@ -29,7 +29,7 @@ interface Props {
 }
 
 const Home = ({ defaultModelId }: Props) => {
-  const { t } = useTranslation('sidebar');
+  const { t } = useTranslation('chat');
   const contextValue = useCreateReducer<HomeInitialState>({
     initialState,
   });
@@ -51,12 +51,13 @@ const Home = ({ defaultModelId }: Props) => {
   const handleNewConversation = () => {
     const lastConversation = conversations[conversations.length - 1];
     const _defaultModelId = defaultModelId ?? models[0].modelId;
+    const model = getModel(_defaultModelId);
     const newConversation: Conversation = {
       id: uuidv4(),
       name: t('New Conversation'),
       messages: [],
-      model: lastConversation?.model || getModel(_defaultModelId),
-      prompt: DEFAULT_SYSTEM_PROMPT,
+      model: lastConversation?.model || model,
+      prompt: t(model.systemPrompt),
       temperature: lastConversation?.temperature ?? DEFAULT_TEMPERATURE,
     };
 
@@ -142,14 +143,15 @@ const Home = ({ defaultModelId }: Props) => {
       const _defaultModelId = defaultModelId
         ? defaultModelId
         : models[0]?.modelId;
+      const model = getModel(_defaultModelId);
       dispatch({
         field: 'selectedConversation',
         value: {
           id: uuidv4(),
           name: t('New Conversation'),
           messages: [],
-          model: lastConversation?.model || getModel(_defaultModelId),
-          prompt: DEFAULT_SYSTEM_PROMPT,
+          model: lastConversation?.model || model,
+          prompt: t(model.systemPrompt),
           temperature: lastConversation?.temperature ?? DEFAULT_TEMPERATURE,
         },
       });

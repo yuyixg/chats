@@ -9,7 +9,8 @@
   "System Prompt": "系统提示",
   "You are ChatGPT, a large language model trained by OpenAI. Follow the user's instructions carefully. Respond using markdown.": "你是 ChatGPT，一个由 OpenAI 训练的大型语言模型。请仔细遵循用户的指示。使用 Markdown 格式进行回应。",
   "Your name is iFLYTEK Spark Cognitive Model, Please follow the instructions of users carefully, Respond in Markdown format.": "你是讯飞星火认知大模型，请仔细遵循用户的指示，使用 Markdown 格式进行回应。",
-  "You are a virtual language chat model. Please carefully follow the user's instructions. Use markdown to respond.": "你是一个虚拟语言聊天大模型。请仔细遵循用户的说明。使用markdown进行响应。",
+  "You are an AI assistant, Follow the user's instructions carefully. Respond using markdown.": "你是AI智能助理，请仔细遵循用户的指示。使用 Markdown 格式进行回应。",
+  "You are an AI assistant with image understanding capabilities, Follow the user's instructions carefully. Respond using markdown.": "你是具有图片理解能力的AI助理，请仔细遵循用户的指示。使用 Markdown 格式进行回应。",
   "Enter a prompt": "输入一个提示",
   "Regenerate response": "重新生成回应",
   "Sorry, there was an error.": "抱歉，出现了错误。",
@@ -37,5 +38,6 @@
   "Creative": "随性",
   "Type a message...": "输入一条消息...",
   "File upload failed": "文件上传失败",
-  "The file size limit is {{fileSize}}": "文件大小限制为 {{fileSize}}"
+  "The file size limit is {{fileSize}}": "文件大小限制为 {{fileSize}}",
+  "New chat": "新建聊天"
 }
