@@ -2,6 +2,7 @@ import type { NextApiRequest, NextApiResponse } from 'next';
 import { Message, QianFanMessage } from '@/types/chat';
 import { Model } from '@/types/model';
 import { QianFanStream } from '@/services/qianfan';
+import { ChatModels } from '@/models';
 
 export const config = {
   // runtime: 'edge',
@@ -25,6 +26,14 @@ export default async function handler(
       parameters: object;
     };
 
+    const chatModel = await ChatModels.findOne({
+      where: { modelId: model.modelId },
+    });
+
+    if (!chatModel) {
+      return;
+    }
+
     let messageToSend: QianFanMessage[] = [];
     messageToSend = messages.map((message) => {
       return {
@@ -33,7 +42,7 @@ export default async function handler(
       } as QianFanMessage;
     });
 
-    const stream = await QianFanStream(model, messageToSend, {
+    const stream = await QianFanStream(chatModel, messageToSend, {
       temperature: 0.8,
       top_p: 0.7,
       penalty_socre: 1,

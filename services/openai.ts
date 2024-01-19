@@ -67,7 +67,7 @@ export const OpenAIStream = async (
     } else if (contentType?.startsWith('text/event-stream')) {
       errors = await res.body;
     }
-    throw new Error(errors);
+    throw new Error(JSON.stringify(errors));
   }
 
   const stream = new ReadableStream({

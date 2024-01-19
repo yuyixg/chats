@@ -1,6 +1,7 @@
 import type { NextApiRequest, NextApiResponse } from 'next';
 import { ChatBody, QianWenContent, QianWenMessage } from '@/types/chat';
 import { QianWenStream } from '@/services/qianwen';
+import { ChatModels } from '@/models';
 
 export const config = {
   // runtime: 'edge',
@@ -14,6 +15,14 @@ export const config = {
 const handler = async (req: NextApiRequest, res: NextApiResponse) => {
   try {
     const { model, messages, prompt, temperature } = req.body as ChatBody;
+
+    const chatModel = await ChatModels.findOne({
+      where: { modelId: model.modelId },
+    });
+
+    if (!chatModel) {
+      return;
+    }
 
     let messagesToSend: QianWenMessage[] = [];
 
@@ -34,10 +43,8 @@ const handler = async (req: NextApiRequest, res: NextApiResponse) => {
       return { role: message.role, content };
     });
 
-    console.log('Send messages \n', messagesToSend);
-
     const stream = await QianWenStream(
-      model,
+      chatModel,
       prompt,
       temperature,
       messagesToSend

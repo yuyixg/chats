@@ -5,16 +5,20 @@ import {
   ReconnectInterval,
   createParser,
 } from 'eventsource-parser';
-import { Model, ModelIds } from '@/types/model';
-import { QIANFAN_API_KEY, QIANFAN_SECRET_KEY } from '../utils/const';
+import { ModelIds } from '@/types/model';
+import { ChatModels } from '@/models';
 
-export const ModelEndpoint = {
+export const ModelEndpoint: { [key in ModelIds]?: string } = {
   [ModelIds.ERNIE_Bot_4]: 'completions_pro',
   [ModelIds.ERNIE_Bot_8K]: 'ernie_bot_8k',
 };
 
-async function getAccessTokenAsync() {
-  let url = `https://aip.baidubce.com/oauth/2.0/token?grant_type=client_credentials&client_id=${QIANFAN_API_KEY}&client_secret=${QIANFAN_SECRET_KEY}`;
+async function getAccessTokenAsync(
+  apiHost: string,
+  apiKey: string,
+  apiSecret: string
+) {
+  let url = `${apiHost}/oauth/2.0/token?grant_type=client_credentials&client_id=${apiKey}&client_secret=${apiSecret}`;
   const resp = await fetch(url, {
     headers: {
       'Content-Type': 'application/json',
@@ -30,14 +34,13 @@ async function getAccessTokenAsync() {
 }
 
 export const QianFanStream = async (
-  model: Model,
+  chatModel: ChatModels,
   messages: QianFanMessage[],
   parameters: any
 ) => {
-  const accessToken = await getAccessTokenAsync();
-  const modelId =
-    (model.modelId as ModelIds.ERNIE_Bot_4) || ModelIds.ERNIE_Bot_8K;
-  const url = `https://aip.baidubce.com/rpc/2.0/ai_custom/v1/wenxinworkshop/chat/${ModelEndpoint[modelId]}?access_token=${accessToken}`;
+  const { modelId, apiHost, apiKey, apiSecret } = chatModel;
+  const accessToken = await getAccessTokenAsync(apiHost!, apiKey!, apiSecret!);
+  const url = `${apiHost}/rpc/2.0/ai_custom/v1/wenxinworkshop/chat/${ModelEndpoint[modelId]}?access_token=${accessToken}`;
   const body = {
     headers: {
       'Content-Type': 'application/json',
@@ -45,18 +48,19 @@ export const QianFanStream = async (
     },
     method: 'POST',
     body: JSON.stringify({
-      model: model.modelId,
+      model: modelId,
       messages: [...messages],
       stream: true,
       ...parameters,
     }),
   };
   const res = await fetch(url, body);
+  console.log(res);
   const decoder = new TextDecoder();
   if (res.status !== 200) {
     let errors = {} as any;
     errors = await res.json();
-    throw new Error(errors);
+    throw new Error(JSON.stringify(errors));
   }
 
   const stream = new ReadableStream({
@@ -67,6 +71,7 @@ export const QianFanStream = async (
           try {
             const json = JSON.parse(data);
             const text = json.result;
+
             controller.enqueue(text);
             if (json.is_end) {
               controller.close();

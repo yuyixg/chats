@@ -5,24 +5,25 @@ import {
   ReconnectInterval,
   createParser,
 } from 'eventsource-parser';
-import { Model } from '@/types/model';
+import { ChatModels } from '@/models';
 
 export const QianWenStream = async (
-  model: Model,
+  chatModel: ChatModels,
   systemPrompt: string,
   temperature: number,
   messages: QianWenMessage[]
 ) => {
-  let url = `https://dashscope.aliyuncs.com/api/v1/services/aigc/multimodal-generation/generation`;
+  const { modelId, apiHost, apiKey } = chatModel;
+  let url = `${apiHost}/services/aigc/multimodal-generation/generation`;
   const body = {
     headers: {
       'Content-Type': 'application/json',
-      Authorization: `Bearer ${process.env.DASHSCOPE_API_KEY}`,
+      Authorization: `Bearer ${apiKey}`,
       'X-DashScope-SSE': 'enable',
     },
     method: 'POST',
     body: JSON.stringify({
-      model: model.modelId,
+      model: modelId,
       input: {
         messages: [
           {
@@ -48,7 +49,7 @@ export const QianWenStream = async (
   if (res.status !== 200) {
     let errors = {} as any;
     errors = await res.json();
-    throw new Error(errors);
+    throw new Error(JSON.stringify(errors));
   }
 
   const stream = new ReadableStream({

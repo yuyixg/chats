@@ -1,6 +1,6 @@
 // Next.js API route support: https://nextjs.org/docs/api-routes/introduction
 import { NextApiRequest } from 'next';
-import { AWS_ACCESS_KEY, AWS_BUCKET_NAME, AWS_SECRET } from '@/utils/const';
+import { MINIO_ACCESS_KEY, MINIO_BUCKET_NAME, MINIO_SECRET } from '@/utils/const';
 import * as AWS from 'aws-sdk';
 
 export default async function handler(req: NextApiRequest, res: any) {
@@ -9,8 +9,8 @@ export default async function handler(req: NextApiRequest, res: any) {
     fileType: string;
   };
   const s3 = new AWS.S3({
-    accessKeyId: AWS_ACCESS_KEY,
-    secretAccessKey: AWS_SECRET,
+    accessKeyId: MINIO_ACCESS_KEY,
+    secretAccessKey: MINIO_SECRET,
     endpoint: 'https://io.starworks.cc:88',
     s3ForcePathStyle: true,
   });
@@ -21,7 +21,7 @@ export default async function handler(req: NextApiRequest, res: any) {
     .padStart(2, '0')}/${date.getDate().toString().padStart(2, '0')}`;
 
   const params = {
-    Bucket: AWS_BUCKET_NAME,
+    Bucket: MINIO_BUCKET_NAME,
     Key: `${key}/${fileName}.${fileType}`,
     Expires: 60 * 60 * 24,
   };

@@ -16,6 +16,9 @@ class Users extends Model<
   declare role: string;
   declare extends?: string;
   declare enable?: boolean;
+  declare remainingTokens: number;
+  declare expirationDate: Date;
+  declare remainingCounts: number;
 }
 
 Users.init(
@@ -29,6 +32,9 @@ Users.init(
     role: { type: DataTypes.STRING },
     extends: { type: DataTypes.JSON },
     enable: { type: DataTypes.BOOLEAN },
+    remainingTokens: { type: DataTypes.INTEGER },
+    expirationDate: { type: DataTypes.DATE },
+    remainingCounts: { type: DataTypes.INTEGER },
   },
   {
     sequelize: connection,
