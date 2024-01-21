@@ -72,9 +72,13 @@ const handler = async (req: NextApiRequest, res: NextApiResponse) => {
           }
           if (done) {
             res.end();
+            const tokenMessages = messagesToSend.map((x) => {
+              return { role: x.role, content: x.content[0].text };
+            });
+            // tokenMessages.push({ role: 'assistant', content: assistantMessage });
             const tokenCount = await QianWenTokenizer(
               chatModel,
-              messagesToSend,
+              tokenMessages,
               prompt
             );
             if (chatMessages) {

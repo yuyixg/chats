@@ -60,7 +60,7 @@ export const QianWenStream = async (
           try {
             const json = JSON.parse(data);
             if (json?.code) {
-              throw new Error(json);
+              throw new Error(JSON.stringify(json));
             }
             if (json.output?.finish_reason === 'stop') {
               controller.close();

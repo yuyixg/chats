@@ -3,7 +3,7 @@ import { QianWenMessage } from '@/types/chat';
 
 export const QianWenTokenizer = async (
   chatModel: ChatModels,
-  messages: QianWenMessage[],
+  messages: any[],
   prompt: string
 ) => {
   const { modelId, apiHost, apiKey, systemPrompt } = chatModel;
@@ -15,22 +15,22 @@ export const QianWenTokenizer = async (
     },
     method: 'POST',
     body: JSON.stringify({
-      model: modelId,
+      model: 'qwen-plus',
       input: {
         messages: [
-          {
-            role: 'system',
-            content: [
-              {
-                text: prompt || systemPrompt,
-              },
-            ],
-          },
           ...messages,
         ],
       },
     }),
   };
   const res = await fetch(url, body);
-  return 1;
+  console.log(res.status);
+  if (res.status === 200) {
+    const result = await res.json();
+    return result.usage.input_tokens;
+  } else {
+    let errors = {} as any;
+    errors = await res.json();
+    throw new Error(JSON.stringify(errors));
+  }
 };
