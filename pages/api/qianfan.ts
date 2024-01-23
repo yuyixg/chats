@@ -2,6 +2,7 @@ import type { NextApiRequest, NextApiResponse } from 'next';
 import { ChatBody, QianFanMessage } from '@/types/chat';
 import { QianFanStream, Tokenizer } from '@/services/qianfan';
 import { ChatMessages, ChatModels } from '@/models';
+import { ChatMessageManager, ChatModelManager } from '@/managers';
 
 export const config = {
   api: {
@@ -19,20 +20,18 @@ export default async function handler(
   try {
     const { model, messages, messageId } = req.body as ChatBody;
 
-    const chatModel = await ChatModels.findOne({
-      where: { modelId: model.modelId },
-    });
+    const chatModel = await ChatModelManager.findModelById(model.modelId);
 
-    if (!chatModel) {
+    const userId = '5fec360a-4f32-49b6-bb93-d36c8ca2b9e1';
+
+    if (chatModel === null) {
       throw 'Model is not Found!';
     }
-    const userId = '5fec360a-4f32-49b6-bb93-d36c8ca2b9e1';
-    const chatMessages = await ChatMessages.findOne({
-      where: {
-        id: messageId,
-        userId: userId,
-      },
-    });
+
+    const chatMessages = await ChatMessageManager.findUserMessageById(
+      messageId,
+      userId
+    );
 
     let messagesToSend: QianFanMessage[] = [];
     messagesToSend = messages.map((message) => {
@@ -66,18 +65,11 @@ export default async function handler(
             });
             const tokenCount = await Tokenizer(chatModel, messagesToSend);
             if (chatMessages) {
-              await ChatMessages.update(
-                {
-                  messages,
-                  tokenCount: tokenCount + chatMessages.tokenCount,
-                  chatCount: chatMessages.chatCount + 1,
-                },
-                {
-                  where: {
-                    id: chatMessages.id,
-                    userId: userId,
-                  },
-                }
+              await ChatMessageManager.updateMessageById(
+                chatMessages.id!,
+                messages,
+                tokenCount + chatMessages.tokenCount,
+                chatMessages.chatCount + 1
               );
             } else {
               await ChatMessages.create({

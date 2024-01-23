@@ -10,7 +10,8 @@ import {
 } from '@/types/chat';
 import { get_encoding } from 'tiktoken';
 import { ModelIds } from '@/types/model';
-import { ChatMessages, ChatModels } from '@/models';
+import { ChatMessages } from '@/models';
+import { ChatModelManager, ChatMessageManager } from '@/managers';
 
 export const config = {
   api: {
@@ -25,9 +26,7 @@ const handler = async (req: NextApiRequest, res: NextApiResponse) => {
   try {
     const { messageId, model, messages, prompt, temperature } =
       req.body as ChatBody;
-    const chatModel = await ChatModels.findOne({
-      where: { modelId: model.modelId },
-    });
+    const chatModel = await ChatModelManager.findModelById(model.modelId);
 
     const userId = '5fec360a-4f32-49b6-bb93-d36c8ca2b9e1';
 
@@ -35,12 +34,10 @@ const handler = async (req: NextApiRequest, res: NextApiResponse) => {
       throw 'Model is not Found!';
     }
 
-    const chatMessages = await ChatMessages.findOne({
-      where: {
-        id: messageId,
-        userId: userId,
-      },
-    });
+    const chatMessages = await ChatMessageManager.findUserMessageById(
+      messageId,
+      userId
+    );
 
     let promptToSend = prompt;
     if (!promptToSend) {
@@ -93,7 +90,7 @@ const handler = async (req: NextApiRequest, res: NextApiResponse) => {
         } as GPT4Message;
       });
     }
-    
+
     const stream = await OpenAIStream(
       chatModel,
       promptToSend,
@@ -119,18 +116,11 @@ const handler = async (req: NextApiRequest, res: NextApiResponse) => {
               content: { text: assistantMessage },
             });
             if (chatMessages) {
-              await ChatMessages.update(
-                {
-                  messages,
-                  tokenCount: tokenCount + chatMessages.tokenCount,
-                  chatCount: chatMessages.chatCount + 1,
-                },
-                {
-                  where: {
-                    id: chatMessages.id,
-                    userId: userId,
-                  },
-                }
+              await ChatMessageManager.updateMessageById(
+                chatMessages.id!,
+                messages,
+                tokenCount + chatMessages.tokenCount,
+                chatMessages.chatCount + 1
               );
             } else {
               await ChatMessages.create({
