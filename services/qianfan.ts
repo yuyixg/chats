@@ -92,3 +92,30 @@ export const QianFanStream = async (
 
   return stream;
 };
+
+export const Tokenizer = async (chatModel: ChatModels, messages: any[]) => {
+  const { apiHost, apiKey, apiSecret } = chatModel;
+  const accessToken = await getAccessTokenAsync(apiHost!, apiKey!, apiSecret!);
+  let url = `${apiHost}/rpc/2.0/ai_custom/v1/wenxinworkshop/tokenizer/erniebot?access_token=${accessToken}`;
+  const body = {
+    headers: {
+      'Content-Type': 'application/json',
+    },
+    method: 'POST',
+    body: JSON.stringify({
+      messages: [...messages],
+    }),
+  };
+  const res = await fetch(url, body);
+  if (res.status === 200) {
+    const result = await res.json();
+    if (result?.error_code) {
+      throw new Error(JSON.stringify(result));
+    }
+    return result.usage.total_tokens;
+  } else {
+    let errors = {} as any;
+    errors = await res.json();
+    throw new Error(JSON.stringify(errors));
+  }
+};

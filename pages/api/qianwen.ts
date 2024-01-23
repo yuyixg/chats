@@ -1,8 +1,7 @@
 import type { NextApiRequest, NextApiResponse } from 'next';
 import { ChatBody, QianWenContent, QianWenMessage } from '@/types/chat';
-import { QianWenStream } from '@/services/qianwen';
+import { QianWenStream, Tokenizer } from '@/services/qianwen';
 import { ChatMessages, ChatModels } from '@/models';
-import { QianWenTokenizer } from '@/services/qianwen.utils';
 
 export const config = {
   // runtime: 'edge',
@@ -27,7 +26,6 @@ const handler = async (req: NextApiRequest, res: NextApiResponse) => {
     }
 
     const userId = '5fec360a-4f32-49b6-bb93-d36c8ca2b9e1';
-
     const chatMessages = await ChatMessages.findOne({
       where: {
         id: messageId,
@@ -76,7 +74,11 @@ const handler = async (req: NextApiRequest, res: NextApiResponse) => {
               return { role: x.role, content: x.content[0].text };
             });
             // tokenMessages.push({ role: 'assistant', content: assistantMessage });
-            const tokenCount = await QianWenTokenizer(
+            messages.push({
+              role: 'assistant',
+              content: { text: assistantMessage },
+            });
+            const tokenCount = await Tokenizer(
               chatModel,
               tokenMessages,
               prompt
