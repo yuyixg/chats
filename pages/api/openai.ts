@@ -13,7 +13,6 @@ import { ModelIds } from '@/types/model';
 import { ChatMessages, ChatModels } from '@/models';
 
 export const config = {
-  // runtime: 'edge',
   api: {
     bodyParser: {
       sizeLimit: '1mb',
@@ -160,7 +159,6 @@ const handler = async (req: NextApiRequest, res: NextApiResponse) => {
   } catch (error) {
     console.error(error);
     res.status(500).end();
-  } finally {
   }
 };
 

@@ -55,7 +55,6 @@ export const QianFanStream = async (
     }),
   };
   const res = await fetch(url, body);
-  console.log(res);
   const decoder = new TextDecoder();
   if (res.status !== 200) {
     let errors = {} as any;

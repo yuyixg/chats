@@ -1,7 +1,6 @@
 import { ChatModels } from '@/models';
 import type { NextApiRequest, NextApiResponse } from 'next';
 export const config = {
-  // runtime: 'edge',
   api: {
     bodyParser: {
       sizeLimit: '1mb',

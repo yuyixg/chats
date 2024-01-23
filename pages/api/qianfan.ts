@@ -1,11 +1,9 @@
 import type { NextApiRequest, NextApiResponse } from 'next';
-import { ChatBody, Message, QianFanMessage } from '@/types/chat';
-import { Model } from '@/types/model';
+import { ChatBody, QianFanMessage } from '@/types/chat';
 import { QianFanStream, Tokenizer } from '@/services/qianfan';
 import { ChatMessages, ChatModels } from '@/models';
 
 export const config = {
-  // runtime: 'edge',
   api: {
     bodyParser: {
       sizeLimit: '1mb',
@@ -62,7 +60,6 @@ export default async function handler(
             assistantMessage += value;
           }
           if (done) {
-            res.end();
             messages.push({
               role: 'assistant',
               content: { text: assistantMessage },
@@ -94,6 +91,7 @@ export default async function handler(
                 chatCount: 1,
               });
             }
+            res.end();
             break;
           }
           res.write(Buffer.from(value));
@@ -108,6 +106,5 @@ export default async function handler(
   } catch (error) {
     console.error(error);
     res.status(500).end();
-  } finally {
   }
 }

@@ -62,16 +62,17 @@ export const QianWenStream = async (
             if (json?.code) {
               throw new Error(JSON.stringify(json));
             }
-            if (json.output?.finish_reason === 'stop') {
-              controller.close();
-              return;
+            if (json.output?.choices.length > 0) {
+              if (json.output?.choices[0]?.finish_reason === 'stop') {
+                controller.close();
+                return;
+              }
+              const text =
+                (json.output.choices[0].message?.content.length > 0 &&
+                  json.output.choices[0].message?.content[0].text) ||
+                '';
+              controller.enqueue(text);
             }
-            const text =
-              (json.output.choices.length > 0 &&
-                json.output.choices[0].message?.content.length > 0 &&
-                json.output.choices[0].message?.content[0].text) ||
-              '';
-            controller.enqueue(text);
           } catch (e) {
             controller.error(e);
           }
@@ -104,12 +105,11 @@ export const Tokenizer = async (
     body: JSON.stringify({
       model: 'qwen-plus',
       input: {
-        messages: [
-          ...messages,
-        ],
+        messages: [...messages],
       },
     }),
   };
+  console.log(body);
   const res = await fetch(url, body);
   console.log(res.status);
   if (res.status === 200) {
@@ -121,4 +121,3 @@ export const Tokenizer = async (
     throw new Error(JSON.stringify(errors));
   }
 };
-

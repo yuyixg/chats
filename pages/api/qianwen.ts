@@ -4,7 +4,6 @@ import { QianWenStream, Tokenizer } from '@/services/qianwen';
 import { ChatMessages, ChatModels } from '@/models';
 
 export const config = {
-  // runtime: 'edge',
   api: {
     bodyParser: {
       sizeLimit: '1mb',
@@ -69,20 +68,18 @@ const handler = async (req: NextApiRequest, res: NextApiResponse) => {
             assistantMessage += value;
           }
           if (done) {
-            res.end();
             const tokenMessages = messagesToSend.map((x) => {
               return { role: x.role, content: x.content[0].text };
-            });
-            // tokenMessages.push({ role: 'assistant', content: assistantMessage });
-            messages.push({
-              role: 'assistant',
-              content: { text: assistantMessage },
             });
             const tokenCount = await Tokenizer(
               chatModel,
               tokenMessages,
               prompt
             );
+            messages.push({
+              role: 'assistant',
+              content: { text: assistantMessage },
+            });
             if (chatMessages) {
               await ChatMessages.update(
                 {
@@ -109,6 +106,7 @@ const handler = async (req: NextApiRequest, res: NextApiResponse) => {
                 chatCount: 1,
               });
             }
+            res.end();
             break;
           }
           res.write(Buffer.from(value));
@@ -123,7 +121,6 @@ const handler = async (req: NextApiRequest, res: NextApiResponse) => {
   } catch (error) {
     console.error(error);
     res.status(500).end();
-  } finally {
   }
 };
 
