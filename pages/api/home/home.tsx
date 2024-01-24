@@ -21,6 +21,9 @@ import { useQuery } from 'react-query';
 import useApiService from '@/apis/useApiService';
 import { serverSideTranslations } from 'next-i18next/serverSideTranslations';
 import { useTranslation } from 'react-i18next';
+import { useSession, signIn } from 'next-auth/react';
+import { getServerSession } from 'next-auth';
+import { authOptions } from '../auth/[...nextauth]';
 
 interface Props {
   serverSideApiKeyIsSet: boolean;
@@ -29,6 +32,14 @@ interface Props {
 }
 
 const Home = ({ defaultModelId }: Props) => {
+  const { data: session, status } = useSession();
+  console.log('home session', session, status);
+  if (status !== 'authenticated') {
+    signIn('keycloak', {
+      callbackUrl: `${process.env.NEXT_PUBLIC_BASE_URL}/application`,
+    });
+  }
+
   const { t } = useTranslation('chat');
   const contextValue = useCreateReducer<HomeInitialState>({
     initialState,
@@ -230,10 +241,21 @@ const Home = ({ defaultModelId }: Props) => {
 
 export default Home;
 
-export const getServerSideProps = async ({ locale }: { locale: string }) => {
+export const getServerSideProps = async ({
+  locale,
+  req,
+  res,
+}: {
+  locale: string;
+  req: any;
+  res: any;
+}) => {
+  const session = await getServerSession(req, res, authOptions);
+  console.log('session session session', session);
   return {
     props: {
       defaultModelId: null,
+      session,
       ...(await serverSideTranslations(locale ?? 'en', [
         'common',
         'chat',
