@@ -66,8 +66,8 @@ const handler = async (req: NextApiRequest, res: NextApiResponse) => {
             assistantMessage += value;
           }
           if (done) {
-            const tokenMessages = messagesToSend.map((x) => {
-              return { role: x.role, content: x.content[0].text };
+            const tokenMessages = messages.map((x) => {
+              return { role: x.role, content: x.content.text }; 
             });
             const tokenCount = await Tokenizer(
               chatModel,

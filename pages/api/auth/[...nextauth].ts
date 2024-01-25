@@ -1,6 +1,51 @@
 import NextAuth, { AuthOptions } from 'next-auth';
 import { JWT } from 'next-auth/jwt';
 
+const refreshAccessToken = async (token: JWT) => {
+  console.log('refreshAccessToken', Date.now() > token.refreshTokenExpired);
+  try {
+    if (Date.now() > token.refreshTokenExpired) throw Error;
+    const details = {
+      client_id: process.env.KEYCLOAK_ID!,
+      client_secret: process.env.KEYCLOAK_SECRET!,
+      grant_type: ['refresh_token'],
+      refresh_token: token.refreshToken,
+    };
+    const formBody: string[] = [];
+    Object.entries(details).forEach(([key, value]: [string, any]) => {
+      const encodedKey = encodeURIComponent(key);
+      const encodedValue = encodeURIComponent(value);
+      formBody.push(encodedKey + '=' + encodedValue);
+    });
+    const formData = formBody.join('&');
+    const url = `https://identity.starworks.cc/realms/MFF/protocol/openid-connect/token`;
+    const response = await fetch(url, {
+      method: 'POST',
+      headers: {
+        'Content-Type': 'application/x-www-form-urlencoded;charset=UTF-8',
+      },
+      body: formData,
+    });
+    const refreshedTokens = await response.json();
+    if (!response.ok) throw refreshedTokens;
+    const result = {
+      ...token,
+      accessToken: refreshedTokens.access_token,
+      accessTokenExpired: refreshedTokens.expires_at,
+      refreshToken: refreshedTokens.refresh_token ?? token.refreshToken,
+      refreshTokenExpired:
+        Date.now() + (refreshedTokens.refresh_expires_in - 15) * 1000,
+    };
+    console.log('result', result);
+    return result;
+  } catch (error) {
+    return {
+      ...token,
+      error: 'RefreshAccessTokenError',
+    };
+  }
+};
+
 export const authOptions: AuthOptions = {
   providers: [
     {
@@ -13,13 +58,8 @@ export const authOptions: AuthOptions = {
           scope: 'openid email profile',
         },
       },
-      // params: { grant_type: 'authorization_code' },
-      // scope: 'openid email profile console-prosa basic-user-attribute',
       wellKnown:
         'https://identity.starworks.cc/realms/MFF/.well-known/openid-configuration',
-      // accessTokenUrl: `https://identity.starworks.cc/realms/MFF/protocol/openid-connect/token`,
-      // requestTokenUrl: `https://identity.starworks.cc/realms/MFF/protocol/openid-connect/auth`,
-      // profileUrl: `https://identity.starworks.cc/realms/MFF/protocol/openid-connect/userinfo`,
       clientId: process.env.KEYCLOAK_ID!,
       clientSecret: process.env.KEYCLOAK_SECRET!,
       profile: (profile) => {
@@ -28,9 +68,6 @@ export const authOptions: AuthOptions = {
           id: profile.sub,
         };
       },
-      // authorizationParams: {
-      //   response_type: 'code',
-      // },
     },
   ],
   session: {
@@ -56,7 +93,7 @@ export const authOptions: AuthOptions = {
       return url.startsWith(baseUrl) ? url : baseUrl;
     },
     async session(params: { session: any; token: JWT }) {
-      console.log('session', params);
+      // console.log('session', params);
       const { session, token } = params;
       if (token) {
         session.user = token.user;
@@ -71,19 +108,19 @@ export const authOptions: AuthOptions = {
       };
     },
     async jwt(params) {
-      // console.log('jwt', params);
+      console.log('jwt', params.token);
       const { account, user, token } = params;
       if (account && user) {
-        token.accessToken = account.accessToken;
-        token.refreshToken = account.refreshToken;
-        token.accessTokenExpired =
-          Date.now() + (account.expires_at! - 15) * 1000;
+        token.accessToken = account.access_token;
+        token.refreshToken = account.refresh_token;
+        token.accessTokenExpired = account.expires_at;
         token.refreshTokenExpired =
-          Date.now() + (account.expires_at! - 15) * 1000;
+          Date.now() + (account.refresh_expires_in - 15) * 1000;
         token.user = user;
         return token;
       }
-      return token;
+      if (Date.now() < token.accessTokenExpired) return token;
+      return refreshAccessToken(token);
     },
   },
 };

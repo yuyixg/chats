@@ -21,7 +21,7 @@ import { useQuery } from 'react-query';
 import useApiService from '@/apis/useApiService';
 import { serverSideTranslations } from 'next-i18next/serverSideTranslations';
 import { useTranslation } from 'react-i18next';
-import { useSession, signIn } from 'next-auth/react';
+import { useSession, signIn, getSession, signOut } from 'next-auth/react';
 import { getServerSession } from 'next-auth';
 import { authOptions } from '../auth/[...nextauth]';
 
@@ -33,13 +33,22 @@ interface Props {
 
 const Home = ({ defaultModelId }: Props) => {
   const { data: session, status } = useSession();
-  console.log('home session', session, status);
-  if (status !== 'authenticated') {
-    signIn('keycloak', {
-      callbackUrl: `${process.env.NEXT_PUBLIC_BASE_URL}/application`,
-    });
-  }
 
+  useEffect(() => {
+    // setInterval(async () => {
+    //   const params = await getSession();
+    //   console.log('params', params);
+    // }, 5000);
+  }, []);
+
+  useEffect(() => {
+    if (
+      status !== 'authenticated' ||
+      session?.error === 'RefreshAccessTokenError'
+    ) {
+      signIn('keycloak');
+    }
+  }, [session]);
   const { t } = useTranslation('chat');
   const contextValue = useCreateReducer<HomeInitialState>({
     initialState,
@@ -62,14 +71,14 @@ const Home = ({ defaultModelId }: Props) => {
   const handleNewConversation = () => {
     const lastConversation = conversations[conversations.length - 1];
     const _defaultModelId = defaultModelId ?? models[0].modelId;
-    const model = getModel(_defaultModelId);
+    const model = lastConversation?.model || getModel(_defaultModelId);
     const newConversation: Conversation = {
       id: uuidv4(),
       name: t('New Conversation'),
       messages: [],
-      model: lastConversation?.model || model,
+      model: model,
       prompt: t(model.systemPrompt),
-      temperature: lastConversation?.temperature ?? DEFAULT_TEMPERATURE,
+      temperature: DEFAULT_TEMPERATURE,
     };
 
     const updatedConversations = [...conversations, newConversation];
@@ -150,20 +159,21 @@ const Home = ({ defaultModelId }: Props) => {
         value: parsedSelectedConversation,
       });
     } else {
+      if (models.length === 0) return;
       const lastConversation = conversations[conversations.length - 1];
       const _defaultModelId = defaultModelId
         ? defaultModelId
         : models[0]?.modelId;
-      const model = getModel(_defaultModelId);
+      const model = lastConversation?.model || getModel(_defaultModelId);
       dispatch({
         field: 'selectedConversation',
         value: {
           id: uuidv4(),
           name: t('New Conversation'),
           messages: [],
-          model: lastConversation?.model || model,
+          model: model,
           prompt: t(model.systemPrompt),
-          temperature: lastConversation?.temperature ?? DEFAULT_TEMPERATURE,
+          temperature: DEFAULT_TEMPERATURE,
         },
       });
     }
@@ -251,7 +261,7 @@ export const getServerSideProps = async ({
   res: any;
 }) => {
   const session = await getServerSession(req, res, authOptions);
-  console.log('session session session', session);
+  // console.log('getServerSession', session);
   return {
     props: {
       defaultModelId: null,

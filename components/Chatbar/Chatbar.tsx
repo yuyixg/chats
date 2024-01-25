@@ -50,7 +50,6 @@ export const Chatbar = () => {
           model: model,
           prompt: t(model.systemPrompt),
           temperature: DEFAULT_TEMPERATURE,
-          folderId: null,
         },
       });
     }
@@ -89,7 +88,6 @@ export const Chatbar = () => {
             model: model,
             prompt: t(model.systemPrompt),
             temperature: DEFAULT_TEMPERATURE,
-            folderId: null,
           },
         });
       }

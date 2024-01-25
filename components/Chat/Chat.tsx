@@ -327,10 +327,9 @@ export const Chat = memo(({ stopConversationRef }: Props) => {
                     <div>
                       <Spinner size='16px' className='mx-auto' />
                     </div>
-                  ) : hasModel() ? (
-                    ''
                   ) : (
-                    t('No model data.')
+                    // models.length == 0 && t('No model data.')
+                    <></>
                   )}
                 </div>
 
@@ -349,7 +348,7 @@ export const Chat = memo(({ stopConversationRef }: Props) => {
                       }
                     />
 
-                    <TemperatureSlider
+                    {/* <TemperatureSlider
                       label={t('Temperature')}
                       onChangeTemperature={(temperature) =>
                         handleUpdateConversation(selectedConversation, {
@@ -357,7 +356,7 @@ export const Chat = memo(({ stopConversationRef }: Props) => {
                           value: temperature,
                         })
                       }
-                    />
+                    /> */}
                   </div>
                 )}
               </div>

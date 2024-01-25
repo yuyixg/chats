@@ -21,7 +21,6 @@ import { Content, Message } from '@/types/chat';
 
 import HomeContext from '@/pages/api/home/home.context';
 import UploadButton from '../UploadButton';
-import { ModelIds } from '@/types/model';
 
 interface Props {
   onSend: (message: Message) => void;
@@ -119,7 +118,6 @@ export const ChatInput = ({
         textareaRef?.current?.scrollHeight > 400 ? 'auto' : 'hidden'
       }`;
     }
-    console.log('Current Content \n', content);
   }, [content]);
 
   useEffect(() => {
@@ -166,7 +164,7 @@ export const ChatInput = ({
                         setContent((pre) => {
                           const image = pre.image?.filter((x) => x !== img);
                           return {
-                            ...pre,
+                            text: pre.text,
                             image,
                           };
                         });
@@ -227,7 +225,7 @@ export const ChatInput = ({
                     setContent((pre) => {
                       const image = pre?.image!.concat(url);
                       return {
-                        text: content?.text,
+                        text: pre.text,
                         image,
                       };
                     });

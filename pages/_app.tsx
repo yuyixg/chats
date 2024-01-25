@@ -6,13 +6,10 @@ import { appWithTranslation } from 'next-i18next';
 import { useRouter } from 'next/router';
 import AdminLayout from './admin/layout/layout';
 import { SessionProvider } from 'next-auth/react';
-import { Session } from 'next-auth';
-function App({
-  Component,
-  pageProps: { session, ...pageProps },
-}: AppProps<{}>) {
+
+function App({ Component, pageProps }: AppProps<{}> | any) {
   const route = useRouter();
-  console.log('pageProps', pageProps);
+  // console.log('pageProps', pageProps);
 
   const queryClient = new QueryClient();
   if (route.pathname.includes('/admin')) {
@@ -23,7 +20,7 @@ function App({
     );
   }
   return (
-    <SessionProvider session={session} basePath='/zh'>
+    <SessionProvider session={pageProps.session} basePath='/api/auth'>
       <Toaster />
       <QueryClientProvider client={queryClient}>
         <Component {...pageProps} />
