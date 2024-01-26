@@ -109,9 +109,7 @@ export const Tokenizer = async (
       },
     }),
   };
-  console.log(body);
   const res = await fetch(url, body);
-  console.log(res.status);
   if (res.status === 200) {
     const result = await res.json();
     return result.usage.input_tokens;

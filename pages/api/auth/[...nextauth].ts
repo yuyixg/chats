@@ -2,7 +2,6 @@ import NextAuth, { AuthOptions } from 'next-auth';
 import { JWT } from 'next-auth/jwt';
 
 const refreshAccessToken = async (token: JWT) => {
-  console.log('refreshAccessToken', Date.now() > token.refreshTokenExpired);
   try {
     if (Date.now() > token.refreshTokenExpired) throw Error;
     const details = {
@@ -31,12 +30,11 @@ const refreshAccessToken = async (token: JWT) => {
     const result = {
       ...token,
       accessToken: refreshedTokens.access_token,
-      accessTokenExpired: refreshedTokens.expires_at,
+      accessTokenExpired: (refreshedTokens.expires_at - 15) * 1000,
       refreshToken: refreshedTokens.refresh_token ?? token.refreshToken,
       refreshTokenExpired:
         Date.now() + (refreshedTokens.refresh_expires_in - 15) * 1000,
     };
-    console.log('result', result);
     return result;
   } catch (error) {
     return {
@@ -45,21 +43,19 @@ const refreshAccessToken = async (token: JWT) => {
     };
   }
 };
-
 export const authOptions: AuthOptions = {
   providers: [
     {
       id: 'keycloak',
       name: 'Keycloak',
       type: 'oauth',
-      // version: '2.0', // Double check your keycloak version
+      checks: ['none'],
       authorization: {
         params: {
           scope: 'openid email profile',
         },
       },
-      wellKnown:
-        'https://identity.starworks.cc/realms/MFF/.well-known/openid-configuration',
+      wellKnown:process.env.KEYCLOAK_WELL_KNOWN!,
       clientId: process.env.KEYCLOAK_ID!,
       clientSecret: process.env.KEYCLOAK_SECRET!,
       profile: (profile) => {
@@ -99,6 +95,7 @@ export const authOptions: AuthOptions = {
         session.user = token.user;
         session.error = token.error;
         session.accessToken = token.accessToken;
+        session.permissions = [];
       }
       return {
         ...session,
@@ -108,12 +105,12 @@ export const authOptions: AuthOptions = {
       };
     },
     async jwt(params) {
-      console.log('jwt', params.token);
+      // console.log('jwt', params.token);
       const { account, user, token } = params;
       if (account && user) {
         token.accessToken = account.access_token;
         token.refreshToken = account.refresh_token;
-        token.accessTokenExpired = account.expires_at;
+        token.accessTokenExpired = (account.expires_at - 15) * 1000;
         token.refreshTokenExpired =
           Date.now() + (account.refresh_expires_in - 15) * 1000;
         token.user = user;

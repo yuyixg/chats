@@ -24,6 +24,7 @@ import { useTranslation } from 'react-i18next';
 import { useSession, signIn, getSession, signOut } from 'next-auth/react';
 import { getServerSession } from 'next-auth';
 import { authOptions } from '../auth/[...nextauth]';
+import { ISession } from '@/types/session';
 
 interface Props {
   serverSideApiKeyIsSet: boolean;
@@ -32,23 +33,34 @@ interface Props {
 }
 
 const Home = ({ defaultModelId }: Props) => {
-  const { data: session, status } = useSession();
-
+  const { data: session, status, update } = useSession();
   useEffect(() => {
-    // setInterval(async () => {
-    //   const params = await getSession();
-    //   console.log('params', params);
-    // }, 5000);
+    console.log('session', session);
+    let listener = () => {
+      console.log(document.visibilityState);
+      if (document.visibilityState === 'visible') {
+        update();
+      }
+    };
+    document.addEventListener('visibilitychange', listener);
+    let sessionInterval = setInterval(() => {
+      update();
+    }, 1000 * 60 * 30);
+    return () => {
+      document.removeEventListener('visibilitychange', listener);
+      clearInterval(sessionInterval);
+    };
   }, []);
 
   useEffect(() => {
     if (
-      status !== 'authenticated' ||
-      session?.error === 'RefreshAccessTokenError'
+      status === 'unauthenticated' ||
+      (session as ISession)['error'] === 'RefreshAccessTokenError'
     ) {
       signIn('keycloak');
     }
   }, [session]);
+
   const { t } = useTranslation('chat');
   const contextValue = useCreateReducer<HomeInitialState>({
     initialState,
@@ -225,7 +237,7 @@ const Home = ({ defaultModelId }: Props) => {
         />
         <link rel='icon' href='/favicon.ico' />
       </Head>
-      {selectedConversation && (
+      {status !== 'unauthenticated' && selectedConversation && (
         <main
           className={`flex h-screen w-screen flex-col text-sm text-white dark:text-white ${lightMode}`}
         >
@@ -261,7 +273,6 @@ export const getServerSideProps = async ({
   res: any;
 }) => {
   const session = await getServerSession(req, res, authOptions);
-  // console.log('getServerSession', session);
   return {
     props: {
       defaultModelId: null,
