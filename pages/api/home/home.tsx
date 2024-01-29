@@ -35,7 +35,6 @@ interface Props {
 const Home = ({ defaultModelId }: Props) => {
   const { data: session, status, update } = useSession();
   useEffect(() => {
-    console.log('session', session);
     let listener = () => {
       console.log(document.visibilityState);
       if (document.visibilityState === 'visible') {

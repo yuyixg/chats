@@ -1,3 +1,4 @@
+import { UserManager } from '@/managers';
 import NextAuth, { AuthOptions } from 'next-auth';
 import { JWT } from 'next-auth/jwt';
 
@@ -17,7 +18,7 @@ const refreshAccessToken = async (token: JWT) => {
       formBody.push(encodedKey + '=' + encodedValue);
     });
     const formData = formBody.join('&');
-    const url = `https://identity.starworks.cc/realms/MFF/protocol/openid-connect/token`;
+    const url = `${process.env.KEYCLOAK_BASE_URL}/token`;
     const response = await fetch(url, {
       method: 'POST',
       headers: {
@@ -55,7 +56,7 @@ export const authOptions: AuthOptions = {
           scope: 'openid email profile',
         },
       },
-      wellKnown:process.env.KEYCLOAK_WELL_KNOWN!,
+      wellKnown: process.env.KEYCLOAK_WELL_KNOWN!,
       clientId: process.env.KEYCLOAK_ID!,
       clientSecret: process.env.KEYCLOAK_SECRET!,
       profile: (profile) => {
@@ -75,10 +76,16 @@ export const authOptions: AuthOptions = {
   },
   secret: process.env.KEYCLOAK_SECRET!,
   callbacks: {
-    async signIn(params: { user: any; account: any }) {
+    async signIn(params) {
       // console.log('signIn', params);
       const { account, user } = params;
       if (account && user) {
+        let currentUser = await UserManager.findUserById(user.id);
+        if (!currentUser) {
+          currentUser = await UserManager.createUser(user.id);
+        }
+        user.modelIds = currentUser.modelIds;
+        user.permissions = currentUser.permissions;
         return true;
       } else {
         return '/unauthorized';
@@ -88,24 +95,24 @@ export const authOptions: AuthOptions = {
       const { url, baseUrl } = params;
       return url.startsWith(baseUrl) ? url : baseUrl;
     },
-    async session(params: { session: any; token: JWT }) {
-      // console.log('session', params);
+    async session(params) {
       const { session, token } = params;
+      console.log('params', params);
       if (token) {
         session.user = token.user;
         session.error = token.error;
         session.accessToken = token.accessToken;
-        session.permissions = [];
+        session.permissions = token.user.permissions || null;
+        session.modelIds = token.user.modelIds || null;
       }
       return {
         ...session,
         expires: session.expires || null,
         error: session.error || null,
         accessToken: session.accessToken || null,
-      };
+      } as any;
     },
     async jwt(params) {
-      // console.log('jwt', params.token);
       const { account, user, token } = params;
       if (account && user) {
         token.accessToken = account.access_token;

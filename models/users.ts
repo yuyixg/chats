@@ -13,12 +13,9 @@ class Users extends Model<
 > {
   declare id?: string;
   declare modelIds: string[];
-  declare role: string;
-  declare extends?: string;
+  declare permissions: string[];
+  declare userInfo?: Object;
   declare enable?: boolean;
-  declare remainingTokens: number;
-  declare expirationDate: Date;
-  declare remainingCounts: number;
 }
 
 Users.init(
@@ -28,13 +25,10 @@ Users.init(
       primaryKey: true,
       defaultValue: UUIDV4,
     },
-    modelIds: { type: DataTypes.JSON },
-    role: { type: DataTypes.STRING },
-    extends: { type: DataTypes.JSON },
+    modelIds: { type: DataTypes.JSON, defaultValue: [] },
+    permissions: { type: DataTypes.JSON, defaultValue: [] },
+    userInfo: { type: DataTypes.JSON },
     enable: { type: DataTypes.BOOLEAN },
-    remainingTokens: { type: DataTypes.INTEGER },
-    expirationDate: { type: DataTypes.DATE },
-    remainingCounts: { type: DataTypes.INTEGER },
   },
   {
     sequelize: connection,
