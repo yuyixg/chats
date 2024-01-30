@@ -1,14 +1,12 @@
-import { IconArrowBarLeft, IconArrowBarRight } from '@tabler/icons-react';
-
 interface Props {
-  onClick: any;
+  onClick: () => void;
   side: 'left' | 'right';
 }
 
 export const CloseSidebarButton = ({ onClick, side }: Props) => {
   return (
     <div
-      className={`group fixed left-0 z-50 ${
+      className={`group fixed left-0 z-20 ${
         side === 'right' ? 'right-[260px]' : 'left-[260px]'
       }`}
       onClick={onClick}
@@ -29,7 +27,7 @@ export const CloseSidebarButton = ({ onClick, side }: Props) => {
 export const OpenSidebarButton = ({ onClick, side }: Props) => {
   return (
     <div
-      className={`group fixed left-0 top-1/2 z-50 ${
+      className={`group fixed left-0 top-1/2 z-20 ${
         side === 'right' ? 'right-2' : 'left-2'
       }`}
       onClick={onClick}

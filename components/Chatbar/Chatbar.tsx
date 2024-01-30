@@ -16,6 +16,7 @@ import { ChatbarInitialState, initialState } from './Chatbar.state';
 
 import { v4 as uuidv4 } from 'uuid';
 import { Conversations } from './Conversations';
+import { ChatBarSettings } from './ChatbarSettings';
 
 export const Chatbar = () => {
   const { t } = useTranslation('chat');
@@ -153,7 +154,7 @@ export const Chatbar = () => {
         toggleOpen={handleToggleChatbar}
         handleCreateItem={handleNewConversation}
         handleDrop={handleDrop}
-        footerComponent={<></>}
+        footerComponent={<ChatBarSettings />}
       />
     </ChatbarContext.Provider>
   );

@@ -21,7 +21,7 @@ import { useQuery } from 'react-query';
 import useApiService from '@/apis/useApiService';
 import { serverSideTranslations } from 'next-i18next/serverSideTranslations';
 import { useTranslation } from 'react-i18next';
-import { useSession, signIn } from 'next-auth/react';
+import { useSession, signIn, getSession } from 'next-auth/react';
 import { getServerSession } from 'next-auth';
 import { authOptions } from '../auth/[...nextauth]';
 
@@ -32,7 +32,7 @@ interface Props {
 }
 
 const Home = ({ defaultModelId }: Props) => {
-  const { data: session, status, update } = useSession();
+  const { data: session, status } = useSession();
 
   useEffect(() => {
     if (
