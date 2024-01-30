@@ -20,7 +20,12 @@ function App({ Component, pageProps }: AppProps<{}> | any) {
     );
   }
   return (
-    <SessionProvider session={pageProps.session} basePath='/api/auth'>
+    <SessionProvider
+      refetchInterval={25 * 60}
+      session={pageProps.session}
+      refetchOnWindowFocus={true}
+      basePath='/api/auth'
+    >
       <Toaster />
       <QueryClientProvider client={queryClient}>
         <Component {...pageProps} />

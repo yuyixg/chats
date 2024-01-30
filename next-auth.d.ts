@@ -6,30 +6,24 @@ declare module 'next-auth' {
    */
   interface Session {
     user: {
-      sub: string;
-      email_verified: boolean;
       name: string;
-      preferred_username: string;
-      given_name: string;
-      family_name: string;
-      email: string;
-      id: string;
-      org_name?: string;
-      telephone?: string;
+      email?: string | null;
+      image?: string | null;
     };
     error: string;
     modelIds: string[];
     permissions: string[];
     expires: number;
     accessToken?: string;
+    refreshToken: string;
+    accessTokenExpired: number;
+    refreshTokenExpired: number;
   }
   /**
    * The shape of the user object returned in the OAuth providers' `profile` callback,
    * or the second parameter of the `session` callback, when using a database.
    */
   interface User {
-    modelIds: string[];
-    permissions: string[];
     sub: string;
     email_verified: boolean;
     name: string;

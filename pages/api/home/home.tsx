@@ -21,10 +21,9 @@ import { useQuery } from 'react-query';
 import useApiService from '@/apis/useApiService';
 import { serverSideTranslations } from 'next-i18next/serverSideTranslations';
 import { useTranslation } from 'react-i18next';
-import { useSession, signIn, getSession, signOut } from 'next-auth/react';
+import { useSession, signIn } from 'next-auth/react';
 import { getServerSession } from 'next-auth';
 import { authOptions } from '../auth/[...nextauth]';
-import { ISession } from '@/types/session';
 
 interface Props {
   serverSideApiKeyIsSet: boolean;
@@ -34,27 +33,11 @@ interface Props {
 
 const Home = ({ defaultModelId }: Props) => {
   const { data: session, status, update } = useSession();
-  useEffect(() => {
-    let listener = () => {
-      console.log(document.visibilityState);
-      if (document.visibilityState === 'visible') {
-        update();
-      }
-    };
-    document.addEventListener('visibilitychange', listener);
-    let sessionInterval = setInterval(() => {
-      update();
-    }, 1000 * 60 * 30);
-    return () => {
-      document.removeEventListener('visibilitychange', listener);
-      clearInterval(sessionInterval);
-    };
-  }, []);
 
   useEffect(() => {
     if (
       status === 'unauthenticated' ||
-      (session as ISession)['error'] === 'RefreshAccessTokenError'
+      session?.error === 'RefreshAccessTokenError'
     ) {
       signIn('keycloak');
     }
@@ -66,14 +49,7 @@ const Home = ({ defaultModelId }: Props) => {
   });
 
   const {
-    state: {
-      conversations,
-      selectedConversation,
-      lightMode,
-      models,
-      prompts,
-      temperature,
-    },
+    state: { conversations, selectedConversation, lightMode, models },
     dispatch,
   } = contextValue;
   const { getModels } = useApiService();
@@ -195,7 +171,7 @@ const Home = ({ defaultModelId }: Props) => {
     ({ signal }) => {
       return getModels({}, signal);
     },
-    { enabled: true, refetchOnMount: false }
+    {}
   );
 
   useEffect(() => {

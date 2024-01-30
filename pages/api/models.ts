@@ -14,7 +14,6 @@ export const config = {
 const handler = async (req: NextApiRequest, res: NextApiResponse) => {
   try {
     const session = await getServerSession(req, res, authOptions);
-    console.log('session', session);
     const models = await ChatModels.findAll({ where: { enable: true } });
     const _models = models
       .filter((m) => session?.modelIds?.includes(m.modelId))

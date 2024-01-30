@@ -77,15 +77,12 @@ export const authOptions: AuthOptions = {
   secret: process.env.KEYCLOAK_SECRET!,
   callbacks: {
     async signIn(params) {
-      // console.log('signIn', params);
       const { account, user } = params;
       if (account && user) {
         let currentUser = await UserManager.findUserById(user.id);
         if (!currentUser) {
           currentUser = await UserManager.createUser(user.id);
         }
-        user.modelIds = currentUser.modelIds;
-        user.permissions = currentUser.permissions;
         return true;
       } else {
         return '/unauthorized';
@@ -96,20 +93,24 @@ export const authOptions: AuthOptions = {
       return url.startsWith(baseUrl) ? url : baseUrl;
     },
     async session(params) {
-      const { session, token } = params;
-      console.log('params', params);
+      const { session: paramsSession, token } = params;
+      let session = {};
       if (token) {
-        session.user = token.user;
-        session.error = token.error;
-        session.accessToken = token.accessToken;
-        session.permissions = token.user.permissions || null;
-        session.modelIds = token.user.modelIds || null;
+        let currentUser = await UserManager.findUserById(token.sub);
+        session = {
+          user: {
+            email: token.user?.email || null,
+            name: token.user.preferred_username,
+            image: null,
+          },
+          error: token.error || null,
+          permissions: currentUser?.permissions || [],
+          modelIds: currentUser?.modelIds || [],
+        };
       }
       return {
         ...session,
-        expires: session.expires || null,
-        error: session.error || null,
-        accessToken: session.accessToken || null,
+        expires: paramsSession.expires || null,
       } as any;
     },
     async jwt(params) {

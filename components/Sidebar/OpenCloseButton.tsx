@@ -7,36 +7,44 @@ interface Props {
 
 export const CloseSidebarButton = ({ onClick, side }: Props) => {
   return (
-    <>
-      <button
-        className={`fixed top-5 ${
-          side === 'right' ? 'right-[270px]' : 'left-[270px]'
-        } z-50 h-7 w-7 hover:text-gray-400 dark:text-white dark:hover:text-gray-300 sm:top-0.5 sm:${
-          side === 'right' ? 'right-[270px]' : 'left-[270px]'
-        } sm:h-8 sm:w-8 sm:text-neutral-700`}
-        onClick={onClick}
-      >
-        {side === 'right' ? <IconArrowBarRight /> : <IconArrowBarLeft />}
+    <div
+      className={`group fixed left-0 z-50 ${
+        side === 'right' ? 'right-[260px]' : 'left-[260px]'
+      }`}
+      onClick={onClick}
+      style={{ top: 'calc(50% - 72px)' }}
+    >
+      <button>
+        <div className='flex h-[72px] w-8 items-center justify-center'>
+          <div className='flex h-6 w-6 flex-col items-center'>
+            <div className='group-hover:rotate-15 group-hover:bg-black h-3 w-1 rounded-full bg-gray-400 transform translate-y-[0.15rem] rotate-0'></div>
+            <div className='group-hover:-rotate-15 group-hover:bg-black h-3 w-1 rounded-full bg-gray-400 transform -translate-y-[0.15rem] rotate-0'></div>
+          </div>
+        </div>
       </button>
-      <div
-        onClick={onClick}
-        className="absolute top-0 left-0 z-10 h-full w-full bg-black opacity-70 sm:hidden"
-      ></div>
-    </>
+    </div>
   );
 };
 
 export const OpenSidebarButton = ({ onClick, side }: Props) => {
   return (
-    <button
-      className={`fixed top-2.5 ${
+    <div
+      className={`group fixed left-0 top-1/2 z-50 ${
         side === 'right' ? 'right-2' : 'left-2'
-      } z-50 h-7 w-7 text-white hover:text-gray-400 dark:text-white dark:hover:text-gray-300 sm:top-0.5 sm:${
-        side === 'right' ? 'right-2' : 'left-2'
-      } sm:h-8 sm:w-8 sm:text-neutral-700`}
+      }`}
       onClick={onClick}
+      style={{ top: 'calc(50% - 72px)' }}
     >
-      {side === 'right' ? <IconArrowBarLeft /> : <IconArrowBarRight />}
-    </button>
+      <button>
+        <span data-state='closed'>
+          <div className='flex h-[72px] w-8 items-center justify-center'>
+            <div className='flex h-6 w-6 flex-col items-center'>
+              <div className='group-hover:bg-black h-3 w-1 rounded-full bg-gray-400 transform translate-y-[0.15rem] -rotate-[15deg]'></div>
+              <div className='group-hover:bg-black h-3 w-1 rounded-full bg-gray-400 transform -translate-y-[0.15rem] rotate-[15deg]'></div>
+            </div>
+          </div>
+        </span>
+      </button>
+    </div>
   );
 };

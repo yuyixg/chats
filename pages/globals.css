@@ -35,3 +35,12 @@ body {
   border-radius: 10px;
   background: #fff;
 }
+
+@layer utilities {
+  .group:hover .group-hover\:rotate-15 {
+    transform: translateY(0.15rem) rotate(15deg) translateZ(0px);
+  }
+  .group:hover .group-hover\:-rotate-15 {
+    transform: translateY(-0.15rem) rotate(-15deg) translateZ(0px);
+  }
+}
