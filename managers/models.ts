@@ -6,7 +6,9 @@ export class ChatModelManager {
       where: {
         enable: true,
       },
-      order: [['rank', 'DESC']],
+      order: [
+        ['rank', 'asc'],
+      ],
     });
   }
 

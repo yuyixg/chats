@@ -1,8 +1,7 @@
-import { ChatModels, UserModels } from '@/models';
 import type { NextApiRequest, NextApiResponse } from 'next';
 import { getServerSession } from 'next-auth';
 import { authOptions } from './auth/[...nextauth]';
-import { UserModelManager } from '@/managers';
+import { ChatModelManager, UserModelManager } from '@/managers';
 export const config = {
   api: {
     bodyParser: {
@@ -19,7 +18,7 @@ const handler = async (req: NextApiRequest, res: NextApiResponse) => {
       return res.status(401).end();
     }
     const userModels = await UserModelManager.findEnableModels(session.userId);
-    const models = await ChatModels.findAll({ where: { enable: true } });
+    const models = await ChatModelManager.findEnableModels();
     const _models = models
       .filter((m) => userModels.includes(m.id))
       .map((x) => {
