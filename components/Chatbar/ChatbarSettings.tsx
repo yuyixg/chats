@@ -1,26 +1,17 @@
-import { IconSettings, IconUser } from '@tabler/icons-react';
-import { useContext, useState } from 'react';
-
+import { IconLogout, IconSettings, IconUser } from '@tabler/icons-react';
+import { useState } from 'react';
 import { useTranslation } from 'next-i18next';
-
-import HomeContext from '@/pages/api/home/home.context';
-
 import { SettingDialog } from '@/components/Settings/SettingDialog';
 
 import { SidebarButton } from '../Sidebar/SidebarButton';
 // import ChatbarContext from '../Chatbar.context';
 import { ClearConversations } from './ClearConversations';
-import { useSession } from 'next-auth/react';
+import { signOut, useSession } from 'next-auth/react';
 
 export const ChatBarSettings = () => {
   const { t } = useTranslation('sidebar');
   const [isSettingDialogOpen, setIsSettingDialog] = useState<boolean>(false);
   const { data: session } = useSession();
-
-  const {
-    state: { lightMode, conversations },
-    dispatch: homeDispatch,
-  } = useContext(HomeContext);
 
   //   const {
   //     handleClearConversations
@@ -48,6 +39,14 @@ export const ChatBarSettings = () => {
         <SidebarButton
           text={session?.user.name}
           icon={<IconUser size={18} />}
+          action={
+            <IconLogout
+              onClick={() => {
+                signOut();
+              }}
+              size={18}
+            />
+          }
           onClick={() => {}}
         />
       )}

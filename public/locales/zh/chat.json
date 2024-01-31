@@ -39,5 +39,6 @@
   "Type a message...": "输入一条消息...",
   "File upload failed": "文件上传失败",
   "The file size limit is {{fileSize}}": "文件大小限制为 {{fileSize}}",
-  "New chat": "新建聊天"
+  "New chat": "新建聊天",
+  "Loading ...": "加载中 ..."
 }

@@ -12,7 +12,7 @@ import {
   updateConversation,
 } from '@/utils/conversation';
 import { KeyValuePair } from '@/types/data';
-import { useEffect, useRef } from 'react';
+import { useEffect, useRef, useState } from 'react';
 import Head from 'next/head';
 import { Navbar } from '@/components/Navbar/Navbar';
 import { Chatbar } from '@/components/Chatbar/Chatbar';
@@ -21,7 +21,7 @@ import { useQuery } from 'react-query';
 import useApiService from '@/apis/useApiService';
 import { serverSideTranslations } from 'next-i18next/serverSideTranslations';
 import { useTranslation } from 'react-i18next';
-import { useSession, signIn, getSession } from 'next-auth/react';
+import { useSession, signIn } from 'next-auth/react';
 import { getServerSession } from 'next-auth';
 import { authOptions } from '../auth/[...nextauth]';
 import { getSettings } from '@/utils/settings';
@@ -45,6 +45,7 @@ const Home = ({ defaultModelId }: Props) => {
   } = contextValue;
   const { getModels } = useApiService();
   const stopConversationRef = useRef<boolean>(false);
+  const [loadingText, setLoadingText] = useState('');
 
   const handleNewConversation = () => {
     const lastConversation = conversations[conversations.length - 1];
@@ -117,15 +118,7 @@ const Home = ({ defaultModelId }: Props) => {
   };
 
   useEffect(() => {
-    if (
-      status === 'unauthenticated' ||
-      session?.error === 'RefreshAccessTokenError'
-    ) {
-      signIn('keycloak');
-    }
-  }, [session]);
-
-  useEffect(() => {
+    setLoadingText(t('Loading ...')!);
     const settings = getSettings();
     if (settings.theme) {
       dispatch({
@@ -139,6 +132,15 @@ const Home = ({ defaultModelId }: Props) => {
       dispatch({ field: 'showChatbar', value: showChatbar === 'true' });
     }
   }, []);
+
+  useEffect(() => {
+    if (
+      status === 'unauthenticated' ||
+      session?.error === 'RefreshAccessTokenError'
+    ) {
+      signIn('keycloak');
+    }
+  }, [session]);
 
   useEffect(() => {
     const conversationHistory = localStorage.getItem('conversationHistory');
@@ -161,7 +163,7 @@ const Home = ({ defaultModelId }: Props) => {
         value: parsedSelectedConversation,
       });
     } else {
-      if (models.length === 0) return;
+      if (!models || models.length === 0) return;
       const lastConversation = conversations[conversations.length - 1];
       const _defaultModelId = defaultModelId
         ? defaultModelId
@@ -220,33 +222,42 @@ const Home = ({ defaultModelId }: Props) => {
     >
       <Head>
         <title>Chats</title>
-        <meta name='description' content='ChatGPT but better.' />
+        <meta name='description' content='' />
         <meta
           name='viewport'
           content='height=device-height ,width=device-width, initial-scale=1, user-scalable=no'
         />
         <link rel='icon' href='/favicon.ico' />
       </Head>
-      {status !== 'unauthenticated' && selectedConversation && (
-        <main
-          className={`flex h-screen w-screen flex-col text-sm text-white dark:text-white ${lightMode}`}
-        >
-          <div className='fixed top-0 w-full sm:hidden'>
-            <Navbar
-              selectedConversation={selectedConversation}
-              onNewConversation={handleNewConversation}
-              hasModel={hasModel}
-            />
+      <main>
+        {status !== 'authenticated' && (
+          <div
+            className={`fixed top-1/2 w-full h-full z-50 text-center text-sm`}
+          >
+            {loadingText}
           </div>
+        )}
+        {status !== 'unauthenticated' && selectedConversation && (
+          <div
+            className={`flex h-screen w-screen flex-col text-sm text-white dark:text-white ${lightMode}`}
+          >
+            <div className='fixed top-0 w-full sm:hidden'>
+              <Navbar
+                selectedConversation={selectedConversation}
+                onNewConversation={handleNewConversation}
+                hasModel={hasModel}
+              />
+            </div>
 
-          <div className='flex h-full w-full pt-[48px] sm:pt-0'>
-            <Chatbar />
-            <div className='flex flex-1'>
-              <Chat stopConversationRef={stopConversationRef} />
+            <div className='flex h-full w-full pt-[48px] sm:pt-0'>
+              <Chatbar />
+              <div className='flex flex-1'>
+                <Chat stopConversationRef={stopConversationRef} />
+              </div>
             </div>
           </div>
-        </main>
-      )}
+        )}
+      </main>
     </HomeContext.Provider>
   );
 };

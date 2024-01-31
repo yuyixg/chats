@@ -44,6 +44,22 @@ const refreshAccessToken = async (token: JWT) => {
     };
   }
 };
+
+const doSignOut = async (jwt: JWT) => {
+  const { idToken } = jwt;
+  try {
+    const params = new URLSearchParams();
+    params.append('id_token_hint', idToken as any);
+    await fetch(
+      `${
+        process.env.KEYCLOAK_ISSUER
+      }/protocol/openid-connect/logout?${params.toString()}`
+    );
+  } catch (e) {
+    console.error(JSON.stringify(e));
+  }
+};
+
 export const authOptions: AuthOptions = {
   providers: [
     {
@@ -75,6 +91,9 @@ export const authOptions: AuthOptions = {
     // signingKey: process.env.JWT_SIGNING_PRIVATE_KEY!,
   },
   secret: process.env.KEYCLOAK_SECRET!,
+  events: {
+    signOut: ({ token }) => doSignOut(token),
+  },
   callbacks: {
     async signIn(params) {
       const { account, user } = params;
@@ -124,6 +143,7 @@ export const authOptions: AuthOptions = {
         token.refreshTokenExpired =
           Date.now() + (account.refresh_expires_in - 15) * 1000;
         token.user = user;
+        token.idToken = account.id_token;
         return token;
       }
       if (Date.now() < token.accessTokenExpired) return token;
