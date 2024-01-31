@@ -2,7 +2,13 @@ import type { NextApiRequest, NextApiResponse } from 'next';
 import { ChatBody, QianFanMessage } from '@/types/chat';
 import { QianFanStream, Tokenizer } from '@/services/qianfan';
 import { ChatMessages, ChatModels } from '@/models';
-import { ChatMessageManager, ChatModelManager } from '@/managers';
+import {
+  ChatMessageManager,
+  ChatModelManager,
+  UserModelManager,
+} from '@/managers';
+import { getServerSession } from 'next-auth/next';
+import { authOptions } from './auth/[...nextauth]';
 
 export const config = {
   api: {
@@ -18,11 +24,24 @@ export default async function handler(
   res: NextApiResponse
 ) {
   try {
+    const session = await getServerSession(req, res, authOptions);
+    if (!session) {
+      res.status(500).end();
+      return;
+    }
+    const { userId } = session;
     const { model, messages, messageId } = req.body as ChatBody;
 
-    const chatModel = await ChatModelManager.findModelById(model.modelId);
+    const userModel = await UserModelManager.findUserModel(
+      userId,
+      model.modelId
+    );
+    if (!userModel) {
+      res.status(400).end('User not this Model');
+      return;
+    }
 
-    const userId = '5fec360a-4f32-49b6-bb93-d36c8ca2b9e1';
+    const chatModel = userModel.ChatModel;
 
     if (chatModel === null) {
       throw 'Model is not Found!';
