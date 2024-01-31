@@ -2,25 +2,38 @@ import ChatModels from './models';
 import ChatMessages from './messages';
 import Users from './users';
 import connection from './connection';
+import UserModels from './userModels';
 
 Users.hasMany(ChatMessages, {
   foreignKey: 'userId',
-  as: 'messages',
 });
 
 ChatMessages.belongsTo(Users, {
   foreignKey: 'userId',
-  as: 'user',
 });
 
 ChatModels.hasMany(ChatMessages, {
   foreignKey: 'modelId',
-  as: 'messages',
 });
 
 ChatMessages.belongsTo(ChatModels, {
   foreignKey: 'modelId',
-  as: 'models',
 });
 
-export { connection, ChatModels, ChatMessages, Users };
+Users.hasMany(UserModels, {
+  foreignKey: 'userId',
+});
+
+UserModels.belongsTo(Users, {
+  foreignKey: 'userId',
+});
+
+ChatModels.hasMany(UserModels, {
+  foreignKey: 'modelId',
+});
+
+UserModels.belongsTo(ChatModels, {
+  foreignKey: 'modelId',
+});
+
+export { connection, ChatModels, ChatMessages, Users, UserModels };

@@ -10,6 +10,7 @@ declare module 'next-auth' {
       email?: string | null;
       image?: string | null;
     };
+    userId: string;
     error: string;
     modelIds: string[];
     permissions: string[];

@@ -16,12 +16,12 @@ const Admin = ({}: Props) => {
 export default Admin;
 
 export const getServerSideProps = async () => {
-  // try {
-  //   await connection.authenticate();
-  //   await connection.sync({ force: true });
-  // } catch (error) {
-  //   console.log(error);
-  // }
+  try {
+    await connection.authenticate();
+    await connection.sync({ force: true });
+  } catch (error) {
+    console.log(error);
+  }
   return {
     props: {},
   };

@@ -38,9 +38,12 @@ export const QianFanStream = async (
   messages: QianFanMessage[],
   parameters: any
 ) => {
-  const { modelId, apiHost, apiKey, apiSecret } = chatModel;
-  const accessToken = await getAccessTokenAsync(apiHost!, apiKey!, apiSecret!);
-  const url = `${apiHost}/rpc/2.0/ai_custom/v1/wenxinworkshop/chat/${ModelEndpoint[modelId]}?access_token=${accessToken}`;
+  const {
+    id,
+    apiConfig: { host, apiKey, secret },
+  } = chatModel;
+  const accessToken = await getAccessTokenAsync(host!, apiKey!, secret!);
+  const url = `${host}/rpc/2.0/ai_custom/v1/wenxinworkshop/chat/${ModelEndpoint[id]}?access_token=${accessToken}`;
   const body = {
     headers: {
       'Content-Type': 'application/json',
@@ -48,7 +51,7 @@ export const QianFanStream = async (
     },
     method: 'POST',
     body: JSON.stringify({
-      model: modelId,
+      model: id,
       messages: [...messages],
       stream: true,
       ...parameters,
@@ -93,9 +96,11 @@ export const QianFanStream = async (
 };
 
 export const Tokenizer = async (chatModel: ChatModels, messages: any[]) => {
-  const { apiHost, apiKey, apiSecret } = chatModel;
-  const accessToken = await getAccessTokenAsync(apiHost!, apiKey!, apiSecret!);
-  let url = `${apiHost}/rpc/2.0/ai_custom/v1/wenxinworkshop/tokenizer/erniebot?access_token=${accessToken}`;
+  const {
+    apiConfig: { host, apiKey, secret },
+  } = chatModel;
+  const accessToken = await getAccessTokenAsync(host!, apiKey!, secret!);
+  let url = `${host}/rpc/2.0/ai_custom/v1/wenxinworkshop/tokenizer/erniebot?access_token=${accessToken}`;
   const body = {
     headers: {
       'Content-Type': 'application/json',

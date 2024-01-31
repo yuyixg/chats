@@ -3,55 +3,51 @@ import {
   InferAttributes,
   InferCreationAttributes,
   Model,
-  UUIDV4,
 } from 'sequelize';
 import connection from './connection';
 import { ModelIds } from '@/types/model';
 import { ModelType } from 'aws-sdk/clients/comprehend';
 
+interface ChatModelApiConfig {
+  appId?: string;
+  type?: string;
+  host?: string;
+  apiKey?: string;
+  secret?: string;
+  version?: string;
+  organization?: string;
+}
+
 class ChatModels extends Model<
   InferAttributes<ChatModels>,
   InferCreationAttributes<ChatModels>
 > {
-  declare id?: string;
-  declare modelId: ModelIds;
+  declare id: ModelIds;
   declare name: string;
   declare type: ModelType;
   declare systemPrompt: string;
   declare maxLength?: number;
   declare tokenLimit?: number;
   declare fileSizeLimit?: number;
-  declare appId?: string;
-  declare apiType?: string;
-  declare apiHost?: string;
-  declare apiKey?: string;
-  declare apiSecret?: string;
-  declare apiVersion?: string;
-  declare apiOrganization?: string;
+  declare apiConfig: ChatModelApiConfig;
+  declare rank?: number;
   declare enable?: boolean;
 }
 
 ChatModels.init(
   {
     id: {
-      type: DataTypes.UUID,
+      type: DataTypes.STRING,
       primaryKey: true,
-      defaultValue: UUIDV4,
     },
-    modelId: { type: DataTypes.STRING },
     name: { type: DataTypes.STRING },
     type: { type: DataTypes.STRING },
     systemPrompt: { type: DataTypes.STRING },
     maxLength: { type: DataTypes.INTEGER },
     tokenLimit: { type: DataTypes.INTEGER },
     fileSizeLimit: { type: DataTypes.INTEGER },
-    appId: { type: DataTypes.STRING },
-    apiType: { type: DataTypes.STRING },
-    apiHost: { type: DataTypes.STRING },
-    apiKey: { type: DataTypes.STRING },
-    apiSecret: { type: DataTypes.STRING },
-    apiVersion: { type: DataTypes.STRING },
-    apiOrganization: { type: DataTypes.STRING },
+    apiConfig: { type: DataTypes.JSON },
+    rank: { type: DataTypes.INTEGER },
     enable: { type: DataTypes.BOOLEAN },
   },
   {

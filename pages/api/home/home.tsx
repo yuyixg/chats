@@ -109,7 +109,7 @@ const Home = ({ defaultModelId }: Props) => {
   };
 
   const hasModel = () => {
-    return models.length > 0;
+    return models?.length > 0;
   };
 
   const getModel = (modelId: string) => {
@@ -199,8 +199,8 @@ const Home = ({ defaultModelId }: Props) => {
         field: 'defaultModelId',
         value: data[0].modelId,
       });
-      dispatch({ field: 'models', value: data });
     }
+    dispatch({ field: 'models', value: data });
     dispatch({
       field: 'modelsLoading',
       value: false,

@@ -15,39 +15,35 @@ export const OpenAIStream = async (
   messages: GPT4Message[] | GPT4VisionMessage[]
 ) => {
   const {
-    modelId,
-    apiHost,
-    apiType,
-    apiVersion,
-    apiKey,
-    apiOrganization,
+    apiConfig: { host, type, version, apiKey, organization },
+    id,
     systemPrompt,
   } = chatModel;
-  let url = `${apiHost}/v1/chat/completions`;
-  if (apiType === 'azure') {
-    const host = apiHost;
-    url = `${host}/openai/deployments/${modelId.replaceAll(
+  let url = `${host}/v1/chat/completions`;
+  if (type === 'azure') {
+    const apiHost = host;
+    url = `${apiHost}/openai/deployments/${id.replaceAll(
       '.',
       ''
-    )}/chat/completions?api-version=${apiVersion}`;
+    )}/chat/completions?api-version=${version}`;
   }
   const body = {
     headers: {
       'Content-Type': 'application/json',
-      ...(apiType === 'openai' && {
+      ...(type === 'openai' && {
         Authorization: `Bearer ${apiKey}`,
       }),
-      ...(apiType === 'azure' && {
+      ...(type === 'azure' && {
         'api-key': apiKey,
       }),
-      ...(apiType === 'openai' &&
-        apiOrganization && {
-          'OpenAI-Organization': apiOrganization,
+      ...(type === 'openai' &&
+        organization && {
+          'OpenAI-Organization': organization,
         }),
     },
     method: 'POST',
     body: JSON.stringify({
-      ...(apiType === 'openai' && { model: modelId }),
+      ...(type === 'openai' && { model: id }),
       messages: [
         {
           role: 'system',
@@ -55,7 +51,7 @@ export const OpenAIStream = async (
         },
         ...messages,
       ],
-      ...(modelId === ModelIds.GPT_4_Vision ? { max_tokens: 4096 } : {}),
+      ...(id === ModelIds.GPT_4_Vision ? { max_tokens: 4096 } : {}),
       temperature: temperature,
       stream: true,
     }),

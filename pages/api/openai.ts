@@ -11,7 +11,9 @@ import {
 import { get_encoding } from 'tiktoken';
 import { ModelIds } from '@/types/model';
 import { ChatMessages } from '@/models';
-import { ChatModelManager, ChatMessageManager } from '@/managers';
+import { ChatMessageManager, UserModelManager } from '@/managers';
+import { getServerSession } from 'next-auth';
+import { authOptions } from './auth/[...nextauth]';
 
 export const config = {
   api: {
@@ -24,11 +26,25 @@ export const config = {
 
 const handler = async (req: NextApiRequest, res: NextApiResponse) => {
   try {
+    const session = await getServerSession(req, res, authOptions);
+    if (!session) {
+      res.status(500).end();
+      return;
+    }
+    const { userId } = session;
     const { messageId, model, messages, prompt, temperature } =
       req.body as ChatBody;
-    const chatModel = await ChatModelManager.findModelById(model.modelId);
 
-    const userId = '5fec360a-4f32-49b6-bb93-d36c8ca2b9e1';
+    const userModel = await UserModelManager.findUserModel(
+      userId,
+      model.modelId
+    );
+    if (!userModel) {
+      res.status(400).end('User not this Model');
+      return;
+    }
+
+    const chatModel = userModel.ChatModel;
 
     if (chatModel === null) {
       throw 'Model is not Found!';
@@ -65,7 +81,7 @@ const handler = async (req: NextApiRequest, res: NextApiResponse) => {
       tokenCount += tokens.length;
     }
 
-    if (chatModel.modelId === ModelIds.GPT_4_Vision) {
+    if (chatModel.id === ModelIds.GPT_4_Vision) {
       messagesToSend = messages.map((message) => {
         const messageContent = message.content;
         let content = [] as GPT4VisionContent[];

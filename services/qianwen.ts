@@ -13,8 +13,12 @@ export const QianWenStream = async (
   temperature: number,
   messages: QianWenMessage[]
 ) => {
-  const { modelId, apiHost, apiKey, systemPrompt } = chatModel;
-  let url = `${apiHost}/services/aigc/multimodal-generation/generation`;
+  const {
+    apiConfig: { host, apiKey },
+    id,
+    systemPrompt,
+  } = chatModel;
+  let url = `${host}/services/aigc/multimodal-generation/generation`;
   const body = {
     headers: {
       'Content-Type': 'application/json',
@@ -23,7 +27,7 @@ export const QianWenStream = async (
     },
     method: 'POST',
     body: JSON.stringify({
-      model: modelId,
+      model: id,
       input: {
         messages: [
           {
@@ -94,8 +98,12 @@ export const Tokenizer = async (
   messages: any[],
   prompt: string
 ) => {
-  const { modelId, apiHost, apiKey, systemPrompt } = chatModel;
-  let url = `${apiHost}/tokenizer`;
+  const {
+    apiConfig: { host, apiKey },
+    id,
+    systemPrompt,
+  } = chatModel;
+  let url = `${host}/tokenizer`;
   const body = {
     headers: {
       'Content-Type': 'application/json',
