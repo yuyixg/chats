@@ -24,6 +24,7 @@ import { useTranslation } from 'react-i18next';
 import { useSession, signIn, getSession } from 'next-auth/react';
 import { getServerSession } from 'next-auth';
 import { authOptions } from '../auth/[...nextauth]';
+import { getSettings } from '@/utils/settings';
 
 interface Props {
   serverSideApiKeyIsSet: boolean;
@@ -33,16 +34,6 @@ interface Props {
 
 const Home = ({ defaultModelId }: Props) => {
   const { data: session, status } = useSession();
-
-  useEffect(() => {
-    if (
-      status === 'unauthenticated' ||
-      session?.error === 'RefreshAccessTokenError'
-    ) {
-      signIn('keycloak');
-    }
-  }, [session]);
-
   const { t } = useTranslation('chat');
   const contextValue = useCreateReducer<HomeInitialState>({
     initialState,
@@ -124,6 +115,30 @@ const Home = ({ defaultModelId }: Props) => {
   const getModel = (modelId: string) => {
     return models.find((x) => x.modelId === modelId)!;
   };
+
+  useEffect(() => {
+    if (
+      status === 'unauthenticated' ||
+      session?.error === 'RefreshAccessTokenError'
+    ) {
+      signIn('keycloak');
+    }
+  }, [session]);
+
+  useEffect(() => {
+    const settings = getSettings();
+    if (settings.theme) {
+      dispatch({
+        field: 'lightMode',
+        value: settings.theme,
+      });
+    }
+
+    const showChatbar = localStorage.getItem('showChatbar');
+    if (showChatbar) {
+      dispatch({ field: 'showChatbar', value: showChatbar === 'true' });
+    }
+  }, []);
 
   useEffect(() => {
     const conversationHistory = localStorage.getItem('conversationHistory');
