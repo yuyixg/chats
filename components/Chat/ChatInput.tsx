@@ -10,8 +10,10 @@ import {
 import {
   KeyboardEvent,
   MutableRefObject,
+  useCallback,
   useContext,
   useEffect,
+  useRef,
   useState,
 } from 'react';
 
@@ -21,6 +23,10 @@ import { Content, Message } from '@/types/chat';
 
 import HomeContext from '@/pages/api/home/home.context';
 import UploadButton from '../UploadButton';
+import { PromptList } from './PromptList';
+import { Prompt } from '@/types/prompt';
+import { VariableModal } from './VariableModal';
+import { isMobile } from '@/utils/common';
 
 interface Props {
   onSend: (message: Message) => void;
@@ -42,8 +48,7 @@ export const ChatInput = ({
   const { t } = useTranslation('chat');
 
   const {
-    state: { selectedConversation, messageIsStreaming },
-    dispatch: homeDispatch,
+    state: { selectedConversation, messageIsStreaming, prompts },
   } = useContext(HomeContext);
 
   const [content, setContent] = useState<Content>({
@@ -52,6 +57,27 @@ export const ChatInput = ({
   });
   const [isTyping, setIsTyping] = useState<boolean>(false);
   const [uploading, setUploading] = useState<boolean>(false);
+  const [showPromptList, setShowPromptList] = useState(false);
+  const [activePromptIndex, setActivePromptIndex] = useState(0);
+  const [promptInputValue, setPromptInputValue] = useState('');
+  const [showPluginSelect, setShowPluginSelect] = useState(false);
+  const [variables, setVariables] = useState<string[]>([]);
+  const [isModalVisible, setIsModalVisible] = useState(false);
+  const promptListRef = useRef<HTMLUListElement | null>(null);
+  const filteredPrompts = prompts.filter((prompt) =>
+    prompt.name.toLowerCase().includes(promptInputValue.toLowerCase())
+  );
+  const updatePromptListVisibility = useCallback((text: string) => {
+    const match = text.match(/\/\w*$/);
+
+    if (match) {
+      setShowPromptList(true);
+      setPromptInputValue(match[0].slice(1));
+    } else {
+      setShowPromptList(false);
+      setPromptInputValue('');
+    }
+  }, []);
 
   const handleChange = (e: React.ChangeEvent<HTMLTextAreaElement>) => {
     const value = e.target.value;
@@ -67,6 +93,7 @@ export const ChatInput = ({
     }
 
     setContent({ ...content, text: value });
+    updatePromptListVisibility(value);
   };
 
   const handleSend = () => {
@@ -93,20 +120,93 @@ export const ChatInput = ({
     }, 1000);
   };
 
-  const isMobile = () => {
-    const userAgent =
-      typeof window.navigator === 'undefined' ? '' : navigator.userAgent;
-    const mobileRegex =
-      /Android|webOS|iPhone|iPad|iPod|BlackBerry|IEMobile|Opera Mini|Mobile|mobile|CriOS/i;
-    return mobileRegex.test(userAgent);
-  };
-
   const handleKeyDown = (e: KeyboardEvent<HTMLTextAreaElement>) => {
-    if (e.key === 'Enter' && !isTyping && !isMobile() && !e.shiftKey) {
+    if (showPromptList) {
+      if (e.key === 'ArrowDown') {
+        e.preventDefault();
+        setActivePromptIndex((prevIndex) =>
+          prevIndex < prompts.length - 1 ? prevIndex + 1 : prevIndex
+        );
+      } else if (e.key === 'ArrowUp') {
+        e.preventDefault();
+        setActivePromptIndex((prevIndex) =>
+          prevIndex > 0 ? prevIndex - 1 : prevIndex
+        );
+      } else if (e.key === 'Tab') {
+        e.preventDefault();
+        setActivePromptIndex((prevIndex) =>
+          prevIndex < prompts.length - 1 ? prevIndex + 1 : 0
+        );
+      } else if (e.key === 'Enter') {
+        e.preventDefault();
+        handleInitModal();
+      } else if (e.key === 'Escape') {
+        e.preventDefault();
+        setShowPromptList(false);
+      } else {
+        setActivePromptIndex(0);
+      }
+    } else if (e.key === 'Enter' && !isTyping && !isMobile() && !e.shiftKey) {
       e.preventDefault();
       handleSend();
-    } else if (e.key === '/' && e.metaKey) {
-      e.preventDefault();
+    }
+  };
+
+  const parseVariables = (content: string) => {
+    const regex = /{{(.*?)}}/g;
+    const foundVariables = [];
+    let match;
+
+    while ((match = regex.exec(content)) !== null) {
+      foundVariables.push(match[1]);
+    }
+
+    return foundVariables;
+  };
+
+  const handlePromptSelect = (prompt: Prompt) => {
+    const parsedVariables = parseVariables(prompt.content);
+    setVariables(parsedVariables);
+
+    if (parsedVariables.length > 0) {
+      setIsModalVisible(true);
+    } else {
+      setContent((prevContent) => {
+        const updatedContent = prevContent.text?.replace(
+          /\/\w*$/,
+          prompt.content
+        );
+        return { ...prevContent, text: updatedContent };
+      });
+      updatePromptListVisibility(prompt.content);
+    }
+  };
+
+  const handleInitModal = () => {
+    const selectedPrompt = filteredPrompts[activePromptIndex];
+    if (selectedPrompt) {
+      setContent((prevContent) => {
+        const newContent = prevContent.text?.replace(
+          /\/\w*$/,
+          selectedPrompt.content
+        );
+        return { ...prevContent, text: newContent };
+      });
+      handlePromptSelect(selectedPrompt);
+    }
+    setShowPromptList(false);
+  };
+
+  const handleSubmit = (updatedVariables: string[]) => {
+    const newContent = content.text?.replace(/{{(.*?)}}/g, (_, variable) => {
+      const index = variables.indexOf(variable);
+      return updatedVariables[index];
+    });
+
+    setContent({ ...content, text: newContent });
+
+    if (textareaRef && textareaRef.current) {
+      textareaRef.current.focus();
     }
   };
 
@@ -246,6 +346,27 @@ export const ChatInput = ({
                 <IconArrowDown size={18} />
               </button>
             </div>
+          )}
+
+          {showPromptList && filteredPrompts.length > 0 && (
+            <div className='absolute bottom-12 w-full'>
+              <PromptList
+                activePromptIndex={activePromptIndex}
+                prompts={filteredPrompts}
+                onSelect={handleInitModal}
+                onMouseOver={setActivePromptIndex}
+                promptListRef={promptListRef}
+              />
+            </div>
+          )}
+
+          {isModalVisible && (
+            <VariableModal
+              prompt={filteredPrompts[activePromptIndex]}
+              variables={variables}
+              onSubmit={handleSubmit}
+              onClose={() => setIsModalVisible(false)}
+            />
           )}
         </div>
       </div>

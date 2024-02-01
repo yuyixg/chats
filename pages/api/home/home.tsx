@@ -25,6 +25,7 @@ import { useSession, signIn } from 'next-auth/react';
 import { getServerSession } from 'next-auth';
 import { authOptions } from '../auth/[...nextauth]';
 import { getSettings } from '@/utils/settings';
+import Promptbar from '@/components/Promptbar';
 
 interface Props {
   serverSideApiKeyIsSet: boolean;
@@ -127,9 +128,19 @@ const Home = ({ defaultModelId }: Props) => {
       });
     }
 
+    const prompts = localStorage.getItem('prompts');
+    if (prompts) {
+      dispatch({ field: 'prompts', value: JSON.parse(prompts) });
+    }
+
     const showChatbar = localStorage.getItem('showChatbar');
     if (showChatbar) {
       dispatch({ field: 'showChatbar', value: showChatbar === 'true' });
+    }
+
+    const showPromptbar = localStorage.getItem('showPromptbar');
+    if (showPromptbar) {
+      dispatch({ field: 'showPromptbar', value: showPromptbar === 'true' });
     }
   }, []);
 
@@ -254,6 +265,7 @@ const Home = ({ defaultModelId }: Props) => {
               <div className='flex flex-1'>
                 <Chat stopConversationRef={stopConversationRef} />
               </div>
+              <Promptbar />
             </div>
           </div>
         )}
