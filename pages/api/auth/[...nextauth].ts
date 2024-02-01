@@ -100,9 +100,10 @@ export const authOptions: AuthOptions = {
       if (account && user) {
         let currentUser = await UserManager.findUserById(user.id);
         if (!currentUser) {
-          currentUser = await UserManager.initUser(user.id, [], {
-            name: user.preferred_username,
-          });
+          currentUser = await UserManager.initUser(
+            user.id,
+            user.preferred_username
+          );
         }
         return true;
       } else {
@@ -126,7 +127,7 @@ export const authOptions: AuthOptions = {
           },
           userId: token.sub,
           error: token.error || null,
-          permissions: currentUser?.permissions || [],
+          permissions: currentUser?.role || null,
         };
       }
       return {

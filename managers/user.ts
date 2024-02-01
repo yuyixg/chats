@@ -6,16 +6,11 @@ export class UserManager {
     return await Users.findByPk(userId);
   }
 
-  static async initUser(
-    id: string,
-    permissions: string[] = [],
-    userInfo: Object = {}
-  ) {
+  static async initUser(id: string, userName: string) {
     const models = await ChatModelManager.findEnableModels();
     const user = await Users.create({
       id,
-      permissions,
-      userInfo,
+      userName,
     });
     const userModels = models.map((x) => {
       return {

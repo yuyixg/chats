@@ -6,14 +6,15 @@ import {
   UUIDV4,
 } from 'sequelize';
 import connection from './connection';
+import { UserRole } from 'aws-sdk/clients/workmail';
 
 class Users extends Model<
   InferAttributes<Users>,
   InferCreationAttributes<Users>
 > {
   declare id?: string;
-  declare permissions: string[];
-  declare userInfo?: Object;
+  declare userName: string;
+  declare role?: UserRole;
 }
 
 Users.init(
@@ -23,8 +24,8 @@ Users.init(
       primaryKey: true,
       defaultValue: UUIDV4,
     },
-    permissions: { type: DataTypes.JSON, defaultValue: [] },
-    userInfo: { type: DataTypes.JSON },
+    userName: { type: DataTypes.STRING },
+    role: { type: DataTypes.STRING, defaultValue: null },
   },
   {
     sequelize: connection,

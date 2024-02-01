@@ -11,7 +11,7 @@ import {
   NavbarMenuItem,
 } from '@nextui-org/react';
 import { useRouter } from 'next/router';
-import { useEffect, useState } from 'react';
+import { useEffect, useLayoutEffect, useState } from 'react';
 const AdminLayout = ({ children }: { children: React.ReactNode }) => {
   const router = useRouter();
   const [active, setActive] = useState('');
@@ -25,7 +25,7 @@ const AdminLayout = ({ children }: { children: React.ReactNode }) => {
   const MenuItem = ({ href, children }: any) => (
     <Link
       href={href}
-      className={`flex align-middle justify-center mx-4 my-4 h-8  text-black-200 ${
+      className={`flex align-middle justify-center mx-4 my-2 h-8  text-black-200 ${
         active === href
           ? 'rounded-small bg-background dark:bg-default'
           : 'font-normal'
@@ -40,7 +40,7 @@ const AdminLayout = ({ children }: { children: React.ReactNode }) => {
       <div className='flex h-screen'>
         <div className='bg-gray-100 w-64 p-6 space-y-6'>
           <div className='flex items-center space-x-2'>
-            <img src='/logo.png' alt='Logo' className='h-8 w-8' />
+            {/* <img src='/logo.png' alt='Logo' className='h-8 w-8' /> */}
           </div>
           <nav className='flex flex-col h-auto rounded-medium'>
             <MenuItem href='/admin/models'>Models</MenuItem>

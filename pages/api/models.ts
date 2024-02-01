@@ -29,7 +29,7 @@ const handler = async (req: NextApiRequest, res: NextApiResponse) => {
           systemPrompt: x.systemPrompt,
           maxLength: x.maxLength,
           tokenLimit: x.tokenLimit,
-          fileSizeLimit: x.fileSizeLimit,
+          imgConfig: x.imgConfig,
         };
       });
     return res.status(200).json(_models);

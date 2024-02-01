@@ -5,7 +5,7 @@ export interface Model {
   systemPrompt: string;
   maxLength?: number;
   tokenLimit?: number;
-  fileSizeLimit?: number;
+  imgConfig?: ModelImageConfig;
   enable?: boolean;
 }
 
@@ -26,49 +26,7 @@ export enum ModelType {
   Spark = 'Spark',
 }
 
-export const Models = [
-  {
-    modelId: ModelIds.GPT_3_5,
-    name: 'GPT-3.5',
-    maxLength: 12000,
-    tokenLimit: 4000,
-    type: ModelType.GPT,
-  },
-  {
-    modelId: ModelIds.GPT_4,
-    name: 'GPT-4',
-    maxLength: 24000,
-    tokenLimit: 8000,
-    type: ModelType.GPT,
-  },
-  {
-    modelId: ModelIds.GPT_4_Vision,
-    name: 'GPT-4-VISION',
-    maxLength: 96000,
-    tokenLimit: 32000,
-    type: ModelType.GPT,
-    fileSizeLimit: 10240,
-  },
-  {
-    modelId: ModelIds.ERNIE_Bot_4,
-    name: 'ERNIE-Bot-4',
-    maxLength: 20000,
-    tokenLimit: 5000,
-    type: ModelType.QianFan,
-  },
-  {
-    modelId: ModelIds.ERNIE_Bot_8K,
-    name: 'ERNIE-Bot-8K',
-    maxLength: 20000,
-    tokenLimit: 5000,
-    type: ModelType.QianFan,
-  },
-  {
-    modelId: ModelIds.QWen_Vl_Plus,
-    name: 'QianWen-VL-Plus',
-    maxLength: 512,
-    tokenLimit: 8192,
-    type: ModelType.QianWen,
-    fileSizeLimit: 10240,
-  },
-];
+export interface ModelImageConfig {
+  count: number;
+  maxSize: number;
+}

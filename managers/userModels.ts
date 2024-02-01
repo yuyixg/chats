@@ -21,7 +21,7 @@ export class UserModelManager {
   }
 
   static async findUserModel(userId: string, modelId: string) {
-    return (await UserModels.findOne({
+    const data = await UserModels.findOne({
       where: {
         userId,
         modelId,
@@ -31,7 +31,32 @@ export class UserModelManager {
         {
           model: ChatModels,
         },
+        {
+          attributes: ['userName'],
+          model: Users,
+        },
       ],
-    })) as UserModelsWithRelations;
+    });
+    return data as UserModelsWithRelations;
+  }
+
+  static async findUserModels(userId: string) {
+    const data = await UserModels.findAll({
+      attributes: ['id', 'userId', 'expires', 'counts', 'enable'],
+      include: [
+        {
+          attributes: ['id'],
+          model: ChatModels,
+        },
+        {
+          attributes: ['userName'],
+          model: Users,
+        },
+      ],
+      where: {
+        userId,
+      },
+    });
+    return data as UserModelsWithRelations[];
   }
 }
