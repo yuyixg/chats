@@ -9,6 +9,9 @@ import {
   Tooltip,
   ChipProps,
 } from '@nextui-org/react';
+import { useQuery } from 'react-query';
+import useApiService from '@/apis/useApiService';
+import { getUsers } from '@/apis/userApis';
 
 const statusColorMap: Record<string, ChipProps['color']> = {
   active: 'success',
@@ -17,6 +20,11 @@ const statusColorMap: Record<string, ChipProps['color']> = {
 };
 
 export default function Models() {
+  useEffect(() => {
+    getUsers().then((data) => {
+      console.log(data);
+    });
+  }, []);
   const renderCell = React.useCallback(
     (user: { name: string }, columnKey: React.Key) => {
       const cellValue = user[columnKey as keyof { name: string }];

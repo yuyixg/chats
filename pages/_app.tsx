@@ -14,9 +14,18 @@ function App({ Component, pageProps }: AppProps<{}> | any) {
   const queryClient = new QueryClient();
   if (route.pathname.includes('/admin')) {
     return (
-      <AdminLayout>
-        <Component {...pageProps} />
-      </AdminLayout>
+      <SessionProvider
+        refetchInterval={25 * 60}
+        session={pageProps.session}
+        refetchOnWindowFocus={true}
+        basePath='/api/auth'
+      >
+        <QueryClientProvider client={queryClient}>
+          <AdminLayout>
+            <Component {...pageProps} />
+          </AdminLayout>
+        </QueryClientProvider>
+      </SessionProvider>
     );
   }
   return (

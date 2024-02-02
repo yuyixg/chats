@@ -1,4 +1,5 @@
 import { ChatModels, UserModels, Users } from '@/models';
+import { Op } from 'sequelize';
 
 interface UserModelsWithRelations extends UserModels {
   ChatModel: ChatModels;
@@ -40,7 +41,7 @@ export class UserModelManager {
     return data as UserModelsWithRelations;
   }
 
-  static async findUserModels(userId: string) {
+  static async findUsersModel(userIds: string[]) {
     const data = await UserModels.findAll({
       attributes: ['id', 'userId', 'expires', 'counts', 'enable'],
       include: [
@@ -49,12 +50,12 @@ export class UserModelManager {
           model: ChatModels,
         },
         {
-          attributes: ['userName'],
+          attributes: ['userName', 'role'],
           model: Users,
         },
       ],
       where: {
-        userId,
+        userId: { [Op.in]: userIds },
       },
     });
     return data as UserModelsWithRelations[];

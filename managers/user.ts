@@ -21,4 +21,8 @@ export class UserManager {
     await UserModelManager.createBulkUserModel(userModels);
     return user;
   }
+
+  static async findUsers() {
+    return await Users.findAll();
+  }
 }

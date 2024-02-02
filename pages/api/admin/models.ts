@@ -13,7 +13,7 @@ export const config = {
 const handler = async (req: NextApiRequest, res: NextApiResponse) => {
   try {
     const { userId } = req.body;
-    const userModels = await UserModelManager.findUserModels(userId);
+    const userModels = await UserModelManager.findUsersModel(userId);
     const data = userModels.map((x) => {
       return {
         userId: x.userId,
