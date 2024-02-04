@@ -35,19 +35,13 @@ const handler = async (req: NextApiRequest, res: NextApiResponse) => {
     const { messageId, model, messages, prompt, temperature } =
       req.body as ChatBody;
 
-    const userModel = await UserModelManager.findUserModel(
+    const chatModel = await UserModelManager.findUserModel(
       userId,
       model.modelId
     );
-    if (!userModel) {
-      res.status(400).end('User not this Model');
+    if (!chatModel) {
+      res.status(400).end('Model is not Found!');
       return;
-    }
-
-    const chatModel = userModel.ChatModel;
-
-    if (chatModel === null) {
-      throw 'Model is not Found!';
     }
 
     const chatMessages = await ChatMessageManager.findUserMessageById(

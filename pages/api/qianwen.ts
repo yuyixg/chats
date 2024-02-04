@@ -2,7 +2,11 @@ import type { NextApiRequest, NextApiResponse } from 'next';
 import { ChatBody, QianWenContent, QianWenMessage } from '@/types/chat';
 import { QianWenStream, Tokenizer } from '@/services/qianwen';
 import { ChatMessages, ChatModels } from '@/models';
-import { ChatMessageManager, ChatModelManager, UserModelManager } from '@/managers';
+import {
+  ChatMessageManager,
+  ChatModelManager,
+  UserModelManager,
+} from '@/managers';
 import { getServerSession } from 'next-auth/next';
 import { authOptions } from './auth/[...nextauth]';
 
@@ -25,19 +29,13 @@ const handler = async (req: NextApiRequest, res: NextApiResponse) => {
     const { messageId, model, messages, prompt, temperature } =
       req.body as ChatBody;
 
-    const userModel = await UserModelManager.findUserModel(
+    const chatModel = await UserModelManager.findUserModel(
       userId,
       model.modelId
     );
-    if (!userModel) {
-      res.status(400).end('User not this Model');
+    if (!chatModel) {
+      res.status(400).end('Model is not Found!');
       return;
-    }
-
-    const chatModel = userModel.ChatModel;
-
-    if (chatModel === null) {
-      throw 'Model is not Found!';
     }
 
     const chatMessages = await ChatMessageManager.findUserMessageById(

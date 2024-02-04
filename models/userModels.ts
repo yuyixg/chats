@@ -7,17 +7,21 @@ import {
 } from 'sequelize';
 import connection from './connection';
 
+export interface UserModel {
+  modelId: string;
+  enable?: boolean;
+  tokens?: number;
+  counts?: number;
+  expires?: number;
+}
+
 class UserModels extends Model<
   InferAttributes<UserModels>,
   InferCreationAttributes<UserModels>
 > {
   declare id?: string;
   declare userId: string;
-  declare modelId: string;
-  declare enable?: boolean;
-  declare tokens?: number;
-  declare counts?: number;
-  declare expires?: number;
+  declare models: UserModel[];
 }
 
 UserModels.init(
@@ -28,11 +32,7 @@ UserModels.init(
       defaultValue: UUIDV4,
     },
     userId: { type: DataTypes.UUID },
-    modelId: { type: DataTypes.STRING },
-    enable: { type: DataTypes.BOOLEAN, defaultValue: false },
-    tokens: { type: DataTypes.INTEGER },
-    counts: { type: DataTypes.INTEGER },
-    expires: { type: DataTypes.INTEGER },
+    models: { type: DataTypes.JSON, defaultValue: [] },
   },
   {
     sequelize: connection,

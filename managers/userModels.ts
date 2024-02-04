@@ -1,63 +1,58 @@
 import { ChatModels, UserModels, Users } from '@/models';
-import { Op } from 'sequelize';
+import { UserModel } from '@/models/userModels';
+import { Op, where } from 'sequelize';
 
 interface UserModelsWithRelations extends UserModels {
-  ChatModel: ChatModels;
   User: Users;
 }
 
 export class UserModelManager {
   static async findEnableModels(userId: string) {
-    const userModels = await UserModels.findAll({
+    const userModels = await UserModels.findOne({
       where: {
         userId,
-        enable: true,
       },
     });
-    return userModels.map((x) => x.modelId);
+    return (
+      userModels?.models.filter((x) => x.enable).map((x) => x.modelId) || []
+    );
   }
 
-  static async createBulkUserModel(records: UserModels[]) {
-    return await UserModels.bulkCreate(records);
+  static async createUserModel(record: UserModels) {
+    return await UserModels.create(record);
   }
 
   static async findUserModel(userId: string, modelId: string) {
     const data = await UserModels.findOne({
       where: {
         userId,
-        modelId,
-        enable: true,
       },
-      include: [
-        {
-          model: ChatModels,
-        },
-        {
-          attributes: ['userName'],
-          model: Users,
-        },
-      ],
     });
-    return data as UserModelsWithRelations;
+    const model = data?.models.find((x) => x.enable && x.modelId === modelId);
+    return model ? ChatModels.findByPk(model?.modelId) : null;
   }
 
-  static async findUsersModel(userIds: string[]) {
+  static async findUsersModel() {
     const data = await UserModels.findAll({
-      attributes: ['id', 'userId', 'expires', 'counts', 'enable'],
+      attributes: ['id', 'userId', 'models'],
       include: [
-        {
-          attributes: ['id'],
-          model: ChatModels,
-        },
         {
           attributes: ['userName', 'role'],
           model: Users,
         },
       ],
-      where: {
-        userId: { [Op.in]: userIds },
-      },
     });
     return data as UserModelsWithRelations[];
+  }
+
+  static async updateUserModel(id: string, models: UserModel[]) {
+    return await UserModels.update(
+      { models },
+      {
+        where: {
+          id,
+        },
+      }
+    );
   }
 }

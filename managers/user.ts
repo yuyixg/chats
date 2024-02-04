@@ -14,11 +14,14 @@ export class UserManager {
     });
     const userModels = models.map((x) => {
       return {
-        userId: user.id,
         modelId: x.id,
-      } as UserModels;
+        enable: false,
+      };
     });
-    await UserModelManager.createBulkUserModel(userModels);
+    await UserModels.create({
+      userId: user.id!,
+      models: userModels,
+    });
     return user;
   }
 

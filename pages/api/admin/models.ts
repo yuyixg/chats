@@ -1,6 +1,5 @@
+import { ChatModelManager } from '@/managers';
 import type { NextApiRequest, NextApiResponse } from 'next';
-import { getServerSession } from 'next-auth';
-import { ChatModelManager, UserModelManager } from '@/managers';
 export const config = {
   api: {
     bodyParser: {
@@ -12,17 +11,17 @@ export const config = {
 
 const handler = async (req: NextApiRequest, res: NextApiResponse) => {
   try {
-    const { userId } = req.body;
-    const userModels = await UserModelManager.findUsersModel(userId);
-    const data = userModels.map((x) => {
+    const { enable } = req.body;
+    const models = await ChatModelManager.findEnableModels(enable);
+    const data = models.map((x) => {
       return {
-        userId: x.userId,
-        userModelId: x.id,
-        expires: x.expires,
-        counts: x.counts,
-        enable: x.enable,
-        modelId: x.ChatModel.id,
-        userName: x.User.userName,
+        modelId: x.id,
+        name: x.name,
+        type: x.type,
+        systemPrompt: x.systemPrompt,
+        maxLength: x.maxLength,
+        tokenLimit: x.tokenLimit,
+        imgConfig: x.imgConfig,
       };
     });
     return res.status(200).json(data);

@@ -28,12 +28,4 @@ UserModels.belongsTo(Users, {
   foreignKey: 'userId',
 });
 
-ChatModels.hasMany(UserModels, {
-  foreignKey: 'modelId',
-});
-
-UserModels.belongsTo(ChatModels, {
-  foreignKey: 'modelId',
-});
-
 export { connection, ChatModels, ChatMessages, Users, UserModels };

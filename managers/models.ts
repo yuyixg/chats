@@ -1,14 +1,12 @@
 import { ChatModels } from '@/models';
 
 export class ChatModelManager {
-  static async findEnableModels() {
+  static async findEnableModels(enable: boolean = true) {
     return await ChatModels.findAll({
       where: {
-        enable: true,
+        enable,
       },
-      order: [
-        ['rank', 'asc'],
-      ],
+      order: [['rank', 'asc']],
     });
   }
 
