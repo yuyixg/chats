@@ -1,1 +1,1 @@
-export { default, getServerSideProps } from './model';
+export { default, getServerSideProps } from './models';

@@ -9,14 +9,15 @@ import {
   Icon12Hours,
   IconActivityHeartbeat,
   IconBug,
+  IconChartLine,
   IconPuzzle,
+  IconUser,
 } from '@tabler/icons-react';
 import { useRouter } from 'next/router';
 import { useEffect, useState } from 'react';
 const AdminLayout = ({ children }: { children: React.ReactNode }) => {
   const router = useRouter();
   const [active, setActive] = useState('');
-  const [selectedKeys, setSelectedKeys] = useState();
 
   // 检测路由变化，更新活跃状态
   useEffect(() => {
@@ -24,7 +25,7 @@ const AdminLayout = ({ children }: { children: React.ReactNode }) => {
   }, [router]);
 
   const activeClass = (pathName: string) => {
-    return pathName === router.pathname ? 'bg-red-100' : '';
+    return pathName === router.pathname ? 'bg-gray-100' : '';
   };
 
   // 创建菜单项组件，用来指示哪个菜单项是活跃的
@@ -61,70 +62,80 @@ const AdminLayout = ({ children }: { children: React.ReactNode }) => {
 
   return (
     <NextUIProvider>
+      <div className='flex w-full h-16 bg-white shadow-small'>
+        <div className='flex w-full items-center justify-between h-16 bg-white px-6'>
+          <div className='flex items-center'>
+            <img className='h-8 w-8 rounded-lg bg-[#dae6f5]' src='/chats.png' />
+            <span className='px-2'>Chats</span>
+          </div>
+          <div className=''>User</div>
+        </div>
+      </div>
       <div className='flex h-screen'>
-        <div className='bg-white w-64'>
+        <div className='w-64 py-6'>
           <Listbox
             variant='light'
-            aria-label='User Menu'
-            onAction={(key) => setSelectedKeys(key as any)}
-            className='p-0 gap-0 divide-y divide-default-300/50 dark:divide-default-100/80 bg-content1 w-full h-full overflow-visible shadow-small'
+            onAction={() => {}}
+            className='p-0 gap-0 shadow-small rounded-md divide-y divide-default-300/50 dark:divide-default-100/80 bg-content1 w-full h-full overflow-visible'
             itemClasses={{
-              base: 'px-6 rounded-none gap-3 h-12',
+              base: 'px-6 rounded-md gap-3 h-12 hover:bg-gray-100 hover:color-black',
             }}
             selectionMode='single'
-            selectedKeys={selectedKeys}
           >
             <ListboxItem
               className={`${activeClass('/admin/models')}`}
               onClick={() => {
                 router.push('/admin/models');
               }}
-              key='issues'
+              key='models'
               startContent={
                 <IconWrapper className='bg-success/10 text-success'>
-                  <IconBug className='text-lg ' />
+                  <IconUser className='text-lg ' />
                 </IconWrapper>
               }
             >
-              Issues
+              User Models
             </ListboxItem>
             <ListboxItem
               className={`${activeClass('/admin/users')}`}
               onClick={() => {
                 router.push('/admin/users');
               }}
-              key='pull_requests'
+              key='users'
               startContent={
                 <IconWrapper className='bg-primary/10 text-primary'>
                   <IconPuzzle className='text-lg ' />
                 </IconWrapper>
               }
             >
-              Pull Requests
+              Models Config
             </ListboxItem>
             <ListboxItem
               className={`${activeClass('/admin/messages')}`}
               onClick={() => {
                 router.push('/admin/messages');
               }}
-              key='discussions'
+              key='messages'
               startContent={
                 <IconWrapper className='bg-secondary/10 text-secondary'>
                   <Icon12Hours className='text-lg ' />
                 </IconWrapper>
               }
             >
-              Discussions
+              Messages
             </ListboxItem>
             <ListboxItem
-              key='actions'
+              onClick={() => {
+                router.push('/');
+              }}
+              key='Chats'
               startContent={
                 <IconWrapper className='bg-warning/10 text-warning'>
-                  <IconActivityHeartbeat className='text-lg ' />
+                  <IconChartLine className='text-lg ' />
                 </IconWrapper>
               }
             >
-              Actions
+              Chats
             </ListboxItem>
           </Listbox>
         </div>
