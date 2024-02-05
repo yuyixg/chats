@@ -4,10 +4,13 @@ import {
   IconMessageChatbot,
   IconMessages,
   IconSettingsCog,
-  IconUser,
+  IconUsers,
+  IconUserStar,
 } from '@tabler/icons-react';
+import { useSession } from 'next-auth/react';
 import { useRouter } from 'next/router';
 const AdminLayout = ({ children }: { children: React.ReactNode }) => {
+  const { data: session } = useSession();
   const router = useRouter();
 
   const activeClass = (pathName: string) => {
@@ -27,21 +30,23 @@ const AdminLayout = ({ children }: { children: React.ReactNode }) => {
 
   return (
     <NextUIProvider>
-      <div className='flex w-full h-16 bg-white shadow-small'>
-        <div className='flex w-full items-center justify-between h-16 bg-white px-6'>
-          <div className='flex items-center'>
-            <img className='h-8 w-8 rounded-lg bg-[#dae6f5]' src='/chats.png' />
-            <span className='px-2'>Chats</span>
-          </div>
-          <div className=''>User</div>
-        </div>
-      </div>
       <div className='flex h-screen'>
-        <div className='flex-none py-6 w-64 basis-64'>
+        <div className='flex-none w-64 basis-64 shadow-small overflow-hidden'>
+          <div className='flex w-full bg-white'>
+            <div className='flex w-full items-center justify-between h-16 bg-white px-6'>
+              <div className='flex items-center'>
+                <img
+                  className='h-8 w-8 rounded-lg bg-[#dae6f5]'
+                  src='/chats.png'
+                />
+                <span className='px-2'>Chats</span>
+              </div>
+            </div>
+          </div>
           <Listbox
             variant='light'
             onAction={() => {}}
-            className='p-0 gap-0 shadow-small rounded-md divide-y divide-default-300/50 dark:divide-default-100/80 bg-content1 w-full h-full overflow-visible'
+            className='p-0 gap-0 rounded-md divide-y divide-default-300/50 dark:divide-default-100/80 bg-content1 w-full overflow-visible'
             itemClasses={{
               base: 'px-6 rounded-md gap-3 h-12 hover:bg-gray-100 hover:color-black',
             }}
@@ -55,7 +60,7 @@ const AdminLayout = ({ children }: { children: React.ReactNode }) => {
               key='admin'
               startContent={
                 <IconWrapper className='bg-success/10 text-success'>
-                  <IconDashboard className='text-lg ' />
+                  <IconDashboard className='text-lg' />
                 </IconWrapper>
               }
             >
@@ -69,7 +74,7 @@ const AdminLayout = ({ children }: { children: React.ReactNode }) => {
               key='models'
               startContent={
                 <IconWrapper className='bg-danger/10 text-danger'>
-                  <IconUser className='text-lg ' />
+                  <IconUsers className='text-lg ' />
                 </IconWrapper>
               }
             >
@@ -117,9 +122,15 @@ const AdminLayout = ({ children }: { children: React.ReactNode }) => {
               Chats
             </ListboxItem>
           </Listbox>
+          <div className='flex items-center p-6 absolute bottom-0'>
+            <div className='bg-gray-200 rounded-md p-1'>
+              <IconUserStar />
+            </div>
+            <div className='px-4'>{session?.user.name}</div>
+          </div>
         </div>
 
-        <div className='flex-grow p-6 overflow-auto'>{children}</div>
+        <div className='flex-grow p-6 py-4 overflow-auto'>{children}</div>
       </div>
     </NextUIProvider>
   );

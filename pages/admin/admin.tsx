@@ -4,13 +4,7 @@ import { useRouter } from 'next/router';
 interface Props {}
 
 const Admin = ({}: Props) => {
-  const router = useRouter();
-  return (
-    <>
-      Admin
-      <button onClick={() => router.push('/admin/model')}>model</button>
-    </>
-  );
+  return <>Dashboard</>;
 };
 
 export default Admin;
