@@ -51,7 +51,7 @@ const handler = async (req: NextApiRequest, res: NextApiResponse) => {
         res.status(400).end('Model is not Found!');
         return;
       }
-      
+
       let modelConfig = JSON.parse(modelConfigJson);
       let apiConfig = JSON.parse(apiConfigJson);
       let imgConfig = JSON.parse(imgConfigJson);
@@ -74,6 +74,7 @@ const handler = async (req: NextApiRequest, res: NextApiResponse) => {
       const models = await ChatModelManager.findEnableModels(all);
       const data = models.map((x) => {
         return {
+          rank: x.rank,
           modelId: x.id,
           name: x.name,
           type: x.type,

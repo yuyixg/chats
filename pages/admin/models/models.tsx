@@ -8,20 +8,12 @@ import {
   TableCell,
   Spinner,
   Tooltip,
-  Switch,
   Chip,
 } from '@nextui-org/react';
-import { getModels, putUserModel } from '@/apis/adminService';
-import { GetModelsResult, GetUsersModelsResult } from '@/types/admin';
+import { getModels } from '@/apis/adminService';
+import { GetModelsResult } from '@/types/admin';
 import { EditModelModal } from '@/components/Admin/editModelModal';
-import {
-  IconDisabled,
-  IconEdit,
-  IconEditCircle,
-  IconEye,
-  IconPencil,
-  IconPencilCog,
-} from '@tabler/icons-react';
+import { IconPencilCog } from '@tabler/icons-react';
 
 export default function Models() {
   const [isOpen, setIsOpen] = useState(false);
@@ -57,6 +49,7 @@ export default function Models() {
   };
 
   const columns = [
+    { name: 'RANK', uid: 'rank' },
     { name: 'ID', uid: 'modelId' },
     { name: 'NAME', uid: 'name' },
     { name: 'TYPE', uid: 'type' },
@@ -71,6 +64,8 @@ export default function Models() {
   const renderCell = React.useCallback(
     (item: GetModelsResult, columnKey: React.Key) => {
       switch (columnKey) {
+        case 'rank':
+          return <div>{item.rank}</div>;
         case 'modelId':
           return (
             <div className='flex'>
