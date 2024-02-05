@@ -5,10 +5,10 @@ import {
   Model,
 } from 'sequelize';
 import connection from './connection';
-import { ModelImageConfig, ModelIds } from '@/types/model';
+import { ChatModelImageConfig, ModelIds, ChatModelConfig } from '@/types/model';
 import { ModelType } from 'aws-sdk/clients/comprehend';
 
-interface ChatModelApiConfig {
+export interface ChatModelApiConfig {
   appId?: string;
   type?: string;
   host?: string;
@@ -25,11 +25,9 @@ class ChatModels extends Model<
   declare id: ModelIds;
   declare name: string;
   declare type: ModelType;
-  declare systemPrompt: string;
-  declare maxLength?: number;
-  declare tokenLimit?: number;
-  declare imgConfig?: ModelImageConfig;
+  declare imgConfig?: ChatModelImageConfig;
   declare apiConfig: ChatModelApiConfig;
+  declare modelConfig: ChatModelConfig;
   declare rank?: number;
   declare enable?: boolean;
 }
@@ -42,9 +40,7 @@ ChatModels.init(
     },
     name: { type: DataTypes.STRING },
     type: { type: DataTypes.STRING },
-    systemPrompt: { type: DataTypes.STRING },
-    maxLength: { type: DataTypes.INTEGER },
-    tokenLimit: { type: DataTypes.INTEGER },
+    modelConfig: { type: DataTypes.JSON },
     imgConfig: { type: DataTypes.JSON },
     apiConfig: { type: DataTypes.JSON },
     rank: { type: DataTypes.INTEGER },

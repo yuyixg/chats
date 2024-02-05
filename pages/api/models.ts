@@ -26,9 +26,9 @@ const handler = async (req: NextApiRequest, res: NextApiResponse) => {
           modelId: x.id,
           name: x.name,
           type: x.type,
-          systemPrompt: x.systemPrompt,
-          maxLength: x.maxLength,
-          tokenLimit: x.tokenLimit,
+          systemPrompt: x.modelConfig?.prompt,
+          maxLength: x.modelConfig?.maxLength,
+          tokenLimit: x.modelConfig?.tokenLimit,
           imgConfig: x.imgConfig,
         };
       });

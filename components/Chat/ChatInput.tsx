@@ -294,7 +294,7 @@ export const ChatInput = ({
                   : 'hidden'
               }`,
             }}
-            placeholder={t('Type a message...') || ''}
+            placeholder={t('Type a message or type "/" to select a prompt...') || ''}
             value={content?.text}
             rows={1}
             onCompositionStart={() => setIsTyping(true)}

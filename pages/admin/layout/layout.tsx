@@ -1,46 +1,18 @@
+import { NextUIProvider, Listbox, ListboxItem, cn } from '@nextui-org/react';
 import {
-  NextUIProvider,
-  Link,
-  Listbox,
-  ListboxItem,
-  cn,
-} from '@nextui-org/react';
-import {
-  Icon12Hours,
-  IconActivityHeartbeat,
-  IconBug,
-  IconChartLine,
-  IconPuzzle,
+  IconDashboard,
+  IconMessageChatbot,
+  IconMessages,
+  IconSettingsCog,
   IconUser,
 } from '@tabler/icons-react';
 import { useRouter } from 'next/router';
-import { useEffect, useState } from 'react';
 const AdminLayout = ({ children }: { children: React.ReactNode }) => {
   const router = useRouter();
-  const [active, setActive] = useState('');
-
-  // 检测路由变化，更新活跃状态
-  useEffect(() => {
-    setActive(router.pathname);
-  }, [router]);
 
   const activeClass = (pathName: string) => {
     return pathName === router.pathname ? 'bg-gray-100' : '';
   };
-
-  // 创建菜单项组件，用来指示哪个菜单项是活跃的
-  const MenuItem = ({ href, children }: any) => (
-    <Link
-      href={href}
-      className={`flex align-middle justify-center mx-4 my-2 h-8  text-black-200 ${
-        active === href
-          ? 'rounded-small bg-background dark:bg-default'
-          : 'font-normal'
-      }`}
-    >
-      {children}
-    </Link>
-  );
 
   const IconWrapper = ({ children, className }: any) => (
     <div
@@ -50,13 +22,6 @@ const AdminLayout = ({ children }: { children: React.ReactNode }) => {
       )}
     >
       {children}
-    </div>
-  );
-
-  const ItemCounter = ({ number }: any) => (
-    <div className='flex items-center gap-1 text-default-400'>
-      <span className='text-small'>{number}</span>
-      {/* <ChevronRightIcon className='text-xl' /> */}
     </div>
   );
 
@@ -72,7 +37,7 @@ const AdminLayout = ({ children }: { children: React.ReactNode }) => {
         </div>
       </div>
       <div className='flex h-screen'>
-        <div className='w-64 py-6'>
+        <div className='flex-none py-6 w-64 basis-64'>
           <Listbox
             variant='light'
             onAction={() => {}}
@@ -83,13 +48,27 @@ const AdminLayout = ({ children }: { children: React.ReactNode }) => {
             selectionMode='single'
           >
             <ListboxItem
-              className={`${activeClass('/admin/models')}`}
+              className={`${activeClass('/admin')}`}
               onClick={() => {
-                router.push('/admin/models');
+                router.push('/admin');
+              }}
+              key='admin'
+              startContent={
+                <IconWrapper className='bg-success/10 text-success'>
+                  <IconDashboard className='text-lg ' />
+                </IconWrapper>
+              }
+            >
+              Dashboard
+            </ListboxItem>
+            <ListboxItem
+              className={`${activeClass('/admin/users')}`}
+              onClick={() => {
+                router.push('/admin/users');
               }}
               key='models'
               startContent={
-                <IconWrapper className='bg-success/10 text-success'>
+                <IconWrapper className='bg-danger/10 text-danger'>
                   <IconUser className='text-lg ' />
                 </IconWrapper>
               }
@@ -97,14 +76,14 @@ const AdminLayout = ({ children }: { children: React.ReactNode }) => {
               User Models
             </ListboxItem>
             <ListboxItem
-              className={`${activeClass('/admin/users')}`}
+              className={`${activeClass('/admin/models')}`}
               onClick={() => {
-                router.push('/admin/users');
+                router.push('/admin/models');
               }}
               key='users'
               startContent={
                 <IconWrapper className='bg-primary/10 text-primary'>
-                  <IconPuzzle className='text-lg ' />
+                  <IconSettingsCog className='text-lg ' />
                 </IconWrapper>
               }
             >
@@ -118,7 +97,7 @@ const AdminLayout = ({ children }: { children: React.ReactNode }) => {
               key='messages'
               startContent={
                 <IconWrapper className='bg-secondary/10 text-secondary'>
-                  <Icon12Hours className='text-lg ' />
+                  <IconMessages className='text-lg ' />
                 </IconWrapper>
               }
             >
@@ -131,7 +110,7 @@ const AdminLayout = ({ children }: { children: React.ReactNode }) => {
               key='Chats'
               startContent={
                 <IconWrapper className='bg-warning/10 text-warning'>
-                  <IconChartLine className='text-lg ' />
+                  <IconMessageChatbot className='text-lg ' />
                 </IconWrapper>
               }
             >
@@ -140,7 +119,7 @@ const AdminLayout = ({ children }: { children: React.ReactNode }) => {
           </Listbox>
         </div>
 
-        <div className='flex-grow p-6 overflow-y-auto'>{children}</div>
+        <div className='flex-grow p-6 overflow-auto'>{children}</div>
       </div>
     </NextUIProvider>
   );

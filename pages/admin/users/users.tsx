@@ -1,4 +1,4 @@
-import React from 'react';
+import React, { useEffect, useState } from 'react';
 import {
   Table,
   TableHeader,
@@ -7,52 +7,162 @@ import {
   TableRow,
   TableCell,
   Chip,
-  Tooltip,
-  ChipProps,
+  Spinner,
 } from '@nextui-org/react';
+import { getUserModels, putUserModel } from '@/apis/adminService';
+import { GetModelsResult, GetUsersModelsResult } from '@/types/admin';
+import { IconPlus, IconX } from '@tabler/icons-react';
+import { AddUserModelModal } from '@/components/Admin/addUserModelModal';
+import toast from 'react-hot-toast';
 
-const statusColorMap: Record<string, ChipProps['color']> = {
-  active: 'success',
-  paused: 'danger',
-  vacation: 'warning',
-};
+export default function Models() {
+  const [isOpen, setIsOpen] = useState(false);
+  const [selectedModel, setSelectedModel] =
+    useState<GetUsersModelsResult | null>(null);
+  const [userModels, setUserModels] = useState<GetUsersModelsResult[]>([]);
+  const [loadingModel, setLoadingModel] = useState(false);
+  useEffect(() => {
+    setLoadingModel(true);
+    init();
+  }, []);
 
-export default function Users() {
+  const init = () => {
+    getUserModels().then((data) => {
+      setUserModels(data);
+      setIsOpen(false);
+      setSelectedModel(null);
+      setLoadingModel(false);
+    });
+  };
+
+  const disEnableUserModel = (item: GetUsersModelsResult, modelId: string) => {
+    putUserModel({
+      userModelId: item.userModelId,
+      models: item.models.map((x) => {
+        return x.modelId === modelId ? { ...x, enable: false } : x;
+      }),
+    }).then(() => {
+      init();
+    });
+  };
+
+  const handleShowAddModal = (item: GetUsersModelsResult) => {
+    setSelectedModel(item);
+    setIsOpen(true);
+  };
+
+  const handleSave = (select: GetModelsResult) => {
+    let models = selectedModel!.models;
+    const foundModel = models.find((m) => m.modelId === select.modelId);
+    if (!foundModel) {
+      models.push({ modelId: select.modelId, enable: true });
+    } else {
+      models = models.map((x) => {
+        return x.modelId === select.modelId ? { ...x, enable: true } : x;
+      });
+    }
+    putUserModel({
+      userModelId: selectedModel!.userModelId,
+      models,
+    }).then(() => {
+      init();
+      toast.success('Save successful!');
+    });
+  };
+
+  const handleClose = () => {
+    setIsOpen(false);
+    setSelectedModel(null);
+  };
+
+  const columns = [
+    { name: 'USERNAME', uid: 'userName' },
+    { name: 'ROLE', uid: 'role' },
+    { name: 'MODELS', uid: 'models' },
+  ];
   const renderCell = React.useCallback(
-    (user: { name: string }, columnKey: React.Key) => {
-      const cellValue = user[columnKey as keyof { name: string }];
-
+    (item: GetUsersModelsResult, columnKey: React.Key) => {
       switch (columnKey) {
-        case 'name':
-          return <div>{user.name}</div>;
+        case 'userName':
+          return <div>{item.userName}</div>;
+        case 'role':
+          return <div>{item.role}</div>;
+        case 'models':
+          return (
+            <>
+              {item.models
+                .filter((x) => x.enable)
+                .map((m) => {
+                  return (
+                    <Chip
+                      endContent={
+                        <IconX
+                          onClick={() => disEnableUserModel(item, m.modelId)}
+                          size={16}
+                        />
+                      }
+                      className='capitalize px-2 mx-1 cursor-pointer'
+                      color='success'
+                      size='sm'
+                      variant='flat'
+                    >
+                      {m.modelId}
+                    </Chip>
+                  );
+                })}
+              <Chip
+                onClick={() => handleShowAddModal(item)}
+                endContent={<IconPlus size={16} />}
+                className='capitalize px-2 cursor-pointer'
+                color={'default'}
+                size='sm'
+                variant='flat'
+              >
+                Add Model
+              </Chip>
+            </>
+          );
         default:
-          return cellValue;
+          return <div></div>;
       }
     },
     []
   );
-  const columns = [
-    { name: 'NAME', uid: 'name' },
-    { name: 'ROLE', uid: 'role' },
-    { name: 'STATUS', uid: 'status' },
-    { name: 'ACTIONS', uid: 'actions' },
-  ];
-  const items = [{ modelId: 'gpt-4', name: 'GPT-4' }];
+
   return (
-    <Table>
-      <TableHeader columns={columns}>
-        {(column) => <TableColumn key={column.uid}>{column.name}</TableColumn>}
-      </TableHeader>
-      <TableBody items={items}>
-        {(item) => (
-          <TableRow key={item.modelId}>
-            {(columnKey) => (
-              <TableCell>{renderCell(item, columnKey)}</TableCell>
-            )}
-          </TableRow>
-        )}
-      </TableBody>
-    </Table>
+    <>
+      <Table
+        classNames={{
+          table: loadingModel ? 'min-h-[320px]' : 'auto',
+        }}
+      >
+        <TableHeader columns={columns}>
+          {(column) => (
+            <TableColumn key={column.uid}>{column.name}</TableColumn>
+          )}
+        </TableHeader>
+        <TableBody
+          loadingContent={<Spinner label='Loading...' />}
+          isLoading={loadingModel}
+          items={userModels}
+        >
+          {(item) => (
+            <TableRow key={item.userId}>
+              {(columnKey) => (
+                <TableCell>{renderCell(item, columnKey)}</TableCell>
+              )}
+            </TableRow>
+          )}
+        </TableBody>
+      </Table>
+
+      <AddUserModelModal
+        selectedModel={selectedModel}
+        onSave={handleSave}
+        onClose={handleClose}
+        isOpen={isOpen}
+      ></AddUserModelModal>
+    </>
   );
 }
 

@@ -51,7 +51,7 @@ const handler = async (req: NextApiRequest, res: NextApiResponse) => {
 
     let promptToSend = prompt;
     if (!promptToSend) {
-      promptToSend = chatModel.systemPrompt;
+      promptToSend = chatModel.modelConfig.prompt;
     }
 
     let temperatureToUse = temperature;
@@ -69,7 +69,10 @@ const handler = async (req: NextApiRequest, res: NextApiResponse) => {
     for (let i = messages.length - 1; i >= 0; i--) {
       const message = messages[i];
       const tokens = encoding.encode(message.content.text!);
-      if (tokenCount + tokens.length + 1000 > chatModel.tokenLimit!) {
+      if (
+        tokenCount + tokens.length + 1000 >
+        chatModel.modelConfig.tokenLimit!
+      ) {
         break;
       }
       tokenCount += tokens.length;

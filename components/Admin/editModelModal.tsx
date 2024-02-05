@@ -1,46 +1,49 @@
-import { getModels } from '@/apis/adminService';
-import { GetModelsResult, GetUsersModelsResult } from '@/types/admin';
+import { putModels } from '@/apis/adminService';
+import { GetModelsResult } from '@/types/admin';
 import {
   Button,
+  Checkbox,
+  CheckboxGroup,
+  Input,
   Modal,
   ModalBody,
   ModalContent,
   ModalFooter,
   ModalHeader,
-  Select,
-  SelectItem,
+  Switch,
+  Textarea,
 } from '@nextui-org/react';
 import React, { useEffect, useState } from 'react';
+import toast from 'react-hot-toast';
 
 interface IProps {
   isOpen: boolean;
-  selectedModel: GetUsersModelsResult | null;
+  selectedModel: GetModelsResult | null;
   onClose: () => void;
-  onSave: (model: GetModelsResult) => void;
+  onSuccessful: () => void;
   saveLoading?: boolean;
 }
 
-export const AddModelModal = (props: IProps) => {
-  const { isOpen, selectedModel, onClose, onSave } = props;
-  const [select, setSelect] = useState<GetModelsResult>();
+export const EditModelModal = (props: IProps) => {
+  const { isOpen, selectedModel, onClose, onSuccessful } = props;
+  const [select, setSelect] = useState<GetModelsResult>(selectedModel!);
   const [models, setModel] = useState<GetModelsResult[]>([]);
-  const [loadingModel, setLoadingModel] = useState(false);
-  
+
   useEffect(() => {
-    isOpen &&
-      getModels().then((data) => {
-        const _models = data.filter(
-          (x) =>
-            !selectedModel?.models.find(
-              (m) => m.modelId === x.modelId && m.enable
-            )
-        );
-        setModel(_models);
-      });
+    isOpen && setSelect(selectedModel!);
   }, [isOpen]);
 
   const handleSave = () => {
-    select && onSave(select);
+    putModels(select).then((data) => {
+      onSuccessful();
+      toast.success('Save successful!');
+    });
+  };
+
+  const onChange = (key: keyof GetModelsResult, value: string | boolean) => {
+    setSelect((prev) => {
+      return { ...prev, [key]: value };
+    });
   };
 
   return (
@@ -49,26 +52,65 @@ export const AddModelModal = (props: IProps) => {
       placement='top'
       isOpen={isOpen}
       onClose={onClose}
+      size='3xl'
     >
       <ModalContent>
         {(onClose) => (
           <>
-            <ModalHeader className='flex flex-col gap-1'>Add Model</ModalHeader>
+            <ModalHeader className='flex flex-col gap-1'>
+              Edit Model - {select?.modelId}
+            </ModalHeader>
             <ModalBody>
-              <Select
-                value={select?.modelId}
-                labelPlacement='outside'
-                label='Select an Model'
-                onChange={(ev) => {
-                  setSelect(models.find((x) => x.modelId === ev.target.value));
+              <div className='flex w-full justify-between items-center'>
+                <Input
+                  type='text'
+                  label='Name'
+                  labelPlacement={'outside'}
+                  placeholder='Enter your Model Name'
+                  value={select?.name}
+                  onValueChange={(value) => {
+                    onChange('name', value);
+                  }}
+                />
+                <Switch
+                  className='pt-[24px] px-2'
+                  isSelected={select?.enable}
+                  size='sm'
+                  color='success'
+                  onValueChange={(value) => {
+                    onChange('enable', value);
+                  }}
+                >
+                  {select?.enable ? 'Enabled' : 'Disabled'}
+                </Switch>
+              </div>
+              <Textarea
+                label='Api Configs'
+                labelPlacement={'outside'}
+                placeholder='Enter your Api Configs'
+                value={select?.apiConfig}
+                onValueChange={(value) => {
+                  onChange('apiConfig', value);
                 }}
-              >
-                {models.map((model) => (
-                  <SelectItem key={model.modelId} value={model.modelId}>
-                    {model.modelId}
-                  </SelectItem>
-                ))}
-              </Select>
+              />
+              <Textarea
+                label='Model Configs'
+                labelPlacement={'outside'}
+                placeholder='Enter your Model Configs'
+                value={select?.modelConfig}
+                onValueChange={(value) => {
+                  onChange('modelConfig', value);
+                }}
+              />
+              <Textarea
+                label='Img Configs'
+                labelPlacement={'outside'}
+                placeholder='Enter your Img Configs'
+                value={select?.imgConfig}
+                onValueChange={(value) => {
+                  onChange('imgConfig', value);
+                }}
+              />
             </ModalBody>
             <ModalFooter>
               <Button color='danger' variant='light' onPress={onClose}>

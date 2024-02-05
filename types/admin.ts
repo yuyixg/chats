@@ -1,5 +1,6 @@
 import { UserModel } from '@/models/userModels';
-import { ModelIds, ModelImageConfig, ModelType } from './model';
+import { ChatModelConfig, ModelIds, ChatModelImageConfig, ModelType } from './model';
+import { ChatModelApiConfig } from '@/models/models';
 
 export const enum UserRole {
   'admin' = 'admin',
@@ -22,9 +23,17 @@ export interface GetModelsResult {
   modelId: ModelIds;
   name: string;
   type: ModelType;
-  systemPrompt: string;
-  maxLength?: number;
-  tokenLimit?: number;
-  imgConfig?: ModelImageConfig;
   enable?: boolean;
+  apiConfig?: string;
+  modelConfig: string;
+  imgConfig?: string;
+}
+
+export interface PutModelParams {
+  modelId: ModelIds;
+  name: string;
+  enable?: boolean;
+  apiConfig?: string;
+  modelConfig: string;
+  imgConfig?: string;
 }

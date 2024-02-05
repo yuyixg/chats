@@ -6,22 +6,29 @@ import {
   TableBody,
   TableRow,
   TableCell,
-  Tooltip,
-  Chip,
-  Skeleton,
   Spinner,
+  Tooltip,
+  Switch,
+  Chip,
 } from '@nextui-org/react';
-import { getUserModels, putUserModel } from '@/apis/adminService';
+import { getModels, putUserModel } from '@/apis/adminService';
 import { GetModelsResult, GetUsersModelsResult } from '@/types/admin';
-import { IconPlus, IconSquareX } from '@tabler/icons-react';
-import { AddModelModal } from '@/components/Admin/editModelModal';
-import { LoadingState } from '@/types';
+import { EditModelModal } from '@/components/Admin/editModelModal';
+import {
+  IconDisabled,
+  IconEdit,
+  IconEditCircle,
+  IconEye,
+  IconPencil,
+  IconPencilCog,
+} from '@tabler/icons-react';
 
 export default function Models() {
   const [isOpen, setIsOpen] = useState(false);
-  const [selectedModel, setSelectedModel] =
-    useState<GetUsersModelsResult | null>(null);
-  const [userModels, setUserModels] = useState<GetUsersModelsResult[]>([]);
+  const [selectedModel, setSelectedModel] = useState<GetModelsResult | null>(
+    null
+  );
+  const [models, setModels] = useState<GetModelsResult[]>([]);
   const [loadingModel, setLoadingModel] = useState(false);
   useEffect(() => {
     setLoadingModel(true);
@@ -29,46 +36,19 @@ export default function Models() {
   }, []);
 
   const init = () => {
-    getUserModels().then((data) => {
-      setUserModels(data);
+    getModels().then((data) => {
+      setModels(data);
       setIsOpen(false);
       setSelectedModel(null);
       setLoadingModel(false);
     });
   };
 
-  const disEnableUserModel = (item: GetUsersModelsResult, modelId: string) => {
-    putUserModel({
-      userModelId: item.userModelId,
-      models: item.models.map((x) => {
-        return x.modelId === modelId ? { ...x, enable: false } : x;
-      }),
-    }).then(() => {
-      init();
-    });
-  };
+  const disEnableModel = (item: GetModelsResult, modelId: string) => {};
 
-  const handleShowAddModal = (item: GetUsersModelsResult) => {
-    setSelectedModel(item);
+  const handleShow = (item: GetModelsResult) => {
     setIsOpen(true);
-  };
-
-  const handleSave = (select: GetModelsResult) => {
-    let models = selectedModel!.models;
-    const foundModel = models.find((m) => m.modelId === select.modelId);
-    if (!foundModel) {
-      models.push({ modelId: select.modelId, enable: true });
-    } else {
-      models = models.map((x) => {
-        return x.modelId === select.modelId ? { ...x, enable: true } : x;
-      });
-    }
-    putUserModel({
-      userModelId: selectedModel!.userModelId,
-      models,
-    }).then(() => {
-      init();
-    });
+    setSelectedModel(item);
   };
 
   const handleClose = () => {
@@ -77,51 +57,53 @@ export default function Models() {
   };
 
   const columns = [
-    { name: 'USERNAME', uid: 'userName' },
-    { name: 'ROLE', uid: 'role' },
-    { name: 'MODELS', uid: 'models' },
+    { name: 'ID', uid: 'modelId' },
+    { name: 'NAME', uid: 'name' },
+    { name: 'TYPE', uid: 'type' },
+    // { name: 'ENABLE', uid: 'enable' },
+    // { name: 'API CONFIG', uid: 'apiConfig' },
+    // { name: 'IMAGE CONFIG', uid: 'imgConfig' },
+    // { name: 'PROMPT', uid: 'systemPrompt' },
+    // { name: 'MAX LENGTH', uid: 'maxLength' },
+    // { name: 'TOKEN LIMIT', uid: 'tokenLimit' },
+    { name: 'ACTIONS', uid: 'actions' },
   ];
   const renderCell = React.useCallback(
-    (item: GetUsersModelsResult, columnKey: React.Key) => {
+    (item: GetModelsResult, columnKey: React.Key) => {
       switch (columnKey) {
-        case 'userName':
-          return <div>{item.userName}</div>;
-        case 'role':
-          return <div>{item.role}</div>;
-        case 'models':
+        case 'modelId':
           return (
-            <>
-              {item.models
-                .filter((x) => x.enable)
-                .map((m) => {
-                  return (
-                    <Chip
-                      endContent={
-                        <IconSquareX
-                          onClick={() => disEnableUserModel(item, m.modelId)}
-                          size={16}
-                        />
-                      }
-                      className='capitalize px-2 mx-1 cursor-pointer'
-                      color='success'
-                      size='sm'
-                      variant='flat'
-                    >
-                      {m.modelId}
-                    </Chip>
-                  );
-                })}
-              <Chip
-                onClick={() => handleShowAddModal(item)}
-                endContent={<IconPlus size={16} />}
-                className='capitalize px-2 cursor-pointer'
-                color={'default'}
-                size='sm'
-                variant='flat'
-              >
-                Add Model
-              </Chip>
-            </>
+            <div className='flex'>
+              <Tooltip content={item.enable ? 'Enabled' : 'Disabled'}>
+                <Chip
+                  className='capitalize border-none gap-1 text-default-600'
+                  color={item.enable ? 'success' : 'default'}
+                  size='sm'
+                  variant='dot'
+                ></Chip>
+              </Tooltip>
+              {item.modelId}
+            </div>
+          );
+        case 'name':
+          return <div>{item.name}</div>;
+        case 'type':
+          return <div>{item.type}</div>;
+        case 'actions':
+          return (
+            <div className='relative flex items-center'>
+              <Tooltip content='Edit'>
+                <span className='text-lg text-default-400 cursor-pointer active:opacity-50'>
+                  <IconPencilCog
+                    onClick={() => {
+                      handleShow(item);
+                    }}
+                    className='text-default-400'
+                    size={20}
+                  />
+                </span>
+              </Tooltip>
+            </div>
           );
         default:
           return <div></div>;
@@ -145,10 +127,10 @@ export default function Models() {
         <TableBody
           loadingContent={<Spinner label='Loading...' />}
           isLoading={loadingModel}
-          items={userModels}
+          items={models}
         >
           {(item) => (
-            <TableRow key={item.userId}>
+            <TableRow key={item.modelId}>
               {(columnKey) => (
                 <TableCell>{renderCell(item, columnKey)}</TableCell>
               )}
@@ -157,12 +139,12 @@ export default function Models() {
         </TableBody>
       </Table>
 
-      <AddModelModal
+      <EditModelModal
         selectedModel={selectedModel}
-        onSave={handleSave}
-        onClose={handleClose}
         isOpen={isOpen}
-      ></AddModelModal>
+        onClose={handleClose}
+        onSuccessful={init}
+      ></EditModelModal>
     </>
   );
 }

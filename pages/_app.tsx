@@ -20,6 +20,7 @@ function App({ Component, pageProps }: AppProps<{}> | any) {
         refetchOnWindowFocus={true}
         basePath='/api/auth'
       >
+        <Toaster />
         <QueryClientProvider client={queryClient}>
           <AdminLayout>
             <Component {...pageProps} />

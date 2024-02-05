@@ -5,7 +5,7 @@ export interface Model {
   systemPrompt: string;
   maxLength?: number;
   tokenLimit?: number;
-  imgConfig?: ModelImageConfig;
+  imgConfig?: ChatModelImageConfig;
   enable?: boolean;
 }
 
@@ -26,7 +26,13 @@ export enum ModelType {
   Spark = 'Spark',
 }
 
-export interface ModelImageConfig {
+export interface ChatModelImageConfig {
   count: number;
   maxSize: number;
+}
+
+export interface ChatModelConfig {
+  prompt: string;
+  maxLength?: number;
+  tokenLimit?: number;
 }

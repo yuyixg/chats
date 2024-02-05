@@ -1,12 +1,8 @@
 import type { NextApiRequest, NextApiResponse } from 'next';
 import { ChatBody, QianWenContent, QianWenMessage } from '@/types/chat';
 import { QianWenStream, Tokenizer } from '@/services/qianwen';
-import { ChatMessages, ChatModels } from '@/models';
-import {
-  ChatMessageManager,
-  ChatModelManager,
-  UserModelManager,
-} from '@/managers';
+import { ChatMessages } from '@/models';
+import { ChatMessageManager, UserModelManager } from '@/managers';
 import { getServerSession } from 'next-auth/next';
 import { authOptions } from './auth/[...nextauth]';
 
