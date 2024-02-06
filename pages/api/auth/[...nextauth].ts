@@ -127,7 +127,7 @@ export const authOptions: AuthOptions = {
           },
           userId: token.sub,
           error: token.error || null,
-          permissions: currentUser?.role || null,
+          role: currentUser?.role || null,
         };
       }
       return {

@@ -13,7 +13,7 @@ declare module 'next-auth' {
     userId: string;
     error: string;
     modelIds: string[];
-    permissions: string[];
+    role: string;
     expires: number;
     accessToken?: string;
     refreshToken: string;
