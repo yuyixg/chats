@@ -28,7 +28,7 @@ const handler = async (req: NextApiRequest, res: NextApiResponse) => {
   try {
     const session = await getServerSession(req, res, authOptions);
     if (!session) {
-      res.status(500).end();
+      res.status(401).end();
       return;
     }
     const { userId } = session;

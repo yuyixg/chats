@@ -1,5 +1,8 @@
 import type { NextApiRequest, NextApiResponse } from 'next';
 import { UserModelManager } from '@/managers';
+import { getServerSession } from 'next-auth';
+import { authOptions } from '../auth/[...nextauth]';
+import { UserRole } from '@/types/admin';
 export const config = {
   api: {
     bodyParser: {
@@ -10,6 +13,17 @@ export const config = {
 };
 
 const handler = async (req: NextApiRequest, res: NextApiResponse) => {
+  const session = await getServerSession(req, res, authOptions);
+  if (!session) {
+    res.status(401).end();
+    return;
+  }
+  const { role } = session;
+  if (role !== UserRole.admin) {
+    res.status(401);
+    return;
+  }
+
   try {
     if (req.method === 'PUT') {
       const { userModelId, models } = req.body;

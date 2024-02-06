@@ -1,12 +1,8 @@
 import type { NextApiRequest, NextApiResponse } from 'next';
 import { ChatBody, QianFanMessage } from '@/types/chat';
 import { QianFanStream, Tokenizer } from '@/services/qianfan';
-import { ChatMessages, ChatModels } from '@/models';
-import {
-  ChatMessageManager,
-  ChatModelManager,
-  UserModelManager,
-} from '@/managers';
+import { ChatMessages } from '@/models';
+import { ChatMessageManager, UserModelManager } from '@/managers';
 import { getServerSession } from 'next-auth/next';
 import { authOptions } from './auth/[...nextauth]';
 
@@ -26,7 +22,7 @@ export default async function handler(
   try {
     const session = await getServerSession(req, res, authOptions);
     if (!session) {
-      res.status(500).end();
+      res.status(401).end();
       return;
     }
     const { userId } = session;
