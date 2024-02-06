@@ -1,5 +1,5 @@
-import { getModels } from '@/apis/adminService';
-import { GetModelsResult, GetUsersModelsResult } from '@/types/admin';
+import { getModels, putUserModel } from '@/apis/adminService';
+import { GetModelResult, GetUserModelResult } from '@/types/admin';
 import {
   Button,
   Modal,
@@ -11,20 +11,21 @@ import {
   SelectItem,
 } from '@nextui-org/react';
 import React, { useEffect, useState } from 'react';
+import toast from 'react-hot-toast';
 
 interface IProps {
   isOpen: boolean;
-  selectedModel: GetUsersModelsResult | null;
+  selectedModel: GetUserModelResult | null;
   onClose: () => void;
-  onSave: (model: GetModelsResult) => void;
+  onSuccessful: () => void;
   saveLoading?: boolean;
 }
 
 export const AddUserModelModal = (props: IProps) => {
-  const { isOpen, selectedModel, onClose, onSave } = props;
-  const [select, setSelect] = useState<GetModelsResult>();
-  const [models, setModel] = useState<GetModelsResult[]>([]);
-  
+  const { isOpen, selectedModel, onClose, onSuccessful } = props;
+  const [select, setSelect] = useState<GetModelResult>();
+  const [models, setModel] = useState<GetModelResult[]>([]);
+
   useEffect(() => {
     isOpen &&
       getModels().then((data) => {
@@ -39,7 +40,28 @@ export const AddUserModelModal = (props: IProps) => {
   }, [isOpen]);
 
   const handleSave = () => {
-    select && onSave(select);
+    let models = selectedModel!.models;
+    const foundModel = models.find((m) => m.modelId === select?.modelId);
+    if (!foundModel) {
+      models.push({ modelId: select?.modelId!, enable: true });
+    } else {
+      models = models.map((x) => {
+        return x.modelId === select?.modelId ? { ...x, enable: true } : x;
+      });
+    }
+    putUserModel({
+      userModelId: selectedModel!.userModelId,
+      models,
+    })
+      .then(() => {
+        toast.success('Save successful!');
+        onSuccessful();
+      })
+      .catch(() => {
+        toast.error(
+          'Save failed! Please try again later, or contact technical personnel.'
+        );
+      });
   };
 
   return (

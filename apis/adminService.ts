@@ -1,12 +1,12 @@
 import { useFetch } from '@/hooks/useFetch';
 import {
-  GetModelsResult,
-  GetUsersModelsResult,
+  GetModelResult,
+  GetUserModelResult,
   PutModelParams,
   PutUserModelParams,
 } from '@/types/admin';
 
-export const getUserModels = (): Promise<GetUsersModelsResult[]> => {
+export const getUserModels = (): Promise<GetUserModelResult[]> => {
   const fetchService = useFetch();
   return fetchService.post('/api/admin/users');
 };
@@ -18,7 +18,7 @@ export const putUserModel = (params: PutUserModelParams): Promise<any> => {
   });
 };
 
-export const getModels = (all: boolean = true): Promise<GetModelsResult[]> => {
+export const getModels = (all: boolean = true): Promise<GetModelResult[]> => {
   const fetchService = useFetch();
   return fetchService.post('/api/admin/models', {
     body: { all },

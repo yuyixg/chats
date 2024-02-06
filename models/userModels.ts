@@ -10,9 +10,9 @@ import connection from './connection';
 export interface UserModel {
   modelId: string;
   enable?: boolean;
-  tokens?: number;
-  counts?: number;
-  expires?: number;
+  tokens?: number | null;
+  counts?: number | null;
+  expires?: number | null;
 }
 
 class UserModels extends Model<

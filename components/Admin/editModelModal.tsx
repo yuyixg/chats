@@ -1,9 +1,7 @@
 import { putModels } from '@/apis/adminService';
-import { GetModelsResult } from '@/types/admin';
+import { GetModelResult } from '@/types/admin';
 import {
   Button,
-  Checkbox,
-  CheckboxGroup,
   Input,
   Modal,
   ModalBody,
@@ -18,7 +16,7 @@ import toast from 'react-hot-toast';
 
 interface IProps {
   isOpen: boolean;
-  selectedModel: GetModelsResult | null;
+  selectedModel: GetModelResult | null;
   onClose: () => void;
   onSuccessful: () => void;
   saveLoading?: boolean;
@@ -26,21 +24,26 @@ interface IProps {
 
 export const EditModelModal = (props: IProps) => {
   const { isOpen, selectedModel, onClose, onSuccessful } = props;
-  const [select, setSelect] = useState<GetModelsResult>(selectedModel!);
-  const [models, setModel] = useState<GetModelsResult[]>([]);
+  const [select, setSelect] = useState<GetModelResult>(selectedModel!);
 
   useEffect(() => {
     isOpen && setSelect(selectedModel!);
   }, [isOpen]);
 
   const handleSave = () => {
-    putModels(select).then((data) => {
-      onSuccessful();
-      toast.success('Save successful!');
-    });
+    putModels(select)
+      .then((data) => {
+        onSuccessful();
+        toast.success('Save successful!');
+      })
+      .catch(() => {
+        toast.error(
+          'Save failed! Please try again later, or contact technical personnel.'
+        );
+      });
   };
 
-  const onChange = (key: keyof GetModelsResult, value: string | boolean) => {
+  const onChange = (key: keyof GetModelResult, value: string | boolean) => {
     setSelect((prev) => {
       return { ...prev, [key]: value };
     });

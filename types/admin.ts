@@ -5,7 +5,7 @@ export const enum UserRole {
   'admin' = 'admin',
 }
 
-export interface GetUsersModelsResult {
+export interface GetUserModelResult {
   userId: string;
   role: string;
   userModelId: string;
@@ -18,7 +18,7 @@ export interface PutUserModelParams {
   models: UserModel[];
 }
 
-export interface GetModelsResult {
+export interface GetModelResult {
   modelId: ModelIds;
   name: string;
   rank: number;

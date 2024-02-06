@@ -29,7 +29,7 @@ const AdminLayout = ({ children }: { children: React.ReactNode }) => {
   );
 
   return (
-    <NextUIProvider>
+    <>
       <div className='flex h-screen'>
         <div className='flex-none w-64 basis-64 shadow-small overflow-hidden'>
           <div className='flex w-full bg-white'>
@@ -132,7 +132,7 @@ const AdminLayout = ({ children }: { children: React.ReactNode }) => {
 
         <div className='flex-grow p-6 py-4 overflow-auto'>{children}</div>
       </div>
-    </NextUIProvider>
+    </>
   );
 };
 export default AdminLayout;

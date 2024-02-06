@@ -10,16 +10,18 @@ import {
   Spinner,
 } from '@nextui-org/react';
 import { getUserModels, putUserModel } from '@/apis/adminService';
-import { GetModelsResult, GetUsersModelsResult } from '@/types/admin';
+import { GetUserModelResult } from '@/types/admin';
 import { IconPlus, IconX } from '@tabler/icons-react';
 import { AddUserModelModal } from '@/components/Admin/addUserModelModal';
 import toast from 'react-hot-toast';
+import { EditUserModelModal } from '@/components/Admin/editUserModelModal';
 
 export default function Models() {
-  const [isOpen, setIsOpen] = useState(false);
-  const [selectedModel, setSelectedModel] =
-    useState<GetUsersModelsResult | null>(null);
-  const [userModels, setUserModels] = useState<GetUsersModelsResult[]>([]);
+  const [isOpen, setIsOpen] = useState({ add: false, edit: false });
+  const [selectedUserModel, setSelectedUserModel] =
+    useState<GetUserModelResult | null>(null);
+  const [selectedModelId, setSelectedModelId] = useState<string>();
+  const [userModels, setUserModels] = useState<GetUserModelResult[]>([]);
   const [loadingModel, setLoadingModel] = useState(false);
   useEffect(() => {
     setLoadingModel(true);
@@ -29,50 +31,44 @@ export default function Models() {
   const init = () => {
     getUserModels().then((data) => {
       setUserModels(data);
-      setIsOpen(false);
-      setSelectedModel(null);
+      setIsOpen({ add: false, edit: false });
+      setSelectedUserModel(null);
       setLoadingModel(false);
     });
   };
 
-  const disEnableUserModel = (item: GetUsersModelsResult, modelId: string) => {
+  const disEnableUserModel = (item: GetUserModelResult, modelId: string) => {
     putUserModel({
       userModelId: item.userModelId,
       models: item.models.map((x) => {
         return x.modelId === modelId ? { ...x, enable: false } : x;
       }),
-    }).then(() => {
-      init();
-    });
-  };
-
-  const handleShowAddModal = (item: GetUsersModelsResult) => {
-    setSelectedModel(item);
-    setIsOpen(true);
-  };
-
-  const handleSave = (select: GetModelsResult) => {
-    let models = selectedModel!.models;
-    const foundModel = models.find((m) => m.modelId === select.modelId);
-    if (!foundModel) {
-      models.push({ modelId: select.modelId, enable: true });
-    } else {
-      models = models.map((x) => {
-        return x.modelId === select.modelId ? { ...x, enable: true } : x;
+    })
+      .then(() => {
+        init();
+        toast.success('Remove successful!');
+      })
+      .catch(() => {
+        toast.error(
+          'Remove failed! Please try again later, or contact technical personnel.'
+        );
       });
-    }
-    putUserModel({
-      userModelId: selectedModel!.userModelId,
-      models,
-    }).then(() => {
-      init();
-      toast.success('Save successful!');
-    });
+  };
+
+  const handleShowAddModal = (item: GetUserModelResult) => {
+    setSelectedUserModel(item);
+    setIsOpen({ add: true, edit: false });
+  };
+
+  const handleShowEditModal = (item: GetUserModelResult, modelId: string) => {
+    setSelectedModelId(modelId);
+    setSelectedUserModel(item);
+    setIsOpen({ add: false, edit: true });
   };
 
   const handleClose = () => {
-    setIsOpen(false);
-    setSelectedModel(null);
+    setIsOpen({ add: false, edit: false });
+    setSelectedUserModel(null);
   };
 
   const columns = [
@@ -81,7 +77,7 @@ export default function Models() {
     { name: 'MODELS', uid: 'models' },
   ];
   const renderCell = React.useCallback(
-    (item: GetUsersModelsResult, columnKey: React.Key) => {
+    (item: GetUserModelResult, columnKey: React.Key) => {
       switch (columnKey) {
         case 'userName':
           return <div>{item.userName}</div>;
@@ -95,13 +91,16 @@ export default function Models() {
                 .map((m) => {
                   return (
                     <Chip
+                      onClick={() => {
+                        handleShowEditModal(item, m.modelId);
+                      }}
                       endContent={
                         <IconX
                           onClick={() => disEnableUserModel(item, m.modelId)}
                           size={16}
                         />
                       }
-                      className='capitalize px-2 mx-1 cursor-pointer'
+                      className='capitalize px-2 mx-1 my-1 cursor-pointer'
                       color='success'
                       size='sm'
                       variant='flat'
@@ -113,7 +112,7 @@ export default function Models() {
               <Chip
                 onClick={() => handleShowAddModal(item)}
                 endContent={<IconPlus size={16} />}
-                className='capitalize px-2 cursor-pointer'
+                className='capitalize px-2 mx-1 cursor-pointer'
                 color={'default'}
                 size='sm'
                 variant='flat'
@@ -157,11 +156,19 @@ export default function Models() {
       </Table>
 
       <AddUserModelModal
-        selectedModel={selectedModel}
-        onSave={handleSave}
+        selectedModel={selectedUserModel}
+        onSuccessful={init}
         onClose={handleClose}
-        isOpen={isOpen}
+        isOpen={isOpen.add}
       ></AddUserModelModal>
+
+      <EditUserModelModal
+        selectedModelId={selectedModelId!}
+        selectedUserModel={selectedUserModel}
+        onSuccessful={init}
+        onClose={handleClose}
+        isOpen={isOpen.edit}
+      ></EditUserModelModal>
     </>
   );
 }

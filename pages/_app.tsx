@@ -9,7 +9,6 @@ import { SessionProvider } from 'next-auth/react';
 
 function App({ Component, pageProps }: AppProps<{}> | any) {
   const route = useRouter();
-  // console.log('pageProps', pageProps);
 
   const queryClient = new QueryClient();
   if (route.pathname.includes('/admin')) {

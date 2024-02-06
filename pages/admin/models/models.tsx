@@ -11,16 +11,16 @@ import {
   Chip,
 } from '@nextui-org/react';
 import { getModels } from '@/apis/adminService';
-import { GetModelsResult } from '@/types/admin';
+import { GetModelResult } from '@/types/admin';
 import { EditModelModal } from '@/components/Admin/editModelModal';
 import { IconPencilCog } from '@tabler/icons-react';
 
 export default function Models() {
   const [isOpen, setIsOpen] = useState(false);
-  const [selectedModel, setSelectedModel] = useState<GetModelsResult | null>(
+  const [selectedModel, setSelectedModel] = useState<GetModelResult | null>(
     null
   );
-  const [models, setModels] = useState<GetModelsResult[]>([]);
+  const [models, setModels] = useState<GetModelResult[]>([]);
   const [loadingModel, setLoadingModel] = useState(false);
   useEffect(() => {
     setLoadingModel(true);
@@ -36,9 +36,9 @@ export default function Models() {
     });
   };
 
-  const disEnableModel = (item: GetModelsResult, modelId: string) => {};
+  const disEnableModel = (item: GetModelResult, modelId: string) => {};
 
-  const handleShow = (item: GetModelsResult) => {
+  const handleShow = (item: GetModelResult) => {
     setIsOpen(true);
     setSelectedModel(item);
   };
@@ -53,16 +53,10 @@ export default function Models() {
     { name: 'ID', uid: 'modelId' },
     { name: 'NAME', uid: 'name' },
     { name: 'TYPE', uid: 'type' },
-    // { name: 'ENABLE', uid: 'enable' },
-    // { name: 'API CONFIG', uid: 'apiConfig' },
-    // { name: 'IMAGE CONFIG', uid: 'imgConfig' },
-    // { name: 'PROMPT', uid: 'systemPrompt' },
-    // { name: 'MAX LENGTH', uid: 'maxLength' },
-    // { name: 'TOKEN LIMIT', uid: 'tokenLimit' },
     { name: 'ACTIONS', uid: 'actions' },
   ];
   const renderCell = React.useCallback(
-    (item: GetModelsResult, columnKey: React.Key) => {
+    (item: GetModelResult, columnKey: React.Key) => {
       switch (columnKey) {
         case 'rank':
           return <div>{item.rank}</div>;
