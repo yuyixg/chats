@@ -15,8 +15,7 @@ const ErrorPage = ({ statusCode }: { statusCode: number }) => {
   if (statusCode === 404) {
     return <Custom404 />;
   }
-
-  // 对其他错误类型进行处理 (可选)
+  
   return (
     <div>
       <h1>{statusCode}: 发生错误</h1>

@@ -11,6 +11,7 @@ import {
   Switch,
   Textarea,
 } from '@nextui-org/react';
+import { useTranslation } from 'next-i18next';
 import React, { useEffect, useState } from 'react';
 import toast from 'react-hot-toast';
 
@@ -23,6 +24,7 @@ interface IProps {
 }
 
 export const EditModelModal = (props: IProps) => {
+  const { t } = useTranslation('admin');
   const { isOpen, selectedModel, onClose, onSuccessful } = props;
   const [select, setSelect] = useState<GetModelResult>(selectedModel!);
 
@@ -34,11 +36,13 @@ export const EditModelModal = (props: IProps) => {
     putModels(select)
       .then((data) => {
         onSuccessful();
-        toast.success('Save successful!');
+        toast.success(t('Save successful!'));
       })
       .catch(() => {
         toast.error(
-          'Save failed! Please try again later, or contact technical personnel.'
+          t(
+            'Save failed! Please try again later, or contact technical personnel.'
+          )
         );
       });
   };
@@ -61,21 +65,22 @@ export const EditModelModal = (props: IProps) => {
         {(onClose) => (
           <>
             <ModalHeader className='flex flex-col gap-1'>
-              Edit Model - {select?.modelId}
+              {t('Edit Model')} - {select?.modelId}
             </ModalHeader>
             <ModalBody>
               <div className='flex w-full justify-between items-center'>
                 <Input
                   type='text'
-                  label='Name'
+                  label={`${t('MODEL NAME')}`}
                   labelPlacement={'outside'}
-                  placeholder='Enter your Model Name'
+                  placeholder={`${t('Enter your')} ${t('MODEL NAME')}`}
                   value={select?.name}
                   onValueChange={(value) => {
                     onChange('name', value);
                   }}
                 />
                 <Switch
+                  style={{ minWidth: '128px' }}
                   className='pt-[24px] px-2'
                   isSelected={select?.enable}
                   size='sm'
@@ -84,31 +89,31 @@ export const EditModelModal = (props: IProps) => {
                     onChange('enable', value);
                   }}
                 >
-                  {select?.enable ? 'Enabled' : 'Disabled'}
+                  {select?.enable ? t('Enabled') : t('Disabled')}
                 </Switch>
               </div>
               <Textarea
-                label='Api Configs'
+                label={`${t('API Configs')}`}
                 labelPlacement={'outside'}
-                placeholder='Enter your Api Configs'
+                placeholder={`${t('Enter your')}${t('API Configs')}`}
                 value={select?.apiConfig}
                 onValueChange={(value) => {
                   onChange('apiConfig', value);
                 }}
               />
               <Textarea
-                label='Model Configs'
+                label={`${t('Model Configs')}`}
                 labelPlacement={'outside'}
-                placeholder='Enter your Model Configs'
+                placeholder={`${t('Enter your')}${t('Model Configs')}`}
                 value={select?.modelConfig}
                 onValueChange={(value) => {
                   onChange('modelConfig', value);
                 }}
               />
               <Textarea
-                label='Img Configs'
+                label={`${t('Image Configs')}`}
                 labelPlacement={'outside'}
-                placeholder='Enter your Img Configs'
+                placeholder={`${t('Enter your')}${t('Image Configs')}`}
                 value={select?.imgConfig}
                 onValueChange={(value) => {
                   onChange('imgConfig', value);
@@ -117,10 +122,10 @@ export const EditModelModal = (props: IProps) => {
             </ModalBody>
             <ModalFooter>
               <Button color='danger' variant='light' onPress={onClose}>
-                Close
+                {t('Close')}
               </Button>
               <Button color='primary' onPress={handleSave}>
-                Save
+                {t('Save')}
               </Button>
             </ModalFooter>
           </>

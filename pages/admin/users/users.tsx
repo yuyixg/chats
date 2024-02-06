@@ -15,8 +15,11 @@ import { IconPlus, IconX } from '@tabler/icons-react';
 import { AddUserModelModal } from '@/components/Admin/addUserModelModal';
 import toast from 'react-hot-toast';
 import { EditUserModelModal } from '@/components/Admin/editUserModelModal';
+import { serverSideTranslations } from 'next-i18next/serverSideTranslations';
+import { useTranslation } from 'next-i18next';
 
 export default function Models() {
+  const { t } = useTranslation('admin');
   const [isOpen, setIsOpen] = useState({ add: false, edit: false });
   const [selectedUserModel, setSelectedUserModel] =
     useState<GetUserModelResult | null>(null);
@@ -72,9 +75,9 @@ export default function Models() {
   };
 
   const columns = [
-    { name: 'USERNAME', uid: 'userName' },
-    { name: 'ROLE', uid: 'role' },
-    { name: 'MODELS', uid: 'models' },
+    { name: t('USERNAME'), uid: 'userName' },
+    { name: t('ROLE'), uid: 'role' },
+    { name: t('MODELS'), uid: 'models' },
   ];
   const renderCell = React.useCallback(
     (item: GetUserModelResult, columnKey: React.Key) => {
@@ -117,7 +120,7 @@ export default function Models() {
                 size='sm'
                 variant='flat'
               >
-                Add Model
+                {t('Add Model')}
               </Chip>
             </>
           );
@@ -141,7 +144,7 @@ export default function Models() {
           )}
         </TableHeader>
         <TableBody
-          loadingContent={<Spinner label='Loading...' />}
+          loadingContent={<Spinner label={t('Loading...')!} />}
           isLoading={loadingModel}
           items={userModels}
         >
@@ -175,6 +178,8 @@ export default function Models() {
 
 export const getServerSideProps = async ({ locale }: { locale: string }) => {
   return {
-    props: {},
+    props: {
+      ...(await serverSideTranslations(locale ?? 'en', ['common', 'admin'])),
+    },
   };
 };

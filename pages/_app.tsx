@@ -6,6 +6,7 @@ import { appWithTranslation } from 'next-i18next';
 import { useRouter } from 'next/router';
 import AdminLayout from './admin/layout/layout';
 import { SessionProvider } from 'next-auth/react';
+import Admin from './admin';
 
 function App({ Component, pageProps }: AppProps<{}> | any) {
   const route = useRouter();

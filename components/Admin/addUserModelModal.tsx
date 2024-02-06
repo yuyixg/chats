@@ -10,6 +10,7 @@ import {
   Select,
   SelectItem,
 } from '@nextui-org/react';
+import { useTranslation } from 'next-i18next';
 import React, { useEffect, useState } from 'react';
 import toast from 'react-hot-toast';
 
@@ -22,6 +23,7 @@ interface IProps {
 }
 
 export const AddUserModelModal = (props: IProps) => {
+  const { t } = useTranslation('admin');
   const { isOpen, selectedModel, onClose, onSuccessful } = props;
   const [select, setSelect] = useState<GetModelResult>();
   const [models, setModel] = useState<GetModelResult[]>([]);
@@ -54,12 +56,14 @@ export const AddUserModelModal = (props: IProps) => {
       models,
     })
       .then(() => {
-        toast.success('Save successful!');
+        toast.success(t('Save successful!'));
         onSuccessful();
       })
       .catch(() => {
         toast.error(
-          'Save failed! Please try again later, or contact technical personnel.'
+          t(
+            'Save failed! Please try again later, or contact technical personnel.'
+          )
         );
       });
   };
@@ -74,12 +78,14 @@ export const AddUserModelModal = (props: IProps) => {
       <ModalContent>
         {(onClose) => (
           <>
-            <ModalHeader className='flex flex-col gap-1'>Add Model</ModalHeader>
+            <ModalHeader className='flex flex-col gap-1'>
+              {t('Add User Model')}
+            </ModalHeader>
             <ModalBody>
               <Select
                 value={select?.modelId}
                 labelPlacement='outside'
-                label='Select an Model'
+                label={`${t('Select an Model')}`}
                 onChange={(ev) => {
                   setSelect(models.find((x) => x.modelId === ev.target.value));
                 }}
@@ -93,10 +99,10 @@ export const AddUserModelModal = (props: IProps) => {
             </ModalBody>
             <ModalFooter>
               <Button color='danger' variant='light' onPress={onClose}>
-                Close
+                {t('Close')}
               </Button>
               <Button color='primary' onPress={handleSave}>
-                Save
+                {t('Save')}
               </Button>
             </ModalFooter>
           </>

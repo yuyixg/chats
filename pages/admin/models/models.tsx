@@ -14,8 +14,11 @@ import { getModels } from '@/apis/adminService';
 import { GetModelResult } from '@/types/admin';
 import { EditModelModal } from '@/components/Admin/editModelModal';
 import { IconPencilCog } from '@tabler/icons-react';
+import { serverSideTranslations } from 'next-i18next/serverSideTranslations';
+import { useTranslation } from 'next-i18next';
 
 export default function Models() {
+  const { t } = useTranslation('admin');
   const [isOpen, setIsOpen] = useState(false);
   const [selectedModel, setSelectedModel] = useState<GetModelResult | null>(
     null
@@ -49,11 +52,11 @@ export default function Models() {
   };
 
   const columns = [
-    { name: 'RANK', uid: 'rank' },
-    { name: 'ID', uid: 'modelId' },
-    { name: 'NAME', uid: 'name' },
-    { name: 'TYPE', uid: 'type' },
-    { name: 'ACTIONS', uid: 'actions' },
+    { name: t('RANK'), uid: 'rank' },
+    { name: t('ID'), uid: 'modelId' },
+    { name: t('MODEL NAME'), uid: 'name' },
+    { name: t('TYPE'), uid: 'type' },
+    { name: t('ACTIONS'), uid: 'actions' },
   ];
   const renderCell = React.useCallback(
     (item: GetModelResult, columnKey: React.Key) => {
@@ -63,7 +66,7 @@ export default function Models() {
         case 'modelId':
           return (
             <div className='flex'>
-              <Tooltip content={item.enable ? 'Enabled' : 'Disabled'}>
+              <Tooltip content={item.enable ? t('Enabled') : t('Disabled')}>
                 <Chip
                   className='capitalize border-none gap-1 text-default-600'
                   color={item.enable ? 'success' : 'default'}
@@ -81,7 +84,7 @@ export default function Models() {
         case 'actions':
           return (
             <div className='relative flex items-center'>
-              <Tooltip content='Edit'>
+              <Tooltip content={t('Edit')}>
                 <span className='text-lg text-default-400 cursor-pointer active:opacity-50'>
                   <IconPencilCog
                     onClick={() => {
@@ -114,7 +117,7 @@ export default function Models() {
           )}
         </TableHeader>
         <TableBody
-          loadingContent={<Spinner label='Loading...' />}
+          loadingContent={<Spinner label={t('Loading...')!} />}
           isLoading={loadingModel}
           items={models}
         >
@@ -140,6 +143,8 @@ export default function Models() {
 
 export const getServerSideProps = async ({ locale }: { locale: string }) => {
   return {
-    props: {},
+    props: {
+      ...(await serverSideTranslations(locale ?? 'en', ['common', 'admin'])),
+    },
   };
 };

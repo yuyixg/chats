@@ -1,15 +1,21 @@
-import { connection } from '@/models';
-import { useRouter } from 'next/router';
+import { serverSideTranslations } from 'next-i18next/serverSideTranslations';
+import AdminLayout from './layout/layout';
+import { Component } from 'react';
 
 interface Props {}
 
-const Admin = ({}: Props) => {
-  return <>Dashboard</>;
+const Admin = (props: any) => {
+  console.log(props);
+  return (
+    <>
+      <>Dashboard</>
+    </>
+  );
 };
 
 export default Admin;
 
-export const getServerSideProps = async () => {
+export const getServerSideProps = async ({ locale }: any) => {
   // try {
   //   await connection.authenticate();
   //   await connection.sync({ force: true });
@@ -17,6 +23,8 @@ export const getServerSideProps = async () => {
   //   console.log(error);
   // }
   return {
-    props: {},
+    props: {
+      ...(await serverSideTranslations(locale ?? 'en', ['common', 'admin'])),
+    },
   };
 };

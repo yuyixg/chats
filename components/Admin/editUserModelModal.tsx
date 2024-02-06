@@ -11,6 +11,7 @@ import {
   ModalHeader,
   Switch,
 } from '@nextui-org/react';
+import { useTranslation } from 'next-i18next';
 import React, { useEffect, useState } from 'react';
 import toast from 'react-hot-toast';
 
@@ -24,6 +25,7 @@ interface IProps {
 }
 
 export const EditUserModelModal = (props: IProps) => {
+  const { t } = useTranslation('admin');
   const { isOpen, selectedUserModel, selectedModelId, onClose, onSuccessful } =
     props;
   const [select, setSelect] = useState<UserModel>();
@@ -47,10 +49,18 @@ export const EditUserModelModal = (props: IProps) => {
     putUserModel({
       userModelId: selectedUserModel?.userModelId!,
       models: models!,
-    }).then(() => {
-      onSuccessful();
-      toast.success('Save successful!');
-    });
+    })
+      .then(() => {
+        onSuccessful();
+        toast.success(t('Save successful!'));
+      })
+      .catch(() => {
+        toast.error(
+          t(
+            'Save failed! Please try again later, or contact technical personnel.'
+          )
+        );
+      });
   };
 
   const onChange = (key: keyof UserModel, value: string | boolean) => {
@@ -71,12 +81,12 @@ export const EditUserModelModal = (props: IProps) => {
         {(onClose) => (
           <>
             <ModalHeader className='flex flex-col gap-1'>
-              Edit Model
+              {t('Edit Model')}
             </ModalHeader>
             <ModalBody>
               <Input
                 type='text'
-                label='ModeId'
+                label={`${t('ModeId')}`}
                 labelPlacement={'outside'}
                 value={select?.modelId}
                 disabled
@@ -85,27 +95,29 @@ export const EditUserModelModal = (props: IProps) => {
                 }}
               />
               <Input
-                label='Available Tokens'
+                label={t('Available Chat Tokens')}
                 labelPlacement={'outside'}
-                placeholder='Enter your Available Tokens'
+                placeholder={`${t('Enter your')}${t('Available Chat Tokens')}`}
                 value={`${select?.tokens || ''}`}
                 onValueChange={(value) => {
                   onChange('tokens', value);
                 }}
               />
               <Input
-                label='Available Counts'
+                label={t('Available Chat Counts')}
                 labelPlacement={'outside'}
-                placeholder='Enter your Available Tokens'
+                placeholder={`${t('Enter your')}${t('Available Chat Counts')}`}
                 value={`${select?.counts || ''}`}
                 onValueChange={(value) => {
                   onChange('counts', value);
                 }}
               />
               <Input
-                label='Expire Date'
+                label={t('Available Chat Expire Date')}
                 labelPlacement={'outside'}
-                placeholder='Enter your Expire Date'
+                placeholder={`${t('Enter your')}${t(
+                  'Available Chat Expire Date'
+                )}`}
                 value={`${select?.expires || ''}`}
                 onValueChange={(value) => {
                   onChange('expires', value);
@@ -114,10 +126,10 @@ export const EditUserModelModal = (props: IProps) => {
             </ModalBody>
             <ModalFooter>
               <Button color='danger' variant='light' onPress={onClose}>
-                Close
+                {t('Close')}
               </Button>
               <Button color='primary' onPress={handleSave}>
-                Save
+                {t('Save')}
               </Button>
             </ModalFooter>
           </>

@@ -1,4 +1,4 @@
-import { NextUIProvider, Listbox, ListboxItem, cn } from '@nextui-org/react';
+import { Listbox, ListboxItem, cn } from '@nextui-org/react';
 import {
   IconDashboard,
   IconMessageChatbot,
@@ -8,10 +8,13 @@ import {
   IconUserStar,
 } from '@tabler/icons-react';
 import { useSession } from 'next-auth/react';
+import { useTranslation } from 'next-i18next';
 import { useRouter } from 'next/router';
+
 const AdminLayout = ({ children }: { children: React.ReactNode }) => {
   const { data: session } = useSession();
   const router = useRouter();
+  const { t } = useTranslation('admin');
 
   const activeClass = (pathName: string) => {
     return pathName === router.pathname ? 'bg-gray-100' : '';
@@ -64,7 +67,7 @@ const AdminLayout = ({ children }: { children: React.ReactNode }) => {
                 </IconWrapper>
               }
             >
-              Dashboard
+              {t('Dashboard')}
             </ListboxItem>
             <ListboxItem
               className={`${activeClass('/admin/users')}`}
@@ -78,7 +81,7 @@ const AdminLayout = ({ children }: { children: React.ReactNode }) => {
                 </IconWrapper>
               }
             >
-              User Models
+              {t('User Models')}
             </ListboxItem>
             <ListboxItem
               className={`${activeClass('/admin/models')}`}
@@ -92,7 +95,7 @@ const AdminLayout = ({ children }: { children: React.ReactNode }) => {
                 </IconWrapper>
               }
             >
-              Models Config
+              {t('Model Configs')}
             </ListboxItem>
             <ListboxItem
               className={`${activeClass('/admin/messages')}`}
@@ -106,7 +109,7 @@ const AdminLayout = ({ children }: { children: React.ReactNode }) => {
                 </IconWrapper>
               }
             >
-              Messages
+              {t('User Messages')}
             </ListboxItem>
             <ListboxItem
               onClick={() => {
@@ -137,7 +140,6 @@ const AdminLayout = ({ children }: { children: React.ReactNode }) => {
 };
 export default AdminLayout;
 export const getServerSideProps = async () => {
-  console.log('getServerSideProps');
   return {
     props: {},
   };
