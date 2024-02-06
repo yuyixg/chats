@@ -8,6 +8,7 @@ import {
   TableCell,
   Chip,
   Spinner,
+  Tooltip,
 } from '@nextui-org/react';
 import { getUserModels, putUserModel } from '@/apis/adminService';
 import { GetUserModelResult } from '@/types/admin';
@@ -89,41 +90,88 @@ export default function Models() {
         case 'models':
           return (
             <>
-              {item.models
-                .filter((x) => x.enable)
-                .map((m) => {
-                  return (
-                    <Chip
-                      onClick={() => {
-                        handleShowEditModal(item, m.modelId);
-                      }}
-                      endContent={
-                        <IconX
-                          onClick={() => disEnableUserModel(item, m.modelId)}
-                          size={16}
-                        />
-                      }
-                      className='capitalize px-2 mx-1 my-1 cursor-pointer'
-                      color='success'
-                      size='sm'
-                      variant='flat'
-                    >
-                      {m.modelId}
-                    </Chip>
-                  );
-                })}
-              <Chip
-                onClick={() => handleShowAddModal(item)}
-                endContent={<IconPlus size={16} />}
-                className='capitalize px-2 mx-1 cursor-pointer'
-                color={'default'}
-                size='sm'
-                variant='flat'
-              >
-                {t('Add Model')}
-              </Chip>
+              <Table removeWrapper>
+                <TableHeader>
+                  <TableColumn>{t('ID')}</TableColumn>
+                  <TableColumn>{t('Available Chat Tokens')}</TableColumn>
+                  <TableColumn>{t('Available Chat Counts')}</TableColumn>
+                  <TableColumn>{t('Available Chat Expire Date')}</TableColumn>
+                </TableHeader>
+                <TableBody>
+                  {item.models.map((m) => {
+                    return (
+                      <TableRow key={m.modelId} className='hover:bg-gray-100'>
+                        <TableCell
+                          className='hover:underline'
+                          onClick={() => handleShowEditModal(item, m.modelId)}
+                        >
+                          <Tooltip
+                            content={m.enable ? t('Enabled') : t('Disabled')}
+                          >
+                            <Chip
+                              className='capitalize border-none gap-1 text-default-600'
+                              color={m.enable ? 'success' : 'default'}
+                              size='sm'
+                              variant='dot'
+                            ></Chip>
+                          </Tooltip>
+                          {m.modelId}
+                        </TableCell>
+                        <TableCell>{m.tokens || '-'}</TableCell>
+                        <TableCell>{m.counts || '-'}</TableCell>
+                        <TableCell>{m.expires || '-'}</TableCell>
+                      </TableRow>
+                    );
+                  })}
+                </TableBody>
+              </Table>
+              <div className='w-full flex items-center justify-end'>
+                <div
+                  className='flex w-32 items-center justify-center border rounded-md text-sm text-gray-600 p-1 cursor-pointer'
+                  onClick={() => handleShowAddModal(item)}
+                >
+                  <IconPlus size={18} /> {t('Add Model')}
+                </div>
+              </div>
             </>
           );
+        // return (
+        //   <>
+        //     {item.models
+        //       .filter((x) => x.enable)
+        //       .map((m) => {
+        //         return (
+        //           <Chip
+        //             onClick={() => {
+        //               handleShowEditModal(item, m.modelId);
+        //             }}
+        //             endContent={
+        //               <IconX
+        //                 onClick={() => disEnableUserModel(item, m.modelId)}
+        //                 size={16}
+        //               />
+        //             }
+        //             className='capitalize px-2 mx-1 my-1 cursor-pointer'
+        //             color='success'
+        //             size='sm'
+        //             variant='flat'
+        //           >
+        //             {m.modelId}
+        //           </Chip>
+        //         );
+        //       })}
+        //     <Chip
+        //       onClick={() => handleShowAddModal(item)}
+        //       endContent={<IconPlus size={16} />}
+        //       className='capitalize px-2 mx-1 cursor-pointer'
+        //       color={'default'}
+        //       size='sm'
+        //       variant='flat'
+        //     >
+        //       {t('Add Model')}
+        //     </Chip>
+        //   </>
+        // );
         default:
           return <div></div>;
       }

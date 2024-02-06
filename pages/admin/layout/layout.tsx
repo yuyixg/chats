@@ -70,20 +70,6 @@ const AdminLayout = ({ children }: { children: React.ReactNode }) => {
               {t('Dashboard')}
             </ListboxItem>
             <ListboxItem
-              className={`${activeClass('/admin/users')}`}
-              onClick={() => {
-                router.push('/admin/users');
-              }}
-              key='models'
-              startContent={
-                <IconWrapper className='bg-danger/10 text-danger'>
-                  <IconUsers className='text-lg ' />
-                </IconWrapper>
-              }
-            >
-              {t('User Models')}
-            </ListboxItem>
-            <ListboxItem
               className={`${activeClass('/admin/models')}`}
               onClick={() => {
                 router.push('/admin/models');
@@ -96,6 +82,20 @@ const AdminLayout = ({ children }: { children: React.ReactNode }) => {
               }
             >
               {t('Model Configs')}
+            </ListboxItem>
+            <ListboxItem
+              className={`${activeClass('/admin/users')}`}
+              onClick={() => {
+                router.push('/admin/users');
+              }}
+              key='models'
+              startContent={
+                <IconWrapper className='bg-danger/10 text-danger'>
+                  <IconUsers className='text-lg ' />
+                </IconWrapper>
+              }
+            >
+              {t('User Models')}
             </ListboxItem>
             <ListboxItem
               className={`${activeClass('/admin/messages')}`}

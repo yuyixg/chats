@@ -20,7 +20,7 @@ const handler = async (req: NextApiRequest, res: NextApiResponse) => {
   }
   const { role } = session;
   if (role !== UserRole.admin) {
-    res.status(401);
+    res.status(401).end();
     return;
   }
 

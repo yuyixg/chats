@@ -122,7 +122,7 @@ export default function Models() {
           items={models}
         >
           {(item) => (
-            <TableRow key={item.modelId}>
+            <TableRow key={item.modelId} className='hover:bg-gray-100'>
               {(columnKey) => (
                 <TableCell>{renderCell(item, columnKey)}</TableCell>
               )}

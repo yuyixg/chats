@@ -27,6 +27,7 @@ export const AddUserModelModal = (props: IProps) => {
   const { isOpen, selectedModel, onClose, onSuccessful } = props;
   const [select, setSelect] = useState<GetModelResult>();
   const [models, setModel] = useState<GetModelResult[]>([]);
+  const [loading, setLoading] = useState(true);
 
   useEffect(() => {
     isOpen &&
@@ -38,6 +39,7 @@ export const AddUserModelModal = (props: IProps) => {
             )
         );
         setModel(_models);
+        setLoading(false);
       });
   }, [isOpen]);
 
@@ -83,6 +85,7 @@ export const AddUserModelModal = (props: IProps) => {
             </ModalHeader>
             <ModalBody>
               <Select
+                isLoading={loading}
                 value={select?.modelId}
                 labelPlacement='outside'
                 label={`${t('Select an Model')}`}

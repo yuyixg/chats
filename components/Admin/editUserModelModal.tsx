@@ -43,6 +43,7 @@ export const EditUserModelModal = (props: IProps) => {
         x.tokens = Number(select.tokens) || null;
         x.counts = Number(select.counts) || null;
         x.expires = select.expires || null;
+        x.enable = select.enable;
       }
       return x;
     });
@@ -84,7 +85,28 @@ export const EditUserModelModal = (props: IProps) => {
               {t('Edit Model')}
             </ModalHeader>
             <ModalBody>
-              <Input
+              <div className='flex w-full justify-between items-center'>
+                <Input
+                  type='text'
+                  label={`${t('ID')}`}
+                  labelPlacement={'outside'}
+                  value={select?.modelId}
+                  disabled
+                />
+                <Switch
+                  style={{ minWidth: '128px' }}
+                  className='pt-[24px] px-2'
+                  isSelected={select?.enable}
+                  size='sm'
+                  color='success'
+                  onValueChange={(value) => {
+                    onChange('enable', value);
+                  }}
+                >
+                  {select?.enable ? t('Enabled') : t('Disabled')}
+                </Switch>
+              </div>
+              {/* <Input
                 type='text'
                 label={`${t('ModeId')}`}
                 labelPlacement={'outside'}
@@ -93,7 +115,7 @@ export const EditUserModelModal = (props: IProps) => {
                 onValueChange={(value) => {
                   onChange('modelId', value);
                 }}
-              />
+              /> */}
               <Input
                 label={t('Available Chat Tokens')}
                 labelPlacement={'outside'}
