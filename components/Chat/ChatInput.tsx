@@ -314,12 +314,12 @@ export const ChatInput = ({
                 <IconSend size={18} />
               )}
             </button>
-            {!!selectedConversation?.model?.imgConfig &&
+            {Object.keys(selectedConversation?.model?.imgConfig || {}).length > 0 &&
               !uploading &&
               content?.image?.length !==
-                selectedConversation?.model?.imgConfig.count && (
+                selectedConversation?.model?.imgConfig?.count && (
                 <UploadButton
-                  maxFileSize={selectedConversation?.model?.imgConfig.maxSize}
+                  maxFileSize={selectedConversation?.model?.imgConfig?.maxSize}
                   onUploading={() => setUploading(true)}
                   onFailed={() => setUploading(false)}
                   onSuccessful={(url: string) => {
