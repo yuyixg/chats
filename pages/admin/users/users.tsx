@@ -9,10 +9,14 @@ import {
   Chip,
   Spinner,
   Tooltip,
+  Accordion,
+  AccordionItem,
+  Input,
+  Button,
 } from '@nextui-org/react';
 import { getUserModels, putUserModel } from '@/apis/adminService';
 import { GetUserModelResult } from '@/types/admin';
-import { IconPlus, IconX } from '@tabler/icons-react';
+import { IconChevronLeft, IconPlus, IconSearch } from '@tabler/icons-react';
 import { AddUserModelModal } from '@/components/Admin/addUserModelModal';
 import toast from 'react-hot-toast';
 import { EditUserModelModal } from '@/components/Admin/editUserModelModal';
@@ -59,9 +63,13 @@ export default function Models() {
       });
   };
 
-  const handleShowAddModal = (item: GetUserModelResult) => {
+  const handleShowAddModal = (
+    item: GetUserModelResult,
+    e: React.MouseEvent<HTMLButtonElement, MouseEvent>
+  ) => {
     setSelectedUserModel(item);
     setIsOpen({ add: true, edit: false });
+    e.preventDefault();
   };
 
   const handleShowEditModal = (item: GetUserModelResult, modelId: string) => {
@@ -75,21 +83,53 @@ export default function Models() {
     setSelectedUserModel(null);
   };
 
-  const columns = [
-    { name: t('USERNAME'), uid: 'userName' },
-    { name: t('ROLE'), uid: 'role' },
-    { name: t('MODELS'), uid: 'models' },
-  ];
-  const renderCell = React.useCallback(
-    (item: GetUserModelResult, columnKey: React.Key) => {
-      switch (columnKey) {
-        case 'userName':
-          return <div>{item.userName}</div>;
-        case 'role':
-          return <div>{item.role}</div>;
-        case 'models':
+  return (
+    <>
+      <div className='flex flex-col gap-4 mb-4'>
+        <div className='flex justify-between gap-3 items-center'>
+          <Input
+            isClearable
+            classNames={{
+              base: 'w-full',
+            }}
+            placeholder='Search by name...'
+            startContent={<IconSearch className='text-default-300' />}
+            // value={filterValue}
+            // onClear={() => setFilterValue('')}
+            // onValueChange={onSearchChange}
+          />
+        </div>
+      </div>
+      <Accordion
+        variant='splitted'
+        selectionMode='multiple'
+        style={{ padding: 0 }}
+      >
+        {userModels.map((item, index) => {
           return (
-            <>
+            <AccordionItem
+              key={index}
+              indicator={<IconChevronLeft size={20} />}
+              title={
+                <div className='flex w-full h-full justify-between items-center'>
+                  <div>
+                    <span className='text-base'>{item.userName}</span>
+                    <span hidden={!item.role} className='text-gray-500 text-xs'>
+                      {`   (${item.role})`}
+                    </span>
+                  </div>
+                  <Button
+                    size='sm'
+                    color='primary'
+                    variant='solid'
+                    onClick={(e) => handleShowAddModal(item, e)}
+                    startContent={<IconPlus size={20} />}
+                  >
+                    {t('Add Model')}
+                  </Button>
+                </div>
+              }
+            >
               <Table removeWrapper>
                 <TableHeader>
                   <TableColumn>{t('ID')}</TableColumn>
@@ -125,87 +165,10 @@ export default function Models() {
                   })}
                 </TableBody>
               </Table>
-              <div className='w-full flex items-center justify-end'>
-                <div
-                  className='flex w-32 items-center justify-center border rounded-md text-sm text-gray-600 p-1 cursor-pointer'
-                  onClick={() => handleShowAddModal(item)}
-                >
-                  <IconPlus size={18} /> {t('Add Model')}
-                </div>
-              </div>
-            </>
+            </AccordionItem>
           );
-        // return (
-        //   <>
-        //     {item.models
-        //       .filter((x) => x.enable)
-        //       .map((m) => {
-        //         return (
-        //           <Chip
-        //             onClick={() => {
-        //               handleShowEditModal(item, m.modelId);
-        //             }}
-        //             endContent={
-        //               <IconX
-        //                 onClick={() => disEnableUserModel(item, m.modelId)}
-        //                 size={16}
-        //               />
-        //             }
-        //             className='capitalize px-2 mx-1 my-1 cursor-pointer'
-        //             color='success'
-        //             size='sm'
-        //             variant='flat'
-        //           >
-        //             {m.modelId}
-        //           </Chip>
-        //         );
-        //       })}
-        //     <Chip
-        //       onClick={() => handleShowAddModal(item)}
-        //       endContent={<IconPlus size={16} />}
-        //       className='capitalize px-2 mx-1 cursor-pointer'
-        //       color={'default'}
-        //       size='sm'
-        //       variant='flat'
-        //     >
-        //       {t('Add Model')}
-        //     </Chip>
-        //   </>
-        // );
-        default:
-          return <div></div>;
-      }
-    },
-    []
-  );
-
-  return (
-    <>
-      <Table
-        classNames={{
-          table: loadingModel ? 'min-h-[320px]' : 'auto',
-        }}
-      >
-        <TableHeader columns={columns}>
-          {(column) => (
-            <TableColumn key={column.uid}>{column.name}</TableColumn>
-          )}
-        </TableHeader>
-        <TableBody
-          loadingContent={<Spinner label={t('Loading...')!} />}
-          isLoading={loadingModel}
-          items={userModels}
-        >
-          {(item) => (
-            <TableRow key={item.userId}>
-              {(columnKey) => (
-                <TableCell>{renderCell(item, columnKey)}</TableCell>
-              )}
-            </TableRow>
-          )}
-        </TableBody>
-      </Table>
-
+        })}
+      </Accordion>
       <AddUserModelModal
         selectedModel={selectedUserModel}
         onSuccessful={init}
