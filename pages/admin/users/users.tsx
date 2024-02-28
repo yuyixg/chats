@@ -7,7 +7,6 @@ import {
   TableRow,
   TableCell,
   Chip,
-  Spinner,
   Tooltip,
   Accordion,
   AccordionItem,
@@ -22,6 +21,7 @@ import toast from 'react-hot-toast';
 import { EditUserModelModal } from '@/components/Admin/editUserModelModal';
 import { serverSideTranslations } from 'next-i18next/serverSideTranslations';
 import { useTranslation } from 'next-i18next';
+import { getSession } from '@/utils/session';
 
 export default function Models() {
   const { t } = useTranslation('admin');
@@ -138,31 +138,32 @@ export default function Models() {
                   <TableColumn>{t('Available Chat Expire Date')}</TableColumn>
                 </TableHeader>
                 <TableBody>
-                  {item.models.map((m) => {
-                    return (
-                      <TableRow key={m.modelId} className='hover:bg-gray-100'>
-                        <TableCell
-                          className='hover:underline'
-                          onClick={() => handleShowEditModal(item, m.modelId)}
-                        >
-                          <Tooltip
-                            content={m.enable ? t('Enabled') : t('Disabled')}
+                  {item.models &&
+                    item.models.map((m) => {
+                      return (
+                        <TableRow key={m.modelId} className='hover:bg-gray-100'>
+                          <TableCell
+                            className='hover:underline'
+                            onClick={() => handleShowEditModal(item, m.modelId)}
                           >
-                            <Chip
-                              className='capitalize border-none gap-1 text-default-600'
-                              color={m.enable ? 'success' : 'default'}
-                              size='sm'
-                              variant='dot'
-                            ></Chip>
-                          </Tooltip>
-                          {m.modelId}
-                        </TableCell>
-                        <TableCell>{m.tokens || '-'}</TableCell>
-                        <TableCell>{m.counts || '-'}</TableCell>
-                        <TableCell>{m.expires || '-'}</TableCell>
-                      </TableRow>
-                    );
-                  })}
+                            <Tooltip
+                              content={m.enable ? t('Enabled') : t('Disabled')}
+                            >
+                              <Chip
+                                className='capitalize border-none gap-1 text-default-600'
+                                color={m.enable ? 'success' : 'default'}
+                                size='sm'
+                                variant='dot'
+                              ></Chip>
+                            </Tooltip>
+                            {m.modelId}
+                          </TableCell>
+                          <TableCell>{m.tokens || '-'}</TableCell>
+                          <TableCell>{m.counts || '-'}</TableCell>
+                          <TableCell>{m.expires || '-'}</TableCell>
+                        </TableRow>
+                      );
+                    })}
                 </TableBody>
               </Table>
             </AccordionItem>

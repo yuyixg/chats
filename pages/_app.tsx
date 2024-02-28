@@ -5,42 +5,23 @@ import { QueryClient, QueryClientProvider } from 'react-query';
 import { appWithTranslation } from 'next-i18next';
 import { useRouter } from 'next/router';
 import AdminLayout from './admin/layout/layout';
-import { SessionProvider } from 'next-auth/react';
-import Admin from './admin';
 
 function App({ Component, pageProps }: AppProps<{}> | any) {
   const route = useRouter();
-
   const queryClient = new QueryClient();
-  if (route.pathname.includes('/admin')) {
-    return (
-      <SessionProvider
-        refetchInterval={25 * 60}
-        session={pageProps.session}
-        refetchOnWindowFocus={true}
-        basePath='/api/auth'
-      >
-        <Toaster />
-        <QueryClientProvider client={queryClient}>
+  return (
+    <>
+      <Toaster />
+      <QueryClientProvider client={queryClient}>
+        {route.pathname.includes('/admin') ? (
           <AdminLayout>
             <Component {...pageProps} />
           </AdminLayout>
-        </QueryClientProvider>
-      </SessionProvider>
-    );
-  }
-  return (
-    <SessionProvider
-      refetchInterval={25 * 60}
-      session={pageProps.session}
-      refetchOnWindowFocus={true}
-      basePath='/api/auth'
-    >
-      <Toaster />
-      <QueryClientProvider client={queryClient}>
-        <Component {...pageProps} />
+        ) : (
+          <Component {...pageProps} />
+        )}
       </QueryClientProvider>
-    </SessionProvider>
+    </>
   );
 }
 

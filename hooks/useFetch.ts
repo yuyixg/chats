@@ -12,7 +12,7 @@ export const useFetch = () => {
   const handleFetch = async (
     url: string,
     request: any,
-    signal?: AbortSignal,
+    signal?: AbortSignal
   ) => {
     const requestUrl = request?.params ? `${url}${request.params}` : url;
 
@@ -32,7 +32,12 @@ export const useFetch = () => {
 
     return fetch(requestUrl, { ...requestBody, headers, signal })
       .then((response) => {
-        if (!response.ok) throw response;
+        if (!response.ok) {
+          if (response.status === 401) {
+            location.href = '/login';
+          }
+          throw response;
+        }
 
         const contentType = response.headers.get('content-type');
         const contentDisposition = response.headers.get('content-disposition');
@@ -68,7 +73,7 @@ export const useFetch = () => {
     },
     post: async <T>(
       url: string,
-      request?: RequestWithBodyModel,
+      request?: RequestWithBodyModel
     ): Promise<T> => {
       return handleFetch(url, { ...request, method: 'post' });
     },
@@ -77,7 +82,7 @@ export const useFetch = () => {
     },
     patch: async <T>(
       url: string,
-      request?: RequestWithBodyModel,
+      request?: RequestWithBodyModel
     ): Promise<T> => {
       return handleFetch(url, { ...request, method: 'patch' });
     },

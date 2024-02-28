@@ -1,5 +1,5 @@
-import { Session } from 'next-auth';
-
-export interface ISession extends Session {
-  error: string | Error;
+export interface Session {
+  userId: string;
+  username: string;
+  role?: string;
 }

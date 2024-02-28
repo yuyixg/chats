@@ -37,7 +37,7 @@ export class UserModelManager {
       attributes: ['id', 'userId', 'models'],
       include: [
         {
-          attributes: ['userName', 'role'],
+          attributes: ['username', 'role'],
           model: Users,
         },
       ],

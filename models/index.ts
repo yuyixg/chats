@@ -3,6 +3,7 @@ import ChatMessages from './messages';
 import Users from './users';
 import connection from './connection';
 import UserModels from './userModels';
+import Sessions from './sessions';
 
 Users.hasMany(ChatMessages, {
   foreignKey: 'userId',
@@ -28,4 +29,4 @@ UserModels.belongsTo(Users, {
   foreignKey: 'userId',
 });
 
-export { connection, ChatModels, ChatMessages, Users, UserModels };
+export { connection, ChatModels, ChatMessages, Users, UserModels, Sessions };

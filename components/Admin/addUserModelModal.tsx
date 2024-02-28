@@ -34,7 +34,7 @@ export const AddUserModelModal = (props: IProps) => {
       getModels().then((data) => {
         const _models = data.filter(
           (x) =>
-            !selectedModel?.models.find(
+            !selectedModel?.models?.find(
               (m) => m.modelId === x.modelId
             )
         );
@@ -44,7 +44,7 @@ export const AddUserModelModal = (props: IProps) => {
   }, [isOpen]);
 
   const handleSave = () => {
-    let models = selectedModel!.models;
+    let models = selectedModel!.models || [];
     const foundModel = models.find((m) => m.modelId === select?.modelId);
     if (!foundModel) {
       models.push({ modelId: select?.modelId!, enable: true });

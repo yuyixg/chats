@@ -3,8 +3,6 @@ import { ChatBody, QianFanMessage } from '@/types/chat';
 import { QianFanStream, Tokenizer } from '@/services/qianfan';
 import { ChatMessages } from '@/models';
 import { ChatMessageManager, UserModelManager } from '@/managers';
-import { getServerSession } from 'next-auth/next';
-import { authOptions } from './auth/[...nextauth]';
 
 export const config = {
   api: {
@@ -20,12 +18,13 @@ export default async function handler(
   res: NextApiResponse
 ) {
   try {
-    const session = await getServerSession(req, res, authOptions);
-    if (!session) {
-      res.status(401).end();
-      return;
-    }
-    const { userId } = session;
+    // const session = await getServerSession(req, res, authOptions);
+    // if (!session) {
+    //   res.status(401).end();
+    //   return;
+    // }
+    // const { userId } = session;
+    const userId = ""
     const { model, messages, messageId } = req.body as ChatBody;
 
     const chatModel = await UserModelManager.findUserModel(

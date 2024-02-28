@@ -17,6 +17,7 @@
     "@types/react-dom": "18.2.7",
     "autoprefixer": "10.4.15",
     "aws-sdk": "^2.1531.0",
+    "bcryptjs": "^2.4.3",
     "echarts-for-react": "^3.0.2",
     "eslint": "8.49.0",
     "eslint-config-next": "13.4.19",
@@ -24,7 +25,6 @@
     "framer-motion": "^10.18.0",
     "i18next": "^22.4.13",
     "next": "^13.4.19",
-    "next-auth": "^4.24.5",
     "next-i18next": "^13.2.2",
     "pg": "^8.11.3",
     "pg-hstore": "^2.3.4",
@@ -47,6 +47,7 @@
   },
   "devDependencies": {
     "@types/aws-sdk": "^2.7.0",
+    "@types/bcryptjs": "^2.4.6",
     "@types/react-syntax-highlighter": "^15.5.11",
     "@types/uuid": "^9.0.4"
   }

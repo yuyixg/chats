@@ -2,8 +2,10 @@ import { Conversation, Message } from '@/types/chat';
 import { ErrorMessage } from '@/types/error';
 import { Model, ModelIds } from '@/types/model';
 import { Prompt } from '@/types/prompt';
+import { UserSession } from '@/utils/user';
 
 export interface HomeInitialState {
+  user: UserSession | null;
   loading: boolean;
   lightMode: 'light' | 'dark';
   messageIsStreaming: boolean;
@@ -23,6 +25,7 @@ export interface HomeInitialState {
 }
 
 export const initialState: HomeInitialState = {
+  user: null,
   loading: false,
   lightMode: 'light',
   messageIsStreaming: false,

@@ -3,8 +3,6 @@ import { ChatBody, QianWenContent, QianWenMessage } from '@/types/chat';
 import { QianWenStream, Tokenizer } from '@/services/qianwen';
 import { ChatMessages } from '@/models';
 import { ChatMessageManager, UserModelManager } from '@/managers';
-import { getServerSession } from 'next-auth/next';
-import { authOptions } from './auth/[...nextauth]';
 
 export const config = {
   api: {
@@ -16,12 +14,13 @@ export const config = {
 };
 const handler = async (req: NextApiRequest, res: NextApiResponse) => {
   try {
-    const session = await getServerSession(req, res, authOptions);
-    if (!session) {
-      res.status(401).end();
-      return;
-    }
-    const { userId } = session;
+    // const session = await getServerSession(req, res, authOptions);
+    // if (!session) {
+    //   res.status(401).end();
+    //   return;
+    // }
+    // const { userId } = session;
+    const userId = ""
     const { messageId, model, messages, prompt, temperature } =
       req.body as ChatBody;
 

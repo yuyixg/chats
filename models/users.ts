@@ -13,8 +13,10 @@ class Users extends Model<
   InferCreationAttributes<Users>
 > {
   declare id?: string;
-  declare userName: string;
+  declare username: string;
+  declare password: string;
   declare role?: UserRole;
+  declare enabled?: boolean;
 }
 
 Users.init(
@@ -24,8 +26,10 @@ Users.init(
       primaryKey: true,
       defaultValue: UUIDV4,
     },
-    userName: { type: DataTypes.STRING },
+    password: { type: DataTypes.STRING },
+    username: { type: DataTypes.STRING },
     role: { type: DataTypes.STRING, defaultValue: null },
+    enabled: { type: DataTypes.BOOLEAN, defaultValue: true },
   },
   {
     sequelize: connection,

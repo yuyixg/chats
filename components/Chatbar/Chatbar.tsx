@@ -8,7 +8,7 @@ import { DEFAULT_TEMPERATURE } from '@/utils/const';
 import { saveConversation, saveConversations } from '@/utils/conversation';
 
 import { Conversation } from '@/types/chat';
-import HomeContext from '@/pages/api/home/home.context';
+import HomeContext from '@/pages/home/home.context';
 
 import Sidebar from '../Sidebar';
 import ChatbarContext from './Chatbar.context';

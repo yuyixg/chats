@@ -11,23 +11,27 @@ import { SettingDialog } from '@/components/Settings/SettingDialog';
 import { SidebarButton } from '../Sidebar/SidebarButton';
 // import ChatbarContext from '../Chatbar.context';
 import { ClearConversations } from './ClearConversations';
-import { signOut, useSession } from 'next-auth/react';
 import ChatbarContext from './Chatbar.context';
-import HomeContext from '@/pages/api/home/home.context';
+import HomeContext from '@/pages/home/home.context';
 import { useRouter } from 'next/router';
 import { UserRole } from '@/types/admin';
+import { clearUserSession } from '@/utils/user';
 
 export const ChatBarSettings = () => {
   const router = useRouter();
   const { t } = useTranslation('sidebar');
   const [isSettingDialogOpen, setIsSettingDialog] = useState<boolean>(false);
-  const { data: session } = useSession();
 
   const {
-    state: { conversations },
+    state: { user, conversations },
   } = useContext(HomeContext);
 
   const { handleClearConversations } = useContext(ChatbarContext);
+
+  const logout = () => {
+    clearUserSession();
+    router.push('/login');
+  };
 
   return (
     <div className='flex flex-col items-center space-y-1 border-t border-white/20 pt-1 text-sm'>
@@ -47,7 +51,7 @@ export const ChatBarSettings = () => {
         onClick={() => setIsSettingDialog(true)}
       />
 
-      {session?.role === UserRole.admin && (
+      {user?.role === UserRole.admin && (
         <SidebarButton
           text={t('Admin Panel')}
           icon={<IconUserCog size={18} />}
@@ -57,18 +61,11 @@ export const ChatBarSettings = () => {
         />
       )}
 
-      {session?.user.name && (
+      {user?.username && (
         <SidebarButton
-          text={session?.user.name}
+          text={user?.username}
           icon={<IconUser size={18} />}
-          action={
-            <IconLogout
-              onClick={() => {
-                signOut();
-              }}
-              size={18}
-            />
-          }
+          action={<IconLogout onClick={logout} size={18} />}
           onClick={() => {}}
         />
       )}

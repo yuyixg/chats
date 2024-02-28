@@ -1,7 +1,6 @@
 import type { NextApiRequest, NextApiResponse } from 'next';
-import { getServerSession } from 'next-auth';
-import { authOptions } from './auth/[...nextauth]';
 import { ChatModelManager, UserModelManager } from '@/managers';
+import { getSession } from '@/utils/session';
 export const config = {
   api: {
     bodyParser: {
@@ -13,11 +12,11 @@ export const config = {
 
 const handler = async (req: NextApiRequest, res: NextApiResponse) => {
   try {
-    const session = await getServerSession(req, res, authOptions);
+    const session = await getSession(req.cookies);
     if (!session) {
       return res.status(401).end();
     }
-    const userModels = await UserModelManager.findEnableModels(session.userId);
+    const userModels = await UserModelManager.findEnableModels(session.userId!);
     const models = await ChatModelManager.findEnableModels();
     const _models = models
       .filter((m) => userModels.includes(m.id))

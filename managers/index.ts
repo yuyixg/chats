@@ -1,6 +1,13 @@
 import { ChatMessageManager } from './messages';
 import { ChatModelManager } from './models';
-import { UserManager } from './user';
+import { UsersManager } from './users';
 import { UserModelManager } from './userModels';
+import { SessionsManager } from './sessions';
 
-export { ChatModelManager, ChatMessageManager, UserManager, UserModelManager };
+export {
+  ChatModelManager,
+  ChatMessageManager,
+  UsersManager,
+  UserModelManager,
+  SessionsManager,
+};

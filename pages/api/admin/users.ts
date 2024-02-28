@@ -1,8 +1,7 @@
 import type { NextApiRequest, NextApiResponse } from 'next';
 import { UserModelManager } from '@/managers';
-import { getServerSession } from 'next-auth';
-import { authOptions } from '../auth/[...nextauth]';
 import { UserRole } from '@/types/admin';
+import { getSession } from '@/utils/session';
 export const config = {
   api: {
     bodyParser: {
@@ -13,12 +12,12 @@ export const config = {
 };
 
 const handler = async (req: NextApiRequest, res: NextApiResponse) => {
-  const session = await getServerSession(req, res, authOptions);
+
+  const session = await getSession(req.cookies);
   if (!session) {
-    res.status(401).end();
-    return;
+    return res.status(401).end();
   }
-  const { role } = session;
+  const role = session.role;
   if (role !== UserRole.admin) {
     res.status(401).end();
     return;
@@ -36,7 +35,7 @@ const handler = async (req: NextApiRequest, res: NextApiResponse) => {
           userId: x.userId,
           userModelId: x.id,
           role: x.User.role,
-          userName: x.User.userName,
+          userName: x.User.username,
           models: x.models,
         };
       });

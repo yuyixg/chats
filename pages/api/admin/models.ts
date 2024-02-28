@@ -1,8 +1,7 @@
 import { ChatModelManager } from '@/managers';
 import type { NextApiRequest, NextApiResponse } from 'next';
-import { getServerSession } from 'next-auth';
-import { authOptions } from '../auth/[...nextauth]';
 import { UserRole } from '@/types/admin';
+import { getSession } from '@/utils/session';
 export const config = {
   api: {
     bodyParser: {
@@ -39,12 +38,11 @@ const checkKey = (
 };
 
 const handler = async (req: NextApiRequest, res: NextApiResponse) => {
-  const session = await getServerSession(req, res, authOptions);
+  const session = await getSession(req.cookies);
   if (!session) {
-    res.status(401).end();
-    return;
+    return res.status(401).end();
   }
-  const { role } = session;
+  const role = session.role;
   if (role !== UserRole.admin) {
     res.status(401).end();
     return;

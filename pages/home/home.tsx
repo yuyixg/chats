@@ -21,27 +21,29 @@ import { useQuery } from 'react-query';
 import useApiService from '@/apis/useApiService';
 import { serverSideTranslations } from 'next-i18next/serverSideTranslations';
 import { useTranslation } from 'react-i18next';
-import { useSession, signIn } from 'next-auth/react';
-import { getServerSession } from 'next-auth';
-import { authOptions } from '../auth/[...nextauth]';
 import { getSettings } from '@/utils/settings';
 import Promptbar from '@/components/Promptbar';
+import { getSession } from '@/utils/session';
+import { Session } from '@/types/session';
+import { getUserSession } from '@/utils/user';
+import { useRouter } from 'next/router';
 
 interface Props {
   serverSideApiKeyIsSet: boolean;
   serverSidePluginKeysSet: boolean;
   defaultModelId: ModelIds;
+  session: Session;
 }
 
-const Home = ({ defaultModelId }: Props) => {
-  const { data: session, status } = useSession();
+const Home = ({ defaultModelId, session }: Props) => {
+  const router = useRouter();
   const { t } = useTranslation('chat');
   const contextValue = useCreateReducer<HomeInitialState>({
     initialState,
   });
 
   const {
-    state: { conversations, selectedConversation, lightMode, models },
+    state: { user, conversations, selectedConversation, lightMode, models },
     dispatch,
   } = contextValue;
   const { getModels } = useApiService();
@@ -128,6 +130,13 @@ const Home = ({ defaultModelId }: Props) => {
       });
     }
 
+    const user = getUserSession();
+    if (user) {
+      dispatch({ field: 'user', value: user });
+    } else {
+      router.push('/login');
+    }
+
     const prompts = localStorage.getItem('prompts');
     if (prompts) {
       dispatch({ field: 'prompts', value: JSON.parse(prompts) });
@@ -143,15 +152,6 @@ const Home = ({ defaultModelId }: Props) => {
       dispatch({ field: 'showPromptbar', value: showPromptbar === 'true' });
     }
   }, []);
-
-  useEffect(() => {
-    if (
-      status === 'unauthenticated' ||
-      session?.error === 'RefreshAccessTokenError'
-    ) {
-      signIn('keycloak');
-    }
-  }, [session]);
 
   useEffect(() => {
     const conversationHistory = localStorage.getItem('conversationHistory');
@@ -241,14 +241,14 @@ const Home = ({ defaultModelId }: Props) => {
         <link rel='icon' href='/favicon.ico' />
       </Head>
       <main>
-        {status !== 'authenticated' && (
+        {/* {status !== 'authenticated' && (
           <div
             className={`fixed top-1/2 w-full h-full z-50 text-center text-sm`}
           >
             {loadingText}
           </div>
-        )}
-        {status !== 'unauthenticated' && selectedConversation && (
+        )} */}
+        {selectedConversation && (
           <div
             className={`flex h-screen w-screen flex-col text-sm text-white dark:text-white ${lightMode}`}
           >
@@ -285,11 +285,11 @@ export const getServerSideProps = async ({
   req: any;
   res: any;
 }) => {
-  const session = await getServerSession(req, res, authOptions);
+  const session = await getSession(req.headers.cookie);
   return {
     props: {
-      defaultModelId: null,
       session,
+      defaultModelId: null,
       ...(await serverSideTranslations(locale ?? 'en', [
         'common',
         'chat',

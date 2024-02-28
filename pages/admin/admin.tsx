@@ -3,6 +3,7 @@ import { serverSideTranslations } from 'next-i18next/serverSideTranslations';
 import React from 'react';
 import ReactECharts from 'echarts-for-react';
 import { Card, CardBody, CardHeader } from '@nextui-org/react';
+import { connection } from '@/models';
 
 interface Props {}
 

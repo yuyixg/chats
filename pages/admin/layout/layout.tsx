@@ -7,14 +7,19 @@ import {
   IconUsers,
   IconUserStar,
 } from '@tabler/icons-react';
-import { useSession } from 'next-auth/react';
 import { useTranslation } from 'next-i18next';
 import { useRouter } from 'next/router';
+import { UserSession, getUserSession } from '@/utils/user';
+import { useEffect, useState } from 'react';
 
 const AdminLayout = ({ children }: { children: React.ReactNode }) => {
-  const { data: session } = useSession();
   const router = useRouter();
   const { t } = useTranslation('admin');
+  const [user, setUser] = useState<UserSession | null>();
+
+  useEffect(() => {
+    setUser(getUserSession());
+  }, []);
 
   const activeClass = (pathName: string) => {
     return pathName === router.pathname ? 'bg-gray-100' : '';
@@ -129,7 +134,7 @@ const AdminLayout = ({ children }: { children: React.ReactNode }) => {
             <div className='bg-gray-200 rounded-md p-1'>
               <IconUserStar />
             </div>
-            <div className='px-4'>{session?.user.name}</div>
+            <div className='px-4'>{user?.username}</div>
           </div>
         </div>
 
@@ -139,7 +144,7 @@ const AdminLayout = ({ children }: { children: React.ReactNode }) => {
   );
 };
 export default AdminLayout;
-export const getServerSideProps = async () => {
+export const getServerSideProps = async (req: any) => {
   return {
     props: {},
   };
