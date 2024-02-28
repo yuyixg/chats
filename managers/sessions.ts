@@ -9,7 +9,6 @@ export class SessionsManager {
       },
     };
     const session = await Sessions.findOne(where);
-    console.log('session', session);
     if (session) {
       await Sessions.destroy(where);
     }
