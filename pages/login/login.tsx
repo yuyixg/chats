@@ -1,6 +1,5 @@
 import { FormEvent } from 'react';
 import { useRouter } from 'next/router';
-import { Session } from '@/types/session';
 import { UserSession, saveUserSession } from '@/utils/user';
 import toast from 'react-hot-toast';
 
