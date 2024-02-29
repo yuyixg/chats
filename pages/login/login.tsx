@@ -1,6 +1,6 @@
 import { FormEvent, useEffect, useState } from 'react';
 import { useRouter } from 'next/router';
-import { UserSession, getUserSession, saveUserSession } from '@/utils/user';
+import { UserSession, saveUserSession } from '@/utils/user';
 import toast from 'react-hot-toast';
 import { serverSideTranslations } from 'next-i18next/serverSideTranslations';
 import { useTranslation } from 'react-i18next';
@@ -37,7 +37,7 @@ export default function LoginPage() {
       });
       router.push('/');
     } else {
-      toast.error('Username or password incorrect.');
+      toast.error(t('Username or password incorrect.'));
       setLoginLoading(false);
     }
   }
