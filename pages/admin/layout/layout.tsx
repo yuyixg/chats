@@ -1,5 +1,6 @@
 import {
   IconChartPie,
+  IconMessageCircle,
   IconMessages,
   IconSettingsCog,
   IconUserStar,
@@ -46,7 +47,7 @@ const AdminLayout = ({ children }: { children: React.ReactNode }) => {
     },
     {
       url: '/',
-      icon: <IconUserStar size={26} />,
+      icon: <IconMessageCircle size={26} />,
       name: 'Chats',
     },
   ];
@@ -124,7 +125,7 @@ const AdminLayout = ({ children }: { children: React.ReactNode }) => {
               return MenuItem(m);
             })}
           </ul>
-          <ul className='pt-4 mt-4 space-y-2 font-medium border-t border-gray-200 dark:border-gray-700'>
+          <ul className='pt-4 mt-4 space-y-2 w-full font-medium border-t border-gray-200 dark:border-gray-700 absolute bottom-4 left-0'>
             <li>
               <a
                 href='#'

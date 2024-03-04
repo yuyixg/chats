@@ -1,4 +1,4 @@
-import { IconClearAll, IconSettings } from '@tabler/icons-react';
+import { IconClearAll } from '@tabler/icons-react';
 import {
   MutableRefObject,
   memo,
@@ -15,19 +15,14 @@ import { useTranslation } from 'next-i18next';
 import { getEndpoint } from '@/utils/apis';
 import { saveConversation, saveConversations } from '@/utils/conversation';
 import { throttle } from '@/utils/throttle';
-
 import { ChatBody, Conversation, Message } from '@/types/chat';
-
 import HomeContext from '@/pages/home/home.context';
-
 import Spinner from '../Spinner';
 import { ChatInput } from './ChatInput';
 import { ChatLoader } from './ChatLoader';
-import { ErrorMessageDiv } from './ErrorMessageDiv';
 import { MemoizedChatMessage } from './MemoizedChatMessage';
 import { ModelSelect } from './ModelSelect';
 import { SystemPrompt } from './SystemPrompt';
-import { TemperatureSlider } from './Temperature';
 
 interface Props {
   stopConversationRef: MutableRefObject<boolean>;
@@ -40,10 +35,7 @@ export const Chat = memo(({ stopConversationRef }: Props) => {
     state: {
       selectedConversation,
       conversations,
-      models,
       modelsLoading,
-      messageIsStreaming,
-      modelError,
       loading,
       prompts,
     },
@@ -95,19 +87,6 @@ export const Chat = memo(({ stopConversationRef }: Props) => {
           temperature: updatedConversation.temperature,
         };
 
-        // if (
-        //   updatedConversation?.model?.id?.includes('ERNIE-Bot') &&
-        //   updatedConversation.prompt.length > 0
-        // ) {
-        //   chatBody.messages = [
-        //     // {
-        //     //   role: 'assistant',
-        //     //   content: { text: '系统提示:' + updatedConversation.prompt },
-        //     // },
-        //     ...chatBody.messages,
-        //   ];
-        // }
-
         const endpoint = getEndpoint(chatBody.model);
         let body = JSON.stringify(chatBody);
 
@@ -123,7 +102,8 @@ export const Chat = memo(({ stopConversationRef }: Props) => {
         if (!response.ok) {
           homeDispatch({ field: 'loading', value: false });
           homeDispatch({ field: 'messageIsStreaming', value: false });
-          toast.error(response.statusText);
+          const res = await response.json();
+          toast.error(t(res.messages) || response.statusText);
           return;
         }
         const data = response.body;

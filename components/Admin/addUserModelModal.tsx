@@ -101,9 +101,6 @@ export const AddUserModelModal = (props: IProps) => {
               </Select>
             </ModalBody>
             <ModalFooter>
-              <Button color='danger' variant='light' onPress={onClose}>
-                {t('Close')}
-              </Button>
               <Button color='primary' onPress={handleSave}>
                 {t('Save')}
               </Button>

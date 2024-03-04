@@ -3,6 +3,7 @@ import { ChatBody, QianWenContent, QianWenMessage } from '@/types/chat';
 import { QianWenStream, Tokenizer } from '@/services/qianwen';
 import { ChatMessages } from '@/models';
 import { ChatMessageManager, UserModelManager } from '@/managers';
+import { getSession } from '@/utils/session';
 
 export const config = {
   api: {
@@ -14,13 +15,12 @@ export const config = {
 };
 const handler = async (req: NextApiRequest, res: NextApiResponse) => {
   try {
-    // const session = await getServerSession(req, res, authOptions);
-    // if (!session) {
-    //   res.status(401).end();
-    //   return;
-    // }
-    // const { userId } = session;
-    const userId = ""
+    const session = await getSession(req.cookies);
+    if (!session) {
+      res.status(401).end();
+      return;
+    }
+    const { userId } = session;
     const { messageId, model, messages, prompt, temperature } =
       req.body as ChatBody;
 
@@ -29,7 +29,11 @@ const handler = async (req: NextApiRequest, res: NextApiResponse) => {
       model.modelId
     );
     if (!chatModel) {
-      res.status(400).end('Model is not Found!');
+      res.status(400).send(
+        JSON.stringify({
+          messages: 'The Model does not exist or access is denied.',
+        })
+      );
       return;
     }
 

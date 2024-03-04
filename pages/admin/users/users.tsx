@@ -110,7 +110,7 @@ export default function Models() {
         {userModels.map(
           (item, index) => {
             return (
-              <Card className='p-2'>
+              <Card className='p-2 max-h-[309px]'>
                 <CardHeader className='justify-between'>
                   <div className='flex gap-5'>
                     <Avatar

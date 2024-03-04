@@ -3,6 +3,7 @@ import { ChatBody, QianFanMessage } from '@/types/chat';
 import { QianFanStream, Tokenizer } from '@/services/qianfan';
 import { ChatMessages } from '@/models';
 import { ChatMessageManager, UserModelManager } from '@/managers';
+import { getSession } from '@/utils/session';
 
 export const config = {
   api: {
@@ -18,13 +19,12 @@ export default async function handler(
   res: NextApiResponse
 ) {
   try {
-    // const session = await getServerSession(req, res, authOptions);
-    // if (!session) {
-    //   res.status(401).end();
-    //   return;
-    // }
-    // const { userId } = session;
-    const userId = ""
+    const session = await getSession(req.cookies);
+    if (!session) {
+      res.status(401).end();
+      return;
+    }
+    const { userId } = session;
     const { model, messages, messageId } = req.body as ChatBody;
 
     const chatModel = await UserModelManager.findUserModel(
@@ -32,7 +32,13 @@ export default async function handler(
       model.modelId
     );
     if (!chatModel) {
-      res.status(400).end('Model is not Found!');
+      res
+        .status(400)
+        .send(
+          JSON.stringify({
+            messages: 'The Model does not exist or access is denied.',
+          })
+        );
       return;
     }
 

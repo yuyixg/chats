@@ -16,7 +16,7 @@ export const QianWenStream = async (
   const {
     apiConfig: { host, apiKey },
     id,
-    systemPrompt,
+    modelConfig: { prompt: systemPrompt },
   } = chatModel;
   let url = `${host}/services/aigc/multimodal-generation/generation`;
   const body = {
@@ -100,8 +100,6 @@ export const Tokenizer = async (
 ) => {
   const {
     apiConfig: { host, apiKey },
-    id,
-    systemPrompt,
   } = chatModel;
   let url = `${host}/tokenizer`;
   const body = {

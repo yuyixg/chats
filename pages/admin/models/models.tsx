@@ -13,7 +13,7 @@ import {
 import { getModels } from '@/apis/adminService';
 import { GetModelResult } from '@/types/admin';
 import { EditModelModal } from '@/components/Admin/editModelModal';
-import { IconPencilCog } from '@tabler/icons-react';
+import { IconPencil } from '@tabler/icons-react';
 import { serverSideTranslations } from 'next-i18next/serverSideTranslations';
 import { useTranslation } from 'next-i18next';
 
@@ -86,7 +86,7 @@ export default function Models() {
             <div className='relative flex items-center'>
               <Tooltip content={t('Edit')}>
                 <span className='text-lg text-default-400 cursor-pointer active:opacity-50'>
-                  <IconPencilCog
+                  <IconPencil
                     onClick={() => {
                       handleShow(item);
                     }}

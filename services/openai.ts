@@ -17,7 +17,7 @@ export const OpenAIStream = async (
   const {
     apiConfig: { host, type, version, apiKey, organization },
     id,
-    systemPrompt,
+    modelConfig: { prompt: systemPrompt },
   } = chatModel;
   let url = `${host}/v1/chat/completions`;
   if (type === 'azure') {

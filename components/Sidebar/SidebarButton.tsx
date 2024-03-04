@@ -15,7 +15,7 @@ export const SidebarButton: FC<Props> = ({ text, icon, action, onClick }) => {
     >
       <div className='flex w-[80%] items-center'>
         <div>{icon}</div>
-        <span className='px-3 whitespace-nowrap overflow-hidden text-ellipsis'>
+        <span className={`px-3 whitespace-nowrap text-ellipsis ${text?.length >= 8 && 'overflow-hidden'}`}>
           {text}
         </span>
       </div>

@@ -84,7 +84,7 @@ export const EditModelModal = (props: IProps) => {
                   className='pt-[24px] px-2'
                   isSelected={select?.enable}
                   size='sm'
-                  color='success'
+                  color='primary'
                   onValueChange={(value) => {
                     onChange('enable', value);
                   }}
@@ -121,9 +121,6 @@ export const EditModelModal = (props: IProps) => {
               />
             </ModalBody>
             <ModalFooter>
-              <Button color='danger' variant='light' onPress={onClose}>
-                {t('Close')}
-              </Button>
               <Button color='primary' onPress={handleSave}>
                 {t('Save')}
               </Button>

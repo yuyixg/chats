@@ -23,12 +23,18 @@ function getCookieSessionId(
   }
   return null;
 }
-export async function getSession(cookies: any) {
+export async function getSession(
+  cookies:
+    | Partial<{
+        [key: string]: string;
+      }>
+    | string
+) {
   const sessionId = getCookieSessionId(cookies);
   if (!sessionId) {
     return null;
   }
-  
+
   const session = await SessionsManager.findSession(sessionId);
 
   return session
