@@ -1,6 +1,5 @@
 import { ChatModels, UserModels, Users } from '@/models';
 import { UserModel } from '@/models/userModels';
-import { Op, where } from 'sequelize';
 
 interface UserModelsWithRelations extends UserModels {
   User: Users;
@@ -41,6 +40,7 @@ export class UserModelManager {
           model: Users,
         },
       ],
+      order: [['createdAt', 'DESC']],
     });
     return data as UserModelsWithRelations[];
   }

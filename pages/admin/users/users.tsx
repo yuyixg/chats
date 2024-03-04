@@ -12,10 +12,20 @@ import {
   AccordionItem,
   Input,
   Button,
+  Card,
+  CardHeader,
+  Avatar,
+  CardBody,
+  CardFooter,
 } from '@nextui-org/react';
 import { getUserModels, putUserModel } from '@/apis/adminService';
 import { GetUserModelResult } from '@/types/admin';
-import { IconChevronLeft, IconPlus, IconSearch } from '@tabler/icons-react';
+import {
+  IconChevronLeft,
+  IconPlus,
+  IconSearch,
+  IconUser,
+} from '@tabler/icons-react';
 import { AddUserModelModal } from '@/components/Admin/addUserModelModal';
 import toast from 'react-hot-toast';
 import { EditUserModelModal } from '@/components/Admin/editUserModelModal';
@@ -63,13 +73,9 @@ export default function Models() {
       });
   };
 
-  const handleShowAddModal = (
-    item: GetUserModelResult,
-    e: React.MouseEvent<HTMLButtonElement, MouseEvent>
-  ) => {
+  const handleShowAddModal = (item: GetUserModelResult) => {
     setSelectedUserModel(item);
     setIsOpen({ add: true, edit: false });
-    e.preventDefault();
   };
 
   const handleShowEditModal = (item: GetUserModelResult, modelId: string) => {
@@ -100,76 +106,93 @@ export default function Models() {
           />
         </div>
       </div>
-      <Accordion
-        variant='splitted'
-        selectionMode='multiple'
-        style={{ padding: 0 }}
-      >
-        {userModels.map((item, index) => {
-          return (
-            <AccordionItem
-              key={index}
-              indicator={<IconChevronLeft size={20} />}
-              title={
-                <div className='flex w-full h-full justify-between items-center'>
-                  <div>
-                    <span className='text-base'>{item.userName}</span>
-                    <span hidden={!item.role} className='text-gray-500 text-xs'>
-                      {`   (${item.role})`}
-                    </span>
+      <div className='grid w-full grid-cols-1 sm:grid-cols-1 md:grid-cols-2 xl:grid-cols-3 gap-3'>
+        {userModels.map(
+          (item, index) => {
+            return (
+              <Card className='p-2'>
+                <CardHeader className='justify-between'>
+                  <div className='flex gap-5'>
+                    <Avatar
+                      isBordered
+                      // color='success'
+                      icon={
+                        <div className=' bg-gray-200 w-full h-full flex justify-center items-center font-semibold text-sm'>
+                          {item.userName[0].toUpperCase()}
+                        </div>
+                      }
+                    />
+                    <div className='flex flex-col gap-1 items-start justify-center'>
+                      <h4 className='text-small font-semibold leading-none text-default-600'>
+                        {item.userName}
+                      </h4>
+                      <h5 className='text-small tracking-tight text-default-400'>
+                        {item.role || '-'}
+                      </h5>
+                    </div>
                   </div>
                   <Button
-                    size='sm'
                     color='primary'
+                    radius='full'
+                    size='sm'
                     variant='solid'
-                    onClick={(e) => handleShowAddModal(item, e)}
-                    startContent={<IconPlus size={20} />}
+                    onClick={() => handleShowAddModal(item)}
                   >
-                    {t('Add Model')}
+                    <IconPlus size={18} />
                   </Button>
-                </div>
-              }
-            >
-              <Table removeWrapper>
-                <TableHeader>
-                  <TableColumn>{t('ID')}</TableColumn>
-                  <TableColumn>{t('Available Chat Tokens')}</TableColumn>
-                  <TableColumn>{t('Available Chat Counts')}</TableColumn>
-                  <TableColumn>{t('Available Chat Expire Date')}</TableColumn>
-                </TableHeader>
-                <TableBody>
-                  {item.models &&
-                    item.models.map((m) => {
-                      return (
-                        <TableRow key={m.modelId} className='hover:bg-gray-100'>
-                          <TableCell
-                            className='hover:underline'
-                            onClick={() => handleShowEditModal(item, m.modelId)}
-                          >
-                            <Tooltip
-                              content={m.enable ? t('Enabled') : t('Disabled')}
+                </CardHeader>
+                <CardBody className='px-3 py-0 text-small text-default-400'>
+                  <Table removeWrapper>
+                    <TableHeader>
+                      <TableColumn>{t('ID')}</TableColumn>
+                      <TableColumn>{t('Remaining Tokens')}</TableColumn>
+                      <TableColumn>{t('Remaining Counts')}</TableColumn>
+                      <TableColumn>{t('Expiration Time')}</TableColumn>
+                    </TableHeader>
+                    <TableBody>
+                      {item.models
+                        .filter((x) => x.enable)
+                        .map((m) => {
+                          return (
+                            <TableRow
+                              key={m.modelId}
+                              className='hover:bg-gray-100'
                             >
-                              <Chip
-                                className='capitalize border-none gap-1 text-default-600'
-                                color={m.enable ? 'success' : 'default'}
-                                size='sm'
-                                variant='dot'
-                              ></Chip>
-                            </Tooltip>
-                            {m.modelId}
-                          </TableCell>
-                          <TableCell>{m.tokens || '-'}</TableCell>
-                          <TableCell>{m.counts || '-'}</TableCell>
-                          <TableCell>{m.expires || '-'}</TableCell>
-                        </TableRow>
-                      );
-                    })}
-                </TableBody>
-              </Table>
-            </AccordionItem>
-          );
-        })}
-      </Accordion>
+                              <TableCell
+                                className='hover:underline'
+                                onClick={() =>
+                                  handleShowEditModal(item, m.modelId)
+                                }
+                              >
+                                <Tooltip
+                                  content={
+                                    m.enable ? t('Enabled') : t('Disabled')
+                                  }
+                                >
+                                  <Chip
+                                    className='capitalize border-none gap-1 text-default-600'
+                                    color={m.enable ? 'success' : 'default'}
+                                    size='sm'
+                                    variant='dot'
+                                  ></Chip>
+                                </Tooltip>
+                                {m.modelId}
+                              </TableCell>
+                              <TableCell>{m.tokens || '-'}</TableCell>
+                              <TableCell>{m.counts || '-'}</TableCell>
+                              <TableCell>{m.expires || '-'}</TableCell>
+                            </TableRow>
+                          );
+                        })}
+                    </TableBody>
+                  </Table>
+                </CardBody>
+                <CardFooter className='gap-3'></CardFooter>
+              </Card>
+            );
+          }
+        )}
+      </div>
       <AddUserModelModal
         selectedModel={selectedUserModel}
         onSuccessful={init}

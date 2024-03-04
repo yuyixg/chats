@@ -93,7 +93,7 @@ const Admin = (props: any) => {
   return (
     <>
       <div className='flex flex-wrap gap-4'>
-        <Card className='w-1/3'>
+        <Card shadow='none' className='w-1/3 border-solid border-1'>
           <CardHeader className='pb-0 pt-2 px-4 flex-col items-start font-semibold'>
             消耗Tokens
           </CardHeader>
@@ -101,7 +101,7 @@ const Admin = (props: any) => {
             <ReactECharts option={option1} />
           </CardBody>
         </Card>
-        <Card className='w-1/3'>
+        <Card shadow='none' className='w-1/3 border-solid border-1'>
           <CardHeader className='pb-0 pt-2 px-4 flex-col items-start font-semibold'>
             使用次数
           </CardHeader>

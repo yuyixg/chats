@@ -117,29 +117,27 @@ export const EditUserModelModal = (props: IProps) => {
                 }}
               /> */}
               <Input
-                label={t('Available Chat Tokens')}
+                label={t('Remaining Tokens')}
                 labelPlacement={'outside'}
-                placeholder={`${t('Enter your')}${t('Available Chat Tokens')}`}
+                placeholder={`${t('Enter your')}${t('Remaining Tokens')}`}
                 value={`${select?.tokens || ''}`}
                 onValueChange={(value) => {
                   onChange('tokens', value);
                 }}
               />
               <Input
-                label={t('Available Chat Counts')}
+                label={t('Remaining Counts')}
                 labelPlacement={'outside'}
-                placeholder={`${t('Enter your')}${t('Available Chat Counts')}`}
+                placeholder={`${t('Enter your')}${t('Remaining Counts')}`}
                 value={`${select?.counts || ''}`}
                 onValueChange={(value) => {
                   onChange('counts', value);
                 }}
               />
               <Input
-                label={t('Available Chat Expire Date')}
+                label={t('Expiration Time')}
                 labelPlacement={'outside'}
-                placeholder={`${t('Enter your')}${t(
-                  'Available Chat Expire Date'
-                )}`}
+                placeholder={`${t('Enter your')}${t('Expiration Time')}`}
                 value={`${select?.expires || ''}`}
                 onValueChange={(value) => {
                   onChange('expires', value);
