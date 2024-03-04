@@ -79,7 +79,7 @@ export const EditUserModelModal = (props: IProps) => {
       size='3xl'
     >
       <ModalContent>
-        {(onClose) => (
+        {() => (
           <>
             <ModalHeader className='flex flex-col gap-1'>
               {t('Edit Model')}
@@ -145,7 +145,7 @@ export const EditUserModelModal = (props: IProps) => {
               />
             </ModalBody>
             <ModalFooter>
-              <Button color='primary' onPress={handleSave}>
+              <Button color='primary' onClick={handleSave}>
                 {t('Save')}
               </Button>
             </ModalFooter>

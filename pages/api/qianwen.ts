@@ -2,7 +2,11 @@ import type { NextApiRequest, NextApiResponse } from 'next';
 import { ChatBody, QianWenContent, QianWenMessage } from '@/types/chat';
 import { QianWenStream, Tokenizer } from '@/services/qianwen';
 import { ChatMessages } from '@/models';
-import { ChatMessageManager, UserModelManager } from '@/managers';
+import {
+  ChatMessageManager,
+  ChatModelManager,
+  UserModelManager,
+} from '@/managers';
 import { getSession } from '@/utils/session';
 
 export const config = {
@@ -23,6 +27,17 @@ const handler = async (req: NextApiRequest, res: NextApiResponse) => {
     const { userId } = session;
     const { messageId, model, messages, prompt, temperature } =
       req.body as ChatBody;
+
+    const enabledModels = await ChatModelManager.findEnableModels();
+
+    if (!enabledModels.find((x) => x.id === model.modelId)) {
+      res.status(400).send(
+        JSON.stringify({
+          messages: 'The Model does not exist or access is denied.',
+        })
+      );
+      return;
+    }
 
     const chatModel = await UserModelManager.findUserModel(
       userId,

@@ -34,13 +34,14 @@ export const AddUserModelModal = (props: IProps) => {
       getModels().then((data) => {
         const _models = data.filter(
           (x) =>
-            !selectedModel?.models.filter((x) => x.enable)?.find(
-              (m) => m.modelId === x.modelId
-            )
+            !selectedModel?.models
+              .filter((x) => x.enable)
+              ?.find((m) => m.modelId === x.modelId)
         );
         setModel(_models);
         setLoading(false);
       });
+    setSelect(undefined);
   }, [isOpen]);
 
   const handleSave = () => {
@@ -78,7 +79,7 @@ export const AddUserModelModal = (props: IProps) => {
       onClose={onClose}
     >
       <ModalContent>
-        {(onClose) => (
+        {() => (
           <>
             <ModalHeader className='flex flex-col gap-1'>
               {t('Add User Model')}
@@ -101,7 +102,7 @@ export const AddUserModelModal = (props: IProps) => {
               </Select>
             </ModalBody>
             <ModalFooter>
-              <Button color='primary' onPress={handleSave}>
+              <Button isDisabled={!select} color='primary' onClick={handleSave}>
                 {t('Save')}
               </Button>
             </ModalFooter>

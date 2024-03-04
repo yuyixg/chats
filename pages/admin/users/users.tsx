@@ -17,6 +17,7 @@ import {
   Avatar,
   CardBody,
   CardFooter,
+  Spinner,
 } from '@nextui-org/react';
 import { getUserModels, putUserModel } from '@/apis/adminService';
 import { GetUserModelResult } from '@/types/admin';
@@ -55,24 +56,6 @@ export default function Models() {
     });
   };
 
-  const disEnableUserModel = (item: GetUserModelResult, modelId: string) => {
-    putUserModel({
-      userModelId: item.userModelId,
-      models: item.models.map((x) => {
-        return x.modelId === modelId ? { ...x, enable: false } : x;
-      }),
-    })
-      .then(() => {
-        init();
-        toast.success('Remove successful!');
-      })
-      .catch(() => {
-        toast.error(
-          'Remove failed! Please try again later, or contact technical personnel.'
-        );
-      });
-  };
-
   const handleShowAddModal = (item: GetUserModelResult) => {
     setSelectedUserModel(item);
     setIsOpen({ add: true, edit: false });
@@ -106,11 +89,17 @@ export default function Models() {
           />
         </div>
       </div>
+      {loadingModel && (
+        <Spinner
+          className='flex justify-center my-20'
+          label={t('Loading...')!}
+        />
+      )}
       <div className='grid w-full grid-cols-1 sm:grid-cols-1 md:grid-cols-2 xl:grid-cols-3 gap-3'>
-        {userModels.map(
-          (item, index) => {
+        {!loadingModel &&
+          userModels.map((item) => {
             return (
-              <Card className='p-2 max-h-[309px]'>
+              <Card key={item.userId} className='p-2 max-h-[309px]'>
                 <CardHeader className='justify-between'>
                   <div className='flex gap-5'>
                     <Avatar
@@ -135,7 +124,7 @@ export default function Models() {
                     color='primary'
                     radius='full'
                     size='sm'
-                    variant='solid'
+                    variant='flat'
                     onClick={() => handleShowAddModal(item)}
                   >
                     <IconPlus size={18} />
@@ -190,8 +179,7 @@ export default function Models() {
                 <CardFooter className='gap-3'></CardFooter>
               </Card>
             );
-          }
-        )}
+          })}
       </div>
       <AddUserModelModal
         selectedModel={selectedUserModel}
