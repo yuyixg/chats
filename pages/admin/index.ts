@@ -1,1 +1,1 @@
-export { default, getServerSideProps } from './admin';
+export { default, getServerSideProps } from './dashboard';

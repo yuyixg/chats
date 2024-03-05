@@ -77,7 +77,7 @@ export default function Models() {
             classNames={{
               base: 'w-full',
             }}
-            placeholder='Search by name...'
+            placeholder={t('Search by name...')!}
             startContent={<IconSearch className='text-default-300' />}
             value={query}
             onClear={() => setQuery('')}
@@ -97,7 +97,7 @@ export default function Models() {
         {!loadingModel &&
           userModels.map((item) => {
             return (
-              <Card key={item.userId} className='p-2 max-h-[309px] shadow-none border'>
+              <Card key={item.userId} className='p-2 max-h-[309px]'>
                 <CardHeader className='justify-between'>
                   <div className='flex gap-5'>
                     <Avatar

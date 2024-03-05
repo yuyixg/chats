@@ -105,7 +105,6 @@ export default function Models() {
   return (
     <>
       <Table
-        shadow={'none'}
         classNames={{
           table: loadingModel ? 'min-h-[320px]' : 'auto',
         }}
