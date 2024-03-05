@@ -3,6 +3,7 @@ import {
   IconMessageCircle,
   IconMessages,
   IconSettingsCog,
+  IconUserCog,
   IconUsers,
 } from '@tabler/icons-react';
 import { useTranslation } from 'next-i18next';
@@ -21,7 +22,9 @@ const AdminLayout = ({ children }: { children: React.ReactNode }) => {
   }, []);
 
   const activeClass = (pathName: string) => {
-    return pathName === router.pathname ? 'bg-gray-100 text-[#338df3] shadow-sm' : '';
+    return pathName === router.pathname
+      ? 'bg-gray-100 text-[#338df3] shadow-sm'
+      : '';
   };
 
   const menus = [
@@ -38,6 +41,11 @@ const AdminLayout = ({ children }: { children: React.ReactNode }) => {
     {
       url: '/admin/users',
       icon: <IconUsers size={22} />,
+      name: t('User Management'),
+    },
+    {
+      url: '/admin/user-models',
+      icon: <IconUserCog size={22} />,
       name: t('User Models'),
     },
     {

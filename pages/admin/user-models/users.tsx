@@ -26,7 +26,7 @@ import { serverSideTranslations } from 'next-i18next/serverSideTranslations';
 import { useTranslation } from 'next-i18next';
 import { useThrottle } from '@/hooks/useThrottle';
 
-export default function Users() {
+export default function UserModels() {
   const { t } = useTranslation('admin');
   const [isOpen, setIsOpen] = useState({ add: false, edit: false });
   const [selectedUserModel, setSelectedUserModel] =
