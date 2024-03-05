@@ -7,6 +7,15 @@ import {
 } from 'eventsource-parser';
 import { ChatModels } from '@/models';
 
+export interface StreamResult {
+  text: string;
+  usage: {
+    input_tokens: number;
+    output_tokens: number;
+    image_tokens: number;
+  };
+}
+
 export const QianWenStream = async (
   chatModel: ChatModels,
   prompt: string,
@@ -67,15 +76,20 @@ export const QianWenStream = async (
               throw new Error(JSON.stringify(json));
             }
             if (json.output?.choices.length > 0) {
-              if (json.output?.choices[0]?.finish_reason === 'stop') {
-                controller.close();
-                return;
-              }
               const text =
                 (json.output.choices[0].message?.content.length > 0 &&
                   json.output.choices[0].message?.content[0].text) ||
                 '';
-              controller.enqueue(text);
+              controller.enqueue(
+                JSON.stringify({
+                  text,
+                  usage: json.usage,
+                })
+              );
+              if (json.output?.choices[0]?.finish_reason === 'stop') {
+                controller.close();
+                return;
+              }
             }
           } catch (e) {
             controller.error(e);

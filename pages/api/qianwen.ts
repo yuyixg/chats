@@ -1,7 +1,6 @@
 import type { NextApiRequest, NextApiResponse } from 'next';
 import { ChatBody, QianWenContent, QianWenMessage } from '@/types/chat';
-import { QianWenStream, Tokenizer } from '@/services/qianwen';
-import { ChatMessages } from '@/models';
+import { QianWenStream, StreamResult, Tokenizer } from '@/services/qianwen';
 import {
   ChatMessageManager,
   ChatModelManager,
@@ -86,21 +85,18 @@ const handler = async (req: NextApiRequest, res: NextApiResponse) => {
     let assistantMessage = '';
     if (stream.getReader) {
       const reader = stream.getReader();
+      let result = {} as StreamResult;
+      let tokenCount = 0;
       const streamResponse = async () => {
         while (true) {
           const { done, value } = await reader.read();
           if (value) {
-            assistantMessage += value;
+            result = JSON.parse(value);
+            assistantMessage += result.text;
           }
           if (done) {
-            const tokenMessages = messages.map((x) => {
-              return { role: x.role, content: x.content.text };
-            });
-            const tokenCount = await Tokenizer(
-              chatModel,
-              tokenMessages,
-              prompt
-            );
+            const { input_tokens, output_tokens, image_tokens } = result.usage;
+            tokenCount += input_tokens + (image_tokens || 0) + output_tokens;
             messages.push({
               role: 'assistant',
               content: { text: assistantMessage },
@@ -113,11 +109,10 @@ const handler = async (req: NextApiRequest, res: NextApiResponse) => {
                 chatMessages.chatCount + 1
               );
             } else {
-              await ChatMessages.create({
+              await ChatMessageManager.createMessage({
                 id: messageId,
                 messages,
                 modelId: chatModel.id!,
-                name: messages[0].content.text!.substring(0, 30),
                 userId: userId,
                 prompt: model.systemPrompt,
                 tokenCount,
@@ -127,7 +122,7 @@ const handler = async (req: NextApiRequest, res: NextApiResponse) => {
             res.end();
             break;
           }
-          res.write(Buffer.from(value));
+          res.write(Buffer.from(result.text));
         }
       };
 

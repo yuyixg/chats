@@ -1,4 +1,4 @@
-import React, { useEffect, useState } from 'react';
+import React, { useCallback, useEffect, useState } from 'react';
 import {
   Table,
   TableHeader,
@@ -19,20 +19,14 @@ import {
   CardFooter,
   Spinner,
 } from '@nextui-org/react';
-import { getUserModels, putUserModel } from '@/apis/adminService';
+import { getUserModels } from '@/apis/adminService';
 import { GetUserModelResult } from '@/types/admin';
-import {
-  IconChevronLeft,
-  IconPlus,
-  IconSearch,
-  IconUser,
-} from '@tabler/icons-react';
+import { IconPlus, IconSearch } from '@tabler/icons-react';
 import { AddUserModelModal } from '@/components/Admin/addUserModelModal';
-import toast from 'react-hot-toast';
 import { EditUserModelModal } from '@/components/Admin/editUserModelModal';
 import { serverSideTranslations } from 'next-i18next/serverSideTranslations';
 import { useTranslation } from 'next-i18next';
-import { getSession } from '@/utils/session';
+import { useThrottle } from '@/hooks/useThrottle';
 
 export default function Models() {
   const { t } = useTranslation('admin');
@@ -42,13 +36,15 @@ export default function Models() {
   const [selectedModelId, setSelectedModelId] = useState<string>();
   const [userModels, setUserModels] = useState<GetUserModelResult[]>([]);
   const [loadingModel, setLoadingModel] = useState(false);
+  const [query, setQuery] = useState<string>('');
+  const throttledValue = useThrottle(query, 1000);
+
   useEffect(() => {
-    setLoadingModel(true);
     init();
-  }, []);
+  }, [throttledValue]);
 
   const init = () => {
-    getUserModels().then((data) => {
+    getUserModels(query).then((data) => {
       setUserModels(data);
       setIsOpen({ add: false, edit: false });
       setSelectedUserModel(null);
@@ -83,9 +79,11 @@ export default function Models() {
             }}
             placeholder='Search by name...'
             startContent={<IconSearch className='text-default-300' />}
-            // value={filterValue}
-            // onClear={() => setFilterValue('')}
-            // onValueChange={onSearchChange}
+            value={query}
+            onClear={() => setQuery('')}
+            onValueChange={(value: string) => {
+              setQuery(value);
+            }}
           />
         </div>
       </div>
@@ -99,7 +97,7 @@ export default function Models() {
         {!loadingModel &&
           userModels.map((item) => {
             return (
-              <Card key={item.userId} className='p-2 max-h-[309px]'>
+              <Card key={item.userId} className='p-2 max-h-[309px] shadow-none border'>
                 <CardHeader className='justify-between'>
                   <div className='flex gap-5'>
                     <Avatar

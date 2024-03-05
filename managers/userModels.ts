@@ -1,5 +1,6 @@
 import { ChatModels, UserModels, Users } from '@/models';
 import { UserModel } from '@/models/userModels';
+import { Op } from 'sequelize';
 
 interface UserModelsWithRelations extends UserModels {
   User: Users;
@@ -31,13 +32,14 @@ export class UserModelManager {
     return model ? ChatModels.findByPk(model?.modelId) : null;
   }
 
-  static async findUsersModel() {
+  static async findUsersModel(query: string) {
     const data = await UserModels.findAll({
       attributes: ['id', 'userId', 'models'],
       include: [
         {
           attributes: ['username', 'role'],
           model: Users,
+          where: { username: { [Op.like]: `%${query}%` } },
         },
       ],
       order: [['createdAt', 'DESC']],

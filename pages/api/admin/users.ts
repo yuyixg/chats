@@ -12,7 +12,6 @@ export const config = {
 };
 
 const handler = async (req: NextApiRequest, res: NextApiResponse) => {
-
   const session = await getSession(req.cookies);
   if (!session) {
     return res.status(401).end();
@@ -29,7 +28,8 @@ const handler = async (req: NextApiRequest, res: NextApiResponse) => {
       const data = await UserModelManager.updateUserModel(userModelId, models);
       return res.status(200).send(data);
     } else {
-      const userModels = await UserModelManager.findUsersModel();
+      const { query } = req.body;
+      const userModels = await UserModelManager.findUsersModel(query);
       const data = userModels.map((x) => {
         return {
           userId: x.userId,

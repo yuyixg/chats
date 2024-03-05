@@ -11,7 +11,7 @@ export const config = {
   maxDuration: 5,
 };
 
-// -> 1234567890 -> 12345**90
+// -> 1234567890 -> 12345***90
 const addAsterisk = (value?: string, separator = '*') => {
   if (!value) {
     return null;

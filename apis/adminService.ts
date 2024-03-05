@@ -6,9 +6,11 @@ import {
   PutUserModelParams,
 } from '@/types/admin';
 
-export const getUserModels = (): Promise<GetUserModelResult[]> => {
+export const getUserModels = (
+  query?: string
+): Promise<GetUserModelResult[]> => {
   const fetchService = useFetch();
-  return fetchService.post('/api/admin/users');
+  return fetchService.post('/api/admin/users', { body: { query } });
 };
 
 export const putUserModel = (params: PutUserModelParams): Promise<any> => {

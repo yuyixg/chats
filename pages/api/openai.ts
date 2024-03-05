@@ -10,9 +10,9 @@ import {
 } from '@/types/chat';
 import { get_encoding } from 'tiktoken';
 import { ModelIds } from '@/types/model';
-import { ChatMessages } from '@/models';
 import { ChatMessageManager, UserModelManager } from '@/managers';
 import { getSession } from '@/utils/session';
+import { apiErrorHandler } from '@/middleware/error-handler';
 
 export const config = {
   api: {
@@ -39,13 +39,11 @@ const handler = async (req: NextApiRequest, res: NextApiResponse) => {
       model.modelId
     );
     if (!chatModel) {
-      res
-        .status(400)
-        .send(
-          JSON.stringify({
-            messages: 'The Model does not exist or access is denied.',
-          })
-        );
+      res.status(400).send(
+        JSON.stringify({
+          messages: 'The Model does not exist or access is denied.',
+        })
+      );
       return;
     }
 
@@ -141,11 +139,10 @@ const handler = async (req: NextApiRequest, res: NextApiResponse) => {
                 chatMessages.chatCount + 1
               );
             } else {
-              await ChatMessages.create({
+              await ChatMessageManager.createMessage({
                 id: messageId,
                 messages,
                 modelId: chatModel.id!,
-                name: messages[0].content.text!.substring(0, 30),
                 userId: userId,
                 prompt: promptToSend,
                 tokenCount,
@@ -170,4 +167,4 @@ const handler = async (req: NextApiRequest, res: NextApiResponse) => {
   }
 };
 
-export default handler;
+export default apiErrorHandler(handler);

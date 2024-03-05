@@ -1,7 +1,6 @@
 import type { NextApiRequest, NextApiResponse } from 'next';
 import { ChatBody, QianFanMessage } from '@/types/chat';
-import { QianFanStream, Tokenizer } from '@/services/qianfan';
-import { ChatMessages } from '@/models';
+import { QianFanStream, SteamResult } from '@/services/qianfan';
 import { ChatMessageManager, UserModelManager } from '@/managers';
 import { getSession } from '@/utils/session';
 
@@ -32,13 +31,11 @@ export default async function handler(
       model.modelId
     );
     if (!chatModel) {
-      res
-        .status(400)
-        .send(
-          JSON.stringify({
-            messages: 'The Model does not exist or access is denied.',
-          })
-        );
+      res.status(400).send(
+        JSON.stringify({
+          messages: 'The Model does not exist or access is denied.',
+        })
+      );
       return;
     }
 
@@ -66,18 +63,20 @@ export default async function handler(
     let assistantMessage = '';
     if (stream.getReader) {
       const reader = stream.getReader();
+      let result = {} as SteamResult;
       const streamResponse = async () => {
         while (true) {
           const { done, value } = await reader.read();
           if (value) {
-            assistantMessage += value;
+            result = JSON.parse(value) as SteamResult;
+            assistantMessage += result.text;
           }
           if (done) {
+            const tokenCount = result.usage.total_tokens;
             messages.push({
               role: 'assistant',
               content: { text: assistantMessage },
             });
-            const tokenCount = await Tokenizer(chatModel, messagesToSend);
             if (chatMessages) {
               await ChatMessageManager.updateMessageById(
                 chatMessages.id!,
@@ -86,11 +85,10 @@ export default async function handler(
                 chatMessages.chatCount + 1
               );
             } else {
-              await ChatMessages.create({
+              await ChatMessageManager.createMessage({
                 id: messageId,
                 messages,
                 modelId: chatModel.id!,
-                name: messages[0].content.text!.substring(0, 30),
                 userId: userId,
                 prompt: model.systemPrompt,
                 tokenCount,
@@ -100,7 +98,7 @@ export default async function handler(
             res.end();
             break;
           }
-          res.write(Buffer.from(value));
+          res.write(Buffer.from(result.text));
         }
       };
 

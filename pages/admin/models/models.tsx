@@ -39,8 +39,6 @@ export default function Models() {
     });
   };
 
-  const disEnableModel = (item: GetModelResult, modelId: string) => {};
-
   const handleShow = (item: GetModelResult) => {
     setIsOpen(true);
     setSelectedModel(item);
