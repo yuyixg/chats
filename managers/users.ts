@@ -1,5 +1,19 @@
 import { Users } from '@/models';
 import bcrypt from 'bcryptjs';
+import { Op } from 'sequelize';
+
+export interface CreateUser {
+  username: string;
+  password: string;
+  role: string;
+}
+
+export interface UpdateUser {
+  id: string;
+  username: string;
+  password: string;
+  role: string;
+}
 
 export class UsersManager {
   static async findByUserId(userId: string) {
@@ -24,14 +38,28 @@ export class UsersManager {
     return null;
   }
 
-  static async createUser(username: string, password: string) {
+  static async createUser(params: CreateUser) {
+    const { username, password, role } = params;
+    let hashPassword = await bcrypt.hashSync(password);
     return await Users.create({
       username,
-      password,
+      password: hashPassword,
+      role,
     });
   }
 
-  static async findUsers() {
-    return await Users.findAll();
+  static async findUsers(query: string) {
+    return await Users.findAll({
+      where: { username: { [Op.like]: `%${query}%` } },
+      order: [['createdAt', 'DESC']],
+    });
+  }
+
+  static async updateUser(params: UpdateUser) {
+    return await Users.update(params, {
+      where: {
+        id: params.id,
+      },
+    });
   }
 }

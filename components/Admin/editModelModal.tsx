@@ -71,9 +71,9 @@ export const EditModelModal = (props: IProps) => {
               <div className='flex w-full justify-between items-center'>
                 <Input
                   type='text'
-                  label={`${t('MODEL NAME')}`}
+                  label={`${t('Model Name')}`}
                   labelPlacement={'outside'}
-                  placeholder={`${t('Enter your')} ${t('MODEL NAME')}`}
+                  placeholder={`${t('Enter your')} ${t('Model Name')}`}
                   value={select?.name}
                   onValueChange={(value) => {
                     onChange('name', value);

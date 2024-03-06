@@ -1,1 +1,1 @@
-export { default, getServerSideProps } from './users';
+export { default, getServerSideProps } from './user-models';

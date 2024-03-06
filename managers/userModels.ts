@@ -6,6 +6,11 @@ interface UserModelsWithRelations extends UserModels {
   User: Users;
 }
 
+export interface CreateUserModel {
+  userId: string;
+  models: UserModel[];
+}
+
 export class UserModelManager {
   static async findEnableModels(userId: string) {
     const userModels = await UserModels.findOne({
@@ -18,8 +23,8 @@ export class UserModelManager {
     );
   }
 
-  static async createUserModel(record: UserModels) {
-    return await UserModels.create(record);
+  static async createUserModel(params: CreateUserModel) {
+    return await UserModels.create(params);
   }
 
   static async findUserModel(userId: string, modelId: string) {

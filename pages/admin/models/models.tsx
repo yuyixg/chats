@@ -50,11 +50,11 @@ export default function Models() {
   };
 
   const columns = [
-    { name: t('RANK'), uid: 'rank' },
+    { name: t('Rank'), uid: 'rank' },
     { name: t('ID'), uid: 'modelId' },
-    { name: t('MODEL NAME'), uid: 'name' },
-    { name: t('TYPE'), uid: 'type' },
-    { name: t('ACTIONS'), uid: 'actions' },
+    { name: t('Model Name'), uid: 'name' },
+    { name: t('Type'), uid: 'type' },
+    { name: t('Actions'), uid: 'actions' },
   ];
   const renderCell = React.useCallback(
     (item: GetModelResult, columnKey: React.Key) => {

@@ -71,6 +71,7 @@ export default function UserModels() {
       <div className='flex flex-col gap-4 mb-4'>
         <div className='flex justify-between gap-3 items-center'>
           <Input
+            size='sm'
             isClearable
             classNames={{
               base: 'w-full',

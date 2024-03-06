@@ -37,3 +37,22 @@ export interface PutModelParams {
   modelConfig: string;
   imgConfig?: string;
 }
+
+export interface CreateUserParams {
+  username: string;
+  password: string;
+  role: string;
+}
+
+export interface PutUserParams extends CreateUserParams {
+  id: string;
+}
+
+export interface GetUsersResult {
+  id: string;
+  username: string;
+  role: string;
+  createdAt: string;
+  updatedAt: string;
+  enabled: boolean;
+}

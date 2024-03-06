@@ -1,5 +1,5 @@
 import type { NextApiRequest, NextApiResponse } from 'next';
-import { UserModelManager } from '@/managers';
+import { UserModelManager, UsersManager } from '@/managers';
 import { UserRole } from '@/types/admin';
 import { getSession } from '@/utils/session';
 export const config = {
@@ -23,23 +23,39 @@ const handler = async (req: NextApiRequest, res: NextApiResponse) => {
   }
 
   try {
-    if (req.method === 'PUT') {
-      const { userModelId, models } = req.body;
-      const data = await UserModelManager.updateUserModel(userModelId, models);
+    if (req.method === 'GET') {
+      const { query } = req.query;
+      const data = await UsersManager.findUsers(query as string);
       return res.status(200).send(data);
-    } else {
-      const { query } = req.body;
-      const userModels = await UserModelManager.findUsersModel(query);
-      const data = userModels.map((x) => {
-        return {
-          userId: x.userId,
-          userModelId: x.id,
-          role: x.User.role,
-          userName: x.User.username,
-          models: x.models,
-        };
+    } else if (req.method === 'PUT') {
+      const { id, username, password, role } = req.body;
+      let user = await UsersManager.findByUserId(id);
+      if (!user) {
+        return res.status(404).send('User not found.');
+      }
+      const data = await UsersManager.updateUser({
+        id,
+        username,
+        password: password ? password : user.password,
+        role,
       });
-      return res.status(200).json(data);
+      return res.send(data);
+    } else {
+      const { username, password, role } = req.body;
+      let isFound = await UsersManager.findByUsername(username);
+      if (isFound) {
+        return res.status(400).send('User existed.');
+      }
+      const user = await UsersManager.createUser({
+        username,
+        password,
+        role,
+      });
+      await UserModelManager.createUserModel({
+        userId: user.id!,
+        models: [],
+      });
+      return res.status(200).json(user);
     }
   } catch (error) {
     console.error(error);
