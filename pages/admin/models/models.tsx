@@ -53,17 +53,18 @@ export default function Models() {
     { name: t('Rank'), uid: 'rank' },
     { name: t('ID'), uid: 'modelId' },
     { name: t('Model Name'), uid: 'name' },
-    { name: t('Type'), uid: 'type' },
+    { name: t('Model Type'), uid: 'type' },
     { name: t('Actions'), uid: 'actions' },
   ];
+  
   const renderCell = React.useCallback(
     (item: GetModelResult, columnKey: React.Key) => {
       switch (columnKey) {
         case 'rank':
-          return <div>{item.rank}</div>;
+          return <div className='text-small'>{item.rank}</div>;
         case 'modelId':
           return (
-            <div className='flex'>
+            <div className='flex text-small items-center'>
               <Tooltip content={item.enable ? t('Enabled') : t('Disabled')}>
                 <Chip
                   className='capitalize border-none gap-1 text-default-600'
@@ -76,9 +77,9 @@ export default function Models() {
             </div>
           );
         case 'name':
-          return <div>{item.name}</div>;
+          return <div className='text-small'>{item.name}</div>;
         case 'type':
-          return <div>{item.type}</div>;
+          return <div className='text-small'>{item.type}</div>;
         case 'actions':
           return (
             <div className='relative flex items-center'>
@@ -120,7 +121,7 @@ export default function Models() {
           items={models}
         >
           {(item) => (
-            <TableRow key={item.modelId} className='hover:bg-gray-100'>
+            <TableRow key={item.modelId} className='hover:bg-gray-100 rounded-lg'>
               {(columnKey) => (
                 <TableCell>{renderCell(item, columnKey)}</TableCell>
               )}

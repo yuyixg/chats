@@ -46,7 +46,6 @@ export default function Users() {
   };
 
   const handleShowEditModal = (user: GetUsersResult) => {
-    console.log('user', user);
     setSelectedUser(user);
     setIsOpenModal(true);
   };
@@ -113,7 +112,7 @@ export default function Users() {
           <Button
             onClick={() => handleShowAddModal()}
             color='primary'
-            size='lg'
+            variant='flat'
             endContent={<IconPlus size={32} />}
           >
             {t('Add User')}

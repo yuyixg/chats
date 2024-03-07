@@ -63,6 +63,7 @@ export const ChatBarSettings = () => {
 
       {user?.username && (
         <SidebarButton
+          className='capitalize'
           text={user?.username}
           icon={<IconUser size={18} />}
           action={<IconLogout onClick={logout} size={18} />}

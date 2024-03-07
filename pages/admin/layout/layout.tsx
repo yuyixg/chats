@@ -12,7 +12,13 @@ import { UserSession, getUserSession } from '@/utils/user';
 import { useEffect, useState } from 'react';
 import { Avatar } from '@nextui-org/react';
 
-const AdminLayout = ({ children }: { children: React.ReactNode }) => {
+const AdminLayout = ({
+  children,
+  className,
+}: {
+  children: React.ReactNode;
+  className?: string;
+}) => {
   const router = useRouter();
   const { t } = useTranslation('admin');
   const [user, setUser] = useState<UserSession | null>();
@@ -23,8 +29,8 @@ const AdminLayout = ({ children }: { children: React.ReactNode }) => {
 
   const activeClass = (pathName: string) => {
     return pathName === router.pathname
-      ? 'bg-gray-100 text-[#338df3] shadow-sm'
-      : '';
+      ? 'bg-gray-100 shadow-sm text-[#338df3]'
+      : 'text-gray-600';
   };
 
   const menus = [
@@ -72,7 +78,7 @@ const AdminLayout = ({ children }: { children: React.ReactNode }) => {
           onClick={() => {
             router.push(url);
           }}
-          className={`flex items-center p-2 text-gray-600 rounded-lg dark:hover:bg-gray-700  hover:bg-gray-100 hover:text-[#338df3] group ${activeClass(
+          className={`flex items-center p-2 cursor-pointer rounded-lg dark:hover:bg-gray-700  hover:bg-gray-100 hover:text-[#338df3] group ${activeClass(
             url
           )}`}
         >
@@ -84,7 +90,7 @@ const AdminLayout = ({ children }: { children: React.ReactNode }) => {
   };
 
   return (
-    <>
+    <div className={className}>
       <button
         data-drawer-target='logo-sidebar'
         data-drawer-toggle='logo-sidebar'
@@ -120,10 +126,7 @@ const AdminLayout = ({ children }: { children: React.ReactNode }) => {
           {user && (
             <ul className='px-2 w-full font-medium absolute bottom-4'>
               <li>
-                <a
-                  href='#'
-                  className='flex items-center text-gray-900 transition duration-75 rounded-lg dark:text-white group'
-                >
+                <div className='flex cursor-pointer items-center text-gray-900 transition duration-75 rounded-lg dark:text-white group'>
                   <Avatar
                     className='w-8 h-8'
                     icon={
@@ -132,15 +135,15 @@ const AdminLayout = ({ children }: { children: React.ReactNode }) => {
                       </div>
                     }
                   />
-                  <span className='ms-3'>{user?.username}</span>
-                </a>
+                  <span className='ms-3 capitalize'>{user?.username}</span>
+                </div>
               </li>
             </ul>
           )}
         </div>
       </aside>
       <div className='p-4 sm:ml-64'>{children}</div>
-    </>
+    </div>
   );
 };
 export default AdminLayout;

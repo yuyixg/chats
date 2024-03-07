@@ -6,8 +6,6 @@ import {
   TableBody,
   TableRow,
   TableCell,
-  Chip,
-  Tooltip,
   Input,
   Button,
   Card,
@@ -25,6 +23,7 @@ import { EditUserModelModal } from '@/components/Admin/editUserModelModal';
 import { serverSideTranslations } from 'next-i18next/serverSideTranslations';
 import { useTranslation } from 'next-i18next';
 import { useThrottle } from '@/hooks/useThrottle';
+import { UserModel } from '@/models/userModels';
 
 export default function UserModels() {
   const { t } = useTranslation('admin');
@@ -33,7 +32,7 @@ export default function UserModels() {
     useState<GetUserModelResult | null>(null);
   const [selectedModelId, setSelectedModelId] = useState<string>();
   const [userModels, setUserModels] = useState<GetUserModelResult[]>([]);
-  const [loadingModel, setLoadingModel] = useState(false);
+  const [loading, setLoading] = useState(false);
   const [query, setQuery] = useState<string>('');
   const throttledValue = useThrottle(query, 1000);
 
@@ -46,7 +45,7 @@ export default function UserModels() {
       setUserModels(data);
       setIsOpen({ add: false, edit: false });
       setSelectedUserModel(null);
-      setLoadingModel(false);
+      setLoading(false);
     });
   };
 
@@ -65,6 +64,33 @@ export default function UserModels() {
     setIsOpen({ add: false, edit: false });
     setSelectedUserModel(null);
   };
+
+  const columns = [
+    { name: t('ID'), uid: 'modelId' },
+    { name: t('Remaining Tokens'), uid: 'tokens' },
+    { name: t('Remaining Counts'), uid: 'counts' },
+    { name: t('Expiration Time'), uid: 'expires' },
+  ];
+
+  const renderCell = React.useCallback(
+    (item: UserModel, columnKey: React.Key) => {
+      switch (columnKey) {
+        case 'modelId':
+          return (
+            <div className='text-small hover:underline'>{item.modelId}</div>
+          );
+        case 'tokens':
+          return <div className='text-small'>{item.tokens || '-'}</div>;
+        case 'counts':
+          return <div className='text-small'>{item.counts || '-'}</div>;
+        case 'expires':
+          return <div className='text-small'>{item.expires || '-'}</div>;
+        default:
+          return <div></div>;
+      }
+    },
+    []
+  );
 
   return (
     <>
@@ -86,22 +112,14 @@ export default function UserModels() {
           />
         </div>
       </div>
-      {loadingModel && (
-        <Spinner
-          className='flex justify-center my-20'
-          label={t('Loading...')!}
-        />
-      )}
       <div className='grid w-full grid-cols-1 sm:grid-cols-1 md:grid-cols-2 xl:grid-cols-3 gap-3'>
-        {!loadingModel &&
+        {!loading &&
           userModels.map((item) => {
             return (
               <Card key={item.userId} className='p-2 max-h-[309px]'>
                 <CardHeader className='justify-between'>
-                  <div className='flex gap-5'>
+                  <div className='flex gap-4'>
                     <Avatar
-                      isBordered
-                      // color='success'
                       icon={
                         <div className=' bg-gray-200 w-full h-full flex justify-center items-center font-semibold text-sm'>
                           {item.userName[0].toUpperCase()}
@@ -109,17 +127,18 @@ export default function UserModels() {
                       }
                     />
                     <div className='flex flex-col gap-1 items-start justify-center'>
-                      <h4 className='text-small font-semibold leading-none text-default-600'>
-                        {item.userName}
-                      </h4>
-                      <h5 className='text-small tracking-tight text-default-400'>
-                        {item.role || '-'}
-                      </h5>
+                      <div className='py-1'>
+                        <h4 className='text-small font-semibold leading-none text-default-600 capitalize'>
+                          {item.userName}
+                        </h4>
+                        <h5 className='text-small tracking-tight text-default-400 capitalize'>
+                          {item.role || '-'}
+                        </h5>
+                      </div>
                     </div>
                   </div>
                   <Button
                     color='primary'
-                    radius='full'
                     size='sm'
                     variant='flat'
                     onClick={() => handleShowAddModal(item)}
@@ -129,47 +148,34 @@ export default function UserModels() {
                 </CardHeader>
                 <CardBody className='px-3 py-0 text-small text-default-400'>
                   <Table removeWrapper>
-                    <TableHeader>
-                      <TableColumn>{t('ID')}</TableColumn>
-                      <TableColumn>{t('Remaining Tokens')}</TableColumn>
-                      <TableColumn>{t('Remaining Counts')}</TableColumn>
-                      <TableColumn>{t('Expiration Time')}</TableColumn>
+                    <TableHeader columns={columns}>
+                      {(column) => (
+                        <TableColumn key={column.uid}>
+                          {column.name}
+                        </TableColumn>
+                      )}
                     </TableHeader>
-                    <TableBody>
-                      {item.models
-                        .filter((x) => x.enable)
-                        .map((m) => {
-                          return (
-                            <TableRow
-                              key={m.modelId}
-                              className='hover:bg-gray-100'
+                    <TableBody
+                      loadingContent={<Spinner label={t('Loading...')!} />}
+                      isLoading={loading}
+                      items={item.models.filter((x) => x.enable)}
+                    >
+                      {(model) => (
+                        <TableRow
+                          key={model.modelId}
+                          className='hover:bg-gray-100 rounded-lg'
+                        >
+                          {(columnKey) => (
+                            <TableCell
+                              onClick={() =>
+                                handleShowEditModal(item, model.modelId)
+                              }
                             >
-                              <TableCell
-                                className='hover:underline'
-                                onClick={() =>
-                                  handleShowEditModal(item, m.modelId)
-                                }
-                              >
-                                <Tooltip
-                                  content={
-                                    m.enable ? t('Enabled') : t('Disabled')
-                                  }
-                                >
-                                  <Chip
-                                    className='capitalize border-none gap-1 text-default-600'
-                                    color={m.enable ? 'success' : 'default'}
-                                    size='sm'
-                                    variant='dot'
-                                  ></Chip>
-                                </Tooltip>
-                                {m.modelId}
-                              </TableCell>
-                              <TableCell>{m.tokens || '-'}</TableCell>
-                              <TableCell>{m.counts || '-'}</TableCell>
-                              <TableCell>{m.expires || '-'}</TableCell>
-                            </TableRow>
-                          );
-                        })}
+                              {renderCell(model, columnKey)}
+                            </TableCell>
+                          )}
+                        </TableRow>
+                      )}
                     </TableBody>
                   </Table>
                 </CardBody>

@@ -30,7 +30,7 @@ const ROLES = [
     value: '-',
   },
   {
-    name: 'admin',
+    name: 'Admin',
     value: 'admin',
   },
 ];
@@ -102,7 +102,6 @@ export const UserModal = (props: IProps) => {
             </ModalHeader>
             <ModalBody>
               <Input
-                required
                 type='text'
                 label={`${t('User Name')}`}
                 labelPlacement={'outside'}
@@ -113,7 +112,7 @@ export const UserModal = (props: IProps) => {
                 }}
               />
               <Input
-                type='text'
+                type='password'
                 label={`${t('Password')}`}
                 labelPlacement={'outside'}
                 placeholder={`${t('Enter your')}${t('Password')}`}
