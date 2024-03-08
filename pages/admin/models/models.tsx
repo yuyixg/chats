@@ -1,21 +1,24 @@
 import React, { useEffect, useState } from 'react';
-import {
-  Table,
-  TableHeader,
-  TableColumn,
-  TableBody,
-  TableRow,
-  TableCell,
-  Spinner,
-  Tooltip,
-  Chip,
-} from '@nextui-org/react';
 import { getModels } from '@/apis/adminService';
 import { GetModelResult } from '@/types/admin';
 import { EditModelModal } from '@/components/Admin/editModelModal';
 import { IconPencil } from '@tabler/icons-react';
 import { serverSideTranslations } from 'next-i18next/serverSideTranslations';
 import { useTranslation } from 'next-i18next';
+import {
+  Table,
+  TableBody,
+  TableCell,
+  TableHead,
+  TableHeader,
+  TableRow,
+} from '@/components/ui/table';
+import {
+  Tooltip,
+  TooltipContent,
+  TooltipProvider,
+  TooltipTrigger,
+} from '@/components/ui/tooltip';
 
 export default function Models() {
   const { t } = useTranslation('admin');
@@ -24,9 +27,9 @@ export default function Models() {
     null
   );
   const [models, setModels] = useState<GetModelResult[]>([]);
-  const [loadingModel, setLoadingModel] = useState(false);
+  const [loading, setLoading] = useState(false);
   useEffect(() => {
-    setLoadingModel(true);
+    setLoading(true);
     init();
   }, []);
 
@@ -35,7 +38,7 @@ export default function Models() {
       setModels(data);
       setIsOpen(false);
       setSelectedModel(null);
-      setLoadingModel(false);
+      setLoading(false);
     });
   };
 
@@ -49,84 +52,43 @@ export default function Models() {
     setSelectedModel(null);
   };
 
-  const columns = [
-    { name: t('Rank'), uid: 'rank' },
-    { name: t('ID'), uid: 'modelId' },
-    { name: t('Model Name'), uid: 'name' },
-    { name: t('Model Type'), uid: 'type' },
-    { name: t('Actions'), uid: 'actions' },
-  ];
-  
-  const renderCell = React.useCallback(
-    (item: GetModelResult, columnKey: React.Key) => {
-      switch (columnKey) {
-        case 'rank':
-          return <div className='text-small'>{item.rank}</div>;
-        case 'modelId':
-          return (
-            <div className='flex text-small items-center'>
-              <Tooltip content={item.enable ? t('Enabled') : t('Disabled')}>
-                <Chip
-                  className='capitalize border-none gap-1 text-default-600'
-                  color={item.enable ? 'success' : 'default'}
-                  size='sm'
-                  variant='dot'
-                ></Chip>
-              </Tooltip>
-              {item.modelId}
-            </div>
-          );
-        case 'name':
-          return <div className='text-small'>{item.name}</div>;
-        case 'type':
-          return <div className='text-small'>{item.type}</div>;
-        case 'actions':
-          return (
-            <div className='relative flex items-center'>
-              <Tooltip content={t('Edit')}>
-                <span className='text-lg text-default-400 cursor-pointer active:opacity-50'>
-                  <IconPencil
-                    onClick={() => {
-                      handleShow(item);
-                    }}
-                    className='text-default-400'
-                    size={20}
-                  />
-                </span>
-              </Tooltip>
-            </div>
-          );
-        default:
-          return <div></div>;
-      }
-    },
-    []
-  );
-
   return (
     <>
-      <Table
-        classNames={{
-          table: loadingModel ? 'min-h-[320px]' : 'auto',
-        }}
-      >
-        <TableHeader columns={columns}>
-          {(column) => (
-            <TableColumn key={column.uid}>{column.name}</TableColumn>
-          )}
+      <Table>
+        <TableHeader>
+          <TableRow>
+            <TableHead className='w-20'>{t('Rank')}</TableHead>
+            <TableHead>{t('Model Type')}</TableHead>
+            <TableHead>{t('Model Name')}</TableHead>
+            <TableHead>{t('ID')}</TableHead>
+            <TableHead>{t('Actions')}</TableHead>
+          </TableRow>
         </TableHeader>
-        <TableBody
-          loadingContent={<Spinner label={t('Loading...')!} />}
-          isLoading={loadingModel}
-          items={models}
-        >
-          {(item) => (
-            <TableRow key={item.modelId} className='hover:bg-gray-100 rounded-lg'>
-              {(columnKey) => (
-                <TableCell>{renderCell(item, columnKey)}</TableCell>
-              )}
+        <TableBody>
+          {models.map((item) => (
+            <TableRow>
+              <TableCell>{item.rank}</TableCell>
+              <TableCell>{item.type}</TableCell>
+              <TableCell>{item.name}</TableCell>
+              <TableCell>{item.modelId}</TableCell>
+              <TableCell>
+                <TooltipProvider>
+                  <Tooltip>
+                    <TooltipTrigger>
+                      <IconPencil
+                        onClick={() => {
+                          handleShow(item);
+                        }}
+                        className='text-default-400'
+                        size={20}
+                      />
+                    </TooltipTrigger>
+                    <TooltipContent>{t('Edit')}</TooltipContent>
+                  </Tooltip>
+                </TooltipProvider>
+              </TableCell>
             </TableRow>
-          )}
+          ))}
         </TableBody>
       </Table>
 

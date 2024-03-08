@@ -3,6 +3,7 @@ import { serverSideTranslations } from 'next-i18next/serverSideTranslations';
 import React from 'react';
 import ReactECharts from 'echarts-for-react';
 import { Card, CardBody, CardHeader } from '@nextui-org/react';
+import { Button } from '@/components/ui/button';
 
 interface Props {}
 
@@ -91,6 +92,7 @@ const Dashboard = (props: any) => {
 
   return (
     <>
+      <Button>保存</Button>
       <div className='flex flex-wrap gap-4'>
         <Card className='w-1/3'>
           <CardHeader className='pb-0 pt-2 px-4 flex-col items-start font-semibold'>
