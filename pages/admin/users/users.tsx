@@ -101,7 +101,7 @@ export default function Users() {
             classNames={{
               base: 'w-full',
             }}
-            placeholder={t('Search by name...')!}
+            placeholder={t('Search...')!}
             startContent={<IconSearch className='text-default-300' />}
             value={query}
             onClear={() => setQuery('')}
