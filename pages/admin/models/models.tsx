@@ -1,7 +1,7 @@
 import React, { useEffect, useState } from 'react';
 import { getModels } from '@/apis/adminService';
 import { GetModelResult } from '@/types/admin';
-import { EditModelModal } from '@/components/Admin/editModelModal';
+import { ModelModal } from '@/components/Admin/ModelModal';
 import { IconPencil } from '@tabler/icons-react';
 import { serverSideTranslations } from 'next-i18next/serverSideTranslations';
 import { useTranslation } from 'next-i18next';
@@ -13,12 +13,7 @@ import {
   TableHeader,
   TableRow,
 } from '@/components/ui/table';
-import {
-  Tooltip,
-  TooltipContent,
-  TooltipProvider,
-  TooltipTrigger,
-} from '@/components/ui/tooltip';
+import { Card } from '@/components/ui/card';
 
 export default function Models() {
   const { t } = useTranslation('admin');
@@ -43,8 +38,8 @@ export default function Models() {
   };
 
   const handleShow = (item: GetModelResult) => {
-    setIsOpen(true);
     setSelectedModel(item);
+    setIsOpen(true);
   };
 
   const handleClose = () => {
@@ -53,7 +48,7 @@ export default function Models() {
   };
 
   return (
-    <>
+    <Card>
       <Table>
         <TableHeader>
           <TableRow>
@@ -72,33 +67,26 @@ export default function Models() {
               <TableCell>{item.name}</TableCell>
               <TableCell>{item.modelId}</TableCell>
               <TableCell>
-                <TooltipProvider>
-                  <Tooltip>
-                    <TooltipTrigger>
-                      <IconPencil
-                        onClick={() => {
-                          handleShow(item);
-                        }}
-                        className='text-default-400'
-                        size={20}
-                      />
-                    </TooltipTrigger>
-                    <TooltipContent>{t('Edit')}</TooltipContent>
-                  </Tooltip>
-                </TooltipProvider>
+                <IconPencil
+                  onClick={() => {
+                    handleShow(item);
+                  }}
+                  className='text-default-400 cursor-pointer'
+                  size={20}
+                />
               </TableCell>
             </TableRow>
           ))}
         </TableBody>
       </Table>
 
-      <EditModelModal
-        selectedModel={selectedModel}
+      <ModelModal
+        selected={selectedModel}
         isOpen={isOpen}
         onClose={handleClose}
         onSuccessful={init}
-      ></EditModelModal>
-    </>
+      ></ModelModal>
+    </Card>
   );
 }
 

@@ -18,12 +18,12 @@ import {
 import { getUserModels } from '@/apis/adminService';
 import { GetUserModelResult } from '@/types/admin';
 import { IconPlus, IconSearch } from '@tabler/icons-react';
-import { AddUserModelModal } from '@/components/Admin/addUserModelModal';
-import { EditUserModelModal } from '@/components/Admin/editUserModelModal';
 import { serverSideTranslations } from 'next-i18next/serverSideTranslations';
 import { useTranslation } from 'next-i18next';
 import { useThrottle } from '@/hooks/useThrottle';
 import { UserModel } from '@/models/userModels';
+import { AddUserModelModal } from '@/components/Admin/AddUserModelModal';
+import { EditUserModelModal } from '@/components/Admin/EditUserModelModal';
 
 export default function UserModels() {
   const { t } = useTranslation('admin');

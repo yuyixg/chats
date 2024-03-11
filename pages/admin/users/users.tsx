@@ -17,7 +17,7 @@ import { IconPencil, IconPlus, IconSearch } from '@tabler/icons-react';
 import { serverSideTranslations } from 'next-i18next/serverSideTranslations';
 import { useTranslation } from 'next-i18next';
 import { useThrottle } from '@/hooks/useThrottle';
-import { UserModal } from '@/components/Admin/userModal';
+import { UserModal } from '@/components/Admin/UserModal';
 
 export default function Users() {
   const { t } = useTranslation('admin');
