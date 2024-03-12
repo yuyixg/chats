@@ -2,7 +2,6 @@ import React, { useEffect, useState } from 'react';
 import { getModels } from '@/apis/adminService';
 import { GetModelResult } from '@/types/admin';
 import { ModelModal } from '@/components/Admin/ModelModal';
-import { IconPencil } from '@tabler/icons-react';
 import { serverSideTranslations } from 'next-i18next/serverSideTranslations';
 import { useTranslation } from 'next-i18next';
 import {

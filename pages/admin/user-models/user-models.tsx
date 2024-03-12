@@ -1,11 +1,10 @@
 import React, { useEffect, useState } from 'react';
 import { getUserModels } from '@/apis/adminService';
 import { GetUserModelResult } from '@/types/admin';
-import { IconPlus, IconSearch } from '@tabler/icons-react';
+import { IconPlus } from '@tabler/icons-react';
 import { serverSideTranslations } from 'next-i18next/serverSideTranslations';
 import { useTranslation } from 'next-i18next';
 import { useThrottle } from '@/hooks/useThrottle';
-import { UserModel } from '@/models/userModels';
 import { AddUserModelModal } from '@/components/Admin/AddUserModelModal';
 import { EditUserModelModal } from '@/components/Admin/EditUserModelModal';
 import { Input } from '@/components/ui/input';
