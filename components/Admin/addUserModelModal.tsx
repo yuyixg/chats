@@ -1,18 +1,22 @@
 import { getModels, putUserModel } from '@/apis/adminService';
 import { GetModelResult, GetUserModelResult } from '@/types/admin';
-import {
-  Button,
-  Modal,
-  ModalBody,
-  ModalContent,
-  ModalFooter,
-  ModalHeader,
-  Select,
-  SelectItem,
-} from '@nextui-org/react';
 import { useTranslation } from 'next-i18next';
 import React, { useEffect, useState } from 'react';
 import toast from 'react-hot-toast';
+import {
+  Dialog,
+  DialogContent,
+  DialogFooter,
+  DialogHeader,
+} from '../ui/dialog';
+import {
+  Select,
+  SelectContent,
+  SelectItem,
+  SelectTrigger,
+  SelectValue,
+} from '../ui/select';
+import { Button } from '../ui/button';
 
 interface IProps {
   isOpen: boolean;
@@ -72,43 +76,32 @@ export const AddUserModelModal = (props: IProps) => {
   };
 
   return (
-    <Modal
-      backdrop='transparent'
-      placement='top'
-      isOpen={isOpen}
-      onClose={onClose}
-    >
-      <ModalContent>
-        {() => (
-          <>
-            <ModalHeader className='flex flex-col gap-1'>
-              {t('Add User Model')}
-            </ModalHeader>
-            <ModalBody>
-              <Select
-                isLoading={loading}
-                value={select?.modelId}
-                labelPlacement='outside'
-                label={`${t('Select an Model')}`}
-                onChange={(ev) => {
-                  setSelect(models.find((x) => x.modelId === ev.target.value));
-                }}
-              >
-                {models.map((model) => (
-                  <SelectItem key={model.modelId} value={model.modelId}>
-                    {model.modelId}
-                  </SelectItem>
-                ))}
-              </Select>
-            </ModalBody>
-            <ModalFooter>
-              <Button isDisabled={!select} color='primary' onClick={handleSave}>
-                {t('Save')}
-              </Button>
-            </ModalFooter>
-          </>
-        )}
-      </ModalContent>
-    </Modal>
+    <Dialog open={isOpen} onOpenChange={onClose}>
+      <DialogContent>
+        <DialogHeader>{t('Add User Model')}</DialogHeader>
+        <Select
+          value={select?.modelId}
+          onValueChange={(value) => {
+            setSelect(models.find((x) => x.modelId === value));
+          }}
+        >
+          <SelectTrigger>
+            <SelectValue placeholder={`${t('Select an Model')}`} />
+          </SelectTrigger>
+          <SelectContent>
+            {models.map((model) => (
+              <SelectItem key={model.modelId} value={model.modelId}>
+                {model.modelId}
+              </SelectItem>
+            ))}
+          </SelectContent>
+        </Select>
+        <DialogFooter>
+          <Button disabled={!select} onClick={handleSave}>
+            {t('Save')}
+          </Button>
+        </DialogFooter>
+      </DialogContent>
+    </Dialog>
   );
 };

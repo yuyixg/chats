@@ -2,8 +2,8 @@ import { serverSideTranslations } from 'next-i18next/serverSideTranslations';
 
 import React from 'react';
 import ReactECharts from 'echarts-for-react';
-import { Card, CardBody, CardHeader } from '@nextui-org/react';
 import { Button } from '@/components/ui/button';
+import { Card, CardContent, CardHeader } from '@/components/ui/card';
 
 interface Props {}
 
@@ -92,23 +92,22 @@ const Dashboard = (props: any) => {
 
   return (
     <>
-      <Button>保存</Button>
       <div className='flex flex-wrap gap-4'>
         <Card className='w-1/3'>
           <CardHeader className='pb-0 pt-2 px-4 flex-col items-start font-semibold'>
             消耗Tokens
           </CardHeader>
-          <CardBody>
+          <CardContent>
             <ReactECharts option={option1} />
-          </CardBody>
+          </CardContent>
         </Card>
         <Card className='w-1/3'>
           <CardHeader className='pb-0 pt-2 px-4 flex-col items-start font-semibold'>
             使用次数
           </CardHeader>
-          <CardBody>
+          <CardContent>
             <ReactECharts option={option2} />
-          </CardBody>
+          </CardContent>
         </Card>
       </div>
     </>

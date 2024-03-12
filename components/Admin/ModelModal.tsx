@@ -14,7 +14,7 @@ import { useForm } from 'react-hook-form';
 import { Form, FormField } from '../ui/form';
 import { zodResolver } from '@hookform/resolvers/zod';
 import { z } from 'zod';
-import { FormFieldType, FormFields, IFormFieldOption } from '../ui/form/type';
+import { FormFieldType, IFormFieldOption } from '../ui/form/type';
 import FormInput from '../ui/form/input';
 import FormSwitch from '../ui/form/switch';
 import FormTextarea from '../ui/form/textarea';
@@ -31,22 +31,17 @@ interface IProps {
 export const ModelModal = (props: IProps) => {
   const { t } = useTranslation('admin');
   const { isOpen, onClose, selected, onSuccessful } = props;
-  const formFields: FormFields = {
-    name: {
+  const formFields: IFormFieldOption[] = [
+    {
       name: 'name',
       label: t('Model Name'),
-      require: z
-        .string()
-        .min(1, `${t('Model Name')}${t('is require.')}`)
-        .optional(),
       render: (options: IFormFieldOption, field: FormFieldType) => (
         <FormInput options={options} field={field} />
       ),
     },
-    modelId: {
+    {
       name: 'modelId',
       label: t('ID'),
-      require: z.string().optional(),
       render: (options: IFormFieldOption, field: FormFieldType) => (
         <FormInput hidden options={options} field={field} />
         // <FormSelect
@@ -59,61 +54,62 @@ export const ModelModal = (props: IProps) => {
         // />
       ),
     },
-    enable: {
+    {
       name: 'enable',
       label: t('Is it enabled'),
-      require: z.boolean().optional(),
       render: (options: IFormFieldOption, field: FormFieldType) => (
         <FormSwitch options={options} field={field} />
       ),
     },
-    apiConfig: {
+    {
       name: 'apiConfig',
       label: t('API Configs'),
-      require: z
-        .string()
-        .min(1, `${t('API Configs')}${t('is require.')}`)
-        .optional(),
       render: (options: IFormFieldOption, field: FormFieldType) => (
         <FormTextarea options={options} field={field} />
       ),
     },
-    modelConfig: {
+    {
       name: 'modelConfig',
       label: t('Model Configs'),
-      require: z
-        .string()
-        .min(1, `${t('Model Configs')}${t('is require.')}`)
-        .optional(),
       render: (options: IFormFieldOption, field: FormFieldType) => (
         <FormTextarea options={options} field={field} />
       ),
     },
-    imgConfig: {
+    {
       name: 'imgConfig',
       label: t('Image Configs'),
-      require: z
-        .string()
-        .min(1, `${t('Image Configs')}${t('is require.')}`)
-        .optional(),
       render: (options: IFormFieldOption, field: FormFieldType) => (
         <FormTextarea options={options} field={field} />
       ),
     },
-  };
+  ];
 
-  const formSchema = z.object(
-    Object.keys(formFields).reduce((result: any, key) => {
-      result[key] = formFields[key].require;
-      return result;
-    }, {})
-  );
+  const formSchema = z.object({
+    name: z
+      .string()
+      .min(1, `${t('This field is require')}`)
+      .optional(),
+    modelId: z.string().optional(),
+    enable: z.boolean().optional(),
+    apiConfig: z
+      .string()
+      .min(1, `${t('This field is require')}`)
+      .optional(),
+    modelConfig: z
+      .string()
+      .min(1, `${t('This field is require')}`)
+      .optional(),
+    imgConfig: z
+      .string()
+      .min(1, `${t('This field is require')}`)
+      .optional(),
+  });
 
   const form = useForm<z.infer<typeof formSchema>>({
     resolver: zodResolver(formSchema),
-    defaultValues: Object.keys(formFields).reduce((result: any, key) => {
-      result[key] = formFields[key].defaultValue;
-      return result;
+    defaultValues: formFields.reduce((obj: any, field) => {
+      obj[field.name] = field.defaultValue;
+      return obj;
     }, {}),
   });
 
@@ -153,7 +149,7 @@ export const ModelModal = (props: IProps) => {
         </DialogHeader>
         <Form {...form}>
           <form onSubmit={form.handleSubmit(onSubmit)}>
-            {Object.values(formFields).map((item) => (
+            {formFields.map((item) => (
               <FormField
                 key={item.name}
                 control={form.control}

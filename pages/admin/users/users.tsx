@@ -1,23 +1,22 @@
 import React, { useEffect, useState } from 'react';
-import {
-  Table,
-  TableHeader,
-  TableColumn,
-  TableBody,
-  TableRow,
-  TableCell,
-  Tooltip,
-  Input,
-  Button,
-  Spinner,
-} from '@nextui-org/react';
 import { getUsers } from '@/apis/adminService';
 import { GetUsersResult } from '@/types/admin';
-import { IconPencil, IconPlus, IconSearch } from '@tabler/icons-react';
+import { IconPlus } from '@tabler/icons-react';
 import { serverSideTranslations } from 'next-i18next/serverSideTranslations';
 import { useTranslation } from 'next-i18next';
 import { useThrottle } from '@/hooks/useThrottle';
 import { UserModal } from '@/components/Admin/UserModal';
+import { Card } from '@/components/ui/card';
+import {
+  Table,
+  TableBody,
+  TableCell,
+  TableHead,
+  TableHeader,
+  TableRow,
+} from '@/components/ui/table';
+import { Button } from '@/components/ui/button';
+import { Input } from '@/components/ui/input';
 
 export default function Users() {
   const { t } = useTranslation('admin');
@@ -55,94 +54,47 @@ export default function Users() {
     setSelectedUser(null);
   };
 
-  const columns = [
-    { name: t('User Name'), uid: 'username' },
-    { name: t('Role'), uid: 'role' },
-    { name: t('Actions'), uid: 'actions' },
-  ];
-
-  const renderCell = React.useCallback(
-    (item: GetUsersResult, columnKey: React.Key) => {
-      switch (columnKey) {
-        case 'username':
-          return <div>{item.username}</div>;
-        case 'role':
-          return <div>{item.role}</div>;
-        case 'actions':
-          return (
-            <div className='relative flex items-center'>
-              <Tooltip content={t('Edit')}>
-                <span className='text-lg text-default-400 cursor-pointer active:opacity-50'>
-                  <IconPencil
-                    onClick={() => {
-                      handleShowEditModal(item);
-                    }}
-                    className='text-default-400'
-                    size={20}
-                  />
-                </span>
-              </Tooltip>
-            </div>
-          );
-        default:
-          return <div></div>;
-      }
-    },
-    []
-  );
-
   return (
     <>
       <div className='flex flex-col gap-4 mb-4'>
         <div className='flex justify-between gap-3 items-center'>
           <Input
-            size='sm'
-            isClearable
-            classNames={{
-              base: 'w-full',
-            }}
+            className='w-full'
             placeholder={t('Search...')!}
-            startContent={<IconSearch className='text-default-300' />}
             value={query}
-            onClear={() => setQuery('')}
-            onValueChange={(value: string) => {
-              setQuery(value);
+            onChange={(e) => {
+              setQuery(e.target.value);
             }}
           />
-          <Button
-            onClick={() => handleShowAddModal()}
-            color='primary'
-            variant='flat'
-            endContent={<IconPlus size={32} />}
-          >
+          <Button onClick={() => handleShowAddModal()} color='primary'>
+            <IconPlus size={20} />
             {t('Add User')}
           </Button>
         </div>
       </div>
-      <Table
-        classNames={{
-          table: loading ? 'min-h-[320px]' : 'auto',
-        }}
-      >
-        <TableHeader columns={columns}>
-          {(column) => (
-            <TableColumn key={column.uid}>{column.name}</TableColumn>
-          )}
-        </TableHeader>
-        <TableBody
-          loadingContent={<Spinner label={t('Loading...')!} />}
-          isLoading={loading}
-          items={users}
-        >
-          {(item) => (
-            <TableRow key={item.id} className='hover:bg-gray-100'>
-              {(columnKey) => (
-                <TableCell>{renderCell(item, columnKey)}</TableCell>
-              )}
+      <Card>
+        <Table>
+          <TableHeader>
+            <TableRow>
+              <TableHead>{t('User Name')}</TableHead>
+              <TableHead>{t('Role')}</TableHead>
             </TableRow>
-          )}
-        </TableBody>
-      </Table>
+          </TableHeader>
+          <TableBody>
+            {users.map((item) => (
+              <TableRow
+                key={item.id}
+                onClick={() => {
+                  handleShowEditModal(item);
+                }}
+              >
+                <TableCell>{item.username}</TableCell>
+                <TableCell>{item.role}</TableCell>
+              </TableRow>
+            ))}
+          </TableBody>
+        </Table>
+      </Card>
       <UserModal
         user={selectedUser}
         onSuccessful={init}

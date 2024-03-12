@@ -12,7 +12,7 @@ export interface UserModel {
   enable?: boolean;
   tokens?: number | null;
   counts?: number | null;
-  expires?: number | null;
+  expires?: string | null;
 }
 
 class UserModels extends Model<

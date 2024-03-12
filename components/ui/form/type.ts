@@ -7,7 +7,6 @@ export interface IFormFieldOption {
   label: string;
   placeholder?: string;
   description?: string;
-  require: any;
   render: (item: IFormFieldOption, field: FormFieldType) => ReactElement;
 }
 
@@ -19,5 +18,5 @@ export type FormFieldType = ControllerRenderProps<
   {
     [x: string]: any;
   },
-  never
+  any
 >;

@@ -48,45 +48,40 @@ export default function Models() {
   };
 
   return (
-    <Card>
-      <Table>
-        <TableHeader>
-          <TableRow>
-            <TableHead className='w-20'>{t('Rank')}</TableHead>
-            <TableHead>{t('Model Type')}</TableHead>
-            <TableHead>{t('Model Name')}</TableHead>
-            <TableHead>{t('ID')}</TableHead>
-            <TableHead>{t('Actions')}</TableHead>
-          </TableRow>
-        </TableHeader>
-        <TableBody>
-          {models.map((item) => (
+    <>
+      <Card>
+        <Table>
+          <TableHeader>
             <TableRow>
-              <TableCell>{item.rank}</TableCell>
-              <TableCell>{item.type}</TableCell>
-              <TableCell>{item.name}</TableCell>
-              <TableCell>{item.modelId}</TableCell>
-              <TableCell>
-                <IconPencil
-                  onClick={() => {
-                    handleShow(item);
-                  }}
-                  className='text-default-400 cursor-pointer'
-                  size={20}
-                />
-              </TableCell>
+              <TableHead className='w-20'>{t('Rank')}</TableHead>
+              <TableHead>{t('Model Type')}</TableHead>
+              <TableHead>{t('Model Name')}</TableHead>
+              <TableHead>{t('ID')}</TableHead>
             </TableRow>
-          ))}
-        </TableBody>
-      </Table>
-
+          </TableHeader>
+          <TableBody>
+            {models.map((item) => (
+              <TableRow
+                onClick={() => {
+                  handleShow(item);
+                }}
+              >
+                <TableCell>{item.rank}</TableCell>
+                <TableCell>{item.type}</TableCell>
+                <TableCell>{item.name}</TableCell>
+                <TableCell>{item.modelId}</TableCell>
+              </TableRow>
+            ))}
+          </TableBody>
+        </Table>
+      </Card>
       <ModelModal
         selected={selectedModel}
         isOpen={isOpen}
         onClose={handleClose}
         onSuccessful={init}
       ></ModelModal>
-    </Card>
+    </>
   );
 }
 

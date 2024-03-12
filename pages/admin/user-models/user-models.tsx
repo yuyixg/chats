@@ -1,20 +1,4 @@
 import React, { useEffect, useState } from 'react';
-import {
-  Table,
-  TableHeader,
-  TableColumn,
-  TableBody,
-  TableRow,
-  TableCell,
-  Input,
-  Button,
-  Card,
-  CardHeader,
-  Avatar,
-  CardBody,
-  CardFooter,
-  Spinner,
-} from '@nextui-org/react';
 import { getUserModels } from '@/apis/adminService';
 import { GetUserModelResult } from '@/types/admin';
 import { IconPlus, IconSearch } from '@tabler/icons-react';
@@ -24,6 +8,18 @@ import { useThrottle } from '@/hooks/useThrottle';
 import { UserModel } from '@/models/userModels';
 import { AddUserModelModal } from '@/components/Admin/AddUserModelModal';
 import { EditUserModelModal } from '@/components/Admin/EditUserModelModal';
+import { Input } from '@/components/ui/input';
+import { Card, CardContent, CardHeader } from '@/components/ui/card';
+import { Button } from '@/components/ui/button';
+import {
+  Table,
+  TableBody,
+  TableCell,
+  TableHead,
+  TableHeader,
+  TableRow,
+} from '@/components/ui/table';
+import { Avatar, AvatarFallback } from '@/components/ui/avatar';
 
 export default function UserModels() {
   const { t } = useTranslation('admin');
@@ -65,124 +61,80 @@ export default function UserModels() {
     setSelectedUserModel(null);
   };
 
-  const columns = [
-    { name: t('ID'), uid: 'modelId' },
-    { name: t('Remaining Tokens'), uid: 'tokens' },
-    { name: t('Remaining Counts'), uid: 'counts' },
-    { name: t('Expiration Time'), uid: 'expires' },
-  ];
-
-  const renderCell = React.useCallback(
-    (item: UserModel, columnKey: React.Key) => {
-      switch (columnKey) {
-        case 'modelId':
-          return (
-            <div className='text-small hover:underline'>{item.modelId}</div>
-          );
-        case 'tokens':
-          return <div className='text-small'>{item.tokens || '-'}</div>;
-        case 'counts':
-          return <div className='text-small'>{item.counts || '-'}</div>;
-        case 'expires':
-          return <div className='text-small'>{item.expires || '-'}</div>;
-        default:
-          return <div></div>;
-      }
-    },
-    []
-  );
-
   return (
     <>
       <div className='flex flex-col gap-4 mb-4'>
         <div className='flex justify-between gap-3 items-center'>
           <Input
-            size='sm'
-            isClearable
-            classNames={{
-              base: 'w-full',
-            }}
             placeholder={t('Search...')!}
-            startContent={<IconSearch className='text-default-300' />}
             value={query}
-            onClear={() => setQuery('')}
-            onValueChange={(value: string) => {
-              setQuery(value);
+            onChange={(e) => {
+              setQuery(e.target.value);
             }}
           />
         </div>
       </div>
       <div className='grid w-full grid-cols-1 sm:grid-cols-1 md:grid-cols-2 xl:grid-cols-3 gap-3'>
-        {!loading &&
-          userModels.map((item) => {
-            return (
-              <Card key={item.userId} className='p-2 max-h-[309px]'>
-                <CardHeader className='justify-between'>
-                  <div className='flex gap-4'>
-                    <Avatar
-                      icon={
-                        <div className=' bg-gray-200 w-full h-full flex justify-center items-center font-semibold text-sm'>
+        {userModels.map((item) => {
+          return (
+            <Card
+              key={item.userId}
+              className='p-2 max-h-[309px] overflow-hidden'
+            >
+              <CardHeader>
+                <div className='flex gap-4'>
+                  <div className='flex w-full justify-between'>
+                    <div className='py-1 gap-2 w-[50%] flex items-center'>
+                      <Avatar>
+                        <AvatarFallback>
                           {item.userName[0].toUpperCase()}
-                        </div>
-                      }
-                    />
-                    <div className='flex flex-col gap-1 items-start justify-center'>
-                      <div className='py-1'>
-                        <h4 className='text-small font-semibold leading-none text-default-600 capitalize'>
-                          {item.userName}
-                        </h4>
-                        <h5 className='text-small tracking-tight text-default-400 capitalize'>
+                        </AvatarFallback>
+                      </Avatar>
+                      <div className='text-small leading-none text-default-600 capitalize'>
+                        <div className='font-semibold'>{item.userName}</div>
+
+                        <div className='text-small tracking-tight text-default-400 capitalize'>
                           {item.role || '-'}
-                        </h5>
+                        </div>
                       </div>
                     </div>
+                    <Button onClick={() => handleShowAddModal(item)}>
+                      <IconPlus size={18} />
+                    </Button>
                   </div>
-                  <Button
-                    color='primary'
-                    size='sm'
-                    variant='flat'
-                    onClick={() => handleShowAddModal(item)}
-                  >
-                    <IconPlus size={18} />
-                  </Button>
-                </CardHeader>
-                <CardBody className='px-3 py-0 text-small text-default-400'>
-                  <Table removeWrapper>
-                    <TableHeader columns={columns}>
-                      {(column) => (
-                        <TableColumn key={column.uid}>
-                          {column.name}
-                        </TableColumn>
-                      )}
-                    </TableHeader>
-                    <TableBody
-                      loadingContent={<Spinner label={t('Loading...')!} />}
-                      isLoading={loading}
-                      items={item.models.filter((x) => x.enable)}
-                    >
-                      {(model) => (
+                </div>
+              </CardHeader>
+              <CardContent className='px-3 py-0 text-small text-default-400 overflow-auto max-h-[200px]'>
+                <Table>
+                  <TableHeader>
+                    <TableRow>
+                      <TableHead>{t('ID')}</TableHead>
+                      <TableHead>{t('Remaining Tokens')}</TableHead>
+                      <TableHead>{t('Remaining Counts')}</TableHead>
+                      <TableHead>{t('Expiration Time')}</TableHead>
+                    </TableRow>
+                  </TableHeader>
+                  <TableBody>
+                    {item.models
+                      .filter((x) => x.enable)
+                      .map((model) => (
                         <TableRow
-                          key={model.modelId}
-                          className='hover:bg-gray-100 rounded-lg'
+                          onClick={() =>
+                            handleShowEditModal(item, model.modelId)
+                          }
                         >
-                          {(columnKey) => (
-                            <TableCell
-                              onClick={() =>
-                                handleShowEditModal(item, model.modelId)
-                              }
-                            >
-                              {renderCell(model, columnKey)}
-                            </TableCell>
-                          )}
+                          <TableCell>{model.modelId}</TableCell>
+                          <TableCell>{model.tokens}</TableCell>
+                          <TableCell>{model.counts}</TableCell>
+                          <TableCell>{model.expires}</TableCell>
                         </TableRow>
-                      )}
-                    </TableBody>
-                  </Table>
-                </CardBody>
-                <CardFooter className='gap-3'></CardFooter>
-              </Card>
-            );
-          })}
+                      ))}
+                  </TableBody>
+                </Table>
+              </CardContent>
+            </Card>
+          );
+        })}
       </div>
       <AddUserModelModal
         selectedModel={selectedUserModel}

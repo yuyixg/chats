@@ -28,7 +28,7 @@ const FormSelect = ({
         </FormControl>
         <SelectContent>
           {items!.map((item) => (
-            <SelectItem value={item.value}>{item.name}</SelectItem>
+            <SelectItem key={item.value} value={item.value}>{item.name}</SelectItem>
           ))}
         </SelectContent>
       </Select>

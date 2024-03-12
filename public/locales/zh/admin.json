@@ -8,7 +8,7 @@
   "Password": "用户密码",
   "Role": "角色",
   "Models": "模型",
-  "Rank": "序号",
+  "Rank": "#",
   "ID": "模型",
   "Model Name": "模型名称",
   "Model Type": "模型类型",
@@ -39,5 +39,7 @@
   "Add User": "添加用户",
   "Edit User": "编辑用户",
   "Is it enabled": "是否启用",
-  "is require.": "为必填."
+  "This field is require": "此字段为必填字段",
+  "Must contain at least {{length}} character(s)": "必须至少包含{{length}}个字符",
+  "Contain at most {{length}} character(s)": "最多包含{{length}}个字符"
 }
