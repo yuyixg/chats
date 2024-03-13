@@ -27,7 +27,7 @@ const handler = async (req: NextApiRequest, res: NextApiResponse) => {
     const { messageId, model, messages, prompt, temperature } =
       req.body as ChatBody;
 
-    const enabledModels = await ChatModelManager.findEnableModels();
+    const enabledModels = await ChatModelManager.findModels();
 
     if (!enabledModels.find((x) => x.id === model.modelId)) {
       res.status(400).send(

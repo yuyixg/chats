@@ -122,7 +122,7 @@ export default function UserModels() {
                             handleShowEditModal(item, model.modelId)
                           }
                         >
-                          <TableCell>{model.modelId}</TableCell>
+                          <TableCell>{model.modelName}</TableCell>
                           <TableCell>{model.tokens}</TableCell>
                           <TableCell>{model.counts}</TableCell>
                           <TableCell>{model.expires}</TableCell>

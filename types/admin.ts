@@ -10,7 +10,17 @@ export interface GetUserModelResult {
   role: string;
   userModelId: string;
   userName: string;
-  models: UserModel[];
+  models: UserModelResult[];
+}
+
+export interface UserModelResult {
+  modelId: string;
+  modelName?: string;
+  modelVersion?: string;
+  enable?: boolean;
+  tokens?: number | null;
+  counts?: number | null;
+  expires?: string | null;
 }
 
 export interface PutUserModelParams {
@@ -31,10 +41,19 @@ export interface GetModelResult {
 }
 
 export interface PutModelParams {
-  modelId: ModelVersions;
+  modelId: string;
   name: string;
   enable?: boolean;
   apiConfig?: string;
+  modelConfig: string;
+  imgConfig?: string;
+}
+
+export interface PostModelParams {
+  modelVersion: ModelVersions;
+  name: string;
+  enable: boolean;
+  apiConfig: string;
   modelConfig: string;
   imgConfig?: string;
 }

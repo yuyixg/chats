@@ -23,7 +23,7 @@ class ChatModels extends Model<
   InferAttributes<ChatModels>,
   InferCreationAttributes<ChatModels>
 > {
-  declare id: string;
+  declare id?: string;
   declare modelVersion: ModelVersions;
   declare name: string;
   declare type: ModelType;

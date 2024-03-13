@@ -69,7 +69,7 @@ export const AddUserModelModal = (props: IProps) => {
       .catch(() => {
         toast.error(
           t(
-            'Save failed! Please try again later, or contact technical personnel.'
+            'Operation failed! Please try again later, or contact technical personnel.'
           )
         );
       });
@@ -91,7 +91,7 @@ export const AddUserModelModal = (props: IProps) => {
           <SelectContent>
             {models.map((model) => (
               <SelectItem key={model.modelId} value={model.modelId}>
-                {model.modelId}
+                {model.name}
               </SelectItem>
             ))}
           </SelectContent>

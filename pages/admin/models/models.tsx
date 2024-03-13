@@ -15,10 +15,11 @@ import {
 import { Card } from '@/components/ui/card';
 import { Button } from '@/components/ui/button';
 import { IconPlus } from '@tabler/icons-react';
+import { AddModelModal } from '@/components/Admin/Models/AddModelModal';
 
 export default function Models() {
   const { t } = useTranslation('admin');
-  const [isOpen, setIsOpen] = useState(false);
+  const [isOpen, setIsOpen] = useState({ add: false, edit: false });
   const [selectedModel, setSelectedModel] = useState<GetModelResult | null>(
     null
   );
@@ -32,7 +33,7 @@ export default function Models() {
   const init = () => {
     getModels().then((data) => {
       setModels(data);
-      setIsOpen(false);
+      setIsOpen({ add: false, edit: false });
       setSelectedModel(null);
       setLoading(false);
     });
@@ -40,11 +41,11 @@ export default function Models() {
 
   const handleShow = (item: GetModelResult) => {
     setSelectedModel(item);
-    setIsOpen(true);
+    setIsOpen({ ...isOpen, edit: true });
   };
 
   const handleClose = () => {
-    setIsOpen(false);
+    setIsOpen({ add: false, edit: false });
     setSelectedModel(null);
   };
 
@@ -52,7 +53,12 @@ export default function Models() {
     <>
       <div className='flex flex-col gap-4 mb-4'>
         <div className='flex justify-end gap-3 items-center'>
-          <Button onClick={() => {}} color='primary'>
+          <Button
+            onClick={() => {
+              setIsOpen({ ...isOpen, add: true });
+            }}
+            color='primary'
+          >
             <IconPlus size={20} />
             {t('Add Model')}
           </Button>
@@ -63,7 +69,7 @@ export default function Models() {
           <TableHeader>
             <TableRow>
               <TableHead className='w-20'>{t('Rank')}</TableHead>
-              <TableHead>{t('Model Name')}</TableHead>
+              <TableHead>{t('Model Display Name')}</TableHead>
               <TableHead>{t('Model Version')}</TableHead>
               <TableHead>{t('Model Type')}</TableHead>
             </TableRow>
@@ -76,7 +82,14 @@ export default function Models() {
                 }}
               >
                 <TableCell>{item.rank}</TableCell>
-                <TableCell>{item.name}</TableCell>
+                <TableCell className='flex items-center gap-1'>
+                  <div
+                    className={`w-2 h-2 rounded-full ${
+                      item.enable ? 'bg-green-400' : 'bg-gray-400'
+                    }`}
+                  ></div>
+                  {item.name}
+                </TableCell>
                 <TableCell>{item.modelVersion}</TableCell>
                 <TableCell>{item.type}</TableCell>
               </TableRow>
@@ -86,10 +99,15 @@ export default function Models() {
       </Card>
       <EditModelModal
         selected={selectedModel}
-        isOpen={isOpen}
+        isOpen={isOpen.edit}
         onClose={handleClose}
         onSuccessful={init}
-      ></EditModelModal>
+      />
+      <AddModelModal
+        isOpen={isOpen.add}
+        onClose={handleClose}
+        onSuccessful={init}
+      />
     </>
   );
 }

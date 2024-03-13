@@ -13,7 +13,6 @@ export interface Model {
 export enum ModelVersions {
   GPT_3_5 = 'gpt-3.5-turbo',
   GPT_4 = 'gpt-4',
-  GPT_4_32K = 'gpt-4-32k',
   GPT_4_Vision = 'gpt-4-vision',
   ERNIE_Bot_4 = 'ERNIE-Bot-4',
   ERNIE_Bot_8K = 'ERNIE-Bot-8K',

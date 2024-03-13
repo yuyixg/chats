@@ -2,6 +2,8 @@ import { ChatModelManager } from '@/managers';
 import type { NextApiRequest, NextApiResponse } from 'next';
 import { UserRole } from '@/types/admin';
 import { getSession } from '@/utils/session';
+import { ModelDefaultTemplates } from '@/types/template';
+import { ModelVersions } from '@/types/model';
 export const config = {
   api: {
     bodyParser: {
@@ -49,7 +51,36 @@ const handler = async (req: NextApiRequest, res: NextApiResponse) => {
   }
 
   try {
-    if (req.method === 'PUT') {
+    if (req.method === 'GET') {
+      const { all } = req.query;
+      const models = await ChatModelManager.findModels(!!all);
+      const data = models.map((x) => {
+        return {
+          rank: x.rank,
+          modelId: x.id,
+          modelVersion: x.modelVersion,
+          name: x.name,
+          type: x.type,
+          enable: x.enable,
+          imgConfig: JSON.stringify(x.imgConfig || {}, null, 2),
+          modelConfig: JSON.stringify(x.modelConfig || {}, null, 2),
+          apiConfig: JSON.stringify(
+            {
+              appId: addAsterisk(x.apiConfig?.appId),
+              apiKey: addAsterisk(x.apiConfig?.apiKey),
+              secret: addAsterisk(x.apiConfig?.secret),
+              version: x.apiConfig?.version,
+              host: x.apiConfig.host,
+              organization: x.apiConfig?.organization,
+              type: x.apiConfig?.type,
+            },
+            null,
+            2
+          ),
+        };
+      });
+      return res.status(200).json(data);
+    } else if (req.method === 'PUT') {
       const {
         modelId,
         name,
@@ -81,35 +112,50 @@ const handler = async (req: NextApiRequest, res: NextApiResponse) => {
         imgConfig
       );
       return res.status(200).send(data);
-    } else {
-      const { all } = req.body;
-      const models = await ChatModelManager.findEnableModels(all);
-      const data = models.map((x) => {
-        return {
-          rank: x.rank,
-          modelId: x.id,
-          modelVersion: x.modelVersion,
-          name: x.name,
-          type: x.type,
-          enable: x.enable,
-          imgConfig: JSON.stringify(x.imgConfig || {}, null, 2),
-          modelConfig: JSON.stringify(x.modelConfig || {}, null, 2),
-          apiConfig: JSON.stringify(
-            {
-              appId: addAsterisk(x.apiConfig?.appId),
-              apiKey: addAsterisk(x.apiConfig?.apiKey),
-              secret: addAsterisk(x.apiConfig?.secret),
-              version: x.apiConfig?.version,
-              host: x.apiConfig.host,
-              organization: x.apiConfig?.organization,
-              type: x.apiConfig?.type,
-            },
-            null,
-            2
-          ),
-        };
-      });
-      return res.status(200).json(data);
+    } else if (req.method === 'POST') {
+      const {
+        modelVersion,
+        name,
+        enable,
+        modelConfig: modelConfigJson,
+        apiConfig: apiConfigJson,
+        imgConfig: imgConfigJson,
+      } = req.body;
+
+      const model = await ChatModelManager.findModelByName(name);
+      if (model) {
+        res.status(400).end('Model name is exist!');
+        return;
+      }
+
+      const template = ModelDefaultTemplates[modelVersion as ModelVersions];
+
+      if (!template) {
+        res.status(400).end('Model is not Found!');
+        return;
+      }
+
+      let modelConfig = JSON.parse(modelConfigJson);
+      let apiConfig = JSON.parse(apiConfigJson);
+      let imgConfig = JSON.parse(imgConfigJson);
+      const data = await ChatModelManager.createModel(
+        template.type,
+        modelVersion,
+        name,
+        enable,
+        modelConfig,
+        apiConfig,
+        imgConfig
+      );
+      return res.status(200).send(data);
+    } else if (req.method === 'DELETE') {
+      const { id } = req.query as { id: string };
+      const model = await ChatModelManager.findModelById(id);
+      if (model) {
+        await ChatModelManager.deleteModelById(id);
+        res.status(200).end();
+      }
+      res.status(400).end('Model is not Found!');
     }
   } catch (error) {
     console.error(error);

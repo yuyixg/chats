@@ -4,6 +4,7 @@ import {
   GetModelResult,
   GetUserModelResult,
   GetUsersResult,
+  PostModelParams,
   PutModelParams,
   PutUserModelParams,
   PutUserParams,
@@ -25,14 +26,24 @@ export const putUserModel = (params: PutUserModelParams): Promise<any> => {
 
 export const getModels = (all: boolean = true): Promise<GetModelResult[]> => {
   const fetchService = useFetch();
-  return fetchService.post('/api/admin/models', {
-    body: { all },
-  });
+  return fetchService.get('/api/admin/models?all=' + all);
 };
 
 export const putModels = (params: PutModelParams): Promise<any> => {
   const fetchService = useFetch();
   return fetchService.put('/api/admin/models', {
+    body: params,
+  });
+};
+
+export const deleteModels = (id: string): Promise<any> => {
+  const fetchService = useFetch();
+  return fetchService.delete('/api/admin/models?id=' + id);
+};
+
+export const postModels = (params: PostModelParams): Promise<any> => {
+  const fetchService = useFetch();
+  return fetchService.post('/api/admin/models', {
     body: params,
   });
 };

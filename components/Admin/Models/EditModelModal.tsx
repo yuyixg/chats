@@ -1,7 +1,7 @@
-import { putModels } from '@/apis/adminService';
+import { deleteModels, putModels } from '@/apis/adminService';
 import { GetModelResult, PutModelParams } from '@/types/admin';
 import { useTranslation } from 'next-i18next';
-import React, { useEffect } from 'react';
+import React, { useEffect, useState } from 'react';
 import toast from 'react-hot-toast';
 import {
   Dialog,
@@ -31,6 +31,7 @@ interface IProps {
 export const EditModelModal = (props: IProps) => {
   const { t } = useTranslation('admin');
   const { isOpen, onClose, selected, onSuccessful } = props;
+  const [deleting, setDeleting] = useState(false);
   const formFields: IFormFieldOption[] = [
     {
       name: 'name',
@@ -44,14 +45,6 @@ export const EditModelModal = (props: IProps) => {
       label: t('ID'),
       render: (options: IFormFieldOption, field: FormFieldType) => (
         <FormInput hidden options={options} field={field} />
-        // <FormSelect
-        //   items={Object.keys(ModelType).map((key) => ({
-        //     name: key,
-        //     value: key,
-        //   }))}
-        //   options={options}
-        //   field={field}
-        // />
       ),
     },
     {
@@ -123,9 +116,28 @@ export const EditModelModal = (props: IProps) => {
       .catch(() => {
         toast.error(
           t(
-            'Save failed! Please try again later, or contact technical personnel.'
+            'Operation failed! Please try again later, or contact technical personnel.'
           )
         );
+      });
+  }
+
+  function onDelete() {
+    setDeleting(true);
+    deleteModels(form.getValues('modelId')!)
+      .then(() => {
+        onSuccessful();
+        toast.success(t('Delete successful!'));
+      })
+      .catch(() => {
+        toast.error(
+          t(
+            'Operation failed! Please try again later, or contact technical personnel.'
+          )
+        );
+      })
+      .finally(() => {
+        setDeleting(false);
       });
   }
 
@@ -158,6 +170,13 @@ export const EditModelModal = (props: IProps) => {
               />
             ))}
             <DialogFooter className='pt-4'>
+              <Button
+                disabled={deleting}
+                variant='destructive'
+                onClick={onDelete}
+              >
+                {t('Delete')}
+              </Button>
               <Button type='submit'>{t('Save')}</Button>
             </DialogFooter>
           </form>

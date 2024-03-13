@@ -39,6 +39,13 @@ export const EditUserModelModal = (props: IProps) => {
       name: 'modelId',
       label: t('ID'),
       render: (options: IFormFieldOption, field: FormFieldType) => (
+        <FormInput hidden options={options} field={field} />
+      ),
+    },
+    {
+      name: 'modelName',
+      label: t('Model Display Name'),
+      render: (options: IFormFieldOption, field: FormFieldType) => (
         <FormInput disabled options={options} field={field} />
       ),
     },
@@ -73,6 +80,7 @@ export const EditUserModelModal = (props: IProps) => {
   ];
 
   const formSchema = z.object({
+    modelName: z.string().optional(),
     modelId: z.string().optional(),
     enable: z.boolean().optional(),
     tokens: z.union([z.string(), z.null(), z.number()]),
@@ -95,6 +103,7 @@ export const EditUserModelModal = (props: IProps) => {
       )!;
       form.reset();
       form.setValue('modelId', model?.modelId);
+      form.setValue('modelName', model?.modelName);
       form.setValue('enable', model?.enable);
       form.setValue('tokens', model?.tokens || null);
       form.setValue('counts', model?.counts || null);
@@ -126,7 +135,7 @@ export const EditUserModelModal = (props: IProps) => {
       .catch(() => {
         toast.error(
           t(
-            'Save failed! Please try again later, or contact technical personnel.'
+            'Operation failed! Please try again later, or contact technical personnel.'
           )
         );
       });

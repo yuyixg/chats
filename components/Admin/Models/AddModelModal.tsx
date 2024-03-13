@@ -1,5 +1,4 @@
-import { putModels } from '@/apis/adminService';
-import { GetModelResult, PutModelParams } from '@/types/admin';
+import { postModels } from '@/apis/adminService';
 import { useTranslation } from 'next-i18next';
 import React, { useEffect } from 'react';
 import toast from 'react-hot-toast';
@@ -19,10 +18,13 @@ import FormInput from '../../ui/form/input';
 import FormSwitch from '../../ui/form/switch';
 import FormTextarea from '../../ui/form/textarea';
 import { Button } from '../../ui/button';
+import FormSelect from '@/components/ui/form/select';
+import { ModelVersions } from '@/types/model';
+import { ModelDefaultTemplates } from '@/types/template';
+import { PostModelParams } from '@/types/admin';
 
 interface IProps {
   isOpen: boolean;
-  selected: GetModelResult | null;
   onClose: () => void;
   onSuccessful: () => void;
   saveLoading?: boolean;
@@ -30,28 +32,27 @@ interface IProps {
 
 export const AddModelModal = (props: IProps) => {
   const { t } = useTranslation('admin');
-  const { isOpen, onClose, selected, onSuccessful } = props;
+  const { isOpen, onClose, onSuccessful } = props;
   const formFields: IFormFieldOption[] = [
+    {
+      name: 'modelVersion',
+      label: t('Model Version'),
+      render: (options: IFormFieldOption, field: FormFieldType) => (
+        <FormSelect
+          items={Object.keys(ModelVersions).map((key) => ({
+            name: ModelVersions[key as keyof typeof ModelVersions],
+            value: ModelVersions[key as keyof typeof ModelVersions],
+          }))}
+          options={options}
+          field={field}
+        />
+      ),
+    },
     {
       name: 'name',
       label: t('Model Display Name'),
       render: (options: IFormFieldOption, field: FormFieldType) => (
         <FormInput options={options} field={field} />
-      ),
-    },
-    {
-      name: 'modelId',
-      label: t('ID'),
-      render: (options: IFormFieldOption, field: FormFieldType) => (
-        <FormInput hidden options={options} field={field} />
-        // <FormSelect
-        //   items={Object.keys(ModelType).map((key) => ({
-        //     name: key,
-        //     value: key,
-        //   }))}
-        //   options={options}
-        //   field={field}
-        // />
       ),
     },
     {
@@ -85,11 +86,14 @@ export const AddModelModal = (props: IProps) => {
   ];
 
   const formSchema = z.object({
+    modelVersion: z
+      .string()
+      .min(1, `${t('This field is require')}`)
+      .optional(),
     name: z
       .string()
       .min(1, `${t('This field is require')}`)
       .optional(),
-    modelId: z.string().optional(),
     enable: z.boolean().optional(),
     apiConfig: z
       .string()
@@ -115,7 +119,7 @@ export const AddModelModal = (props: IProps) => {
 
   function onSubmit(values: z.infer<typeof formSchema>) {
     if (!form.formState.isValid) return;
-    putModels(values as PutModelParams)
+    postModels(values as PostModelParams)
       .then(() => {
         onSuccessful();
         toast.success(t('Save successful!'));
@@ -123,7 +127,7 @@ export const AddModelModal = (props: IProps) => {
       .catch(() => {
         toast.error(
           t(
-            'Save failed! Please try again later, or contact technical personnel.'
+            'Operation failed! Please try again later, or contact technical personnel.'
           )
         );
       });
@@ -132,20 +136,35 @@ export const AddModelModal = (props: IProps) => {
   useEffect(() => {
     if (isOpen) {
       form.reset();
-      form.setValue('name', selected?.name);
-      form.setValue('modelId', selected?.modelId);
-      form.setValue('enable', selected?.enable);
-      form.setValue('apiConfig', selected?.apiConfig);
-      form.setValue('modelConfig', selected?.modelConfig);
-      form.setValue('imgConfig', selected?.imgConfig);
+      form.setValue('name', '');
+      form.setValue('modelVersion', '');
+      form.setValue('enable', true);
+      form.setValue('apiConfig', '');
+      form.setValue('modelConfig', '');
+      form.setValue('imgConfig', '{}');
     }
   }, [isOpen]);
+
+  useEffect(() => {
+    const subscription = form.watch((value, { name, type }) => {
+      if (name === 'modelVersion' && type === 'change') {
+        const template =
+          ModelDefaultTemplates[value.modelVersion as ModelVersions];
+        form.setValue('apiConfig', JSON.stringify(template.apiConfig, null, 2));
+        form.setValue(
+          'modelConfig',
+          JSON.stringify({ ...template.modelConfig }, null, 2)
+        );
+      }
+    });
+    return () => subscription.unsubscribe();
+  }, [form.watch]);
 
   return (
     <Dialog open={isOpen} onOpenChange={onClose}>
       <DialogContent>
         <DialogHeader>
-          <DialogTitle>{t('Edit Model')}</DialogTitle>
+          <DialogTitle>{t('Add Model')}</DialogTitle>
         </DialogHeader>
         <Form {...form}>
           <form onSubmit={form.handleSubmit(onSubmit)}>

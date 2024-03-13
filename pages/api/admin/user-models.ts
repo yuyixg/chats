@@ -1,5 +1,5 @@
 import type { NextApiRequest, NextApiResponse } from 'next';
-import { UserModelManager } from '@/managers';
+import { ChatModelManager, UserModelManager } from '@/managers';
 import { UserRole } from '@/types/admin';
 import { getSession } from '@/utils/session';
 export const config = {
@@ -30,13 +30,21 @@ const handler = async (req: NextApiRequest, res: NextApiResponse) => {
     } else {
       const { query } = req.body;
       const userModels = await UserModelManager.findUsersModel(query);
+      const models = await ChatModelManager.findModels(true);
       const data = userModels.map((x) => {
         return {
           userId: x.userId,
           userModelId: x.id,
           role: x.User.role,
           userName: x.User.username,
-          models: x.models,
+          models: x.models.map((item) => {
+            const model = models.find((model) => model.id === item.modelId)!;
+            return {
+              modelVersion: model.modelVersion,
+              modelName: model.name,
+              ...item,
+            };
+          }),
         };
       });
       return res.status(200).json(data);

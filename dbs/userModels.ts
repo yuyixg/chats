@@ -9,7 +9,6 @@ import connection from './connection';
 
 export interface UserModel {
   modelId: string;
-  modelVersion: string;
   enable?: boolean;
   tokens?: number | null;
   counts?: number | null;
