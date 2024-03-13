@@ -1,5 +1,5 @@
-import { ChatModels } from '@/models';
-import { ChatModelApiConfig } from '@/models/models';
+import { ChatModels } from '@/dbs';
+import { ChatModelApiConfig } from '@/dbs/models';
 import { ChatModelConfig, ChatModelImageConfig } from '@/types/model';
 
 export class ChatModelManager {

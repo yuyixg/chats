@@ -1,5 +1,5 @@
-import { ChatModels, UserModels, Users } from '@/models';
-import { UserModel } from '@/models/userModels';
+import { ChatModels, UserModels, Users } from '@/dbs';
+import { UserModel } from '@/dbs/userModels';
 import { Op } from 'sequelize';
 
 interface UserModelsWithRelations extends UserModels {

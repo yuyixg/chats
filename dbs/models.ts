@@ -3,9 +3,10 @@ import {
   InferAttributes,
   InferCreationAttributes,
   Model,
+  UUIDV4,
 } from 'sequelize';
 import connection from './connection';
-import { ChatModelImageConfig, ModelIds, ChatModelConfig } from '@/types/model';
+import { ChatModelImageConfig, ModelVersions, ChatModelConfig } from '@/types/model';
 import { ModelType } from 'aws-sdk/clients/comprehend';
 
 export interface ChatModelApiConfig {
@@ -22,7 +23,8 @@ class ChatModels extends Model<
   InferAttributes<ChatModels>,
   InferCreationAttributes<ChatModels>
 > {
-  declare id: ModelIds;
+  declare id: string;
+  declare modelVersion: ModelVersions;
   declare name: string;
   declare type: ModelType;
   declare imgConfig?: ChatModelImageConfig;
@@ -35,9 +37,11 @@ class ChatModels extends Model<
 ChatModels.init(
   {
     id: {
-      type: DataTypes.STRING,
+      type: DataTypes.UUID,
       primaryKey: true,
+      defaultValue: UUIDV4,
     },
+    modelVersion: { type: DataTypes.STRING },
     name: { type: DataTypes.STRING },
     type: { type: DataTypes.STRING },
     modelConfig: { type: DataTypes.JSON },

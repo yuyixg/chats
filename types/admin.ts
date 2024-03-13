@@ -1,5 +1,5 @@
-import { UserModel } from '@/models/userModels';
-import { ModelIds, ModelType } from './model';
+import { UserModel } from '@/dbs/userModels';
+import { ModelVersions, ModelType } from './model';
 
 export const enum UserRole {
   'admin' = 'admin',
@@ -19,7 +19,8 @@ export interface PutUserModelParams {
 }
 
 export interface GetModelResult {
-  modelId: ModelIds;
+  modelId: string;
+  modelVersion: ModelVersions;
   name: string;
   rank: number;
   type: ModelType;
@@ -30,7 +31,7 @@ export interface GetModelResult {
 }
 
 export interface PutModelParams {
-  modelId: ModelIds;
+  modelId: ModelVersions;
   name: string;
   enable?: boolean;
   apiConfig?: string;

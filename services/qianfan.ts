@@ -5,12 +5,12 @@ import {
   ReconnectInterval,
   createParser,
 } from 'eventsource-parser';
-import { ModelIds } from '@/types/model';
-import { ChatModels } from '@/models';
+import { ModelVersions } from '@/types/model';
+import { ChatModels } from '@/dbs';
 
-export const ModelEndpoint: { [key in ModelIds]?: string } = {
-  [ModelIds.ERNIE_Bot_4]: 'completions_pro',
-  [ModelIds.ERNIE_Bot_8K]: 'ernie_bot_8k',
+export const ModelEndpoint: { [key in ModelVersions]?: string } = {
+  [ModelVersions.ERNIE_Bot_4]: 'completions_pro',
+  [ModelVersions.ERNIE_Bot_8K]: 'ernie_bot_8k',
 };
 
 export interface SteamResult {
@@ -48,11 +48,11 @@ export const QianFanStream = async (
   parameters: any
 ) => {
   const {
-    id,
+    modelVersion,
     apiConfig: { host, apiKey, secret },
   } = chatModel;
   const accessToken = await getAccessTokenAsync(host!, apiKey!, secret!);
-  const url = `${host}/rpc/2.0/ai_custom/v1/wenxinworkshop/chat/${ModelEndpoint[id]}?access_token=${accessToken}`;
+  const url = `${host}/rpc/2.0/ai_custom/v1/wenxinworkshop/chat/${ModelEndpoint[modelVersion]}?access_token=${accessToken}`;
   const body = {
     headers: {
       'Content-Type': 'application/json',
@@ -60,7 +60,7 @@ export const QianFanStream = async (
     },
     method: 'POST',
     body: JSON.stringify({
-      model: id,
+      model: modelVersion,
       messages: [...messages],
       stream: true,
       ...parameters,

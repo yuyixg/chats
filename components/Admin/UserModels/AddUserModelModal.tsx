@@ -8,15 +8,15 @@ import {
   DialogContent,
   DialogFooter,
   DialogHeader,
-} from '../ui/dialog';
+} from '../../ui/dialog';
 import {
   Select,
   SelectContent,
   SelectItem,
   SelectTrigger,
   SelectValue,
-} from '../ui/select';
-import { Button } from '../ui/button';
+} from '../../ui/select';
+import { Button } from '../../ui/button';
 
 interface IProps {
   isOpen: boolean;

@@ -1,4 +1,4 @@
-import Sessions from '@/models/sessions';
+import Sessions from '@/dbs/sessions';
 import { Session } from '@/types/session';
 
 export class SessionsManager {

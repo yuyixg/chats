@@ -3,7 +3,7 @@ import HomeContext from './home.context';
 import { HomeInitialState, initialState } from './home.state';
 import { Conversation } from '@/types/chat';
 import { v4 as uuidv4 } from 'uuid';
-import { ModelIds } from '@/types/model';
+import { ModelVersions } from '@/types/model';
 import { DEFAULT_TEMPERATURE } from '@/utils/const';
 import {
   cleanConversationHistory,
@@ -31,7 +31,7 @@ import { useRouter } from 'next/router';
 interface Props {
   serverSideApiKeyIsSet: boolean;
   serverSidePluginKeysSet: boolean;
-  defaultModelId: ModelIds;
+  defaultModelId: ModelVersions;
   session: Session;
 }
 

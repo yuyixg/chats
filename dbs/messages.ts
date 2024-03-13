@@ -30,7 +30,7 @@ ChatMessages.init(
       defaultValue: UUIDV4,
     },
     userId: { type: DataTypes.UUID },
-    modelId: { type: DataTypes.STRING },
+    modelId: { type: DataTypes.UUID },
     messages: { type: DataTypes.JSON },
     name: { type: DataTypes.STRING },
     prompt: { type: DataTypes.STRING },

@@ -10,14 +10,14 @@ import {
   DialogFooter,
   DialogHeader,
   DialogTitle,
-} from '../ui/dialog';
-import { Form, FormField } from '../ui/form';
-import { FormFieldType, IFormFieldOption } from '../ui/form/type';
-import FormInput from '../ui/form/input';
+} from '../../ui/dialog';
+import { Form, FormField } from '../../ui/form';
+import { FormFieldType, IFormFieldOption } from '../../ui/form/type';
+import FormInput from '../../ui/form/input';
 import { useForm } from 'react-hook-form';
 import { zodResolver } from '@hookform/resolvers/zod';
-import { Button } from '../ui/button';
-import FormSelect from '../ui/form/select';
+import { Button } from '../../ui/button';
+import FormSelect from '../../ui/form/select';
 
 interface IProps {
   user?: GetUsersResult | null;

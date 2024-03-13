@@ -1,4 +1,4 @@
-import { ChatMessages } from '@/models';
+import { ChatMessages } from '@/dbs';
 import { Message } from '@/types/chat';
 
 export interface CreateMessage {

@@ -88,6 +88,7 @@ const handler = async (req: NextApiRequest, res: NextApiResponse) => {
         return {
           rank: x.rank,
           modelId: x.id,
+          modelVersion: x.modelVersion,
           name: x.name,
           type: x.type,
           enable: x.enable,

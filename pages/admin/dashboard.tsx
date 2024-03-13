@@ -4,6 +4,7 @@ import React from 'react';
 import ReactECharts from 'echarts-for-react';
 import { Button } from '@/components/ui/button';
 import { Card, CardContent, CardHeader } from '@/components/ui/card';
+import { connection } from '@/dbs';
 
 interface Props {}
 

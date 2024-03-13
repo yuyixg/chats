@@ -5,7 +5,7 @@ import {
   ReconnectInterval,
   createParser,
 } from 'eventsource-parser';
-import { ChatModels } from '@/models';
+import { ChatModels } from '@/dbs';
 
 export interface StreamResult {
   text: string;
@@ -24,7 +24,7 @@ export const QianWenStream = async (
 ) => {
   const {
     apiConfig: { host, apiKey },
-    id,
+    modelVersion,
     modelConfig: { prompt: systemPrompt },
   } = chatModel;
   let url = `${host}/services/aigc/multimodal-generation/generation`;
@@ -36,7 +36,7 @@ export const QianWenStream = async (
     },
     method: 'POST',
     body: JSON.stringify({
-      model: id,
+      model: modelVersion,
       input: {
         messages: [
           {

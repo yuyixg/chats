@@ -1,7 +1,7 @@
 import React, { useEffect, useState } from 'react';
 import { getModels } from '@/apis/adminService';
 import { GetModelResult } from '@/types/admin';
-import { ModelModal } from '@/components/Admin/ModelModal';
+import { EditModelModal } from '@/components/Admin/Models/EditModelModal';
 import { serverSideTranslations } from 'next-i18next/serverSideTranslations';
 import { useTranslation } from 'next-i18next';
 import {
@@ -13,6 +13,8 @@ import {
   TableRow,
 } from '@/components/ui/table';
 import { Card } from '@/components/ui/card';
+import { Button } from '@/components/ui/button';
+import { IconPlus } from '@tabler/icons-react';
 
 export default function Models() {
   const { t } = useTranslation('admin');
@@ -48,14 +50,22 @@ export default function Models() {
 
   return (
     <>
+      <div className='flex flex-col gap-4 mb-4'>
+        <div className='flex justify-end gap-3 items-center'>
+          <Button onClick={() => {}} color='primary'>
+            <IconPlus size={20} />
+            {t('Add Model')}
+          </Button>
+        </div>
+      </div>
       <Card>
         <Table>
           <TableHeader>
             <TableRow>
               <TableHead className='w-20'>{t('Rank')}</TableHead>
-              <TableHead>{t('Model Type')}</TableHead>
               <TableHead>{t('Model Name')}</TableHead>
-              <TableHead>{t('ID')}</TableHead>
+              <TableHead>{t('Model Version')}</TableHead>
+              <TableHead>{t('Model Type')}</TableHead>
             </TableRow>
           </TableHeader>
           <TableBody>
@@ -66,20 +76,20 @@ export default function Models() {
                 }}
               >
                 <TableCell>{item.rank}</TableCell>
-                <TableCell>{item.type}</TableCell>
                 <TableCell>{item.name}</TableCell>
-                <TableCell>{item.modelId}</TableCell>
+                <TableCell>{item.modelVersion}</TableCell>
+                <TableCell>{item.type}</TableCell>
               </TableRow>
             ))}
           </TableBody>
         </Table>
       </Card>
-      <ModelModal
+      <EditModelModal
         selected={selectedModel}
         isOpen={isOpen}
         onClose={handleClose}
         onSuccessful={init}
-      ></ModelModal>
+      ></EditModelModal>
     </>
   );
 }

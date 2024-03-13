@@ -5,8 +5,8 @@ import {
   ReconnectInterval,
   createParser,
 } from 'eventsource-parser';
-import { ModelIds } from '@/types/model';
-import { ChatModels } from '@/models';
+import { ModelVersions } from '@/types/model';
+import { ChatModels } from '@/dbs';
 
 export const OpenAIStream = async (
   chatModel: ChatModels,
@@ -16,13 +16,13 @@ export const OpenAIStream = async (
 ) => {
   const {
     apiConfig: { host, type, version, apiKey, organization },
-    id,
+    modelVersion,
     modelConfig: { prompt: systemPrompt },
   } = chatModel;
   let url = `${host}/v1/chat/completions`;
   if (type === 'azure') {
     const apiHost = host;
-    url = `${apiHost}/openai/deployments/${id.replaceAll(
+    url = `${apiHost}/openai/deployments/${modelVersion.replaceAll(
       '.',
       ''
     )}/chat/completions?api-version=${version}`;
@@ -43,7 +43,7 @@ export const OpenAIStream = async (
     },
     method: 'POST',
     body: JSON.stringify({
-      ...(type === 'openai' && { model: id }),
+      ...(type === 'openai' && { model: modelVersion }),
       messages: [
         {
           role: 'system',
@@ -51,7 +51,7 @@ export const OpenAIStream = async (
         },
         ...messages,
       ],
-      ...(id === ModelIds.GPT_4_Vision ? { max_tokens: 4096 } : {}),
+      ...(modelVersion === ModelVersions.GPT_4_Vision ? { max_tokens: 4096 } : {}),
       temperature: temperature,
       stream: true,
     }),

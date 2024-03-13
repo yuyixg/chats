@@ -1,5 +1,6 @@
 export interface Model {
-  modelId: ModelIds;
+  modelId: string;
+  modelVersion: ModelVersions;
   name: string;
   type: ModelType;
   systemPrompt: string;
@@ -9,7 +10,7 @@ export interface Model {
   enable?: boolean;
 }
 
-export enum ModelIds {
+export enum ModelVersions {
   GPT_3_5 = 'gpt-3.5-turbo',
   GPT_4 = 'gpt-4',
   GPT_4_32K = 'gpt-4-32k',

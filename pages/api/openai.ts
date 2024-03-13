@@ -9,7 +9,7 @@ import {
   GPT4VisionContent,
 } from '@/types/chat';
 import { get_encoding } from 'tiktoken';
-import { ModelIds } from '@/types/model';
+import { ModelVersions } from '@/types/model';
 import { ChatMessageManager, UserModelManager } from '@/managers';
 import { getSession } from '@/utils/session';
 import { apiErrorHandler } from '@/middleware/error-handler';
@@ -33,6 +33,7 @@ const handler = async (req: NextApiRequest, res: NextApiResponse) => {
     const { userId } = session;
     const { messageId, model, messages, prompt, temperature } =
       req.body as ChatBody;
+    console.log('model', model);
 
     const chatModel = await UserModelManager.findUserModel(
       userId,
@@ -81,7 +82,7 @@ const handler = async (req: NextApiRequest, res: NextApiResponse) => {
       tokenCount += tokens.length;
     }
 
-    if (chatModel.id === ModelIds.GPT_4_Vision) {
+    if (chatModel.modelVersion === ModelVersions.GPT_4_Vision) {
       messagesToSend = messages.map((message) => {
         const messageContent = message.content;
         let content = [] as GPT4VisionContent[];

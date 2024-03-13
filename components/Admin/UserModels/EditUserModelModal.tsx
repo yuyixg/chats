@@ -3,22 +3,22 @@ import { GetUserModelResult } from '@/types/admin';
 import { useTranslation } from 'next-i18next';
 import React, { useEffect } from 'react';
 import toast from 'react-hot-toast';
-import { FormFieldType, IFormFieldOption } from '../ui/form/type';
-import FormInput from '../ui/form/input';
-import FormSwitch from '../ui/form/switch';
+import { FormFieldType, IFormFieldOption } from '../../ui/form/type';
+import FormInput from '../../ui/form/input';
+import FormSwitch from '../../ui/form/switch';
 import {
   Dialog,
   DialogContent,
   DialogFooter,
   DialogHeader,
   DialogTitle,
-} from '../ui/dialog';
-import { Form, FormField } from '../ui/form';
+} from '../../ui/dialog';
+import { Form, FormField } from '../../ui/form';
 import { z } from 'zod';
 import { useForm } from 'react-hook-form';
 import { zodResolver } from '@hookform/resolvers/zod';
-import { Button } from '../ui/button';
-import FormCalendar from '../ui/form/calendar';
+import { Button } from '../../ui/button';
+import FormCalendar from '../../ui/form/calendar';
 
 interface IProps {
   isOpen: boolean;

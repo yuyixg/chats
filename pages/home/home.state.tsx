@@ -1,6 +1,6 @@
 import { Conversation, Message } from '@/types/chat';
 import { ErrorMessage } from '@/types/error';
-import { Model, ModelIds } from '@/types/model';
+import { Model, ModelVersions } from '@/types/model';
 import { Prompt } from '@/types/prompt';
 import { UserSession } from '@/utils/user';
 
@@ -21,7 +21,7 @@ export interface HomeInitialState {
   showPromptbar: boolean;
   messageError: boolean;
   searchTerm: string;
-  defaultModelId: ModelIds | null;
+  defaultModelId: string | null;
 }
 
 export const initialState: HomeInitialState = {

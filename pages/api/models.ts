@@ -23,6 +23,7 @@ const handler = async (req: NextApiRequest, res: NextApiResponse) => {
       .map((x) => {
         return {
           modelId: x.id,
+          modelVersion: x.modelVersion,
           name: x.name,
           type: x.type,
           systemPrompt: x.modelConfig?.prompt,

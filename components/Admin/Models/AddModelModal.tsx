@@ -9,16 +9,16 @@ import {
   DialogFooter,
   DialogHeader,
   DialogTitle,
-} from '../ui/dialog';
+} from '../../ui/dialog';
 import { useForm } from 'react-hook-form';
-import { Form, FormField } from '../ui/form';
+import { Form, FormField } from '../../ui/form';
 import { zodResolver } from '@hookform/resolvers/zod';
 import { z } from 'zod';
-import { FormFieldType, IFormFieldOption } from '../ui/form/type';
-import FormInput from '../ui/form/input';
-import FormSwitch from '../ui/form/switch';
-import FormTextarea from '../ui/form/textarea';
-import { Button } from '../ui/button';
+import { FormFieldType, IFormFieldOption } from '../../ui/form/type';
+import FormInput from '../../ui/form/input';
+import FormSwitch from '../../ui/form/switch';
+import FormTextarea from '../../ui/form/textarea';
+import { Button } from '../../ui/button';
 
 interface IProps {
   isOpen: boolean;
@@ -28,13 +28,13 @@ interface IProps {
   saveLoading?: boolean;
 }
 
-export const ModelModal = (props: IProps) => {
+export const AddModelModal = (props: IProps) => {
   const { t } = useTranslation('admin');
   const { isOpen, onClose, selected, onSuccessful } = props;
   const formFields: IFormFieldOption[] = [
     {
       name: 'name',
-      label: t('Model Name'),
+      label: t('Model Display Name'),
       render: (options: IFormFieldOption, field: FormFieldType) => (
         <FormInput options={options} field={field} />
       ),

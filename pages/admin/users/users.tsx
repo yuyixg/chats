@@ -5,7 +5,7 @@ import { IconPlus } from '@tabler/icons-react';
 import { serverSideTranslations } from 'next-i18next/serverSideTranslations';
 import { useTranslation } from 'next-i18next';
 import { useThrottle } from '@/hooks/useThrottle';
-import { UserModal } from '@/components/Admin/UserModal';
+import { UserModal } from '@/components/Admin/Users/UserModal';
 import { Card } from '@/components/ui/card';
 import {
   Table,
