@@ -39,8 +39,8 @@ export const AddUserModelModal = (props: IProps) => {
         const _models = data.filter(
           (x) =>
             !selectedModel?.models
-              .filter((x) => x.enable)
-              ?.find((m) => m.modelId === x.modelId)
+              .filter((m) => m.enable)
+              ?.find((m) => m.modelId === x.modelId) && x.enable
         );
         setModel(_models);
         setLoading(false);
