@@ -7,6 +7,7 @@ import {
   UserModelManager,
 } from '@/managers';
 import { getSession } from '@/utils/session';
+import { internalServerError, modelUnauthorized } from '@/utils/error';
 
 export const config = {
   api: {
@@ -20,8 +21,7 @@ const handler = async (req: NextApiRequest, res: NextApiResponse) => {
   try {
     const session = await getSession(req.cookies);
     if (!session) {
-      res.status(401).end();
-      return;
+      return modelUnauthorized(res);
     }
     const { userId } = session;
     const { messageId, model, messages, prompt, temperature } =
@@ -30,12 +30,7 @@ const handler = async (req: NextApiRequest, res: NextApiResponse) => {
     const enabledModels = await ChatModelManager.findModels();
 
     if (!enabledModels.find((x) => x.id === model.modelId)) {
-      res.status(400).send(
-        JSON.stringify({
-          messages: 'The Model does not exist or access is denied.',
-        })
-      );
-      return;
+      return modelUnauthorized(res);
     }
 
     const chatModel = await UserModelManager.findUserModel(
@@ -43,12 +38,7 @@ const handler = async (req: NextApiRequest, res: NextApiResponse) => {
       model.modelId
     );
     if (!chatModel) {
-      res.status(400).send(
-        JSON.stringify({
-          messages: 'The Model does not exist or access is denied.',
-        })
-      );
-      return;
+      return modelUnauthorized(res);
     }
 
     const chatMessages = await ChatMessageManager.findUserMessageById(
@@ -128,12 +118,12 @@ const handler = async (req: NextApiRequest, res: NextApiResponse) => {
 
       streamResponse().catch((error) => {
         console.error(error);
-        res.status(500).end();
+        return internalServerError(res);
       });
     }
   } catch (error) {
     console.error(error);
-    res.status(500).end();
+    return internalServerError(res);
   }
 };
 

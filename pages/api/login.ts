@@ -1,5 +1,6 @@
 import { NextApiRequest, NextApiResponse } from 'next';
 import { SessionsManager, UsersManager } from '@/managers';
+import { badRequest, internalServerError } from '@/utils/error';
 
 export const config = {
   api: {
@@ -23,14 +24,14 @@ export default async function handler(
         username: user.username,
         role: user.role,
       });
-      return res.status(200).json({
+      return res.json({
         sessionId: session.id,
         username: user.username,
         role: user.role,
       });
     }
-    return res.status(400).json('Username or password is incorrect.');
+    return badRequest(res, 'Username or password incorrect.');
   } catch (error: any) {
-    return res.status(500).json({ error: 'Something went wrong.' });
+    return internalServerError(res);
   }
 }

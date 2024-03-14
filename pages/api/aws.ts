@@ -1,8 +1,13 @@
-// Next.js API route support: https://nextjs.org/docs/api-routes/introduction
 import { NextApiRequest } from 'next';
 import * as AWS from 'aws-sdk';
+import { getSession } from '@/utils/session';
+import { unauthorized } from '@/utils/error';
 
 export default async function handler(req: NextApiRequest, res: any) {
+  const session = await getSession(req.cookies);
+  if (!session) {
+    return unauthorized(res);
+  }
   const { MINIO_ACCESS_KEY, MINIO_SECRET, MINIO_ENDPOINT, MINIO_BUCKET_NAME } =
     process.env;
   const { fileName, fileType } = JSON.parse(req.body) as {
@@ -29,5 +34,5 @@ export default async function handler(req: NextApiRequest, res: any) {
 
   const putUrl = await s3.getSignedUrlPromise('putObject', params);
   const getUrl = await s3.getSignedUrlPromise('getObject', params);
-  res.status(200).send({ putUrl, getUrl });
+  res.json({ putUrl, getUrl });
 }

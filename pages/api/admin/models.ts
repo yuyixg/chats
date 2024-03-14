@@ -4,6 +4,7 @@ import { UserRole } from '@/types/admin';
 import { getSession } from '@/utils/session';
 import { ModelDefaultTemplates } from '@/types/template';
 import { ModelVersions } from '@/types/model';
+import { badRequest, internalServerError } from '@/utils/error';
 export const config = {
   api: {
     bodyParser: {
@@ -79,7 +80,7 @@ const handler = async (req: NextApiRequest, res: NextApiResponse) => {
           ),
         };
       });
-      return res.status(200).json(data);
+      return res.json(data);
     } else if (req.method === 'PUT') {
       const {
         modelId,
@@ -111,7 +112,7 @@ const handler = async (req: NextApiRequest, res: NextApiResponse) => {
         apiConfig,
         imgConfig
       );
-      return res.status(200).send(data);
+      return res.json(data);
     } else if (req.method === 'POST') {
       const {
         modelVersion,
@@ -147,19 +148,19 @@ const handler = async (req: NextApiRequest, res: NextApiResponse) => {
         apiConfig,
         imgConfig
       );
-      return res.status(200).send(data);
+      return res.json(data);
     } else if (req.method === 'DELETE') {
       const { id } = req.query as { id: string };
       const model = await ChatModelManager.findModelById(id);
       if (model) {
         await ChatModelManager.deleteModelById(id);
-        res.status(200).end();
+        res.end();
       }
-      res.status(400).end('Model is not Found!');
+      return badRequest(res, 'Model is not Found!');
     }
   } catch (error) {
     console.error(error);
-    return res.status(500).end();
+    return internalServerError(res);
   }
 };
 

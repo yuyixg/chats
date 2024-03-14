@@ -1,6 +1,7 @@
 import type { NextApiRequest, NextApiResponse } from 'next';
 import { ChatModelManager, UserModelManager } from '@/managers';
 import { getSession } from '@/utils/session';
+import { internalServerError, unauthorized } from '@/utils/error';
 export const config = {
   api: {
     bodyParser: {
@@ -14,12 +15,12 @@ const handler = async (req: NextApiRequest, res: NextApiResponse) => {
   try {
     const session = await getSession(req.cookies);
     if (!session) {
-      return res.status(401).end();
+      return unauthorized(res);
     }
     const userModels = await UserModelManager.findEnableModels(session.userId!);
     const models = await ChatModelManager.findModels();
     const _models = models
-      .filter((m) => userModels.includes(m.id))
+      .filter((m) => userModels.includes(m.id!))
       .map((x) => {
         return {
           modelId: x.id,
@@ -32,10 +33,10 @@ const handler = async (req: NextApiRequest, res: NextApiResponse) => {
           imgConfig: x.imgConfig,
         };
       });
-    return res.status(200).json(_models);
+    return res.json(_models);
   } catch (error) {
     console.error(error);
-    return res.status(500).end();
+    return internalServerError(res);
   }
 };
 

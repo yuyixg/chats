@@ -43,5 +43,6 @@
   "Loading ...": "加载中 ...",
   "Type a message or type \"/\" to select a prompt...": "输入一条消息或键入 \"/\" 以选择提示...",
   "Enter a prompt or type \"/\" to select a prompt...": "输入一条提示或键入 \"/\" 以选择提示...",
-  "The Model does not exist or access is denied.": "模型不存在或没有访问权限."
+  "The Model does not exist or access is denied.": "模型不存在或没有访问权限。",
+  "Unauthorized.": "未授权访问。"
 }

@@ -9,9 +9,9 @@ import {
 } from '@/types/chat';
 import { get_encoding } from 'tiktoken';
 import { ModelVersions } from '@/types/model';
-import { ChatMessageManager, UserModelManager } from '@/managers';
+import { ChatMessageManager, ChatModelManager, UserModelManager } from '@/managers';
 import { getSession } from '@/utils/session';
-import { apiErrorHandler } from '@/middleware/error-handler';
+import { internalServerError, modelUnauthorized } from '@/utils/error';
 
 export const config = {
   api: {
@@ -26,24 +26,24 @@ const handler = async (req: NextApiRequest, res: NextApiResponse) => {
   try {
     const session = await getSession(req.cookies);
     if (!session) {
-      res
-        .status(401)
-        .json({ messages: 'The Model does not exist or access is denied.' });
-      return;
+      return modelUnauthorized(res);
     }
     const { userId } = session;
     const { messageId, model, messages, prompt, temperature } =
       req.body as ChatBody;
+
+    const enabledModels = await ChatModelManager.findModels();
+
+    if (!enabledModels.find((x) => x.id === model.modelId)) {
+      return modelUnauthorized(res);
+    }
 
     const chatModel = await UserModelManager.findUserModel(
       userId,
       model.modelId
     );
     if (!chatModel) {
-      res.status(400).json({
-        messages: 'The Model does not exist or access is denied.',
-      });
-      return;
+      return modelUnauthorized(res);
     }
 
     const chatMessages = await ChatMessageManager.findUserMessageById(
@@ -157,13 +157,13 @@ const handler = async (req: NextApiRequest, res: NextApiResponse) => {
 
       streamResponse().catch((error) => {
         console.error(error);
-        res.status(500).json({ messages: 'Sorry, there was an error.' });
+        return internalServerError(res);
       });
     }
   } catch (error) {
     console.error(error);
-    res.status(500).json({ messages: 'Sorry, there was an error.' });
+    return internalServerError(res);
   }
 };
 
-export default apiErrorHandler(handler);
+export default handler;

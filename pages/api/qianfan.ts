@@ -1,8 +1,9 @@
 import type { NextApiRequest, NextApiResponse } from 'next';
 import { ChatBody, QianFanMessage } from '@/types/chat';
 import { QianFanStream, SteamResult } from '@/services/qianfan';
-import { ChatMessageManager, UserModelManager } from '@/managers';
+import { ChatMessageManager, ChatModelManager, UserModelManager } from '@/managers';
 import { getSession } from '@/utils/session';
+import { internalServerError, modelUnauthorized } from '@/utils/error';
 
 export const config = {
   api: {
@@ -20,23 +21,23 @@ export default async function handler(
   try {
     const session = await getSession(req.cookies);
     if (!session) {
-      res.status(401).end();
-      return;
+      return modelUnauthorized(res);
     }
     const { userId } = session;
     const { model, messages, messageId } = req.body as ChatBody;
+
+    const enabledModels = await ChatModelManager.findModels();
+
+    if (!enabledModels.find((x) => x.id === model.modelId)) {
+      return modelUnauthorized(res);
+    }
 
     const chatModel = await UserModelManager.findUserModel(
       userId,
       model.modelId
     );
     if (!chatModel) {
-      res.status(400).send(
-        JSON.stringify({
-          messages: 'The Model does not exist or access is denied.',
-        })
-      );
-      return;
+      return modelUnauthorized(res);
     }
 
     const chatMessages = await ChatMessageManager.findUserMessageById(
@@ -104,11 +105,11 @@ export default async function handler(
 
       streamResponse().catch((error) => {
         console.error(error);
-        res.status(500).end();
+        return internalServerError(res);
       });
     }
   } catch (error) {
     console.error(error);
-    res.status(500).end();
+    return internalServerError(res);
   }
 }

@@ -2,6 +2,7 @@ import type { NextApiRequest, NextApiResponse } from 'next';
 import { UserModelManager, UsersManager } from '@/managers';
 import { UserRole } from '@/types/admin';
 import { getSession } from '@/utils/session';
+import { internalServerError } from '@/utils/error';
 export const config = {
   api: {
     bodyParser: {
@@ -26,7 +27,7 @@ const handler = async (req: NextApiRequest, res: NextApiResponse) => {
     if (req.method === 'GET') {
       const { query } = req.query;
       const data = await UsersManager.findUsers(query as string);
-      return res.status(200).send(data);
+      return res.json(data);
     } else if (req.method === 'PUT') {
       const { id, username, password, role } = req.body;
       let user = await UsersManager.findByUserId(id);
@@ -55,11 +56,11 @@ const handler = async (req: NextApiRequest, res: NextApiResponse) => {
         userId: user.id!,
         models: [],
       });
-      return res.status(200).json(user);
+      return res.json(user);
     }
   } catch (error) {
     console.error(error);
-    return res.status(500).end();
+    return internalServerError(res);
   }
 };
 

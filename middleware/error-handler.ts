@@ -6,7 +6,6 @@ export function apiErrorHandler(handler: any) {
       await handler(req, res);
     } catch (error) {
       console.error(error);
-      // res.status(500).json({ statusCode: 500, message: error.message });
     }
   };
 }
