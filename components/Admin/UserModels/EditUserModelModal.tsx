@@ -112,7 +112,6 @@ export const EditUserModelModal = (props: IProps) => {
   }, [isOpen]);
 
   const onSubmit = (values: z.infer<typeof formSchema>) => {
-    console.log(values);
     const models = selectedUserModel?.models.map((x) => {
       if (x.modelId === values?.modelId) {
         x.tokens = Number(values.tokens) || null;
