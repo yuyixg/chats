@@ -5,7 +5,7 @@ import toast from 'react-hot-toast';
 import { serverSideTranslations } from 'next-i18next/serverSideTranslations';
 import { useTranslation } from 'react-i18next';
 
-export default function LoginPage({ locale }: { locale: string }) {
+export default function LoginPage() {
   const { t } = useTranslation('login');
   const router = useRouter();
   const [loginLoading, setLoginLoading] = useState(false);
@@ -13,7 +13,6 @@ export default function LoginPage({ locale }: { locale: string }) {
 
   useEffect(() => {
     setIsClient(true);
-    localStorage.setItem('locale', locale);
   }, []);
   async function handleSubmit(event: FormEvent<HTMLFormElement>) {
     event.preventDefault();
@@ -136,7 +135,6 @@ export default function LoginPage({ locale }: { locale: string }) {
 export const getServerSideProps = async ({ locale }: { locale: string }) => {
   return {
     props: {
-      locale,
       ...(await serverSideTranslations(locale ?? 'en', ['login'])),
     },
   };

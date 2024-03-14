@@ -20,7 +20,7 @@ export const getUserSession = () => {
   return JSON.parse(user) as UserSession;
 };
 
-export const getLoginUrl = () => {
-  const locale = localStorage.getItem('locale');
-  return (locale ? '/' + locale : '') + '/login';
+export const getLoginUrl = (locale?: string) => {
+  const _locale = locale || localStorage.getItem('locale');
+  return (_locale ? '/' + _locale : '') + '/login';
 };

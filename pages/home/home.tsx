@@ -33,9 +33,10 @@ interface Props {
   serverSidePluginKeysSet: boolean;
   defaultModelId: ModelVersions;
   session: Session;
+  locale: string;
 }
 
-const Home = ({ defaultModelId, session }: Props) => {
+const Home = ({ defaultModelId, locale }: Props) => {
   const router = useRouter();
   const { t } = useTranslation('chat');
   const contextValue = useCreateReducer<HomeInitialState>({
@@ -43,7 +44,7 @@ const Home = ({ defaultModelId, session }: Props) => {
   });
 
   const {
-    state: { user, conversations, selectedConversation, lightMode, models },
+    state: { conversations, selectedConversation, lightMode, models },
     dispatch,
   } = contextValue;
   const { getModels } = useApiService();
@@ -121,6 +122,7 @@ const Home = ({ defaultModelId, session }: Props) => {
   };
 
   useEffect(() => {
+    localStorage.setItem('locale', locale);
     setLoadingText(t('Loading ...')!);
     const settings = getSettings();
     if (settings.theme) {
@@ -134,7 +136,7 @@ const Home = ({ defaultModelId, session }: Props) => {
     if (user) {
       dispatch({ field: 'user', value: user });
     } else {
-      router.push(getLoginUrl());
+      router.push(getLoginUrl(locale));
     }
 
     const prompts = localStorage.getItem('prompts');
@@ -279,15 +281,14 @@ export default Home;
 export const getServerSideProps = async ({
   locale,
   req,
-  res,
 }: {
   locale: string;
   req: any;
-  res: any;
 }) => {
   const session = await getSession(req.headers.cookie);
   return {
     props: {
+      locale,
       session,
       defaultModelId: null,
       ...(await serverSideTranslations(locale ?? 'en', [
