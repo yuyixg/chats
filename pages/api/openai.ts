@@ -1,7 +1,6 @@
 import type { NextApiRequest, NextApiResponse } from 'next';
 import { DEFAULT_TEMPERATURE } from '@/utils/const';
 import { OpenAIStream } from '@/services/openai';
-
 import {
   ChatBody,
   GPT4Message,
@@ -27,24 +26,23 @@ const handler = async (req: NextApiRequest, res: NextApiResponse) => {
   try {
     const session = await getSession(req.cookies);
     if (!session) {
-      res.status(401).end();
+      res
+        .status(401)
+        .json({ messages: 'The Model does not exist or access is denied.' });
       return;
     }
     const { userId } = session;
     const { messageId, model, messages, prompt, temperature } =
       req.body as ChatBody;
-    console.log('model', model);
 
     const chatModel = await UserModelManager.findUserModel(
       userId,
       model.modelId
     );
     if (!chatModel) {
-      res.status(400).send(
-        JSON.stringify({
-          messages: 'The Model does not exist or access is denied.',
-        })
-      );
+      res.status(400).json({
+        messages: 'The Model does not exist or access is denied.',
+      });
       return;
     }
 
@@ -159,12 +157,12 @@ const handler = async (req: NextApiRequest, res: NextApiResponse) => {
 
       streamResponse().catch((error) => {
         console.error(error);
-        res.status(500).end();
+        res.status(500).json({ messages: 'Sorry, there was an error.' });
       });
     }
   } catch (error) {
     console.error(error);
-    res.status(500).end();
+    res.status(500).json({ messages: 'Sorry, there was an error.' });
   }
 };
 

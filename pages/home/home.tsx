@@ -25,7 +25,7 @@ import { getSettings } from '@/utils/settings';
 import Promptbar from '@/components/Promptbar';
 import { getSession } from '@/utils/session';
 import { Session } from '@/types/session';
-import { getUserSession } from '@/utils/user';
+import { getLoginUrl, getUserSession } from '@/utils/user';
 import { useRouter } from 'next/router';
 
 interface Props {
@@ -134,7 +134,7 @@ const Home = ({ defaultModelId, session }: Props) => {
     if (user) {
       dispatch({ field: 'user', value: user });
     } else {
-      router.push('/login');
+      router.push(getLoginUrl());
     }
 
     const prompts = localStorage.getItem('prompts');

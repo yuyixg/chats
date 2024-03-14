@@ -15,7 +15,7 @@ import ChatbarContext from './Chatbar.context';
 import HomeContext from '@/pages/home/home.context';
 import { useRouter } from 'next/router';
 import { UserRole } from '@/types/admin';
-import { clearUserSession } from '@/utils/user';
+import { clearUserSession, getLoginUrl } from '@/utils/user';
 
 export const ChatBarSettings = () => {
   const router = useRouter();
@@ -30,7 +30,7 @@ export const ChatBarSettings = () => {
 
   const logout = () => {
     clearUserSession();
-    router.push('/login');
+    router.push(getLoginUrl());
   };
 
   return (

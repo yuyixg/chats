@@ -1,3 +1,5 @@
+import { getLoginUrl } from "@/utils/user";
+
 export type RequestModel = {
   params?: object;
   headers?: object;
@@ -34,7 +36,7 @@ export const useFetch = () => {
       .then((response) => {
         if (!response.ok) {
           if (response.status === 401) {
-            location.href = '/login';
+            location.href = getLoginUrl();
           }
           throw response;
         }

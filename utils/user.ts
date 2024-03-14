@@ -19,3 +19,8 @@ export const getUserSession = () => {
   }
   return JSON.parse(user) as UserSession;
 };
+
+export const getLoginUrl = () => {
+  const locale = localStorage.getItem('locale');
+  return (locale ? '/' + locale : '') + '/login';
+};
