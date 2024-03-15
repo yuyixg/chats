@@ -9,9 +9,18 @@ import {
 } from '@/types/chat';
 import { get_encoding } from 'tiktoken';
 import { ModelVersions } from '@/types/model';
-import { ChatMessageManager, ChatModelManager, UserModelManager } from '@/managers';
+import {
+  ChatMessageManager,
+  ChatModelManager,
+  UserModelManager,
+} from '@/managers';
 import { getSession } from '@/utils/session';
-import { internalServerError, modelUnauthorized } from '@/utils/error';
+import {
+  badRequest,
+  internalServerError,
+  modelUnauthorized,
+} from '@/utils/error';
+import { verifyModel } from '@/utils/model';
 
 export const config = {
   api: {
@@ -38,12 +47,21 @@ const handler = async (req: NextApiRequest, res: NextApiResponse) => {
       return modelUnauthorized(res);
     }
 
-    const chatModel = await UserModelManager.findUserModel(
+    const userModel = await UserModelManager.findUserModel(
       userId,
       model.modelId
     );
-    if (!chatModel) {
+    if (!userModel || !userModel.enable) {
       return modelUnauthorized(res);
+    }
+
+    const chatModel = (await ChatModelManager.findModelById(
+      userModel.modelId
+    ))!;
+
+    const verifyMessage = verifyModel(userModel, chatModel.modelConfig);
+    if (verifyMessage) {
+      return badRequest(res, verifyMessage);
     }
 
     const chatMessages = await ChatMessageManager.findUserMessageById(
@@ -70,14 +88,14 @@ const handler = async (req: NextApiRequest, res: NextApiResponse) => {
 
     for (let i = messages.length - 1; i >= 0; i--) {
       const message = messages[i];
-      const tokens = encoding.encode(message.content.text!);
+      const sendTokens = encoding.encode(message.content.text!);
       if (
-        tokenCount + tokens.length + 1000 >
+        tokenCount + sendTokens.length + 1000 >
         chatModel.modelConfig.tokenLimit!
       ) {
         break;
       }
-      tokenCount += tokens.length;
+      tokenCount += sendTokens.length;
     }
 
     if (chatModel.modelVersion === ModelVersions.GPT_4_Vision) {
@@ -123,8 +141,8 @@ const handler = async (req: NextApiRequest, res: NextApiResponse) => {
             assistantMessage += value;
           }
           if (done) {
-            var tokens = encoding.encode(assistantMessage);
-            tokenCount += tokens.length;
+            let messageTokens = encoding.encode(assistantMessage);
+            tokenCount += messageTokens.length;
             encoding.free();
             messages.push({
               role: 'assistant',
@@ -148,6 +166,11 @@ const handler = async (req: NextApiRequest, res: NextApiResponse) => {
                 chatCount: 1,
               });
             }
+            await UserModelManager.updateUserModelTokenCount(
+              userModel.id!,
+              userModel.modelId,
+              tokenCount
+            );
             res.end();
             break;
           }

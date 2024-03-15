@@ -51,7 +51,9 @@ export const OpenAIStream = async (
         },
         ...messages,
       ],
-      ...(modelVersion === ModelVersions.GPT_4_Vision ? { max_tokens: 4096 } : {}),
+      ...(modelVersion === ModelVersions.GPT_4_Vision
+        ? { max_tokens: 4096 }
+        : {}),
       temperature: temperature,
       stream: true,
     }),

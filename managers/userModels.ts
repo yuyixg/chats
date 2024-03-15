@@ -1,4 +1,4 @@
-import { ChatModels, UserModels, Users } from '@/dbs';
+import { UserModels, Users } from '@/dbs';
 import { UserModel } from '@/dbs/userModels';
 import { Op } from 'sequelize';
 
@@ -34,7 +34,7 @@ export class UserModelManager {
       },
     });
     const model = data?.models.find((x) => x.enable && x.modelId === modelId);
-    return model ? ChatModels.findByPk(model?.modelId) : null;
+    return model ? { ...model, id: data?.id } : null;
   }
 
   static async findUsersModel(query: string) {
@@ -53,6 +53,34 @@ export class UserModelManager {
   }
 
   static async updateUserModel(id: string, models: UserModel[]) {
+    return await UserModels.update(
+      { models },
+      {
+        where: {
+          id,
+        },
+      }
+    );
+  }
+
+  static async updateUserModelTokenCount(
+    id: string,
+    modelId: string,
+    token: number
+  ) {
+    const userModel = await UserModels.findByPk(id);
+    const models = userModel?.models.map((m) => {
+      if (m.modelId === modelId) {
+        if (m.tokens && m.tokens !== null) {
+          m.tokens -= token;
+        }
+        if (m.counts && m.counts !== null) {
+          m.counts -= 1;
+        }
+      }
+      return m;
+    });
+
     return await UserModels.update(
       { models },
       {
