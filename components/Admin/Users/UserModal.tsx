@@ -46,6 +46,7 @@ export const UserModal = (props: IProps) => {
     {
       name: 'username',
       label: t('User Name'),
+      defaultValue: '',
       render: (options: IFormFieldOption, field: FormFieldType) => (
         <FormInput options={options} field={field} />
       ),
@@ -53,6 +54,7 @@ export const UserModal = (props: IProps) => {
     {
       name: 'password',
       label: t('Password'),
+      defaultValue: '',
       render: (options: IFormFieldOption, field: FormFieldType) => (
         <FormInput type='password' options={options} field={field} />
       ),
@@ -60,6 +62,7 @@ export const UserModal = (props: IProps) => {
     {
       name: 'role',
       label: t('Role'),
+      defaultValue: '-',
       render: (options: IFormFieldOption, field: FormFieldType) => (
         <FormSelect items={ROLES} options={options} field={field} />
       ),
@@ -90,18 +93,16 @@ export const UserModal = (props: IProps) => {
 
   const form = useForm<z.infer<typeof formSchema>>({
     resolver: zodResolver(formSchema),
-    defaultValues: {
-      username: '',
-      password: '',
-      role: '',
-    },
+    defaultValues: formFields.reduce((obj: any, field) => {
+      obj[field.name] = field.defaultValue;
+      return obj;
+    }, {}),
   });
 
   useEffect(() => {
     form.reset();
-    form.setValue('username', user?.username || '');
-    form.setValue('password', '');
-    form.setValue('role', user?.role || '-');
+    // fix bug https://github.com/react-hook-form/react-hook-form/issues/2755
+    form.formState.isValid;
   }, [isOpen]);
 
   const onSubmit = (values: z.infer<typeof formSchema>) => {
@@ -143,7 +144,7 @@ export const UserModal = (props: IProps) => {
         <DialogHeader>
           <DialogTitle>{user ? t('Edit User') : t('Add User')}</DialogTitle>
         </DialogHeader>
-        <Form {...form} handleSubmit={form.handleSubmit}>
+        <Form {...form}>
           <form onSubmit={form.handleSubmit(onSubmit)}>
             {formFields.map((item) => (
               <FormField

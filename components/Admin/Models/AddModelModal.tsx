@@ -37,6 +37,7 @@ export const AddModelModal = (props: IProps) => {
     {
       name: 'modelVersion',
       label: t('Model Version'),
+      defaultValue: '',
       render: (options: IFormFieldOption, field: FormFieldType) => (
         <FormSelect
           items={Object.keys(ModelVersions).map((key) => ({
@@ -51,6 +52,7 @@ export const AddModelModal = (props: IProps) => {
     {
       name: 'name',
       label: t('Model Display Name'),
+      defaultValue: '',
       render: (options: IFormFieldOption, field: FormFieldType) => (
         <FormInput options={options} field={field} />
       ),
@@ -58,6 +60,7 @@ export const AddModelModal = (props: IProps) => {
     {
       name: 'enable',
       label: t('Is it enabled'),
+      defaultValue: true,
       render: (options: IFormFieldOption, field: FormFieldType) => (
         <FormSwitch options={options} field={field} />
       ),
@@ -65,6 +68,7 @@ export const AddModelModal = (props: IProps) => {
     {
       name: 'apiConfig',
       label: t('API Configs'),
+      defaultValue: '',
       render: (options: IFormFieldOption, field: FormFieldType) => (
         <FormTextarea options={options} field={field} />
       ),
@@ -72,6 +76,7 @@ export const AddModelModal = (props: IProps) => {
     {
       name: 'modelConfig',
       label: t('Model Configs'),
+      defaultValue: '',
       render: (options: IFormFieldOption, field: FormFieldType) => (
         <FormTextarea options={options} field={field} />
       ),
@@ -79,6 +84,7 @@ export const AddModelModal = (props: IProps) => {
     {
       name: 'imgConfig',
       label: t('Image Configs'),
+      defaultValue: '',
       render: (options: IFormFieldOption, field: FormFieldType) => (
         <FormTextarea options={options} field={field} />
       ),
@@ -136,12 +142,7 @@ export const AddModelModal = (props: IProps) => {
   useEffect(() => {
     if (isOpen) {
       form.reset();
-      form.setValue('name', '');
-      form.setValue('modelVersion', '');
-      form.setValue('enable', true);
-      form.setValue('apiConfig', '');
-      form.setValue('modelConfig', '');
-      form.setValue('imgConfig', '{}');
+      form.formState.isValid;
     }
   }, [isOpen]);
 

@@ -33,7 +33,6 @@ export const EditUserModelModal = (props: IProps) => {
   const { t } = useTranslation('admin');
   const { isOpen, selectedUserModel, selectedModelId, onClose, onSuccessful } =
     props;
-
   const formFields: IFormFieldOption[] = [
     {
       name: 'modelId',
@@ -90,18 +89,19 @@ export const EditUserModelModal = (props: IProps) => {
 
   const form = useForm<z.infer<typeof formSchema>>({
     resolver: zodResolver(formSchema),
-    defaultValues: formFields.reduce((obj: any, field) => {
-      obj[field.name] = field.defaultValue;
+    defaultValues: formFields.reduce((obj: any, current) => {
+      obj[current.name] = current.defaultValue;
       return obj;
     }, {}),
   });
 
   useEffect(() => {
     if (isOpen) {
+      form.reset();
+      form.formState.isValid;
       const model = selectedUserModel?.models.find(
         (x) => x.modelId === selectedModelId
       )!;
-      form.reset();
       form.setValue('modelId', model?.modelId);
       form.setValue('modelName', model?.modelName);
       form.setValue('enable', model?.enable);

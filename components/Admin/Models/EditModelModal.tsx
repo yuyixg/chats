@@ -144,6 +144,7 @@ export const EditModelModal = (props: IProps) => {
   useEffect(() => {
     if (isOpen) {
       form.reset();
+      form.formState.isValid;
       form.setValue('name', selected?.name);
       form.setValue('modelId', selected?.modelId);
       form.setValue('enable', selected?.enable);
