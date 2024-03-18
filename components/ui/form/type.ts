@@ -10,10 +10,6 @@ export interface IFormFieldOption {
   render: (item: IFormFieldOption, field: FormFieldType) => ReactElement;
 }
 
-export type FormFields = {
-  [key: string]: IFormFieldOption;
-};
-
 export type FormFieldType = ControllerRenderProps<
   {
     [x: string]: any;

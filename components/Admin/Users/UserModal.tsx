@@ -48,7 +48,7 @@ export const UserModal = (props: IProps) => {
       label: t('User Name'),
       defaultValue: '',
       render: (options: IFormFieldOption, field: FormFieldType) => (
-        <FormInput options={options} field={field} />
+        <FormInput disabled={!!user} options={options} field={field} />
       ),
     },
     {
@@ -56,7 +56,12 @@ export const UserModal = (props: IProps) => {
       label: t('Password'),
       defaultValue: '',
       render: (options: IFormFieldOption, field: FormFieldType) => (
-        <FormInput type='password' options={options} field={field} />
+        <FormInput
+          type='password'
+          hidden={!!user}
+          options={options}
+          field={field}
+        />
       ),
     },
     {
@@ -79,15 +84,20 @@ export const UserModal = (props: IProps) => {
         })!
       )
       .max(10, t('Contain at most {{length}} character(s)', { length: 10 })!),
-    password: z
-      .string()
-      .min(
-        6,
-        t('Must contain at least {{length}} character(s)', {
-          length: 6,
-        })!
-      )
-      .max(18, t('Contain at most {{length}} character(s)', { length: 18 })!),
+    password: !user
+      ? z
+          .string()
+          .min(
+            6,
+            t('Must contain at least {{length}} character(s)', {
+              length: 6,
+            })!
+          )
+          .max(
+            18,
+            t('Contain at most {{length}} character(s)', { length: 18 })!
+          )
+      : z.string(),
     role: z.string().optional(),
   });
 
@@ -103,6 +113,10 @@ export const UserModal = (props: IProps) => {
     form.reset();
     // fix bug https://github.com/react-hook-form/react-hook-form/issues/2755
     form.formState.isValid;
+    if (user) {
+      form.setValue('username', user.username);
+      form.setValue('role', user.role);
+    }
   }, [isOpen]);
 
   const onSubmit = (values: z.infer<typeof formSchema>) => {
