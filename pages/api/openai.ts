@@ -41,9 +41,8 @@ const handler = async (req: NextApiRequest, res: NextApiResponse) => {
     const { messageId, model, messages, prompt, temperature } =
       req.body as ChatBody;
 
-    const enabledModels = await ChatModelManager.findModels();
-
-    if (!enabledModels.find((x) => x.id === model.modelId)) {
+    const chatModel = await ChatModelManager.findModelById(model.modelId);
+    if (!chatModel?.enable) {
       return modelUnauthorized(res);
     }
 
@@ -55,19 +54,10 @@ const handler = async (req: NextApiRequest, res: NextApiResponse) => {
       return modelUnauthorized(res);
     }
 
-    const chatModel = (await ChatModelManager.findModelById(
-      userModel.modelId
-    ))!;
-
     const verifyMessage = verifyModel(userModel, chatModel.modelConfig);
     if (verifyMessage) {
       return badRequest(res, verifyMessage);
     }
-
-    const chatMessages = await ChatMessageManager.findUserMessageById(
-      messageId,
-      userId
-    );
 
     let promptToSend = prompt;
     if (!promptToSend) {
@@ -148,28 +138,15 @@ const handler = async (req: NextApiRequest, res: NextApiResponse) => {
               role: 'assistant',
               content: { text: assistantMessage },
             });
-            if (chatMessages) {
-              await ChatMessageManager.updateMessageById(
-                chatMessages.id!,
-                messages,
-                tokenCount + chatMessages.tokenCount,
-                chatMessages.chatCount + 1
-              );
-            } else {
-              await ChatMessageManager.createMessage({
-                id: messageId,
-                messages,
-                modelId: chatModel.id!,
-                userId: userId,
-                prompt: promptToSend,
-                tokenCount,
-                chatCount: 1,
-              });
-            }
-            await UserModelManager.updateUserModelTokenCount(
+            await ChatMessageManager.recordChat(
+              messageId,
+              userId,
               userModel.id!,
-              userModel.modelId,
-              tokenCount
+              messages,
+              tokenCount,
+              promptToSend,
+              chatModel,
+              userModel
             );
             res.end();
             break;

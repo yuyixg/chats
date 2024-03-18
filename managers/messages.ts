@@ -1,5 +1,7 @@
-import { ChatMessages } from '@/dbs';
+import { ChatMessages, ChatModels } from '@/dbs';
 import { Message } from '@/types/chat';
+import { UserModelManager } from './userModels';
+import { UserModel } from '@/dbs/userModels';
 
 export interface CreateMessage {
   id: string;
@@ -54,5 +56,44 @@ export class ChatMessageManager {
       tokenCount,
       chatCount: 1,
     });
+  }
+
+  static async recordChat(
+    messageId: string,
+    userId: string,
+    userModelId: string,
+    messages: Message[],
+    tokenCount: number,
+    promptToSend: string,
+    chatModel: ChatModels,
+    userModel: UserModel
+  ) {
+    const chatMessages = await ChatMessageManager.findUserMessageById(
+      messageId,
+      userId
+    );
+    if (chatMessages) {
+      await ChatMessageManager.updateMessageById(
+        chatMessages.id!,
+        messages,
+        tokenCount + chatMessages.tokenCount,
+        chatMessages.chatCount + 1
+      );
+    } else {
+      await ChatMessageManager.createMessage({
+        id: messageId,
+        messages,
+        modelId: chatModel.id!,
+        userId: userId,
+        prompt: promptToSend,
+        tokenCount,
+        chatCount: 1,
+      });
+    }
+    await UserModelManager.updateUserModelTokenCount(
+      userModelId,
+      userModel.modelId,
+      tokenCount
+    );
   }
 }

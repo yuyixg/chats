@@ -1,9 +1,18 @@
 import type { NextApiRequest, NextApiResponse } from 'next';
 import { ChatBody, QianFanMessage } from '@/types/chat';
 import { QianFanStream, SteamResult } from '@/services/qianfan';
-import { ChatMessageManager, ChatModelManager, UserModelManager } from '@/managers';
+import {
+  ChatMessageManager,
+  ChatModelManager,
+  UserModelManager,
+} from '@/managers';
 import { getSession } from '@/utils/session';
-import { internalServerError, modelUnauthorized } from '@/utils/error';
+import {
+  badRequest,
+  internalServerError,
+  modelUnauthorized,
+} from '@/utils/error';
+import { verifyModel } from '@/utils/model';
 
 export const config = {
   api: {
@@ -26,24 +35,23 @@ export default async function handler(
     const { userId } = session;
     const { model, messages, messageId } = req.body as ChatBody;
 
-    const enabledModels = await ChatModelManager.findModels();
-
-    if (!enabledModels.find((x) => x.id === model.modelId)) {
+    const chatModel = await ChatModelManager.findModelById(model.modelId);
+    if (!chatModel?.enable) {
       return modelUnauthorized(res);
     }
 
-    const chatModel = await UserModelManager.findUserModel(
+    const userModel = await UserModelManager.findUserModel(
       userId,
       model.modelId
     );
-    if (!chatModel) {
+    if (!userModel || !userModel.enable) {
       return modelUnauthorized(res);
     }
 
-    const chatMessages = await ChatMessageManager.findUserMessageById(
-      messageId,
-      userId
-    );
+    const verifyMessage = verifyModel(userModel, chatModel.modelConfig);
+    if (verifyMessage) {
+      return badRequest(res, verifyMessage);
+    }
 
     let messagesToSend: QianFanMessage[] = [];
     messagesToSend = messages.map((message) => {
@@ -78,24 +86,16 @@ export default async function handler(
               role: 'assistant',
               content: { text: assistantMessage },
             });
-            if (chatMessages) {
-              await ChatMessageManager.updateMessageById(
-                chatMessages.id!,
-                messages,
-                tokenCount + chatMessages.tokenCount,
-                chatMessages.chatCount + 1
-              );
-            } else {
-              await ChatMessageManager.createMessage({
-                id: messageId,
-                messages,
-                modelId: chatModel.id!,
-                userId: userId,
-                prompt: model.systemPrompt,
-                tokenCount,
-                chatCount: 1,
-              });
-            }
+            await ChatMessageManager.recordChat(
+              messageId,
+              userId,
+              userModel.id!,
+              messages,
+              tokenCount,
+              '',
+              chatModel,
+              userModel
+            );
             res.end();
             break;
           }

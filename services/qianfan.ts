@@ -66,6 +66,7 @@ export const QianFanStream = async (
       ...parameters,
     }),
   };
+  
   const res = await fetch(url, body);
   const decoder = new TextDecoder();
   if (res.status !== 200) {

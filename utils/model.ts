@@ -5,8 +5,8 @@ export function verifyModel(model: UserModel, config: ChatModelConfig) {
   const { maxLength = 0 } = config;
   const { tokens, counts, expires } = model;
   const result = {
-    tokens: 'Not enough Tokens',
-    counts: 'Not enough Counts',
+    tokens: 'Not enough tokens available to send the message',
+    counts: 'Not enough counts available to send the message',
     expires: 'Subscription has expired',
   };
 
