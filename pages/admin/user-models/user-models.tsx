@@ -89,10 +89,10 @@ export default function UserModels() {
                           {item.userName[0].toUpperCase()}
                         </AvatarFallback>
                       </Avatar>
-                      <div className='text-small leading-none text-default-600 capitalize'>
+                      <div className='text-sm leading-none text-default-600 capitalize'>
                         <div className='font-semibold'>{item.userName}</div>
 
-                        <div className='text-small tracking-tight text-default-400 capitalize'>
+                        <div className='text-xs tracking-tight text-default-400 capitalize'>
                           {item.role || '-'}
                         </div>
                       </div>

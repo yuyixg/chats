@@ -171,13 +171,13 @@ export const EditModelModal = (props: IProps) => {
               />
             ))}
             <DialogFooter className='pt-4'>
-              <Button
+              {/* <Button
                 disabled={deleting}
                 variant='destructive'
                 onClick={onDelete}
               >
                 {t('Delete')}
-              </Button>
+              </Button> */}
               <Button type='submit'>{t('Save')}</Button>
             </DialogFooter>
           </form>

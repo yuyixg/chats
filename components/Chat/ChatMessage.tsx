@@ -127,8 +127,8 @@ export const ChatMessage: FC<Props> = memo(
       <div
         className={`group md:px-4 ${
           message.role === 'assistant'
-            ? 'border-b border-black/10 bg-gray-50 text-gray-800 dark:border-gray-900/50 dark:bg-[#444654] dark:text-gray-100'
-            : 'border-b border-black/10 bg-white text-gray-800 dark:border-gray-900/50 dark:bg-[#343541] dark:text-gray-100'
+            ? 'text-gray-800 dark:text-gray-100'
+            : 'text-gray-800 dark:text-gray-100'
         }`}
         style={{ overflowWrap: 'anywhere' }}
       >
@@ -191,7 +191,7 @@ export const ChatMessage: FC<Props> = memo(
                       {message.content?.image &&
                         message.content.image.map((img, index) => (
                           <img
-                            className='rounded-lg mr-2'
+                            className='rounded-md mr-2'
                             key={index}
                             style={{ maxWidth: 268, maxHeight: 168 }}
                             src={img}

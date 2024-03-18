@@ -10,7 +10,7 @@ export const CloseSidebarButton = ({ onClick, side }: Props) => {
         side === 'right' ? 'right-[260px]' : 'left-[260px]'
       }`}
       onClick={onClick}
-      style={{ top: 4 }}
+      style={{ top: 'calc(50% - 72px)' }}
     >
       <button>
         <div className='flex h-[32px] w-8 items-center justify-center'>
@@ -36,7 +36,7 @@ export const OpenSidebarButton = ({ onClick, side }: Props) => {
     <div
       className={`group fixed z-50 ${side === 'right' ? 'right-2' : 'left-2'}`}
       onClick={onClick}
-      style={{ top: 4 }}
+      style={{ top: 'calc(50% - 72px)' }}
     >
       <button>
         <span data-state='closed'>

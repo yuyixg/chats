@@ -5,10 +5,7 @@ import { oneDark } from 'react-syntax-highlighter/dist/cjs/styles/prism';
 
 import { useTranslation } from 'next-i18next';
 
-import {
-  generateRandomString,
-  programmingLanguages,
-} from '@/utils/codeblock';
+import { generateRandomString, programmingLanguages } from '@/utils/codeblock';
 
 interface Props {
   language: string;
@@ -60,7 +57,7 @@ export const CodeBlock: FC<Props> = memo(({ language, value }) => {
     URL.revokeObjectURL(url);
   };
   return (
-    <div className='codeblock relative font-sans text-[16px]'>
+    <div className='codeblock rounded-sm bg-gray-950 relative font-sans text-[16px]'>
       <div className='flex items-center justify-between py-1.5 px-4'>
         <span className='text-xs lowercase text-white'>{language}</span>
 
@@ -84,7 +81,11 @@ export const CodeBlock: FC<Props> = memo(({ language, value }) => {
       <SyntaxHighlighter
         language={language}
         style={oneDark}
-        customStyle={{ margin: 0 }}
+        customStyle={{
+          margin: 0,
+          borderBottomRightRadius: 12,
+          borderBottomLeftRadius: 12,
+        }}
       >
         {value}
       </SyntaxHighlighter>

@@ -108,7 +108,7 @@ const AdminLayout = ({
               Chats
             </span>
           </a>
-          <ul className='space-y-2 font-medium text-[15px]'>
+          <ul className='space-y-2 font-medium text-[14px]'>
             {menus.map((m) => {
               return MenuItem(m);
             })}
@@ -117,7 +117,7 @@ const AdminLayout = ({
           {user && (
             <ul className='w-full font-medium absolute bottom-0 right-0 left-0'>
               <li>
-                <div className='flex h-16 cursor-pointer items-center border-t text-gray-900 transition duration-75 group pl-4'>
+                <div className='flex h-16 cursor-pointer items-center text-gray-900 transition duration-75 group pl-4'>
                   <Avatar className='w-8 h-8'>
                     <AvatarFallback>
                       {user?.username[0].toUpperCase()}
