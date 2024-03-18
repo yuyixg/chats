@@ -1,6 +1,13 @@
 import type { NextApiRequest, NextApiResponse } from 'next';
-import { ChatBody, QianWenContent, QianWenMessage } from '@/types/chat';
-import { QianWenStream, QianWenStreamResult } from '@/services/qianwen';
+import { DEFAULT_TEMPERATURE } from '@/utils/const';
+import { LingYiStream, LingYiSteamResult } from '@/services/lingyi';
+import {
+  ChatBody,
+  GPT4Message,
+  GPT4VisionMessage,
+  GPT4VisionContent,
+} from '@/types/chat';
+import { ModelVersions } from '@/types/model';
 import {
   ChatMessageManager,
   ChatModelManager,
@@ -22,6 +29,7 @@ export const config = {
   },
   maxDuration: 5,
 };
+
 const handler = async (req: NextApiRequest, res: NextApiResponse) => {
   try {
     const session = await getSession(req.cookies);
@@ -50,47 +58,64 @@ const handler = async (req: NextApiRequest, res: NextApiResponse) => {
       return badRequest(res, verifyMessage);
     }
 
-    let messagesToSend: QianWenMessage[] = [];
+    let promptToSend = prompt;
+    if (!promptToSend) {
+      promptToSend = chatModel.modelConfig.prompt;
+    }
 
-    messagesToSend = messages.map((message) => {
-      const messageContent = message.content;
-      let content = [] as QianWenContent[];
-      if (messageContent?.image) {
-        messageContent.image.forEach((url) => {
-          content.push({
-            image: url,
+    let temperatureToUse = temperature;
+    if (temperatureToUse == null) {
+      temperatureToUse = DEFAULT_TEMPERATURE;
+    }
+
+    let messagesToSend: GPT4Message[] | GPT4VisionMessage[] = [];
+
+    if (chatModel.modelVersion === ModelVersions.yi_vl_plus) {
+      messagesToSend = messages.map((message) => {
+        const messageContent = message.content;
+        let content = [] as GPT4VisionContent[];
+        if (messageContent?.image) {
+          messageContent.image.forEach((url) => {
+            content.push({
+              type: 'image_url',
+              image_url: { url },
+            });
           });
-        });
-      }
-      if (messageContent?.text) {
-        content.push({ text: messageContent.text });
-      }
+        }
+        if (messageContent?.text) {
+          content.push({ type: 'text', text: messageContent.text });
+        }
+        return { role: message.role, content };
+      });
+    } else {
+      messagesToSend = messages.map((message) => {
+        return {
+          role: message.role,
+          content: message.content.text,
+        } as GPT4Message;
+      });
+    }
 
-      return { role: message.role, content };
-    });
-
-    const stream = await QianWenStream(
+    const stream = await LingYiStream(
       chatModel,
-      prompt,
-      temperature,
+      promptToSend,
+      temperatureToUse,
       messagesToSend
     );
-
     let assistantMessage = '';
+    res.setHeader('Content-Type', 'application/octet-stream');
     if (stream.getReader) {
       const reader = stream.getReader();
-      let result = {} as QianWenStreamResult;
-      let tokenCount = 0;
+      let result = {} as LingYiSteamResult;
       const streamResponse = async () => {
         while (true) {
           const { done, value } = await reader.read();
           if (value) {
-            result = JSON.parse(value);
+            result = JSON.parse(value) as LingYiSteamResult;
             assistantMessage += result.text;
           }
           if (done) {
-            const { input_tokens, output_tokens, image_tokens } = result.usage;
-            tokenCount += input_tokens + (image_tokens || 0) + output_tokens;
+            const tokenCount = result.usage.total_tokens;
             messages.push({
               role: 'assistant',
               content: { text: assistantMessage },

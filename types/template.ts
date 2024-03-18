@@ -18,6 +18,11 @@ type QianFanApiConfig = {
   secret: string;
 };
 
+type LingYiApiConfig = {
+  apiKey: string;
+  host: string;
+};
+
 export const ModelDefaultTemplates = {
   [ModelVersions.GPT_3_5]: {
     type: ModelType.GPT,
@@ -94,5 +99,39 @@ export const ModelDefaultTemplates = {
       prompt:
         "You are an AI assistant, Follow the user's instructions carefully. Respond using markdown.",
     },
+  },
+  [ModelVersions.yi_34b_chat_0205]: {
+    type: ModelType.LingYi,
+    apiConfig: {
+      host: 'https://api.lingyiwanwu.com/',
+      apiKey: '',
+    } as LingYiApiConfig,
+    modelConfig: {
+      prompt:
+        "You are an AI assistant, Follow the user's instructions carefully. Respond using markdown.",
+    },
+  },
+  [ModelVersions.yi_34b_chat_200k]: {
+    type: ModelType.LingYi,
+    apiConfig: {
+      host: 'https://api.lingyiwanwu.com/',
+      apiKey: '',
+    } as LingYiApiConfig,
+    modelConfig: {
+      prompt:
+        "You are an AI assistant, Follow the user's instructions carefully. Respond using markdown.",
+    },
+  },
+  [ModelVersions.yi_vl_plus]: {
+    type: ModelType.LingYi,
+    apiConfig: {
+      host: 'https://api.lingyiwanwu.com/',
+      apiKey: '',
+    } as LingYiApiConfig,
+    modelConfig: {
+      prompt:
+        "You are an AI assistant with image understanding capabilities, Follow the user's instructions carefully. Respond using markdown.",
+    },
+    imgConfig: {},
   },
 };

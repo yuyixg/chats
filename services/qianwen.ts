@@ -7,7 +7,7 @@ import {
 } from 'eventsource-parser';
 import { ChatModels } from '@/dbs';
 
-export interface StreamResult {
+export interface QianWenStreamResult {
   text: string;
   usage: {
     input_tokens: number;

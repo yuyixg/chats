@@ -1,6 +1,6 @@
 import type { NextApiRequest, NextApiResponse } from 'next';
 import { ChatBody, QianFanMessage } from '@/types/chat';
-import { QianFanStream, SteamResult } from '@/services/qianfan';
+import { QianFanStream, QianFanSteamResult } from '@/services/qianfan';
 import {
   ChatMessageManager,
   ChatModelManager,
@@ -72,12 +72,12 @@ export default async function handler(
     let assistantMessage = '';
     if (stream.getReader) {
       const reader = stream.getReader();
-      let result = {} as SteamResult;
+      let result = {} as QianFanSteamResult;
       const streamResponse = async () => {
         while (true) {
           const { done, value } = await reader.read();
           if (value) {
-            result = JSON.parse(value) as SteamResult;
+            result = JSON.parse(value) as QianFanSteamResult;
             assistantMessage += result.text;
           }
           if (done) {

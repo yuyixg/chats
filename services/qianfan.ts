@@ -13,7 +13,7 @@ export const ModelEndpoint: { [key in ModelVersions]?: string } = {
   [ModelVersions.ERNIE_Bot_8K]: 'ernie_bot_8k',
 };
 
-export interface SteamResult {
+export interface QianFanSteamResult {
   text: string;
   usage: {
     prompt_tokens: number;
