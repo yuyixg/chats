@@ -1,9 +1,17 @@
-import { FormEvent, useEffect, useState } from 'react';
+import { useEffect, useState } from 'react';
 import { useRouter } from 'next/router';
-import { UserSession, saveUserSession } from '@/utils/user';
+import { UserSession, getUserSession, saveUserSession } from '@/utils/user';
 import toast from 'react-hot-toast';
 import { serverSideTranslations } from 'next-i18next/serverSideTranslations';
 import { useTranslation } from 'react-i18next';
+import { FormFieldType, IFormFieldOption } from '@/components/ui/form/type';
+import FormInput from '@/components/ui/form/input';
+import { z } from 'zod';
+import { useForm } from 'react-hook-form';
+import { zodResolver } from '@hookform/resolvers/zod';
+import { Form, FormField } from '@/components/ui/form';
+import { Button } from '@/components/ui/button';
+import FormCheckbox from '@/components/ui/form/checkbox';
 
 export default function LoginPage() {
   const { t } = useTranslation('login');
@@ -11,17 +19,62 @@ export default function LoginPage() {
   const [loginLoading, setLoginLoading] = useState(false);
   const [isClient, setIsClient] = useState(false);
 
+  const formFields: IFormFieldOption[] = [
+    {
+      name: 'username',
+      label: t('Your username'),
+      defaultValue: '',
+      render: (options: IFormFieldOption, field: FormFieldType) => (
+        <FormInput options={options} field={field} />
+      ),
+    },
+    {
+      name: 'password',
+      label: t('Your password'),
+      defaultValue: '',
+      render: (options: IFormFieldOption, field: FormFieldType) => (
+        <FormInput type='password' options={options} field={field} />
+      ),
+    },
+    {
+      name: 'remember',
+      label: t('Remember me'),
+      defaultValue: true,
+      render: (options: IFormFieldOption, field: FormFieldType) => (
+        <FormCheckbox options={options} field={field} />
+      ),
+    },
+  ];
+
+  const formSchema = z.object({
+    username: z.string().min(1, `${t('Please enter you user name')}`),
+    password: z.string().min(1, `${t('Please enter you password')}`),
+    remember: z.boolean(),
+  });
+
+  const form = useForm<z.infer<typeof formSchema>>({
+    resolver: zodResolver(formSchema),
+    defaultValues: formFields.reduce((obj: any, field) => {
+      obj[field.name] = field.defaultValue;
+      return obj;
+    }, {}),
+  });
+
   useEffect(() => {
+    form.formState.isValid;
+    const userInfo = getUserSession();
+    if (userInfo) {
+      const { username, password } = userInfo;
+      form.setValue('username', username);
+      form.setValue('password', password);
+    }
     setIsClient(true);
   }, []);
-  async function handleSubmit(event: FormEvent<HTMLFormElement>) {
-    event.preventDefault();
-    setLoginLoading(true);
-    const formData = new FormData(event.currentTarget);
-    const username = formData.get('username');
-    const password = formData.get('password');
-    const remember = formData.get('remember');
 
+  async function onSubmit(values: z.infer<typeof formSchema>) {
+    if (!form.formState.isValid) return;
+    setLoginLoading(true);
+    const { username, password, remember } = values;
     const response = await fetch('/api/login', {
       method: 'POST',
       headers: { 'Content-Type': 'application/json' },
@@ -30,10 +83,15 @@ export default function LoginPage() {
 
     if (response.ok) {
       const user = (await response.json()) as UserSession;
-      document.cookie = `sessionId=${user.sessionId}; path=/`;
+      let expires = new Date();
+      expires.setDate(expires.getDate() + 1);
+      console.log(expires.toLocaleString());
+      document.cookie = `sessionId=${
+        user.sessionId
+      }; expires=${expires.toUTCString()}; path=/`;
       saveUserSession({
         ...user,
-        password: remember === 'on' ? `${password}` : '',
+        password: remember ? `${password}` : '',
       });
       router.push('/');
     } else {
@@ -47,7 +105,7 @@ export default function LoginPage() {
       {isClient ? (
         <>
           <div className='flex w-full justify-center'>
-            <div className='relative p-4 mt-6 w-full max-w-md max-h-full'>
+            <div className='relative p-4 mt-32 w-full max-w-md max-h-full'>
               <div className='relative bg-white rounded-lg shadow dark:bg-gray-700'>
                 <div className='flex items-center justify-between p-4 md:p-5 border-b rounded-t dark:border-gray-600'>
                   <h3 className='text-xl font-semibold text-gray-900 dark:text-white'>
@@ -55,59 +113,29 @@ export default function LoginPage() {
                   </h3>
                 </div>
                 <div className='p-4 md:p-5'>
-                  <form
-                    className='space-y-4'
-                    name='loginForm'
-                    onSubmit={handleSubmit}
-                  >
-                    <div>
-                      <label className='block mb-2 text-sm font-medium text-gray-900 dark:text-white'>
-                        {t('Your username')}
-                      </label>
-                      <input
-                        type='text'
-                        name='username'
-                        className='bg-gray-50 border border-gray-300 text-gray-900 text-sm rounded-lg focus:ring-blue-500 focus:border-blue-500 block w-full p-2.5 dark:bg-gray-600 dark:border-gray-500 dark:placeholder-gray-400 dark:text-white'
-                        placeholder=''
-                        required
-                      />
-                    </div>
-                    <div>
-                      <label className='block mb-2 text-sm font-medium text-gray-900 dark:text-white'>
-                        {t('Your password')}
-                      </label>
-                      <input
-                        type='password'
-                        name='password'
-                        placeholder=''
-                        className='bg-gray-50 border border-gray-300 text-gray-900 text-sm rounded-lg focus:ring-blue-500 focus:border-blue-500 block w-full p-2.5 dark:bg-gray-600 dark:border-gray-500 dark:placeholder-gray-400 dark:text-white'
-                        required
-                      />
-                    </div>
-                    {/* <div className='flex justify-between'>
-                      <div className='flex items-start'>
-                        <div className='flex items-center h-5'>
-                          <input
-                            type='checkbox'
-                            name='remember'
-                            className='w-4 h-4 border border-gray-300 rounded bg-gray-50 focus:ring-3 focus:ring-blue-300 dark:bg-gray-600 dark:border-gray-500 dark:focus:ring-blue-600 dark:ring-offset-gray-800 dark:focus:ring-offset-gray-800'
-                          />
-                        </div>
-                        <label className='ms-2 text-sm font-medium text-gray-900 dark:text-gray-300'>
-                          {t('Remember me')}
-                        </label>
+                  <Form {...form}>
+                    <form onSubmit={form.handleSubmit(onSubmit)}>
+                      {formFields.map((item) => (
+                        <FormField
+                          key={item.name}
+                          control={form.control}
+                          name={item.name as never}
+                          render={({ field }) => item.render(item, field)}
+                        />
+                      ))}
+                      <div className='w-full flex justify-center'>
+                        <Button
+                          className='w-52'
+                          disabled={loginLoading}
+                          type='submit'
+                        >
+                          {loginLoading
+                            ? t('Logging in...')
+                            : t('Login to your account')}
+                        </Button>
                       </div>
-                    </div> */}
-                    <button
-                      disabled={loginLoading}
-                      type='submit'
-                      className='w-full text-white bg-blue-700 hover:bg-blue-800 focus:ring-4 focus:outline-none focus:ring-blue-300 font-medium rounded-lg text-sm px-5 py-2.5 text-center dark:bg-blue-600 dark:hover:bg-blue-700 dark:focus:ring-blue-800'
-                    >
-                      {loginLoading
-                        ? t('Logging in...')
-                        : t('Login to your account')}
-                    </button>
-                  </form>
+                    </form>
+                  </Form>
                 </div>
               </div>
             </div>
