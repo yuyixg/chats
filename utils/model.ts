@@ -1,5 +1,6 @@
 import { UserModel } from '@/dbs/userModels';
-import { ChatModelConfig } from '@/types/model';
+import { ChatModelConfig, ModelConfigType, ModelVersions } from '@/types/model';
+import { ModelDefaultTemplates } from '@/types/template';
 
 export function verifyModel(model: UserModel, config: ChatModelConfig) {
   const { maxLength = 0 } = config;
@@ -29,4 +30,21 @@ export function verifyModel(model: UserModel, config: ChatModelConfig) {
   }
 
   return null;
+}
+
+export function getModelConfigs(
+  modelVersion: ModelVersions | undefined,
+  configType: ModelConfigType
+) {
+  if (!modelVersion) return null;
+  const template = ModelDefaultTemplates[modelVersion] as any;
+  return template[configType] || null;
+}
+
+export function mergeModelConfigs(obj1: any, obj2: any) {
+  const config = Object.keys(obj1 || {}).reduce((result: any, key) => {
+    result[key] = obj2[key] || null;
+    return result;
+  }, {});
+  return JSON.stringify(config, null, 2);
 }

@@ -23,28 +23,37 @@ type LingYiApiConfig = {
   host: string;
 };
 
+const gptDefaultApiConfig = {
+  host: '',
+  apiKey: '',
+  version: '2023-12-01-preview',
+  type: 'openai',
+};
+
+const qianFanDefaultApiConfig = {
+  host: 'https://aip.baidubce.com',
+  apiKey: '',
+  secret: '',
+};
+
+const lingYiDefaultApiConfig = {
+  host: 'https://api.lingyiwanwu.com/',
+  apiKey: '',
+};
+
 export const ModelDefaultTemplates = {
   [ModelVersions.GPT_3_5]: {
     type: ModelType.GPT,
-    apiConfig: {
-      host: '',
-      apiKey: '',
-      version: '2023-12-01-preview',
-      type: 'openai',
-    } as ChatGPTApiConfig,
+    apiConfig: gptDefaultApiConfig as ChatGPTApiConfig,
     modelConfig: {
       prompt:
         "You are ChatGPT, a large language model trained by OpenAI. Follow the user's instructions carefully. Respond using markdown.",
     },
+    imgConfig: null,
   },
   [ModelVersions.GPT_4]: {
     type: ModelType.GPT,
-    apiConfig: {
-      host: '',
-      apiKey: '',
-      version: '2023-12-01-preview',
-      type: 'openai',
-    } as ChatGPTApiConfig,
+    apiConfig: gptDefaultApiConfig as ChatGPTApiConfig,
     modelConfig: {
       prompt:
         "You are ChatGPT, a large language model trained by OpenAI. Follow the user's instructions carefully. Respond using markdown.",
@@ -52,17 +61,12 @@ export const ModelDefaultTemplates = {
   },
   [ModelVersions.GPT_4_Vision]: {
     type: ModelType.GPT,
-    apiConfig: {
-      host: '',
-      apiKey: '',
-      version: '2023-12-01-preview',
-      type: 'openai',
-    } as ChatGPTApiConfig,
+    apiConfig: gptDefaultApiConfig as ChatGPTApiConfig,
     modelConfig: {
       prompt:
         "You are ChatGPT, a large language model trained by OpenAI. Follow the user's instructions carefully. Respond using markdown.",
     },
-    imgConfig: {},
+    imgConfig: { count: 5, maxSize: 10240 },
   },
   [ModelVersions.QWen_Vl_Plus]: {
     type: ModelType.QianWen,
@@ -74,15 +78,11 @@ export const ModelDefaultTemplates = {
       prompt:
         "You are an AI assistant with image understanding capabilities, Follow the user's instructions carefully. Respond using markdown.",
     },
-    imgConfig: {},
+    imgConfig: { count: 5, maxSize: 10240 },
   },
   [ModelVersions.ERNIE_Bot_4]: {
     type: ModelType.QianFan,
-    apiConfig: {
-      host: 'https://aip.baidubce.com',
-      apiKey: '',
-      secret: '',
-    } as QianFanApiConfig,
+    apiConfig: qianFanDefaultApiConfig as QianFanApiConfig,
     modelConfig: {
       prompt:
         "You are an AI assistant, Follow the user's instructions carefully. Respond using markdown.",
@@ -90,11 +90,7 @@ export const ModelDefaultTemplates = {
   },
   [ModelVersions.ERNIE_Bot_8K]: {
     type: ModelType.QianFan,
-    apiConfig: {
-      host: 'https://aip.baidubce.com',
-      apiKey: '',
-      secret: '',
-    } as QianFanApiConfig,
+    apiConfig: qianFanDefaultApiConfig as QianFanApiConfig,
     modelConfig: {
       prompt:
         "You are an AI assistant, Follow the user's instructions carefully. Respond using markdown.",
@@ -102,10 +98,7 @@ export const ModelDefaultTemplates = {
   },
   [ModelVersions.yi_34b_chat_0205]: {
     type: ModelType.LingYi,
-    apiConfig: {
-      host: 'https://api.lingyiwanwu.com/',
-      apiKey: '',
-    } as LingYiApiConfig,
+    apiConfig: lingYiDefaultApiConfig as LingYiApiConfig,
     modelConfig: {
       prompt:
         "You are an AI assistant, Follow the user's instructions carefully. Respond using markdown.",
@@ -113,10 +106,7 @@ export const ModelDefaultTemplates = {
   },
   [ModelVersions.yi_34b_chat_200k]: {
     type: ModelType.LingYi,
-    apiConfig: {
-      host: 'https://api.lingyiwanwu.com/',
-      apiKey: '',
-    } as LingYiApiConfig,
+    apiConfig: lingYiDefaultApiConfig as LingYiApiConfig,
     modelConfig: {
       prompt:
         "You are an AI assistant, Follow the user's instructions carefully. Respond using markdown.",
@@ -124,10 +114,7 @@ export const ModelDefaultTemplates = {
   },
   [ModelVersions.yi_vl_plus]: {
     type: ModelType.LingYi,
-    apiConfig: {
-      host: 'https://api.lingyiwanwu.com/',
-      apiKey: '',
-    } as LingYiApiConfig,
+    apiConfig: lingYiDefaultApiConfig as LingYiApiConfig,
     modelConfig: {
       prompt:
         "You are an AI assistant with image understanding capabilities, Follow the user's instructions carefully. Respond using markdown.",

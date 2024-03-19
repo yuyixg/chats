@@ -44,7 +44,16 @@ export class UserModelManager {
         {
           attributes: ['username', 'role'],
           model: Users,
-          where: { username: { [Op.like]: `%${query}%` } },
+          where: {
+            [Op.or]: [
+              {
+                username: { [Op.like]: `%${query}%` },
+              },
+              {
+                role: { [Op.like]: `%${query}%` },
+              },
+            ],
+          },
         },
       ],
       order: [['createdAt', 'DESC']],

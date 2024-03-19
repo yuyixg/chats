@@ -12,7 +12,10 @@ export class ChatModelManager {
     const where = { enable: true };
     return await ChatModels.findAll({
       where: findAll ? {} : where,
-      order: [['rank', 'asc']],
+      order: [
+        ['rank', 'asc'],
+        ['createdAt', 'asc'],
+      ],
     });
   }
 

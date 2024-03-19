@@ -40,3 +40,5 @@ export interface ChatModelConfig {
   maxLength?: number;
   tokenLimit?: number;
 }
+
+export type ModelConfigType = 'imgConfig' | 'apiConfig' | 'modelConfig';

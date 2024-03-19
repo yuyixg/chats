@@ -19,6 +19,7 @@ import FormInput from '../../ui/form/input';
 import FormSwitch from '../../ui/form/switch';
 import FormTextarea from '../../ui/form/textarea';
 import { Button } from '../../ui/button';
+import { getModelConfigs, mergeModelConfigs } from '@/utils/model';
 
 interface IProps {
   isOpen: boolean;
@@ -65,14 +66,22 @@ export const EditModelModal = (props: IProps) => {
       name: 'modelConfig',
       label: t('Model Configs'),
       render: (options: IFormFieldOption, field: FormFieldType) => (
-        <FormTextarea options={options} field={field} />
+        <FormTextarea
+          hidden={!getModelConfigs(selected?.modelVersion, 'modelConfig')}
+          options={options}
+          field={field}
+        />
       ),
     },
     {
       name: 'imgConfig',
       label: t('Image Configs'),
       render: (options: IFormFieldOption, field: FormFieldType) => (
-        <FormTextarea options={options} field={field} />
+        <FormTextarea
+          hidden={!getModelConfigs(selected?.modelVersion, 'imgConfig')}
+          options={options}
+          field={field}
+        />
       ),
     },
   ];
@@ -148,9 +157,27 @@ export const EditModelModal = (props: IProps) => {
       form.setValue('name', selected?.name);
       form.setValue('modelId', selected?.modelId);
       form.setValue('enable', selected?.enable);
-      form.setValue('apiConfig', selected?.apiConfig);
-      form.setValue('modelConfig', selected?.modelConfig);
-      form.setValue('imgConfig', selected?.imgConfig);
+      form.setValue(
+        'apiConfig',
+        mergeModelConfigs(
+          getModelConfigs(selected!.modelVersion, 'apiConfig'),
+          JSON.parse(selected?.apiConfig || '{}')
+        )
+      );
+      form.setValue(
+        'modelConfig',
+        mergeModelConfigs(
+          getModelConfigs(selected!.modelVersion, 'modelConfig'),
+          JSON.parse(selected?.modelConfig || '{}')
+        )
+      );
+      form.setValue(
+        'imgConfig',
+        mergeModelConfigs(
+          getModelConfigs(selected!.modelVersion, 'imgConfig'),
+          JSON.parse(selected?.imgConfig || '{}')
+        )
+      );
     }
   }, [isOpen]);
 

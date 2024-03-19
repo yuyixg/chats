@@ -20,8 +20,8 @@ import FormTextarea from '../../ui/form/textarea';
 import { Button } from '../../ui/button';
 import FormSelect from '@/components/ui/form/select';
 import { ModelVersions } from '@/types/model';
-import { ModelDefaultTemplates } from '@/types/template';
 import { PostModelParams } from '@/types/admin';
+import { getModelConfigs } from '@/utils/model';
 
 interface IProps {
   isOpen: boolean;
@@ -78,7 +78,16 @@ export const AddModelModal = (props: IProps) => {
       label: t('Model Configs'),
       defaultValue: '',
       render: (options: IFormFieldOption, field: FormFieldType) => (
-        <FormTextarea options={options} field={field} />
+        <FormTextarea
+          hidden={
+            !getModelConfigs(
+              form.getValues('modelVersion') as ModelVersions,
+              'modelConfig'
+            )
+          }
+          options={options}
+          field={field}
+        />
       ),
     },
     {
@@ -86,7 +95,16 @@ export const AddModelModal = (props: IProps) => {
       label: t('Image Configs'),
       defaultValue: '',
       render: (options: IFormFieldOption, field: FormFieldType) => (
-        <FormTextarea options={options} field={field} />
+        <FormTextarea
+          hidden={
+            !getModelConfigs(
+              form.getValues('modelVersion') as ModelVersions,
+              'imgConfig'
+            )
+          }
+          options={options}
+          field={field}
+        />
       ),
     },
   ];
@@ -149,12 +167,18 @@ export const AddModelModal = (props: IProps) => {
   useEffect(() => {
     const subscription = form.watch((value, { name, type }) => {
       if (name === 'modelVersion' && type === 'change') {
-        const template =
-          ModelDefaultTemplates[value.modelVersion as ModelVersions];
-        form.setValue('apiConfig', JSON.stringify(template.apiConfig, null, 2));
+        const modelVersion = value.modelVersion as ModelVersions;
+        form.setValue(
+          'apiConfig',
+          JSON.stringify(getModelConfigs(modelVersion, 'apiConfig'), null, 2)
+        );
         form.setValue(
           'modelConfig',
-          JSON.stringify({ ...template.modelConfig }, null, 2)
+          JSON.stringify(getModelConfigs(modelVersion, 'modelConfig'), null, 2)
+        );
+        form.setValue(
+          'imgConfig',
+          JSON.stringify(getModelConfigs(modelVersion, 'imgConfig'), null, 2)
         );
       }
     });

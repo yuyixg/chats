@@ -5,12 +5,14 @@ import { FormFieldType, IFormFieldOption } from './type';
 const FormTextarea = ({
   options,
   field,
+  hidden,
 }: {
   options: IFormFieldOption;
   field: FormFieldType;
+  hidden?: boolean;
 }) => {
   return (
-    <FormItem className='py-2'>
+    <FormItem className='py-2' hidden={hidden}>
       <FormLabel>{options.label}</FormLabel>
       <FormControl>
         <Textarea
