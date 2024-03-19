@@ -1,5 +1,6 @@
 import {
   IconChartPie,
+  IconLogout,
   IconMessageCircle,
   IconMessages,
   IconSettingsCog,
@@ -8,7 +9,12 @@ import {
 } from '@tabler/icons-react';
 import { useTranslation } from 'next-i18next';
 import { useRouter } from 'next/router';
-import { UserSession, getUserSession } from '@/utils/user';
+import {
+  UserSession,
+  clearUserSession,
+  getLoginUrl,
+  getUserSession,
+} from '@/utils/user';
 import { useEffect, useState } from 'react';
 import { Avatar, AvatarFallback } from '@/components/ui/avatar';
 
@@ -31,6 +37,11 @@ const AdminLayout = ({
     return pathName === router.pathname
       ? 'bg-gray-100 shadow-sm text-700'
       : 'text-gray-600';
+  };
+
+  const logout = () => {
+    clearUserSession();
+    router.push(getLoginUrl());
   };
 
   const menus = [
@@ -115,15 +126,22 @@ const AdminLayout = ({
           </ul>
 
           {user && (
-            <ul className='w-full font-medium absolute bottom-0 right-0 left-0'>
+            <ul className='w-full font-medium text-[14px] absolute bottom-0 right-0 left-0'>
               <li>
-                <div className='flex h-16 cursor-pointer items-center text-gray-900 transition duration-75 group pl-4'>
-                  <Avatar className='w-8 h-8'>
-                    <AvatarFallback>
-                      {user?.username[0].toUpperCase()}
-                    </AvatarFallback>
-                  </Avatar>
-                  <span className='ms-3 capitalize'>{user?.username}</span>
+                <div className='flex h-16 cursor-pointer items-center justify-between text-gray-900 transition duration-75 group pl-4 pr-4'>
+                  <div className='flex items-center'>
+                    <Avatar className='w-8 h-8'>
+                      <AvatarFallback>
+                        {user?.username[0].toUpperCase()}
+                      </AvatarFallback>
+                    </Avatar>
+                    <span className='ms-3 capitalize'>{user?.username}</span>
+                  </div>
+                  <IconLogout
+                    onClick={logout}
+                    className='text-gray-500'
+                    size={18}
+                  />
                 </div>
               </li>
             </ul>
