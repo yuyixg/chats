@@ -1,7 +1,10 @@
-import { ChatMessages, ChatModels } from '@/dbs';
+import { ChatMessages, ChatModels, Users } from '@/dbs';
 import { Message } from '@/types/chat';
 import { UserModelManager } from './userModels';
-import { UserModel } from '@/dbs/userModels';
+import UserModels, { UserModel } from '@/dbs/userModels';
+import { Op } from 'sequelize';
+import { UserChatMessage } from '@/types/message';
+import { PageResult } from '@/types/page';
 
 export interface CreateMessage {
   id: string;
@@ -21,6 +24,26 @@ export class ChatMessageManager {
         userId,
       },
     });
+  }
+
+  static async findMessages(query: string) {
+    const messages = (await ChatMessages.findAndCountAll({
+      include: {
+        attributes: ['username', 'role'],
+        model: Users,
+        where: {
+          [Op.or]: [
+            {
+              username: { [Op.like]: `%${query}%` },
+            },
+            {
+              role: { [Op.like]: `%${query}%` },
+            },
+          ],
+        },
+      },
+    })) as PageResult<UserChatMessage[]>;
+    return messages;
   }
 
   static async updateMessageById(

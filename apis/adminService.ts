@@ -2,6 +2,8 @@ import { useFetch } from '@/hooks/useFetch';
 import {
   CreateUserParams,
   GetModelResult,
+  GetUserMessageParams,
+  GetUserMessageResult,
   GetUserModelResult,
   GetUsersResult,
   PostModelParams,
@@ -10,6 +12,7 @@ import {
   PutUserModelParams,
   PutUserParams,
 } from '@/types/admin';
+import { PageResult } from '@/types/page';
 
 export const getUserModels = (
   query?: string
@@ -73,4 +76,14 @@ export const putUser = (params: PutUserParams) => {
   return fetchService.put('/api/admin/users', {
     body: params,
   });
+};
+
+export const getMessages = (
+  params: GetUserMessageParams
+): Promise<PageResult<GetUserMessageResult[]>> => {
+  const { query = null, page = 1, pageSize = 12 } = params;
+  const fetchService = useFetch();
+  return fetchService.get(
+    `/api/admin/messages?page=${page}&pageSize=${pageSize}&query=${query}`
+  );
 };

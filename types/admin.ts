@@ -1,5 +1,6 @@
 import { UserModel } from '@/dbs/userModels';
 import { ModelVersions, ModelType } from './model';
+import { Paging } from './page';
 
 export const enum UserRole {
   'admin' = 'admin',
@@ -80,4 +81,18 @@ export interface GetUsersResult {
   createdAt: string;
   updatedAt: string;
   enabled: boolean;
+}
+
+export interface GetUserMessageParams extends Paging {
+  query: string;
+}
+
+export interface GetUserMessageResult {
+  id: string;
+  username: string;
+  chatCount: number;
+  tokenCount: number;
+  name: string;
+  createdAt: string;
+  updatedAt: string;
 }
