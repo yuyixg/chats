@@ -28,6 +28,11 @@ export interface PutUserModelParams {
   models: UserModel[];
 }
 
+export interface PostUserModelParams {
+  userModelIds: string[];
+  modelId: string;
+}
+
 export interface GetModelResult {
   modelId: string;
   modelVersion: ModelVersions;

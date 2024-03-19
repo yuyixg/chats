@@ -1,4 +1,4 @@
-import { getModels, putUserModel } from '@/apis/adminService';
+import { getModels, postUserModel, putUserModel } from '@/apis/adminService';
 import { GetModelResult, GetUserModelResult } from '@/types/admin';
 import { useTranslation } from 'next-i18next';
 import React, { useEffect, useState } from 'react';
@@ -21,6 +21,7 @@ import { Button } from '../../ui/button';
 interface IProps {
   isOpen: boolean;
   selectedModel: GetUserModelResult | null;
+  userModelIds: string[];
   onClose: () => void;
   onSuccessful: () => void;
   saveLoading?: boolean;
@@ -28,7 +29,7 @@ interface IProps {
 
 export const AddUserModelModal = (props: IProps) => {
   const { t } = useTranslation('admin');
-  const { isOpen, selectedModel, onClose, onSuccessful } = props;
+  const { isOpen, selectedModel, userModelIds, onClose, onSuccessful } = props;
   const [select, setSelect] = useState<GetModelResult>();
   const [models, setModel] = useState<GetModelResult[]>([]);
   const [loading, setLoading] = useState(true);
@@ -49,30 +50,37 @@ export const AddUserModelModal = (props: IProps) => {
   }, [isOpen]);
 
   const handleSave = () => {
-    let models = selectedModel!.models || [];
-    const foundModel = models.find((m) => m.modelId === select?.modelId);
-    if (!foundModel) {
-      models.push({ modelId: select?.modelId!, enable: true });
+    let p = null;
+    if (selectedModel) {
+      let models = selectedModel!.models || [];
+      const foundModel = models.find((m) => m.modelId === select?.modelId);
+      if (!foundModel) {
+        models.push({ modelId: select?.modelId!, enable: true });
+      } else {
+        models = models.map((x) => {
+          return x.modelId === select?.modelId ? { ...x, enable: true } : x;
+        });
+      }
+      p = putUserModel({
+        userModelId: selectedModel!.userModelId,
+        models,
+      });
     } else {
-      models = models.map((x) => {
-        return x.modelId === select?.modelId ? { ...x, enable: true } : x;
+      p = postUserModel({
+        userModelIds: userModelIds,
+        modelId: select!.modelId,
       });
     }
-    putUserModel({
-      userModelId: selectedModel!.userModelId,
-      models,
-    })
-      .then(() => {
-        toast.success(t('Save successful!'));
-        onSuccessful();
-      })
-      .catch(() => {
-        toast.error(
-          t(
-            'Operation failed! Please try again later, or contact technical personnel.'
-          )
-        );
-      });
+    p.then(() => {
+      toast.success(t('Save successful!'));
+      onSuccessful();
+    }).catch(() => {
+      toast.error(
+        t(
+          'Operation failed! Please try again later, or contact technical personnel.'
+        )
+      );
+    });
   };
 
   return (

@@ -37,6 +37,14 @@ export class UserModelManager {
     return model ? { ...model, id: data?.id } : null;
   }
 
+  static async findUserModelByIds(ids: string[]) {
+    return await UserModels.findAll({
+      where: {
+        id: ids,
+      },
+    });
+  }
+
   static async findUsersModel(query: string) {
     const data = await UserModels.findAll({
       attributes: ['id', 'userId', 'models'],

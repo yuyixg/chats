@@ -5,6 +5,7 @@ import {
   GetUserModelResult,
   GetUsersResult,
   PostModelParams,
+  PostUserModelParams,
   PutModelParams,
   PutUserModelParams,
   PutUserParams,
@@ -14,12 +15,19 @@ export const getUserModels = (
   query?: string
 ): Promise<GetUserModelResult[]> => {
   const fetchService = useFetch();
-  return fetchService.post('/api/admin/user-models', { body: { query } });
+  return fetchService.get('/api/admin/user-models?query=' + query);
 };
 
 export const putUserModel = (params: PutUserModelParams): Promise<any> => {
   const fetchService = useFetch();
   return fetchService.put('/api/admin/user-models', {
+    body: params,
+  });
+};
+
+export const postUserModel = (params: PostUserModelParams): Promise<any> => {
+  const fetchService = useFetch();
+  return fetchService.post('/api/admin/user-models', {
     body: params,
   });
 };

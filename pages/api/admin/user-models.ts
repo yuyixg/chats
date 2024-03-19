@@ -2,7 +2,7 @@ import type { NextApiRequest, NextApiResponse } from 'next';
 import { ChatModelManager, UserModelManager } from '@/managers';
 import { UserRole } from '@/types/admin';
 import { getSession } from '@/utils/session';
-import { internalServerError } from '@/utils/error';
+import { internalServerError, modelUnauthorized } from '@/utils/error';
 export const config = {
   api: {
     bodyParser: {
@@ -24,12 +24,8 @@ const handler = async (req: NextApiRequest, res: NextApiResponse) => {
   }
 
   try {
-    if (req.method === 'PUT') {
-      const { userModelId, models } = req.body;
-      const data = await UserModelManager.updateUserModel(userModelId, models);
-      return res.json(data);
-    } else {
-      const { query } = req.body;
+    if (req.method === 'GET') {
+      const { query } = req.query as { query: string };
       const userModels = await UserModelManager.findUsersModel(query);
       const models = await ChatModelManager.findModels(true);
       const data = userModels.map((x) => {
@@ -49,6 +45,34 @@ const handler = async (req: NextApiRequest, res: NextApiResponse) => {
         };
       });
       return res.json(data);
+    } else if (req.method === 'PUT') {
+      const { userModelId, models } = req.body;
+      const data = await UserModelManager.updateUserModel(userModelId, models);
+      return res.json(data);
+    } else if (req.method === 'POST') {
+      const { userModelIds, modelId } = req.body;
+      const userModels = await UserModelManager.findUserModelByIds(
+        userModelIds
+      );
+      const model = await ChatModelManager.findModelById(modelId);
+      if (!model) {
+        return modelUnauthorized(res);
+      }
+      userModels.map((um) => {
+        const foundModel = um.models.find((m) => m.modelId === modelId);
+        if (!foundModel) {
+          um.models.push({
+            modelId: modelId,
+            enable: true,
+          });
+        }
+        return um;
+      });
+
+      for (const um of userModels) {
+        await UserModelManager.updateUserModel(um.id!, um.models);
+      }
+      return res.end();
     }
   } catch (error) {
     console.error(error);

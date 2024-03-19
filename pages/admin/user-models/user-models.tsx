@@ -44,7 +44,7 @@ export default function UserModels() {
     });
   };
 
-  const handleShowAddModal = (item: GetUserModelResult) => {
+  const handleShowAddModal = (item: GetUserModelResult | null) => {
     setSelectedUserModel(item);
     setIsOpen({ add: true, edit: false });
   };
@@ -71,6 +71,15 @@ export default function UserModels() {
               setQuery(e.target.value);
             }}
           />
+          <Button
+            onClick={() => {
+              handleShowAddModal(null);
+            }}
+            color='primary'
+          >
+            <IconPlus size={20} />
+            {t('Batch add Model')}
+          </Button>
         </div>
       </div>
       <div className='grid w-full grid-cols-1 sm:grid-cols-1 md:grid-cols-2 xl:grid-cols-3 gap-3'>
@@ -97,7 +106,10 @@ export default function UserModels() {
                         </div>
                       </div>
                     </div>
-                    <Button onClick={() => handleShowAddModal(item)}>
+                    <Button
+                      variant='outline'
+                      onClick={() => handleShowAddModal(item)}
+                    >
                       <IconPlus size={18} />
                     </Button>
                   </div>
@@ -136,6 +148,7 @@ export default function UserModels() {
         })}
       </div>
       <AddUserModelModal
+        userModelIds={userModels.map((x) => x.userModelId)}
         selectedModel={selectedUserModel}
         onSuccessful={init}
         onClose={handleClose}
