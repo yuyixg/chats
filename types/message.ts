@@ -6,6 +6,9 @@ export interface UserChatMessage extends Model {
     username: string;
     role: string;
   };
+  ChatModel: {
+    name: string;
+  };
   id?: string;
   userId: string;
   modelId: string;

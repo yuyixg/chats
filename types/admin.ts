@@ -93,6 +93,7 @@ export interface GetUserMessageResult {
   chatCount: number;
   tokenCount: number;
   name: string;
+  modelName: string;
   createdAt: string;
   updatedAt: string;
 }

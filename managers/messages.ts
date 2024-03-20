@@ -26,22 +26,28 @@ export class ChatMessageManager {
     });
   }
 
-  static async findMessages(query: string) {
+  static async findMessages(query: string, page: number, pageSize: number) {
     const messages = (await ChatMessages.findAndCountAll({
-      include: {
-        attributes: ['username', 'role'],
-        model: Users,
-        where: {
-          [Op.or]: [
-            {
-              username: { [Op.like]: `%${query}%` },
-            },
-            {
-              role: { [Op.like]: `%${query}%` },
-            },
-          ],
+      include: [
+        {
+          attributes: ['username', 'role'],
+          model: Users,
+          where: {
+            [Op.or]: [
+              {
+                username: { [Op.like]: `%${query}` },
+              },
+            ],
+          },
         },
-      },
+        {
+          attributes: ['name'],
+          model: ChatModels,
+        },
+      ],
+      offset: (page - 1) * pageSize,
+      limit: pageSize,
+      order: [['updatedAt', 'DESC']],
     })) as PageResult<UserChatMessage[]>;
     return messages;
   }

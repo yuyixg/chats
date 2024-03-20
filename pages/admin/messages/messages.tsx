@@ -5,7 +5,6 @@ import { getMessages } from '@/apis/adminService';
 import { PageResult, Paging } from '@/types/page';
 import { GetUserMessageResult } from '@/types/admin';
 import { Input } from '@/components/ui/input';
-import { Button } from '@/components/ui/button';
 import { Card } from '@/components/ui/card';
 import {
   Table,
@@ -15,19 +14,25 @@ import {
   TableHeader,
   TableRow,
 } from '@/components/ui/table';
+import PaginationContainer from '@/components/Admin/Pagiation';
 
 export default function Messages() {
   const { t } = useTranslation('admin');
-  const [page, setPage] = useState<Paging>({ page: 1, pageSize: 12 });
-  const [messages, setMessages] =
-    useState<PageResult<GetUserMessageResult[]>>();
+  const [pagination, setPagination] = useState<Paging>({
+    page: 1,
+    pageSize: 12,
+  });
+  const [messages, setMessages] = useState<PageResult<GetUserMessageResult[]>>({
+    count: 0,
+    rows: [],
+  });
   const [query, setQuery] = useState('');
 
   useEffect(() => {
-    getMessages({ ...page, query }).then((data) => {
+    getMessages({ ...pagination, query }).then((data) => {
       setMessages(data);
     });
-  }, []);
+  }, [pagination, query]);
 
   return (
     <>
@@ -47,24 +52,22 @@ export default function Messages() {
         <Table>
           <TableHeader>
             <TableRow>
+              <TableHead>{t('Model Display Name')}</TableHead>
               <TableHead>{t('Title')}</TableHead>
               <TableHead>{t('User Name')}</TableHead>
               <TableHead>{t('Consume tokens')}</TableHead>
               <TableHead>{t('Chat Counts')}</TableHead>
-              <TableHead>{t('Created Time')}</TableHead>
               <TableHead>{t('Updated Time')}</TableHead>
             </TableRow>
           </TableHeader>
           <TableBody>
             {messages?.rows.map((item) => (
               <TableRow key={item.id}>
-                <TableCell>{item.name}</TableCell>
+                <TableCell>{item.modelName}</TableCell>
+                <TableCell className='truncate'>{item.name}</TableCell>
                 <TableCell>{item.username}</TableCell>
                 <TableCell>{item.tokenCount}</TableCell>
                 <TableCell>{item.chatCount}</TableCell>
-                <TableCell>
-                  {new Date(item.createdAt).toLocaleString()}
-                </TableCell>
                 <TableCell>
                   {new Date(item.updatedAt).toLocaleString()}
                 </TableCell>
@@ -72,6 +75,17 @@ export default function Messages() {
             ))}
           </TableBody>
         </Table>
+        {messages.count !== 0 && (
+          <PaginationContainer
+            page={pagination.page}
+            pageSize={pagination.pageSize}
+            currentCount={messages.rows.length}
+            totalCount={messages.count}
+            onPagingChange={(page, pageSize) => {
+              setPagination({ page, pageSize });
+            }}
+          />
+        )}
       </Card>
     </>
   );
@@ -80,7 +94,11 @@ export default function Messages() {
 export const getServerSideProps = async ({ locale }: { locale: string }) => {
   return {
     props: {
-      ...(await serverSideTranslations(locale ?? 'en', ['common', 'admin'])),
+      ...(await serverSideTranslations(locale ?? 'en', [
+        'common',
+        'admin',
+        'pagination',
+      ])),
     },
   };
 };

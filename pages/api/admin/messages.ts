@@ -25,14 +25,23 @@ const handler = async (req: NextApiRequest, res: NextApiResponse) => {
 
   try {
     if (req.method === 'GET') {
-      const { query } = req.query as { query: string };
-      const messages = await ChatMessageManager.findMessages(query);
+      const { query, page, pageSize } = req.query as {
+        query: string;
+        page: string;
+        pageSize: string;
+      };
+      const messages = await ChatMessageManager.findMessages(
+        query,
+        parseInt(page),
+        parseInt(pageSize)
+      );
       const rows = messages.rows.map((x) => {
         return {
           username: x.User.username,
           chatCount: x.chatCount,
           tokenCount: x.tokenCount,
           name: x.name,
+          modelName: x.ChatModel.name,
           createdAt: x.createdAt,
           updatedAt: x.updatedAt,
         };
