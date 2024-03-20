@@ -72,7 +72,6 @@ export default function UserModels() {
             }}
           />
           <Button
-            key='show-batch-add-modal'
             onClick={() => {
               handleShowAddModal(null);
             }}
@@ -108,7 +107,6 @@ export default function UserModels() {
                       </div>
                     </div>
                     <Button
-                      key='show-add-model'
                       variant='outline'
                       onClick={() => handleShowAddModal(item)}
                     >
@@ -132,6 +130,7 @@ export default function UserModels() {
                       .filter((x) => x.enable)
                       .map((model) => (
                         <TableRow
+                          key={model.modelId}
                           onClick={() =>
                             handleShowEditModal(item, model.modelId)
                           }
