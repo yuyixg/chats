@@ -1,10 +1,8 @@
 import { FC, useContext, useState } from 'react';
-
 import { useTranslation } from 'next-i18next';
-
 import { DEFAULT_TEMPERATURE } from '@/utils/const';
+import { HomeContext } from '@/pages/home/home';
 
-import HomeContext from '@/pages/api/home/home.context';
 
 interface Props {
   label: string;

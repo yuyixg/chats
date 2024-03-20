@@ -1,14 +1,8 @@
 import { useContext, useEffect, useState } from 'react';
 import { useTranslation } from 'react-i18next';
-
 import { useCreateReducer } from '@/hooks/useCreateReducer';
-
 import { savePrompts } from '@/utils/prompts';
-
 import { Prompt } from '@/types/prompt';
-
-import HomeContext from '@/pages/api/home/home.context';
-
 import { PromptbarSettings } from './components/PromptbarSettings';
 import { Prompts } from './components/Prompts';
 
@@ -17,6 +11,7 @@ import PromptbarContext from './PromptBar.context';
 import { PromptbarInitialState, initialState } from './Promptbar.state';
 
 import { v4 as uuidv4 } from 'uuid';
+import { HomeContext } from '@/pages/home/home';
 
 const Promptbar = () => {
   const { t } = useTranslation('promptbar');

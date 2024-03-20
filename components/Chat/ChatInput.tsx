@@ -21,12 +21,12 @@ import { useTranslation } from 'next-i18next';
 
 import { Content, Message } from '@/types/chat';
 
-import HomeContext from '@/pages/api/home/home.context';
 import UploadButton from '../UploadButton';
 import { PromptList } from './PromptList';
 import { Prompt } from '@/types/prompt';
 import { VariableModal } from './VariableModal';
 import { isMobile } from '@/utils/common';
+import { HomeContext } from '@/pages/home/home';
 
 interface Props {
   onSend: (message: Message) => void;

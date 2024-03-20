@@ -1,6 +1,4 @@
 import { useCreateReducer } from '@/hooks/useCreateReducer';
-import HomeContext from './home.context';
-import { HomeInitialState, initialState } from './home.state';
 import { Conversation } from '@/types/chat';
 import { v4 as uuidv4 } from 'uuid';
 import { ModelVersions } from '@/types/model';
@@ -27,6 +25,13 @@ import { getSession } from '@/utils/session';
 import { Session } from '@/types/session';
 import { getLoginUrl, getUserSession } from '@/utils/user';
 import { useRouter } from 'next/router';
+import { Dispatch, createContext } from 'react';
+import { ActionType } from '@/hooks/useCreateReducer';
+import { Message } from '@/types/chat';
+import { ErrorMessage } from '@/types/error';
+import { Model } from '@/types/model';
+import { Prompt } from '@/types/prompt';
+import { UserSession } from '@/utils/user';
 
 interface Props {
   serverSideApiKeyIsSet: boolean;
@@ -35,6 +40,63 @@ interface Props {
   session: Session;
   locale: string;
 }
+
+interface HomeInitialState {
+  user: UserSession | null;
+  loading: boolean;
+  lightMode: 'light' | 'dark';
+  messageIsStreaming: boolean;
+  modelError: ErrorMessage | null;
+  modelsLoading: boolean;
+  models: Model[];
+  conversations: Conversation[];
+  selectedConversation: Conversation | undefined;
+  currentMessage: Message | undefined;
+  prompts: Prompt[];
+  temperature: number;
+  showChatbar: boolean;
+  showPromptbar: boolean;
+  messageError: boolean;
+  searchTerm: string;
+  defaultModelId: string | null;
+}
+
+const initialState: HomeInitialState = {
+  user: null,
+  loading: false,
+  lightMode: 'light',
+  messageIsStreaming: false,
+  modelError: null,
+  modelsLoading: false,
+  models: [],
+  conversations: [],
+  selectedConversation: undefined,
+  currentMessage: undefined,
+  prompts: [],
+  temperature: 1,
+  showPromptbar: false,
+  showChatbar: true,
+  messageError: false,
+  searchTerm: '',
+  defaultModelId: null,
+};
+
+interface HomeContextProps {
+  state: HomeInitialState;
+  dispatch: Dispatch<ActionType<HomeInitialState>>;
+  handleNewConversation: () => void;
+  handleSelectConversation: (conversation: Conversation) => void;
+  handleUpdateConversation: (
+    conversation: Conversation,
+    data: KeyValuePair | KeyValuePair[]
+  ) => void;
+  hasModel: () => boolean;
+  getModel: (modeId: string) => Model;
+}
+
+const HomeContext = createContext<HomeContextProps>(undefined!);
+
+export { initialState, HomeContext };
 
 const Home = ({ defaultModelId, locale }: Props) => {
   const router = useRouter();

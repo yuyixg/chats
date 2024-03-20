@@ -1,11 +1,11 @@
 import { useContext, useEffect, useState } from 'react';
 import { useTranslation } from 'next-i18next';
 
-import HomeContext from '@/pages/api/home/home.context';
 
 import cl100k_base from '@dqbd/tiktoken/encoders/cl100k_base.json';
 import { Tiktoken } from '@dqbd/tiktoken/lite';
 import { Content } from '@/types/chat';
+import { HomeContext } from '@/pages/home/home';
 
 export function ChatInputTokenCount(props: { content: Content }) {
   const { t } = useTranslation('chat');

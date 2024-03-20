@@ -16,13 +16,13 @@ import { getEndpoint } from '@/utils/apis';
 import { saveConversation, saveConversations } from '@/utils/conversation';
 import { throttle } from '@/utils/throttle';
 import { ChatBody, Conversation, Message } from '@/types/chat';
-import HomeContext from '@/pages/api/home/home.context';
 import Spinner from '../Spinner';
 import { ChatInput } from './ChatInput';
 import { ChatLoader } from './ChatLoader';
 import { MemoizedChatMessage } from './MemoizedChatMessage';
 import { ModelSelect } from './ModelSelect';
 import { SystemPrompt } from './SystemPrompt';
+import { HomeContext } from '@/pages/home/home';
 
 interface Props {
   stopConversationRef: MutableRefObject<boolean>;

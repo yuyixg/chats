@@ -8,7 +8,6 @@ import { DEFAULT_TEMPERATURE } from '@/utils/const';
 import { saveConversation, saveConversations } from '@/utils/conversation';
 
 import { Conversation } from '@/types/chat';
-import HomeContext from '@/pages/api/home/home.context';
 
 import Sidebar from '../Sidebar';
 import ChatbarContext from './Chatbar.context';
@@ -17,6 +16,7 @@ import { ChatbarInitialState, initialState } from './Chatbar.state';
 import { v4 as uuidv4 } from 'uuid';
 import { Conversations } from './Conversations';
 import { ChatBarSettings } from './ChatbarSettings';
+import { HomeContext } from '@/pages/home/home';
 
 export const Chatbar = () => {
   const { t } = useTranslation('chat');

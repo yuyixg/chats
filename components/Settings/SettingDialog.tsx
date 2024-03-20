@@ -7,8 +7,8 @@ import { useCreateReducer } from '@/hooks/useCreateReducer';
 import { getSettings, saveSettings } from '@/utils/settings';
 
 import { Settings } from '@/types/settings';
+import { HomeContext } from '@/pages/home/home';
 
-import HomeContext from '@/pages/api/home/home.context';
 
 interface Props {
   open: boolean;
