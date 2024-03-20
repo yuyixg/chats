@@ -80,7 +80,7 @@ export default function Users() {
               <TableHead>{t('Role')}</TableHead>
             </TableRow>
           </TableHeader>
-          <TableBody>
+          <TableBody isLoading={loading}>
             {users.map((item) => (
               <TableRow
                 key={item.id}

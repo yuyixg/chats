@@ -152,9 +152,5 @@ const AdminLayout = ({
     </div>
   );
 };
-export default AdminLayout;
-export const getServerSideProps = () => {
-  return {
-    props: {},
-  };
-};
+
+export default  AdminLayout;

@@ -32,11 +32,13 @@ export interface TableBodyProps
 }
 
 const TableBody = React.forwardRef<HTMLTableSectionElement, TableBodyProps>(
-  ({ className, isLoading, ...props }, ref) =>
+  ({ className, isLoading, loadingContent, ...props }, ref) =>
     isLoading ? (
       <tbody>
         <tr>
-          <td>Loading...</td>
+          <td className='text-center align-middle p-4 h-32' colSpan={100}>
+            {loadingContent || 'Loading...'}
+          </td>
         </tr>
       </tbody>
     ) : (

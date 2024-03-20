@@ -18,6 +18,7 @@ import PaginationContainer from '@/components/Admin/Pagiation';
 
 export default function Messages() {
   const { t } = useTranslation('admin');
+  const [loading, setLoading] = useState(true);
   const [pagination, setPagination] = useState<Paging>({
     page: 1,
     pageSize: 12,
@@ -31,6 +32,7 @@ export default function Messages() {
   useEffect(() => {
     getMessages({ ...pagination, query }).then((data) => {
       setMessages(data);
+      setLoading(false);
     });
   }, [pagination, query]);
 
@@ -60,7 +62,7 @@ export default function Messages() {
               <TableHead>{t('Updated Time')}</TableHead>
             </TableRow>
           </TableHeader>
-          <TableBody>
+          <TableBody isLoading={loading}>
             {messages?.rows.map((item) => (
               <TableRow key={item.id}>
                 <TableCell>{item.modelName}</TableCell>

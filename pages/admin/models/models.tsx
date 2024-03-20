@@ -24,9 +24,8 @@ export default function Models() {
     null
   );
   const [models, setModels] = useState<GetModelResult[]>([]);
-  const [loading, setLoading] = useState(false);
+  const [loading, setLoading] = useState(true);
   useEffect(() => {
-    setLoading(true);
     init();
   }, []);
 
@@ -74,7 +73,7 @@ export default function Models() {
               <TableHead>{t('Model Type')}</TableHead>
             </TableRow>
           </TableHeader>
-          <TableBody>
+          <TableBody isLoading={loading}>
             {models.map((item) => (
               <TableRow
                 key={item.modelId}

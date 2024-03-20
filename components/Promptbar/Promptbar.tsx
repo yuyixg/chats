@@ -7,7 +7,7 @@ import { savePrompts } from '@/utils/prompts';
 
 import { Prompt } from '@/types/prompt';
 
-import HomeContext from '@/pages/home/home.context';
+import HomeContext from '@/pages/api/home/home.context';
 
 import { PromptbarSettings } from './components/PromptbarSettings';
 import { Prompts } from './components/Prompts';

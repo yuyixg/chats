@@ -1,6 +1,6 @@
 import { Conversation, Message } from '@/types/chat';
 import { ErrorMessage } from '@/types/error';
-import { Model, ModelVersions } from '@/types/model';
+import { Model } from '@/types/model';
 import { Prompt } from '@/types/prompt';
 import { UserSession } from '@/utils/user';
 

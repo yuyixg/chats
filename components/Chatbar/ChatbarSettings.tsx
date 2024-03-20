@@ -12,7 +12,7 @@ import { SidebarButton } from '../Sidebar/SidebarButton';
 // import ChatbarContext from '../Chatbar.context';
 import { ClearConversations } from './ClearConversations';
 import ChatbarContext from './Chatbar.context';
-import HomeContext from '@/pages/home/home.context';
+import HomeContext from '@/pages/api/home/home.context';
 import { useRouter } from 'next/router';
 import { UserRole } from '@/types/admin';
 import { clearUserSession, getLoginUrl } from '@/utils/user';
