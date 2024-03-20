@@ -37,6 +37,7 @@ const handler = async (req: NextApiRequest, res: NextApiResponse) => {
       );
       const rows = messages.rows.map((x) => {
         return {
+          messageId: x.id,
           username: x.User.username,
           chatCount: x.chatCount,
           tokenCount: x.tokenCount,

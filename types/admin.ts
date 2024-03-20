@@ -88,7 +88,7 @@ export interface GetUserMessageParams extends Paging {
 }
 
 export interface GetUserMessageResult {
-  id: string;
+  messageId: string;
   username: string;
   chatCount: number;
   tokenCount: number;
