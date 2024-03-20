@@ -31,10 +31,6 @@ export default function UserModels() {
   const [query, setQuery] = useState<string>('');
   const throttledValue = useThrottle(query, 1000);
 
-  useEffect(() => {
-    init();
-  }, [throttledValue]);
-
   const init = () => {
     getUserModels(query).then((data) => {
       setUserModels(data);
@@ -43,6 +39,10 @@ export default function UserModels() {
       setLoading(false);
     });
   };
+
+  useEffect(() => {
+    init();
+  }, [throttledValue]);
 
   const handleShowAddModal = (item: GetUserModelResult | null) => {
     setSelectedUserModel(item);
@@ -72,6 +72,7 @@ export default function UserModels() {
             }}
           />
           <Button
+            key='show-batch-add-modal'
             onClick={() => {
               handleShowAddModal(null);
             }}
@@ -107,6 +108,7 @@ export default function UserModels() {
                       </div>
                     </div>
                     <Button
+                      key='show-add-model'
                       variant='outline'
                       onClick={() => handleShowAddModal(item)}
                     >

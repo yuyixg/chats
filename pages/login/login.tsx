@@ -144,11 +144,7 @@ export default function LoginPage() {
             <div className='w-full mx-auto fixed bottom-1'>
               <hr className='border-gray-200 dark:border-gray-700' />
               <span className='block text-sm text-gray-500 text-center py-4 dark:text-gray-400'>
-                © 2023{' '}
-                <a href='/' className='hover:underline'>
-                  Chats™
-                </a>
-                . All Rights Reserved.
+                © 2023 Chats™ . All Rights Reserved.
               </span>
             </div>
           </footer>

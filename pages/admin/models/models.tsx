@@ -98,12 +98,14 @@ export default function Models() {
         </Table>
       </Card>
       <EditModelModal
+        key='edit-model-modal'
         selected={selectedModel}
         isOpen={isOpen.edit}
         onClose={handleClose}
         onSuccessful={init}
       />
       <AddModelModal
+        key='add-model-modal'
         isOpen={isOpen.add}
         onClose={handleClose}
         onSuccessful={init}
