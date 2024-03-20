@@ -153,3 +153,8 @@ const AdminLayout = ({
   );
 };
 export default AdminLayout;
+export const getServerSideProps = () => {
+  return {
+    props: {},
+  };
+};
