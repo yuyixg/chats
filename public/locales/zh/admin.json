@@ -50,5 +50,6 @@
   "This field is require": "此字段为必填字段",
   "Must contain at least {{length}} character(s)": "必须至少包含{{length}}个字符",
   "Contain at most {{length}} character(s)": "最多包含{{length}}个字符",
-  "Batch add Model": "批量添加模型"
+  "Batch add Model": "批量添加模型",
+  "Click User name set model": "点击用户名设置模型"
 }

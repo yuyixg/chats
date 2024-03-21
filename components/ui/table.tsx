@@ -2,6 +2,7 @@ import * as React from 'react';
 
 import { cn } from '@/lib/utils';
 import { ReactElement } from 'react-markdown/lib/react-markdown';
+import { Skeleton } from './skeleton';
 
 const Table = React.forwardRef<
   HTMLTableElement,
@@ -37,7 +38,15 @@ const TableBody = React.forwardRef<HTMLTableSectionElement, TableBodyProps>(
       <tbody>
         <tr>
           <td className='text-center align-middle p-4 h-32' colSpan={100}>
-            {loadingContent || 'Loading...'}
+            {loadingContent || (
+              <div className='flex flex-col space-y-3'>
+                <Skeleton className='h-[125px] w-full rounded-xl' />
+                <div className='space-y-2'>
+                  <Skeleton className='h-4 w-full' />
+                  <Skeleton className='h-4 w-[90%]' />
+                </div>
+              </div>
+            )}
           </td>
         </tr>
       </tbody>

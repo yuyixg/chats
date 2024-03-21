@@ -5,6 +5,14 @@ import ReactECharts from 'echarts-for-react';
 import { Button } from '@/components/ui/button';
 import { Card, CardContent, CardHeader } from '@/components/ui/card';
 import { connection } from '@/dbs';
+import {
+  Table,
+  TableBody,
+  TableCell,
+  TableHead,
+  TableHeader,
+  TableRow,
+} from '@/components/ui/table';
 
 interface Props {}
 
@@ -93,6 +101,81 @@ const Dashboard = (props: any) => {
 
   return (
     <>
+      <Table>
+        <TableHeader>
+          <TableRow>
+            <TableHead rowSpan={2}>UserName</TableHead>
+            <TableHead rowSpan={2}>Role</TableHead>
+            <TableHead colSpan={4}>Models</TableHead>
+          </TableRow>
+          <TableRow>
+            <TableHead>ModelName</TableHead>
+            <TableHead>Tokens</TableHead>
+            <TableHead>Counts</TableHead>
+            <TableHead>Expire</TableHead>
+          </TableRow>
+        </TableHeader>
+        <TableBody>
+          <TableRow>
+            <TableCell>admin</TableCell>
+            <TableCell>-</TableCell>
+            <TableCell>GPT</TableCell>
+            <TableCell>1000</TableCell>
+            <TableCell>2000</TableCell>
+            <TableCell>2024/3/21</TableCell>
+          </TableRow>
+          <TableRow>
+            <TableCell colSpan={2}></TableCell>
+            <TableCell>GPT4</TableCell>
+            <TableCell>4000</TableCell>
+            <TableCell>5000</TableCell>
+            <TableCell>2024/3/21</TableCell>
+          </TableRow>
+        </TableBody>
+      </Table>
+      <table className='ui celled structured table'>
+        <thead className=''>
+          <tr className=''>
+            <th rowSpan={2} className=''>
+              Name
+            </th>
+            <th rowSpan={2} className=''>
+              Type
+            </th>
+            <th rowSpan={2} className=''>
+              Files
+            </th>
+            <th colSpan={3} className=''>
+              Languages
+            </th>
+          </tr>
+          <tr className=''>
+            <th className=''>Ruby</th>
+            <th className=''>JavaScript</th>
+            <th className=''>Python</th>
+          </tr>
+        </thead>
+        <tbody className=''>
+          <tr className=''>
+            <td className=''>Alpha Team</td>
+            <td className=''>Project 1</td>
+            <td className='right aligned'>2</td>
+            <td className='center aligned'>
+              <i aria-hidden='true' className='green checkmark large icon'></i>
+            </td>
+          </tr>
+          <tr className=''>
+            <td rowSpan={3} className=''>
+              Beta Team
+            </td>
+            <td className=''>Project 1</td>
+            <td className='right aligned'>52</td>
+            <td className='center aligned'>
+              <i aria-hidden='true' className='green checkmark large icon'></i>
+            </td>
+          </tr>
+        </tbody>
+      </table>
       <div className='flex flex-wrap gap-4'>
         <Card className='w-1/3'>
           <CardHeader className='pb-0 pt-2 px-4 flex-col items-start font-semibold'>
