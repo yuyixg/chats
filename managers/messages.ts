@@ -17,6 +17,14 @@ export interface CreateMessage {
 }
 
 export class ChatMessageManager {
+  static async findMessageById(id: string) {
+    return await ChatMessages.findOne({
+      where: {
+        id
+      },
+    });
+  }
+
   static async findUserMessageById(id: string, userId: string) {
     return await ChatMessages.findOne({
       where: {

@@ -14,7 +14,7 @@ import {
   TableHeader,
   TableRow,
 } from '@/components/ui/table';
-import PaginationContainer from '@/components/Admin/Pagiation';
+import PaginationContainer from '@/components/Admin/Pagiation/Pagiation';
 
 export default function Messages() {
   const { t } = useTranslation('admin');
@@ -64,7 +64,13 @@ export default function Messages() {
           </TableHeader>
           <TableBody isLoading={loading}>
             {messages?.rows.map((item) => (
-              <TableRow className='cursor-pointer' key={item.messageId}>
+              <TableRow
+                className='cursor-pointer'
+                key={item.messageId}
+                onClick={() => {
+                  window.open('/message/' + item.messageId, '_blank');
+                }}
+              >
                 <TableCell>{item.modelName}</TableCell>
                 <TableCell className='truncate'>{item.name}</TableCell>
                 <TableCell>{item.username}</TableCell>
@@ -96,11 +102,7 @@ export default function Messages() {
 export const getServerSideProps = async ({ locale }: { locale: string }) => {
   return {
     props: {
-      ...(await serverSideTranslations(locale ?? 'en', [
-        'common',
-        'admin',
-        'pagination',
-      ])),
+      ...(await serverSideTranslations(locale ?? 'en', ['common', 'admin'])),
     },
   };
 };

@@ -1,6 +1,7 @@
 import { UserModel } from '@/dbs/userModels';
 import { ModelVersions, ModelType } from './model';
 import { Paging } from './page';
+import { Message } from './chat';
 
 export const enum UserRole {
   'admin' = 'admin',
@@ -96,4 +97,9 @@ export interface GetUserMessageResult {
   modelName: string;
   createdAt: string;
   updatedAt: string;
+}
+
+export interface GetMessageDetailsResult {
+  prompt: string;
+  messages: Message[];
 }

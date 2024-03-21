@@ -1,6 +1,7 @@
 import { useFetch } from '@/hooks/useFetch';
 import {
   CreateUserParams,
+  GetMessageDetailsResult,
   GetModelResult,
   GetUserMessageParams,
   GetUserMessageResult,
@@ -86,4 +87,9 @@ export const getMessages = (
   return fetchService.get(
     `/api/admin/messages?page=${page}&pageSize=${pageSize}&query=${query}`
   );
+};
+
+export const getMessageDetails = (messageId: string): Promise<GetMessageDetailsResult> => {
+  const fetchService = useFetch();
+  return fetchService.get(`/api/admin/message-details?messageId=${messageId}`);
 };

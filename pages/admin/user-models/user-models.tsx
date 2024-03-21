@@ -138,7 +138,7 @@ export default function UserModels() {
           </TableHeader>
 
           {userModels.map((user) => (
-            <TableBody className='tbody-hover'>
+            <TableBody key={user.userId} className='tbody-hover'>
               {user.models.length > 0 ? (
                 user.models.map((model, index) => {
                   return (
