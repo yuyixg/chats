@@ -34,14 +34,16 @@ const handler = async (req: NextApiRequest, res: NextApiResponse) => {
           userModelId: x.id,
           role: x.User.role,
           userName: x.User.username,
-          models: x.models.map((item) => {
-            const model = models.find((model) => model.id === item.modelId)!;
-            return {
-              modelVersion: model.modelVersion,
-              modelName: model.name,
-              ...item,
-            };
-          }),
+          models: x.models
+            .filter((x) => x.enable)
+            .map((item) => {
+              const model = models.find((model) => model.id === item.modelId)!;
+              return {
+                modelVersion: model.modelVersion,
+                modelName: model.name,
+                ...item,
+              };
+            }),
         };
       });
       return res.json(data);

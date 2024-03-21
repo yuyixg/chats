@@ -64,7 +64,7 @@ export default function Messages() {
           </TableHeader>
           <TableBody isLoading={loading}>
             {messages?.rows.map((item) => (
-              <TableRow key={item.messageId}>
+              <TableRow className='cursor-pointer' key={item.messageId}>
                 <TableCell>{item.modelName}</TableCell>
                 <TableCell className='truncate'>{item.name}</TableCell>
                 <TableCell>{item.username}</TableCell>

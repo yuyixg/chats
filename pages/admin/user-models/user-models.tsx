@@ -60,9 +60,10 @@ export default function UserModels() {
     setSelectedUserModel(null);
   };
 
-  const UserTableCell = (user: GetUserModelResult) => {
+  const UserTableCell = (user: GetUserModelResult, rowSpan: number = 1) => {
     return (
       <TableCell
+        rowSpan={rowSpan}
         className='cursor-pointer capitalize'
         onClick={() => handleShowAddModal(user)}
       >
@@ -71,7 +72,7 @@ export default function UserModels() {
             <AvatarFallback>{user.userName[0].toUpperCase()}</AvatarFallback>
           </Avatar>
           <div>
-            <p className='font-semibold hover:text-primary'>{user.userName}</p>
+            <p className='font-semibold hover:underline'>{user.userName}</p>
             <p className='text-[12px] text-gray-500'>{user.role}</p>
           </div>
         </div>
@@ -82,11 +83,12 @@ export default function UserModels() {
   const ModelTableCell = (
     user: GetUserModelResult,
     modelId: string,
-    value: any
+    value: any,
+    hover: boolean = false
   ) => {
     return (
       <TableCell
-        className='cursor-pointer'
+        className={`cursor-pointer ${hover && 'hover:underline'}`}
         onClick={() => handleEditModal(user, modelId)}
       >
         {value || '-'}
@@ -134,28 +136,31 @@ export default function UserModels() {
               <TableHead className='h-10'>{t('Expiration Time')}</TableHead>
             </TableRow>
           </TableHeader>
-          <TableBody isLoading={loading}>
-            {userModels.map((user) => {
-              return user.models.length > 0 ? (
-                user.models
-                  .filter((m) => m.enable)
-                  .map((model, index) => {
-                    return (
-                      <TableRow
-                        key={model.modelId}
-                        className={`${
-                          index !== user.models.length - 1 && 'border-none'
-                        }`}
-                      >
-                        {index === 0 && UserTableCell(user)}
-                        {index !== 0 && <TableCell colSpan={1}></TableCell>}
-                        {ModelTableCell(user, model.modelId, model.modelName)}
-                        {ModelTableCell(user, model.modelId, model.tokens)}
-                        {ModelTableCell(user, model.modelId, model.counts)}
-                        {ModelTableCell(user, model.modelId, model.expires)}
-                      </TableRow>
-                    );
-                  })
+
+          {userModels.map((user) => (
+            <TableBody className='tbody-hover'>
+              {user.models.length > 0 ? (
+                user.models.map((model, index) => {
+                  return (
+                    <TableRow
+                      key={model.modelId}
+                      className={`${
+                        index !== user.models.length - 1 && 'border-none'
+                      }`}
+                    >
+                      {index === 0 && UserTableCell(user, user.models.length)}
+                      {ModelTableCell(
+                        user,
+                        model.modelId,
+                        model.modelName,
+                        true
+                      )}
+                      {ModelTableCell(user, model.modelId, model.tokens)}
+                      {ModelTableCell(user, model.modelId, model.counts)}
+                      {ModelTableCell(user, model.modelId, model.expires)}
+                    </TableRow>
+                  );
+                })
               ) : (
                 <TableRow
                   key={user.userId}
@@ -167,9 +172,9 @@ export default function UserModels() {
                     {t('Click User name set model')}
                   </TableCell>
                 </TableRow>
-              );
-            })}
-          </TableBody>
+              )}
+            </TableBody>
+          ))}
         </Table>
       </Card>
       <AddUserModelModal

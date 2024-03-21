@@ -76,6 +76,7 @@ export default function Models() {
           <TableBody isLoading={loading}>
             {models.map((item) => (
               <TableRow
+                className='cursor-pointer'
                 key={item.modelId}
                 onClick={() => {
                   handleShow(item);

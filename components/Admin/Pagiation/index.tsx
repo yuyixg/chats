@@ -30,7 +30,7 @@ const PaginationContainer = ({
   }
 
   return (
-    <div className='flex w-full p-4 items-center justify-between'>
+    <div className='flex w-full p-4 items-center justify-between text-gray-500 text-sm'>
       <div>
         {t(
           'Showing {{currentCount}} - {{currentTotalCount}} total {{totalCount}}',

@@ -83,6 +83,7 @@ export default function Users() {
           <TableBody isLoading={loading}>
             {users.map((item) => (
               <TableRow
+                className='cursor-pointer'
                 key={item.id}
                 onClick={() => {
                   handleShowEditModal(item);
