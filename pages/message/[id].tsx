@@ -18,15 +18,17 @@ export default function MessageDetails() {
   }, []);
   return (
     <>
-      {message.messages.map((m) => (
-        <ChatMessage message={m} />
+      {message.messages.map((m, index) => (
+        <ChatMessage key={'message' + index} message={m} />
       ))}
     </>
   );
 }
 
-export const getServerSideProps = async () => {
+export const getServerSideProps = async ({ locale }: { locale: string }) => {
   return {
-    props: {},
+    props: {
+      ...(await serverSideTranslations(locale ?? 'en', ['common', 'markdown'])),
+    },
   };
 };
