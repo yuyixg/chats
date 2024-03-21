@@ -142,6 +142,7 @@ export default function UserModels() {
                   .map((model, index) => {
                     return (
                       <TableRow
+                        key={model.modelId}
                         className={`${
                           index !== user.models.length - 1 && 'border-none'
                         }`}
@@ -157,6 +158,7 @@ export default function UserModels() {
                   })
               ) : (
                 <TableRow
+                  key={user.userId}
                   className='cursor-pointer'
                   onClick={() => handleShowAddModal(user)}
                 >
