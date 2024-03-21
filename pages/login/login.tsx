@@ -75,7 +75,7 @@ export default function LoginPage() {
     if (!form.formState.isValid) return;
     setLoginLoading(true);
     const { username, password, remember } = values;
-    const response = await fetch('/api/login', {
+    const response = await fetch('/api/user', {
       method: 'POST',
       headers: { 'Content-Type': 'application/json' },
       body: JSON.stringify({ username, password }),
@@ -95,7 +95,7 @@ export default function LoginPage() {
       });
       router.push('/');
     } else {
-      toast.error(t('Username or password incorrect.'));
+      toast.error(t('Username or password incorrect'));
       setLoginLoading(false);
     }
   }

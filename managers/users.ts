@@ -55,6 +55,12 @@ export class UsersManager {
     });
   }
 
+  static async updateUserPassword(user: Users) {
+    return await Users.update(user, {
+      where: { id: user.id },
+    });
+  }
+
   static async updateUser(params: UpdateUser) {
     return await Users.update(params, {
       where: {
