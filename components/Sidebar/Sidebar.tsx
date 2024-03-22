@@ -1,4 +1,4 @@
-import { IconFolderPlus, IconMistOff, IconPlus } from '@tabler/icons-react';
+import { IconMistOff, IconPlus } from '@tabler/icons-react';
 import { ReactNode } from 'react';
 import { useTranslation } from 'next-i18next';
 

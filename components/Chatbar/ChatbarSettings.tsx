@@ -1,5 +1,6 @@
 import {
   IconLogout,
+  IconPasswordUser,
   IconSettings,
   IconUser,
   IconUserCog,
@@ -14,13 +15,22 @@ import { ClearConversations } from './ClearConversations';
 import ChatbarContext from './Chatbar.context';
 import { useRouter } from 'next/router';
 import { UserRole } from '@/types/admin';
-import { clearUserSession, getLoginUrl } from '@/utils/user';
+import {
+  clearUserSession,
+  getLoginUrl,
+  clearUserSessionId,
+} from '@/utils/user';
 import { HomeContext } from '@/pages/home/home';
+import { Popover, PopoverContent, PopoverTrigger } from '../ui/popover';
+import { Separator } from '../ui/separator';
+import { ChangePasswordModal } from '../Sidebar/ChangePasswordModal';
 
 export const ChatBarSettings = () => {
   const router = useRouter();
   const { t } = useTranslation('sidebar');
   const [isSettingDialogOpen, setIsSettingDialog] = useState<boolean>(false);
+  const [isChangePasswordOpen, setIsChangePasswordOpen] =
+    useState<boolean>(false);
 
   const {
     state: { user, conversations },
@@ -29,6 +39,7 @@ export const ChatBarSettings = () => {
   const { handleClearConversations } = useContext(ChatbarContext);
 
   const logout = () => {
+    clearUserSessionId();
     clearUserSession();
     router.push(getLoginUrl());
   };
@@ -62,21 +73,47 @@ export const ChatBarSettings = () => {
       )}
 
       {user?.username && (
-        <SidebarButton
-          className='capitalize'
-          text={user?.username}
-          icon={<IconUser size={18} />}
-          action={
-            <IconLogout className='text-gray-500' onClick={logout} size={18} />
-          }
-          onClick={() => {}}
-        />
+        <Popover>
+          <PopoverTrigger className='w-full'>
+            <SidebarButton
+              className='capitalize'
+              text={user?.username}
+              icon={<IconUser size={18} />}
+              onClick={() => {}}
+            />
+          </PopoverTrigger>
+          <PopoverContent className='w-[244px]'>
+            <SidebarButton
+              text={t('Change Password')}
+              icon={<IconPasswordUser size={18} />}
+              onClick={() => {
+                setIsChangePasswordOpen(true);
+              }}
+            />
+            <Separator className='my-2' />
+            <SidebarButton
+              text={t('Log out')}
+              icon={<IconLogout size={18} />}
+              onClick={logout}
+            />
+          </PopoverContent>
+        </Popover>
       )}
 
       <SettingDialog
         open={isSettingDialogOpen}
         onClose={() => {
           setIsSettingDialog(false);
+        }}
+      />
+      <ChangePasswordModal
+        isOpen={isChangePasswordOpen}
+        onClose={() => {
+          setIsChangePasswordOpen(false);
+        }}
+        onSuccessful={() => {
+          setIsChangePasswordOpen(false);
+          logout();
         }}
       />
     </div>

@@ -45,8 +45,10 @@ export default async function handler(
         return badRequest(res, 'User not found');
       }
       const hashPassword = await bcrypt.hashSync(newPassword);
-      user.password = hashPassword;
-      const result = await UsersManager.updateUserPassword(user);
+      const result = await UsersManager.updateUserPassword(
+        user.id!,
+        hashPassword
+      );
       return res.json(result);
     }
   } catch (error: any) {

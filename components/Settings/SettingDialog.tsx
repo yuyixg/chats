@@ -1,4 +1,4 @@
-import { FC, useContext, useEffect, useReducer, useRef } from 'react';
+import { FC, useContext, useEffect, useRef } from 'react';
 
 import { useTranslation } from 'next-i18next';
 
@@ -8,7 +8,7 @@ import { getSettings, saveSettings } from '@/utils/settings';
 
 import { Settings } from '@/types/settings';
 import { HomeContext } from '@/pages/home/home';
-
+import { useTheme } from 'next-themes';
 
 interface Props {
   open: boolean;
@@ -23,6 +23,7 @@ export const SettingDialog: FC<Props> = ({ open, onClose }) => {
   });
   const { dispatch: homeDispatch } = useContext(HomeContext);
   const modalRef = useRef<HTMLDivElement>(null);
+  const { setTheme } = useTheme();
 
   useEffect(() => {
     const handleMouseDown = (e: MouseEvent) => {
@@ -44,6 +45,7 @@ export const SettingDialog: FC<Props> = ({ open, onClose }) => {
   }, [onClose]);
 
   const handleSave = () => {
+    setTheme(state.theme);
     homeDispatch({ field: 'lightMode', value: state.theme });
     saveSettings(state);
   };
@@ -84,8 +86,18 @@ export const SettingDialog: FC<Props> = ({ open, onClose }) => {
                   dispatch({ field: 'theme', value: event.target.value })
                 }
               >
-                <option className="dark:bg-[#343541] dark:text-white" value='dark'>{t('Dark mode')}</option>
-                <option className="dark:bg-[#343541] dark:text-white" value='light'>{t('Light mode')}</option>
+                <option
+                  className='dark:bg-[#343541] dark:text-white'
+                  value='dark'
+                >
+                  {t('Dark mode')}
+                </option>
+                <option
+                  className='dark:bg-[#343541] dark:text-white'
+                  value='light'
+                >
+                  {t('Light mode')}
+                </option>
               </select>
             </div>
 

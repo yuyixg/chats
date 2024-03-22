@@ -1,6 +1,11 @@
 import { useEffect, useState } from 'react';
 import { useRouter } from 'next/router';
-import { UserSession, getUserSession, saveUserSession } from '@/utils/user';
+import {
+  UserSession,
+  getUserSession,
+  saveUserSession,
+  setUserSessionId,
+} from '@/utils/user';
 import toast from 'react-hot-toast';
 import { serverSideTranslations } from 'next-i18next/serverSideTranslations';
 import { useTranslation } from 'react-i18next';
@@ -83,12 +88,7 @@ export default function LoginPage() {
 
     if (response.ok) {
       const user = (await response.json()) as UserSession;
-      let expires = new Date();
-      expires.setDate(expires.getDate() + 1);
-      console.log(expires.toLocaleString());
-      document.cookie = `sessionId=${
-        user.sessionId
-      }; expires=${expires.toUTCString()}; path=/`;
+      setUserSessionId(user.sessionId);
       saveUserSession({
         ...user,
         password: remember ? `${password}` : '',

@@ -24,3 +24,15 @@ export const getLoginUrl = (locale?: string) => {
   const _locale = locale || localStorage.getItem('locale');
   return (_locale ? '/' + _locale : '') + '/login';
 };
+
+export const setUserSessionId = (sessionId: string) => {
+  let expires = new Date();
+  expires.setDate(expires.getDate() + 1);
+  document.cookie = `sessionId=${sessionId}; expires=${expires.toUTCString()}; path=/`;
+};
+
+export const clearUserSessionId = () => {
+  const user = getUserSession();
+  user &&
+    (document.cookie = `sessionId=${user.sessionId}; expires=-2738049600; path=/`);
+};

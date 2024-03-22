@@ -8,5 +8,15 @@
   "Clear conversations": "清空对话",
   "Settings": "偏好设置",
   "Export data": "导出对话",
-  "Admin Panel": "后台管理"
+  "Admin Panel": "后台管理",
+  "Log out": "退出登录",
+  "Change Password": "修改密码",
+  "New Password": "新的密码",
+  "Confirm Password": "确认密码",
+  "The two password inputs are inconsistent": "俩次密码输入不一致",
+  "Save successful!": "保存成功！",
+  "Operation failed! Please try again later, or contact technical personnel.": "操作失败！请稍后再试，或联系技术人员。",
+  "Must contain at least {{length}} character(s)": "必须至少包含{{length}}个字符",
+  "Contain at most {{length}} character(s)": "最多包含{{length}}个字符",
+  "Save": "保存"
 }

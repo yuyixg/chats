@@ -3,8 +3,6 @@ import React from 'react';
 import ReactECharts from 'echarts-for-react';
 import { Card, CardContent, CardHeader } from '@/components/ui/card';
 
-interface Props {}
-
 const Dashboard = (props: any) => {
   const option1 = {
     tooltip: {
