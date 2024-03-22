@@ -20,6 +20,9 @@ export enum ModelVersions {
   yi_34b_chat_0205 = 'yi-34b-chat-0205',
   yi_34b_chat_200k = 'yi-34b-chat-200k',
   yi_vl_plus = 'yi-vl-plus',
+  moonshot_v1_8k = 'moonshot-v1-8k',
+  moonshot_v1_32k = 'moonshot-v1-32k',
+  moonshot_v1_128k = 'moonshot-v1-128k',
 }
 
 export enum ModelType {
@@ -28,6 +31,7 @@ export enum ModelType {
   QianFan = 'QianFan',
   Spark = 'Spark',
   LingYi = 'LingYi',
+  Kimi = 'Kimi',
 }
 
 export interface ChatModelImageConfig {

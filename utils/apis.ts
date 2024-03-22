@@ -7,6 +7,7 @@ export const getEndpoint = (model: Model) => {
     [ModelType.QianWen]: 'api/qianwen',
     [ModelType.Spark]: 'api/spark',
     [ModelType.LingYi]: 'api/lingyi',
+    [ModelType.Kimi]: 'api/kimi',
   };
   return Endpoints[model.type];
 };

@@ -23,6 +23,11 @@ type LingYiApiConfig = {
   host: string;
 };
 
+type KimiApiConfig = {
+  apiKey: string;
+  host: string;
+};
+
 const gptDefaultApiConfig = {
   host: '',
   apiKey: '',
@@ -37,7 +42,12 @@ const qianFanDefaultApiConfig = {
 };
 
 const lingYiDefaultApiConfig = {
-  host: 'https://api.lingyiwanwu.com/',
+  host: 'https://api.lingyiwanwu.com',
+  apiKey: '',
+};
+
+const kimiDefaultApiConfig = {
+  host: 'https://api.moonshot.cn',
   apiKey: '',
 };
 
@@ -120,5 +130,29 @@ export const ModelDefaultTemplates = {
         "You are an AI assistant with image understanding capabilities, Follow the user's instructions carefully. Respond using markdown.",
     },
     imgConfig: {},
+  },
+  [ModelVersions.moonshot_v1_8k]: {
+    type: ModelType.Kimi,
+    apiConfig: kimiDefaultApiConfig as KimiApiConfig,
+    modelConfig: {
+      prompt:
+        "You are an AI assistant, Follow the user's instructions carefully. Respond using markdown.",
+    },
+  },
+  [ModelVersions.moonshot_v1_32k]: {
+    type: ModelType.Kimi,
+    apiConfig: kimiDefaultApiConfig as KimiApiConfig,
+    modelConfig: {
+      prompt:
+        "You are an AI assistant, Follow the user's instructions carefully. Respond using markdown.",
+    },
+  },
+  [ModelVersions.moonshot_v1_128k]: {
+    type: ModelType.Kimi,
+    apiConfig: kimiDefaultApiConfig as KimiApiConfig,
+    modelConfig: {
+      prompt:
+        "You are an AI assistant, Follow the user's instructions carefully. Respond using markdown.",
+    },
   },
 };
