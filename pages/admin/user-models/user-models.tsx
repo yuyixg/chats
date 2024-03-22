@@ -122,7 +122,10 @@ export default function UserModels() {
         <Table>
           <TableHeader>
             <TableRow className='pointer-events-none'>
-              <TableHead rowSpan={2} style={{ borderRight: '1px solid #ddd' }}>
+              <TableHead
+                rowSpan={2}
+                style={{ borderRight: '1px solid hsl(var(--muted))' }}
+              >
                 {t('User Name')}
               </TableHead>
               <TableHead colSpan={4} className='text-center h-10'>

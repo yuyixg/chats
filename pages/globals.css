@@ -102,5 +102,5 @@ select:focus {
 }
 
 .tbody-hover:hover td {
-  background-color: #f6f6f8;
+  background-color: hsl(var(--muted));
 }
