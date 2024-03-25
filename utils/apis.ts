@@ -1,6 +1,7 @@
+import { FileType } from '@/types/file';
 import { Model, ModelType } from '@/types/model';
 
-export const getEndpoint = (model: Model) => {
+export const getModelEndpoint = (model: Model) => {
   const Endpoints = {
     [ModelType.GPT]: 'api/models/openai',
     [ModelType.QianFan]: 'api/models/qianfan',
@@ -10,4 +11,15 @@ export const getEndpoint = (model: Model) => {
     [ModelType.Kimi]: 'api/models/kimi',
   };
   return Endpoints[model.type];
+};
+
+export const getFileEndpoint = (file: FileType) => {
+  const Endpoints = {
+    [FileType.Local]: 'api/files/local',
+    [FileType.Minio]: 'api/files/minio',
+    [FileType.Aws]: 'api/files/aws',
+    [FileType.Azure]: 'api/files/azure',
+    [FileType.Aliyun]: 'api/files/aliyun',
+  };
+  return Endpoints[file];
 };

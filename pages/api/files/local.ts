@@ -8,7 +8,8 @@ export const config = {
   },
 };
 
-export default async (req: NextApiRequest, res: NextApiResponse) => {
+const handler = async (req: NextApiRequest, res: NextApiResponse) => {
+  console.log(req.headers);
   if (req.method === 'POST') {
     const data = (await new Promise((resolve, reject) => {
       const form = new IncomingForm();
@@ -19,16 +20,19 @@ export default async (req: NextApiRequest, res: NextApiResponse) => {
     })) as any;
     try {
       const file = data.files.file[0];
-      console.log(file);
       const imagePath = file.filepath;
       const pathToWriteImage = `public/files/${file.originalFilename}`;
       const image = await fs.readFile(imagePath);
       await fs.writeFile(pathToWriteImage, image);
-      //store path in DB
-      res.status(200).json({ message: 'image uploaded!' });
+      res.status(200).json({
+        getUrl: `${req.headers.origin}/files/${file.originalFilename}`,
+      });
     } catch (error) {
-      res.status(500).json({ message: error });
+      console.log(error);
+      res.status(400).end('Upload failed!');
       return;
     }
   }
 };
+
+export default handler;

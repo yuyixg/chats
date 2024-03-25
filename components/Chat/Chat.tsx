@@ -12,7 +12,7 @@ import toast from 'react-hot-toast';
 
 import { useTranslation } from 'next-i18next';
 
-import { getEndpoint } from '@/utils/apis';
+import { getModelEndpoint } from '@/utils/apis';
 import { saveConversation, saveConversations } from '@/utils/conversation';
 import { throttle } from '@/utils/throttle';
 import { ChatBody, Conversation, Message } from '@/types/chat';
@@ -87,7 +87,7 @@ export const Chat = memo(({ stopConversationRef }: Props) => {
           temperature: updatedConversation.temperature,
         };
 
-        const endpoint = getEndpoint(chatBody.model);
+        const endpoint = getModelEndpoint(chatBody.model);
         let body = JSON.stringify(chatBody);
 
         const controller = new AbortController();

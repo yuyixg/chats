@@ -27,6 +27,7 @@ import { Prompt } from '@/types/prompt';
 import { VariableModal } from './VariableModal';
 import { isMobile } from '@/utils/common';
 import { HomeContext } from '@/pages/home/home';
+import { FileType } from '@/types/file';
 
 interface Props {
   onSend: (message: Message) => void;
@@ -294,7 +295,9 @@ export const ChatInput = ({
                   : 'hidden'
               }`,
             }}
-            placeholder={t('Type a message or type "/" to select a prompt...') || ''}
+            placeholder={
+              t('Type a message or type "/" to select a prompt...') || ''
+            }
             value={content?.text}
             rows={1}
             onCompositionStart={() => setIsTyping(true)}
@@ -314,12 +317,17 @@ export const ChatInput = ({
                 <IconSend size={18} />
               )}
             </button>
-            {Object.keys(selectedConversation?.model?.imgConfig || {}).length > 0 &&
+            {Object.keys(selectedConversation?.model?.imgConfig || {}).length >
+              0 &&
               !uploading &&
               content?.image?.length !==
                 selectedConversation?.model?.imgConfig?.count && (
                 <UploadButton
-                  maxFileSize={selectedConversation?.model?.imgConfig?.maxSize}
+                  fileConfig={{
+                    fileServerType: FileType.Local,
+                    maxFileSize:
+                      selectedConversation?.model?.imgConfig?.maxSize,
+                  }}
                   onUploading={() => setUploading(true)}
                   onFailed={() => setUploading(false)}
                   onSuccessful={(url: string) => {

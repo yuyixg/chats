@@ -1,12 +1,18 @@
 import { useEffect, useRef } from 'react';
 import toast from 'react-hot-toast';
 import { useTranslation } from 'next-i18next';
+import { getFileEndpoint } from '@/utils/apis';
+import { FileType } from '@/types/file';
 
 interface Props {
   onSuccessful?: (url: string) => void;
   onUploading?: () => void;
   onFailed?: () => void;
   children?: React.ReactNode;
+  fileConfig: {
+    fileServerType: FileType;
+    maxFileSize?: number;
+  };
   maxFileSize?: number;
 }
 
@@ -14,74 +20,79 @@ const UploadButton: React.FunctionComponent<Props> = ({
   onSuccessful,
   onUploading,
   onFailed,
-  maxFileSize,
+  fileConfig,
   children,
 }: Props) => {
   const { t } = useTranslation('chat');
   const uploadRef = useRef<HTMLInputElement>(null);
-
+  const { maxFileSize, fileServerType } = fileConfig;
   const changeFile = async (event: any) => {
+    const file = event?.target?.files[0];
+    if (maxFileSize && file?.size / 1024 > maxFileSize) {
+      toast.error(
+        t(`The file size limit is {{fileSize}}`, {
+          fileSize: maxFileSize / 1024 + 'MB',
+        })
+      );
+      onFailed && onFailed();
+      return;
+    }
+
     const fileForm = new FormData();
-    fileForm.append('file', event?.target?.files[0]);
-    console.log(event?.target?.files);
+    fileForm.append('file', file);
     try {
-      const response = await fetch('/api/files/local', {
-        method: 'POST',
-        body: fileForm,
-      });
-      const data = await response.json();
-      if (!response.ok) {
-        throw data;
+      if (file) {
+        const url = getFileEndpoint(fileServerType);
+        onUploading && onUploading();
+        if (FileType.Local === FileType.Local) {
+          const response = await fetch(url, {
+            method: 'POST',
+            body: fileForm,
+          });
+          const { getUrl } = await response.json();
+          if (!response.ok) {
+            onFailed && onFailed();
+            toast.error(t('File upload failed'));
+          }
+          onSuccessful && onSuccessful(getUrl);
+        } else {
+          const fileType = file.name.substring(
+            file.name.lastIndexOf('.'),
+            file.name.length
+          );
+          const res = await fetch(url, {
+            method: 'POST',
+            body: JSON.stringify({
+              fileName: file.name.replace(fileType, ''),
+              fileType: fileType.replace('.', ''),
+            }),
+          });
+          const { putUrl, getUrl } = await res.json();
+
+          fetch(putUrl, {
+            method: 'PUT',
+            body: file,
+            headers: {
+              'Content-Type': '',
+            },
+          })
+            .then((response) => {
+              if (response.ok) {
+                onSuccessful && onSuccessful(getUrl);
+              } else {
+                toast.error(response?.statusText);
+              }
+            })
+            .catch((error) => {
+              onFailed && onFailed();
+              toast.error(t('File upload failed'));
+              console.error(error);
+            });
+        }
       }
-      toast.success('Upload!');
     } catch (error) {
       console.log(error);
     }
-    // const file = event?.target?.files[0];
-    // if (maxFileSize && file?.size / 1024 > maxFileSize) {
-    //   toast.error(
-    //     t(`The file size limit is {{fileSize}}`, {
-    //       fileSize: maxFileSize / 1024 + 'MB',
-    //     })
-    //   );
-    //   onFailed && onFailed();
-    //   return;
-    // }
-    // if (file) {
-    //   onUploading && onUploading();
-    //   const fileType = file.name.substring(
-    //     file.name.lastIndexOf('.'),
-    //     file.name.length
-    //   );
-    //   const res = await fetch('/api/aws', {
-    //     method: 'POST',
-    //     body: JSON.stringify({
-    //       fileName: file.name.replace(fileType, ''),
-    //       fileType: fileType.replace('.', ''),
-    //     }),
-    //   });
-    //   const { putUrl, getUrl } = await res.json();
-
-    //   fetch(putUrl, {
-    //     method: 'PUT',
-    //     body: file,
-    //     headers: {
-    //       'Content-Type': '',
-    //     },
-    //   })
-    //     .then((response) => {
-    //       if (response.ok) {
-    //         onSuccessful && onSuccessful(getUrl);
-    //       } else {
-    //         toast.error(response?.statusText);
-    //       }
-    //     })
-    //     .catch((error) => {
-    //       onFailed && onFailed();
-    //       toast.error(t('File upload failed'));
-    //       console.error(error);
-    //     });
-    // }
   };
 
   useEffect(() => {
