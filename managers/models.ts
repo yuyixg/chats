@@ -1,5 +1,5 @@
-import { ChatModels } from '@/dbs';
-import { ChatModelApiConfig } from '@/dbs/models';
+import { ChatModels } from '@/db';
+import { ChatModelApiConfig } from '@/db/models';
 import {
   ChatModelConfig,
   ChatModelImageConfig,

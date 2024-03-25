@@ -1,4 +1,4 @@
-import { UserModel } from '@/dbs/userModels';
+import { UserModel } from '@/db/userModels';
 import { ModelVersions, ModelType } from './model';
 import { Paging } from './page';
 import { Message } from './chat';

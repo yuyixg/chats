@@ -1,4 +1,4 @@
-import { Users } from '@/dbs';
+import { Users } from '@/db';
 import bcrypt from 'bcryptjs';
 import { Op } from 'sequelize';
 

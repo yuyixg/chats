@@ -6,7 +6,7 @@ import {
   createParser,
 } from 'eventsource-parser';
 import { ModelVersions } from '@/types/model';
-import { ChatModels } from '@/dbs';
+import { ChatModels } from '@/db';
 
 export interface LingYiSteamResult {
   text: string;

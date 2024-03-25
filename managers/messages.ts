@@ -1,7 +1,7 @@
-import { ChatMessages, ChatModels, Users } from '@/dbs';
+import { ChatMessages, ChatModels, Users } from '@/db';
 import { Message } from '@/types/chat';
 import { UserModelManager } from './userModels';
-import UserModels, { UserModel } from '@/dbs/userModels';
+import UserModels, { UserModel } from '@/db/userModels';
 import { Op, where } from 'sequelize';
 import { UserChatMessage } from '@/types/message';
 import { PageResult } from '@/types/page';

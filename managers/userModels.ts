@@ -1,5 +1,5 @@
-import { UserModels, Users } from '@/dbs';
-import { UserModel } from '@/dbs/userModels';
+import { UserModels, Users } from '@/db';
+import { UserModel } from '@/db/userModels';
 import { Op } from 'sequelize';
 
 interface UserModelsWithRelations extends UserModels {

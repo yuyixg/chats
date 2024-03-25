@@ -1,4 +1,4 @@
-import { UserModel } from '@/dbs/userModels';
+import { UserModel } from '@/db/userModels';
 import { ChatModelConfig, ModelConfigType, ModelVersions } from '@/types/model';
 import { ModelDefaultTemplates } from '@/types/template';
 

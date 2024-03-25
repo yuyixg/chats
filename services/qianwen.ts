@@ -5,7 +5,7 @@ import {
   ReconnectInterval,
   createParser,
 } from 'eventsource-parser';
-import { ChatModels } from '@/dbs';
+import { ChatModels } from '@/db';
 
 export interface QianWenStreamResult {
   text: string;
