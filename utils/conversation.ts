@@ -30,6 +30,11 @@ export const saveConversations = (conversations: Conversation[]) => {
   localStorage.setItem('conversationHistory', JSON.stringify(conversations));
 };
 
+export const clearConversations = () => {
+  localStorage.removeItem('selectedConversation');
+  localStorage.removeItem('conversationHistory');
+};
+
 export const cleanConversationHistory = (history: any[]): Conversation[] => {
   if (!Array.isArray(history)) {
     console.warn('history is not an array. Returning an empty array.');

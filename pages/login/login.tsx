@@ -17,6 +17,7 @@ import { zodResolver } from '@hookform/resolvers/zod';
 import { Form, FormField } from '@/components/ui/form';
 import { Button } from '@/components/ui/button';
 import FormCheckbox from '@/components/ui/form/checkbox';
+import { clearConversations } from '@/utils/conversation';
 
 export default function LoginPage() {
   const { t } = useTranslation('login');
@@ -66,6 +67,7 @@ export default function LoginPage() {
   });
 
   useEffect(() => {
+    clearConversations();
     form.formState.isValid;
     const userInfo = getUserSession();
     if (userInfo) {

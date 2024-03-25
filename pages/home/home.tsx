@@ -33,6 +33,8 @@ import { Model } from '@/types/model';
 import { Prompt } from '@/types/prompt';
 import { UserSession } from '@/utils/user';
 import { getUserMessages } from '@/apis/userService';
+import InitDbData from '@/db/init';
+import { connection } from '@/db';
 
 interface Props {
   serverSideApiKeyIsSet: boolean;
@@ -247,9 +249,7 @@ const Home = ({ defaultModelId, locale }: Props) => {
     } else {
       if (!models || models.length === 0) return;
       const lastConversation = conversations[conversations.length - 1];
-      const _defaultModelId = defaultModelId
-        ? defaultModelId
-        : models[0]?.id;
+      const _defaultModelId = defaultModelId ? defaultModelId : models[0]?.id;
       const model = lastConversation?.model || getModel(_defaultModelId);
       dispatch({
         field: 'selectedConversation',
@@ -354,6 +354,16 @@ export const getServerSideProps = async ({
   locale: string;
   req: any;
 }) => {
+  try {
+    await connection.authenticate();
+    await connection.sync({ alter: true });
+    await InitDbData();
+    console.log('------------------');
+    console.log('Initialized Data');
+    console.log('------------------');
+  } catch (error) {
+    console.log(error);
+  }
   const session = await getSession(req.headers.cookie);
   return {
     props: {

@@ -2,7 +2,6 @@ import { serverSideTranslations } from 'next-i18next/serverSideTranslations';
 import React from 'react';
 import ReactECharts from 'echarts-for-react';
 import { Card, CardContent, CardHeader } from '@/components/ui/card';
-import { connection } from '@/db';
 
 const Dashboard = (props: any) => {
   const option1 = {
@@ -114,12 +113,6 @@ const Dashboard = (props: any) => {
 export default Dashboard;
 
 export const getServerSideProps = async ({ locale }: any) => {
-  // try {
-  //   await connection.authenticate();
-  //   await connection.sync({ force: true });
-  // } catch (error) {
-  //   console.log(error);
-  // }
   return {
     props: {
       ...(await serverSideTranslations(locale ?? 'en', ['common', 'admin'])),
