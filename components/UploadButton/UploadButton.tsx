@@ -21,51 +21,67 @@ const UploadButton: React.FunctionComponent<Props> = ({
   const uploadRef = useRef<HTMLInputElement>(null);
 
   const changeFile = async (event: any) => {
-    const file = event?.target?.files[0];
-    if (maxFileSize && file?.size / 1024 > maxFileSize) {
-      toast.error(
-        t(`The file size limit is {{fileSize}}`, {
-          fileSize: maxFileSize / 1024 + 'MB',
-        })
-      );
-      onFailed && onFailed();
-      return;
-    }
-    if (file) {
-      onUploading && onUploading();
-      const fileType = file.name.substring(
-        file.name.lastIndexOf('.'),
-        file.name.length
-      );
-      const res = await fetch('/api/aws', {
+    const fileForm = new FormData();
+    fileForm.append('file', event?.target?.files[0]);
+    console.log(event?.target?.files);
+    try {
+      const response = await fetch('/api/files/local', {
         method: 'POST',
-        body: JSON.stringify({
-          fileName: file.name.replace(fileType, ''),
-          fileType: fileType.replace('.', ''),
-        }),
+        body: fileForm,
       });
-      const { putUrl, getUrl } = await res.json();
-
-      fetch(putUrl, {
-        method: 'PUT',
-        body: file,
-        headers: {
-          'Content-Type': '',
-        },
-      })
-        .then((response) => {
-          if (response.ok) {
-            onSuccessful && onSuccessful(getUrl);
-          } else {
-            toast.error(response?.statusText);
-          }
-        })
-        .catch((error) => {
-          onFailed && onFailed();
-          toast.error(t('File upload failed'));
-          console.error(error);
-        });
+      const data = await response.json();
+      if (!response.ok) {
+        throw data;
+      }
+      toast.success('Upload!');
+    } catch (error) {
+      console.log(error);
     }
+    // const file = event?.target?.files[0];
+    // if (maxFileSize && file?.size / 1024 > maxFileSize) {
+    //   toast.error(
+    //     t(`The file size limit is {{fileSize}}`, {
+    //       fileSize: maxFileSize / 1024 + 'MB',
+    //     })
+    //   );
+    //   onFailed && onFailed();
+    //   return;
+    // }
+    // if (file) {
+    //   onUploading && onUploading();
+    //   const fileType = file.name.substring(
+    //     file.name.lastIndexOf('.'),
+    //     file.name.length
+    //   );
+    //   const res = await fetch('/api/aws', {
+    //     method: 'POST',
+    //     body: JSON.stringify({
+    //       fileName: file.name.replace(fileType, ''),
+    //       fileType: fileType.replace('.', ''),
+    //     }),
+    //   });
+    //   const { putUrl, getUrl } = await res.json();
+
+    //   fetch(putUrl, {
+    //     method: 'PUT',
+    //     body: file,
+    //     headers: {
+    //       'Content-Type': '',
+    //     },
+    //   })
+    //     .then((response) => {
+    //       if (response.ok) {
+    //         onSuccessful && onSuccessful(getUrl);
+    //       } else {
+    //         toast.error(response?.statusText);
+    //       }
+    //     })
+    //     .catch((error) => {
+    //       onFailed && onFailed();
+    //       toast.error(t('File upload failed'));
+    //       console.error(error);
+    //     });
+    // }
   };
 
   useEffect(() => {
