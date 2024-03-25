@@ -8,11 +8,13 @@ export default function MessageDetails() {
   const router = useRouter();
   const { id } = router.query as { id: string };
   const [message, setMessage] = useState<GetMessageDetailsResult>({
+    name: '',
     prompt: '',
     messages: [],
   });
   useEffect(() => {
     getMessageDetails(id!).then((data) => {
+      document.title = data.name;
       setMessage(data);
     });
   }, []);

@@ -31,6 +31,7 @@ const handler = async (req: NextApiRequest, res: NextApiResponse) => {
       if (messageId) {
         const message = await ChatMessageManager.findMessageById(messageId);
         return res.json({
+          name: message?.name,
           prompt: message?.prompt,
           messages: message?.messages,
         });

@@ -100,6 +100,7 @@ export interface GetUserMessageResult {
 }
 
 export interface GetMessageDetailsResult {
+  name: string;
   prompt: string;
   messages: Message[];
 }

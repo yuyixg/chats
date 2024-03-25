@@ -1,9 +1,5 @@
 import { Nav } from '@/components/Admin/Nav/Nav';
-import {
-  ResizableHandle,
-  ResizablePanel,
-  ResizablePanelGroup,
-} from '@/components/ui/resizable';
+import { ResizablePanel, ResizablePanelGroup } from '@/components/ui/resizable';
 import { TooltipProvider } from '@/components/ui/tooltip';
 import { cn } from '@/lib/utils';
 import {
@@ -14,14 +10,12 @@ import {
   IconUserCog,
   IconUsers,
 } from '@tabler/icons-react';
-import { ArchiveX, Inbox, Send, Trash2 } from 'lucide-react';
 import { useTranslation } from 'next-i18next';
 import { useRouter } from 'next/router';
-import { useState } from 'react';
+import { useEffect, useState } from 'react';
 
 const AdminLayout = ({
   children,
-  className,
 }: {
   children: React.ReactNode;
   className?: string;
@@ -30,12 +24,6 @@ const AdminLayout = ({
   const { t } = useTranslation('admin');
   const [isCollapsed, setIsCollapsed] = useState(false);
   let defaultLayout = [265, 1095];
-
-  const activeClass = (pathName: string) => {
-    return pathName === router.pathname
-      ? 'bg-gray-100 shadow-sm text-700'
-      : 'text-gray-600';
-  };
 
   const links = [
     {
@@ -70,28 +58,9 @@ const AdminLayout = ({
     },
   ];
 
-  const MenuItem = (props: {
-    url: string;
-    icon: JSX.Element;
-    name: string;
-  }) => {
-    const { url, icon, name } = props;
-    return (
-      <li key={url}>
-        <a
-          onClick={() => {
-            router.push(url);
-          }}
-          className={`flex items-center p-2 cursor-pointer rounded-lg hover:bg-gray-100 hover:text-gray-700 group ${activeClass(
-            url
-          )}`}
-        >
-          {icon}
-          <span className='ms-3'>{name}</span>
-        </a>
-      </li>
-    );
-  };
+  useEffect(() => {
+    document.title = 'Chats Admin';
+  }, []);
 
   return (
     <>
@@ -139,33 +108,6 @@ const AdminLayout = ({
             <div className='p-4'>{children}</div>
           </ResizablePanel>
         </ResizablePanelGroup>
-        {/* <div className={className}>
-        <aside className='fixed top-0 left-0 z-40 w-64 h-screen transition-transform -translate-x-full sm:translate-x-0 shadow-medium border-r'>
-          <div className='h-full px-3 py-4 overflow-y-auto bg-white'>
-            <a
-              onClick={() => {
-                router.push('/admin/dashboard');
-              }}
-              className='flex items-center ps-1 mb-5'
-            >
-              <img
-                className='h-8 me-3 rounded-sm'
-                alt='chats Logo'
-                src='/chats.png'
-              />
-              <span className='self-center text-md font-medium whitespace-nowrap'>
-                Chats
-              </span>
-            </a>
-            <ul className='space-y-2 font-medium text-[14px]'>
-              {menus.map((m) => {
-                return MenuItem(m);
-              })}
-            </ul>
-          </div>
-        </aside>
-        <div className='p-4 sm:ml-64'>{children}</div>
-      </div> */}
       </TooltipProvider>
     </>
   );
