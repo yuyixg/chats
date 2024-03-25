@@ -64,11 +64,11 @@ export default function UserModels() {
     return (
       <TableCell
         rowSpan={rowSpan}
-        className='cursor-pointer capitalize'
+        className='cursor-pointer py-2 capitalize'
         onClick={() => handleShowAddModal(user)}
       >
         <div className='flex items-center gap-2 h-6'>
-          <Avatar>
+          <Avatar className='h-8 w-8 rounded-[50%]'>
             <AvatarFallback>{user.userName[0].toUpperCase()}</AvatarFallback>
           </Avatar>
           <div>
@@ -88,7 +88,7 @@ export default function UserModels() {
   ) => {
     return (
       <TableCell
-        className={`cursor-pointer ${hover && 'hover:underline'}`}
+        className={`cursor-pointer py-2 ${hover && 'hover:underline'}`}
         onClick={() => handleEditModal(user, modelId)}
       >
         {value || '-'}
@@ -128,20 +128,24 @@ export default function UserModels() {
               >
                 {t('User Name')}
               </TableHead>
-              <TableHead colSpan={4} className='text-center h-10'>
+              <TableHead colSpan={4} className='text-center h-8'>
                 {t('Models')}
               </TableHead>
             </TableRow>
             <TableRow className='pointer-events-none'>
-              <TableHead className='h-10'>{t('Model Display Name')}</TableHead>
-              <TableHead className='h-10'>{t('Remaining Tokens')}</TableHead>
-              <TableHead className='h-10'>{t('Remaining Counts')}</TableHead>
-              <TableHead className='h-10'>{t('Expiration Time')}</TableHead>
+              <TableHead className='h-8'>{t('Model Display Name')}</TableHead>
+              <TableHead className='h-8'>{t('Remaining Tokens')}</TableHead>
+              <TableHead className='h-8'>{t('Remaining Counts')}</TableHead>
+              <TableHead className='h-8'>{t('Expiration Time')}</TableHead>
             </TableRow>
           </TableHeader>
 
           {userModels.map((user) => (
-            <TableBody key={user.userId} className='tbody-hover'>
+            <TableBody
+              key={user.userId}
+              className='tbody-hover'
+              style={{ borderTop: '1px solid hsl(var(--muted))' }}
+            >
               {user.models.length > 0 ? (
                 user.models.map((model, index) => {
                   return (
@@ -171,7 +175,10 @@ export default function UserModels() {
                   onClick={() => handleShowAddModal(user)}
                 >
                   {UserTableCell(user)}
-                  <TableCell className='text-center text-gray-500' colSpan={4}>
+                  <TableCell
+                    className='py-2 text-center text-gray-500'
+                    colSpan={4}
+                  >
                     {t('Click User name set model')}
                   </TableCell>
                 </TableRow>
