@@ -41,14 +41,14 @@ const handler = async (req: NextApiRequest, res: NextApiResponse) => {
     const { messageId, model, messages, prompt, temperature } =
       req.body as ChatBody;
 
-    const chatModel = await ChatModelManager.findModelById(model.modelId);
+    const chatModel = await ChatModelManager.findModelById(model.id);
     if (!chatModel?.enable) {
       return modelUnauthorized(res);
     }
 
     const userModel = await UserModelManager.findUserModel(
       userId,
-      model.modelId
+      model.id
     );
     if (!userModel || !userModel.enable) {
       return modelUnauthorized(res);

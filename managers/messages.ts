@@ -2,7 +2,7 @@ import { ChatMessages, ChatModels, Users } from '@/dbs';
 import { Message } from '@/types/chat';
 import { UserModelManager } from './userModels';
 import UserModels, { UserModel } from '@/dbs/userModels';
-import { Op } from 'sequelize';
+import { Op, where } from 'sequelize';
 import { UserChatMessage } from '@/types/message';
 import { PageResult } from '@/types/page';
 
@@ -20,7 +20,7 @@ export class ChatMessageManager {
   static async findMessageById(id: string) {
     return await ChatMessages.findOne({
       where: {
-        id
+        id,
       },
     });
   }
@@ -60,6 +60,32 @@ export class ChatMessageManager {
     return messages;
   }
 
+  static async findUserMessages(userId: string) {
+    const messages = (await ChatMessages.findAll({
+      include: [
+        {
+          attributes: [
+            'name',
+            'id',
+            'modelVersion',
+            'modelConfig',
+            'type',
+            'imgConfig',
+          ],
+          model: ChatModels,
+        },
+      ],
+      where: {
+        userId,
+        isDeleted: {
+          [Op.not]: true,
+        },
+      },
+      order: [['createdAt', 'ASC']],
+    })) as UserChatMessage[];
+    return messages;
+  }
+
   static async updateMessageById(
     id: string,
     messages: Message[],
@@ -78,6 +104,14 @@ export class ChatMessageManager {
         },
       }
     );
+  }
+
+  static async updateMessageName(id: string, name: string) {
+    return await ChatMessages.update({ name }, { where: { id } });
+  }
+
+  static async deleteMessageById(id: string) {
+    return await ChatMessages.update({ isDeleted: true }, { where: { id } });
   }
 
   static async createMessage(params: CreateMessage) {

@@ -17,6 +17,8 @@ class ChatMessages extends Model<
   declare modelId: string;
   declare messages: Message[];
   declare name: string;
+  declare isDeleted?: boolean;
+  declare isShared?: boolean;
   declare prompt: string;
   declare tokenCount: number;
   declare chatCount: number;
@@ -33,6 +35,8 @@ ChatMessages.init(
     modelId: { type: DataTypes.UUID },
     messages: { type: DataTypes.JSON },
     name: { type: DataTypes.STRING },
+    isDeleted: { type: DataTypes.BOOLEAN, allowNull: true },
+    isShared: { type: DataTypes.BOOLEAN, allowNull: true },
     prompt: { type: DataTypes.STRING },
     tokenCount: { type: DataTypes.INTEGER, defaultValue: 0 },
     chatCount: { type: DataTypes.INTEGER, defaultValue: 0 },

@@ -23,7 +23,7 @@ const handler = async (req: NextApiRequest, res: NextApiResponse) => {
       .filter((m) => userModels.includes(m.id!))
       .map((x) => {
         return {
-          modelId: x.id,
+          id: x.id,
           modelVersion: x.modelVersion,
           name: x.name,
           type: x.type,

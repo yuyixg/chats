@@ -1,5 +1,5 @@
 export interface Model {
-  modelId: string;
+  id: string;
   modelVersion: ModelVersions;
   name: string;
   type: ModelType;

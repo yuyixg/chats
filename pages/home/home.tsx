@@ -32,6 +32,7 @@ import { ErrorMessage } from '@/types/error';
 import { Model } from '@/types/model';
 import { Prompt } from '@/types/prompt';
 import { UserSession } from '@/utils/user';
+import { getUserMessages } from '@/apis/userService';
 
 interface Props {
   serverSideApiKeyIsSet: boolean;
@@ -115,7 +116,7 @@ const Home = ({ defaultModelId, locale }: Props) => {
 
   const handleNewConversation = () => {
     const lastConversation = conversations[conversations.length - 1];
-    const _defaultModelId = defaultModelId ?? models[0].modelId;
+    const _defaultModelId = defaultModelId ?? models[0].id;
     const model = lastConversation?.model || getModel(_defaultModelId);
     const newConversation: Conversation = {
       id: uuidv4(),
@@ -180,7 +181,7 @@ const Home = ({ defaultModelId, locale }: Props) => {
   };
 
   const getModel = (modelId: string) => {
-    return models.find((x) => x.modelId === modelId)!;
+    return models.find((x) => x.id === modelId)!;
   };
 
   useEffect(() => {
@@ -218,16 +219,22 @@ const Home = ({ defaultModelId, locale }: Props) => {
   }, []);
 
   useEffect(() => {
-    const conversationHistory = localStorage.getItem('conversationHistory');
-    if (conversationHistory) {
-      const parsedConversationHistory: Conversation[] =
-        JSON.parse(conversationHistory);
-      const cleanedConversationHistory = cleanConversationHistory(
-        parsedConversationHistory
-      );
+    getUserMessages().then((data) => {
+      dispatch({ field: 'conversations', value: data });
+    });
+  }, []);
 
-      dispatch({ field: 'conversations', value: cleanedConversationHistory });
-    }
+  useEffect(() => {
+    // const conversationHistory = localStorage.getItem('conversationHistory');
+    // if (conversationHistory) {
+    //   const parsedConversationHistory: Conversation[] =
+    //     JSON.parse(conversationHistory);
+    //   const cleanedConversationHistory = cleanConversationHistory(
+    //     parsedConversationHistory
+    //   );
+
+    //   dispatch({ field: 'conversations', value: cleanedConversationHistory });
+    // }
     const selectedConversation = localStorage.getItem('selectedConversation');
     if (selectedConversation) {
       const parsedSelectedConversation: Conversation =
@@ -242,7 +249,7 @@ const Home = ({ defaultModelId, locale }: Props) => {
       const lastConversation = conversations[conversations.length - 1];
       const _defaultModelId = defaultModelId
         ? defaultModelId
-        : models[0]?.modelId;
+        : models[0]?.id;
       const model = lastConversation?.model || getModel(_defaultModelId);
       dispatch({
         field: 'selectedConversation',
@@ -274,7 +281,7 @@ const Home = ({ defaultModelId, locale }: Props) => {
     if (data && data.length > 0) {
       dispatch({
         field: 'defaultModelId',
-        value: data[0].modelId,
+        value: data[0].id,
       });
     }
     dispatch({ field: 'models', value: data });

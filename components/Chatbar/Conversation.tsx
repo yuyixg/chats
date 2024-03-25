@@ -19,12 +19,16 @@ import { Conversation } from '@/types/chat';
 import SidebarActionButton from '../SidebarActionButton';
 import ChatbarContext from '@/components/Chatbar/Chatbar.context';
 import { HomeContext } from '@/pages/home/home';
+import { deleteUserMessages, putUserMessages } from '@/apis/userService';
+import toast from 'react-hot-toast';
+import { useTranslation } from 'next-i18next';
 
 interface Props {
   conversation: Conversation;
 }
 
 export const ConversationComponent = ({ conversation }: Props) => {
+  const { t } = useTranslation('chat');
   const {
     state: { selectedConversation, messageIsStreaming },
     handleSelectConversation,
@@ -70,8 +74,15 @@ export const ConversationComponent = ({ conversation }: Props) => {
     e.stopPropagation();
     if (isDeleting) {
       handleDeleteConversation(conversation);
+      deleteUserMessages(conversation.id).then(() => {
+        toast.success(t('Delete successful'));
+      });
     } else if (isRenaming) {
       handleRename(conversation);
+      const { id, name } = conversation;
+      putUserMessages(id, name).then(() => {
+        toast.success(t('Save successful'));
+      });
     }
     setIsDeleting(false);
     setIsRenaming(false);
@@ -104,7 +115,7 @@ export const ConversationComponent = ({ conversation }: Props) => {
   return (
     <div className='relative flex items-center'>
       {isRenaming && selectedConversation?.id === conversation.id ? (
-        <div className='flex w-full items-center gap-3 rounded-lg text-black dark:text-white bg-[#cdcdcd] p-3'>
+        <div className='flex w-full items-center gap-3 rounded-lg text-black dark:text-white dark:bg-[#343541]/90 p-3'>
           <IconMessage size={18} />
           <input
             className='mr-12 flex-1 overflow-hidden overflow-ellipsis border-neutral-400 bg-transparent text-left text-[12.5px] leading-3 outline-none text-black dark:text-white'

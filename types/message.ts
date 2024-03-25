@@ -1,5 +1,6 @@
 import { Message } from '@/types/chat';
 import { Model } from 'sequelize';
+import { ModelType } from './model';
 
 export interface UserChatMessage extends Model {
   User: {
@@ -8,6 +9,11 @@ export interface UserChatMessage extends Model {
   };
   ChatModel: {
     name: string;
+    imgConfig: string;
+    id: string;
+    modelVersion: string;
+    systemPrompt: string;
+    type: ModelType;
   };
   id?: string;
   userId: string;
