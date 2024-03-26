@@ -9,7 +9,6 @@ export const config = {
 };
 
 const handler = async (req: NextApiRequest, res: NextApiResponse) => {
-  console.log(req.headers);
   if (req.method === 'POST') {
     const data = (await new Promise((resolve, reject) => {
       const form = new IncomingForm();
