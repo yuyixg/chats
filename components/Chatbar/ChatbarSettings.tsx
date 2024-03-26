@@ -100,12 +100,14 @@ export const ChatBarSettings = () => {
         </Popover>
       )}
 
-      <SettingDialog
-        open={isSettingDialogOpen}
-        onClose={() => {
-          setIsSettingDialog(false);
-        }}
-      />
+      {isSettingDialogOpen && (
+        <SettingDialog
+          open={isSettingDialogOpen}
+          onClose={() => {
+            setIsSettingDialog(false);
+          }}
+        />
+      )}
       <ChangePasswordModal
         isOpen={isChangePasswordOpen}
         onClose={() => {

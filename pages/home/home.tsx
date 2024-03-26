@@ -33,8 +33,6 @@ import { Model } from '@/types/model';
 import { Prompt } from '@/types/prompt';
 import { UserSession } from '@/utils/user';
 import { getUserMessages } from '@/apis/userService';
-import InitDbData from '@/db/init';
-import { connection } from '@/db';
 
 interface Props {
   serverSideApiKeyIsSet: boolean;
@@ -319,27 +317,27 @@ const Home = ({ defaultModelId, locale }: Props) => {
             {loadingText}
           </div>
         )} */}
-        {selectedConversation && (
-          <div
-            className={`flex h-screen w-screen flex-col text-sm text-white dark:text-white ${lightMode}`}
-          >
-            <div className='fixed top-0 w-full sm:hidden'>
+        <div
+          className={`flex h-screen w-screen flex-col text-sm text-white dark:text-white ${lightMode}`}
+        >
+          <div className='fixed top-0 w-full sm:hidden'>
+            {selectedConversation && (
               <Navbar
                 selectedConversation={selectedConversation}
                 onNewConversation={handleNewConversation}
                 hasModel={hasModel}
               />
-            </div>
-
-            <div className='flex h-full w-full pt-[48px] sm:pt-0'>
-              <Chatbar />
-              <div className='flex flex-1'>
-                <Chat stopConversationRef={stopConversationRef} />
-              </div>
-              <Promptbar />
-            </div>
+            )}
           </div>
-        )}
+
+          <div className='flex h-full w-full pt-[48px] sm:pt-0'>
+            <Chatbar />
+            <div className='flex flex-1'>
+              <Chat stopConversationRef={stopConversationRef} />
+            </div>
+            <Promptbar />
+          </div>
+        </div>
       </main>
     </HomeContext.Provider>
   );
@@ -354,16 +352,6 @@ export const getServerSideProps = async ({
   locale: string;
   req: any;
 }) => {
-  try {
-    await connection.authenticate();
-    await connection.sync({ alter: true });
-    await InitDbData();
-    console.log('------------------');
-    console.log('Initialized Data');
-    console.log('------------------');
-  } catch (error) {
-    console.log(error);
-  }
   const session = await getSession(req.headers.cookie);
   return {
     props: {

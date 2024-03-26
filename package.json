@@ -6,7 +6,11 @@
     "dev": "next dev",
     "build": "next build",
     "start": "next start",
-    "lint": "next lint"
+    "lint": "next lint",
+    "init": "ts-node -O \"{\\\"module\\\":\\\"commonjs\\\"}\" ./db/sync.ts",
+    "db:sqlite": "set DB_DIALECT=sqlite && npm run init",
+    "db:pg": "export $(cat .env.local | xargs) && env && npm run init",
+    "db-win:pg": "set DB_DIALECT=postgres && (for /F \"tokens=*\" %i in (.env.local) do set %i) && npm run init"
   },
   "dependencies": {
     "@dqbd/tiktoken": "^1.0.7",
@@ -75,6 +79,8 @@
     "@types/bcryptjs": "^2.4.6",
     "@types/formidable": "^3.4.5",
     "@types/react-syntax-highlighter": "^15.5.11",
-    "@types/uuid": "^9.0.4"
+    "@types/uuid": "^9.0.4",
+    "cross-env": "^7.0.3",
+    "ts-node-dev": "^2.0.0"
   }
 }
