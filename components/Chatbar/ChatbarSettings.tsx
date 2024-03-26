@@ -46,9 +46,9 @@ export const ChatBarSettings = () => {
 
   return (
     <div className='flex flex-col items-center space-y-1 border-t border-white/20 pt-1 text-sm'>
-      {conversations.length > 0 ? (
+      {/* {conversations.length > 0 ? (
         <ClearConversations onClearConversations={handleClearConversations} />
-      ) : null}
+      ) : null} */}
 
       {/* <SidebarButton
         text={t('Export data')}
