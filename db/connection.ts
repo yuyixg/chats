@@ -12,7 +12,7 @@ if (DB_DIALECT === 'postgres') {
 } else {
   connection = new Sequelize({
     dialect: 'sqlite',
-    storage: './database/chats.sqlite',
+    storage: 'database/chats.sqlite',
   });
 }
 

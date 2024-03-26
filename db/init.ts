@@ -17,7 +17,7 @@ export async function initialBaseData() {
       `INSERT INTO users ("id", "password", "username", "role", "enabled", "createdAt", "updatedAt") VALUES ('${adminUser.id}', '${adminUser.password}', '${adminUser.username}', '${adminUser.role}', 't', '${currentDate}', '${currentDate}');`
     );
     await connection.query(
-      `INSERT INTO user_models ("id", "userId", "models", "createdAt", "updatedAt") VALUES ('138c7746-daf5-44e2-af27-0f5bbc06296f', '${adminUser.id}', '[]', '${currentDate}', '${currentDate}');`
+      `INSERT INTO user_models ("id", "userId", "models", "createdAt", "updatedAt") VALUES ('5a567a51-4332-48ab-b2ab-d684e5553faf', '${adminUser.id}', '[]', '${currentDate}', '${currentDate}');`
     );
   }
 }
