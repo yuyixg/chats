@@ -63,7 +63,7 @@ const handler = async (req: NextApiRequest, res: NextApiResponse) => {
           name: x.name,
           type: x.type,
           enable: x.enable,
-          imgConfig: JSON.stringify(x.imgConfig || {}, null, 2),
+          fileConfig: JSON.stringify(x.fileConfig || {}, null, 2),
           modelConfig: JSON.stringify(x.modelConfig || {}, null, 2),
           apiConfig: JSON.stringify(
             {
@@ -88,7 +88,7 @@ const handler = async (req: NextApiRequest, res: NextApiResponse) => {
         enable,
         modelConfig: modelConfigJson,
         apiConfig: apiConfigJson,
-        imgConfig: imgConfigJson,
+        fileConfig: fileConfigJson,
       } = req.body;
       const model = await ChatModelManager.findModelById(modelId);
       if (!model) {
@@ -98,7 +98,7 @@ const handler = async (req: NextApiRequest, res: NextApiResponse) => {
 
       let modelConfig = JSON.parse(modelConfigJson);
       let apiConfig = JSON.parse(apiConfigJson);
-      let imgConfig = JSON.parse(imgConfigJson);
+      let fileConfig = JSON.parse(fileConfigJson);
 
       apiConfig.appId = checkKey(model?.apiConfig.apiKey, apiConfig.appId);
       apiConfig.apiKey = checkKey(model?.apiConfig.apiKey, apiConfig.apiKey);
@@ -110,7 +110,7 @@ const handler = async (req: NextApiRequest, res: NextApiResponse) => {
         enable,
         modelConfig,
         apiConfig,
-        imgConfig
+        fileConfig
       );
       return res.json(data);
     } else if (req.method === 'POST') {
@@ -120,7 +120,7 @@ const handler = async (req: NextApiRequest, res: NextApiResponse) => {
         enable,
         modelConfig: modelConfigJson,
         apiConfig: apiConfigJson,
-        imgConfig: imgConfigJson,
+        fileConfig: fileConfigJson,
       } = req.body;
 
       const model = await ChatModelManager.findModelByName(name);
@@ -138,7 +138,7 @@ const handler = async (req: NextApiRequest, res: NextApiResponse) => {
 
       let modelConfig = JSON.parse(modelConfigJson);
       let apiConfig = JSON.parse(apiConfigJson);
-      let imgConfig = JSON.parse(imgConfigJson);
+      let fileConfig = JSON.parse(fileConfigJson);
       const data = await ChatModelManager.createModel(
         template.type,
         modelVersion,
@@ -146,7 +146,7 @@ const handler = async (req: NextApiRequest, res: NextApiResponse) => {
         enable,
         modelConfig,
         apiConfig,
-        imgConfig
+        fileConfig
       );
       return res.json(data);
     } else if (req.method === 'DELETE') {

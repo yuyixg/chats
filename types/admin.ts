@@ -44,7 +44,7 @@ export interface GetModelResult {
   enable?: boolean;
   apiConfig?: string;
   modelConfig: string;
-  imgConfig?: string;
+  fileConfig?: string;
 }
 
 export interface PutModelParams {
@@ -53,7 +53,7 @@ export interface PutModelParams {
   enable?: boolean;
   apiConfig?: string;
   modelConfig: string;
-  imgConfig?: string;
+  fileConfig?: string;
 }
 
 export interface PostModelParams {
@@ -62,7 +62,7 @@ export interface PostModelParams {
   enable: boolean;
   apiConfig: string;
   modelConfig: string;
-  imgConfig?: string;
+  fileConfig?: string;
 }
 
 export interface CreateUserParams {

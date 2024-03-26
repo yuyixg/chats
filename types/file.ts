@@ -1,4 +1,4 @@
-export enum FileType {
+export enum FileServerType {
   Local = 'Local',
   Minio = 'Minio',
   Aws = 'Aws',

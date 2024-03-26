@@ -2,7 +2,7 @@ import { useEffect, useRef } from 'react';
 import toast from 'react-hot-toast';
 import { useTranslation } from 'next-i18next';
 import { getFileEndpoint } from '@/utils/apis';
-import { FileType } from '@/types/file';
+import { FileServerType } from '@/types/file';
 
 interface Props {
   onSuccessful?: (url: string) => void;
@@ -10,7 +10,7 @@ interface Props {
   onFailed?: () => void;
   children?: React.ReactNode;
   fileConfig: {
-    fileServerType: FileType;
+    fileServerType: FileServerType;
     maxFileSize?: number;
   };
   maxFileSize?: number;
@@ -44,7 +44,7 @@ const UploadButton: React.FunctionComponent<Props> = ({
       if (file) {
         const url = getFileEndpoint(fileServerType);
         onUploading && onUploading();
-        if (FileType.Local === FileType.Local) {
+        if (FileServerType.Local === FileServerType.Local) {
           const response = await fetch(url, {
             method: 'POST',
             body: fileForm,

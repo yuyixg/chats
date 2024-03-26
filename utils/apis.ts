@@ -1,4 +1,4 @@
-import { FileType } from '@/types/file';
+import { FileServerType } from '@/types/file';
 import { Model, ModelType } from '@/types/model';
 
 export const getModelEndpoint = (model: Model) => {
@@ -13,13 +13,13 @@ export const getModelEndpoint = (model: Model) => {
   return Endpoints[model.type];
 };
 
-export const getFileEndpoint = (file: FileType) => {
+export const getFileEndpoint = (file: FileServerType) => {
   const Endpoints = {
-    [FileType.Local]: 'api/files/local',
-    [FileType.Minio]: 'api/files/minio',
-    [FileType.Aws]: 'api/files/aws',
-    [FileType.Azure]: 'api/files/azure',
-    [FileType.Aliyun]: 'api/files/aliyun',
+    [FileServerType.Local]: 'api/files/local',
+    [FileServerType.Minio]: 'api/files/minio',
+    [FileServerType.Aws]: 'api/files/aws',
+    [FileServerType.Azure]: 'api/files/azure',
+    [FileServerType.Aliyun]: 'api/files/aliyun',
   };
   return Endpoints[file];
 };

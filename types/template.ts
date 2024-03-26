@@ -59,7 +59,7 @@ export const ModelDefaultTemplates = {
       prompt:
         "You are ChatGPT, a large language model trained by OpenAI. Follow the user's instructions carefully. Respond using markdown.",
     },
-    imgConfig: null,
+    fileConfig: null,
   },
   [ModelVersions.GPT_4]: {
     type: ModelType.GPT,
@@ -76,7 +76,7 @@ export const ModelDefaultTemplates = {
       prompt:
         "You are ChatGPT, a large language model trained by OpenAI. Follow the user's instructions carefully. Respond using markdown.",
     },
-    imgConfig: { count: 5, maxSize: 10240 },
+    fileConfig: { count: 5, maxSize: 10240 },
   },
   [ModelVersions.QWen_Vl_Plus]: {
     type: ModelType.QianWen,
@@ -88,7 +88,7 @@ export const ModelDefaultTemplates = {
       prompt:
         "You are an AI assistant with image understanding capabilities, Follow the user's instructions carefully. Respond using markdown.",
     },
-    imgConfig: { count: 5, maxSize: 10240 },
+    fileConfig: { count: 5, maxSize: 10240 },
   },
   [ModelVersions.ERNIE_Bot_4]: {
     type: ModelType.QianFan,
@@ -129,7 +129,7 @@ export const ModelDefaultTemplates = {
       prompt:
         "You are an AI assistant with image understanding capabilities, Follow the user's instructions carefully. Respond using markdown.",
     },
-    imgConfig: {},
+    fileConfig: {},
   },
   [ModelVersions.moonshot_v1_8k]: {
     type: ModelType.Kimi,

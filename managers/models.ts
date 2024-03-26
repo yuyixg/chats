@@ -2,7 +2,7 @@ import { ChatModels } from '@/db';
 import { ChatModelApiConfig } from '@/db/models';
 import {
   ChatModelConfig,
-  ChatModelImageConfig,
+  ChatModelFileConfig,
   ModelType,
   ModelVersions,
 } from '@/types/model';
@@ -50,7 +50,7 @@ export class ChatModelManager {
     enable: boolean,
     modelConfig: ChatModelConfig,
     apiConfig: ChatModelApiConfig,
-    imgConfig: ChatModelImageConfig
+    fileConfig: ChatModelFileConfig
   ) {
     return await ChatModels.create({
       type,
@@ -59,7 +59,7 @@ export class ChatModelManager {
       enable,
       modelConfig,
       apiConfig,
-      imgConfig,
+      fileConfig,
     });
   }
 
@@ -69,7 +69,7 @@ export class ChatModelManager {
     enable: boolean,
     modelConfig: ChatModelConfig,
     apiConfig: ChatModelApiConfig,
-    imgConfig: ChatModelImageConfig
+    fileConfig: ChatModelFileConfig
   ) {
     return await ChatModels.update(
       {
@@ -77,7 +77,7 @@ export class ChatModelManager {
         enable,
         modelConfig,
         apiConfig,
-        imgConfig,
+        fileConfig,
       },
       {
         where: { id },

@@ -70,7 +70,7 @@ export class ChatMessageManager {
             'modelVersion',
             'modelConfig',
             'type',
-            'imgConfig',
+            'fileConfig',
           ],
           model: ChatModels,
         },

@@ -30,7 +30,7 @@ const handler = async (req: NextApiRequest, res: NextApiResponse) => {
           systemPrompt: x.modelConfig?.prompt,
           maxLength: x.modelConfig?.maxLength,
           tokenLimit: x.modelConfig?.tokenLimit,
-          imgConfig: x.imgConfig,
+          fileConfig: x.fileConfig,
         };
       });
     return res.json(_models);

@@ -91,15 +91,15 @@ export const AddModelModal = (props: IProps) => {
       ),
     },
     {
-      name: 'imgConfig',
-      label: t('Image Configs'),
+      name: 'fileConfig',
+      label: t('File Configs'),
       defaultValue: '',
       render: (options: IFormFieldOption, field: FormFieldType) => (
         <FormTextarea
           hidden={
             !getModelConfigs(
               form.getValues('modelVersion') as ModelVersions,
-              'imgConfig'
+              'fileConfig'
             )
           }
           options={options}
@@ -127,7 +127,7 @@ export const AddModelModal = (props: IProps) => {
       .string()
       .min(1, `${t('This field is require')}`)
       .optional(),
-    imgConfig: z
+    fileConfig: z
       .string()
       .min(1, `${t('This field is require')}`)
       .optional(),
@@ -177,8 +177,8 @@ export const AddModelModal = (props: IProps) => {
           JSON.stringify(getModelConfigs(modelVersion, 'modelConfig'), null, 2)
         );
         form.setValue(
-          'imgConfig',
-          JSON.stringify(getModelConfigs(modelVersion, 'imgConfig'), null, 2)
+          'fileConfig',
+          JSON.stringify(getModelConfigs(modelVersion, 'fileConfig'), null, 2)
         );
       }
     });

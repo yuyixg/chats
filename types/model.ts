@@ -6,7 +6,7 @@ export interface Model {
   systemPrompt: string;
   maxLength?: number;
   tokenLimit?: number;
-  imgConfig?: ChatModelImageConfig;
+  fileConfig?: ChatModelFileConfig;
   enable?: boolean;
 }
 
@@ -34,9 +34,13 @@ export enum ModelType {
   Kimi = 'Kimi',
 }
 
-export interface ChatModelImageConfig {
-  count: number;
-  maxSize: number;
+export interface ChatModelFileConfig {
+  fileType: string;
+  fileMaxSize: number;
+  fileCount: number;
+  imageType: string;
+  imageMaxSize: number;
+  imageCount: number;
 }
 
 export interface ChatModelConfig {
@@ -45,4 +49,4 @@ export interface ChatModelConfig {
   tokenLimit?: number;
 }
 
-export type ModelConfigType = 'imgConfig' | 'apiConfig' | 'modelConfig';
+export type ModelConfigType = 'fileConfig' | 'apiConfig' | 'modelConfig';
