@@ -7,7 +7,7 @@ export interface Model {
   maxLength?: number;
   tokenLimit?: number;
   fileConfig?: ChatModelFileConfig;
-  enable?: boolean;
+  enabled?: boolean;
 }
 
 export enum ModelVersions {
@@ -35,12 +35,9 @@ export enum ModelType {
 }
 
 export interface ChatModelFileConfig {
-  fileType: string;
+  type: string;
   fileMaxSize: number;
-  fileCount: number;
-  imageType: string;
-  imageMaxSize: number;
-  imageCount: number;
+  maxCount: number;
 }
 
 export interface ChatModelConfig {

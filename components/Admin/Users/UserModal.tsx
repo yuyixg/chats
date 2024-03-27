@@ -1,4 +1,4 @@
-import { createUser, putUser } from '@/apis/adminService';
+import { postUser, putUser } from '@/apis/adminService';
 import { GetUsersResult } from '@/types/admin';
 import { z } from 'zod';
 import { useTranslation } from 'next-i18next';
@@ -134,7 +134,7 @@ export const UserModal = (props: IProps) => {
         ...params,
       });
     } else {
-      p = createUser(params);
+      p = postUser(params);
     }
     p.then(() => {
       toast.success(t('Save successful!'));

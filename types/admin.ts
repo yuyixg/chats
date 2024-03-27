@@ -2,6 +2,7 @@ import { UserModel } from '@/db/userModels';
 import { ModelVersions, ModelType } from './model';
 import { Paging } from './page';
 import { Message } from './chat';
+import { FileServerType, PutFileServerParams } from './file';
 
 export const enum UserRole {
   'admin' = 'admin',
@@ -19,7 +20,7 @@ export interface UserModelResult {
   modelId: string;
   modelName?: string;
   modelVersion?: string;
-  enable?: boolean;
+  enabled?: boolean;
   tokens?: number | null;
   counts?: number | null;
   expires?: string | null;
@@ -41,7 +42,7 @@ export interface GetModelResult {
   name: string;
   rank: number;
   type: ModelType;
-  enable?: boolean;
+  enabled?: boolean;
   apiConfig?: string;
   modelConfig: string;
   fileConfig?: string;
@@ -50,7 +51,7 @@ export interface GetModelResult {
 export interface PutModelParams {
   modelId: string;
   name: string;
-  enable?: boolean;
+  enabled?: boolean;
   apiConfig?: string;
   modelConfig: string;
   fileConfig?: string;
@@ -59,19 +60,19 @@ export interface PutModelParams {
 export interface PostModelParams {
   modelVersion: ModelVersions;
   name: string;
-  enable: boolean;
+  enabled: boolean;
   apiConfig: string;
   modelConfig: string;
   fileConfig?: string;
 }
 
-export interface CreateUserParams {
+export interface PostUserParams {
   username: string;
   password: string;
   role: string;
 }
 
-export interface PutUserParams extends CreateUserParams {
+export interface PutUserParams extends PostUserParams {
   id: string;
 }
 
@@ -103,4 +104,9 @@ export interface GetMessageDetailsResult {
   name: string;
   prompt: string;
   messages: Message[];
+}
+
+export interface GetFileServerResult extends PutFileServerParams {
+  createdAt: string;
+  updatedAt: string;
 }

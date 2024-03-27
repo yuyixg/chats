@@ -35,7 +35,7 @@ const handler = async (req: NextApiRequest, res: NextApiResponse) => {
           role: x.User.role,
           userName: x.User.username,
           models: x.models
-            .filter((x) => x.enable)
+            .filter((x) => x.enabled)
             .map((item) => {
               const model = models.find((model) => model.id === item.modelId)!;
               return {
@@ -65,7 +65,7 @@ const handler = async (req: NextApiRequest, res: NextApiResponse) => {
         if (!foundModel) {
           um.models.push({
             modelId: modelId,
-            enable: true,
+            enabled: true,
           });
         }
         return um;

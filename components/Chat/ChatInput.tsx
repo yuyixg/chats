@@ -18,16 +18,13 @@ import {
 } from 'react';
 
 import { useTranslation } from 'next-i18next';
-
 import { Content, Message } from '@/types/chat';
-
 import UploadButton from '../UploadButton';
 import { PromptList } from './PromptList';
 import { Prompt } from '@/types/prompt';
 import { VariableModal } from './VariableModal';
 import { isMobile } from '@/utils/common';
 import { HomeContext } from '@/pages/home/home';
-import { FileServerType } from '@/types/file';
 
 interface Props {
   onSend: (message: Message) => void;
@@ -323,7 +320,7 @@ export const ChatInput = ({
             </button>
             {Object.keys(fileConfig || {}).length > 0 &&
               !uploading &&
-              content?.image?.length !== fileConfig?.fileCount && (
+              content?.image?.length !== fileConfig?.maxCount && (
                 <UploadButton
                   fileConfig={fileConfig!}
                   onUploading={() => setUploading(true)}

@@ -42,7 +42,7 @@ const handler = async (req: NextApiRequest, res: NextApiResponse) => {
       req.body as ChatBody;
 
     const chatModel = await ChatModelManager.findModelById(model.id);
-    if (!chatModel?.enable) {
+    if (!chatModel?.enabled) {
       return modelUnauthorized(res);
     }
 
@@ -50,7 +50,7 @@ const handler = async (req: NextApiRequest, res: NextApiResponse) => {
       userId,
       model.id
     );
-    if (!userModel || !userModel.enable) {
+    if (!userModel || !userModel.enabled) {
       return modelUnauthorized(res);
     }
 

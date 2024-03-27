@@ -9,7 +9,7 @@ import {
 
 export class ChatModelManager {
   static async findModels(findAll: boolean = false) {
-    const where = { enable: true };
+    const where = { enabled: true };
     return await ChatModels.findAll({
       where: findAll ? {} : where,
       order: [
@@ -47,7 +47,7 @@ export class ChatModelManager {
     type: ModelType,
     modelVersion: ModelVersions,
     name: string,
-    enable: boolean,
+    enabled: boolean,
     modelConfig: ChatModelConfig,
     apiConfig: ChatModelApiConfig,
     fileConfig: ChatModelFileConfig
@@ -56,7 +56,7 @@ export class ChatModelManager {
       type,
       modelVersion,
       name,
-      enable,
+      enabled,
       modelConfig,
       apiConfig,
       fileConfig,
@@ -66,7 +66,7 @@ export class ChatModelManager {
   static async updateModel(
     id: string,
     name: string,
-    enable: boolean,
+    enabled: boolean,
     modelConfig: ChatModelConfig,
     apiConfig: ChatModelApiConfig,
     fileConfig: ChatModelFileConfig
@@ -74,7 +74,7 @@ export class ChatModelManager {
     return await ChatModels.update(
       {
         name,
-        enable,
+        enabled,
         modelConfig,
         apiConfig,
         fileConfig,

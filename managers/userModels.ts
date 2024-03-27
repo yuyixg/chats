@@ -19,7 +19,7 @@ export class UserModelManager {
       },
     });
     return (
-      userModels?.models.filter((x) => x.enable).map((x) => x.modelId) || []
+      userModels?.models.filter((x) => x.enabled).map((x) => x.modelId) || []
     );
   }
 
@@ -33,7 +33,7 @@ export class UserModelManager {
         userId,
       },
     });
-    const model = data?.models.find((x) => x.enable && x.modelId === modelId);
+    const model = data?.models.find((x) => x.enabled && x.modelId === modelId);
     return model ? { ...model, id: data?.id } : null;
   }
 

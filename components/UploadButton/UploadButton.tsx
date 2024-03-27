@@ -3,16 +3,15 @@ import toast from 'react-hot-toast';
 import { useTranslation } from 'next-i18next';
 import { getFileEndpoint } from '@/utils/apis';
 import { FileServerType } from '@/types/file';
+import { ChatModelFileConfig } from '@/types/model';
 
 interface Props {
   onSuccessful?: (url: string) => void;
   onUploading?: () => void;
   onFailed?: () => void;
   children?: React.ReactNode;
-  fileConfig: {
-    fileServerType: FileServerType;
-    maxFileSize?: number;
-  };
+  fileServerType?: FileServerType;
+  fileConfig: ChatModelFileConfig;
   maxFileSize?: number;
 }
 
@@ -21,17 +20,18 @@ const UploadButton: React.FunctionComponent<Props> = ({
   onUploading,
   onFailed,
   fileConfig,
+  fileServerType,
   children,
 }: Props) => {
   const { t } = useTranslation('chat');
   const uploadRef = useRef<HTMLInputElement>(null);
-  const { maxFileSize, fileServerType } = fileConfig;
+  const { fileMaxSize } = fileConfig;
   const changeFile = async (event: any) => {
     const file = event?.target?.files[0];
-    if (maxFileSize && file?.size / 1024 > maxFileSize) {
+    if (fileMaxSize && file?.size / 1024 > fileMaxSize) {
       toast.error(
         t(`The file size limit is {{fileSize}}`, {
-          fileSize: maxFileSize / 1024 + 'MB',
+          fileSize: fileMaxSize / 1024 + 'MB',
         })
       );
       onFailed && onFailed();
@@ -42,7 +42,7 @@ const UploadButton: React.FunctionComponent<Props> = ({
     fileForm.append('file', file);
     try {
       if (file) {
-        const url = getFileEndpoint(fileServerType);
+        const url = getFileEndpoint(fileServerType!);
         onUploading && onUploading();
         if (FileServerType.Local === FileServerType.Local) {
           const response = await fetch(url, {

@@ -40,8 +40,8 @@ export const AddUserModelModal = (props: IProps) => {
         const _models = data.filter(
           (x) =>
             !selectedModel?.models
-              .filter((m) => m.enable)
-              ?.find((m) => m.modelId === x.modelId) && x.enable
+              .filter((m) => m.enabled)
+              ?.find((m) => m.modelId === x.modelId) && x.enabled
         );
         setModel(_models);
         setLoading(false);
@@ -55,10 +55,10 @@ export const AddUserModelModal = (props: IProps) => {
       let models = selectedModel!.models || [];
       const foundModel = models.find((m) => m.modelId === select?.modelId);
       if (!foundModel) {
-        models.push({ modelId: select?.modelId!, enable: true });
+        models.push({ modelId: select?.modelId!, enabled: true });
       } else {
         models = models.map((x) => {
-          return x.modelId === select?.modelId ? { ...x, enable: true } : x;
+          return x.modelId === select?.modelId ? { ...x, enabled: true } : x;
         });
       }
       p = putUserModel({

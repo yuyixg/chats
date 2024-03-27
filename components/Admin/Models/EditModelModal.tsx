@@ -49,7 +49,7 @@ export const EditModelModal = (props: IProps) => {
       ),
     },
     {
-      name: 'enable',
+      name: 'enabled',
       label: t('Is it enabled'),
       render: (options: IFormFieldOption, field: FormFieldType) => (
         <FormSwitch options={options} field={field} />
@@ -92,7 +92,7 @@ export const EditModelModal = (props: IProps) => {
       .min(1, `${t('This field is require')}`)
       .optional(),
     modelId: z.string().optional(),
-    enable: z.boolean().optional(),
+    enabled: z.boolean().optional(),
     apiConfig: z
       .string()
       .min(1, `${t('This field is require')}`)
@@ -156,7 +156,7 @@ export const EditModelModal = (props: IProps) => {
       form.formState.isValid;
       form.setValue('name', selected?.name);
       form.setValue('modelId', selected?.modelId);
-      form.setValue('enable', selected?.enable);
+      form.setValue('enabled', selected?.enabled);
       form.setValue(
         'apiConfig',
         mergeModelConfigs(

@@ -36,7 +36,7 @@ export default async function handler(
     const { model, messages, messageId } = req.body as ChatBody;
 
     const chatModel = await ChatModelManager.findModelById(model.id);
-    if (!chatModel?.enable) {
+    if (!chatModel?.enabled) {
       return modelUnauthorized(res);
     }
 
@@ -44,7 +44,7 @@ export default async function handler(
       userId,
       model.id
     );
-    if (!userModel || !userModel.enable) {
+    if (!userModel || !userModel.enabled) {
       return modelUnauthorized(res);
     }
 

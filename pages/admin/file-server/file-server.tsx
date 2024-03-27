@@ -1,7 +1,6 @@
 import React, { useEffect, useState } from 'react';
-import { getModels } from '@/apis/adminService';
-import { GetModelResult } from '@/types/admin';
-import { EditModelModal } from '@/components/Admin/Models/EditModelModal';
+import { getFileServers } from '@/apis/adminService';
+import { GetFileServerResult } from '@/types/admin';
 import { serverSideTranslations } from 'next-i18next/serverSideTranslations';
 import { useTranslation } from 'next-i18next';
 import {
@@ -15,37 +14,35 @@ import {
 import { Card } from '@/components/ui/card';
 import { Button } from '@/components/ui/button';
 import { IconPlus } from '@tabler/icons-react';
-import { AddModelModal } from '@/components/Admin/Models/AddModelModal';
+import { FileServerModal } from '@/components/Admin/Files/FileServerModal';
 
-export default function Models() {
+export default function FileServer() {
   const { t } = useTranslation('admin');
-  const [isOpen, setIsOpen] = useState({ add: false, edit: false });
-  const [selectedModel, setSelectedModel] = useState<GetModelResult | null>(
-    null
-  );
-  const [models, setModels] = useState<GetModelResult[]>([]);
+  const [isOpen, setIsOpen] = useState(false);
+  const [selected, setSelected] = useState<GetFileServerResult | null>(null);
+  const [fileServers, setFileServers] = useState<GetFileServerResult[]>([]);
   const [loading, setLoading] = useState(true);
   useEffect(() => {
     init();
   }, []);
 
   const init = () => {
-    getModels().then((data) => {
-      setModels(data);
-      setIsOpen({ add: false, edit: false });
-      setSelectedModel(null);
+    getFileServers().then((data) => {
+      setFileServers(data);
+      setIsOpen(false);
+      setSelected(null);
       setLoading(false);
     });
   };
 
-  const handleShow = (item: GetModelResult) => {
-    setSelectedModel(item);
-    setIsOpen({ ...isOpen, edit: true });
+  const handleShow = (item: GetFileServerResult) => {
+    setSelected(item);
+    setIsOpen(true);
   };
 
   const handleClose = () => {
-    setIsOpen({ add: false, edit: false });
-    setSelectedModel(null);
+    setIsOpen(false);
+    setSelected(null);
   };
 
   return (
@@ -54,12 +51,12 @@ export default function Models() {
         <div className='flex justify-end gap-3 items-center'>
           <Button
             onClick={() => {
-              setIsOpen({ ...isOpen, add: true });
+              setIsOpen(true);
             }}
             color='primary'
           >
             <IconPlus size={20} />
-            {t('Add Model')}
+            {t('Add File Server')}
           </Button>
         </div>
       </div>
@@ -67,22 +64,20 @@ export default function Models() {
         <Table>
           <TableHeader>
             <TableRow>
-              <TableHead className='w-20'>{t('Rank')}</TableHead>
-              <TableHead>{t('Model Display Name')}</TableHead>
-              <TableHead>{t('Model Version')}</TableHead>
-              <TableHead>{t('Model Type')}</TableHead>
+              <TableHead>{t('Server Name')}</TableHead>
+              <TableHead>{t('File Server Type')}</TableHead>
+              <TableHead>{t('Created Time')}</TableHead>
             </TableRow>
           </TableHeader>
           <TableBody isLoading={loading}>
-            {models.map((item) => (
+            {fileServers.map((item) => (
               <TableRow
                 className='cursor-pointer'
-                key={item.modelId}
+                key={item.id}
                 onClick={() => {
                   handleShow(item);
                 }}
               >
-                <TableCell>{item.rank}</TableCell>
                 <TableCell className='flex items-center gap-1'>
                   <div
                     className={`w-2 h-2 rounded-full ${
@@ -91,21 +86,18 @@ export default function Models() {
                   ></div>
                   {item.name}
                 </TableCell>
-                <TableCell>{item.modelVersion}</TableCell>
                 <TableCell>{item.type}</TableCell>
+                <TableCell>
+                  {new Date(item.createdAt).toLocaleString()}
+                </TableCell>
               </TableRow>
             ))}
           </TableBody>
         </Table>
       </Card>
-      <EditModelModal
-        selected={selectedModel}
-        isOpen={isOpen.edit}
-        onClose={handleClose}
-        onSuccessful={init}
-      />
-      <AddModelModal
-        isOpen={isOpen.add}
+      <FileServerModal
+        selected={selected}
+        isOpen={isOpen}
         onClose={handleClose}
         onSuccessful={init}
       />

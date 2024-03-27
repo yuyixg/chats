@@ -37,7 +37,7 @@ class ChatModels extends Model<
   declare modelConfig: ChatModelConfig;
   declare fileServerType?: FileServerType;
   declare rank?: number;
-  declare enable?: boolean;
+  declare enabled?: boolean;
 }
 
 ChatModels.init(
@@ -55,7 +55,7 @@ ChatModels.init(
     fileConfig: { type: DataTypes.JSON },
     apiConfig: { type: DataTypes.JSON },
     rank: { type: DataTypes.INTEGER },
-    enable: { type: DataTypes.BOOLEAN },
+    enabled: { type: DataTypes.BOOLEAN },
   },
   {
     sequelize: connection,

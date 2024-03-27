@@ -62,7 +62,7 @@ const handler = async (req: NextApiRequest, res: NextApiResponse) => {
           modelVersion: x.modelVersion,
           name: x.name,
           type: x.type,
-          enable: x.enable,
+          enabled: x.enabled,
           fileConfig: JSON.stringify(x.fileConfig || {}, null, 2),
           modelConfig: JSON.stringify(x.modelConfig || {}, null, 2),
           apiConfig: JSON.stringify(
@@ -85,7 +85,7 @@ const handler = async (req: NextApiRequest, res: NextApiResponse) => {
       const {
         modelId,
         name,
-        enable,
+        enabled,
         modelConfig: modelConfigJson,
         apiConfig: apiConfigJson,
         fileConfig: fileConfigJson,
@@ -107,7 +107,7 @@ const handler = async (req: NextApiRequest, res: NextApiResponse) => {
       const data = await ChatModelManager.updateModel(
         modelId,
         name,
-        enable,
+        enabled,
         modelConfig,
         apiConfig,
         fileConfig
@@ -117,7 +117,7 @@ const handler = async (req: NextApiRequest, res: NextApiResponse) => {
       const {
         modelVersion,
         name,
-        enable,
+        enabled,
         modelConfig: modelConfigJson,
         apiConfig: apiConfigJson,
         fileConfig: fileConfigJson,
@@ -143,7 +143,7 @@ const handler = async (req: NextApiRequest, res: NextApiResponse) => {
         template.type,
         modelVersion,
         name,
-        enable,
+        enabled,
         modelConfig,
         apiConfig,
         fileConfig
