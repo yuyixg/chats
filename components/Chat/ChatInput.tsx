@@ -325,7 +325,7 @@ export const ChatInput = ({
                 selectedConversation?.model?.imgConfig?.count && (
                 <UploadButton
                   fileConfig={{
-                    fileServerType: FileType.Local,
+                    fileServerType: FileType.Minio,
                     maxFileSize:
                       selectedConversation?.model?.imgConfig?.maxSize,
                   }}
