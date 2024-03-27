@@ -5,6 +5,7 @@ import { getSession } from '@/utils/session';
 import { ModelDefaultTemplates } from '@/types/template';
 import { ModelVersions } from '@/types/model';
 import { badRequest, internalServerError } from '@/utils/error';
+import { addAsterisk, checkKey } from '@/utils/common';
 export const config = {
   api: {
     bodyParser: {
@@ -12,32 +13,6 @@ export const config = {
     },
   },
   maxDuration: 5,
-};
-
-// -> 1234567890 -> 12345***90
-const addAsterisk = (value?: string, separator = '*') => {
-  if (!value) {
-    return null;
-  }
-  return (
-    value.substring(0, 5) +
-    value
-      .substring(5, value.length - 2)
-      .split('')
-      .map((x) => separator)
-      .join('') +
-    value.substring(value.length - 2, value.length)
-  );
-};
-
-const checkKey = (
-  originValue: string | undefined,
-  currentValue: string | undefined
-) => {
-  if (originValue && addAsterisk(originValue) === currentValue) {
-    return originValue;
-  }
-  return currentValue;
 };
 
 const handler = async (req: NextApiRequest, res: NextApiResponse) => {
@@ -63,6 +38,7 @@ const handler = async (req: NextApiRequest, res: NextApiResponse) => {
           name: x.name,
           type: x.type,
           enabled: x.enabled,
+          fileServerId: x.fileServerId,
           fileConfig: JSON.stringify(x.fileConfig || {}, null, 2),
           modelConfig: JSON.stringify(x.modelConfig || {}, null, 2),
           apiConfig: JSON.stringify(
@@ -86,6 +62,7 @@ const handler = async (req: NextApiRequest, res: NextApiResponse) => {
         modelId,
         name,
         enabled,
+        fileServerId,
         modelConfig: modelConfigJson,
         apiConfig: apiConfigJson,
         fileConfig: fileConfigJson,
@@ -110,6 +87,7 @@ const handler = async (req: NextApiRequest, res: NextApiResponse) => {
         enabled,
         modelConfig,
         apiConfig,
+        fileServerId,
         fileConfig
       );
       return res.json(data);
@@ -118,6 +96,7 @@ const handler = async (req: NextApiRequest, res: NextApiResponse) => {
         modelVersion,
         name,
         enabled,
+        fileServerId,
         modelConfig: modelConfigJson,
         apiConfig: apiConfigJson,
         fileConfig: fileConfigJson,
@@ -146,6 +125,7 @@ const handler = async (req: NextApiRequest, res: NextApiResponse) => {
         enabled,
         modelConfig,
         apiConfig,
+        fileServerId,
         fileConfig
       );
       return res.json(data);

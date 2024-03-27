@@ -1,5 +1,9 @@
-import { deleteModels, putModels } from '@/apis/adminService';
-import { GetModelResult, PutModelParams } from '@/types/admin';
+import { deleteModels, getFileServers, putModels } from '@/apis/adminService';
+import {
+  GetFileServerResult,
+  GetModelResult,
+  PutModelParams,
+} from '@/types/admin';
 import { useTranslation } from 'next-i18next';
 import React, { useEffect, useState } from 'react';
 import toast from 'react-hot-toast';
@@ -19,7 +23,8 @@ import FormInput from '../../ui/form/input';
 import FormSwitch from '../../ui/form/switch';
 import FormTextarea from '../../ui/form/textarea';
 import { Button } from '../../ui/button';
-import { getModelConfigs, mergeModelConfigs } from '@/utils/model';
+import { getModelConfigs, mergeConfigs } from '@/utils/model';
+import FormSelect from '@/components/ui/form/select';
 
 interface IProps {
   isOpen: boolean;
@@ -32,6 +37,7 @@ interface IProps {
 export const EditModelModal = (props: IProps) => {
   const { t } = useTranslation('admin');
   const { isOpen, onClose, selected, onSuccessful } = props;
+  const [fileServers, setFileServers] = useState<GetFileServerResult[]>([]);
   const [deleting, setDeleting] = useState(false);
   const formFields: IFormFieldOption[] = [
     {
@@ -74,6 +80,22 @@ export const EditModelModal = (props: IProps) => {
       ),
     },
     {
+      name: 'fileServerId',
+      label: t('File Server Type'),
+      defaultValue: '',
+      render: (options: IFormFieldOption, field: FormFieldType) => (
+        <FormSelect
+          hidden={!selected?.fileServerId}
+          items={fileServers.map((item) => ({
+            name: item.name,
+            value: item.id,
+          }))}
+          options={options}
+          field={field}
+        />
+      ),
+    },
+    {
       name: 'fileConfig',
       label: t('File Configs'),
       render: (options: IFormFieldOption, field: FormFieldType) => (
@@ -101,6 +123,7 @@ export const EditModelModal = (props: IProps) => {
       .string()
       .min(1, `${t('This field is require')}`)
       .optional(),
+    fileServerId: z.union([z.string(), z.undefined()]),
     fileConfig: z
       .string()
       .min(1, `${t('This field is require')}`)
@@ -152,28 +175,32 @@ export const EditModelModal = (props: IProps) => {
 
   useEffect(() => {
     if (isOpen) {
+      getFileServers(true).then((data) => {
+        setFileServers(data);
+      });
       form.reset();
       form.formState.isValid;
       form.setValue('name', selected?.name);
       form.setValue('modelId', selected?.modelId);
       form.setValue('enabled', selected?.enabled);
+      form.setValue('fileServerId', selected?.fileServerId);
       form.setValue(
         'apiConfig',
-        mergeModelConfigs(
+        mergeConfigs(
           getModelConfigs(selected!.modelVersion, 'apiConfig'),
           JSON.parse(selected?.apiConfig || '{}')
         )
       );
       form.setValue(
         'modelConfig',
-        mergeModelConfigs(
+        mergeConfigs(
           getModelConfigs(selected!.modelVersion, 'modelConfig'),
           JSON.parse(selected?.modelConfig || '{}')
         )
       );
       form.setValue(
         'fileConfig',
-        mergeModelConfigs(
+        mergeConfigs(
           getModelConfigs(selected!.modelVersion, 'fileConfig'),
           JSON.parse(selected?.fileConfig || '{}')
         )

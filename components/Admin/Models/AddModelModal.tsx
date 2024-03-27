@@ -1,6 +1,6 @@
-import { postModels } from '@/apis/adminService';
+import { getFileServers, postModels } from '@/apis/adminService';
 import { useTranslation } from 'next-i18next';
-import React, { useEffect } from 'react';
+import React, { useEffect, useState } from 'react';
 import toast from 'react-hot-toast';
 import {
   Dialog,
@@ -20,7 +20,7 @@ import FormTextarea from '../../ui/form/textarea';
 import { Button } from '../../ui/button';
 import FormSelect from '@/components/ui/form/select';
 import { ModelVersions } from '@/types/model';
-import { PostModelParams } from '@/types/admin';
+import { GetFileServerResult, PostModelParams } from '@/types/admin';
 import { getModelConfigs } from '@/utils/model';
 
 interface IProps {
@@ -32,7 +32,9 @@ interface IProps {
 
 export const AddModelModal = (props: IProps) => {
   const { t } = useTranslation('admin');
+  const [fileServers, setFileServers] = useState<GetFileServerResult[]>([]);
   const { isOpen, onClose, onSuccessful } = props;
+
   const formFields: IFormFieldOption[] = [
     {
       name: 'modelVersion',
@@ -91,6 +93,27 @@ export const AddModelModal = (props: IProps) => {
       ),
     },
     {
+      name: 'fileServerId',
+      label: t('File Server Type'),
+      defaultValue: '',
+      render: (options: IFormFieldOption, field: FormFieldType) => (
+        <FormSelect
+          hidden={
+            !getModelConfigs(
+              form.getValues('modelVersion') as ModelVersions,
+              'fileConfig'
+            )
+          }
+          items={fileServers.map((item) => ({
+            name: item.name,
+            value: item.id,
+          }))}
+          options={options}
+          field={field}
+        />
+      ),
+    },
+    {
       name: 'fileConfig',
       label: t('File Configs'),
       defaultValue: '',
@@ -127,6 +150,7 @@ export const AddModelModal = (props: IProps) => {
       .string()
       .min(1, `${t('This field is require')}`)
       .optional(),
+    fileServerId: z.string(),
     fileConfig: z
       .string()
       .min(1, `${t('This field is require')}`)
@@ -159,6 +183,9 @@ export const AddModelModal = (props: IProps) => {
 
   useEffect(() => {
     if (isOpen) {
+      getFileServers(true).then((data) => {
+        setFileServers(data);
+      });
       form.reset();
       form.formState.isValid;
     }

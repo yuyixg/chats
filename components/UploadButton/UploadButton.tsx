@@ -38,13 +38,13 @@ const UploadButton: React.FunctionComponent<Props> = ({
       return;
     }
 
-    const fileForm = new FormData();
-    fileForm.append('file', file);
     try {
       if (file) {
         const url = getFileEndpoint(fileServerType!);
         onUploading && onUploading();
-        if (FileServerType.Local === FileServerType.Local) {
+        if (fileServerType === FileServerType.Local) {
+          const fileForm = new FormData();
+          fileForm.append('file', file);
           const response = await fetch(url, {
             method: 'POST',
             body: fileForm,
@@ -97,11 +97,12 @@ const UploadButton: React.FunctionComponent<Props> = ({
 
   useEffect(() => {
     const fileInput = document.getElementById('upload')!;
+    fileInput.removeEventListener('change', changeFile);
     fileInput.addEventListener('change', changeFile);
     return () => {
       fileInput.removeEventListener('change', changeFile);
     };
-  }, []);
+  }, [fileServerType]);
 
   return (
     <div>

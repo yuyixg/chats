@@ -3,6 +3,7 @@ import { UserRole } from '@/types/admin';
 import { getSession } from '@/utils/session';
 import { internalServerError } from '@/utils/error';
 import { FileServerManager } from '@/managers/fileServer';
+import { addAsterisk, checkKey } from '@/utils/common';
 export const config = {
   api: {
     bodyParser: {
@@ -25,14 +26,49 @@ const handler = async (req: NextApiRequest, res: NextApiResponse) => {
 
   try {
     if (req.method === 'GET') {
-      const data = await FileServerManager.findFileServers();
+      const { select } = req.query;
+      const servers = await FileServerManager.findFileServers();
+      let data = [];
+      if (select) {
+        data = servers
+          .filter((x) => x.enabled)
+          .map((x) => {
+            return { id: x.id, name: x.name };
+          });
+      } else {
+        data = servers.map((x) => {
+          return {
+            id: x.id,
+            name: x.name,
+            type: x.type,
+            configs: {
+              endpoint: x.configs.endpoint,
+              bucketName: x.configs.bucketName,
+              region: x.configs.region,
+              accessKey: addAsterisk(x.configs.accessKey),
+              accessSecret: addAsterisk(x.configs.accessSecret),
+            },
+            enabled: x.enabled,
+            createdAt: x.createdAt,
+          };
+        });
+      }
       return res.json(data);
     } else if (req.method === 'PUT') {
-      const { id, type, name, enabled, configs } = req.body;
+      const { id, type, name, enabled, configs: configsJSON } = req.body;
       let fileServer = await FileServerManager.findById(id);
       if (!fileServer) {
         return res.status(404).send('File server not found');
       }
+
+      let configs = JSON.parse(configsJSON);
+
+      configs.appId = checkKey(fileServer.configs.accessKey, configs.accessKey);
+      configs.apiKey = checkKey(
+        fileServer.configs.accessSecret,
+        configs.accessSecret
+      );
+
       const data = await FileServerManager.updateFileServer({
         id,
         name,
@@ -51,7 +87,7 @@ const handler = async (req: NextApiRequest, res: NextApiResponse) => {
         type,
         name,
         enabled,
-        configs,
+        configs: JSON.parse(configs),
       });
       return res.json(fileServer);
     }

@@ -50,7 +50,7 @@ export const ChatInput = ({
   } = useContext(HomeContext);
 
   const {
-    model: { fileConfig },
+    model: { fileConfig, fileServerType },
   } = selectedConversation || { model: { fileConfig: null } };
 
   const [content, setContent] = useState<Content>({
@@ -318,10 +318,11 @@ export const ChatInput = ({
                 <IconSend size={18} />
               )}
             </button>
-            {Object.keys(fileConfig || {}).length > 0 &&
+            {fileServerType &&
               !uploading &&
               content?.image?.length !== fileConfig?.maxCount && (
                 <UploadButton
+                  fileServerType={fileServerType}
                   fileConfig={fileConfig!}
                   onUploading={() => setUploading(true)}
                   onFailed={() => setUploading(false)}

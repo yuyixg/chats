@@ -1,3 +1,5 @@
+import { FileServerType } from './file';
+
 export interface Model {
   id: string;
   modelVersion: ModelVersions;
@@ -6,6 +8,7 @@ export interface Model {
   systemPrompt: string;
   maxLength?: number;
   tokenLimit?: number;
+  fileServerType: FileServerType;
   fileConfig?: ChatModelFileConfig;
   enabled?: boolean;
 }

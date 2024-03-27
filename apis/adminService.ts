@@ -98,9 +98,13 @@ export const getMessageDetails = (
   return fetchService.get(`/api/admin/message-details?messageId=${messageId}`);
 };
 
-export const getFileServers = (): Promise<GetFileServerResult[]> => {
+export const getFileServers = (
+  select: boolean = false
+): Promise<GetFileServerResult[]> => {
   const fetchService = useFetch();
-  return fetchService.get('/api/admin/file-server');
+  return fetchService.get(
+    '/api/admin/file-server?select=' + (!select ? '' : true)
+  );
 };
 
 export const postFileServer = (params: PostFileServerParams) => {

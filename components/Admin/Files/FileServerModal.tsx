@@ -26,6 +26,7 @@ import {
 } from '@/types/file';
 import { getFileConfigs } from '@/utils/file';
 import { GetFileServerResult } from '@/types/admin';
+import { mergeConfigs } from '@/utils/model';
 
 interface IProps {
   selected: GetFileServerResult | null;
@@ -132,7 +133,10 @@ export const FileServerModal = (props: IProps) => {
         form.setValue('name', selected.name);
         form.setValue('type', selected.type);
         form.setValue('enabled', selected.enabled);
-        form.setValue('configs', JSON.stringify(selected.configs));
+        form.setValue(
+          'configs',
+          mergeConfigs(getFileConfigs(selected.type), selected.configs)
+        );
       }
     }
   }, [isOpen]);
@@ -141,7 +145,10 @@ export const FileServerModal = (props: IProps) => {
     const subscription = form.watch((value, { name, type }) => {
       if (name === 'type' && type === 'change') {
         const type = value.type as FileServerType;
-        form.setValue('configs', JSON.stringify(getFileConfigs(type), null, 2));
+        form.setValue(
+          'configs',
+          JSON.stringify(getFileConfigs(type) || {}, null, 2)
+        );
       }
     });
     return () => subscription.unsubscribe();

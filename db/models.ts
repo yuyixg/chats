@@ -35,7 +35,7 @@ class ChatModels extends Model<
   declare fileConfig?: ChatModelFileConfig;
   declare apiConfig: ChatModelApiConfig;
   declare modelConfig: ChatModelConfig;
-  declare fileServerType?: FileServerType;
+  declare fileServerId?: string;
   declare rank?: number;
   declare enabled?: boolean;
 }
@@ -47,7 +47,7 @@ ChatModels.init(
       primaryKey: true,
       defaultValue: UUIDV4,
     },
-    fileServerType: { type: DataTypes.STRING },
+    fileServerId: { type: DataTypes.STRING },
     modelVersion: { type: DataTypes.STRING },
     name: { type: DataTypes.STRING },
     type: { type: DataTypes.STRING },

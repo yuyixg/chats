@@ -1,4 +1,3 @@
-import { Users } from '@/db';
 import FileServer from '@/db/fileServer';
 import { PostFileServerParams, PutFileServerParams } from '@/types/file';
 
@@ -15,14 +14,16 @@ export class FileServerManager {
     return await FileServer.create(params);
   }
 
-  static async findFileServers() {
+  static async findFileServers(findAll: boolean = true) {
+    const where = { enabled: true };
     return await FileServer.findAll({
+      where: findAll ? {} : where,
       order: [['createdAt', 'DESC']],
     });
   }
 
   static async updateFileServer(params: PutFileServerParams) {
-    return await Users.update(params, {
+    return await FileServer.update(params, {
       where: {
         id: params.id,
       },

@@ -45,6 +45,7 @@ export interface GetModelResult {
   enabled?: boolean;
   apiConfig?: string;
   modelConfig: string;
+  fileServerId?: string;
   fileConfig?: string;
 }
 
@@ -54,6 +55,7 @@ export interface PutModelParams {
   enabled?: boolean;
   apiConfig?: string;
   modelConfig: string;
+  fileServerId?: string;
   fileConfig?: string;
 }
 
@@ -63,6 +65,7 @@ export interface PostModelParams {
   enabled: boolean;
   apiConfig: string;
   modelConfig: string;
+  fileServerId?: string;
   fileConfig?: string;
 }
 

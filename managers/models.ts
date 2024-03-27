@@ -50,6 +50,7 @@ export class ChatModelManager {
     enabled: boolean,
     modelConfig: ChatModelConfig,
     apiConfig: ChatModelApiConfig,
+    fileServerId: string,
     fileConfig: ChatModelFileConfig
   ) {
     return await ChatModels.create({
@@ -59,6 +60,7 @@ export class ChatModelManager {
       enabled,
       modelConfig,
       apiConfig,
+      fileServerId,
       fileConfig,
     });
   }
@@ -69,6 +71,7 @@ export class ChatModelManager {
     enabled: boolean,
     modelConfig: ChatModelConfig,
     apiConfig: ChatModelApiConfig,
+    fileServerId: string,
     fileConfig: ChatModelFileConfig
   ) {
     return await ChatModels.update(
@@ -77,6 +80,7 @@ export class ChatModelManager {
         enabled,
         modelConfig,
         apiConfig,
+        fileServerId,
         fileConfig,
       },
       {
