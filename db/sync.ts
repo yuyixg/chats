@@ -4,7 +4,7 @@ import { initialBaseData, initialProjectEnvironment } from './init';
 (async () => {
   try {
     await connection.authenticate();
-    await connection.sync({ alter: true, logging: true });
+    await connection.sync({ force: true, logging: true });
     await initialBaseData();
     console.log('Database synchronized successfully.');
     await initialProjectEnvironment();

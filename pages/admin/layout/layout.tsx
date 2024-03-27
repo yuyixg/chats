@@ -4,6 +4,7 @@ import { TooltipProvider } from '@/components/ui/tooltip';
 import { cn } from '@/lib/utils';
 import {
   IconChartPie,
+  IconFiles,
   IconMessageCircle,
   IconMessages,
   IconSettingsCog,
@@ -32,11 +33,6 @@ const AdminLayout = ({
       title: t('Dashboard'),
     },
     {
-      url: '/admin/models',
-      icon: <IconSettingsCog stroke={1.6} size={22} />,
-      title: t('Model Configs'),
-    },
-    {
       url: '/admin/users',
       icon: <IconUsers stroke={1.6} size={22} />,
       title: t('User Management'),
@@ -45,6 +41,16 @@ const AdminLayout = ({
       url: '/admin/user-models',
       icon: <IconUserCog stroke={1.6} size={22} />,
       title: t('User Models'),
+    },
+    {
+      url: '/admin/models',
+      icon: <IconSettingsCog stroke={1.6} size={22} />,
+      title: t('Model Configs'),
+    },
+    {
+      url: '/admin/file-server',
+      icon: <IconFiles stroke={1.6} size={22} />,
+      title: t('File Server'),
     },
     {
       url: '/admin/messages',

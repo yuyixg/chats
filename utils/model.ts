@@ -41,7 +41,7 @@ export function getModelConfigs(
   return template[configType] || null;
 }
 
-export function mergeModelConfigs(obj1: any, obj2: any) {
+export function mergeConfigs(obj1: any, obj2: any) {
   const config = Object.keys(obj1 || {}).reduce((result: any, key) => {
     result[key] = obj2[key] || null;
     return result;

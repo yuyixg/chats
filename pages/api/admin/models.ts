@@ -5,6 +5,7 @@ import { getSession } from '@/utils/session';
 import { ModelDefaultTemplates } from '@/types/template';
 import { ModelVersions } from '@/types/model';
 import { badRequest, internalServerError } from '@/utils/error';
+import { addAsterisk, checkKey } from '@/utils/common';
 export const config = {
   api: {
     bodyParser: {
@@ -12,32 +13,6 @@ export const config = {
     },
   },
   maxDuration: 5,
-};
-
-// -> 1234567890 -> 12345***90
-const addAsterisk = (value?: string, separator = '*') => {
-  if (!value) {
-    return null;
-  }
-  return (
-    value.substring(0, 5) +
-    value
-      .substring(5, value.length - 2)
-      .split('')
-      .map((x) => separator)
-      .join('') +
-    value.substring(value.length - 2, value.length)
-  );
-};
-
-const checkKey = (
-  originValue: string | undefined,
-  currentValue: string | undefined
-) => {
-  if (originValue && addAsterisk(originValue) === currentValue) {
-    return originValue;
-  }
-  return currentValue;
 };
 
 const handler = async (req: NextApiRequest, res: NextApiResponse) => {
@@ -62,8 +37,9 @@ const handler = async (req: NextApiRequest, res: NextApiResponse) => {
           modelVersion: x.modelVersion,
           name: x.name,
           type: x.type,
-          enable: x.enable,
-          imgConfig: JSON.stringify(x.imgConfig || {}, null, 2),
+          enabled: x.enabled,
+          fileServerId: x.fileServerId,
+          fileConfig: JSON.stringify(x.fileConfig || {}, null, 2),
           modelConfig: JSON.stringify(x.modelConfig || {}, null, 2),
           apiConfig: JSON.stringify(
             {
@@ -85,10 +61,11 @@ const handler = async (req: NextApiRequest, res: NextApiResponse) => {
       const {
         modelId,
         name,
-        enable,
+        enabled,
+        fileServerId,
         modelConfig: modelConfigJson,
         apiConfig: apiConfigJson,
-        imgConfig: imgConfigJson,
+        fileConfig: fileConfigJson,
       } = req.body;
       const model = await ChatModelManager.findModelById(modelId);
       if (!model) {
@@ -98,7 +75,7 @@ const handler = async (req: NextApiRequest, res: NextApiResponse) => {
 
       let modelConfig = JSON.parse(modelConfigJson);
       let apiConfig = JSON.parse(apiConfigJson);
-      let imgConfig = JSON.parse(imgConfigJson);
+      let fileConfig = JSON.parse(fileConfigJson);
 
       apiConfig.appId = checkKey(model?.apiConfig.apiKey, apiConfig.appId);
       apiConfig.apiKey = checkKey(model?.apiConfig.apiKey, apiConfig.apiKey);
@@ -107,20 +84,22 @@ const handler = async (req: NextApiRequest, res: NextApiResponse) => {
       const data = await ChatModelManager.updateModel(
         modelId,
         name,
-        enable,
+        enabled,
         modelConfig,
         apiConfig,
-        imgConfig
+        fileServerId,
+        fileConfig
       );
       return res.json(data);
     } else if (req.method === 'POST') {
       const {
         modelVersion,
         name,
-        enable,
+        enabled,
+        fileServerId,
         modelConfig: modelConfigJson,
         apiConfig: apiConfigJson,
-        imgConfig: imgConfigJson,
+        fileConfig: fileConfigJson,
       } = req.body;
 
       const model = await ChatModelManager.findModelByName(name);
@@ -138,15 +117,16 @@ const handler = async (req: NextApiRequest, res: NextApiResponse) => {
 
       let modelConfig = JSON.parse(modelConfigJson);
       let apiConfig = JSON.parse(apiConfigJson);
-      let imgConfig = JSON.parse(imgConfigJson);
+      let fileConfig = JSON.parse(fileConfigJson);
       const data = await ChatModelManager.createModel(
         template.type,
         modelVersion,
         name,
-        enable,
+        enabled,
         modelConfig,
         apiConfig,
-        imgConfig
+        fileServerId,
+        fileConfig
       );
       return res.json(data);
     } else if (req.method === 'DELETE') {

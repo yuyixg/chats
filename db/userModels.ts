@@ -9,7 +9,7 @@ import connection from './connection';
 
 export interface UserModel {
   modelId: string;
-  enable?: boolean;
+  enabled?: boolean;
   tokens?: number | null;
   counts?: number | null;
   expires?: string | null;

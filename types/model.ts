@@ -1,3 +1,5 @@
+import { FileServerType } from './file';
+
 export interface Model {
   id: string;
   modelVersion: ModelVersions;
@@ -6,8 +8,9 @@ export interface Model {
   systemPrompt: string;
   maxLength?: number;
   tokenLimit?: number;
-  imgConfig?: ChatModelImageConfig;
-  enable?: boolean;
+  fileServerType: FileServerType;
+  fileConfig?: ChatModelFileConfig;
+  enabled?: boolean;
 }
 
 export enum ModelVersions {
@@ -34,9 +37,10 @@ export enum ModelType {
   Kimi = 'Kimi',
 }
 
-export interface ChatModelImageConfig {
-  count: number;
-  maxSize: number;
+export interface ChatModelFileConfig {
+  type: string;
+  fileMaxSize: number;
+  maxCount: number;
 }
 
 export interface ChatModelConfig {
@@ -45,4 +49,4 @@ export interface ChatModelConfig {
   tokenLimit?: number;
 }
 
-export type ModelConfigType = 'imgConfig' | 'apiConfig' | 'modelConfig';
+export type ModelConfigType = 'fileConfig' | 'apiConfig' | 'modelConfig';

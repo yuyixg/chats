@@ -1,6 +1,7 @@
 import { useFetch } from '@/hooks/useFetch';
 import {
-  CreateUserParams,
+  PostUserParams,
+  GetFileServerResult,
   GetMessageDetailsResult,
   GetModelResult,
   GetUserMessageParams,
@@ -13,6 +14,7 @@ import {
   PutUserModelParams,
   PutUserParams,
 } from '@/types/admin';
+import { PostFileServerParams, PutFileServerParams } from '@/types/file';
 import { PageResult } from '@/types/page';
 
 export const getUserModels = (
@@ -65,7 +67,7 @@ export const getUsers = (query?: string): Promise<GetUsersResult[]> => {
   return fetchService.get('/api/admin/users?query=' + query);
 };
 
-export const createUser = (params: CreateUserParams) => {
+export const postUser = (params: PostUserParams) => {
   const fetchService = useFetch();
   return fetchService.post('/api/admin/users', {
     body: params,
@@ -89,7 +91,32 @@ export const getMessages = (
   );
 };
 
-export const getMessageDetails = (messageId: string): Promise<GetMessageDetailsResult> => {
+export const getMessageDetails = (
+  messageId: string
+): Promise<GetMessageDetailsResult> => {
   const fetchService = useFetch();
   return fetchService.get(`/api/admin/message-details?messageId=${messageId}`);
+};
+
+export const getFileServers = (
+  select: boolean = false
+): Promise<GetFileServerResult[]> => {
+  const fetchService = useFetch();
+  return fetchService.get(
+    '/api/admin/file-server?select=' + (!select ? '' : true)
+  );
+};
+
+export const postFileServer = (params: PostFileServerParams) => {
+  const fetchService = useFetch();
+  return fetchService.post('/api/admin/file-server', {
+    body: params,
+  });
+};
+
+export const putFileServer = (params: PutFileServerParams) => {
+  const fetchService = useFetch();
+  return fetchService.put('/api/admin/file-server', {
+    body: params,
+  });
 };

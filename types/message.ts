@@ -9,7 +9,7 @@ export interface UserChatMessage extends Model {
   };
   ChatModel: {
     name: string;
-    imgConfig: string;
+    fileConfig: string;
     id: string;
     modelVersion: string;
     systemPrompt: string;

@@ -18,16 +18,13 @@ import {
 } from 'react';
 
 import { useTranslation } from 'next-i18next';
-
 import { Content, Message } from '@/types/chat';
-
 import UploadButton from '../UploadButton';
 import { PromptList } from './PromptList';
 import { Prompt } from '@/types/prompt';
 import { VariableModal } from './VariableModal';
 import { isMobile } from '@/utils/common';
 import { HomeContext } from '@/pages/home/home';
-import { FileType } from '@/types/file';
 
 interface Props {
   onSend: (message: Message) => void;
@@ -52,6 +49,10 @@ export const ChatInput = ({
     state: { selectedConversation, messageIsStreaming, prompts },
   } = useContext(HomeContext);
 
+  const {
+    model: { fileConfig, fileServerType },
+  } = selectedConversation || { model: { fileConfig: null } };
+
   const [content, setContent] = useState<Content>({
     text: '',
     image: [],
@@ -61,7 +62,6 @@ export const ChatInput = ({
   const [showPromptList, setShowPromptList] = useState(false);
   const [activePromptIndex, setActivePromptIndex] = useState(0);
   const [promptInputValue, setPromptInputValue] = useState('');
-  const [showPluginSelect, setShowPluginSelect] = useState(false);
   const [variables, setVariables] = useState<string[]>([]);
   const [isModalVisible, setIsModalVisible] = useState(false);
   const promptListRef = useRef<HTMLUListElement | null>(null);
@@ -318,17 +318,12 @@ export const ChatInput = ({
                 <IconSend size={18} />
               )}
             </button>
-            {Object.keys(selectedConversation?.model?.imgConfig || {}).length >
-              0 &&
+            {fileServerType &&
               !uploading &&
-              content?.image?.length !==
-                selectedConversation?.model?.imgConfig?.count && (
+              content?.image?.length !== fileConfig?.maxCount && (
                 <UploadButton
-                  fileConfig={{
-                    fileServerType: FileType.Minio,
-                    maxFileSize:
-                      selectedConversation?.model?.imgConfig?.maxSize,
-                  }}
+                  fileServerType={fileServerType}
+                  fileConfig={fileConfig!}
                   onUploading={() => setUploading(true)}
                   onFailed={() => setUploading(false)}
                   onSuccessful={(url: string) => {

@@ -2,14 +2,14 @@ import { ChatModels } from '@/db';
 import { ChatModelApiConfig } from '@/db/models';
 import {
   ChatModelConfig,
-  ChatModelImageConfig,
+  ChatModelFileConfig,
   ModelType,
   ModelVersions,
 } from '@/types/model';
 
 export class ChatModelManager {
   static async findModels(findAll: boolean = false) {
-    const where = { enable: true };
+    const where = { enabled: true };
     return await ChatModels.findAll({
       where: findAll ? {} : where,
       order: [
@@ -47,37 +47,41 @@ export class ChatModelManager {
     type: ModelType,
     modelVersion: ModelVersions,
     name: string,
-    enable: boolean,
+    enabled: boolean,
     modelConfig: ChatModelConfig,
     apiConfig: ChatModelApiConfig,
-    imgConfig: ChatModelImageConfig
+    fileServerId: string,
+    fileConfig: ChatModelFileConfig
   ) {
     return await ChatModels.create({
       type,
       modelVersion,
       name,
-      enable,
+      enabled,
       modelConfig,
       apiConfig,
-      imgConfig,
+      fileServerId,
+      fileConfig,
     });
   }
 
   static async updateModel(
     id: string,
     name: string,
-    enable: boolean,
+    enabled: boolean,
     modelConfig: ChatModelConfig,
     apiConfig: ChatModelApiConfig,
-    imgConfig: ChatModelImageConfig
+    fileServerId: string,
+    fileConfig: ChatModelFileConfig
   ) {
     return await ChatModels.update(
       {
         name,
-        enable,
+        enabled,
         modelConfig,
         apiConfig,
-        imgConfig,
+        fileServerId,
+        fileConfig,
       },
       {
         where: { id },

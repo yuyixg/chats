@@ -2,17 +2,16 @@ import { useEffect, useRef } from 'react';
 import toast from 'react-hot-toast';
 import { useTranslation } from 'next-i18next';
 import { getFileEndpoint } from '@/utils/apis';
-import { FileType } from '@/types/file';
+import { FileServerType } from '@/types/file';
+import { ChatModelFileConfig } from '@/types/model';
 
 interface Props {
   onSuccessful?: (url: string) => void;
   onUploading?: () => void;
   onFailed?: () => void;
   children?: React.ReactNode;
-  fileConfig: {
-    fileServerType: FileType;
-    maxFileSize?: number;
-  };
+  fileServerType?: FileServerType;
+  fileConfig: ChatModelFileConfig;
   maxFileSize?: number;
 }
 
@@ -21,30 +20,31 @@ const UploadButton: React.FunctionComponent<Props> = ({
   onUploading,
   onFailed,
   fileConfig,
+  fileServerType,
   children,
 }: Props) => {
   const { t } = useTranslation('chat');
   const uploadRef = useRef<HTMLInputElement>(null);
-  const { maxFileSize, fileServerType } = fileConfig;
+  const { fileMaxSize } = fileConfig;
   const changeFile = async (event: any) => {
     const file = event?.target?.files[0];
-    if (maxFileSize && file?.size / 1024 > maxFileSize) {
+    if (fileMaxSize && file?.size / 1024 > fileMaxSize) {
       toast.error(
         t(`The file size limit is {{fileSize}}`, {
-          fileSize: maxFileSize / 1024 + 'MB',
+          fileSize: fileMaxSize / 1024 + 'MB',
         })
       );
       onFailed && onFailed();
       return;
     }
 
-    const fileForm = new FormData();
-    fileForm.append('file', file);
     try {
       if (file) {
-        const url = getFileEndpoint(fileServerType);
+        const url = getFileEndpoint(fileServerType!);
         onUploading && onUploading();
-        if (FileType.Local === FileType.Local) {
+        if (fileServerType === FileServerType.Local) {
+          const fileForm = new FormData();
+          fileForm.append('file', file);
           const response = await fetch(url, {
             method: 'POST',
             body: fileForm,
@@ -97,11 +97,12 @@ const UploadButton: React.FunctionComponent<Props> = ({
 
   useEffect(() => {
     const fileInput = document.getElementById('upload')!;
+    fileInput.removeEventListener('change', changeFile);
     fileInput.addEventListener('change', changeFile);
     return () => {
       fileInput.removeEventListener('change', changeFile);
     };
-  }, []);
+  }, [fileServerType]);
 
   return (
     <div>

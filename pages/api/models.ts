@@ -1,5 +1,9 @@
 import type { NextApiRequest, NextApiResponse } from 'next';
-import { ChatModelManager, UserModelManager } from '@/managers';
+import {
+  ChatModelManager,
+  FileServerManager,
+  UserModelManager,
+} from '@/managers';
 import { getSession } from '@/utils/session';
 import { internalServerError, unauthorized } from '@/utils/error';
 export const config = {
@@ -19,6 +23,7 @@ const handler = async (req: NextApiRequest, res: NextApiResponse) => {
     }
     const userModels = await UserModelManager.findEnableModels(session.userId!);
     const models = await ChatModelManager.findModels();
+    const fileServers = await FileServerManager.findFileServers(false);
     const _models = models
       .filter((m) => userModels.includes(m.id!))
       .map((x) => {
@@ -30,7 +35,9 @@ const handler = async (req: NextApiRequest, res: NextApiResponse) => {
           systemPrompt: x.modelConfig?.prompt,
           maxLength: x.modelConfig?.maxLength,
           tokenLimit: x.modelConfig?.tokenLimit,
-          imgConfig: x.imgConfig,
+          fileConfig: x.fileConfig,
+          fileServerType: fileServers.find((f) => f.id === x.fileServerId)
+            ?.type,
         };
       });
     return res.json(_models);

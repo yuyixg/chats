@@ -49,7 +49,7 @@ export const EditUserModelModal = (props: IProps) => {
       ),
     },
     {
-      name: 'enable',
+      name: 'enabled',
       label: t('Is it enabled'),
       render: (options: IFormFieldOption, field: FormFieldType) => (
         <FormSwitch options={options} field={field} />
@@ -81,7 +81,7 @@ export const EditUserModelModal = (props: IProps) => {
   const formSchema = z.object({
     modelName: z.string().optional(),
     modelId: z.string().optional(),
-    enable: z.boolean().optional(),
+    enabled: z.boolean().optional(),
     tokens: z.union([z.string(), z.null(), z.number()]),
     counts: z.union([z.string(), z.null(), z.number()]),
     expires: z.union([z.string(), z.null(), z.date()]),
@@ -104,7 +104,7 @@ export const EditUserModelModal = (props: IProps) => {
       )!;
       form.setValue('modelId', model?.modelId);
       form.setValue('modelName', model?.modelName);
-      form.setValue('enable', model?.enable);
+      form.setValue('enabled', model?.enabled);
       form.setValue('tokens', model?.tokens || null);
       form.setValue('counts', model?.counts || null);
       form.setValue('expires', model?.expires || null);
@@ -119,7 +119,7 @@ export const EditUserModelModal = (props: IProps) => {
         x.expires = values.expires
           ? new Date(values.expires).toLocaleDateString()
           : null;
-        x.enable = values.enable;
+        x.enabled = values.enabled;
       }
       return x;
     });
@@ -163,87 +163,5 @@ export const EditUserModelModal = (props: IProps) => {
         </Form>
       </DialogContent>
     </Dialog>
-    // <Modal
-    //   backdrop='transparent'
-    //   placement='top'
-    //   isOpen={isOpen}
-    //   onClose={onClose}
-    //   size='3xl'
-    // >
-    //   <ModalContent>
-    //     {() => (
-    //       <>
-    //         <ModalHeader className='flex flex-col gap-1'>
-    //           {t('Edit Model')}
-    //         </ModalHeader>
-    //         <ModalBody>
-    //           <div className='flex w-full justify-between items-center'>
-    //             <Input
-    //               type='text'
-    //               label={`${t('ID')}`}
-    //               labelPlacement={'outside'}
-    //               value={select?.modelId}
-    //               disabled
-    //             />
-    //             <Switch
-    //               style={{ minWidth: '128px' }}
-    //               className='pt-[24px] px-2'
-    //               isSelected={select?.enable}
-    //               size='sm'
-    //               color='primary'
-    //               onValueChange={(value) => {
-    //                 onChange('enable', value);
-    //               }}
-    //             >
-    //               {select?.enable ? t('Enabled') : t('Disabled')}
-    //             </Switch>
-    //           </div>
-    //           {/* <Input
-    //             type='text'
-    //             label={`${t('ModeId')}`}
-    //             labelPlacement={'outside'}
-    //             value={select?.modelId}
-    //             disabled
-    //             onValueChange={(value) => {
-    //               onChange('modelId', value);
-    //             }}
-    //           /> */}
-    //           <Input
-    //             label={t('Remaining Tokens')}
-    //             labelPlacement={'outside'}
-    //             placeholder={`${t('Enter your')}${t('Remaining Tokens')}`}
-    //             value={`${select?.tokens || ''}`}
-    //             onValueChange={(value) => {
-    //               onChange('tokens', value);
-    //             }}
-    //           />
-    //           <Input
-    //             label={t('Remaining Counts')}
-    //             labelPlacement={'outside'}
-    //             placeholder={`${t('Enter your')}${t('Remaining Counts')}`}
-    //             value={`${select?.counts || ''}`}
-    //             onValueChange={(value) => {
-    //               onChange('counts', value);
-    //             }}
-    //           />
-    //           <Input
-    //             label={t('Expiration Time')}
-    //             labelPlacement={'outside'}
-    //             placeholder={`${t('Enter your')}${t('Expiration Time')}`}
-    //             value={`${select?.expires || ''}`}
-    //             onValueChange={(value) => {
-    //               onChange('expires', value);
-    //             }}
-    //           />
-    //         </ModalBody>
-    //         <ModalFooter>
-    //           <Button color='primary' onClick={handleSave}>
-    //             {t('Save')}
-    //           </Button>
-    //         </ModalFooter>
-    //       </>
-    //     )}
-    //   </ModalContent>
-    // </Modal>
   );
 };
