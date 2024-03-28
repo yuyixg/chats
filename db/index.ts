@@ -4,7 +4,7 @@ import Users from './users';
 import connection from './connection';
 import UserModels from './userModels';
 import Sessions from './sessions';
-import FileServer from './fileServer';
+import FileServers from './fileServers';
 
 Users.hasMany(ChatMessages, {
   foreignKey: 'userId',
@@ -30,4 +30,12 @@ UserModels.belongsTo(Users, {
   foreignKey: 'userId',
 });
 
-export { connection, ChatModels, ChatMessages, Users, UserModels, Sessions, FileServer };
+export {
+  connection,
+  ChatModels,
+  ChatMessages,
+  Users,
+  UserModels,
+  Sessions,
+  FileServers,
+};

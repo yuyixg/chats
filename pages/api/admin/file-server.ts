@@ -2,7 +2,7 @@ import type { NextApiRequest, NextApiResponse } from 'next';
 import { UserRole } from '@/types/admin';
 import { getSession } from '@/utils/session';
 import { internalServerError } from '@/utils/error';
-import { FileServerManager } from '@/managers/fileServer';
+import { FileServerManager } from '@/managers';
 import { addAsterisk, checkKey } from '@/utils/common';
 export const config = {
   api: {

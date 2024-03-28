@@ -8,18 +8,19 @@ import {
 import connection from './connection';
 import { FileServerType, IFileConfig } from '@/types/file';
 
-class FileServer extends Model<
-  InferAttributes<FileServer>,
-  InferCreationAttributes<FileServer>
+class FileServers extends Model<
+  InferAttributes<FileServers>,
+  InferCreationAttributes<FileServers>
 > {
   declare id?: string;
   declare name: string;
   declare enabled: boolean;
   declare type: FileServerType;
   declare configs: IFileConfig;
+  declare createdAt?: string;
 }
 
-FileServer.init(
+FileServers.init(
   {
     id: {
       type: DataTypes.UUID,
@@ -30,11 +31,15 @@ FileServer.init(
     enabled: { type: DataTypes.BOOLEAN },
     type: { type: DataTypes.STRING },
     configs: { type: DataTypes.JSON },
+    createdAt: {
+      type: DataTypes.STRING,
+      defaultValue: new Date().toLocaleString(),
+    },
   },
   {
     sequelize: connection,
-    tableName: 'file_server',
+    tableName: 'file_servers',
   }
 );
 
-export default FileServer;
+export default FileServers;

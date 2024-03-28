@@ -12,7 +12,6 @@ import {
   ChatModelConfig,
 } from '@/types/model';
 import { ModelType } from 'aws-sdk/clients/comprehend';
-import { FileServerType } from '@/types/file';
 
 export interface ChatModelApiConfig {
   appId?: string;
