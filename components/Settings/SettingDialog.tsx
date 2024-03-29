@@ -1,4 +1,4 @@
-import { FC, useContext, useEffect, useRef } from 'react';
+import { FC, useContext, useEffect, useRef, useState } from 'react';
 
 import { useTranslation } from 'next-i18next';
 
@@ -24,6 +24,9 @@ export const SettingDialog: FC<Props> = ({ open, onClose }) => {
   const { dispatch: homeDispatch } = useContext(HomeContext);
   const modalRef = useRef<HTMLDivElement>(null);
   const { setTheme } = useTheme();
+  const [language, setLanguage] = useState(
+    localStorage.getItem('locale') || 'en'
+  );
 
   useEffect(() => {
     const handleMouseDown = (e: MouseEvent) => {
@@ -73,6 +76,34 @@ export const SettingDialog: FC<Props> = ({ open, onClose }) => {
             <div className='text-lg pb-4 font-bold text-black dark:text-neutral-200'>
               {t('Settings')}
             </div>
+
+            {/* <div className='text-sm font-bold mb-2 text-black dark:text-neutral-200'>
+              {t('Language')}
+            </div>
+
+            <div className='w-full mb-4 focus:outline-none active:outline-none rounded-lg border border-neutral-200 bg-transparent pr-2 text-neutral-900 dark:border-neutral-600 dark:text-white'>
+              <select
+                className='w-full bg-transparent p-2'
+                value={language}
+                onChange={(event) => {
+                  setLanguage(event.target.value);
+                  localStorage.setItem('locale', event.target.value);
+                }}
+              >
+                <option
+                  className='dark:bg-[#343541] dark:text-white'
+                  value='zh'
+                >
+                  {t('Chinese')}
+                </option>
+                <option
+                  className='dark:bg-[#343541] dark:text-white'
+                  value='en'
+                >
+                  {t('English')}
+                </option>
+              </select>
+            </div> */}
 
             <div className='text-sm font-bold mb-2 text-black dark:text-neutral-200'>
               {t('Theme')}

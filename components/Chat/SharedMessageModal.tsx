@@ -55,7 +55,7 @@ export const SharedMessageModal = (props: IProps) => {
     const { id } = conversation!;
     if (!navigator.clipboard) return;
     navigator.clipboard
-      .writeText(`${location.origin}/message/${id}`)
+      .writeText(`${location.origin}/share/${id}`)
       .then(() => {
         toast.success(t('Copy Successful'));
       });

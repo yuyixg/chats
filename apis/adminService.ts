@@ -120,3 +120,10 @@ export const putFileServer = (params: PutFileServerParams) => {
     body: params,
   });
 };
+
+export const getShareMessage = (
+  messageId: string
+): Promise<GetMessageDetailsResult> => {
+  const fetchService = useFetch();
+  return fetchService.get(`/api/share?messageId=${messageId}`);
+};

@@ -98,7 +98,7 @@ const HomeContext = createContext<HomeContextProps>(undefined!);
 
 export { initialState, HomeContext };
 
-const Home = ({ defaultModelId, locale }: Props) => {
+const Home = ({ defaultModelId }: Props) => {
   const router = useRouter();
   const { t } = useTranslation('chat');
   const contextValue = useCreateReducer<HomeInitialState>({
@@ -186,7 +186,7 @@ const Home = ({ defaultModelId, locale }: Props) => {
   };
 
   useEffect(() => {
-    localStorage.setItem('locale', locale);
+    localStorage.setItem('locale', 'en');
     setLoadingText(t('Loading ...')!);
     const settings = getSettings();
     if (settings.theme) {
@@ -200,7 +200,7 @@ const Home = ({ defaultModelId, locale }: Props) => {
     if (user) {
       dispatch({ field: 'user', value: user });
     } else {
-      router.push(getLoginUrl(locale));
+      router.push(getLoginUrl(localStorage.getItem('locale') || 'en'));
     }
 
     const prompts = localStorage.getItem('prompts');
