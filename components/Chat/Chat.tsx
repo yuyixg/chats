@@ -1,4 +1,4 @@
-import { IconClearAll } from '@tabler/icons-react';
+import { IconShare } from '@tabler/icons-react';
 import {
   MutableRefObject,
   memo,
@@ -23,6 +23,7 @@ import { MemoizedChatMessage } from './MemoizedChatMessage';
 import { ModelSelect } from './ModelSelect';
 import { SystemPrompt } from './SystemPrompt';
 import { HomeContext } from '@/pages/home/home';
+import { SharedMessageModal } from './SharedMessageModal';
 
 interface Props {
   stopConversationRef: MutableRefObject<boolean>;
@@ -49,6 +50,7 @@ export const Chat = memo(({ stopConversationRef }: Props) => {
   const [showSettings, setShowSettings] = useState<boolean>(false);
   const [showScrollDownButton, setShowScrollDownButton] =
     useState<boolean>(false);
+  const [showShareModal, setShowShareModal] = useState(false);
 
   const messagesEndRef = useRef<HTMLDivElement>(null);
   const chatContainerRef = useRef<HTMLDivElement>(null);
@@ -231,6 +233,13 @@ export const Chat = memo(({ stopConversationRef }: Props) => {
     setShowSettings(!showSettings);
   };
 
+  const handleSharedMessage = (isShare: boolean) => {
+    handleUpdateConversation(selectedConversation!, {
+      key: 'isShared',
+      value: isShare,
+    });
+  };
+
   const onClearAll = () => {
     if (
       confirm(t('Are you sure you want to clear all messages?')!) &&
@@ -344,12 +353,21 @@ export const Chat = memo(({ stopConversationRef }: Props) => {
               <div className='sticky top-0 z-10 flex justify-center bg-white py-2 text-sm text-neutral-500 dark:border-none dark:bg-[#343541] dark:text-neutral-200'>
                 {selectedConversation?.model?.name?.toUpperCase()}
                 {/* {t('Temp')}:{selectedConversation?.temperature} | */}
-                {/* <button
+                <button
                   className='ml-2 cursor-pointer hover:opacity-50'
-                  onClick={handleSettings}
+                  onClick={() => {
+                    setShowShareModal(true);
+                  }}
                 >
-                  <IconSettings size={18} />
-                </button> */}
+                  <IconShare
+                    size={18}
+                    style={{
+                      color: selectedConversation?.isShared
+                        ? 'hsl(var(--primary))'
+                        : '',
+                    }}
+                  />
+                </button>
                 {/* <button
                   className='ml-2 cursor-pointer hover:opacity-50'
                   onClick={onClearAll}
@@ -407,6 +425,14 @@ export const Chat = memo(({ stopConversationRef }: Props) => {
             showScrollDownButton={showScrollDownButton}
           />
         )}
+        <SharedMessageModal
+          isOpen={showShareModal}
+          onClose={() => {
+            setShowShareModal(false);
+          }}
+          conversation={selectedConversation}
+          onShareChange={handleSharedMessage}
+        />
       </>
     </div>
   );

@@ -106,12 +106,15 @@ export class ChatMessageManager {
     );
   }
 
-  static async updateMessageName(id: string, name: string) {
-    return await ChatMessages.update({ name }, { where: { id } });
+  static async updateUserMessage(id: string, name: string, isShared: boolean) {
+    return await ChatMessages.update({ name, isShared }, { where: { id } });
   }
 
   static async deleteMessageById(id: string) {
-    return await ChatMessages.update({ isDeleted: true }, { where: { id } });
+    return await ChatMessages.update(
+      { isDeleted: true, isShared: false },
+      { where: { id } }
+    );
   }
 
   static async createMessage(params: CreateMessage) {

@@ -1,6 +1,7 @@
 import {
   IconCheck,
   IconMessage,
+  IconMessageShare,
   IconPencil,
   IconTrash,
   IconX,
@@ -140,9 +141,13 @@ export const ConversationComponent = ({ conversation }: Props) => {
           draggable='true'
           onDragStart={(e) => handleDragStart(e, conversation)}
         >
-          <IconMessage size={18} />
+          {conversation.isShared ? (
+            <IconMessageShare size={18} />
+          ) : (
+            <IconMessage size={18} />
+          )}
           <div
-            className={`relative max-h-5 flex-1 overflow-hidden text-ellipsis whitespace-nowrap break-all text-left text-[12.5px] leading-3 ${
+            className={`relative max-h-5 flex-1 overflow-hidden text-ellipsis whitespace-nowrap break-all text-left text-[12.5px] leading-4 ${
               selectedConversation?.id === conversation.id ? 'pr-12' : 'pr-1'
             }`}
           >

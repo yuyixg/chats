@@ -1,7 +1,7 @@
 import type { NextApiRequest, NextApiResponse } from 'next';
 import { ChatMessageManager } from '@/managers';
 import { getSession } from '@/utils/session';
-import { internalServerError } from '@/utils/error';
+import { badRequest, internalServerError } from '@/utils/error';
 export const config = {
   api: {
     bodyParser: {
@@ -29,12 +29,24 @@ const handler = async (req: NextApiRequest, res: NextApiResponse) => {
           messages: x.messages,
           prompt: x.prompt,
           model: x.ChatModel,
+          isShared: x.isShared,
         };
       });
       return res.json(data);
     } else if (req.method === 'PUT') {
-      const { id, name } = req.body;
-      await ChatMessageManager.updateMessageName(id, name);
+      const { id, name, isShared } = req.body;
+      const userMessage = await ChatMessageManager.findUserMessageById(
+        id,
+        session.userId
+      );
+      if (!userMessage || userMessage.isDeleted) {
+        return badRequest(res);
+      }
+      await ChatMessageManager.updateUserMessage(
+        id,
+        name || userMessage.name,
+        isShared
+      );
       res.end();
     } else if (req.method === 'DELETE') {
       const { id } = req.query as { id: string };

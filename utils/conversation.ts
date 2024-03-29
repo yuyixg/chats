@@ -1,5 +1,4 @@
 import { Conversation } from '@/types/chat';
-import { DEFAULT_SYSTEM_PROMPT, DEFAULT_TEMPERATURE } from './const';
 
 export const updateConversation = (
   updatedConversation: Conversation,
@@ -33,40 +32,4 @@ export const saveConversations = (conversations: Conversation[]) => {
 export const clearConversations = () => {
   localStorage.removeItem('selectedConversation');
   localStorage.removeItem('conversationHistory');
-};
-
-export const cleanConversationHistory = (history: any[]): Conversation[] => {
-  if (!Array.isArray(history)) {
-    console.warn('history is not an array. Returning an empty array.');
-    return [];
-  }
-
-  return history.reduce((acc: any[], conversation) => {
-    try {
-      if (!conversation.model) {
-        conversation.model = null;
-      }
-
-      if (!conversation.prompt) {
-        conversation.prompt = DEFAULT_SYSTEM_PROMPT;
-      }
-
-      if (!conversation.temperature) {
-        conversation.temperature = DEFAULT_TEMPERATURE;
-      }
-
-      if (!conversation.messages) {
-        conversation.messages = [];
-      }
-
-      acc.push(conversation);
-      return acc;
-    } catch (error) {
-      console.warn(
-        `error while cleaning conversations' history. Removing culprit`,
-        error
-      );
-    }
-    return acc;
-  }, []);
 };

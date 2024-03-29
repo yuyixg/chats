@@ -12,12 +12,17 @@ export const getUserMessages = () => {
   return fetchService.get('/api/messages');
 };
 
-export const putUserMessages = (id: string, name: string) => {
+export const putUserMessages = (
+  id: string,
+  name: string,
+  isShared?: boolean
+) => {
   const fetchService = useFetch();
   return fetchService.put('/api/messages', {
     body: {
       id,
       name,
+      isShared,
     },
   });
 };

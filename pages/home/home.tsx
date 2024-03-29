@@ -124,6 +124,7 @@ const Home = ({ defaultModelId, locale }: Props) => {
       model: model,
       prompt: t(model.systemPrompt),
       fileServerConfig: model.fileServerConfig,
+      isShared: false,
       temperature: DEFAULT_TEMPERATURE,
     };
 
@@ -225,16 +226,6 @@ const Home = ({ defaultModelId, locale }: Props) => {
   }, []);
 
   useEffect(() => {
-    // const conversationHistory = localStorage.getItem('conversationHistory');
-    // if (conversationHistory) {
-    //   const parsedConversationHistory: Conversation[] =
-    //     JSON.parse(conversationHistory);
-    //   const cleanedConversationHistory = cleanConversationHistory(
-    //     parsedConversationHistory
-    //   );
-
-    //   dispatch({ field: 'conversations', value: cleanedConversationHistory });
-    // }
     const selectedConversation = localStorage.getItem('selectedConversation');
     if (selectedConversation) {
       const parsedSelectedConversation: Conversation =

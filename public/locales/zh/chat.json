@@ -46,5 +46,11 @@
   "NNot enough counts available to send the message": "没有足够的聊天次数可用于发送消息",
   "Subscription has expired": "订阅已过期",
   "Save successful": "保存成功",
-  "Delete successful": "删除成功"
+  "Delete successful": "删除成功",
+  "Share Message": "分享聊天",
+  "Share": "分享",
+  "Close Shared": "关闭分享",
+  "Share and Copy Link": "分享并复制链接",
+  "Copy Successful": "复制成功",
+  "Copy Link": "复制链接"
 }

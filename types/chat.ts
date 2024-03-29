@@ -61,6 +61,7 @@ export interface Conversation {
   model: Model;
   prompt: string;
   temperature: number;
+  isShared: boolean;
   fileServerConfig: {
     id: string;
     type: FileServerType;
