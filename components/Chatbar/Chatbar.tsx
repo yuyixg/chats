@@ -50,7 +50,7 @@ export const Chatbar = () => {
           messages: [],
           model: model,
           prompt: t(model.systemPrompt),
-          fileServerType: model.fileServerType,
+          fileServerConfig: model.fileServerConfig,
           temperature: DEFAULT_TEMPERATURE,
         },
       });
@@ -89,7 +89,7 @@ export const Chatbar = () => {
             messages: [],
             model: model,
             prompt: t(model.systemPrompt),
-            fileServerType: model.fileServerType,
+            fileServerType: model.fileServerConfig,
             temperature: DEFAULT_TEMPERATURE,
           },
         });

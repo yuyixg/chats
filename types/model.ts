@@ -8,7 +8,10 @@ export interface Model {
   systemPrompt: string;
   maxLength?: number;
   tokenLimit?: number;
-  fileServerType: FileServerType;
+  fileServerConfig: {
+    id: string;
+    type: FileServerType;
+  };
   fileConfig?: ChatModelFileConfig;
   enabled?: boolean;
 }

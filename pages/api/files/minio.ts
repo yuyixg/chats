@@ -1,38 +1,52 @@
 import { NextApiRequest } from 'next';
 import * as AWS from 'aws-sdk';
 import { getSession } from '@/utils/session';
-import { unauthorized } from '@/utils/error';
+import { badRequest, internalServerError, unauthorized } from '@/utils/error';
+import { FileServerManager } from '@/managers';
 
 export default async function handler(req: NextApiRequest, res: any) {
-  const session = await getSession(req.cookies);
-  if (!session) {
-    return unauthorized(res);
+  try {
+    const session = await getSession(req.cookies);
+    if (!session) {
+      return unauthorized(res);
+    }
+    const { id } = req.query as { id: string };
+    const fileServer = await FileServerManager.findById(id);
+    if (!fileServer || !fileServer.enabled) {
+      return badRequest(res, 'Not found File Server');
+    }
+
+    const {
+      configs: { accessKey, accessSecret, endpoint, bucketName },
+    } = fileServer;
+
+    const { fileName, fileType } = JSON.parse(req.body) as {
+      fileName: string;
+      fileType: string;
+    };
+    const s3 = new AWS.S3({
+      accessKeyId: accessKey,
+      secretAccessKey: accessSecret,
+      endpoint: endpoint,
+      s3ForcePathStyle: true,
+    });
+
+    const date = new Date();
+    const key = `${date.getFullYear()}/${(date.getMonth() + 1)
+      .toString()
+      .padStart(2, '0')}/${date.getDate().toString().padStart(2, '0')}`;
+
+    const params = {
+      Bucket: bucketName,
+      Key: `${key}/${fileName}.${fileType}`,
+      Expires: 60 * 60 * 24,
+    };
+
+    const putUrl = await s3.getSignedUrlPromise('putObject', params);
+    const getUrl = await s3.getSignedUrlPromise('getObject', params);
+    res.json({ putUrl, getUrl });
+  } catch (error) {
+    console.error(error);
+    return internalServerError(res);
   }
-  const { MINIO_ACCESS_KEY, MINIO_SECRET, MINIO_ENDPOINT, MINIO_BUCKET_NAME } =
-    process.env;
-  const { fileName, fileType } = JSON.parse(req.body) as {
-    fileName: string;
-    fileType: string;
-  };
-  const s3 = new AWS.S3({
-    accessKeyId: MINIO_ACCESS_KEY,
-    secretAccessKey: MINIO_SECRET,
-    endpoint: MINIO_ENDPOINT,
-    s3ForcePathStyle: true,
-  });
-
-  const date = new Date();
-  const key = `${date.getFullYear()}/${(date.getMonth() + 1)
-    .toString()
-    .padStart(2, '0')}/${date.getDate().toString().padStart(2, '0')}`;
-
-  const params = {
-    Bucket: MINIO_BUCKET_NAME,
-    Key: `${key}/${fileName}.${fileType}`,
-    Expires: 60 * 60 * 24,
-  };
-
-  const putUrl = await s3.getSignedUrlPromise('putObject', params);
-  const getUrl = await s3.getSignedUrlPromise('getObject', params);
-  res.json({ putUrl, getUrl });
 }

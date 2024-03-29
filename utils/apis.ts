@@ -13,7 +13,7 @@ export const getModelEndpoint = (model: Model) => {
   return Endpoints[model.type];
 };
 
-export const getFileEndpoint = (file: FileServerType) => {
+export const getFileEndpoint = (file: FileServerType, serverId: string) => {
   const Endpoints = {
     [FileServerType.Local]: 'api/files/local',
     [FileServerType.Minio]: 'api/files/minio',
@@ -21,5 +21,5 @@ export const getFileEndpoint = (file: FileServerType) => {
     [FileServerType.Azure]: 'api/files/azure',
     [FileServerType.Aliyun]: 'api/files/aliyun',
   };
-  return Endpoints[file];
+  return Endpoints[file] + '?id=' + serverId;
 };

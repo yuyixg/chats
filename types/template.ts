@@ -51,13 +51,6 @@ const kimiDefaultApiConfig = {
   apiKey: '',
 };
 
-const minIOFileConfig = {
-  accessKey: '',
-  accessSecret: '',
-  endpoint: '',
-  bucketName: '',
-};
-
 export const ModelDefaultTemplates = {
   [ModelVersions.GPT_3_5]: {
     type: ModelType.GPT,

@@ -123,7 +123,7 @@ const Home = ({ defaultModelId, locale }: Props) => {
       messages: [],
       model: model,
       prompt: t(model.systemPrompt),
-      fileServerType: model.fileServerType,
+      fileServerConfig: model.fileServerConfig,
       temperature: DEFAULT_TEMPERATURE,
     };
 
@@ -257,7 +257,7 @@ const Home = ({ defaultModelId, locale }: Props) => {
           messages: [],
           model: model,
           prompt: t(model.systemPrompt),
-          fileServerType: model.fileServerType,
+          fileServerConfig: model.fileServerConfig,
           temperature: DEFAULT_TEMPERATURE,
         },
       });

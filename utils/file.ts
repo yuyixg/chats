@@ -5,14 +5,21 @@ export function getFileConfigs(type: FileServerType) {
 }
 
 export const FileDefaultTemplates = {
-  [FileServerType.Local]: {},
+  [FileServerType.Local]: {
+    storageFolderName: '',
+  },
   [FileServerType.Minio]: {
     accessKey: '',
     accessSecret: '',
     endpoint: '',
     bucketName: '',
   },
-  [FileServerType.Aws]: {},
+  [FileServerType.Aws]: {
+    accessKey: '',
+    accessSecret: '',
+    region: '',
+    bucketName: '',
+  },
   [FileServerType.Azure]: {},
   [FileServerType.Aliyun]: {},
 };

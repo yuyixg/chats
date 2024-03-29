@@ -46,6 +46,7 @@ const handler = async (req: NextApiRequest, res: NextApiResponse) => {
               bucketName: x.configs.bucketName,
               region: x.configs.region,
               accessKey: addAsterisk(x.configs.accessKey),
+              storageFolderName: x.configs.storageFolderName,
               accessSecret: addAsterisk(x.configs.accessSecret),
             },
             enabled: x.enabled,
@@ -62,9 +63,11 @@ const handler = async (req: NextApiRequest, res: NextApiResponse) => {
       }
 
       let configs = JSON.parse(configsJSON);
-
-      configs.appId = checkKey(fileServer.configs.accessKey, configs.accessKey);
-      configs.apiKey = checkKey(
+      configs.accessKey = checkKey(
+        fileServer.configs.accessKey,
+        configs.accessKey
+      );
+      configs.accessSecret = checkKey(
         fileServer.configs.accessSecret,
         configs.accessSecret
       );
@@ -76,19 +79,23 @@ const handler = async (req: NextApiRequest, res: NextApiResponse) => {
         configs,
         enabled,
       });
+      console.log('configs \n ', configs);
+      await FileServerManager.initFileServer(type, configs);
       return res.send(data);
     } else {
-      const { type, name, enabled, configs } = req.body;
+      const { type, name, enabled, configs: configsJson } = req.body;
       let isFound = await FileServerManager.findByName(name);
       if (isFound) {
         return res.status(400).send('Name existed');
       }
+      const configs = JSON.parse(configsJson);
       const fileServer = await FileServerManager.createFileServer({
         type,
         name,
         enabled,
-        configs: JSON.parse(configs),
+        configs,
       });
+      await FileServerManager.initFileServer(type, configs);
       return res.json(fileServer);
     }
   } catch (error) {

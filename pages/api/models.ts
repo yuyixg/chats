@@ -27,6 +27,7 @@ const handler = async (req: NextApiRequest, res: NextApiResponse) => {
     const _models = models
       .filter((m) => userModels.includes(m.id!))
       .map((x) => {
+        const fileServer = fileServers.find((f) => f.id === x.fileServerId);
         return {
           id: x.id,
           modelVersion: x.modelVersion,
@@ -36,8 +37,12 @@ const handler = async (req: NextApiRequest, res: NextApiResponse) => {
           maxLength: x.modelConfig?.maxLength,
           tokenLimit: x.modelConfig?.tokenLimit,
           fileConfig: x.fileConfig,
-          fileServerType: fileServers.find((f) => f.id === x.fileServerId)
-            ?.type,
+          fileServerConfig: fileServer
+            ? {
+                id: fileServer?.id,
+                type: fileServer?.type,
+              }
+            : null,
         };
       });
     return res.json(_models);

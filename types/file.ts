@@ -12,6 +12,7 @@ export interface IFileConfig {
   endpoint?: string;
   bucketName?: string;
   region?: string;
+  storageFolderName?: string;
 }
 
 export interface PostFileServerParams {

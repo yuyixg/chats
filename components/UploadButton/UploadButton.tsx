@@ -10,7 +10,10 @@ interface Props {
   onUploading?: () => void;
   onFailed?: () => void;
   children?: React.ReactNode;
-  fileServerType?: FileServerType;
+  fileServerConfig?: {
+    id: string;
+    type: FileServerType;
+  };
   fileConfig: ChatModelFileConfig;
   maxFileSize?: number;
 }
@@ -20,7 +23,7 @@ const UploadButton: React.FunctionComponent<Props> = ({
   onUploading,
   onFailed,
   fileConfig,
-  fileServerType,
+  fileServerConfig,
   children,
 }: Props) => {
   const { t } = useTranslation('chat');
@@ -40,9 +43,10 @@ const UploadButton: React.FunctionComponent<Props> = ({
 
     try {
       if (file) {
-        const url = getFileEndpoint(fileServerType!);
+        const { id: serverId, type: serverType } = fileServerConfig!;
+        const url = getFileEndpoint(serverType, serverId);
         onUploading && onUploading();
-        if (fileServerType === FileServerType.Local) {
+        if (serverType === FileServerType.Local) {
           const fileForm = new FormData();
           fileForm.append('file', file);
           const response = await fetch(url, {
@@ -102,7 +106,7 @@ const UploadButton: React.FunctionComponent<Props> = ({
     return () => {
       fileInput.removeEventListener('change', changeFile);
     };
-  }, [fileServerType]);
+  }, [fileServerConfig]);
 
   return (
     <div>
