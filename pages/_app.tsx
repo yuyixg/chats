@@ -5,8 +5,6 @@ import { QueryClient, QueryClientProvider } from 'react-query';
 import { appWithTranslation } from 'next-i18next';
 import { useRouter } from 'next/router';
 import AdminLayout from './admin/layout/layout';
-import { ThemeProvider as NextThemesProvider } from 'next-themes';
-import { type ThemeProviderProps } from 'next-themes/dist/types';
 import { ThemeProvider } from '@/components/theme-provider';
 
 function App({ Component, pageProps }: AppProps<{}> | any) {
@@ -15,7 +13,7 @@ function App({ Component, pageProps }: AppProps<{}> | any) {
   return (
     <ThemeProvider
       attribute='class'
-      defaultTheme='dark'
+      defaultTheme='light'
       enableSystem
       disableTransitionOnChange
     >

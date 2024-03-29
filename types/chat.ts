@@ -1,3 +1,4 @@
+import { FileServerType } from './file';
 import { Model } from './model';
 
 export type Role = 'assistant' | 'user';
@@ -60,4 +61,5 @@ export interface Conversation {
   model: Model;
   prompt: string;
   temperature: number;
+  fileServerType?: FileServerType;
 }

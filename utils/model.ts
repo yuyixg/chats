@@ -41,6 +41,32 @@ export function getModelConfigs(
   return template[configType] || null;
 }
 
+export function getModelApiConfig(modelVersion: ModelVersions | undefined) {
+  return getModelConfigs(modelVersion, 'apiConfig');
+}
+export function getModelModelConfig(modelVersion: ModelVersions | undefined) {
+  return getModelConfigs(modelVersion, 'modelConfig');
+}
+export function getModelFileConfig(modelVersion: ModelVersions | undefined) {
+  return getModelConfigs(modelVersion, 'fileConfig');
+}
+
+export function getModelApiConfigJson(modelVersion: ModelVersions | undefined) {
+  return JSON.stringify(getModelConfigs(modelVersion, 'apiConfig'), null, 2);
+}
+
+export function getModelModelConfigJson(
+  modelVersion: ModelVersions | undefined
+) {
+  return JSON.stringify(getModelConfigs(modelVersion, 'modelConfig'), null, 2);
+}
+
+export function getModelFileConfigJson(
+  modelVersion: ModelVersions | undefined
+) {
+  return JSON.stringify(getModelConfigs(modelVersion, 'fileConfig'), null, 2);
+}
+
 export function mergeConfigs(obj1: any, obj2: any) {
   const config = Object.keys(obj1 || {}).reduce((result: any, key) => {
     result[key] = obj2[key] || null;

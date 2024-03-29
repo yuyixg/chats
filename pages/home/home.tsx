@@ -4,7 +4,6 @@ import { v4 as uuidv4 } from 'uuid';
 import { ModelVersions } from '@/types/model';
 import { DEFAULT_TEMPERATURE } from '@/utils/const';
 import {
-  cleanConversationHistory,
   saveConversation,
   saveConversations,
   updateConversation,
@@ -124,6 +123,7 @@ const Home = ({ defaultModelId, locale }: Props) => {
       messages: [],
       model: model,
       prompt: t(model.systemPrompt),
+      fileServerType: model.fileServerType,
       temperature: DEFAULT_TEMPERATURE,
     };
 
@@ -257,6 +257,7 @@ const Home = ({ defaultModelId, locale }: Props) => {
           messages: [],
           model: model,
           prompt: t(model.systemPrompt),
+          fileServerType: model.fileServerType,
           temperature: DEFAULT_TEMPERATURE,
         },
       });

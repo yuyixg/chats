@@ -21,7 +21,13 @@ import { Button } from '../../ui/button';
 import FormSelect from '@/components/ui/form/select';
 import { ModelVersions } from '@/types/model';
 import { GetFileServerResult, PostModelParams } from '@/types/admin';
-import { getModelConfigs } from '@/utils/model';
+import {
+  getModelApiConfigJson,
+  getModelFileConfig,
+  getModelFileConfigJson,
+  getModelModelConfig,
+  getModelModelConfigJson,
+} from '@/utils/model';
 
 interface IProps {
   isOpen: boolean;
@@ -82,9 +88,8 @@ export const AddModelModal = (props: IProps) => {
       render: (options: IFormFieldOption, field: FormFieldType) => (
         <FormTextarea
           hidden={
-            !getModelConfigs(
-              form.getValues('modelVersion') as ModelVersions,
-              'modelConfig'
+            !getModelModelConfig(
+              form.getValues('modelVersion') as ModelVersions
             )
           }
           options={options}
@@ -99,10 +104,7 @@ export const AddModelModal = (props: IProps) => {
       render: (options: IFormFieldOption, field: FormFieldType) => (
         <FormSelect
           hidden={
-            !getModelConfigs(
-              form.getValues('modelVersion') as ModelVersions,
-              'fileConfig'
-            )
+            !getModelFileConfig(form.getValues('modelVersion') as ModelVersions)
           }
           items={fileServers.map((item) => ({
             name: item.name,
@@ -120,10 +122,7 @@ export const AddModelModal = (props: IProps) => {
       render: (options: IFormFieldOption, field: FormFieldType) => (
         <FormTextarea
           hidden={
-            !getModelConfigs(
-              form.getValues('modelVersion') as ModelVersions,
-              'fileConfig'
-            )
+            !getModelFileConfig(form.getValues('modelVersion') as ModelVersions)
           }
           options={options}
           field={field}
@@ -195,18 +194,9 @@ export const AddModelModal = (props: IProps) => {
     const subscription = form.watch((value, { name, type }) => {
       if (name === 'modelVersion' && type === 'change') {
         const modelVersion = value.modelVersion as ModelVersions;
-        form.setValue(
-          'apiConfig',
-          JSON.stringify(getModelConfigs(modelVersion, 'apiConfig'), null, 2)
-        );
-        form.setValue(
-          'modelConfig',
-          JSON.stringify(getModelConfigs(modelVersion, 'modelConfig'), null, 2)
-        );
-        form.setValue(
-          'fileConfig',
-          JSON.stringify(getModelConfigs(modelVersion, 'fileConfig'), null, 2)
-        );
+        form.setValue('apiConfig', getModelApiConfigJson(modelVersion));
+        form.setValue('modelConfig', getModelModelConfigJson(modelVersion));
+        form.setValue('fileConfig', getModelFileConfigJson(modelVersion));
       }
     });
     return () => subscription.unsubscribe();

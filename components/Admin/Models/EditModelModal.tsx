@@ -23,7 +23,12 @@ import FormInput from '../../ui/form/input';
 import FormSwitch from '../../ui/form/switch';
 import FormTextarea from '../../ui/form/textarea';
 import { Button } from '../../ui/button';
-import { getModelConfigs, mergeConfigs } from '@/utils/model';
+import {
+  getModelApiConfig,
+  getModelFileConfig,
+  getModelModelConfig,
+  mergeConfigs,
+} from '@/utils/model';
 import FormSelect from '@/components/ui/form/select';
 
 interface IProps {
@@ -73,7 +78,7 @@ export const EditModelModal = (props: IProps) => {
       label: t('Model Configs'),
       render: (options: IFormFieldOption, field: FormFieldType) => (
         <FormTextarea
-          hidden={!getModelConfigs(selected?.modelVersion, 'modelConfig')}
+          hidden={!getModelModelConfig(selected?.modelVersion)}
           options={options}
           field={field}
         />
@@ -85,7 +90,7 @@ export const EditModelModal = (props: IProps) => {
       defaultValue: '',
       render: (options: IFormFieldOption, field: FormFieldType) => (
         <FormSelect
-          hidden={!selected?.fileServerId}
+          hidden={!getModelFileConfig(selected?.modelVersion)}
           items={fileServers.map((item) => ({
             name: item.name,
             value: item.id,
@@ -100,7 +105,7 @@ export const EditModelModal = (props: IProps) => {
       label: t('File Configs'),
       render: (options: IFormFieldOption, field: FormFieldType) => (
         <FormTextarea
-          hidden={!getModelConfigs(selected?.modelVersion, 'fileConfig')}
+          hidden={!getModelFileConfig(selected?.modelVersion)}
           options={options}
           field={field}
         />
@@ -187,21 +192,21 @@ export const EditModelModal = (props: IProps) => {
       form.setValue(
         'apiConfig',
         mergeConfigs(
-          getModelConfigs(selected!.modelVersion, 'apiConfig'),
+          getModelApiConfig(selected!.modelVersion),
           JSON.parse(selected?.apiConfig || '{}')
         )
       );
       form.setValue(
         'modelConfig',
         mergeConfigs(
-          getModelConfigs(selected!.modelVersion, 'modelConfig'),
+          getModelModelConfig(selected!.modelVersion),
           JSON.parse(selected?.modelConfig || '{}')
         )
       );
       form.setValue(
         'fileConfig',
         mergeConfigs(
-          getModelConfigs(selected!.modelVersion, 'fileConfig'),
+          getModelFileConfig(selected!.modelVersion),
           JSON.parse(selected?.fileConfig || '{}')
         )
       );
