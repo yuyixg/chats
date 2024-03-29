@@ -6,7 +6,7 @@ interface Props {
 export const CloseSidebarButton = ({ onClick, side }: Props) => {
   return (
     <div
-      className={`group fixed z-50  ${
+      className={`group fixed z-10  ${
         side === 'right' ? 'right-[260px]' : 'left-[260px]'
       }`}
       onClick={onClick}
@@ -34,7 +34,7 @@ export const CloseSidebarButton = ({ onClick, side }: Props) => {
 export const OpenSidebarButton = ({ onClick, side }: Props) => {
   return (
     <div
-      className={`group fixed z-50 ${side === 'right' ? 'right-2' : 'left-2'}`}
+      className={`group fixed z-10 ${side === 'right' ? 'right-2' : 'left-2'}`}
       onClick={onClick}
       style={{ top: 'calc(50% - 72px)' }}
     >

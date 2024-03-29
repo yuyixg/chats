@@ -223,7 +223,6 @@ export const ChatInput = ({
 
   useEffect(() => {
     setContent({ text: '', image: [] });
-    console.log('selectedConversation\n', selectedConversation);
   }, [selectedConversation?.model]);
 
   return (
