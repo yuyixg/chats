@@ -269,6 +269,7 @@ const Home = ({ defaultModelId }: Props) => {
       value: true,
     });
     if (data && data.length > 0) {
+      localStorage.removeItem('selectedConversation');
       dispatch({
         field: 'defaultModelId',
         value: data[0].id,
