@@ -1,5 +1,5 @@
 import type { NextApiRequest, NextApiResponse } from 'next';
-import { ChatMessageManager } from '@/managers';
+import { ChatMessageManager, FileServerManager } from '@/managers';
 import { getSession } from '@/utils/session';
 import { badRequest, internalServerError } from '@/utils/error';
 export const config = {
@@ -22,13 +22,31 @@ const handler = async (req: NextApiRequest, res: NextApiResponse) => {
       const messages = await ChatMessageManager.findUserMessages(
         session.userId
       );
+      const fileServers = await FileServerManager.findFileServers(false);
+
       const data = messages.map((x) => {
+        const fileServer = fileServers.find(
+          (f) => f.id === x.ChatModel.fileServerId
+        );
         return {
           id: x.id,
           name: x.name,
           messages: x.messages,
           prompt: x.prompt,
-          model: x.ChatModel,
+          model: {
+            id: x.ChatModel.id,
+            modelVersion: x.ChatModel.modelVersion,
+            name: x.ChatModel.name,
+            type: x.ChatModel.type,
+            systemPrompt: x.ChatModel.systemPrompt,
+            fileConfig: x.ChatModel.fileConfig,
+            fileServerConfig: fileServer
+              ? {
+                  id: fileServer.id,
+                  type: fileServer.type,
+                }
+              : null,
+          },
           isShared: x.isShared,
         };
       });

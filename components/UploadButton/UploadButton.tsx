@@ -28,7 +28,7 @@ const UploadButton: React.FunctionComponent<Props> = ({
 }: Props) => {
   const { t } = useTranslation('chat');
   const uploadRef = useRef<HTMLInputElement>(null);
-  const { fileMaxSize } = fileConfig;
+  const { fileMaxSize } = fileConfig || { fileMaxSize: 0 };
   const changeFile = async (event: any) => {
     const file = event?.target?.files[0];
     if (fileMaxSize && file?.size / 1024 > fileMaxSize) {

@@ -71,6 +71,7 @@ export class ChatMessageManager {
             'modelConfig',
             'type',
             'fileConfig',
+            'fileServerId',
           ],
           model: ChatModels,
         },

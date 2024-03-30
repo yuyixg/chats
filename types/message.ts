@@ -14,6 +14,7 @@ export interface UserChatMessage extends Model {
     modelVersion: string;
     systemPrompt: string;
     type: ModelType;
+    fileServerId: string;
   };
   id?: string;
   userId: string;
