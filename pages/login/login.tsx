@@ -18,7 +18,7 @@ import { Form, FormField } from '@/components/ui/form';
 import { Button } from '@/components/ui/button';
 import FormCheckbox from '@/components/ui/form/checkbox';
 import { clearConversations } from '@/utils/conversation';
-import { DEFAULT_LOCALE } from '@/types/settings';
+import { DEFAULT_LANGUAGE } from '@/types/settings';
 
 export default function LoginPage() {
   const { t } = useTranslation('login');
@@ -162,7 +162,7 @@ export default function LoginPage() {
 export const getServerSideProps = async ({ locale }: { locale: string }) => {
   return {
     props: {
-      ...(await serverSideTranslations(locale ?? DEFAULT_LOCALE, ['login'])),
+      ...(await serverSideTranslations(locale ?? DEFAULT_LANGUAGE, ['login'])),
     },
   };
 };

@@ -109,7 +109,7 @@ export const ChangePasswordModal = (props: IProps) => {
 
   return (
     <Dialog open={isOpen} onOpenChange={onClose}>
-      <DialogContent className='dark:bg-[#202123]'>
+      <DialogContent>
         <DialogHeader>{t('Change Password')}</DialogHeader>
         <Form {...form}>
           <form onSubmit={form.handleSubmit(onSubmit)}>

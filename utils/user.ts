@@ -1,3 +1,5 @@
+import { getSettingsLanguage } from "./settings";
+
 export interface UserSession {
   sessionId: string;
   username: string;
@@ -21,7 +23,7 @@ export const getUserSession = () => {
 };
 
 export const getLoginUrl = (locale?: string) => {
-  const _locale = locale || localStorage.getItem('locale');
+  const _locale = locale || getSettingsLanguage();
   return (_locale ? '/' + _locale : '') + '/login';
 };
 

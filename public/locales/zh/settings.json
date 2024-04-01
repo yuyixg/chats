@@ -1,8 +1,10 @@
 {
   "Settings": "偏好设置",
   "Theme": "主题",
-  "Dark mode": "深色模式",
-  "Light mode": "浅色模式",
+  "dark": "深色模式",
+  "light": "浅色模式",
+  "zh": "简体中文",
+  "en": "英语",
   "Save": "保存",
   "Language": "语言",
   "English": "英语",

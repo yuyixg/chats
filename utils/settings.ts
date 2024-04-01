@@ -1,10 +1,11 @@
-import { Settings } from '@/types/settings';
+import { DEFAULT_LANGUAGE, DEFAULT_THEME, Settings } from '@/types/settings';
 
 const STORAGE_KEY = 'settings';
 
 export const getSettings = (): Settings => {
   let settings: Settings = {
-    theme: 'light',
+    theme: DEFAULT_THEME,
+    language: DEFAULT_LANGUAGE,
   };
   const settingsJson = localStorage.getItem(STORAGE_KEY);
   if (settingsJson) {
@@ -20,4 +21,8 @@ export const getSettings = (): Settings => {
 
 export const saveSettings = (settings: Settings) => {
   localStorage.setItem(STORAGE_KEY, JSON.stringify(settings));
+};
+
+export const getSettingsLanguage = () => {
+  return getSettings().language;
 };

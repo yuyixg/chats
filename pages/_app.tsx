@@ -6,6 +6,7 @@ import { appWithTranslation } from 'next-i18next';
 import { useRouter } from 'next/router';
 import AdminLayout from './admin/layout/layout';
 import { ThemeProvider } from '@/components/theme-provider';
+import { DEFAULT_THEME, Themes } from '@/types/settings';
 
 function App({ Component, pageProps }: AppProps<{}> | any) {
   const route = useRouter();
@@ -13,7 +14,7 @@ function App({ Component, pageProps }: AppProps<{}> | any) {
   return (
     <ThemeProvider
       attribute='class'
-      defaultTheme='light'
+      defaultTheme='system'
       enableSystem
       disableTransitionOnChange
     >

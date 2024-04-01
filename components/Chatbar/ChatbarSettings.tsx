@@ -102,7 +102,7 @@ export const ChatBarSettings = () => {
 
       {isSettingDialogOpen && (
         <SettingDialog
-          open={isSettingDialogOpen}
+          isOpen={isSettingDialogOpen}
           onClose={() => {
             setIsSettingDialog(false);
           }}

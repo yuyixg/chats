@@ -18,7 +18,7 @@ import { useQuery } from 'react-query';
 import useApiService from '@/apis/useApiService';
 import { serverSideTranslations } from 'next-i18next/serverSideTranslations';
 import { useTranslation } from 'react-i18next';
-import { getSettings } from '@/utils/settings';
+import { getSettingsLanguage, getSettings } from '@/utils/settings';
 import Promptbar from '@/components/Promptbar';
 import { getSession } from '@/utils/session';
 import { Session } from '@/types/session';
@@ -32,7 +32,13 @@ import { Model } from '@/types/model';
 import { Prompt } from '@/types/prompt';
 import { UserSession } from '@/utils/user';
 import { getUserMessages } from '@/apis/userService';
-import { DEFAULT_LOCALE } from '@/types/settings';
+import {
+  DEFAULT_LANGUAGE,
+  DEFAULT_THEME,
+  Languages,
+  Themes,
+} from '@/types/settings';
+import { useTheme } from 'next-themes';
 
 interface Props {
   serverSideApiKeyIsSet: boolean;
@@ -45,7 +51,8 @@ interface Props {
 interface HomeInitialState {
   user: UserSession | null;
   loading: boolean;
-  lightMode: 'light' | 'dark';
+  theme: (typeof Themes)[number];
+  language: (typeof Languages)[number];
   messageIsStreaming: boolean;
   modelError: ErrorMessage | null;
   modelsLoading: boolean;
@@ -65,7 +72,8 @@ interface HomeInitialState {
 const initialState: HomeInitialState = {
   user: null,
   loading: false,
-  lightMode: 'light',
+  theme: DEFAULT_THEME,
+  language: DEFAULT_LANGUAGE,
   messageIsStreaming: false,
   modelError: null,
   modelsLoading: false,
@@ -107,11 +115,12 @@ const Home = ({ defaultModelId }: Props) => {
   });
 
   const {
-    state: { conversations, selectedConversation, lightMode, models },
+    state: { conversations, selectedConversation, models },
     dispatch,
   } = contextValue;
   const { getModels } = useApiService();
   const stopConversationRef = useRef<boolean>(false);
+  const { setTheme } = useTheme();
   const [loadingText, setLoadingText] = useState('');
 
   const handleNewConversation = () => {
@@ -187,13 +196,20 @@ const Home = ({ defaultModelId }: Props) => {
   };
 
   useEffect(() => {
-    localStorage.setItem('locale', DEFAULT_LOCALE);
     setLoadingText(t('Loading ...')!);
     const settings = getSettings();
     if (settings.theme) {
       dispatch({
-        field: 'lightMode',
+        field: 'theme',
         value: settings.theme,
+      });
+      setTheme(settings.theme);
+    }
+
+    if (settings.language) {
+      dispatch({
+        field: 'language',
+        value: settings.language,
       });
     }
 
@@ -201,7 +217,9 @@ const Home = ({ defaultModelId }: Props) => {
     if (user) {
       dispatch({ field: 'user', value: user });
     } else {
-      router.push(getLoginUrl(localStorage.getItem('locale') || DEFAULT_LOCALE));
+      router.push(
+        getLoginUrl(getSettingsLanguage())
+      );
     }
 
     const prompts = localStorage.getItem('prompts');
@@ -312,7 +330,7 @@ const Home = ({ defaultModelId }: Props) => {
           </div>
         )} */}
         <div
-          className={`flex h-screen w-screen flex-col text-sm text-white dark:text-white ${lightMode}`}
+          className={`flex h-screen w-screen flex-col text-sm`}
         >
           <div className='fixed top-0 w-full sm:hidden'>
             {selectedConversation && (
@@ -352,7 +370,7 @@ export const getServerSideProps = async ({
       locale,
       session,
       defaultModelId: null,
-      ...(await serverSideTranslations(locale ?? DEFAULT_LOCALE, [
+      ...(await serverSideTranslations(locale ?? DEFAULT_LANGUAGE, [
         'common',
         'chat',
         'sidebar',

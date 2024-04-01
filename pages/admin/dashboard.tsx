@@ -2,7 +2,7 @@ import { serverSideTranslations } from 'next-i18next/serverSideTranslations';
 import React from 'react';
 import ReactECharts from 'echarts-for-react';
 import { Card, CardContent, CardHeader } from '@/components/ui/card';
-import { DEFAULT_LOCALE } from '@/types/settings';
+import { DEFAULT_LANGUAGE } from '@/types/settings';
 
 const Dashboard = (props: any) => {
   const option1 = {
@@ -116,7 +116,7 @@ export default Dashboard;
 export const getServerSideProps = async ({ locale }: any) => {
   return {
     props: {
-      ...(await serverSideTranslations(locale ?? DEFAULT_LOCALE, ['common', 'admin'])),
+      ...(await serverSideTranslations(locale ?? DEFAULT_LANGUAGE, ['common', 'admin'])),
     },
   };
 };

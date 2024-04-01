@@ -69,53 +69,51 @@ const AdminLayout = ({
   }, []);
 
   return (
-    <>
-      <TooltipProvider delayDuration={0}>
-        <ResizablePanelGroup
-          direction='horizontal'
-          className='h-full w-full items-stretch'
+    <TooltipProvider delayDuration={0}>
+      <ResizablePanelGroup
+        direction='horizontal'
+        className='h-full w-full items-stretch'
+      >
+        <ResizablePanel
+          defaultSize={defaultLayout[0]}
+          collapsedSize={10}
+          collapsible={true}
+          minSize={8}
+          maxSize={12}
+          className={cn(
+            isCollapsed && 'transition-all duration-300 ease-in-out',
+            'h-full'
+          )}
         >
-          <ResizablePanel
-            defaultSize={defaultLayout[0]}
-            collapsedSize={10}
-            collapsible={true}
-            minSize={8}
-            maxSize={12}
-            className={cn(
-              isCollapsed && 'transition-all duration-300 ease-in-out',
-              'h-full'
-            )}
-          >
-            <div className='px-3 py-4 overflow-y-auto'>
-              <a
-                onClick={() => {
-                  router.push('/admin/dashboard');
-                }}
-                className='flex items-center ps-1 mb-1 cursor-pointer'
-              >
-                <img
-                  className='h-8 me-3 rounded-sm'
-                  alt='chats Logo'
-                  src='/chats.png'
-                />
-                <span className='self-center text-md font-medium whitespace-nowrap'>
-                  Chats
-                </span>
-              </a>
-            </div>
-            <Nav isCollapsed={isCollapsed} links={links} />
-          </ResizablePanel>
-          {/* <ResizableHandle withHandle /> */}
-          <ResizablePanel
-            defaultSize={defaultLayout[1]}
-            maxSize={90}
-            minSize={85}
-          >
-            <div className='p-4'>{children}</div>
-          </ResizablePanel>
-        </ResizablePanelGroup>
-      </TooltipProvider>
-    </>
+          <div className='px-3 py-4 overflow-y-auto'>
+            <a
+              onClick={() => {
+                router.push('/admin/dashboard');
+              }}
+              className='flex items-center ps-1 mb-1 cursor-pointer'
+            >
+              <img
+                className='h-8 me-3 rounded-sm'
+                alt='chats Logo'
+                src='/chats.png'
+              />
+              <span className='self-center text-md font-medium whitespace-nowrap'>
+                Chats
+              </span>
+            </a>
+          </div>
+          <Nav isCollapsed={isCollapsed} links={links} />
+        </ResizablePanel>
+        {/* <ResizableHandle withHandle /> */}
+        <ResizablePanel
+          defaultSize={defaultLayout[1]}
+          maxSize={90}
+          minSize={85}
+        >
+          <div className='p-4'>{children}</div>
+        </ResizablePanel>
+      </ResizablePanelGroup>
+    </TooltipProvider>
   );
 };
 

@@ -17,7 +17,7 @@ import {
 } from '@/components/ui/table';
 import { Button } from '@/components/ui/button';
 import { Input } from '@/components/ui/input';
-import { DEFAULT_LOCALE } from '@/types/settings';
+import { DEFAULT_LANGUAGE } from '@/types/settings';
 
 export default function Users() {
   const { t } = useTranslation('admin');
@@ -110,7 +110,7 @@ export default function Users() {
 export const getServerSideProps = async ({ locale }: { locale: string }) => {
   return {
     props: {
-      ...(await serverSideTranslations(locale ?? DEFAULT_LOCALE, ['common', 'admin'])),
+      ...(await serverSideTranslations(locale ?? DEFAULT_LANGUAGE, ['common', 'admin'])),
     },
   };
 };

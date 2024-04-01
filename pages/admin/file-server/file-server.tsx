@@ -15,7 +15,7 @@ import { Card } from '@/components/ui/card';
 import { Button } from '@/components/ui/button';
 import { IconPlus } from '@tabler/icons-react';
 import { FileServerModal } from '@/components/Admin/Files/FileServerModal';
-import { DEFAULT_LOCALE } from '@/types/settings';
+import { DEFAULT_LANGUAGE } from '@/types/settings';
 
 export default function FileServer() {
   const { t } = useTranslation('admin');
@@ -109,7 +109,7 @@ export default function FileServer() {
 export const getServerSideProps = async ({ locale }: { locale: string }) => {
   return {
     props: {
-      ...(await serverSideTranslations(locale ?? DEFAULT_LOCALE, ['common', 'admin'])),
+      ...(await serverSideTranslations(locale ?? DEFAULT_LANGUAGE, ['common', 'admin'])),
     },
   };
 };

@@ -2,7 +2,7 @@ import { getShareMessage } from '@/apis/adminService';
 import { ChatMessage } from '@/components/Admin/Messages/ChatMessage';
 import { Button } from '@/components/ui/button';
 import { GetMessageDetailsResult } from '@/types/admin';
-import { DEFAULT_LOCALE } from '@/types/settings';
+import { DEFAULT_LANGUAGE } from '@/types/settings';
 import { serverSideTranslations } from 'next-i18next/serverSideTranslations';
 import Link from 'next/link';
 import { useRouter } from 'next/router';
@@ -44,7 +44,7 @@ export default function ShareMessage() {
 export const getServerSideProps = async ({ locale }: { locale: string }) => {
   return {
     props: {
-      ...(await serverSideTranslations(locale ?? DEFAULT_LOCALE, ['common', 'markdown'])),
+      ...(await serverSideTranslations(locale ?? DEFAULT_LANGUAGE, ['common', 'markdown'])),
     },
   };
 };
