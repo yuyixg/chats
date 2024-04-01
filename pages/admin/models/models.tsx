@@ -16,6 +16,7 @@ import { Card } from '@/components/ui/card';
 import { Button } from '@/components/ui/button';
 import { IconPlus } from '@tabler/icons-react';
 import { AddModelModal } from '@/components/Admin/Models/AddModelModal';
+import { DEFAULT_LOCALE } from '@/types/settings';
 
 export default function Models() {
   const { t } = useTranslation('admin');
@@ -116,7 +117,7 @@ export default function Models() {
 export const getServerSideProps = async ({ locale }: { locale: string }) => {
   return {
     props: {
-      ...(await serverSideTranslations(locale ?? 'en', ['common', 'admin'])),
+      ...(await serverSideTranslations(locale ?? DEFAULT_LOCALE, ['common', 'admin'])),
     },
   };
 };

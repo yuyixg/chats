@@ -19,6 +19,7 @@ import {
   TableRow,
 } from '@/components/ui/table';
 import { Avatar, AvatarFallback } from '@/components/ui/avatar';
+import { DEFAULT_LOCALE } from '@/types/settings';
 
 export default function UserModels() {
   const { t } = useTranslation('admin');
@@ -209,7 +210,7 @@ export default function UserModels() {
 export const getServerSideProps = async ({ locale }: { locale: string }) => {
   return {
     props: {
-      ...(await serverSideTranslations(locale ?? 'en', ['common', 'admin'])),
+      ...(await serverSideTranslations(locale ?? DEFAULT_LOCALE, ['common', 'admin'])),
     },
   };
 };

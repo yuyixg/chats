@@ -32,6 +32,7 @@ import { Model } from '@/types/model';
 import { Prompt } from '@/types/prompt';
 import { UserSession } from '@/utils/user';
 import { getUserMessages } from '@/apis/userService';
+import { DEFAULT_LOCALE } from '@/types/settings';
 
 interface Props {
   serverSideApiKeyIsSet: boolean;
@@ -186,7 +187,7 @@ const Home = ({ defaultModelId }: Props) => {
   };
 
   useEffect(() => {
-    localStorage.setItem('locale', 'en');
+    localStorage.setItem('locale', DEFAULT_LOCALE);
     setLoadingText(t('Loading ...')!);
     const settings = getSettings();
     if (settings.theme) {
@@ -200,7 +201,7 @@ const Home = ({ defaultModelId }: Props) => {
     if (user) {
       dispatch({ field: 'user', value: user });
     } else {
-      router.push(getLoginUrl(localStorage.getItem('locale') || 'en'));
+      router.push(getLoginUrl(localStorage.getItem('locale') || DEFAULT_LOCALE));
     }
 
     const prompts = localStorage.getItem('prompts');
@@ -351,7 +352,7 @@ export const getServerSideProps = async ({
       locale,
       session,
       defaultModelId: null,
-      ...(await serverSideTranslations(locale ?? 'en', [
+      ...(await serverSideTranslations(locale ?? DEFAULT_LOCALE, [
         'common',
         'chat',
         'sidebar',

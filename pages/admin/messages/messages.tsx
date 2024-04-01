@@ -15,6 +15,7 @@ import {
   TableRow,
 } from '@/components/ui/table';
 import PaginationContainer from '@/components/Admin/Pagiation/Pagiation';
+import { DEFAULT_LOCALE } from '@/types/settings';
 
 export default function Messages() {
   const { t } = useTranslation('admin');
@@ -102,7 +103,7 @@ export default function Messages() {
 export const getServerSideProps = async ({ locale }: { locale: string }) => {
   return {
     props: {
-      ...(await serverSideTranslations(locale ?? 'en', [
+      ...(await serverSideTranslations(locale ?? DEFAULT_LOCALE, [
         'common',
         'admin',
         'pagination',

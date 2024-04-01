@@ -6,7 +6,7 @@ import { useCreateReducer } from '@/hooks/useCreateReducer';
 
 import { getSettings, saveSettings } from '@/utils/settings';
 
-import { Settings } from '@/types/settings';
+import { DEFAULT_LOCALE, Settings } from '@/types/settings';
 import { HomeContext } from '@/pages/home/home';
 import { useTheme } from 'next-themes';
 
@@ -25,7 +25,7 @@ export const SettingDialog: FC<Props> = ({ open, onClose }) => {
   const modalRef = useRef<HTMLDivElement>(null);
   const { setTheme } = useTheme();
   const [language, setLanguage] = useState(
-    localStorage.getItem('locale') || 'en'
+    localStorage.getItem('locale') || DEFAULT_LOCALE
   );
 
   useEffect(() => {

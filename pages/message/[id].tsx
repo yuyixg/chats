@@ -1,6 +1,7 @@
 import { getMessageDetails } from '@/apis/adminService';
 import { ChatMessage } from '@/components/Admin/Messages/ChatMessage';
 import { GetMessageDetailsResult } from '@/types/admin';
+import { DEFAULT_LOCALE } from '@/types/settings';
 import { serverSideTranslations } from 'next-i18next/serverSideTranslations';
 import { useRouter } from 'next/router';
 import { useEffect, useState } from 'react';
@@ -30,7 +31,7 @@ export default function MessageDetails() {
 export const getServerSideProps = async ({ locale }: { locale: string }) => {
   return {
     props: {
-      ...(await serverSideTranslations(locale ?? 'en', ['common', 'markdown'])),
+      ...(await serverSideTranslations(locale ?? DEFAULT_LOCALE, ['common', 'markdown'])),
     },
   };
 };
