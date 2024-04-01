@@ -59,6 +59,7 @@ export default function Messages() {
               <TableHead>{t('Title')}</TableHead>
               <TableHead>{t('User Name')}</TableHead>
               <TableHead>{t('Consume tokens')}</TableHead>
+              <TableHead>{t('Consume price')}</TableHead>
               <TableHead>{t('Chat Counts')}</TableHead>
               <TableHead>{t('Updated Time')}</TableHead>
             </TableRow>
@@ -76,6 +77,7 @@ export default function Messages() {
                 <TableCell className='truncate'>{item.name}</TableCell>
                 <TableCell>{item.username}</TableCell>
                 <TableCell>{item.tokenCount}</TableCell>
+                <TableCell>{item.totalPrice?.toFixed(2) || '0.00'}</TableCell>
                 <TableCell>{item.chatCount}</TableCell>
                 <TableCell>
                   {new Date(item.updatedAt).toLocaleString()}

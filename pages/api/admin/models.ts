@@ -54,6 +54,7 @@ const handler = async (req: NextApiRequest, res: NextApiResponse) => {
             null,
             2
           ),
+          price: JSON.stringify(x.price || {}, null, 2),
         };
       });
       return res.json(data);
@@ -66,6 +67,7 @@ const handler = async (req: NextApiRequest, res: NextApiResponse) => {
         modelConfig: modelConfigJson,
         apiConfig: apiConfigJson,
         fileConfig: fileConfigJson,
+        price: priceJSON,
       } = req.body;
       const model = await ChatModelManager.findModelById(modelId);
       if (!model) {
@@ -76,6 +78,7 @@ const handler = async (req: NextApiRequest, res: NextApiResponse) => {
       let modelConfig = JSON.parse(modelConfigJson);
       let apiConfig = JSON.parse(apiConfigJson);
       let fileConfig = JSON.parse(fileConfigJson);
+      let price = JSON.parse(priceJSON);
 
       apiConfig.appId = checkKey(model?.apiConfig.apiKey, apiConfig.appId);
       apiConfig.apiKey = checkKey(model?.apiConfig.apiKey, apiConfig.apiKey);
@@ -88,7 +91,8 @@ const handler = async (req: NextApiRequest, res: NextApiResponse) => {
         modelConfig,
         apiConfig,
         fileServerId,
-        fileConfig
+        fileConfig,
+        price
       );
       return res.json(data);
     } else if (req.method === 'POST') {
@@ -97,6 +101,7 @@ const handler = async (req: NextApiRequest, res: NextApiResponse) => {
         name,
         enabled,
         fileServerId,
+        price: priceJSON,
         modelConfig: modelConfigJson,
         apiConfig: apiConfigJson,
         fileConfig: fileConfigJson,
@@ -118,11 +123,14 @@ const handler = async (req: NextApiRequest, res: NextApiResponse) => {
       let modelConfig = JSON.parse(modelConfigJson);
       let apiConfig = JSON.parse(apiConfigJson);
       let fileConfig = JSON.parse(fileConfigJson);
+      let price = JSON.parse(priceJSON);
+
       const data = await ChatModelManager.createModel(
         template.type,
         modelVersion,
         name,
         enabled,
+        price,
         modelConfig,
         apiConfig,
         fileServerId,

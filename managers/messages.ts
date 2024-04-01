@@ -1,8 +1,8 @@
 import { ChatMessages, ChatModels, Users } from '@/db';
 import { Message } from '@/types/chat';
 import { UserModelManager } from './userModels';
-import UserModels, { UserModel } from '@/db/userModels';
-import { Op, where } from 'sequelize';
+import { UserModel } from '@/db/userModels';
+import { Op } from 'sequelize';
 import { UserChatMessage } from '@/types/message';
 import { PageResult } from '@/types/page';
 
@@ -14,6 +14,7 @@ export interface CreateMessage {
   prompt: string;
   tokenCount: number;
   chatCount: number;
+  totalPrice: number;
 }
 
 export class ChatMessageManager {
@@ -91,13 +92,15 @@ export class ChatMessageManager {
     id: string,
     messages: Message[],
     tokenCount: number,
-    chatCount: number
+    chatCount: number,
+    totalPrice: number
   ) {
     return await ChatMessages.update(
       {
         messages,
         tokenCount,
         chatCount,
+        totalPrice,
       },
       {
         where: {
@@ -119,7 +122,7 @@ export class ChatMessageManager {
   }
 
   static async createMessage(params: CreateMessage) {
-    const { id, messages, modelId, userId, prompt, tokenCount, chatCount } =
+    const { id, messages, modelId, userId, prompt, tokenCount, totalPrice } =
       params;
     return await ChatMessages.create({
       id,
@@ -130,6 +133,7 @@ export class ChatMessageManager {
       prompt,
       tokenCount,
       chatCount: 1,
+      totalPrice,
     });
   }
 
@@ -139,6 +143,7 @@ export class ChatMessageManager {
     userModelId: string,
     messages: Message[],
     tokenCount: number,
+    totalPrice: number,
     promptToSend: string,
     chatModel: ChatModels,
     userModel: UserModel
@@ -152,7 +157,8 @@ export class ChatMessageManager {
         chatMessages.id!,
         messages,
         tokenCount + chatMessages.tokenCount,
-        chatMessages.chatCount + 1
+        chatMessages.chatCount + 1,
+        totalPrice + chatMessages.totalPrice
       );
     } else {
       await ChatMessageManager.createMessage({
@@ -163,6 +169,7 @@ export class ChatMessageManager {
         prompt: promptToSend,
         tokenCount,
         chatCount: 1,
+        totalPrice,
       });
     }
     await UserModelManager.updateUserModelTokenCount(

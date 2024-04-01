@@ -21,6 +21,7 @@ import {
   modelUnauthorized,
 } from '@/utils/error';
 import { verifyModel } from '@/utils/model';
+import { calcTokenPrice } from '@/utils/message';
 
 export const config = {
   api: {
@@ -46,10 +47,7 @@ const handler = async (req: NextApiRequest, res: NextApiResponse) => {
       return modelUnauthorized(res);
     }
 
-    const userModel = await UserModelManager.findUserModel(
-      userId,
-      model.id
-    );
+    const userModel = await UserModelManager.findUserModel(userId, model.id);
     if (!userModel || !userModel.enabled) {
       return modelUnauthorized(res);
     }
@@ -131,8 +129,13 @@ const handler = async (req: NextApiRequest, res: NextApiResponse) => {
             assistantMessage += value;
           }
           if (done) {
-            let messageTokens = encoding.encode(assistantMessage);
-            tokenCount += messageTokens.length;
+            let messageTokens = encoding.encode(assistantMessage).length;
+            tokenCount += messageTokens;
+            const totalPrice = calcTokenPrice(
+              chatModel.price,
+              tokenCount,
+              messageTokens
+            );
             encoding.free();
             messages.push({
               role: 'assistant',
@@ -144,6 +147,7 @@ const handler = async (req: NextApiRequest, res: NextApiResponse) => {
               userModel.id!,
               messages,
               tokenCount,
+              totalPrice,
               promptToSend,
               chatModel,
               userModel

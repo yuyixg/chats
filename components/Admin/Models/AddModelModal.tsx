@@ -27,6 +27,7 @@ import {
   getModelFileConfigJson,
   getModelModelConfig,
   getModelModelConfigJson,
+  getModelPriceConfigJson,
 } from '@/utils/model';
 
 interface IProps {
@@ -129,6 +130,14 @@ export const AddModelModal = (props: IProps) => {
         />
       ),
     },
+    {
+      name: 'price',
+      label: t('Token Price'),
+      defaultValue: '',
+      render: (options: IFormFieldOption, field: FormFieldType) => (
+        <FormTextarea options={options} field={field} />
+      ),
+    },
   ];
 
   const formSchema = z.object({
@@ -151,6 +160,10 @@ export const AddModelModal = (props: IProps) => {
       .optional(),
     fileServerId: z.string(),
     fileConfig: z
+      .string()
+      .min(1, `${t('This field is require')}`)
+      .optional(),
+    price: z
       .string()
       .min(1, `${t('This field is require')}`)
       .optional(),
@@ -197,6 +210,7 @@ export const AddModelModal = (props: IProps) => {
         form.setValue('apiConfig', getModelApiConfigJson(modelVersion));
         form.setValue('modelConfig', getModelModelConfigJson(modelVersion));
         form.setValue('fileConfig', getModelFileConfigJson(modelVersion));
+        form.setValue('price', getModelPriceConfigJson(modelVersion));
       }
     });
     return () => subscription.unsubscribe();

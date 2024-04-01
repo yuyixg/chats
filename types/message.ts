@@ -24,6 +24,7 @@ export interface UserChatMessage extends Model {
   prompt: string;
   tokenCount: number;
   chatCount: number;
+  totalPrice: number;
   isShared: boolean;
   createdAt: string;
   updatedAt: string;

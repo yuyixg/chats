@@ -51,6 +51,10 @@ export function getModelFileConfig(modelVersion: ModelVersions | undefined) {
   return getModelConfigs(modelVersion, 'fileConfig');
 }
 
+export function getModelPriceConfig(modelVersion: ModelVersions | undefined) {
+  return getModelConfigs(modelVersion, 'price');
+}
+
 export function getModelApiConfigJson(modelVersion: ModelVersions | undefined) {
   return JSON.stringify(getModelConfigs(modelVersion, 'apiConfig'), null, 2);
 }
@@ -65,6 +69,12 @@ export function getModelFileConfigJson(
   modelVersion: ModelVersions | undefined
 ) {
   return JSON.stringify(getModelConfigs(modelVersion, 'fileConfig'), null, 2);
+}
+
+export function getModelPriceConfigJson(
+  modelVersion: ModelVersions | undefined
+) {
+  return JSON.stringify(getModelConfigs(modelVersion, 'price'), null, 2);
 }
 
 export function mergeConfigs(obj1: any, obj2: any) {

@@ -27,6 +27,7 @@ import {
   getModelApiConfig,
   getModelFileConfig,
   getModelModelConfig,
+  getModelPriceConfig,
   mergeConfigs,
 } from '@/utils/model';
 import FormSelect from '@/components/ui/form/select';
@@ -111,6 +112,13 @@ export const EditModelModal = (props: IProps) => {
         />
       ),
     },
+    {
+      name: 'price',
+      label: t('Token Price'),
+      render: (options: IFormFieldOption, field: FormFieldType) => (
+        <FormTextarea options={options} field={field} />
+      ),
+    },
   ];
 
   const formSchema = z.object({
@@ -130,6 +138,10 @@ export const EditModelModal = (props: IProps) => {
       .optional(),
     fileServerId: z.union([z.string(), z.undefined()]),
     fileConfig: z
+      .string()
+      .min(1, `${t('This field is require')}`)
+      .optional(),
+    price: z
       .string()
       .min(1, `${t('This field is require')}`)
       .optional(),
@@ -208,6 +220,13 @@ export const EditModelModal = (props: IProps) => {
         mergeConfigs(
           getModelFileConfig(selected!.modelVersion),
           JSON.parse(selected?.fileConfig || '{}')
+        )
+      );
+      form.setValue(
+        'price',
+        mergeConfigs(
+          getModelPriceConfig(selected!.modelVersion),
+          JSON.parse(selected?.price || '{}')
         )
       );
     }

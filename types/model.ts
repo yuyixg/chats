@@ -52,4 +52,9 @@ export interface ChatModelConfig {
   tokenLimit?: number;
 }
 
-export type ModelConfigType = 'fileConfig' | 'apiConfig' | 'modelConfig';
+export interface ChatModelPrice {
+  input: number;
+  out: number;
+}
+
+export type ModelConfigType = 'fileConfig' | 'apiConfig' | 'modelConfig' | 'price';

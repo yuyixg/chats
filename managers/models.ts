@@ -3,6 +3,7 @@ import { ChatModelApiConfig } from '@/db/models';
 import {
   ChatModelConfig,
   ChatModelFileConfig,
+  ChatModelPrice,
   ModelType,
   ModelVersions,
 } from '@/types/model';
@@ -48,6 +49,7 @@ export class ChatModelManager {
     modelVersion: ModelVersions,
     name: string,
     enabled: boolean,
+    price: ChatModelPrice,
     modelConfig: ChatModelConfig,
     apiConfig: ChatModelApiConfig,
     fileServerId: string,
@@ -62,6 +64,7 @@ export class ChatModelManager {
       apiConfig,
       fileServerId,
       fileConfig,
+      price,
     });
   }
 
@@ -72,7 +75,8 @@ export class ChatModelManager {
     modelConfig: ChatModelConfig,
     apiConfig: ChatModelApiConfig,
     fileServerId: string,
-    fileConfig: ChatModelFileConfig
+    fileConfig: ChatModelFileConfig,
+    price: ChatModelPrice
   ) {
     return await ChatModels.update(
       {
@@ -82,6 +86,7 @@ export class ChatModelManager {
         apiConfig,
         fileServerId,
         fileConfig,
+        price,
       },
       {
         where: { id },

@@ -60,6 +60,10 @@ export const ModelDefaultTemplates = {
         "You are ChatGPT, a large language model trained by OpenAI. Follow the user's instructions carefully. Respond using markdown.",
     },
     fileConfig: null,
+    price: {
+      input: 0.00001085,
+      out: 0.00001446,
+    },
   },
   [ModelVersions.GPT_4]: {
     type: ModelType.GPT,
@@ -67,6 +71,10 @@ export const ModelDefaultTemplates = {
     modelConfig: {
       prompt:
         "You are ChatGPT, a large language model trained by OpenAI. Follow the user's instructions carefully. Respond using markdown.",
+    },
+    price: {
+      input: 0.00021691,
+      out: 0.00043381,
     },
   },
   [ModelVersions.GPT_4_Vision]: {
@@ -77,6 +85,10 @@ export const ModelDefaultTemplates = {
         "You are ChatGPT, a large language model trained by OpenAI. Follow the user's instructions carefully. Respond using markdown.",
     },
     fileConfig: { count: 5, maxSize: 10240 },
+    price: {
+      input: 0.0000723,
+      out: 0.00021691,
+    },
   },
   [ModelVersions.QWen_Vl_Plus]: {
     type: ModelType.QianWen,
@@ -89,6 +101,10 @@ export const ModelDefaultTemplates = {
         "You are an AI assistant with image understanding capabilities, Follow the user's instructions carefully. Respond using markdown.",
     },
     fileConfig: { count: 5, maxSize: 10240 },
+    price: {
+      input: 0,
+      out: 0,
+    },
   },
   [ModelVersions.ERNIE_Bot_4]: {
     type: ModelType.QianFan,
@@ -96,6 +112,10 @@ export const ModelDefaultTemplates = {
     modelConfig: {
       prompt:
         "You are an AI assistant, Follow the user's instructions carefully. Respond using markdown.",
+    },
+    price: {
+      input: 0.000024,
+      out: 0.000048,
     },
   },
   [ModelVersions.ERNIE_Bot_8K]: {
@@ -105,6 +125,10 @@ export const ModelDefaultTemplates = {
       prompt:
         "You are an AI assistant, Follow the user's instructions carefully. Respond using markdown.",
     },
+    price: {
+      input: 0.000024,
+      out: 0.000048,
+    },
   },
   [ModelVersions.yi_34b_chat_0205]: {
     type: ModelType.LingYi,
@@ -113,6 +137,10 @@ export const ModelDefaultTemplates = {
       prompt:
         "You are an AI assistant, Follow the user's instructions carefully. Respond using markdown.",
     },
+    price: {
+      input: 0.0000025,
+      out: 0.0000025,
+    },
   },
   [ModelVersions.yi_34b_chat_200k]: {
     type: ModelType.LingYi,
@@ -120,6 +148,10 @@ export const ModelDefaultTemplates = {
     modelConfig: {
       prompt:
         "You are an AI assistant, Follow the user's instructions carefully. Respond using markdown.",
+    },
+    price: {
+      input: 0.000012,
+      out: 0.000012,
     },
   },
   [ModelVersions.yi_vl_plus]: {
@@ -130,6 +162,10 @@ export const ModelDefaultTemplates = {
         "You are an AI assistant with image understanding capabilities, Follow the user's instructions carefully. Respond using markdown.",
     },
     fileConfig: {},
+    price: {
+      input: 0.000006,
+      out: 0.000006,
+    },
   },
   [ModelVersions.moonshot_v1_8k]: {
     type: ModelType.Kimi,
@@ -137,6 +173,10 @@ export const ModelDefaultTemplates = {
     modelConfig: {
       prompt:
         "You are an AI assistant, Follow the user's instructions carefully. Respond using markdown.",
+    },
+    price: {
+      input: 0.000012,
+      out: 0.000012,
     },
   },
   [ModelVersions.moonshot_v1_32k]: {
@@ -146,6 +186,10 @@ export const ModelDefaultTemplates = {
       prompt:
         "You are an AI assistant, Follow the user's instructions carefully. Respond using markdown.",
     },
+    price: {
+      input: 0.000024,
+      out: 0.000024,
+    },
   },
   [ModelVersions.moonshot_v1_128k]: {
     type: ModelType.Kimi,
@@ -153,6 +197,10 @@ export const ModelDefaultTemplates = {
     modelConfig: {
       prompt:
         "You are an AI assistant, Follow the user's instructions carefully. Respond using markdown.",
+    },
+    price: {
+      input: 0.00006,
+      out: 0.00006,
     },
   },
 };

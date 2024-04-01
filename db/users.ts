@@ -13,8 +13,10 @@ class Users extends Model<
   InferCreationAttributes<Users>
 > {
   declare id?: string;
+  declare avatar?: string;
   declare username: string;
   declare password: string;
+  declare balance: number;
   declare role?: UserRole;
   declare enabled?: boolean;
 }
@@ -26,8 +28,10 @@ Users.init(
       primaryKey: true,
       defaultValue: UUIDV4,
     },
+    avatar: { type: DataTypes.STRING, defaultValue: null },
     password: { type: DataTypes.STRING },
     username: { type: DataTypes.STRING },
+    balance: { type: DataTypes.INTEGER, defaultValue: 0 },
     role: { type: DataTypes.STRING, defaultValue: null },
     enabled: { type: DataTypes.BOOLEAN, defaultValue: true },
   },

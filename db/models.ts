@@ -10,6 +10,7 @@ import {
   ChatModelFileConfig,
   ModelVersions,
   ChatModelConfig,
+  ChatModelPrice,
 } from '@/types/model';
 import { ModelType } from 'aws-sdk/clients/comprehend';
 
@@ -37,6 +38,7 @@ class ChatModels extends Model<
   declare fileServerId?: string;
   declare rank?: number;
   declare enabled?: boolean;
+  declare price: ChatModelPrice;
 }
 
 ChatModels.init(
@@ -55,6 +57,7 @@ ChatModels.init(
     apiConfig: { type: DataTypes.JSON },
     rank: { type: DataTypes.INTEGER },
     enabled: { type: DataTypes.BOOLEAN },
+    price: { type: DataTypes.JSON, defaultValue: { input: 0, out: 0 } },
   },
   {
     sequelize: connection,

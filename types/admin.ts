@@ -47,6 +47,7 @@ export interface GetModelResult {
   modelConfig: string;
   fileServerId?: string;
   fileConfig?: string;
+  price: string;
 }
 
 export interface PutModelParams {
@@ -57,6 +58,7 @@ export interface PutModelParams {
   modelConfig: string;
   fileServerId?: string;
   fileConfig?: string;
+  price: string;
 }
 
 export interface PostModelParams {
@@ -96,6 +98,7 @@ export interface GetUserMessageResult {
   messageId: string;
   username: string;
   chatCount: number;
+  totalPrice: number;
   tokenCount: number;
   name: string;
   modelName: string;
