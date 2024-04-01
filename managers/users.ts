@@ -1,4 +1,5 @@
 import { Users } from '@/db';
+import prisma from '@/db/prisma';
 import bcrypt from 'bcryptjs';
 import { Op } from 'sequelize';
 
