@@ -2,6 +2,7 @@ import { ModelVersions, ModelType } from './model';
 import { Paging } from './page';
 import { Message } from './chat';
 import { PutFileServerParams } from './file';
+import Decimal from 'decimal.js';
 
 export const enum UserRole {
   'admin' = 'admin',
@@ -97,7 +98,7 @@ export interface GetUserMessageResult {
   messageId: string;
   username: string;
   chatCount: number;
-  totalPrice: number;
+  totalPrice: Decimal;
   tokenCount: number;
   name: string;
   modelName: string;

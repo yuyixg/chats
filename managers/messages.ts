@@ -1,6 +1,7 @@
 import { Message } from '@/types/chat';
 import { UserModelManager } from './userModels';
 import prisma from '@/db/prisma';
+import Decimal from 'decimal.js';
 
 export interface CreateMessage {
   id: string;
@@ -10,7 +11,7 @@ export interface CreateMessage {
   prompt: string;
   tokenCount: number;
   chatCount: number;
-  totalPrice: number;
+  totalPrice: Decimal;
 }
 
 export class ChatMessageManager {
@@ -77,7 +78,7 @@ export class ChatMessageManager {
     messages: string,
     tokenCount: number,
     chatCount: number,
-    totalPrice: number
+    totalPrice: Decimal
   ) {
     return await prisma.messages.update({
       where: { id },
@@ -124,7 +125,7 @@ export class ChatMessageManager {
     userModelId: string,
     messages: Message[],
     tokenCount: number,
-    totalPrice: number,
+    totalPrice: Decimal,
     promptToSend: string,
     modelId: string
   ) {
@@ -134,14 +135,14 @@ export class ChatMessageManager {
         userId,
       },
     });
-
     if (chatMessages) {
+      const _totalPrice = new Decimal(totalPrice);
       await ChatMessageManager.updateMessageById(
         chatMessages.id!,
         JSON.stringify(messages),
         tokenCount + chatMessages.tokenCount,
         chatMessages.chatCount + 1,
-        totalPrice + chatMessages.totalPrice
+        _totalPrice.plus(chatMessages.totalPrice)
       );
     } else {
       await ChatMessageManager.createMessage({

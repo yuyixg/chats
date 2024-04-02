@@ -1,13 +1,14 @@
 import { ChatModelPrice } from '@/types/model';
+import Decimal from 'decimal.js';
 
 export const calcTokenPrice = (
   priceConfig: ChatModelPrice,
   inputTokenCount: number,
   outTokenCount: number
 ) => {
-  return (
+  return new Decimal(
     calcInputTokenPrice(inputTokenCount, priceConfig.input) +
-    calcOutTokenPrice(outTokenCount, priceConfig.out)
+      calcOutTokenPrice(outTokenCount, priceConfig.out)
   );
 };
 

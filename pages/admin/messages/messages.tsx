@@ -77,7 +77,9 @@ export default function Messages() {
                 <TableCell className='truncate'>{item.name}</TableCell>
                 <TableCell>{item.username}</TableCell>
                 <TableCell>{item.tokenCount}</TableCell>
-                <TableCell>{item.totalPrice?.toFixed(2) || '0.00'}</TableCell>
+                <TableCell>
+                  {(+item.totalPrice)?.toFixed(2) || '0.00'}
+                </TableCell>
                 <TableCell>{item.chatCount}</TableCell>
                 <TableCell>
                   {new Date(item.updatedAt).toLocaleString()}

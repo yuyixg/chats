@@ -23,23 +23,22 @@ const handler = async (req: NextApiRequest, res: NextApiResponse) => {
         session.userId
       );
       const fileServers = await FileServerManager.findFileServers(false);
-
       const data = messages.map((x) => {
         const fileServer = fileServers.find(
-          (f) => f.id === x.ChatModel.fileServerId
+          (f) => f.id === x.chatModel.fileServerId
         );
         return {
           id: x.id,
           name: x.name,
-          messages: x.messages,
+          messages: JSON.parse(x.messages),
           prompt: x.prompt,
           model: {
-            id: x.ChatModel.id,
-            modelVersion: x.ChatModel.modelVersion,
-            name: x.ChatModel.name,
-            type: x.ChatModel.type,
-            systemPrompt: x.ChatModel.systemPrompt,
-            fileConfig: x.ChatModel.fileConfig,
+            id: x.chatModel.id,
+            modelVersion: x.chatModel.modelVersion,
+            name: x.chatModel.name,
+            type: x.chatModel.type,
+            // systemPrompt: x.chatModel.systemPrompt,
+            fileConfig: x.chatModel.fileConfig,
             fileServerConfig: fileServer
               ? {
                   id: fileServer.id,

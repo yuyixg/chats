@@ -3,7 +3,6 @@ import { ChatModelManager, UserModelManager } from '@/managers';
 import { UserRole } from '@/types/admin';
 import { getSession } from '@/utils/session';
 import { internalServerError, modelUnauthorized } from '@/utils/error';
-import { UserModel } from '@/db/userModels';
 export const config = {
   api: {
     bodyParser: {
@@ -30,7 +29,7 @@ const handler = async (req: NextApiRequest, res: NextApiResponse) => {
       const userModels = await UserModelManager.findUsersModel(query);
       const chatModels = await ChatModelManager.findModels(true);
       const data = userModels.map((x) => {
-        const models = JSON.parse(x.models || '[]') as UserModel[];
+        const models = JSON.parse(x.models || '[]') as any[];
         return {
           userId: x.userId,
           userModelId: x.id,
@@ -53,7 +52,7 @@ const handler = async (req: NextApiRequest, res: NextApiResponse) => {
       return res.json(data);
     } else if (req.method === 'PUT') {
       const { userModelId, models } = req.body;
-      const data = await UserModelManager.updateUserModel(userModelId, models);
+      const data = await UserModelManager.updateUserModel(userModelId, JSON.stringify(models));
       return res.json(data);
     } else if (req.method === 'POST') {
       const { userModelIds, modelId } = req.body;
@@ -65,7 +64,7 @@ const handler = async (req: NextApiRequest, res: NextApiResponse) => {
         return modelUnauthorized(res);
       }
       userModels.map((um) => {
-        const models = JSON.parse(um.models || '[]') as UserModel[];
+        const models = JSON.parse(um.models || '[]') as any[];
         const foundModel = models.find((m) => m.modelId === modelId);
         if (!foundModel) {
           models.push({

@@ -80,8 +80,8 @@ model Messages {
   messages    String     @default("[]")
   tokenCount  Int        @default(0)
   chatCount   Int        @default(0)
-  totalPrice  Int        @default(0)
-  isDeleted   Boolean?
+  totalPrice  Decimal    @default(0)
+  isDeleted   Boolean?   @default(false)
   isShared    Boolean    @default(false)
   createdAt   DateTime   @default(now())
   updatedAt   DateTime   @updatedAt
@@ -91,7 +91,7 @@ model Messages {
 
 model UserBalances {
   id        String   @id @default(uuid())
-  balance   Int      @default(0)
+  balance   Decimal  @default(0)
   userId    String   @unique
   createdAt DateTime @default(now())
   updatedAt DateTime @updatedAt
@@ -101,7 +101,7 @@ model UserBalances {
 model BalanceLogs {
   id        String   @id @default(uuid())
   userId    String
-  value     Int      @default(0)
+  value     Decimal  @default(0)
   createdAt DateTime @default(now())
   updatedAt DateTime @updatedAt
 }

@@ -27,7 +27,7 @@ export default async function handler(
     return res.json({
       name: message?.name,
       prompt: message?.prompt,
-      messages: message?.messages,
+      messages: JSON.parse(message?.messages || '[]'),
     });
   } catch (error: any) {
     return internalServerError(res);

@@ -38,6 +38,7 @@
     "class-variance-authority": "^0.7.0",
     "clsx": "^2.1.0",
     "date-fns": "^3.4.0",
+    "decimal.js": "^10.4.3",
     "echarts-for-react": "^3.0.2",
     "eslint": "8.49.0",
     "eslint-config-next": "13.4.19",
@@ -78,6 +79,7 @@
   "devDependencies": {
     "@types/aws-sdk": "^2.7.0",
     "@types/bcryptjs": "^2.4.6",
+    "@types/decimal.js": "^7.4.0",
     "@types/formidable": "^3.4.5",
     "@types/react-syntax-highlighter": "^15.5.11",
     "@types/uuid": "^9.0.4",

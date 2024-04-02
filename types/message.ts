@@ -1,6 +1,7 @@
 import { Message } from '@/types/chat';
 import { Model } from 'sequelize';
 import { ModelType } from './model';
+import Decimal from 'decimal.js';
 
 export interface UserChatMessage extends Model {
   User: {
@@ -24,7 +25,7 @@ export interface UserChatMessage extends Model {
   prompt: string;
   tokenCount: number;
   chatCount: number;
-  totalPrice: number;
+  totalPrice: Decimal;
   isShared: boolean;
   createdAt: string;
   updatedAt: string;

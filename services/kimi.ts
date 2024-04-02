@@ -26,7 +26,6 @@ export const KimiStream = async (
     modelVersion,
   } = chatModel;
   let url = `${host}/v1/chat/completions`;
-  console.log('messages \n', messages);
   const body = {
     headers: {
       'Content-Type': 'application/json',
