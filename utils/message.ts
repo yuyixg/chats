@@ -1,13 +1,13 @@
 import { ChatModelPrice } from '@/types/model';
 
 export const calcTokenPrice = (
-  price: ChatModelPrice,
+  priceConfig: ChatModelPrice,
   inputTokenCount: number,
   outTokenCount: number
 ) => {
   return (
-    calcInputTokenPrice(inputTokenCount, price.input) +
-    calcOutTokenPrice(outTokenCount, price.out)
+    calcInputTokenPrice(inputTokenCount, priceConfig.input) +
+    calcOutTokenPrice(outTokenCount, priceConfig.out)
   );
 };
 

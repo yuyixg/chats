@@ -1,47 +1,32 @@
-import { ChatModels } from '@/db';
-import { ChatModelApiConfig } from '@/db/models';
-import {
-  ChatModelConfig,
-  ChatModelFileConfig,
-  ChatModelPrice,
-  ModelType,
-  ModelVersions,
-} from '@/types/model';
+import prisma from '@/db/prisma';
+import { ModelType, ModelVersions } from '@/types/model';
 
 export class ChatModelManager {
   static async findModels(findAll: boolean = false) {
     const where = { enabled: true };
-    return await ChatModels.findAll({
+    return await prisma.chatModels.findMany({
       where: findAll ? {} : where,
-      order: [
-        ['rank', 'asc'],
-        ['createdAt', 'asc'],
-      ],
+      orderBy: [{ rank: 'asc' }, { createdAt: 'asc' }],
     });
   }
 
   static async findModelById(id: string) {
-    return await ChatModels.findOne({
-      where: {
-        id,
-      },
-    });
+    const model = await prisma.chatModels.findUnique({ where: { id } });
+    return {
+      ...model,
+      fileConfig: JSON.parse(model?.fileConfig || '{}'),
+      apiConfig: JSON.parse(model?.apiConfig || '{}'),
+      modelConfig: JSON.parse(model?.modelConfig || '{}'),
+      priceConfig: JSON.parse(model?.priceConfig || '{}'),
+    };
   }
 
   static async deleteModelById(id: string) {
-    return await ChatModels.destroy({
-      where: {
-        id,
-      },
-    });
+    return await prisma.chatModels.delete({ where: { id } });
   }
 
   static async findModelByName(name: string) {
-    return await ChatModels.findOne({
-      where: {
-        name,
-      },
-    });
+    return await prisma.chatModels.findUnique({ where: { name } });
   }
 
   static async createModel(
@@ -49,22 +34,24 @@ export class ChatModelManager {
     modelVersion: ModelVersions,
     name: string,
     enabled: boolean,
-    price: ChatModelPrice,
-    modelConfig: ChatModelConfig,
-    apiConfig: ChatModelApiConfig,
     fileServerId: string,
-    fileConfig: ChatModelFileConfig
+    fileConfig: string,
+    apiConfig: string,
+    modelConfig: string,
+    priceConfig: string
   ) {
-    return await ChatModels.create({
-      type,
-      modelVersion,
-      name,
-      enabled,
-      modelConfig,
-      apiConfig,
-      fileServerId,
-      fileConfig,
-      price,
+    return await prisma.chatModels.create({
+      data: {
+        type,
+        modelVersion,
+        name,
+        enabled,
+        fileServerId,
+        fileConfig,
+        priceConfig,
+        modelConfig,
+        apiConfig,
+      },
     });
   }
 
@@ -72,25 +59,23 @@ export class ChatModelManager {
     id: string,
     name: string,
     enabled: boolean,
-    modelConfig: ChatModelConfig,
-    apiConfig: ChatModelApiConfig,
     fileServerId: string,
-    fileConfig: ChatModelFileConfig,
-    price: ChatModelPrice
+    fileConfig: string,
+    apiConfig: string,
+    modelConfig: string,
+    priceConfig: string
   ) {
-    return await ChatModels.update(
-      {
+    return await prisma.chatModels.update({
+      where: { id },
+      data: {
         name,
         enabled,
-        modelConfig,
-        apiConfig,
         fileServerId,
         fileConfig,
-        price,
+        priceConfig,
+        modelConfig,
+        apiConfig,
       },
-      {
-        where: { id },
-      }
-    );
+    });
   }
 }

@@ -1,26 +1,33 @@
-import Sessions from '@/db/sessions';
-import { Session } from '@/types/session';
+import prisma from '@/db/prisma';
 
 export class SessionsManager {
-  static async generateSession(params: Session) {
-    const where = {
+  static async generateSession(userId: string) {
+    const session = await prisma.sessions.findFirst({
       where: {
-        userId: params.userId,
+        userId,
       },
-    };
-    const session = await Sessions.findOne(where);
+    });
+
     if (session) {
-      await Sessions.destroy(where);
+      await prisma.sessions.delete({
+        where: {
+          id: session.id,
+        },
+      });
     }
 
-    return await Sessions.create({
-      userId: params.userId,
-      username: params.username,
-      role: params.role,
+    return await prisma.sessions.create({
+      data: {
+        userId,
+      },
     });
   }
 
   static async findSession(id: string) {
-    return await Sessions.findByPk(id);
+    const session = await prisma.sessions.findFirst({
+      where: { id: id },
+      include: { user: true },
+    });
+    return session;
   }
 }

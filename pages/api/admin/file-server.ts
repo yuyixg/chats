@@ -37,17 +37,18 @@ const handler = async (req: NextApiRequest, res: NextApiResponse) => {
           });
       } else {
         data = servers.map((x) => {
+          const configs = JSON.parse(x?.configs || '{}');
           return {
             id: x.id,
             name: x.name,
             type: x.type,
             configs: {
-              endpoint: x.configs.endpoint,
-              bucketName: x.configs.bucketName,
-              region: x.configs.region,
-              accessKey: addAsterisk(x.configs.accessKey),
-              storageFolderName: x.configs.storageFolderName,
-              accessSecret: addAsterisk(x.configs.accessSecret),
+              endpoint: configs.endpoint,
+              bucketName: configs.bucketName,
+              region: configs.region,
+              accessKey: addAsterisk(configs.accessKey),
+              storageFolderName: configs.storageFolderName,
+              accessSecret: addAsterisk(configs.accessSecret),
             },
             enabled: x.enabled,
             createdAt: x.createdAt,
@@ -76,19 +77,17 @@ const handler = async (req: NextApiRequest, res: NextApiResponse) => {
         id,
         name,
         type,
-        configs,
+        configs: JSON.stringify(configs),
         enabled,
       });
-      console.log('configs \n ', configs);
       await FileServerManager.initFileServer(type, configs);
       return res.send(data);
     } else {
-      const { type, name, enabled, configs: configsJson } = req.body;
+      const { type, name, enabled, configs } = req.body;
       let isFound = await FileServerManager.findByName(name);
       if (isFound) {
         return res.status(400).send('Name existed');
       }
-      const configs = JSON.parse(configsJson);
       const fileServer = await FileServerManager.createFileServer({
         type,
         name,

@@ -31,6 +31,7 @@ const handler = async (req: NextApiRequest, res: NextApiResponse) => {
       const { all } = req.query;
       const models = await ChatModelManager.findModels(!!all);
       const data = models.map((x) => {
+        const apiConfig = JSON.parse(x.apiConfig);
         return {
           rank: x.rank,
           modelId: x.id,
@@ -39,22 +40,18 @@ const handler = async (req: NextApiRequest, res: NextApiResponse) => {
           type: x.type,
           enabled: x.enabled,
           fileServerId: x.fileServerId,
-          fileConfig: JSON.stringify(x.fileConfig || {}, null, 2),
-          modelConfig: JSON.stringify(x.modelConfig || {}, null, 2),
-          apiConfig: JSON.stringify(
-            {
-              appId: addAsterisk(x.apiConfig?.appId),
-              apiKey: addAsterisk(x.apiConfig?.apiKey),
-              secret: addAsterisk(x.apiConfig?.secret),
-              version: x.apiConfig?.version,
-              host: x.apiConfig.host,
-              organization: x.apiConfig?.organization,
-              type: x.apiConfig?.type,
-            },
-            null,
-            2
-          ),
-          price: JSON.stringify(x.price || {}, null, 2),
+          fileConfig: x.fileConfig,
+          modelConfig: x.modelConfig,
+          apiConfig: JSON.stringify({
+            appId: addAsterisk(apiConfig?.appId),
+            apiKey: addAsterisk(apiConfig?.apiKey),
+            secret: addAsterisk(apiConfig?.secret),
+            version: apiConfig?.version,
+            host: apiConfig.host,
+            organization: apiConfig?.organization,
+            type: apiConfig?.type,
+          }),
+          priceConfig: x.priceConfig,
         };
       });
       return res.json(data);
@@ -64,10 +61,10 @@ const handler = async (req: NextApiRequest, res: NextApiResponse) => {
         name,
         enabled,
         fileServerId,
-        modelConfig: modelConfigJson,
+        fileConfig,
+        modelConfig,
         apiConfig: apiConfigJson,
-        fileConfig: fileConfigJson,
-        price: priceJSON,
+        priceConfig,
       } = req.body;
       const model = await ChatModelManager.findModelById(modelId);
       if (!model) {
@@ -75,11 +72,7 @@ const handler = async (req: NextApiRequest, res: NextApiResponse) => {
         return;
       }
 
-      let modelConfig = JSON.parse(modelConfigJson);
       let apiConfig = JSON.parse(apiConfigJson);
-      let fileConfig = JSON.parse(fileConfigJson);
-      let price = JSON.parse(priceJSON);
-
       apiConfig.appId = checkKey(model?.apiConfig.apiKey, apiConfig.appId);
       apiConfig.apiKey = checkKey(model?.apiConfig.apiKey, apiConfig.apiKey);
       apiConfig.secret = checkKey(model?.apiConfig.secret, apiConfig.secret);
@@ -88,11 +81,11 @@ const handler = async (req: NextApiRequest, res: NextApiResponse) => {
         modelId,
         name,
         enabled,
-        modelConfig,
-        apiConfig,
         fileServerId,
         fileConfig,
-        price
+        JSON.stringify(apiConfig),
+        modelConfig,
+        priceConfig
       );
       return res.json(data);
     } else if (req.method === 'POST') {
@@ -101,10 +94,10 @@ const handler = async (req: NextApiRequest, res: NextApiResponse) => {
         name,
         enabled,
         fileServerId,
-        price: priceJSON,
-        modelConfig: modelConfigJson,
-        apiConfig: apiConfigJson,
-        fileConfig: fileConfigJson,
+        priceConfig,
+        modelConfig,
+        apiConfig,
+        fileConfig,
       } = req.body;
 
       const model = await ChatModelManager.findModelByName(name);
@@ -120,21 +113,16 @@ const handler = async (req: NextApiRequest, res: NextApiResponse) => {
         return;
       }
 
-      let modelConfig = JSON.parse(modelConfigJson);
-      let apiConfig = JSON.parse(apiConfigJson);
-      let fileConfig = JSON.parse(fileConfigJson);
-      let price = JSON.parse(priceJSON);
-
       const data = await ChatModelManager.createModel(
         template.type,
         modelVersion,
         name,
         enabled,
-        price,
-        modelConfig,
-        apiConfig,
         fileServerId,
-        fileConfig
+        fileConfig,
+        apiConfig,
+        modelConfig,
+        priceConfig
       );
       return res.json(data);
     } else if (req.method === 'DELETE') {

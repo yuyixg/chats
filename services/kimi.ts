@@ -5,7 +5,6 @@ import {
   ReconnectInterval,
   createParser,
 } from 'eventsource-parser';
-import { ChatModels } from '@/db';
 
 export interface KimiSteamResult {
   text: string;
@@ -17,7 +16,7 @@ export interface KimiSteamResult {
 }
 
 export const KimiStream = async (
-  chatModel: ChatModels,
+  chatModel: any,
   prompt: string,
   temperature: number,
   messages: GPT4Message[] | GPT4VisionMessage[]

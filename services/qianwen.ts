@@ -17,7 +17,7 @@ export interface QianWenStreamResult {
 }
 
 export const QianWenStream = async (
-  chatModel: ChatModels,
+  chatModel: any,
   prompt: string,
   temperature: number,
   messages: QianWenMessage[]

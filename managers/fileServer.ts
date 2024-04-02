@@ -1,4 +1,4 @@
-import { FileServers } from '@/db';
+import prisma from '@/db/prisma';
 import {
   FileServerType,
   IFileConfig,
@@ -10,30 +10,33 @@ import fs from 'fs';
 
 export class FileServerManager {
   static async findById(id: string) {
-    return await FileServers.findByPk(id);
+    const fileServer = await prisma.fileServers.findUnique({ where: { id } });
+    return {
+      ...fileServer,
+      configs: JSON.parse(fileServer?.configs || '{}'),
+    };
   }
 
   static async findByName(name: string) {
-    return await FileServers.findOne({ where: { name } });
+    return await prisma.fileServers.findFirst({ where: { name } });
   }
 
   static async createFileServer(params: PostFileServerParams) {
-    return await FileServers.create(params);
+    return await prisma.fileServers.create({ data: { ...params } });
   }
 
   static async findFileServers(findAll: boolean = true) {
     const where = { enabled: true };
-    return await FileServers.findAll({
+    return await prisma.fileServers.findMany({
       where: findAll ? {} : where,
-      order: [['createdAt', 'DESC']],
+      orderBy: { createdAt: 'desc' },
     });
   }
 
   static async updateFileServer(params: PutFileServerParams) {
-    return await FileServers.update(params, {
-      where: {
-        id: params.id,
-      },
+    return await prisma.fileServers.update({
+      where: { id: params.id },
+      data: { ...params },
     });
   }
 

@@ -6,10 +6,9 @@ import {
   createParser,
 } from 'eventsource-parser';
 import { ModelVersions } from '@/types/model';
-import { ChatModels } from '@/db';
 
 export const OpenAIStream = async (
-  chatModel: ChatModels,
+  chatModel: any,
   prompt: string,
   temperature: number,
   messages: GPT4Message[] | GPT4VisionMessage[]

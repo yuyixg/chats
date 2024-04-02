@@ -113,7 +113,7 @@ export const EditModelModal = (props: IProps) => {
       ),
     },
     {
-      name: 'price',
+      name: 'priceConfig',
       label: t('Token Price'),
       render: (options: IFormFieldOption, field: FormFieldType) => (
         <FormTextarea options={options} field={field} />
@@ -136,12 +136,9 @@ export const EditModelModal = (props: IProps) => {
       .string()
       .min(1, `${t('This field is require')}`)
       .optional(),
-    fileServerId: z.union([z.string(), z.undefined()]),
-    fileConfig: z
-      .string()
-      .min(1, `${t('This field is require')}`)
-      .optional(),
-    price: z
+    fileServerId: z.string().nullable().default(null),
+    fileConfig: z.string().nullable().default(null),
+    priceConfig: z
       .string()
       .min(1, `${t('This field is require')}`)
       .optional(),
@@ -197,37 +194,37 @@ export const EditModelModal = (props: IProps) => {
       });
       form.reset();
       form.formState.isValid;
-      form.setValue('name', selected?.name);
-      form.setValue('modelId', selected?.modelId);
-      form.setValue('enabled', selected?.enabled);
-      form.setValue('fileServerId', selected?.fileServerId);
+      const {
+        name,
+        modelId,
+        modelVersion,
+        enabled,
+        fileServerId,
+        fileConfig,
+        apiConfig,
+        modelConfig,
+        priceConfig,
+      } = selected!;
+      form.setValue('name', name);
+      form.setValue('modelId', modelId);
+      form.setValue('enabled', enabled);
+      form.setValue('fileServerId', fileServerId || null);
+      fileConfig &&
+        form.setValue(
+          'fileConfig',
+          mergeConfigs(getModelFileConfig(modelVersion), JSON.parse(fileConfig))
+        );
       form.setValue(
         'apiConfig',
-        mergeConfigs(
-          getModelApiConfig(selected!.modelVersion),
-          JSON.parse(selected?.apiConfig || '{}')
-        )
+        mergeConfigs(getModelApiConfig(modelVersion), JSON.parse(apiConfig))
       );
       form.setValue(
         'modelConfig',
-        mergeConfigs(
-          getModelModelConfig(selected!.modelVersion),
-          JSON.parse(selected?.modelConfig || '{}')
-        )
+        mergeConfigs(getModelModelConfig(modelVersion), JSON.parse(modelConfig))
       );
       form.setValue(
-        'fileConfig',
-        mergeConfigs(
-          getModelFileConfig(selected!.modelVersion),
-          JSON.parse(selected?.fileConfig || '{}')
-        )
-      );
-      form.setValue(
-        'price',
-        mergeConfigs(
-          getModelPriceConfig(selected!.modelVersion),
-          JSON.parse(selected?.price || '{}')
-        )
+        'priceConfig',
+        mergeConfigs(getModelPriceConfig(modelVersion), JSON.parse(priceConfig))
       );
     }
   }, [isOpen]);

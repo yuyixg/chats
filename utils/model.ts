@@ -1,8 +1,7 @@
-import { UserModel } from '@/db/userModels';
 import { ChatModelConfig, ModelConfigType, ModelVersions } from '@/types/model';
 import { ModelDefaultTemplates } from '@/types/template';
 
-export function verifyModel(model: UserModel, config: ChatModelConfig) {
+export function verifyModel(model: any, config: ChatModelConfig) {
   const { maxLength = 0 } = config;
   const { tokens, counts, expires } = model;
   const result = {
@@ -52,7 +51,7 @@ export function getModelFileConfig(modelVersion: ModelVersions | undefined) {
 }
 
 export function getModelPriceConfig(modelVersion: ModelVersions | undefined) {
-  return getModelConfigs(modelVersion, 'price');
+  return getModelConfigs(modelVersion, 'priceConfig');
 }
 
 export function getModelApiConfigJson(modelVersion: ModelVersions | undefined) {
@@ -68,18 +67,19 @@ export function getModelModelConfigJson(
 export function getModelFileConfigJson(
   modelVersion: ModelVersions | undefined
 ) {
-  return JSON.stringify(getModelConfigs(modelVersion, 'fileConfig'), null, 2);
+  const config = getModelConfigs(modelVersion, 'fileConfig');
+  return config ? JSON.stringify(config, null, 2) : null;
 }
 
 export function getModelPriceConfigJson(
   modelVersion: ModelVersions | undefined
 ) {
-  return JSON.stringify(getModelConfigs(modelVersion, 'price'), null, 2);
+  return JSON.stringify(getModelConfigs(modelVersion, 'priceConfig'), null, 2);
 }
 
 export function mergeConfigs(obj1: any, obj2: any) {
   const config = Object.keys(obj1 || {}).reduce((result: any, key) => {
-    result[key] = obj2[key] || null;
+    result[key] = obj2[key] === '' ? null : obj2[key];
     return result;
   }, {});
   return JSON.stringify(config, null, 2);

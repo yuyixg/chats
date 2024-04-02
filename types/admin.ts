@@ -1,8 +1,7 @@
-import { UserModel } from '@/db/userModels';
 import { ModelVersions, ModelType } from './model';
 import { Paging } from './page';
 import { Message } from './chat';
-import { FileServerType, PutFileServerParams } from './file';
+import { PutFileServerParams } from './file';
 
 export const enum UserRole {
   'admin' = 'admin',
@@ -28,7 +27,7 @@ export interface UserModelResult {
 
 export interface PutUserModelParams {
   userModelId: string;
-  models: UserModel[];
+  models: any[];
 }
 
 export interface PostUserModelParams {
@@ -42,12 +41,12 @@ export interface GetModelResult {
   name: string;
   rank: number;
   type: ModelType;
-  enabled?: boolean;
-  apiConfig?: string;
+  enabled: boolean;
+  apiConfig: string;
   modelConfig: string;
-  fileServerId?: string;
-  fileConfig?: string;
-  price: string;
+  fileServerId: string;
+  fileConfig: string;
+  priceConfig: string;
 }
 
 export interface PutModelParams {
@@ -58,7 +57,7 @@ export interface PutModelParams {
   modelConfig: string;
   fileServerId?: string;
   fileConfig?: string;
-  price: string;
+  priceConfig: string;
 }
 
 export interface PostModelParams {

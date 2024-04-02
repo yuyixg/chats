@@ -3,6 +3,7 @@ import { ChatModelManager, UserModelManager } from '@/managers';
 import { UserRole } from '@/types/admin';
 import { getSession } from '@/utils/session';
 import { internalServerError, modelUnauthorized } from '@/utils/error';
+import { UserModel } from '@/db/userModels';
 export const config = {
   api: {
     bodyParser: {
@@ -27,17 +28,20 @@ const handler = async (req: NextApiRequest, res: NextApiResponse) => {
     if (req.method === 'GET') {
       const { query } = req.query as { query: string };
       const userModels = await UserModelManager.findUsersModel(query);
-      const models = await ChatModelManager.findModels(true);
+      const chatModels = await ChatModelManager.findModels(true);
       const data = userModels.map((x) => {
+        const models = JSON.parse(x.models || '[]') as UserModel[];
         return {
           userId: x.userId,
           userModelId: x.id,
-          role: x.User.role,
-          userName: x.User.username,
-          models: x.models
+          role: x.user.role,
+          userName: x.user.username,
+          models: models
             .filter((x) => x.enabled)
             .map((item) => {
-              const model = models.find((model) => model.id === item.modelId)!;
+              const model = chatModels.find(
+                (model) => model.id === item.modelId
+              )!;
               return {
                 modelVersion: model.modelVersion,
                 modelName: model.name,
@@ -61,12 +65,14 @@ const handler = async (req: NextApiRequest, res: NextApiResponse) => {
         return modelUnauthorized(res);
       }
       userModels.map((um) => {
-        const foundModel = um.models.find((m) => m.modelId === modelId);
+        const models = JSON.parse(um.models || '[]') as UserModel[];
+        const foundModel = models.find((m) => m.modelId === modelId);
         if (!foundModel) {
-          um.models.push({
+          models.push({
             modelId: modelId,
             enabled: true,
           });
+          um.models = JSON.stringify(models);
         }
         return um;
       });

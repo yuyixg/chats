@@ -37,7 +37,11 @@ export async function getSession(
 
   const session = await SessionsManager.findSession(sessionId);
 
-  return session
-    ? { userId: session.userId, username: session.username, role: session.role }
-    : null;
+  if (session) {
+    const {
+      user: { id, username, role },
+    } = session;
+    return { userId: id, username, role };
+  }
+  return null;
 }

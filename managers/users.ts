@@ -1,7 +1,5 @@
-import { Users } from '@/db';
 import prisma from '@/db/prisma';
 import bcrypt from 'bcryptjs';
-import { Op } from 'sequelize';
 
 export interface CreateUser {
   username: string;
@@ -17,15 +15,14 @@ export interface UpdateUser {
 }
 
 export class UsersManager {
-  static async findByUserId(userId: string) {
-    return await Users.findByPk(userId);
+  static async findByUserId(id: string) {
+    return await prisma.users.findUnique({ where: { id } });
   }
 
   static async findByUsername(username: string) {
-    const users = await Users.findOne({
-      where: { username: username?.toLowerCase() },
+    return await prisma.users.findFirst({
+      where: { username: username.toLowerCase() },
     });
-    return users;
   }
 
   static async singIn(username: string, password: string) {
@@ -42,34 +39,36 @@ export class UsersManager {
   static async createUser(params: CreateUser) {
     const { username, password, role } = params;
     let hashPassword = await bcrypt.hashSync(password);
-    return await Users.create({
-      username,
-      password: hashPassword,
-      role,
+    return prisma.users.create({
+      data: {
+        username,
+        password: hashPassword,
+        role,
+      },
     });
   }
 
   static async findUsers(query: string) {
-    return await Users.findAll({
-      where: { username: { [Op.like]: `%${query}%` } },
-      order: [['createdAt', 'DESC']],
+    return await prisma.users.findMany({
+      where: {
+        username: {
+          contains: query,
+        },
+      },
+      orderBy: {
+        createdAt: 'desc',
+      },
     });
   }
 
   static async updateUserPassword(id: string, password: string) {
-    return await Users.update(
-      { password },
-      {
-        where: { id },
-      }
-    );
+    return await prisma.users.update({ where: { id }, data: { password } });
   }
 
   static async updateUser(params: UpdateUser) {
-    return await Users.update(params, {
-      where: {
-        id: params.id,
-      },
+    return await prisma.users.update({
+      where: { id: params.id },
+      data: { ...params },
     });
   }
 }

@@ -6,7 +6,6 @@ import {
   createParser,
 } from 'eventsource-parser';
 import { ModelVersions } from '@/types/model';
-import { ChatModels } from '@/db';
 
 export interface LingYiSteamResult {
   text: string;
@@ -18,7 +17,7 @@ export interface LingYiSteamResult {
 }
 
 export const LingYiStream = async (
-  chatModel: ChatModels,
+  chatModel: any,
   prompt: string,
   temperature: number,
   messages: GPT4Message[] | GPT4VisionMessage[]

@@ -2,7 +2,7 @@ import { ReactElement } from 'react';
 import { ControllerRenderProps } from 'react-hook-form';
 
 export interface IFormFieldOption {
-  defaultValue?: string | boolean | undefined;
+  defaultValue?: string | boolean | undefined | null;
   name: string;
   label: string;
   placeholder?: string;

@@ -60,7 +60,7 @@ export const ModelDefaultTemplates = {
         "You are ChatGPT, a large language model trained by OpenAI. Follow the user's instructions carefully. Respond using markdown.",
     },
     fileConfig: null,
-    price: {
+    priceConfig: {
       input: 0.00001085,
       out: 0.00001446,
     },
@@ -72,7 +72,7 @@ export const ModelDefaultTemplates = {
       prompt:
         "You are ChatGPT, a large language model trained by OpenAI. Follow the user's instructions carefully. Respond using markdown.",
     },
-    price: {
+    priceConfig: {
       input: 0.00021691,
       out: 0.00043381,
     },
@@ -85,7 +85,7 @@ export const ModelDefaultTemplates = {
         "You are ChatGPT, a large language model trained by OpenAI. Follow the user's instructions carefully. Respond using markdown.",
     },
     fileConfig: { count: 5, maxSize: 10240 },
-    price: {
+    priceConfig: {
       input: 0.0000723,
       out: 0.00021691,
     },
@@ -101,7 +101,7 @@ export const ModelDefaultTemplates = {
         "You are an AI assistant with image understanding capabilities, Follow the user's instructions carefully. Respond using markdown.",
     },
     fileConfig: { count: 5, maxSize: 10240 },
-    price: {
+    priceConfig: {
       input: 0,
       out: 0,
     },
@@ -113,7 +113,7 @@ export const ModelDefaultTemplates = {
       prompt:
         "You are an AI assistant, Follow the user's instructions carefully. Respond using markdown.",
     },
-    price: {
+    priceConfig: {
       input: 0.000024,
       out: 0.000048,
     },
@@ -125,7 +125,7 @@ export const ModelDefaultTemplates = {
       prompt:
         "You are an AI assistant, Follow the user's instructions carefully. Respond using markdown.",
     },
-    price: {
+    priceConfig: {
       input: 0.000024,
       out: 0.000048,
     },
@@ -137,7 +137,7 @@ export const ModelDefaultTemplates = {
       prompt:
         "You are an AI assistant, Follow the user's instructions carefully. Respond using markdown.",
     },
-    price: {
+    priceConfig: {
       input: 0.0000025,
       out: 0.0000025,
     },
@@ -149,7 +149,7 @@ export const ModelDefaultTemplates = {
       prompt:
         "You are an AI assistant, Follow the user's instructions carefully. Respond using markdown.",
     },
-    price: {
+    priceConfig: {
       input: 0.000012,
       out: 0.000012,
     },
@@ -162,7 +162,7 @@ export const ModelDefaultTemplates = {
         "You are an AI assistant with image understanding capabilities, Follow the user's instructions carefully. Respond using markdown.",
     },
     fileConfig: {},
-    price: {
+    priceConfig: {
       input: 0.000006,
       out: 0.000006,
     },
@@ -174,7 +174,7 @@ export const ModelDefaultTemplates = {
       prompt:
         "You are an AI assistant, Follow the user's instructions carefully. Respond using markdown.",
     },
-    price: {
+    priceConfig: {
       input: 0.000012,
       out: 0.000012,
     },
@@ -186,7 +186,7 @@ export const ModelDefaultTemplates = {
       prompt:
         "You are an AI assistant, Follow the user's instructions carefully. Respond using markdown.",
     },
-    price: {
+    priceConfig: {
       input: 0.000024,
       out: 0.000024,
     },
@@ -198,7 +198,7 @@ export const ModelDefaultTemplates = {
       prompt:
         "You are an AI assistant, Follow the user's instructions carefully. Respond using markdown.",
     },
-    price: {
+    priceConfig: {
       input: 0.00006,
       out: 0.00006,
     },

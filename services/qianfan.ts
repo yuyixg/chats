@@ -43,7 +43,7 @@ async function getAccessTokenAsync(
 }
 
 export const QianFanStream = async (
-  chatModel: ChatModels,
+  chatModel: any,
   messages: QianFanMessage[],
   parameters: any
 ) => {
@@ -66,7 +66,7 @@ export const QianFanStream = async (
       ...parameters,
     }),
   };
-  
+
   const res = await fetch(url, body);
   const decoder = new TextDecoder();
   if (res.status !== 200) {

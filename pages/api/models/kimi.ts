@@ -39,20 +39,21 @@ const handler = async (req: NextApiRequest, res: NextApiResponse) => {
     if (!chatModel?.enabled) {
       return modelUnauthorized(res);
     }
+    const { modelConfig, priceConfig } = chatModel;
 
     const userModel = await UserModelManager.findUserModel(userId, model.id);
     if (!userModel || !userModel.enabled) {
       return modelUnauthorized(res);
     }
 
-    const verifyMessage = verifyModel(userModel, chatModel.modelConfig);
+    const verifyMessage = verifyModel(userModel, modelConfig);
     if (verifyMessage) {
       return badRequest(res, verifyMessage);
     }
 
     let promptToSend = prompt;
     if (!promptToSend) {
-      promptToSend = chatModel.modelConfig.prompt;
+      promptToSend = modelConfig.prompt;
     }
 
     let temperatureToUse = temperature;
@@ -91,7 +92,7 @@ const handler = async (req: NextApiRequest, res: NextApiResponse) => {
               result.usage;
             const tokenCount = total_tokens;
             const totalPrice = calcTokenPrice(
-              chatModel.price,
+              priceConfig,
               prompt_tokens,
               completion_tokens
             );
@@ -107,8 +108,7 @@ const handler = async (req: NextApiRequest, res: NextApiResponse) => {
               tokenCount,
               totalPrice,
               '',
-              chatModel,
-              userModel
+              chatModel.id!
             );
             res.end();
             break;

@@ -38,11 +38,11 @@ const handler = async (req: NextApiRequest, res: NextApiResponse) => {
       const rows = messages.rows.map((x) => {
         return {
           messageId: x.id,
-          username: x.User.username,
+          username: x.user.username,
           chatCount: x.chatCount,
           tokenCount: x.tokenCount,
           name: x.name,
-          modelName: x.ChatModel.name,
+          modelName: x.chatModel.name,
           totalPrice: x.totalPrice,
           createdAt: x.createdAt,
           updatedAt: x.updatedAt,
@@ -75,7 +75,7 @@ const handler = async (req: NextApiRequest, res: NextApiResponse) => {
       });
       await UserModelManager.createUserModel({
         userId: user.id!,
-        models: [],
+        models: '[]',
       });
       return res.json(user);
     }

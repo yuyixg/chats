@@ -41,12 +41,14 @@ export default async function handler(
       return modelUnauthorized(res);
     }
 
+    const { modelConfig, priceConfig } = chatModel;
+
     const userModel = await UserModelManager.findUserModel(userId, model.id);
     if (!userModel || !userModel.enabled) {
       return modelUnauthorized(res);
     }
 
-    const verifyMessage = verifyModel(userModel, chatModel.modelConfig);
+    const verifyMessage = verifyModel(userModel, modelConfig);
     if (verifyMessage) {
       return badRequest(res, verifyMessage);
     }
@@ -83,7 +85,7 @@ export default async function handler(
               result.usage;
             const tokenCount = total_tokens;
             const totalPrice = calcTokenPrice(
-              chatModel.price,
+              priceConfig,
               prompt_tokens,
               completion_tokens
             );
@@ -99,8 +101,7 @@ export default async function handler(
               tokenCount,
               totalPrice,
               '',
-              chatModel,
-              userModel
+              chatModel.id!
             );
             res.end();
             break;

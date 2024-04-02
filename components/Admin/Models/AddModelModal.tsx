@@ -101,7 +101,7 @@ export const AddModelModal = (props: IProps) => {
     {
       name: 'fileServerId',
       label: t('File Server Type'),
-      defaultValue: '',
+      defaultValue: null,
       render: (options: IFormFieldOption, field: FormFieldType) => (
         <FormSelect
           hidden={
@@ -119,7 +119,7 @@ export const AddModelModal = (props: IProps) => {
     {
       name: 'fileConfig',
       label: t('File Configs'),
-      defaultValue: '',
+      defaultValue: null,
       render: (options: IFormFieldOption, field: FormFieldType) => (
         <FormTextarea
           hidden={
@@ -131,7 +131,7 @@ export const AddModelModal = (props: IProps) => {
       ),
     },
     {
-      name: 'price',
+      name: 'priceConfig',
       label: t('Token Price'),
       defaultValue: '',
       render: (options: IFormFieldOption, field: FormFieldType) => (
@@ -158,12 +158,9 @@ export const AddModelModal = (props: IProps) => {
       .string()
       .min(1, `${t('This field is require')}`)
       .optional(),
-    fileServerId: z.string(),
-    fileConfig: z
-      .string()
-      .min(1, `${t('This field is require')}`)
-      .optional(),
-    price: z
+    fileServerId: z.string().nullable().default(null),
+    fileConfig: z.string().nullable().default(null),
+    priceConfig: z
       .string()
       .min(1, `${t('This field is require')}`)
       .optional(),
@@ -210,7 +207,7 @@ export const AddModelModal = (props: IProps) => {
         form.setValue('apiConfig', getModelApiConfigJson(modelVersion));
         form.setValue('modelConfig', getModelModelConfigJson(modelVersion));
         form.setValue('fileConfig', getModelFileConfigJson(modelVersion));
-        form.setValue('price', getModelPriceConfigJson(modelVersion));
+        form.setValue('priceConfig', getModelPriceConfigJson(modelVersion));
       }
     });
     return () => subscription.unsubscribe();

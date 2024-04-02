@@ -54,7 +54,7 @@ const handler = async (req: NextApiRequest, res: NextApiResponse) => {
       });
       await UserModelManager.createUserModel({
         userId: user.id!,
-        models: [],
+        models: '[]',
       });
       return res.json(user);
     }

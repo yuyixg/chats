@@ -7,8 +7,7 @@
     "build": "next build",
     "start": "next start",
     "lint": "next lint",
-    "init": "ts-node -O \"{\\\"module\\\":\\\"commonjs\\\"}\" ./db/sync.ts",
-    "db:sqlite": "set DB_DIALECT=sqlite && npm run init",
+    "db:init": "ts-node -O \"{\\\"module\\\":\\\"commonjs\\\"}\" db/init.ts",
     "db:pg": "export $(cat .env.local | xargs) && env && npm run init",
     "db-win:pg": "set DB_DIALECT=postgres && (for /F \"tokens=*\" %i in (.env.local) do set %i) && npm run init"
   },

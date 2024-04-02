@@ -19,7 +19,7 @@ export interface PostFileServerParams {
   type: FileServerType;
   name: string;
   enabled: boolean;
-  configs: IFileConfig;
+  configs: string;
 }
 
 export interface PutFileServerParams extends PostFileServerParams {

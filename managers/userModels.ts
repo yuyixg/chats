@@ -1,83 +1,55 @@
-import { UserModels, Users } from '@/db';
+import prisma from '@/db/prisma';
 import { UserModel } from '@/db/userModels';
-import { Op } from 'sequelize';
-
-interface UserModelsWithRelations extends UserModels {
-  User: Users;
-}
 
 export interface CreateUserModel {
   userId: string;
-  models: UserModel[];
+  models: string;
 }
 
 export class UserModelManager {
-  static async findEnableModels(userId: string) {
-    const userModels = await UserModels.findOne({
-      where: {
-        userId,
-      },
+  static async findUserEnableModels(userId: string) {
+    const userModel = await prisma.userModels.findFirst({
+      where: { userId },
     });
-    return (
-      userModels?.models.filter((x) => x.enabled).map((x) => x.modelId) || []
-    );
+    const models = JSON.parse(userModel?.models || '[]') as UserModel[];
+    return models.filter((x) => x.enabled).map((x) => x.modelId) || [];
   }
 
   static async createUserModel(params: CreateUserModel) {
-    return await UserModels.create(params);
+    return await prisma.userModels.create({ data: { ...params } });
   }
 
   static async findUserModel(userId: string, modelId: string) {
-    const data = await UserModels.findOne({
-      where: {
-        userId,
-      },
-    });
-    const model = data?.models.find((x) => x.enabled && x.modelId === modelId);
-    return model ? { ...model, id: data?.id } : null;
+    const userModel = await prisma.userModels.findFirst({ where: { userId } });
+    const models = JSON.parse(userModel?.models || '[]') as UserModel[];
+    const model = models.find((x) => x.enabled && x.modelId === modelId);
+    return model ? { ...model, id: userModel?.id } : null;
   }
 
   static async findUserModelByIds(ids: string[]) {
-    return await UserModels.findAll({
-      where: {
-        id: ids,
-      },
-    });
+    return await prisma.userModels.findMany({ where: { id: { in: ids } } });
   }
 
   static async findUsersModel(query: string) {
-    const data = await UserModels.findAll({
-      attributes: ['id', 'userId', 'models'],
-      include: [
-        {
-          attributes: ['username', 'role'],
-          model: Users,
-          where: {
-            [Op.or]: [
-              {
-                username: { [Op.like]: `%${query}%` },
-              },
-              {
-                role: { [Op.like]: `%${query}%` },
-              },
-            ],
+    return await prisma.userModels.findMany({
+      include: { user: { select: { username: true, role: true } } },
+      where: {
+        OR: [
+          {
+            user: { username: { contains: query } },
           },
-        },
-      ],
-      order: [['createdAt', 'DESC']],
+          { user: { role: { contains: query } } },
+        ],
+      },
+      orderBy: { createdAt: 'desc' },
     });
-    return data as UserModelsWithRelations[];
   }
 
-  static async updateUserModel(id: string, models: UserModel[]) {
-    return await UserModels.update(
-      { models },
-      {
-        where: {
-          id,
-        },
-      }
-    );
+  static async updateUserModel(id: string, models: string) {
+    return await prisma.userModels.update({
+      where: { id },
+      data: { models },
+    });
   }
 
   static async updateUserModelTokenCount(
@@ -85,8 +57,9 @@ export class UserModelManager {
     modelId: string,
     token: number
   ) {
-    const userModel = await UserModels.findByPk(id);
-    const models = userModel?.models.map((m) => {
+    const userModel = await prisma.userModels.findUnique({ where: { id } });
+    let models = JSON.parse(userModel?.models || '[]') as UserModel[];
+    models = models.map((m) => {
       if (m.modelId === modelId) {
         if (m.tokens && m.tokens !== null) {
           m.tokens -= token;
@@ -98,13 +71,13 @@ export class UserModelManager {
       return m;
     });
 
-    return await UserModels.update(
-      { models },
-      {
-        where: {
-          id,
-        },
-      }
-    );
+    return await prisma.userModels.update({
+      where: {
+        id,
+      },
+      data: {
+        models: JSON.stringify(models),
+      },
+    });
   }
 }

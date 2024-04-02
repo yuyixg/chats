@@ -22,11 +22,7 @@ export default async function handler(
       const { username, password } = req.body;
       const user = await UsersManager.singIn(username, password);
       if (user) {
-        const session = await SessionsManager.generateSession({
-          userId: user.id!,
-          username: user.username,
-          role: user.role,
-        });
+        const session = await SessionsManager.generateSession(user.id!);
         return res.json({
           sessionId: session.id,
           username: user.username,

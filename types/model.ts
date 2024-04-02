@@ -57,4 +57,4 @@ export interface ChatModelPrice {
   out: number;
 }
 
-export type ModelConfigType = 'fileConfig' | 'apiConfig' | 'modelConfig' | 'price';
+export type ModelConfigType = 'fileConfig' | 'apiConfig' | 'modelConfig' | 'priceConfig';

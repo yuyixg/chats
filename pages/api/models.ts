@@ -21,7 +21,7 @@ const handler = async (req: NextApiRequest, res: NextApiResponse) => {
     if (!session) {
       return unauthorized(res);
     }
-    const userModels = await UserModelManager.findEnableModels(session.userId!);
+    const userModels = await UserModelManager.findUserEnableModels(session.userId!);
     const models = await ChatModelManager.findModels();
     const fileServers = await FileServerManager.findFileServers(false);
     const _models = models
@@ -33,9 +33,9 @@ const handler = async (req: NextApiRequest, res: NextApiResponse) => {
           modelVersion: x.modelVersion,
           name: x.name,
           type: x.type,
-          systemPrompt: x.modelConfig?.prompt,
-          maxLength: x.modelConfig?.maxLength,
-          tokenLimit: x.modelConfig?.tokenLimit,
+          // systemPrompt: x.modelConfig?.prompt,
+          // maxLength: x.modelConfig?.maxLength,
+          // tokenLimit: x.modelConfig?.tokenLimit,
           fileConfig: x.fileConfig,
           fileServerConfig: fileServer
             ? {
