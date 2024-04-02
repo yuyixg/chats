@@ -12,6 +12,7 @@ import { ModelVersions } from '@/types/model';
 import {
   ChatMessageManager,
   ChatModelManager,
+  UserBalancesManager,
   UserModelManager,
 } from '@/managers';
 import { getSession } from '@/utils/session';
@@ -150,6 +151,7 @@ const handler = async (req: NextApiRequest, res: NextApiResponse) => {
               promptToSend,
               chatModel.id!
             );
+            await UserBalancesManager.updateBalance(userId, totalPrice);
             res.end();
             break;
           }

@@ -85,6 +85,9 @@ export interface GetUsersResult {
   id: string;
   username: string;
   role: string;
+  email: string;
+  phone: string;
+  balance: Decimal;
   createdAt: string;
   updatedAt: string;
   enabled: boolean;

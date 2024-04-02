@@ -79,6 +79,8 @@ export default function Users() {
             <TableRow>
               <TableHead>{t('User Name')}</TableHead>
               <TableHead>{t('Role')}</TableHead>
+              <TableHead>{t('Balance')}</TableHead>
+              <TableHead>{t('Created Time')}</TableHead>
             </TableRow>
           </TableHeader>
           <TableBody isLoading={loading}>
@@ -92,6 +94,10 @@ export default function Users() {
               >
                 <TableCell>{item.username}</TableCell>
                 <TableCell>{item.role}</TableCell>
+                <TableCell>{(+item.balance).toFixed(2)}</TableCell>
+                <TableCell>
+                  {new Date(item.createdAt).toLocaleString()}
+                </TableCell>
               </TableRow>
             ))}
           </TableBody>
@@ -110,7 +116,10 @@ export default function Users() {
 export const getServerSideProps = async ({ locale }: { locale: string }) => {
   return {
     props: {
-      ...(await serverSideTranslations(locale ?? DEFAULT_LANGUAGE, ['common', 'admin'])),
+      ...(await serverSideTranslations(locale ?? DEFAULT_LANGUAGE, [
+        'common',
+        'admin',
+      ])),
     },
   };
 };

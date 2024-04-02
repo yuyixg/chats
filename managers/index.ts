@@ -4,6 +4,7 @@ import { UsersManager } from './users';
 import { UserModelManager } from './userModels';
 import { SessionsManager } from './sessions';
 import { FileServerManager } from './fileServer';
+import { UserBalancesManager } from './userBalances';
 
 export {
   ChatModelManager,
@@ -12,4 +13,5 @@ export {
   UserModelManager,
   SessionsManager,
   FileServerManager,
+  UserBalancesManager,
 };

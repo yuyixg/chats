@@ -50,6 +50,7 @@ export class UsersManager {
 
   static async findUsers(query: string) {
     return await prisma.users.findMany({
+      include: { userBalances: { select: { balance: true } } },
       where: {
         username: {
           contains: query,

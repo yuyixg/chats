@@ -4,6 +4,7 @@ import { ChatBody, GPT4Message, GPT4VisionMessage } from '@/types/chat';
 import {
   ChatMessageManager,
   ChatModelManager,
+  UserBalancesManager,
   UserModelManager,
 } from '@/managers';
 import { getSession } from '@/utils/session';
@@ -110,6 +111,7 @@ const handler = async (req: NextApiRequest, res: NextApiResponse) => {
               '',
               chatModel.id!
             );
+            await UserBalancesManager.updateBalance(userId, totalPrice);
             res.end();
             break;
           }

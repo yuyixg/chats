@@ -4,6 +4,7 @@ import { QianFanStream, QianFanSteamResult } from '@/services/qianfan';
 import {
   ChatMessageManager,
   ChatModelManager,
+  UserBalancesManager,
   UserModelManager,
 } from '@/managers';
 import { getSession } from '@/utils/session';
@@ -103,6 +104,7 @@ export default async function handler(
               '',
               chatModel.id!
             );
+            await UserBalancesManager.updateBalance(userId, totalPrice);
             res.end();
             break;
           }

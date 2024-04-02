@@ -26,7 +26,20 @@ const handler = async (req: NextApiRequest, res: NextApiResponse) => {
   try {
     if (req.method === 'GET') {
       const { query } = req.query;
-      const data = await UsersManager.findUsers(query as string);
+      const users = await UsersManager.findUsers(query as string);
+      const data = users.map((x) => {
+        return {
+          id: x.id,
+          username: x.username,
+          role: x.role,
+          balance: x.userBalances?.balance,
+          avatar: x.avatar,
+          phone: x.phone,
+          email: x.email,
+          enabled: x.enabled,
+          createdAt: x.createdAt,
+        };
+      });
       return res.json(data);
     } else if (req.method === 'PUT') {
       const { id, username, password, role } = req.body;
