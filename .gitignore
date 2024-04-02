@@ -37,5 +37,5 @@ next-env.d.ts
 # file
 public/files
 
-# database
-database
+# prisma
+prisma/chats.db
