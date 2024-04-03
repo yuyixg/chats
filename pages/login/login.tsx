@@ -19,6 +19,7 @@ import { Button } from '@/components/ui/button';
 import FormCheckbox from '@/components/ui/form/checkbox';
 import { clearConversations } from '@/utils/conversation';
 import { DEFAULT_LANGUAGE } from '@/types/settings';
+import Image from 'next/image';
 
 export default function LoginPage() {
   const { t } = useTranslation('login');
@@ -105,55 +106,120 @@ export default function LoginPage() {
 
   return (
     <>
-      {isClient ? (
-        <>
-          <div className='flex w-full justify-center'>
-            <div className='relative p-4 mt-32 w-full max-w-md max-h-full'>
-              <div className='relative bg-white rounded-lg shadow dark:bg-gray-700'>
-                <div className='flex items-center justify-between p-4 md:p-5 border-b rounded-t dark:border-gray-600'>
-                  <h3 className='text-xl font-semibold text-gray-900 dark:text-white'>
-                    {t('Sign in to Chats')}
-                  </h3>
-                </div>
-                <div className='p-4 md:p-5'>
-                  <Form {...form}>
-                    <form onSubmit={form.handleSubmit(onSubmit)}>
-                      {formFields.map((item) => (
-                        <FormField
-                          key={item.name}
-                          control={form.control}
-                          name={item.name as never}
-                          render={({ field }) => item.render(item, field)}
-                        />
-                      ))}
-                      <div className='w-full flex justify-center'>
-                        <Button
-                          className='w-52'
-                          disabled={loginLoading}
-                          type='submit'
-                        >
-                          {loginLoading
-                            ? t('Logging in...')
-                            : t('Login to your account')}
-                        </Button>
-                      </div>
-                    </form>
-                  </Form>
-                </div>
-              </div>
+      {isClient && (
+        <div className='container relative h-screen flex-col items-center justify-center md:grid lg:max-w-none lg:grid-cols-2 lg:px-0'>
+          <div className='relative hidden h-full flex-col bg-muted p-10 text-white lg:flex dark:border-r'>
+            <div className='absolute inset-0 bg-zinc-900' />
+            <div className='relative z-20 flex items-center text-lg font-medium'>
+              <Image
+                src='/chats.png'
+                width={32}
+                height={32}
+                className='mr-2 h-8 w-8'
+                alt='logo'
+              />
+              Chats
+            </div>
+            <div className='relative z-20 mt-auto'>
+              <blockquote className='space-y-2'>
+                {/* <p className='text-lg'>
+                  &ldquo;This library has saved me countless hours of work and
+                  helped me deliver stunning designs to my clients faster than
+                  ever before.&rdquo;
+                </p>
+                <footer className='text-sm'>Sofia Davis</footer> */}
+              </blockquote>
             </div>
           </div>
-          <footer className='bg-white dark:bg-gray-900'>
-            <div className='w-full mx-auto fixed bottom-1'>
-              <hr className='border-gray-200 dark:border-gray-700' />
-              <span className='block text-sm text-gray-500 text-center py-4 dark:text-gray-400'>
+          <div className='lg:p-8'>
+            <div className='mx-auto flex w-full flex-col justify-center space-y-6 sm:w-[350px] mt-12 md:mt-0 lg:mt-0'>
+              <div className='flex flex-col space-y-2 text-center'>
+                <h1 className='text-2xl font-semibold tracking-tight'>
+                  {t('Sign in to Chats')}
+                </h1>
+                <p className='text-sm text-muted-foreground'>
+                  {t(
+                    'Enter your username and password below to complete the login'
+                  )}
+                </p>
+              </div>
+              <>
+                <div className='flex w-full justify-center'>
+                  <div className='relative w-full max-w-md max-h-full'>
+                    <div className='relative'>
+                      <Form {...form}>
+                        <form onSubmit={form.handleSubmit(onSubmit)}>
+                          {formFields.map((item) => (
+                            <FormField
+                              key={item.name}
+                              control={form.control}
+                              name={item.name as never}
+                              render={({ field }) => item.render(item, field)}
+                            />
+                          ))}
+                          <div className='w-full flex justify-center'>
+                            <Button
+                              className='w-full'
+                              disabled={loginLoading}
+                              type='submit'
+                            >
+                              {loginLoading
+                                ? t('Logging in...')
+                                : t('Login to your account')}
+                            </Button>
+                          </div>
+                        </form>
+                      </Form>
+                      <div className='relative'>
+                        <div className='absolute inset-0 flex items-center'>
+                          <span className='w-full border-t' />
+                        </div>
+                        <div className='relative flex justify-center text-xs uppercase'>
+                          <span className='bg-background p-4 text-muted-foreground'>
+                            {t('Or continue with')}
+                          </span>
+                        </div>
+                      </div>
+                      <form
+                        action='http://localhost:3000/api/auth/signin/keycloak'
+                        method='POST'
+                      >
+                        <input
+                          type='hidden'
+                          name='csrfToken'
+                          value='a5c1f563718b2d7e188c75fbd2e9ae54290c0b153b949476f9978167c3141a02'
+                        />
+                        <input
+                          type='hidden'
+                          name='callbackUrl'
+                          value='http://localhost:3000'
+                        />
+                        <Button
+                          disabled={loginLoading}
+                          className='w-full'
+                          variant='outline'
+                          type='submit'
+                        >
+                          <Image
+                            src='keyCloak.svg'
+                            alt='KeyCloak'
+                            width={0}
+                            height={0}
+                            className='mr-2 h-5 w-5 rounded dark:bg-white'
+                          />
+                          KeyCloak
+                        </Button>
+                      </form>
+                    </div>
+                  </div>
+                </div>
+              </>
+              <p className='px-8 text-center text-sm text-muted-foreground'>
                 © 2023 Chats™ . All Rights Reserved.
-              </span>
+              </p>
             </div>
-          </footer>
-        </>
-      ) : (
-        <div></div>
+          </div>
+        </div>
       )}
     </>
   );

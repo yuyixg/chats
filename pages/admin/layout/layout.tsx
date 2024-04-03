@@ -94,7 +94,7 @@ const AdminLayout = ({
             >
               <img
                 className='h-8 me-3 rounded-sm'
-                alt='chats Logo'
+                alt='Chats Logo'
                 src='/chats.png'
               />
               <span className='self-center text-md font-medium whitespace-nowrap'>
