@@ -13,6 +13,7 @@ import {
   PutModelParams,
   PutUserModelParams,
   PutUserParams,
+  PutUserBalanceParams,
 } from '@/types/admin';
 import { PostFileServerParams, PutFileServerParams } from '@/types/file';
 import { PageResult } from '@/types/page';
@@ -77,6 +78,13 @@ export const postUser = (params: PostUserParams) => {
 export const putUser = (params: PutUserParams) => {
   const fetchService = useFetch();
   return fetchService.put('/api/admin/users', {
+    body: params,
+  });
+};
+
+export const putUserBalance = (params: PutUserBalanceParams) => {
+  const fetchService = useFetch();
+  return fetchService.put('/api/admin/user-balances', {
     body: params,
   });
 };

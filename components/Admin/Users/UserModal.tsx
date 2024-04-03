@@ -24,7 +24,6 @@ interface IProps {
   isOpen: boolean;
   onClose: () => void;
   onSuccessful: () => void;
-  saveLoading?: boolean;
 }
 
 const ROLES = [

@@ -1,7 +1,7 @@
 import React, { useEffect, useState } from 'react';
 import { getUsers } from '@/apis/adminService';
 import { GetUsersResult } from '@/types/admin';
-import { IconPlus } from '@tabler/icons-react';
+import { IconDots, IconPlus } from '@tabler/icons-react';
 import { serverSideTranslations } from 'next-i18next/serverSideTranslations';
 import { useTranslation } from 'next-i18next';
 import { useThrottle } from '@/hooks/useThrottle';
@@ -18,10 +18,22 @@ import {
 import { Button } from '@/components/ui/button';
 import { Input } from '@/components/ui/input';
 import { DEFAULT_LANGUAGE } from '@/types/settings';
+import {
+  DropdownMenu,
+  DropdownMenuContent,
+  DropdownMenuItem,
+  DropdownMenuSeparator,
+  DropdownMenuTrigger,
+} from '@/components/ui/dropdown-menu';
+import { EditUserBalanceModal } from '@/components/Admin/Users/EditUserBalanceModel';
 
 export default function Users() {
   const { t } = useTranslation('admin');
-  const [isOpenModal, setIsOpenModal] = useState(false);
+  const [isOpenModal, setIsOpenModal] = useState({
+    edit: false,
+    create: false,
+    recharge: false,
+  });
   const [selectedUser, setSelectedUser] = useState<GetUsersResult | null>(null);
   const [users, setUsers] = useState<GetUsersResult[]>([]);
   const [loading, setLoading] = useState(true);
@@ -35,23 +47,27 @@ export default function Users() {
   const init = () => {
     getUsers(query).then((data) => {
       setUsers(data);
-      setIsOpenModal(false);
-      setSelectedUser(null);
+      handleClose();
       setLoading(false);
     });
   };
 
   const handleShowAddModal = () => {
-    setIsOpenModal(true);
+    setIsOpenModal({ edit: false, create: true, recharge: false });
   };
 
   const handleShowEditModal = (user: GetUsersResult) => {
     setSelectedUser(user);
-    setIsOpenModal(true);
+    setIsOpenModal({ edit: true, create: false, recharge: false });
+  };
+
+  const handleShowReChargeModal = (user: GetUsersResult) => {
+    setSelectedUser(user);
+    setIsOpenModal({ edit: false, create: false, recharge: true });
   };
 
   const handleClose = () => {
-    setIsOpenModal(false);
+    setIsOpenModal({ edit: false, create: false, recharge: false });
     setSelectedUser(null);
   };
 
@@ -79,24 +95,47 @@ export default function Users() {
             <TableRow>
               <TableHead>{t('User Name')}</TableHead>
               <TableHead>{t('Role')}</TableHead>
-              <TableHead>{t('Balance')}</TableHead>
+              <TableHead>
+                {t('Balance')}({t('Unit')})
+              </TableHead>
               <TableHead>{t('Created Time')}</TableHead>
+              <TableHead className='w-16'></TableHead>
             </TableRow>
           </TableHeader>
           <TableBody isLoading={loading}>
             {users.map((item) => (
-              <TableRow
-                className='cursor-pointer'
-                key={item.id}
-                onClick={() => {
-                  handleShowEditModal(item);
-                }}
-              >
+              <TableRow className='cursor-pointer' key={item.id}>
                 <TableCell>{item.username}</TableCell>
                 <TableCell>{item.role}</TableCell>
                 <TableCell>{(+item.balance).toFixed(2)}</TableCell>
                 <TableCell>
                   {new Date(item.createdAt).toLocaleString()}
+                </TableCell>
+                <TableCell>
+                  <DropdownMenu>
+                    <DropdownMenuTrigger>
+                      <Button variant='ghost'>
+                        <IconDots size={16} />
+                      </Button>
+                    </DropdownMenuTrigger>
+                    <DropdownMenuContent>
+                      <DropdownMenuItem
+                        onClick={() => {
+                          handleShowEditModal(item);
+                        }}
+                      >
+                        编辑
+                      </DropdownMenuItem>
+                      <DropdownMenuSeparator />
+                      <DropdownMenuItem
+                        onClick={() => {
+                          handleShowReChargeModal(item);
+                        }}
+                      >
+                        充值
+                      </DropdownMenuItem>
+                    </DropdownMenuContent>
+                  </DropdownMenu>
                 </TableCell>
               </TableRow>
             ))}
@@ -107,8 +146,14 @@ export default function Users() {
         user={selectedUser}
         onSuccessful={init}
         onClose={handleClose}
-        isOpen={isOpenModal}
-      ></UserModal>
+        isOpen={isOpenModal.create || isOpenModal.edit}
+      />
+      <EditUserBalanceModal
+        onSuccessful={init}
+        onClose={handleClose}
+        user={selectedUser}
+        isOpen={isOpenModal.recharge}
+      />
     </>
   );
 }

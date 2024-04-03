@@ -81,6 +81,11 @@ export interface PutUserParams extends PostUserParams {
   id: string;
 }
 
+export interface PutUserBalanceParams {
+  userId: string;
+  value: number;
+}
+
 export interface GetUsersResult {
   id: string;
   username: string;

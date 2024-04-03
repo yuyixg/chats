@@ -1,5 +1,11 @@
 import { Input } from '../input';
-import { FormControl, FormItem, FormLabel, FormMessage } from '../form';
+import {
+  FormControl,
+  FormDescription,
+  FormItem,
+  FormLabel,
+  FormMessage,
+} from '../form';
 import { FormFieldType, IFormFieldOption } from './type';
 import { HTMLInputTypeAttribute } from 'react';
 
@@ -28,6 +34,7 @@ const FormInput = ({
         />
       </FormControl>
       <FormMessage />
+      <FormDescription>{options?.description}</FormDescription>
     </FormItem>
   );
 };

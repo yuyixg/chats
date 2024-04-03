@@ -151,7 +151,7 @@ const handler = async (req: NextApiRequest, res: NextApiResponse) => {
               promptToSend,
               chatModel.id!
             );
-            await UserBalancesManager.updateBalance(userId, totalPrice);
+            await UserBalancesManager.chatUpdateBalance(userId, totalPrice);
             res.end();
             break;
           }

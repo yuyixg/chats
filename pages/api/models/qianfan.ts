@@ -104,7 +104,7 @@ export default async function handler(
               '',
               chatModel.id!
             );
-            await UserBalancesManager.updateBalance(userId, totalPrice);
+            await UserBalancesManager.chatUpdateBalance(userId, totalPrice);
             res.end();
             break;
           }
