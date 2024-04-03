@@ -124,7 +124,7 @@ export default function Users() {
                           handleShowEditModal(item);
                         }}
                       >
-                        编辑
+                        {t('Edit')}
                       </DropdownMenuItem>
                       <DropdownMenuSeparator />
                       <DropdownMenuItem
@@ -132,7 +132,7 @@ export default function Users() {
                           handleShowReChargeModal(item);
                         }}
                       >
-                        充值
+                        {t('User recharge')}
                       </DropdownMenuItem>
                     </DropdownMenuContent>
                   </DropdownMenu>
