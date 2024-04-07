@@ -110,6 +110,8 @@ export interface GetUserMessageResult {
   chatCount: number;
   totalPrice: Decimal;
   tokenCount: number;
+  isDeleted: boolean;
+  isShared: boolean;
   name: string;
   modelName: string;
   createdAt: string;

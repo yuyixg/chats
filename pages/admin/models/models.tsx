@@ -14,9 +14,15 @@ import {
 } from '@/components/ui/table';
 import { Card } from '@/components/ui/card';
 import { Button } from '@/components/ui/button';
-import { IconPlus } from '@tabler/icons-react';
+import { IconDots, IconPlus } from '@tabler/icons-react';
 import { AddModelModal } from '@/components/Admin/Models/AddModelModal';
 import { DEFAULT_LANGUAGE } from '@/types/settings';
+import {
+  DropdownMenu,
+  DropdownMenuContent,
+  DropdownMenuItem,
+  DropdownMenuTrigger,
+} from '@/components/ui/dropdown-menu';
 
 export default function Models() {
   const { t } = useTranslation('admin');
@@ -72,28 +78,39 @@ export default function Models() {
               <TableHead>{t('Model Display Name')}</TableHead>
               <TableHead>{t('Model Version')}</TableHead>
               <TableHead>{t('Model Type')}</TableHead>
+              <TableHead className='w-16'></TableHead>
             </TableRow>
           </TableHeader>
           <TableBody isLoading={loading}>
             {models.map((item) => (
-              <TableRow
-                className='cursor-pointer'
-                key={item.modelId}
-                onClick={() => {
-                  handleShow(item);
-                }}
-              >
+              <TableRow className='cursor-pointer' key={item.modelId}>
                 <TableCell>{item.rank}</TableCell>
-                <TableCell className='flex items-center gap-1'>
-                  <div
-                    className={`w-2 h-2 rounded-full ${
-                      item.enabled ? 'bg-green-400' : 'bg-gray-400'
-                    }`}
-                  ></div>
-                  {item.name}
+                <TableCell>
+                  <div className='flex items-center gap-1 '>
+                    <div
+                      className={`w-2 h-2 rounded-full ${
+                        item.enabled ? 'bg-green-400' : 'bg-gray-400'
+                      }`}
+                    ></div>
+                    {item.name}
+                  </div>
                 </TableCell>
                 <TableCell>{item.modelVersion}</TableCell>
                 <TableCell>{item.type}</TableCell>
+                <TableCell>
+                  <DropdownMenu>
+                    <DropdownMenuTrigger>
+                      <Button variant='ghost'>
+                        <IconDots size={16} />
+                      </Button>
+                    </DropdownMenuTrigger>
+                    <DropdownMenuContent>
+                      <DropdownMenuItem onClick={() => handleShow(item)}>
+                        {t('Edit')}
+                      </DropdownMenuItem>
+                    </DropdownMenuContent>
+                  </DropdownMenu>
+                </TableCell>
               </TableRow>
             ))}
           </TableBody>
@@ -117,7 +134,10 @@ export default function Models() {
 export const getServerSideProps = async ({ locale }: { locale: string }) => {
   return {
     props: {
-      ...(await serverSideTranslations(locale ?? DEFAULT_LANGUAGE, ['common', 'admin'])),
+      ...(await serverSideTranslations(locale ?? DEFAULT_LANGUAGE, [
+        'common',
+        'admin',
+      ])),
     },
   };
 };

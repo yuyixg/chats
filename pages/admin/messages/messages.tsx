@@ -16,6 +16,7 @@ import {
 } from '@/components/ui/table';
 import PaginationContainer from '@/components/Admin/Pagiation/Pagiation';
 import { DEFAULT_LANGUAGE } from '@/types/settings';
+import { Badge } from '@/components/ui/badge';
 
 export default function Messages() {
   const { t } = useTranslation('admin');
@@ -55,26 +56,28 @@ export default function Messages() {
         <Table>
           <TableHeader>
             <TableRow>
-              <TableHead>{t('Model Display Name')}</TableHead>
               <TableHead>{t('Title')}</TableHead>
+              <TableHead>{t('Model Display Name')}</TableHead>
               <TableHead>{t('User Name')}</TableHead>
               <TableHead>{t('Consume tokens')}</TableHead>
               <TableHead>{t('Consume price')}</TableHead>
               <TableHead>{t('Chat Counts')}</TableHead>
               <TableHead>{t('Updated Time')}</TableHead>
+              <TableHead>{t('Status')}</TableHead>
             </TableRow>
           </TableHeader>
           <TableBody isLoading={loading}>
             {messages?.rows.map((item) => (
-              <TableRow
-                className='cursor-pointer'
-                key={item.messageId}
-                onClick={() => {
-                  window.open('/message/' + item.messageId, '_blank');
-                }}
-              >
+              <TableRow key={item.messageId}>
+                <TableCell
+                  onClick={() => {
+                    window.open('/message/' + item.messageId, '_blank');
+                  }}
+                  className='truncate cursor-pointer'
+                >
+                  {item.name}
+                </TableCell>
                 <TableCell>{item.modelName}</TableCell>
-                <TableCell className='truncate'>{item.name}</TableCell>
                 <TableCell>{item.username}</TableCell>
                 <TableCell>{item.tokenCount}</TableCell>
                 <TableCell>
@@ -83,6 +86,14 @@ export default function Messages() {
                 <TableCell>{item.chatCount}</TableCell>
                 <TableCell>
                   {new Date(item.updatedAt).toLocaleString()}
+                </TableCell>
+                <TableCell>
+                  {item.isDeleted && (
+                    <Badge variant='destructive'>{t('Deleted')}</Badge>
+                  )}
+                  {item.isShared && (
+                    <Badge className=' bg-green-600'>{t('Shared')}</Badge>
+                  )}
                 </TableCell>
               </TableRow>
             ))}

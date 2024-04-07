@@ -43,6 +43,8 @@ const handler = async (req: NextApiRequest, res: NextApiResponse) => {
           tokenCount: x.tokenCount,
           name: x.name,
           modelName: x.chatModel.name,
+          isDeleted: x.isDeleted,
+          isShared: x.isShared,
           totalPrice: x.totalPrice,
           createdAt: x.createdAt,
           updatedAt: x.updatedAt,
