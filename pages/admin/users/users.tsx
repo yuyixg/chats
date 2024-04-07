@@ -101,7 +101,7 @@ export default function Users() {
                 {t('Balance')}({t('Unit')})
               </TableHead>
               <TableHead>{t('Phone')}</TableHead>
-              <TableHead>{t('E-mail')}</TableHead>
+              <TableHead>{t('E-Mail')}</TableHead>
               <TableHead>{t('Created Time')}</TableHead>
               <TableHead className='w-16'></TableHead>
             </TableRow>
