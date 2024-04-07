@@ -1,7 +1,7 @@
 import { putUserModel } from '@/apis/adminService';
 import { GetUserModelResult } from '@/types/admin';
 import { useTranslation } from 'next-i18next';
-import React, { useEffect } from 'react';
+import React, { useEffect, useState } from 'react';
 import toast from 'react-hot-toast';
 import { FormFieldType, IFormFieldOption } from '../../ui/form/type';
 import FormInput from '../../ui/form/input';
@@ -33,6 +33,7 @@ export const EditUserModelModal = (props: IProps) => {
   const { t } = useTranslation('admin');
   const { isOpen, selectedUserModel, selectedModelId, onClose, onSuccessful } =
     props;
+  const [submit, setSubmit] = useState(false);
   const formFields: IFormFieldOption[] = [
     {
       name: 'modelId',
@@ -112,6 +113,7 @@ export const EditUserModelModal = (props: IProps) => {
   }, [isOpen]);
 
   const onSubmit = (values: z.infer<typeof formSchema>) => {
+    setSubmit(true);
     const models = selectedUserModel?.models.map((x) => {
       if (x.modelId === values?.modelId) {
         x.tokens = Number(values.tokens) || null;
@@ -137,6 +139,9 @@ export const EditUserModelModal = (props: IProps) => {
             'Operation failed! Please try again later, or contact technical personnel.'
           )
         );
+      })
+      .finally(() => {
+        setSubmit(false);
       });
   };
 
@@ -157,7 +162,9 @@ export const EditUserModelModal = (props: IProps) => {
               />
             ))}
             <DialogFooter className='pt-4'>
-              <Button type='submit'>{t('Save')}</Button>
+              <Button disabled={submit} type='submit'>
+                {t('Save')}
+              </Button>
             </DialogFooter>
           </form>
         </Form>

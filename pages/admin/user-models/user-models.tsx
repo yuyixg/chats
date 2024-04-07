@@ -1,7 +1,7 @@
 import React, { useEffect, useState } from 'react';
 import { getUserModels } from '@/apis/adminService';
 import { GetUserModelResult } from '@/types/admin';
-import { IconPlus } from '@tabler/icons-react';
+import { IconDots, IconPlus } from '@tabler/icons-react';
 import { serverSideTranslations } from 'next-i18next/serverSideTranslations';
 import { useTranslation } from 'next-i18next';
 import { useThrottle } from '@/hooks/useThrottle';
@@ -18,8 +18,13 @@ import {
   TableHeader,
   TableRow,
 } from '@/components/ui/table';
-import { Avatar, AvatarFallback } from '@/components/ui/avatar';
 import { DEFAULT_LANGUAGE } from '@/types/settings';
+import {
+  DropdownMenu,
+  DropdownMenuContent,
+  DropdownMenuItem,
+  DropdownMenuTrigger,
+} from '@/components/ui/dropdown-menu';
 
 export default function UserModels() {
   const { t } = useTranslation('admin');
@@ -61,27 +66,27 @@ export default function UserModels() {
     setSelectedUserModel(null);
   };
 
-  const UserTableCell = (user: GetUserModelResult, rowSpan: number = 1) => {
+  const UserNameCell = (user: GetUserModelResult, rowSpan: number = 1) => {
     return (
-      <TableCell
-        rowSpan={rowSpan}
-        className='cursor-pointer py-2 capitalize'
-        onClick={() => handleShowAddModal(user)}
-      >
-        <div className='flex items-center gap-2 h-6'>
-          <Avatar className='h-8 w-8 rounded-[50%]'>
-            <AvatarFallback>{user.userName[0].toUpperCase()}</AvatarFallback>
-          </Avatar>
-          <div>
-            <p className='font-semibold hover:underline'>{user.userName}</p>
-            <p className='text-[12px] text-gray-500'>{user.role}</p>
-          </div>
+      <TableCell rowSpan={rowSpan} className='py-0 capitalize'>
+        <div className='flex items-center gap-2'>
+          <div>{user.userName}</div>
         </div>
       </TableCell>
     );
   };
 
-  const ModelTableCell = (
+  const UserBalanceCell = (user: GetUserModelResult, rowSpan: number = 1) => {
+    return (
+      <TableCell className='py-0' rowSpan={rowSpan}>
+        <div className='flex items-center gap-2'>
+          <div>{(+user.balance).toFixed(2)}</div>
+        </div>
+      </TableCell>
+    );
+  };
+
+  const ModelCell = (
     user: GetUserModelResult,
     modelId: string,
     value: any,
@@ -89,10 +94,29 @@ export default function UserModels() {
   ) => {
     return (
       <TableCell
-        className={`cursor-pointer py-2 ${hover && 'hover:underline'}`}
+        className={`cursor-pointer ${hover && 'hover:underline py-0'}`}
         onClick={() => handleEditModal(user, modelId)}
       >
         {value || '-'}
+      </TableCell>
+    );
+  };
+
+  const ActionCell = (user: GetUserModelResult, rowSpan: number = 1) => {
+    return (
+      <TableCell className='py-0' rowSpan={rowSpan}>
+        <DropdownMenu>
+          <DropdownMenuTrigger>
+            <Button variant='ghost'>
+              <IconDots size={16} />
+            </Button>
+          </DropdownMenuTrigger>
+          <DropdownMenuContent>
+            <DropdownMenuItem onClick={() => handleShowAddModal(user)}>
+              {t('Add User Model')}
+            </DropdownMenuItem>
+          </DropdownMenuContent>
+        </DropdownMenu>
       </TableCell>
     );
   };
@@ -123,21 +147,29 @@ export default function UserModels() {
         <Table>
           <TableHeader>
             <TableRow className='pointer-events-none'>
+              <TableHead rowSpan={2}>{t('User Name')}</TableHead>
               <TableHead
                 rowSpan={2}
                 style={{ borderRight: '1px solid hsl(var(--muted))' }}
               >
-                {t('User Name')}
+                {t('Balance')}
               </TableHead>
-              <TableHead colSpan={4} className='text-center h-8'>
+              <TableHead colSpan={4} className='text-center'>
                 {t('Models')}
+              </TableHead>
+              <TableHead
+                rowSpan={2}
+                style={{ borderLeft: '1px solid hsl(var(--muted))' }}
+                className='w-16'
+              >
+                操作
               </TableHead>
             </TableRow>
             <TableRow className='pointer-events-none'>
-              <TableHead className='h-8'>{t('Model Display Name')}</TableHead>
-              <TableHead className='h-8'>{t('Remaining Tokens')}</TableHead>
-              <TableHead className='h-8'>{t('Remaining Counts')}</TableHead>
-              <TableHead className='h-8'>{t('Expiration Time')}</TableHead>
+              <TableHead>{t('Model Display Name')}</TableHead>
+              <TableHead>{t('Remaining Tokens')}</TableHead>
+              <TableHead>{t('Remaining Counts')}</TableHead>
+              <TableHead>{t('Expiration Time')}</TableHead>
             </TableRow>
           </TableHeader>
 
@@ -156,16 +188,13 @@ export default function UserModels() {
                         index !== user.models.length - 1 && 'border-none'
                       }`}
                     >
-                      {index === 0 && UserTableCell(user, user.models.length)}
-                      {ModelTableCell(
-                        user,
-                        model.modelId,
-                        model.modelName,
-                        true
-                      )}
-                      {ModelTableCell(user, model.modelId, model.tokens)}
-                      {ModelTableCell(user, model.modelId, model.counts)}
-                      {ModelTableCell(user, model.modelId, model.expires)}
+                      {index === 0 && UserNameCell(user, user.models.length)}
+                      {index === 0 && UserBalanceCell(user, user.models.length)}
+                      {ModelCell(user, model.modelId, model.modelName, true)}
+                      {ModelCell(user, model.modelId, model.tokens)}
+                      {ModelCell(user, model.modelId, model.counts)}
+                      {ModelCell(user, model.modelId, model.expires)}
+                      {index === 0 && ActionCell(user, user.models.length)}
                     </TableRow>
                   );
                 })
@@ -175,12 +204,13 @@ export default function UserModels() {
                   className='cursor-pointer'
                   onClick={() => handleShowAddModal(user)}
                 >
-                  {UserTableCell(user)}
+                  {UserNameCell(user)}
+                  {UserBalanceCell(user)}
                   <TableCell
-                    className='py-2 text-center text-gray-500'
-                    colSpan={4}
+                    className='text-center text-gray-500 py-0'
+                    colSpan={5}
                   >
-                    {t('Click User name set model')}
+                    {t('Click set model')}
                   </TableCell>
                 </TableRow>
               )}
@@ -210,7 +240,10 @@ export default function UserModels() {
 export const getServerSideProps = async ({ locale }: { locale: string }) => {
   return {
     props: {
-      ...(await serverSideTranslations(locale ?? DEFAULT_LANGUAGE, ['common', 'admin'])),
+      ...(await serverSideTranslations(locale ?? DEFAULT_LANGUAGE, [
+        'common',
+        'admin',
+      ])),
     },
   };
 };

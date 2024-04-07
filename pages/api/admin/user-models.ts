@@ -27,6 +27,7 @@ const handler = async (req: NextApiRequest, res: NextApiResponse) => {
     if (req.method === 'GET') {
       const { query } = req.query as { query: string };
       const userModels = await UserModelManager.findUsersModel(query);
+      console.log(JSON.stringify(userModels));
       const chatModels = await ChatModelManager.findModels(true);
       const data = userModels.map((x) => {
         const models = JSON.parse(x.models || '[]') as any[];
@@ -35,6 +36,7 @@ const handler = async (req: NextApiRequest, res: NextApiResponse) => {
           userModelId: x.id,
           role: x.user.role,
           userName: x.user.username,
+          balance: x.user.userBalances?.balance,
           models: models
             .filter((x) => x.enabled)
             .map((item) => {
@@ -52,7 +54,10 @@ const handler = async (req: NextApiRequest, res: NextApiResponse) => {
       return res.json(data);
     } else if (req.method === 'PUT') {
       const { userModelId, models } = req.body;
-      const data = await UserModelManager.updateUserModel(userModelId, JSON.stringify(models));
+      const data = await UserModelManager.updateUserModel(
+        userModelId,
+        JSON.stringify(models)
+      );
       return res.json(data);
     } else if (req.method === 'POST') {
       const { userModelIds, modelId } = req.body;

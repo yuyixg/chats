@@ -32,7 +32,7 @@ export const AddUserModelModal = (props: IProps) => {
   const { isOpen, selectedModel, userModelIds, onClose, onSuccessful } = props;
   const [select, setSelect] = useState<GetModelResult>();
   const [models, setModel] = useState<GetModelResult[]>([]);
-  const [loading, setLoading] = useState(true);
+  const [submit, setSubmit] = useState(false);
 
   useEffect(() => {
     isOpen &&
@@ -44,12 +44,13 @@ export const AddUserModelModal = (props: IProps) => {
               ?.find((m) => m.modelId === x.modelId) && x.enabled
         );
         setModel(_models);
-        setLoading(false);
+        setSubmit(false);
       });
     setSelect(undefined);
   }, [isOpen]);
 
   const handleSave = () => {
+    setSubmit(true);
     let p = null;
     if (selectedModel) {
       let models = selectedModel!.models || [];
@@ -72,15 +73,19 @@ export const AddUserModelModal = (props: IProps) => {
       });
     }
     p.then(() => {
-      toast.success(t('Save successful!'));
       onSuccessful();
-    }).catch(() => {
-      toast.error(
-        t(
-          'Operation failed! Please try again later, or contact technical personnel.'
-        )
-      );
-    });
+      toast.success(t('Save successful!'));
+    })
+      .catch(() => {
+        toast.error(
+          t(
+            'Operation failed! Please try again later, or contact technical personnel.'
+          )
+        );
+      })
+      .finally(() => {
+        setSubmit(false);
+      });
   };
 
   return (
@@ -105,7 +110,7 @@ export const AddUserModelModal = (props: IProps) => {
           </SelectContent>
         </Select>
         <DialogFooter>
-          <Button disabled={!select} onClick={handleSave}>
+          <Button disabled={!select || submit} onClick={handleSave}>
             {t('Save')}
           </Button>
         </DialogFooter>

@@ -13,6 +13,7 @@ export interface GetUserModelResult {
   role: string;
   userModelId: string;
   userName: string;
+  balance: Decimal;
   models: UserModelResult[];
 }
 

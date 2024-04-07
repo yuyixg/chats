@@ -31,7 +31,11 @@ export class UserModelManager {
 
   static async findUsersModel(query: string) {
     return await prisma.userModels.findMany({
-      include: { user: { select: { username: true, role: true } } },
+      include: {
+        user: {
+          include: { userBalances: { select: { balance: true } } },
+        },
+      },
       where: {
         OR: [
           {
