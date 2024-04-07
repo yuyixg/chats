@@ -89,9 +89,17 @@ export class UsersManager {
     return await prisma.users.findMany({
       include: { userBalances: { select: { balance: true } } },
       where: {
-        username: {
-          contains: query,
-        },
+        OR: [
+          {
+            username: { contains: query },
+          },
+          {
+            phone: { contains: query },
+          },
+          {
+            email: { contains: query },
+          },
+        ],
       },
       orderBy: {
         createdAt: 'desc',
