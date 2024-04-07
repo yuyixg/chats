@@ -10,5 +10,6 @@
   "Logging in...": "登录中...",
   "Old password incorrect": "旧密码不正确",
   "Enter your username and password below to complete the login": "在下面输入您的用户名和密码以完成登录",
-  "Or continue with": "或者其他"
+  "Or continue with": "或者其他",
+  "Authorizing...": "授权中..."
 }

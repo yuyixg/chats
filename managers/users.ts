@@ -1,10 +1,17 @@
 import prisma from '@/db/prisma';
 import bcrypt from 'bcryptjs';
+import { UserBalancesManager, UserModelManager } from '.';
+import Decimal from 'decimal.js';
 
 export interface CreateUser {
   username: string;
   password: string;
   role: string;
+  email?: string;
+  phone?: string;
+  avatar?: string;
+  provider?: string;
+  sub?: string;
 }
 
 export interface UpdateUser {
@@ -17,6 +24,10 @@ export interface UpdateUser {
 export class UsersManager {
   static async findByUserId(id: string) {
     return await prisma.users.findUnique({ where: { id } });
+  }
+
+  static async findByUserByProvider(provider: string, sub: string) {
+    return await prisma.users.findFirst({ where: { provider, sub } });
   }
 
   static async findByUsername(username: string) {
@@ -37,13 +48,12 @@ export class UsersManager {
   }
 
   static async createUser(params: CreateUser) {
-    const { username, password, role } = params;
+    const { password } = params;
     let hashPassword = await bcrypt.hashSync(password);
     return prisma.users.create({
       data: {
-        username,
+        ...params,
         password: hashPassword,
-        role,
       },
     });
   }
@@ -71,5 +81,17 @@ export class UsersManager {
       where: { id: params.id },
       data: { ...params },
     });
+  }
+
+  static async initialUser(userId: string, createUserId?: string) {
+    await UserModelManager.createUserModel({
+      userId: userId,
+      models: '[]',
+    });
+    await UserBalancesManager.createBalance(
+      userId,
+      new Decimal(0),
+      createUserId || userId
+    );
   }
 }

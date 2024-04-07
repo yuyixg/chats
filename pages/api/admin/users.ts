@@ -1,13 +1,8 @@
 import type { NextApiRequest, NextApiResponse } from 'next';
-import {
-  UserBalancesManager,
-  UserModelManager,
-  UsersManager,
-} from '@/managers';
+import { UsersManager } from '@/managers';
 import { UserRole } from '@/types/admin';
 import { getSession } from '@/utils/session';
 import { internalServerError } from '@/utils/error';
-import Decimal from 'decimal.js';
 export const config = {
   api: {
     bodyParser: {
@@ -70,15 +65,7 @@ const handler = async (req: NextApiRequest, res: NextApiResponse) => {
         password,
         role,
       });
-      await UserModelManager.createUserModel({
-        userId: user.id!,
-        models: '[]',
-      });
-      await UserBalancesManager.createBalance(
-        user.id!,
-        new Decimal(0),
-        session.userId
-      );
+      await UsersManager.initialUser(user.id!, session.userId);
       return res.json(user);
     }
   } catch (error) {

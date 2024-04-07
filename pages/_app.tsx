@@ -6,7 +6,7 @@ import { appWithTranslation } from 'next-i18next';
 import { useRouter } from 'next/router';
 import AdminLayout from './admin/layout/layout';
 import { ThemeProvider } from '@/components/theme-provider';
-import { DEFAULT_THEME, Themes } from '@/types/settings';
+import { SessionProvider } from 'next-auth/react';
 
 function App({ Component, pageProps }: AppProps<{}> | any) {
   const route = useRouter();
@@ -24,6 +24,10 @@ function App({ Component, pageProps }: AppProps<{}> | any) {
           <AdminLayout>
             <Component {...pageProps} />
           </AdminLayout>
+        ) : route.pathname.includes('/authorizing') ? (
+          <SessionProvider>
+            <Component {...pageProps} />
+          </SessionProvider>
         ) : (
           <Component {...pageProps} />
         )}

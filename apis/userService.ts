@@ -31,3 +31,8 @@ export const deleteUserMessages = (id: string) => {
   const fetchService = useFetch();
   return fetchService.delete('/api/messages?id=' + id);
 };
+
+export const getCsrfToken = (): Promise<{ csrfToken: string }> => {
+  const fetchServer = useFetch();
+  return fetchServer.get('/api/auth/csrf');
+};

@@ -1,3 +1,4 @@
+import { SessionsManager, UsersManager } from '@/managers';
 import NextAuth, { AuthOptions } from 'next-auth';
 
 export const authOptions: AuthOptions = {
@@ -25,17 +26,50 @@ export const authOptions: AuthOptions = {
   secret: process.env.KEYCLOAK_SECRET,
   callbacks: {
     async signIn(params: { user: any; account: any }) {
-      console.log('signIn', params);
       const { account, user } = params;
       if (account && user) {
         return true;
       } else {
-        return '/';
+        return '/login';
       }
     },
     async redirect(params: { url: string; baseUrl: string }) {
       const { url, baseUrl } = params;
       return url.startsWith(baseUrl) ? url : baseUrl;
+    },
+    async session(params) {
+      return { ...params.token } as any;
+    },
+    async jwt({ token, profile, trigger }) {
+      if (trigger === 'signIn' || trigger === 'update') {
+        let user = await UsersManager.findByUserByProvider(
+          'keycloak',
+          profile?.sub!
+        );
+        if (!user) {
+          user = await UsersManager.createUser({
+            provider: 'keycloak',
+            sub: profile?.sub,
+            username: profile?.name!,
+            password: '-',
+            role: '-',
+            email: profile?.email,
+          });
+          await UsersManager.initialUser(user.id!);
+        }
+
+        const session = await SessionsManager.generateSession(user.id!);
+        return {
+          sessionId: session.id,
+          username: user.username,
+          role: user.role,
+        };
+      }
+      return {
+        sessionId: token?.sessionId,
+        username: token?.username,
+        role: token?.role,
+      };
     },
   },
 };

@@ -8,6 +8,8 @@ CREATE TABLE "Users" (
     "phone" TEXT,
     "role" TEXT NOT NULL DEFAULT '-',
     "enabled" BOOLEAN NOT NULL DEFAULT true,
+    "provider" TEXT,
+    "sub" TEXT,
     "createdAt" DATETIME NOT NULL DEFAULT CURRENT_TIMESTAMP,
     "updatedAt" DATETIME NOT NULL
 );

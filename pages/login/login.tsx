@@ -20,12 +20,14 @@ import FormCheckbox from '@/components/ui/form/checkbox';
 import { clearConversations } from '@/utils/conversation';
 import { DEFAULT_LANGUAGE } from '@/types/settings';
 import Image from 'next/image';
+import { getCsrfToken } from '@/apis/userService';
 
 export default function LoginPage() {
   const { t } = useTranslation('login');
   const router = useRouter();
   const [loginLoading, setLoginLoading] = useState(false);
   const [isClient, setIsClient] = useState(false);
+  const [csrfToken, setCsrfToken] = useState<string>('');
 
   const formFields: IFormFieldOption[] = [
     {
@@ -69,6 +71,9 @@ export default function LoginPage() {
   });
 
   useEffect(() => {
+    getCsrfToken().then((data) => {
+      setCsrfToken(data?.csrfToken);
+    });
     clearConversations();
     form.formState.isValid;
     const userInfo = getUserSession();
@@ -180,19 +185,16 @@ export default function LoginPage() {
                           </span>
                         </div>
                       </div>
-                      <form
-                        action='http://localhost:3000/api/auth/signin/keycloak'
-                        method='POST'
-                      >
+                      <form action='/api/auth/signin/keycloak' method='POST'>
                         <input
                           type='hidden'
                           name='csrfToken'
-                          value='a5c1f563718b2d7e188c75fbd2e9ae54290c0b153b949476f9978167c3141a02'
+                          value={csrfToken}
                         />
                         <input
                           type='hidden'
                           name='callbackUrl'
-                          value='http://localhost:3000'
+                          value={`${location.origin}/authorizing`}
                         />
                         <Button
                           disabled={loginLoading}
@@ -201,7 +203,7 @@ export default function LoginPage() {
                           type='submit'
                         >
                           <Image
-                            src='keyCloak.svg'
+                            src='/keyCloak.svg'
                             alt='KeyCloak'
                             width={0}
                             height={0}
