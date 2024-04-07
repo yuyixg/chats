@@ -26,6 +26,8 @@ import {
   DropdownMenuTrigger,
 } from '@/components/ui/dropdown-menu';
 import { EditUserBalanceModal } from '@/components/Admin/Users/EditUserBalanceModel';
+import { Badge } from '@/components/ui/badge';
+import { Avatar } from '@/components/ui/avatar';
 
 export default function Users() {
   const { t } = useTranslation('admin');
@@ -98,6 +100,8 @@ export default function Users() {
               <TableHead>
                 {t('Balance')}({t('Unit')})
               </TableHead>
+              <TableHead>{t('Phone')}</TableHead>
+              <TableHead>{t('E-mail')}</TableHead>
               <TableHead>{t('Created Time')}</TableHead>
               <TableHead className='w-16'></TableHead>
             </TableRow>
@@ -105,9 +109,23 @@ export default function Users() {
           <TableBody isLoading={loading}>
             {users.map((item) => (
               <TableRow className='cursor-pointer' key={item.id}>
-                <TableCell>{item.username}</TableCell>
+                <TableCell>
+                  <div className='flex gap-1 items-center'>
+                    <div
+                      className={`w-2 h-2 rounded-full ${
+                        item.enabled ? 'bg-green-400' : 'bg-gray-400'
+                      }`}
+                    ></div>
+                    {item.username}
+                    {item.provider && (
+                      <Badge className='capitalize'>{item.provider}</Badge>
+                    )}
+                  </div>
+                </TableCell>
                 <TableCell>{item.role}</TableCell>
                 <TableCell>{(+item.balance).toFixed(2)}</TableCell>
+                <TableCell>{item.phone}</TableCell>
+                <TableCell>{item.email}</TableCell>
                 <TableCell>
                   {new Date(item.createdAt).toLocaleString()}
                 </TableCell>

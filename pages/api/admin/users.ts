@@ -36,13 +36,14 @@ const handler = async (req: NextApiRequest, res: NextApiResponse) => {
           avatar: x.avatar,
           phone: x.phone,
           email: x.email,
+          provider: x.provider,
           enabled: x.enabled,
           createdAt: x.createdAt,
         };
       });
       return res.json(data);
     } else if (req.method === 'PUT') {
-      const { id, username, password, role } = req.body;
+      const { id, username, password, role, enabled, phone, email } = req.body;
       let user = await UsersManager.findByUserId(id);
       if (!user) {
         return res.status(404).send('User not found.');
@@ -52,6 +53,9 @@ const handler = async (req: NextApiRequest, res: NextApiResponse) => {
         username,
         password: password ? password : user.password,
         role,
+        enabled,
+        phone,
+        email,
       });
       return res.send(data);
     } else {

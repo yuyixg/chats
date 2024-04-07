@@ -55,6 +55,8 @@
   "Eg: ": "例如: ",
   "Add User": "添加用户",
   "Edit User": "编辑用户",
+  "Phone": "手机号码",
+  "E-Mail": "电子邮件",
   "Is it enabled": "是否启用",
   "This field is require": "此字段为必填字段",
   "Must contain at least {{length}} character(s)": "必须至少包含{{length}}个字符",

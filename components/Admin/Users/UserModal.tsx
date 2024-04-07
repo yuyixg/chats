@@ -18,6 +18,7 @@ import { useForm } from 'react-hook-form';
 import { zodResolver } from '@hookform/resolvers/zod';
 import { Button } from '../../ui/button';
 import FormSelect from '../../ui/form/select';
+import FormSwitch from '@/components/ui/form/switch';
 
 interface IProps {
   user?: GetUsersResult | null;
@@ -40,7 +41,7 @@ const ROLES = [
 export const UserModal = (props: IProps) => {
   const { t } = useTranslation('admin');
   const { user, isOpen, onClose, onSuccessful } = props;
-  const [loading, setLoading] = useState(false);
+  const [submit, setSubmit] = useState(false);
   const formFields: IFormFieldOption[] = [
     {
       name: 'username',
@@ -48,6 +49,13 @@ export const UserModal = (props: IProps) => {
       defaultValue: '',
       render: (options: IFormFieldOption, field: FormFieldType) => (
         <FormInput disabled={!!user} options={options} field={field} />
+      ),
+    },
+    {
+      name: 'enabled',
+      label: t('Is it enabled'),
+      render: (options: IFormFieldOption, field: FormFieldType) => (
+        <FormSwitch options={options} field={field} />
       ),
     },
     {
@@ -71,6 +79,22 @@ export const UserModal = (props: IProps) => {
         <FormSelect items={ROLES} options={options} field={field} />
       ),
     },
+    {
+      name: 'phone',
+      label: t('Phone'),
+      defaultValue: '',
+      render: (options: IFormFieldOption, field: FormFieldType) => (
+        <FormInput options={options} field={field} />
+      ),
+    },
+    {
+      name: 'email',
+      label: t('E-Mail'),
+      defaultValue: '',
+      render: (options: IFormFieldOption, field: FormFieldType) => (
+        <FormInput options={options} field={field} />
+      ),
+    },
   ];
 
   const formSchema = z.object({
@@ -83,6 +107,9 @@ export const UserModal = (props: IProps) => {
         })!
       )
       .max(10, t('Contain at most {{length}} character(s)', { length: 10 })!),
+    enabled: z.boolean().optional(),
+    phone: z.string().nullable().default(null),
+    email: z.string().nullable().default(null),
     password: !user
       ? z
           .string()
@@ -113,16 +140,21 @@ export const UserModal = (props: IProps) => {
     // fix bug https://github.com/react-hook-form/react-hook-form/issues/2755
     form.formState.isValid;
     if (user) {
+      console.log('user', user);
       form.setValue('username', user.username);
+      form.setValue('enabled', user.enabled);
+      form.setValue('phone', user.phone);
+      form.setValue('email', user.email);
       form.setValue('role', user.role);
     }
   }, [isOpen]);
 
   const onSubmit = (values: z.infer<typeof formSchema>) => {
     if (!form.formState.isValid) return;
-    setLoading(true);
+    setSubmit(true);
     let p = null;
     let params = {
+      ...values,
       username: values.username!,
       password: values.password!,
       role: values.role!,
@@ -147,7 +179,7 @@ export const UserModal = (props: IProps) => {
         );
       })
       .finally(() => {
-        setLoading(false);
+        setSubmit(false);
       });
   };
 
@@ -168,7 +200,7 @@ export const UserModal = (props: IProps) => {
               />
             ))}
             <DialogFooter className='pt-4'>
-              <Button disabled={loading} type='submit'>
+              <Button disabled={submit} type='submit'>
                 {t('Save')}
               </Button>
             </DialogFooter>

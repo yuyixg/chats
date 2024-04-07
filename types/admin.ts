@@ -94,6 +94,7 @@ export interface GetUsersResult {
   email: string;
   phone: string;
   balance: Decimal;
+  provider: string;
   createdAt: string;
   updatedAt: string;
   enabled: boolean;

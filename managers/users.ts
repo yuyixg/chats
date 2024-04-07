@@ -19,6 +19,9 @@ export interface UpdateUser {
   username: string;
   password: string;
   role: string;
+  email?: string;
+  phone?: string;
+  enabled?: boolean;
 }
 
 export class UsersManager {
@@ -36,8 +39,32 @@ export class UsersManager {
     });
   }
 
+  static async findByUnique(value: string) {
+    const _value = value.toLocaleLowerCase();
+    return await prisma.users.findFirst({
+      where: {
+        OR: [
+          {
+            username: _value,
+          },
+          {
+            phone: _value,
+          },
+          {
+            email: _value,
+          },
+        ],
+        AND: [
+          {
+            enabled: true,
+          },
+        ],
+      },
+    });
+  }
+
   static async singIn(username: string, password: string) {
-    const user = await this.findByUsername(username);
+    const user = await this.findByUnique(username);
     if (user) {
       const match = await bcrypt.compareSync(password, user.password);
       if (match) {
