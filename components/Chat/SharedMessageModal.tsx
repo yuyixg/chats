@@ -63,9 +63,9 @@ export const SharedMessageModal = (props: IProps) => {
 
   return (
     <Dialog open={isOpen} onOpenChange={onClose}>
-      <DialogContent className='dark:bg-[#202123] w-3/5 h-3/5'>
+      <DialogContent className='h-3/5'>
         <DialogHeader>{t('Share Message')}</DialogHeader>
-        <ScrollArea className='h-96 w-full rounded-md border'>
+        <ScrollArea className='max-h-64 w-full rounded-md border'>
           {conversation?.messages &&
             conversation.messages.map((m, index) => (
               <ChatMessage

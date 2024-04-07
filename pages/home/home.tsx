@@ -347,7 +347,7 @@ const Home = ({ defaultModelId }: Props) => {
             <div className='flex flex-1'>
               <Chat stopConversationRef={stopConversationRef} />
             </div>
-            <Promptbar />
+            {/* <Promptbar /> */}
           </div>
         </div>
       </main>
