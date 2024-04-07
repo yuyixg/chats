@@ -61,13 +61,6 @@ export const EditModelModal = (props: IProps) => {
       ),
     },
     {
-      name: 'enabled',
-      label: t('Is it enabled'),
-      render: (options: IFormFieldOption, field: FormFieldType) => (
-        <FormSwitch options={options} field={field} />
-      ),
-    },
-    {
       name: 'apiConfig',
       label: t('API Configs'),
       render: (options: IFormFieldOption, field: FormFieldType) => (
@@ -117,6 +110,13 @@ export const EditModelModal = (props: IProps) => {
       label: t('Token Price'),
       render: (options: IFormFieldOption, field: FormFieldType) => (
         <FormTextarea options={options} field={field} />
+      ),
+    },
+    {
+      name: 'enabled',
+      label: t('Is it enabled'),
+      render: (options: IFormFieldOption, field: FormFieldType) => (
+        <FormSwitch options={options} field={field} />
       ),
     },
   ];
@@ -237,14 +237,16 @@ export const EditModelModal = (props: IProps) => {
         </DialogHeader>
         <Form {...form}>
           <form onSubmit={form.handleSubmit(onSubmit)}>
-            {formFields.map((item) => (
-              <FormField
-                key={item.name}
-                control={form.control}
-                name={item.name as never}
-                render={({ field }) => item.render(item, field)}
-              />
-            ))}
+            <div className='grid grid-cols-2 gap-4'>
+              {formFields.map((item) => (
+                <FormField
+                  key={item.name}
+                  control={form.control}
+                  name={item.name as never}
+                  render={({ field }) => item.render(item, field)}
+                />
+              ))}
+            </div>
             <DialogFooter className='pt-4'>
               {/* <Button
                 disabled={deleting}
