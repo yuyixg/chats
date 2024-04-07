@@ -21,6 +21,12 @@ import { clearConversations } from '@/utils/conversation';
 import { DEFAULT_LANGUAGE } from '@/types/settings';
 import Image from 'next/image';
 import { getCsrfToken } from '@/apis/userService';
+import {
+  Tooltip,
+  TooltipContent,
+  TooltipProvider,
+  TooltipTrigger,
+} from '@/components/ui/tooltip';
 
 export default function LoginPage() {
   const { t } = useTranslation('login');
@@ -185,33 +191,66 @@ export default function LoginPage() {
                           </span>
                         </div>
                       </div>
-                      <form action='/api/auth/signin/keycloak' method='POST'>
-                        <input
-                          type='hidden'
-                          name='csrfToken'
-                          value={csrfToken}
-                        />
-                        <input
-                          type='hidden'
-                          name='callbackUrl'
-                          value={`${location.origin}/authorizing`}
-                        />
-                        <Button
-                          disabled={loginLoading}
-                          className='w-full'
-                          variant='outline'
-                          type='submit'
-                        >
-                          <Image
-                            src='/keyCloak.svg'
-                            alt='KeyCloak'
-                            width={0}
-                            height={0}
-                            className='mr-2 h-5 w-5 rounded dark:bg-white'
+                      <div className='flex justify-center gap-2'>
+                        <TooltipProvider>
+                          <Tooltip>
+                            <TooltipTrigger asChild>
+                              <Button
+                                onClick={() => {
+                                  router.push('/login/wechat');
+                                }}
+                                className='p-0'
+                                disabled={loginLoading}
+                                variant='link'
+                                type='submit'
+                              >
+                                <Image
+                                  src='/wechat.svg'
+                                  alt='WeChat'
+                                  width={0}
+                                  height={0}
+                                  className='mr-2 h-6 w-6 dark:bg-white'
+                                />
+                              </Button>
+                            </TooltipTrigger>
+                            <TooltipContent>微信登录</TooltipContent>
+                          </Tooltip>
+                        </TooltipProvider>
+
+                        <form action='/api/auth/signin/keycloak' method='POST'>
+                          <input
+                            type='hidden'
+                            name='csrfToken'
+                            value={csrfToken}
                           />
-                          KeyCloak
-                        </Button>
-                      </form>
+                          <input
+                            type='hidden'
+                            name='callbackUrl'
+                            value={`${location.origin}/authorizing`}
+                          />
+                          <TooltipProvider>
+                            <Tooltip>
+                              <TooltipTrigger asChild>
+                                <Button
+                                  className='p-0'
+                                  disabled={loginLoading}
+                                  variant='link'
+                                  type='submit'
+                                >
+                                  <Image
+                                    src='/keyCloak.svg'
+                                    alt='KeyCloak'
+                                    width={0}
+                                    height={0}
+                                    className='mr-2 h-6 w-6 rounded-md dark:bg-white'
+                                  />
+                                </Button>
+                              </TooltipTrigger>
+                              <TooltipContent>KeyCloak</TooltipContent>
+                            </Tooltip>
+                          </TooltipProvider>
+                        </form>
+                      </div>
                     </div>
                   </div>
                 </div>
