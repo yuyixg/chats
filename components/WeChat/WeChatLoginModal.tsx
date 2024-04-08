@@ -1,7 +1,10 @@
 import useExternal from '@/hooks/useExternal';
 import { useEffect } from 'react';
+import { Dialog, DialogContent } from '../ui/dialog';
+import Spinner from '../Spinner';
 
-const WeChatLogin = () => {
+const WeChatLoginModal = (props: { isOpen: boolean; onClose: () => void }) => {
+  const { isOpen, onClose } = props;
   const status = useExternal(
     'https://res.wx.qq.com/connect/zh_CN/htmledition/js/wxLogin.js',
     {
@@ -11,7 +14,7 @@ const WeChatLogin = () => {
     }
   );
   useEffect(() => {
-    if (status === 'ready') {
+    if (isOpen && status === 'ready') {
       const { origin } = location;
       new WxLogin({
         id: 'wxContainer',
@@ -25,17 +28,21 @@ const WeChatLogin = () => {
     }
   }, [status]);
   return (
-    <div
-      id='wxContainer'
-      className='flex justify-center items-center h-screen'
-    ></div>
+    <Dialog open={isOpen} onOpenChange={onClose}>
+      <DialogContent className='w-[340px] h-[320px]'>
+        <div
+          id='wxContainer'
+          className='flex justify-center items-center'
+        ></div>
+
+        {status !== 'ready' && (
+          <div className='flex justify-center items-center'>
+            <Spinner size='32px' className='mx-auto bg-gray-500' />
+          </div>
+        )}
+      </DialogContent>
+    </Dialog>
   );
 };
 
-export default WeChatLogin;
-
-export const getServerSideProps = async () => {
-  return {
-    props: {},
-  };
-};
+export default WeChatLoginModal;

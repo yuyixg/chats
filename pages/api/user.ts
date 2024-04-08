@@ -20,7 +20,6 @@ export default async function handler(
   try {
     if (req.method === 'POST') {
       const { username, password, code } = req.body;
-      console.log('user login', username, code);
       let user = null;
       if (code) {
         user = await UsersManager.weChatLogin(code);

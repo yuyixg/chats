@@ -22,13 +22,7 @@ export default function Authorizing(props: { session: any }) {
       router.push('/login');
       return;
     }
-    if (session) {
-      setUserSessionId(session.sessionId);
-      saveUserSession({
-        ...session,
-      });
-      router.push('/');
-    } else if (code) {
+    if (code) {
       singIn({ code })
         .then((response) => {
           setUserSessionId(response.sessionId);
@@ -40,6 +34,12 @@ export default function Authorizing(props: { session: any }) {
         .catch(() => {
           toast.error(t('授权失败,请稍后再试'));
         });
+    } else if (session) {
+      setUserSessionId(session.sessionId);
+      saveUserSession({
+        ...session,
+      });
+      router.push('/');
     }
   }, []);
   return (

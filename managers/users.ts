@@ -143,7 +143,6 @@ export class UsersManager {
   }
 
   static async weChatLogin(code: string) {
-    console.log('weChatLogin', code);
     const fetchServer = useFetch();
     const res = await fetchServer.get<IWeChatLoginResult>(
       `https://api.weixin.qq.com/sns/oauth2/access_token?appid=${process.env.WECHAT_APP_ID}&secret=${process.env.WECHAT_SECRET}&code=${code}&grant_type=authorization_code`,
@@ -153,22 +152,22 @@ export class UsersManager {
         },
       }
     );
-    console.log('weChatLogin res', JSON.stringify(res));
     if (res.errcode) {
       return null;
     } else {
-      const user = await this.findByUserByProvider(
+      let user = await this.findByUserByProvider(
         ProviderType.WeChat,
         res.openid
       );
       if (!user) {
-        return await this.createUser({
+        user = await this.createUser({
           username: res.openid,
           password: '-',
           role: '-',
           provider: ProviderType.WeChat,
           sub: res.openid,
         });
+        await this.initialUser(user.id);
       }
       return user;
     }

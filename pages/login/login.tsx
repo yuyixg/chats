@@ -26,6 +26,7 @@ import {
   TooltipProvider,
   TooltipTrigger,
 } from '@/components/ui/tooltip';
+import WeChatLoginModal from '@/components/WeChat/WeChatLoginModal';
 
 export default function LoginPage() {
   const { t } = useTranslation('login');
@@ -33,6 +34,7 @@ export default function LoginPage() {
   const [loginLoading, setLoginLoading] = useState(false);
   const [isClient, setIsClient] = useState(false);
   const [csrfToken, setCsrfToken] = useState<string>('');
+  const [weChatModal, setWeChatModal] = useState(false);
 
   const formFields: IFormFieldOption[] = [
     {
@@ -193,19 +195,18 @@ export default function LoginPage() {
                             <TooltipTrigger asChild>
                               <Button
                                 onClick={() => {
-                                  router.push('/login/wechat');
+                                  setWeChatModal(true);
                                 }}
-                                className='p-0'
+                                className='p-0 w-6 h-6'
                                 disabled={loginLoading}
                                 variant='link'
-                                type='submit'
                               >
                                 <Image
                                   src='/wechat.svg'
                                   alt='WeChat'
                                   width={0}
                                   height={0}
-                                  className='mr-2 h-6 w-6 dark:bg-white'
+                                  className='h-6 w-6 dark:bg-white'
                                 />
                               </Button>
                             </TooltipTrigger>
@@ -228,7 +229,7 @@ export default function LoginPage() {
                             <Tooltip>
                               <TooltipTrigger asChild>
                                 <Button
-                                  className='p-0'
+                                  className='p-0 w-6 h-6'
                                   disabled={loginLoading}
                                   variant='link'
                                   type='submit'
@@ -238,7 +239,7 @@ export default function LoginPage() {
                                     alt='KeyCloak'
                                     width={0}
                                     height={0}
-                                    className='mr-2 h-6 w-6 rounded-md dark:bg-white'
+                                    className='h-6 w-6 rounded-md dark:bg-white'
                                   />
                                 </Button>
                               </TooltipTrigger>
@@ -251,6 +252,14 @@ export default function LoginPage() {
                   </div>
                 </div>
               </>
+              {weChatModal && (
+                <WeChatLoginModal
+                  isOpen={weChatModal}
+                  onClose={() => {
+                    setWeChatModal(false);
+                  }}
+                />
+              )}
               <p className='px-8 text-center text-sm text-muted-foreground'>
                 © 2023 Chats™ . All Rights Reserved.
               </p>
