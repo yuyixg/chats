@@ -35,7 +35,7 @@ const handler = async (req: NextApiRequest, res: NextApiResponse) => {
         parseInt(page),
         parseInt(pageSize)
       );
-      const rows = messages.rows.map((x) => {
+      const rows = messages.rows.map((x: any) => {
         return {
           messageId: x.id,
           username: x.user.username,

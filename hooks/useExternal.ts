@@ -32,13 +32,13 @@ interface LoadResult {
   status: Status;
 }
 
-type LoadExternal = <T>(path: string, props?: Partial<T>) => LoadResult;
+type LoadExternal = <T>(path: string, props?: Partial<T> | any) => LoadResult;
 
 const loadScript: LoadExternal = (path, props = {}) => {
   const script = document.querySelector(`script[src="${path}"]`);
 
   if (!script) {
-    const newScript = document.createElement('script');
+    const newScript = document.createElement('script') as any;
     newScript.src = path;
 
     Object.keys(props).forEach((key) => {
@@ -63,7 +63,7 @@ const loadScript: LoadExternal = (path, props = {}) => {
 const loadCss: LoadExternal = (path, props = {}) => {
   const css = document.querySelector(`link[href="${path}"]`);
   if (!css) {
-    const newCss = document.createElement('link');
+    const newCss = document.createElement('link') as any;
 
     newCss.rel = 'stylesheet';
     newCss.href = path;

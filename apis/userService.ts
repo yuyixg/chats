@@ -1,4 +1,6 @@
 import { useFetch } from '@/hooks/useFetch';
+import { SingInParams } from '@/types/user';
+import { UserSession } from '@/utils/user';
 
 export const changeUserPassword = (newPassword: string) => {
   const fetchService = useFetch();
@@ -35,4 +37,9 @@ export const deleteUserMessages = (id: string) => {
 export const getCsrfToken = (): Promise<{ csrfToken: string }> => {
   const fetchServer = useFetch();
   return fetchServer.get('/api/auth/csrf');
+};
+
+export const singIn = (params: SingInParams): Promise<UserSession> => {
+  const fetchServer = useFetch();
+  return fetchServer.post('/api/user', { body: params });
 };

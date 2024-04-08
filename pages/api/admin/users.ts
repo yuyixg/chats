@@ -3,6 +3,7 @@ import { UsersManager } from '@/managers';
 import { UserRole } from '@/types/admin';
 import { getSession } from '@/utils/session';
 import { internalServerError } from '@/utils/error';
+import { UsersRelate } from '@/db/type';
 export const config = {
   api: {
     bodyParser: {
@@ -27,7 +28,7 @@ const handler = async (req: NextApiRequest, res: NextApiResponse) => {
     if (req.method === 'GET') {
       const { query } = req.query;
       const users = await UsersManager.findUsers(query as string);
-      const data = users.map((x) => {
+      const data = users.map((x: UsersRelate) => {
         return {
           id: x.id,
           username: x.username,

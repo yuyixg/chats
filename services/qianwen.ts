@@ -5,7 +5,7 @@ import {
   ReconnectInterval,
   createParser,
 } from 'eventsource-parser';
-import { ChatModels } from '@/db';
+
 
 export interface QianWenStreamResult {
   text: string;
@@ -105,37 +105,4 @@ export const QianWenStream = async (
     },
   });
   return stream;
-};
-
-export const Tokenizer = async (
-  chatModel: ChatModels,
-  messages: any[],
-  prompt: string
-) => {
-  const {
-    apiConfig: { host, apiKey },
-  } = chatModel;
-  let url = `${host}/tokenizer`;
-  const body = {
-    headers: {
-      'Content-Type': 'application/json',
-      Authorization: `Bearer ${apiKey}`,
-    },
-    method: 'POST',
-    body: JSON.stringify({
-      model: 'qwen-plus',
-      input: {
-        messages: [...messages],
-      },
-    }),
-  };
-  const res = await fetch(url, body);
-  if (res.status === 200) {
-    const result = await res.json();
-    return result.usage.input_tokens;
-  } else {
-    let errors = {} as any;
-    errors = await res.json();
-    throw new Error(JSON.stringify(errors));
-  }
 };

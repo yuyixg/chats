@@ -6,6 +6,7 @@ import { ModelDefaultTemplates } from '@/types/template';
 import { ModelVersions } from '@/types/model';
 import { badRequest, internalServerError } from '@/utils/error';
 import { addAsterisk, checkKey } from '@/utils/common';
+import { ChatModels } from '@prisma/client';
 export const config = {
   api: {
     bodyParser: {
@@ -30,7 +31,7 @@ const handler = async (req: NextApiRequest, res: NextApiResponse) => {
     if (req.method === 'GET') {
       const { all } = req.query;
       const models = await ChatModelManager.findModels(!!all);
-      const data = models.map((x) => {
+      const data = models.map((x: ChatModels) => {
         const apiConfig = JSON.parse(x.apiConfig);
         return {
           rank: x.rank,

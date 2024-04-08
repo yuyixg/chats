@@ -3,6 +3,7 @@ import { ChatModelManager, UserModelManager } from '@/managers';
 import { UserRole } from '@/types/admin';
 import { getSession } from '@/utils/session';
 import { internalServerError, modelUnauthorized } from '@/utils/error';
+import { ChatModels, UserModels } from '@prisma/client';
 export const config = {
   api: {
     bodyParser: {
@@ -29,7 +30,7 @@ const handler = async (req: NextApiRequest, res: NextApiResponse) => {
       const userModels = await UserModelManager.findUsersModel(query);
       console.log(JSON.stringify(userModels));
       const chatModels = await ChatModelManager.findModels(true);
-      const data = userModels.map((x) => {
+      const data = userModels.map((x: any) => {
         const models = JSON.parse(x.models || '[]') as any[];
         return {
           userId: x.userId,
@@ -41,7 +42,7 @@ const handler = async (req: NextApiRequest, res: NextApiResponse) => {
             .filter((x) => x.enabled)
             .map((item) => {
               const model = chatModels.find(
-                (model) => model.id === item.modelId
+                (model: ChatModels) => model.id === item.modelId
               )!;
               return {
                 modelVersion: model.modelVersion,
@@ -68,7 +69,7 @@ const handler = async (req: NextApiRequest, res: NextApiResponse) => {
       if (!model) {
         return modelUnauthorized(res);
       }
-      userModels.map((um) => {
+      userModels.map((um: UserModels) => {
         const models = JSON.parse(um.models || '[]') as any[];
         const foundModel = models.find((m) => m.modelId === modelId);
         if (!foundModel) {

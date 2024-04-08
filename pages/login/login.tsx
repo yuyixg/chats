@@ -1,7 +1,6 @@
 import { useEffect, useState } from 'react';
 import { useRouter } from 'next/router';
 import {
-  UserSession,
   getUserSession,
   saveUserSession,
   setUserSessionId,
@@ -20,7 +19,7 @@ import FormCheckbox from '@/components/ui/form/checkbox';
 import { clearConversations } from '@/utils/conversation';
 import { DEFAULT_LANGUAGE } from '@/types/settings';
 import Image from 'next/image';
-import { getCsrfToken } from '@/apis/userService';
+import { getCsrfToken, singIn } from '@/apis/userService';
 import {
   Tooltip,
   TooltipContent,
@@ -95,24 +94,21 @@ export default function LoginPage() {
     if (!form.formState.isValid) return;
     setLoginLoading(true);
     const { username, password, remember } = values;
-    const response = await fetch('/api/user', {
-      method: 'POST',
-      headers: { 'Content-Type': 'application/json' },
-      body: JSON.stringify({ username, password }),
-    });
-
-    if (response.ok) {
-      const user = (await response.json()) as UserSession;
-      setUserSessionId(user.sessionId);
-      saveUserSession({
-        ...user,
-        password: remember ? `${password}` : '',
+    singIn({ username, password })
+      .then((response) => {
+        setUserSessionId(response.sessionId);
+        saveUserSession({
+          ...response,
+          password: remember ? `${password}` : '',
+        });
+        router.push('/');
+      })
+      .catch(() => {
+        toast.error(t('Username or password incorrect'));
+      })
+      .finally(() => {
+        setLoginLoading(false);
       });
-      router.push('/');
-    } else {
-      toast.error(t('Username or password incorrect'));
-      setLoginLoading(false);
-    }
   }
 
   return (

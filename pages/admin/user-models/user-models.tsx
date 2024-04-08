@@ -219,7 +219,7 @@ export default function UserModels() {
         </Table>
       </Card>
       <AddUserModelModal
-        userModelIds={userModels.map((x) => x.userModelId)}
+        userModelIds={userModels.map((x: GetUserModelResult) => x.userModelId)}
         selectedModel={selectedUserModel}
         onSuccessful={init}
         onClose={handleClose}

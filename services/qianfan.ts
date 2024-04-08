@@ -6,7 +6,6 @@ import {
   createParser,
 } from 'eventsource-parser';
 import { ModelVersions } from '@/types/model';
-import { ChatModels } from '@/db';
 
 export const ModelEndpoint: { [key in ModelVersions]?: string } = {
   [ModelVersions.ERNIE_Bot_4]: 'completions_pro',
@@ -52,7 +51,8 @@ export const QianFanStream = async (
     apiConfig: { host, apiKey, secret },
   } = chatModel;
   const accessToken = await getAccessTokenAsync(host!, apiKey!, secret!);
-  const url = `${host}/rpc/2.0/ai_custom/v1/wenxinworkshop/chat/${ModelEndpoint[modelVersion]}?access_token=${accessToken}`;
+  const version = (ModelEndpoint as any)[modelVersion];
+  const url = `${host}/rpc/2.0/ai_custom/v1/wenxinworkshop/chat/${version}?access_token=${accessToken}`;
   const body = {
     headers: {
       'Content-Type': 'application/json',
@@ -107,33 +107,4 @@ export const QianFanStream = async (
   });
 
   return stream;
-};
-
-export const Tokenizer = async (chatModel: ChatModels, messages: any[]) => {
-  const {
-    apiConfig: { host, apiKey, secret },
-  } = chatModel;
-  const accessToken = await getAccessTokenAsync(host!, apiKey!, secret!);
-  let url = `${host}/rpc/2.0/ai_custom/v1/wenxinworkshop/tokenizer/erniebot?access_token=${accessToken}`;
-  const body = {
-    headers: {
-      'Content-Type': 'application/json',
-    },
-    method: 'POST',
-    body: JSON.stringify({
-      messages: [...messages],
-    }),
-  };
-  const res = await fetch(url, body);
-  if (res.status === 200) {
-    const result = await res.json();
-    if (result?.error_code) {
-      throw new Error(JSON.stringify(result));
-    }
-    return result.usage.total_tokens;
-  } else {
-    let errors = {} as any;
-    errors = await res.json();
-    throw new Error(JSON.stringify(errors));
-  }
 };

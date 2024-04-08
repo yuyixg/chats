@@ -19,8 +19,15 @@ export default async function handler(
 ) {
   try {
     if (req.method === 'POST') {
-      const { username, password } = req.body;
-      const user = await UsersManager.singIn(username, password);
+      const { username, password, code } = req.body;
+      console.log('user login', username, code);
+      let user = null;
+      if (code) {
+        user = await UsersManager.weChatLogin(code);
+      } else {
+        user = await UsersManager.singIn(username, password);
+      }
+
       if (user) {
         const session = await SessionsManager.generateSession(user.id!);
         return res.json({
