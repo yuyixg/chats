@@ -68,7 +68,7 @@ export default function UserModels() {
 
   const UserNameCell = (user: GetUserModelResult, rowSpan: number = 1) => {
     return (
-      <TableCell rowSpan={rowSpan} className='py-0 capitalize'>
+      <TableCell rowSpan={rowSpan} className='capitalize'>
         <div className='flex items-center gap-2'>
           <div>{user.userName}</div>
         </div>
@@ -78,7 +78,7 @@ export default function UserModels() {
 
   const UserBalanceCell = (user: GetUserModelResult, rowSpan: number = 1) => {
     return (
-      <TableCell className='py-0' rowSpan={rowSpan}>
+      <TableCell rowSpan={rowSpan}>
         <div className='flex items-center gap-2'>
           <div>{(+user.balance).toFixed(2)}</div>
         </div>
@@ -94,7 +94,7 @@ export default function UserModels() {
   ) => {
     return (
       <TableCell
-        className={`cursor-pointer ${hover && 'hover:underline py-0'}`}
+        className={`cursor-pointer ${hover && 'hover:underline'}`}
         onClick={() => handleEditModal(user, modelId)}
       >
         {value || '-'}
@@ -104,7 +104,7 @@ export default function UserModels() {
 
   const ActionCell = (user: GetUserModelResult, rowSpan: number = 1) => {
     return (
-      <TableCell className='py-0' rowSpan={rowSpan}>
+      <TableCell rowSpan={rowSpan}>
         <DropdownMenu>
           <DropdownMenuTrigger>
             <Button variant='ghost'>
@@ -207,7 +207,7 @@ export default function UserModels() {
                   {UserNameCell(user)}
                   {UserBalanceCell(user)}
                   <TableCell
-                    className='text-center text-gray-500 py-0'
+                    className='text-center text-gray-500'
                     colSpan={5}
                   >
                     {t('Click set model')}

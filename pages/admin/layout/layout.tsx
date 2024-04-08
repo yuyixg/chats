@@ -1,5 +1,9 @@
 import { Nav } from '@/components/Admin/Nav/Nav';
-import { ResizablePanel, ResizablePanelGroup } from '@/components/ui/resizable';
+import {
+  ResizableHandle,
+  ResizablePanel,
+  ResizablePanelGroup,
+} from '@/components/ui/resizable';
 import { TooltipProvider } from '@/components/ui/tooltip';
 import { cn } from '@/lib/utils';
 import {
@@ -14,6 +18,7 @@ import {
 import { useTranslation } from 'next-i18next';
 import { useRouter } from 'next/router';
 import { useEffect, useState } from 'react';
+import Image from 'next/image';
 
 const AdminLayout = ({
   children,
@@ -24,9 +29,8 @@ const AdminLayout = ({
   const router = useRouter();
   const { t } = useTranslation('admin');
   const [isCollapsed, setIsCollapsed] = useState(false);
-  let defaultLayout = [265, 1095];
 
-  const links = [
+  const menus = [
     {
       url: '/admin/dashboard',
       icon: <IconChartPie stroke={1.6} size={22} />,
@@ -75,41 +79,52 @@ const AdminLayout = ({
         className='h-full w-full items-stretch'
       >
         <ResizablePanel
-          defaultSize={defaultLayout[0]}
-          collapsedSize={10}
+          defaultSize={120}
+          collapsedSize={4}
           collapsible={true}
-          minSize={8}
+          minSize={6}
           maxSize={12}
+          onCollapse={() => {
+            setIsCollapsed(true);
+          }}
+          onExpand={() => {
+            setIsCollapsed(false);
+          }}
           className={cn(
-            isCollapsed && 'transition-all duration-300 ease-in-out',
+            isCollapsed &&
+              'min-w-[50px] transition-all duration-300 ease-in-out',
             'h-full'
           )}
         >
-          <div className='px-3 py-4 overflow-y-auto'>
+          <div className={cn('px-4 py-4 overflow-y-auto', isCollapsed && 'px-2')}>
             <a
               onClick={() => {
                 router.push('/admin/dashboard');
               }}
-              className='flex items-center ps-1 mb-1 cursor-pointer'
+              className={cn(
+                'flex items-center cursor-pointer',
+                isCollapsed && 'justify-center'
+              )}
             >
-              <img
-                className='h-8 me-3 rounded-sm'
+              <Image
+                className='h-8 w-8 rounded-sm'
                 alt='Chats Logo'
                 src='/chats.png'
+                width={32}
+                height={32}
               />
-              <span className='self-center text-md font-medium whitespace-nowrap'>
+              <span
+                hidden={isCollapsed}
+                className='self-center text-lg font-medium whitespace-nowrap'
+              >
                 Chats
               </span>
             </a>
           </div>
-          <Nav isCollapsed={isCollapsed} links={links} />
+          <Nav isCollapsed={isCollapsed} menus={menus} />
         </ResizablePanel>
-        {/* <ResizableHandle withHandle /> */}
-        <ResizablePanel
-          defaultSize={defaultLayout[1]}
-          maxSize={90}
-          minSize={85}
-        >
+        <ResizableHandle className='h-screen' withHandle />
+        <ResizablePanel defaultSize={1000}>
           <div className='p-4'>{children}</div>
         </ResizablePanel>
       </ResizablePanelGroup>

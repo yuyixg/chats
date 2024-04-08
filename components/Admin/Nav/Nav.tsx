@@ -10,7 +10,7 @@ import {
 import { buttonVariants } from '@/components/ui/button';
 import { useRouter } from 'next/router';
 
-interface ILink {
+interface IMenu {
   title: string;
   icon: JSX.Element;
   url: string;
@@ -18,12 +18,12 @@ interface ILink {
 
 interface NavProps {
   isCollapsed: boolean;
-  links: ILink[];
+  menus: IMenu[];
 }
 
-export function Nav({ links, isCollapsed }: NavProps) {
+export function Nav({ menus, isCollapsed }: NavProps) {
   const router = useRouter();
-  const active = (link: ILink) => {
+  const active = (link: IMenu) => {
     const { url } = link;
     return url === router.pathname;
   };
@@ -31,51 +31,51 @@ export function Nav({ links, isCollapsed }: NavProps) {
   return (
     <div
       data-collapsed={isCollapsed}
-      className='group flex flex-col gap-4 py-2'
+      className='group flex flex-col gap-4 py-2 data-[collapsed=true]:py-2'
     >
-      <nav className='grid gap-2 px-2 group-[[data-collapsed=true]]:justify-center group-[[data-collapsed=true]]:px-2'>
-        {links.map((link, index) =>
+      <nav className='grid gap-1 px-2 group-[[data-collapsed=true]]:justify-center group-[[data-collapsed=true]]:px-2'>
+        {menus.map((menu, index) =>
           isCollapsed ? (
             <Tooltip key={index} delayDuration={0}>
               <TooltipTrigger asChild>
                 <Link
-                  href={link.url}
+                  href={menu.url}
                   className={cn(
                     buttonVariants({
-                      variant: active(link) ? 'default' : 'ghost',
+                      variant: active(menu) ? 'default' : 'ghost',
                       size: 'icon',
                     }),
                     'h-9 w-9 flex',
-                    active(link)
+                    active(menu)
                       ? 'dark:bg-muted dark:text-white dark:hover:bg-muted dark:hover:text-white'
                       : ''
                   )}
                 >
-                  <span>{link.icon}</span>
-                  <span className='sr-only'>{link.title}</span>
+                  <span>{menu.icon}</span>
+                  <span className='sr-only'>{menu.title}</span>
                 </Link>
               </TooltipTrigger>
               <TooltipContent side='right' className='flex items-center gap-4'>
-                {link.title}
+                {menu.title}
               </TooltipContent>
             </Tooltip>
           ) : (
             <Link
               key={index}
-              href={link.url}
+              href={menu.url}
               className={cn(
                 buttonVariants({
-                  variant: active(link) ? 'default' : 'ghost',
+                  variant: active(menu) ? 'default' : 'ghost',
                   size: 'sm',
                 }),
-                active(link)
+                active(menu)
                   ? 'dark:bg-muted dark:text-white dark:hover:bg-muted dark:hover:text-white'
                   : '',
                 'justify-start'
               )}
             >
-              <span className='mr-2'>{link.icon}</span>
-              {link.title}
+              <span className='mr-2'>{menu.icon}</span>
+              {menu.title}
             </Link>
           )
         )}
