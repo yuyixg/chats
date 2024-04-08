@@ -66,7 +66,7 @@ export default function Messages() {
               <TableHead>{t('Status')}</TableHead>
             </TableRow>
           </TableHeader>
-          <TableBody isLoading={loading}>
+          <TableBody isLoading={loading} isEmpty={messages.count === 0}>
             {messages?.rows.map((item) => (
               <TableRow key={item.messageId}>
                 <TableCell

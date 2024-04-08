@@ -81,7 +81,7 @@ export default function Models() {
               <TableHead className='w-16'></TableHead>
             </TableRow>
           </TableHeader>
-          <TableBody isLoading={loading}>
+          <TableBody isLoading={loading} isEmpty={models.length === 0}>
             {models.map((item) => (
               <TableRow className='cursor-pointer' key={item.modelId}>
                 <TableCell>{item.rank}</TableCell>

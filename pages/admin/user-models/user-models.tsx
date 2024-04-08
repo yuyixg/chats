@@ -206,10 +206,7 @@ export default function UserModels() {
                 >
                   {UserNameCell(user)}
                   {UserBalanceCell(user)}
-                  <TableCell
-                    className='text-center text-gray-500'
-                    colSpan={5}
-                  >
+                  <TableCell className='text-center text-gray-500' colSpan={5}>
                     {t('Click set model')}
                   </TableCell>
                 </TableRow>

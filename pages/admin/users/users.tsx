@@ -106,7 +106,7 @@ export default function Users() {
               <TableHead className='w-16'></TableHead>
             </TableRow>
           </TableHeader>
-          <TableBody isLoading={loading}>
+          <TableBody isLoading={loading} isEmpty={users.length === 0}>
             {users.map((item) => (
               <TableRow className='cursor-pointer' key={item.id}>
                 <TableCell>

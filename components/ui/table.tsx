@@ -30,10 +30,15 @@ export interface TableBodyProps
   extends React.InputHTMLAttributes<HTMLTableSectionElement> {
   isLoading?: boolean;
   loadingContent?: ReactElement;
+  isEmpty?: boolean;
+  emptyContent?: ReactElement;
 }
 
 const TableBody = React.forwardRef<HTMLTableSectionElement, TableBodyProps>(
-  ({ className, isLoading, loadingContent, ...props }, ref) =>
+  (
+    { className, isLoading, loadingContent, isEmpty, emptyContent, ...props },
+    ref
+  ) =>
     isLoading ? (
       <tbody>
         <tr>
@@ -46,6 +51,16 @@ const TableBody = React.forwardRef<HTMLTableSectionElement, TableBodyProps>(
                   <Skeleton className='h-4 w-[90%]' />
                 </div>
               </div>
+            )}
+          </td>
+        </tr>
+      </tbody>
+    ) : isEmpty ? (
+      <tbody>
+        <tr>
+          <td className='text-center align-middle p-4 h-32' colSpan={100}>
+            {emptyContent || (
+              <div className='flex flex-col space-y-3'>No results.</div>
             )}
           </td>
         </tr>

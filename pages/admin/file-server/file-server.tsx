@@ -70,7 +70,7 @@ export default function FileServer() {
               <TableHead>{t('Created Time')}</TableHead>
             </TableRow>
           </TableHeader>
-          <TableBody isLoading={loading}>
+          <TableBody isLoading={loading} isEmpty={fileServers.length === 0}>
             {fileServers.map((item) => (
               <TableRow
                 className='cursor-pointer'
@@ -109,7 +109,10 @@ export default function FileServer() {
 export const getServerSideProps = async ({ locale }: { locale: string }) => {
   return {
     props: {
-      ...(await serverSideTranslations(locale ?? DEFAULT_LANGUAGE, ['common', 'admin'])),
+      ...(await serverSideTranslations(locale ?? DEFAULT_LANGUAGE, [
+        'common',
+        'admin',
+      ])),
     },
   };
 };
