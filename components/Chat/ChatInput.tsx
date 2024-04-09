@@ -25,6 +25,7 @@ import { Prompt } from '@/types/prompt';
 import { VariableModal } from './VariableModal';
 import { isMobile } from '@/utils/common';
 import { HomeContext } from '@/pages/home/home';
+import toast from 'react-hot-toast';
 
 interface Props {
   onSend: (message: Message) => void;
@@ -84,7 +85,7 @@ export const ChatInput = ({
     const value = e.target.value;
     const maxLength = selectedConversation?.model?.maxLength;
     if (maxLength && value.length > maxLength) {
-      alert(
+      toast.error(
         t(
           `Message limit is {{maxLength}} characters. You have entered {{valueLength}} characters.`,
           { maxLength, valueLength: value.length }
@@ -103,7 +104,7 @@ export const ChatInput = ({
     }
 
     if (!content.text) {
-      alert(t('Please enter a message'));
+      toast.error(t('Please enter a message'));
       return;
     }
     onSend({ role: 'user', content });

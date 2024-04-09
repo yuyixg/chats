@@ -1,6 +1,6 @@
 import { FC, KeyboardEvent, useEffect, useRef, useState } from 'react';
-
 import { Prompt } from '@/types/prompt';
+import toast from 'react-hot-toast';
 
 interface Props {
   prompt: Prompt;
@@ -39,7 +39,7 @@ export const VariableModal: FC<Props> = ({
 
   const handleSubmit = () => {
     if (updatedVariables.some((variable) => variable.value === '')) {
-      alert('Please fill out all variables');
+      toast.error('Please fill out all variables');
       return;
     }
 
