@@ -11,8 +11,8 @@ import { Label } from '../ui/label';
 import { Button } from '../ui/button';
 import { cn } from '@/lib/utils';
 import { Input } from '../ui/input';
-import { callWxPay } from '@/apis/payApiService';
-import { yuanToCents } from '@/utils/wxpay/utils';
+import { createOrder } from '@/apis/payApiService';
+import { useRouter } from 'next/router';
 
 interface IProps {
   isOpen: boolean;
@@ -23,18 +23,18 @@ interface IProps {
 
 export const RechargeModal = (props: IProps) => {
   const { t } = useTranslation('admin');
+  const router = useRouter();
   const { isOpen, onClose, onSuccessful } = props;
   const [amount, setAmount] = useState(50);
   const [isCustomAmount, setCustomAmount] = useState(false);
-  const [isPayModalOpen, setPayModal] = useState(false);
   const [payLoading, setPayLoading] = useState(false);
   const amounts = [50, 100, 200, 500, 1000, 2000, 5000];
 
   const onPaying = () => {
     setPayLoading(true);
-    callWxPay(yuanToCents(amount))
-      .then((res) => {
-        console.log(res);
+    createOrder(amount)
+      .then((orderId) => {
+        router.push('/payment/' + orderId);
       })
       .finally(() => {
         setPayLoading(false);
@@ -53,6 +53,7 @@ export const RechargeModal = (props: IProps) => {
             <div className='grid gap-2 grid-cols-2 sm:grid-cols-3 md:grid-cols-4 lg:grid-cols-4 '>
               {amounts.map((item) => (
                 <Button
+                  key={item}
                   className={cn(
                     'w-32',
                     item === amount &&
@@ -89,7 +90,7 @@ export const RechargeModal = (props: IProps) => {
                       className='w-full'
                       type='number'
                       value={amount}
-                      min={1}
+                      min={0.1}
                       max={5000}
                       onChange={(e) => {
                         setAmount(+e.target.value);

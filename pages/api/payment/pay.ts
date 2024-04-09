@@ -22,21 +22,19 @@ const handler = async (req: NextApiRequest, res: NextApiResponse) => {
     if (req.method === 'POST') {
       const { amount } = req.body as { amount: number };
       const outTradeNo = generateOrderTradeNo();
-      console.log(amount, outTradeNo);
-      return res.end();
-      // const order = await OrdersManager.createOrder({
-      //   outTradeNo,
-      //   amount,
-      //   createUserId: session.userId,
-      // });
-      // const ipAddress = requestIp.getClientIp(req) || '127.0.0.1';
-      // return await WxPayManager.callWxJSApiPay({
-      //   ipAddress,
-      //   orderId: order.id,
-      //   amount,
-      //   openId: session.sub!,
-      //   outTradeNo,
-      // });
+      const order = await OrdersManager.createOrder({
+        outTradeNo,
+        amount,
+        createUserId: session.userId,
+      });
+      const ipAddress = requestIp.getClientIp(req) || '127.0.0.1';
+      return await WxPayManager.callWxJSApiPay({
+        ipAddress,
+        orderId: order.id,
+        amount,
+        openId: session.sub!,
+        outTradeNo,
+      });
     }
   } catch (error) {
     console.error(error);

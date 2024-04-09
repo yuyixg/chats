@@ -1,7 +1,8 @@
 import type { NextApiRequest, NextApiResponse } from 'next';
 import { getSession } from '@/utils/session';
 import { internalServerError, unauthorized } from '@/utils/error';
-import requestIp from 'request-ip';
+import { generateOrderTradeNo } from '@/utils/wxpay/utils';
+import { OrdersManager } from '@/managers';
 export const config = {
   api: {
     bodyParser: {
@@ -18,6 +19,14 @@ const handler = async (req: NextApiRequest, res: NextApiResponse) => {
       return unauthorized(res);
     }
     if (req.method === 'POST') {
+      const { amount } = req.body as { amount: number };
+      const outTradeNo = generateOrderTradeNo();
+      const order = await OrdersManager.createOrder({
+        outTradeNo,
+        amount,
+        createUserId: session.userId,
+      });
+      return res.json(order.id);
     }
   } catch (error) {
     console.error(error);

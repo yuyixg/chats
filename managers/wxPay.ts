@@ -42,10 +42,10 @@ export class WxPayManager {
       amount: { total: amount, currency: 'CNY' },
       notify_url: notifyUrl,
     } as IJsApi;
-    const publicKey = fs.readFileSync(
+    const publicKey = await fs.readFileSync(
       `${process.cwd()}/cert/apiclient_cert.pem`
     );
-    const privateKey = fs.readFileSync(
+    const privateKey = await fs.readFileSync(
       `${process.cwd()}/cert/apiclient_key.pem`
     );
     const weChartPay = new WxPay(

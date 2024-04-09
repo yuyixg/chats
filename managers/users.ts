@@ -2,8 +2,8 @@ import prisma from '@/db/prisma';
 import bcrypt from 'bcryptjs';
 import { UserBalancesManager, UserModelManager } from '.';
 import Decimal from 'decimal.js';
-import { useFetch } from '@/hooks/useFetch';
 import { ProviderType } from '@/types/user';
+import { weChatAuth } from '@/utils/weChat';
 
 export interface CreateUser {
   username: string;
@@ -26,7 +26,7 @@ export interface UpdateUser {
   enabled?: boolean;
 }
 
-export interface IWeChatLoginResult {
+export interface IWeChatAuthResult {
   access_token: string;
   expires_in: number;
   refresh_token: string;
@@ -143,33 +143,24 @@ export class UsersManager {
   }
 
   static async weChatLogin(code: string) {
-    const fetchServer = useFetch();
-    const res = await fetchServer.get<IWeChatLoginResult>(
-      `https://api.weixin.qq.com/sns/oauth2/access_token?appid=${process.env.WECHAT_APP_ID}&secret=${process.env.WECHAT_SECRET}&code=${code}&grant_type=authorization_code`,
-      {
-        headers: {
-          'Content-Type': 'application/json',
-        },
-      }
-    );
-    if (res.errcode) {
+    const result = await weChatAuth(code);
+    if (!result) {
       return null;
-    } else {
-      let user = await this.findByUserByProvider(
-        ProviderType.WeChat,
-        res.openid
-      );
-      if (!user) {
-        user = await this.createUser({
-          username: res.openid,
-          password: '-',
-          role: '-',
-          provider: ProviderType.WeChat,
-          sub: res.openid,
-        });
-        await this.initialUser(user.id);
-      }
-      return user;
     }
+    let user = await this.findByUserByProvider(
+      ProviderType.WeChat,
+      result.openid
+    );
+    if (!user) {
+      user = await this.createUser({
+        username: result.openid,
+        password: '-',
+        role: '-',
+        provider: ProviderType.WeChat,
+        sub: result.openid,
+      });
+      await this.initialUser(user.id);
+    }
+    return user;
   }
 }
