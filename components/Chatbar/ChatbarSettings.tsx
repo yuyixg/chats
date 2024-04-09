@@ -1,5 +1,6 @@
 import {
   IconLogout,
+  IconMoneybag,
   IconPasswordUser,
   IconSettings,
   IconUser,
@@ -24,13 +25,15 @@ import { HomeContext } from '@/pages/home/home';
 import { Popover, PopoverContent, PopoverTrigger } from '../ui/popover';
 import { Separator } from '../ui/separator';
 import { ChangePasswordModal } from '../Sidebar/ChangePasswordModal';
+import { RechargeModal } from '../UserRecharge/RechargeModal';
 
 export const ChatBarSettings = () => {
   const router = useRouter();
   const { t } = useTranslation('sidebar');
-  const [isSettingDialogOpen, setIsSettingDialog] = useState<boolean>(false);
-  const [isChangePasswordOpen, setIsChangePasswordOpen] =
+  const [isSettingModalOpen, setIsSettingModal] = useState<boolean>(false);
+  const [isChangePasswordModalOpen, setIsChangePasswordModal] =
     useState<boolean>(false);
+  const [isRechargeModalOpen, setIsRechargeModal] = useState<boolean>(false);
 
   const {
     state: { user, conversations },
@@ -59,7 +62,7 @@ export const ChatBarSettings = () => {
       <SidebarButton
         text={t('Settings')}
         icon={<IconSettings size={18} />}
-        onClick={() => setIsSettingDialog(true)}
+        onClick={() => setIsSettingModal(true)}
       />
 
       {user?.role === UserRole.admin && (
@@ -71,6 +74,12 @@ export const ChatBarSettings = () => {
           }}
         />
       )}
+
+      <SidebarButton
+        text={t('账号充值')}
+        icon={<IconMoneybag size={18} />}
+        onClick={() => setIsRechargeModal(true)}
+      />
 
       {user?.username && (
         <Popover>
@@ -87,7 +96,7 @@ export const ChatBarSettings = () => {
               text={t('Change Password')}
               icon={<IconPasswordUser size={18} />}
               onClick={() => {
-                setIsChangePasswordOpen(true);
+                setIsChangePasswordModal(true);
               }}
             />
             <Separator className='my-2' />
@@ -100,24 +109,36 @@ export const ChatBarSettings = () => {
         </Popover>
       )}
 
-      {isSettingDialogOpen && (
+      {isSettingModalOpen && (
         <SettingDialog
-          isOpen={isSettingDialogOpen}
+          isOpen={isSettingModalOpen}
           onClose={() => {
-            setIsSettingDialog(false);
+            setIsSettingModal(false);
           }}
         />
       )}
       <ChangePasswordModal
-        isOpen={isChangePasswordOpen}
+        isOpen={isChangePasswordModalOpen}
         onClose={() => {
-          setIsChangePasswordOpen(false);
+          setIsChangePasswordModal(false);
         }}
         onSuccessful={() => {
-          setIsChangePasswordOpen(false);
+          setIsChangePasswordModal(false);
           logout();
         }}
       />
+
+      {isRechargeModalOpen && (
+        <RechargeModal
+          isOpen={isRechargeModalOpen}
+          onClose={() => {
+            setIsRechargeModal(false);
+          }}
+          onSuccessful={() => {
+            setIsRechargeModal(false);
+          }}
+        />
+      )}
     </div>
   );
 };

@@ -98,7 +98,7 @@ export default function Users() {
               <TableHead>{t('User Name')}</TableHead>
               <TableHead>{t('Role')}</TableHead>
               <TableHead>
-                {t('Balance')}({t('Unit')})
+                {t('Balance')}({t('Yuan')})
               </TableHead>
               <TableHead>{t('Phone')}</TableHead>
               <TableHead>{t('E-Mail')}</TableHead>

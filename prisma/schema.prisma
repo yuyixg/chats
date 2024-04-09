@@ -108,3 +108,22 @@ model BalanceLogs {
   createdAt    DateTime @default(now())
   updatedAt    DateTime @updatedAt
 }
+
+model Orders {
+  id           String   @id @default(uuid())
+  createUserId String
+  amount       Int
+  outTradeNo   String
+  status       String
+  payH5Url     String?
+  prepayId     String?
+  createdAt    DateTime @default(now())
+  updatedAt    DateTime @updatedAt
+}
+
+model Counterfoils {
+  id        String   @id @default(uuid())
+  orderId   String
+  info      String
+  createdAt DateTime @default(now())
+}

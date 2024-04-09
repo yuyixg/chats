@@ -39,9 +39,9 @@ export async function getSession(
 
   if (session) {
     const {
-      user: { id, username, role },
+      user: { id, username, role, provider, sub },
     } = session;
-    return { userId: id, username, role };
+    return { userId: id, username, role, provider, sub };
   }
   return null;
 }

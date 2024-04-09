@@ -39,3 +39,6 @@ public/files
 
 # prisma
 prisma/chats.db
+
+# wx
+cert

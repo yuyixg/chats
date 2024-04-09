@@ -100,6 +100,27 @@ CREATE TABLE "BalanceLogs" (
     "updatedAt" DATETIME NOT NULL
 );
 
+-- CreateTable
+CREATE TABLE "Orders" (
+    "id" TEXT NOT NULL PRIMARY KEY,
+    "createUserId" TEXT NOT NULL,
+    "amount" INTEGER NOT NULL,
+    "outTradeNo" TEXT NOT NULL,
+    "status" TEXT NOT NULL,
+    "payH5Url" TEXT,
+    "prepayId" TEXT,
+    "createdAt" DATETIME NOT NULL DEFAULT CURRENT_TIMESTAMP,
+    "updatedAt" DATETIME NOT NULL
+);
+
+-- CreateTable
+CREATE TABLE "Counterfoils" (
+    "id" TEXT NOT NULL PRIMARY KEY,
+    "orderId" TEXT NOT NULL,
+    "info" TEXT NOT NULL,
+    "createdAt" DATETIME NOT NULL DEFAULT CURRENT_TIMESTAMP
+);
+
 -- CreateIndex
 CREATE UNIQUE INDEX "Users_email_key" ON "Users"("email");
 

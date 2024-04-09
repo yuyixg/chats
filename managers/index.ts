@@ -5,6 +5,8 @@ import { UserModelManager } from './userModels';
 import { SessionsManager } from './sessions';
 import { FileServerManager } from './fileServer';
 import { UserBalancesManager } from './userBalances';
+import { WxPayManager } from './wxPay';
+import { OrdersManager } from './order';
 
 export {
   ChatModelManager,
@@ -14,4 +16,6 @@ export {
   SessionsManager,
   FileServerManager,
   UserBalancesManager,
+  WxPayManager,
+  OrdersManager,
 };
