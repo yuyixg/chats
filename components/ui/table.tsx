@@ -60,7 +60,9 @@ const TableBody = React.forwardRef<HTMLTableSectionElement, TableBodyProps>(
         <tr>
           <td className='text-center align-middle p-4 h-32' colSpan={100}>
             {emptyContent || (
-              <div className='flex flex-col space-y-3'>No results.</div>
+              <div className='flex flex-col space-y-3 text-muted-foreground'>
+                No results.
+              </div>
             )}
           </td>
         </tr>

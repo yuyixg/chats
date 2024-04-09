@@ -54,19 +54,20 @@ const Sidebar = <T,>({
       <div
         className={`fixed top-0 ${side}-0 z-40 flex h-full w-[260px] flex-none flex-col space-y-2 text-black bg-[#f9f9f9] dark:bg-black dark:text-white p-2 text-[14px] transition-all sm:relative sm:top-0`}
       >
-        <div className='flex items-center'>
-          <button
-            hidden={!hasModel()}
-            className='flex w-full flex-shrink-0 cursor-pointer select-none items-center gap-3 rounded-md p-3 text-black dark:text-white transition-colors duration-200 hover:bg-[#cdcdcd] hover:dark:bg-[#343541] bg-[#ececec] dark:bg-[#343541]/80'
-            onClick={() => {
-              handleCreateItem();
-              handleSearchTerm('');
-            }}
-          >
-            <IconPlus size={18} />
-            {addItemButtonTitle}
-          </button>
-        </div>
+        {hasModel() && (
+          <div className='flex items-center'>
+            <button
+              className='flex w-full flex-shrink-0 cursor-pointer select-none items-center gap-3 rounded-md p-3 text-black dark:text-white transition-colors duration-200 hover:bg-[#cdcdcd] hover:dark:bg-[#343541] bg-[#ececec] dark:bg-[#343541]/80'
+              onClick={() => {
+                handleCreateItem();
+                handleSearchTerm('');
+              }}
+            >
+              <IconPlus size={18} />
+              {addItemButtonTitle}
+            </button>
+          </div>
+        )}
         <Search
           placeholder={t('Search...') || ''}
           searchTerm={searchTerm}
