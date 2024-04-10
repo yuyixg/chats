@@ -6,7 +6,7 @@ export function redirectToWeChatAuthUrl(redirectUri: string) {
   // snsapi_base 默认授权 只能获取openid
   const scope = 'snsapi_base';
   // const redirectUri = encodeURIComponent(`${origin}/authorizing`);
-  location.href = `https://open.weixin.qq.com/connect/oauth2/authorize?appid=wxcf07ba9d66de4aca&redirect_uri=${redirectUri}&response_type=code&scope=${scope}&state=STATE#wechat_redirect`;
+  location.href = `https://open.weixin.qq.com/connect/oauth2/authorize?appid=wx05e69f4a0aeb8421&redirect_uri=${redirectUri}&response_type=code&scope=${scope}&state=STATE#wechat_redirect`;
 }
 
 export async function weChatAuth(code: string) {

@@ -13,6 +13,7 @@ import { cn } from '@/lib/utils';
 import { Input } from '../ui/input';
 import { createOrder } from '@/apis/payApiService';
 import { useRouter } from 'next/router';
+import { yuanToCents } from '@/utils/wxpay/utils';
 
 interface IProps {
   isOpen: boolean;
@@ -32,7 +33,7 @@ export const RechargeModal = (props: IProps) => {
 
   const onPaying = () => {
     setPayLoading(true);
-    createOrder(amount)
+    createOrder(yuanToCents(amount))
       .then((orderId) => {
         router.push('/payment/' + orderId);
       })

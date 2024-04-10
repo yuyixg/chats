@@ -23,7 +23,7 @@ export default function Authorizing(props: { session: any }) {
       return;
     }
     if (code) {
-      const callbackUrl = localStorage.getItem('callbackUrl');
+      // const callbackUrl = localStorage.getItem('callbackUrl');
       // if (callbackUrl) {
       //   localStorage.removeItem('callbackUrl');
       //   router.push(`/payment${callbackUrl}?code=${code}`);
