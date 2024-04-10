@@ -109,7 +109,7 @@ export const ChangePasswordModal = (props: IProps) => {
 
   return (
     <Dialog open={isOpen} onOpenChange={onClose}>
-      <DialogContent>
+      <DialogContent className='w-5/6 sm:w-4/5 lg:w-[650px]'>
         <DialogHeader>{t('Change Password')}</DialogHeader>
         <Form {...form}>
           <form onSubmit={form.handleSubmit(onSubmit)}>

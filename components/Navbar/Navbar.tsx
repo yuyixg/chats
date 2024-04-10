@@ -15,7 +15,7 @@ export const Navbar: FC<Props> = ({
   hasModel,
 }) => {
   return (
-    <nav className='flex w-full justify-between items-center py-3 px-4 bg-[#ececec] dark:bg-black'>
+    <nav className='flex w-full justify-between items-center py-3 px-4 bg-[#ececec] dark:bg-[#202123]'>
       <div className='mr-4'></div>
 
       <div className='max-w-[240px] overflow-hidden text-ellipsis whitespace-nowrap'>

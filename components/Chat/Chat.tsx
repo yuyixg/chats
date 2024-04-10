@@ -414,8 +414,17 @@ export const Chat = memo(({ stopConversationRef }: Props) => {
             }}
             onScrollDownClick={handleScrollDown}
             onRegenerate={() => {
-              if (currentMessage) {
-                handleSend(currentMessage, 2);
+              const lastMessage =
+                selectedConversation?.messages[
+                  selectedConversation?.messages.length - 1
+                ];
+              if (lastMessage?.role === 'user') {
+                handleSend(lastMessage, 1);
+              } else {
+                if (currentMessage) {
+                  console.log(currentMessage);
+                  handleSend(currentMessage, 2);
+                }
               }
             }}
             showScrollDownButton={showScrollDownButton}

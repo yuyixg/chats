@@ -106,10 +106,8 @@ export default function LoginPage() {
         router.push('/');
       })
       .catch(() => {
-        toast.error(t('Username or password incorrect'));
-      })
-      .finally(() => {
         setLoginLoading(false);
+        toast.error(t('Username or password incorrect'));
       });
   }
 
@@ -197,7 +195,7 @@ export default function LoginPage() {
                                 onClick={() => {
                                   setWeChatModal(true);
                                 }}
-                                className='p-0 w-6 h-6'
+                                className='p-0 w-8 h-8'
                                 disabled={loginLoading}
                                 variant='link'
                               >
@@ -206,7 +204,7 @@ export default function LoginPage() {
                                   alt='WeChat'
                                   width={0}
                                   height={0}
-                                  className='h-6 w-6 dark:bg-white'
+                                  className='h-8 w-8 dark:bg-transparent'
                                 />
                               </Button>
                             </TooltipTrigger>
@@ -229,7 +227,7 @@ export default function LoginPage() {
                             <Tooltip>
                               <TooltipTrigger asChild>
                                 <Button
-                                  className='p-0 w-6 h-6'
+                                  className='p-0 w-8 h-8'
                                   disabled={loginLoading}
                                   variant='link'
                                   type='submit'
@@ -239,7 +237,7 @@ export default function LoginPage() {
                                     alt='KeyCloak'
                                     width={0}
                                     height={0}
-                                    className='h-6 w-6 rounded-md dark:bg-white'
+                                    className='h-8 w-8 rounded-md dark:bg-white'
                                   />
                                 </Button>
                               </TooltipTrigger>

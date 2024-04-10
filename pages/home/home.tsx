@@ -115,7 +115,13 @@ const Home = ({ defaultModelId }: Props) => {
   });
 
   const {
-    state: { conversations, selectedConversation, models, user },
+    state: {
+      conversations,
+      selectedConversation,
+      models,
+      user,
+      messageIsStreaming,
+    },
     dispatch,
   } = contextValue;
   const { getModels } = useApiService();
@@ -198,13 +204,6 @@ const Home = ({ defaultModelId }: Props) => {
   useEffect(() => {
     setLoadingText(t('Loading ...')!);
 
-    const session = getUserSession();
-    if (session) {
-      dispatch({ field: 'user', value: session });
-    } else {
-      router.push(getLoginUrl(getSettingsLanguage()));
-    }
-
     const settings = getSettings();
     if (settings.theme) {
       dispatch({
@@ -235,13 +234,23 @@ const Home = ({ defaultModelId }: Props) => {
     if (showPromptbar) {
       dispatch({ field: 'showPromptbar', value: showPromptbar === 'true' });
     }
+
+    const session = getUserSession();
+    if (session) {
+      setTimeout(() => {
+        dispatch({ field: 'user', value: session });
+      }, 1000);
+    } else {
+      router.push(getLoginUrl(getSettingsLanguage()));
+    }
   }, []);
 
   useEffect(() => {
-    getUserMessages().then((data) => {
-      dispatch({ field: 'conversations', value: data });
-    });
-  }, []);
+    !messageIsStreaming &&
+      getUserMessages().then((data) => {
+        dispatch({ field: 'conversations', value: data });
+      });
+  }, [messageIsStreaming]);
 
   useEffect(() => {
     const selectedConversation = localStorage.getItem('selectedConversation');
@@ -323,7 +332,7 @@ const Home = ({ defaultModelId }: Props) => {
       <main>
         {!user && (
           <div
-            className={`fixed top-0 left-0 bottom-0 right-0 bg-white dark:bg-black text-black dark:text-white z-50 text-center text-sm`}
+            className={`fixed top-0 left-0 bottom-0 right-0 bg-white dark:bg-[#202123] text-black/80 dark:text-white/80 z-50 text-center text-[12.5px]`}
           >
             <div className='fixed w-screen h-screen top-1/2'>{loadingText}</div>
           </div>
@@ -339,7 +348,7 @@ const Home = ({ defaultModelId }: Props) => {
             )}
           </div>
 
-          <div className='flex h-full w-full pt-[48px] sm:pt-0'>
+          <div className='flex h-full w-full pt-[48px] sm:pt-0 dark:bg-[#343541]'>
             <Chatbar />
             <div className='flex flex-1'>
               <Chat stopConversationRef={stopConversationRef} />

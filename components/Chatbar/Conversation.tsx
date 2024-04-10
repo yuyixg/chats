@@ -49,15 +49,6 @@ export const ConversationComponent = ({ conversation }: Props) => {
     }
   };
 
-  const handleDragStart = (
-    e: DragEvent<HTMLButtonElement>,
-    conversation: Conversation
-  ) => {
-    if (e.dataTransfer) {
-      e.dataTransfer.setData('conversation', JSON.stringify(conversation));
-    }
-  };
-
   const handleRename = (conversation: Conversation) => {
     if (renameValue.trim().length > 0) {
       handleUpdateConversation(conversation, [
@@ -138,8 +129,6 @@ export const ConversationComponent = ({ conversation }: Props) => {
           }`}
           onClick={() => handleSelectConversation(conversation)}
           disabled={messageIsStreaming}
-          draggable='true'
-          onDragStart={(e) => handleDragStart(e, conversation)}
         >
           {conversation.isShared ? (
             <IconMessageShare size={18} />

@@ -102,7 +102,7 @@ export const SettingDialog: FC<Props> = ({ isOpen, onClose }) => {
   return (
     <Dialog open={isOpen} onOpenChange={onClose}>
       {isOpen && (
-        <DialogContent>
+        <DialogContent className='w-5/6 sm:w-4/5 lg:w-[650px]'>
           <DialogHeader>{t('Settings')}</DialogHeader>
           <Form {...form}>
             <form onSubmit={form.handleSubmit(onSubmit)}>

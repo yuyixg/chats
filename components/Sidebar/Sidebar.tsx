@@ -1,9 +1,7 @@
 import { IconMistOff, IconPlus } from '@tabler/icons-react';
 import { ReactNode } from 'react';
 import { useTranslation } from 'next-i18next';
-
 import { CloseSidebarButton, OpenSidebarButton } from './OpenCloseButton';
-
 import Search from '../Search';
 
 interface Props<T> {
@@ -49,15 +47,19 @@ const Sidebar = <T,>({
     e.target.style.background = 'none';
   };
 
-  return isOpen ? (
-    <div>
+  return (
+    <>
       <div
-        className={`fixed top-0 ${side}-0 z-40 flex h-full w-[260px] flex-none flex-col space-y-2 text-black bg-[#f9f9f9] dark:bg-black dark:text-white p-2 text-[14px] transition-all sm:relative sm:top-0`}
+        className={`${
+          isOpen
+            ? 'animate-slide-in w-[260px]'
+            : 'animate-slide-out slide-out-hidden'
+        } fixed top-0 ${side}-0 z-40 flex h-full flex-none flex-col space-y-2 text-black bg-[#f9f9f9] dark:bg-[#202123] dark:text-white p-2 text-[14px] sm:relative sm:top-0`}
       >
         {hasModel() && (
           <div className='flex items-center'>
             <button
-              className='flex w-full flex-shrink-0 cursor-pointer select-none items-center gap-3 rounded-md p-3 text-black dark:text-white transition-colors duration-200 hover:bg-[#cdcdcd] hover:dark:bg-[#343541] bg-[#ececec] dark:bg-[#343541]/80'
+              className='flex w-full flex-shrink-0 cursor-pointer select-none items-center gap-3 rounded-md p-3 text-black dark:text-white hover:bg-[#cdcdcd] hover:dark:bg-[#343541] bg-[#ececec] dark:bg-[#343541]/80'
               onClick={() => {
                 handleCreateItem();
                 handleSearchTerm('');
@@ -95,12 +97,11 @@ const Sidebar = <T,>({
           )}
         </div>
         {footerComponent}
+        <CloseSidebarButton onClick={toggleOpen} side={side} />
       </div>
 
-      <CloseSidebarButton onClick={toggleOpen} side={side} />
-    </div>
-  ) : (
-    <OpenSidebarButton onClick={toggleOpen} side={side} />
+      {!isOpen && <OpenSidebarButton onClick={toggleOpen} side={side} />}
+    </>
   );
 };
 

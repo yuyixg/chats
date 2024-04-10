@@ -4,13 +4,7 @@ import {
   IconTrash,
   IconX,
 } from '@tabler/icons-react';
-import {
-  DragEvent,
-  MouseEventHandler,
-  useContext,
-  useEffect,
-  useState,
-} from 'react';
+import { MouseEventHandler, useContext, useEffect, useState } from 'react';
 
 import { Prompt } from '@/types/prompt';
 
@@ -33,7 +27,6 @@ export const PromptComponent = ({ prompt }: Props) => {
   const [showModal, setShowModal] = useState<boolean>(false);
   const [isDeleting, setIsDeleting] = useState(false);
   const [isRenaming, setIsRenaming] = useState(false);
-  const [renameValue, setRenameValue] = useState('');
 
   const handleUpdate = (prompt: Prompt) => {
     handleUpdatePrompt(prompt);
@@ -61,12 +54,6 @@ export const PromptComponent = ({ prompt }: Props) => {
     setIsDeleting(true);
   };
 
-  const handleDragStart = (e: DragEvent<HTMLButtonElement>, prompt: Prompt) => {
-    if (e.dataTransfer) {
-      e.dataTransfer.setData('prompt', JSON.stringify(prompt));
-    }
-  };
-
   useEffect(() => {
     if (isRenaming) {
       setIsDeleting(false);
@@ -76,30 +63,23 @@ export const PromptComponent = ({ prompt }: Props) => {
   }, [isRenaming, isDeleting]);
 
   return (
-    <div className="relative flex items-center">
+    <div className='relative flex items-center'>
       <button
-        className="flex w-full cursor-pointer items-center gap-3 rounded-lg p-3 text-sm transition-colors duration-200 hover:bg-[#ececec] hover:dark:bg-[#343541]/90"
-        draggable="true"
+        className='flex w-full cursor-pointer items-center gap-3 rounded-lg p-3 text-sm transition-colors duration-200 hover:bg-[#ececec] hover:dark:bg-[#343541]/90'
         onClick={(e) => {
           e.stopPropagation();
           setShowModal(true);
         }}
-        onDragStart={(e) => handleDragStart(e, prompt)}
-        onMouseLeave={() => {
-          setIsDeleting(false);
-          setIsRenaming(false);
-          setRenameValue('');
-        }}
       >
         <IconBulbFilled size={18} />
 
-        <div className="relative max-h-5 flex-1 overflow-hidden text-ellipsis whitespace-nowrap break-all pr-4 text-left text-[12.5px] leading-3">
+        <div className='relative max-h-5 flex-1 overflow-hidden text-ellipsis whitespace-nowrap break-all pr-4 text-left text-[12.5px] leading-3'>
           {prompt.name}
         </div>
       </button>
 
       {(isDeleting || isRenaming) && (
-        <div className="absolute right-1 z-10 flex text-gray-300">
+        <div className='absolute right-1 z-10 flex text-gray-300'>
           <SidebarActionButton handleClick={handleDelete}>
             <IconCheck size={18} />
           </SidebarActionButton>
@@ -111,7 +91,7 @@ export const PromptComponent = ({ prompt }: Props) => {
       )}
 
       {!isDeleting && !isRenaming && (
-        <div className="absolute right-1 z-10 flex text-gray-300">
+        <div className='absolute right-1 z-10 flex text-gray-300'>
           <SidebarActionButton handleClick={handleOpenDeleteModal}>
             <IconTrash size={18} />
           </SidebarActionButton>
