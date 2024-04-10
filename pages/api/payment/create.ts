@@ -24,15 +24,14 @@ const handler = async (req: NextApiRequest, res: NextApiResponse) => {
         return badRequest(res, '订单不存在');
       }
 
-      const weChatAuthResult = await weChatAuth(code);
-      if (!weChatAuthResult) {
-        return badRequest(res, '微信授权失败');
-      }
+      // const weChatAuthResult = await weChatAuth(code);
+      // if (!weChatAuthResult) {
+      //   return badRequest(res, '微信授权失败');
+      // }
 
       const ipAddress = requestIp.getClientIp(req) || '127.0.0.1';
-      const result = await WxPayManager.callWxJSApiPay({
+      const result = await WxPayManager.callWxH5Pay({
         ipAddress,
-        openId: weChatAuthResult.openid,
         orderId: order.id,
         amount: order.amount,
         outTradeNo: order.outTradeNo,

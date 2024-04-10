@@ -20,6 +20,7 @@ export async function weChatAuth(code: string) {
     }
   );
   if (res.errcode) {
+    console.error('WeChat Auth error', JSON.stringify(res));
     return null;
   }
   return res;

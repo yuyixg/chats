@@ -22,7 +22,7 @@ export class WxPayManager {
     const { amount, orderId, ipAddress, openId, outTradeNo } = params;
     const {
       WECHAT_PAY_APP_ID,
-      WECHAT_PAY_SECRET,
+      WECHAT_PAY_MCHID,
       WECHAT_PAY_API_V3_KEY,
       WECHAT_PAY_NOTIFY_URL,
     } = process.env;
@@ -50,7 +50,7 @@ export class WxPayManager {
     );
     const weChartPay = new WxPay(
       WECHAT_PAY_APP_ID!,
-      WECHAT_PAY_SECRET!,
+      WECHAT_PAY_MCHID!,
       publicKey,
       privateKey,
       {
@@ -64,7 +64,7 @@ export class WxPayManager {
     const { amount, orderId, ipAddress, outTradeNo } = params;
     const {
       WECHAT_PAY_APP_ID,
-      WECHAT_PAY_SECRET,
+      WECHAT_PAY_MCHID,
       WECHAT_PAY_API_V3_KEY,
       WECHAT_PAY_NOTIFY_URL,
     } = process.env;
@@ -90,7 +90,7 @@ export class WxPayManager {
     );
     const weChartPay = new WxPay(
       WECHAT_PAY_APP_ID!,
-      WECHAT_PAY_SECRET!,
+      WECHAT_PAY_MCHID!,
       publicKey,
       privateKey,
       {
