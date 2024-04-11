@@ -51,8 +51,8 @@ export default function Authorizing(props: { session: any }) {
   return (
     <>
       {isClient && (
-        <div className='w-full text-center mt-8 text-gray-600'>
-          {t('Authorizing...')}
+        <div className='w-full text-center mt-8 text-gray-600 text-[12.5px]'>
+          {t('Logging in...')}
         </div>
       )}
     </>

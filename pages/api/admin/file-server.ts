@@ -4,7 +4,7 @@ import { getSession } from '@/utils/session';
 import { internalServerError } from '@/utils/error';
 import { FileServerManager } from '@/managers';
 import { addAsterisk, checkKey } from '@/utils/common';
-import { FileServers } from '@prisma/client';
+import { FileServices } from '@prisma/client';
 export const config = {
   api: {
     bodyParser: {
@@ -32,12 +32,12 @@ const handler = async (req: NextApiRequest, res: NextApiResponse) => {
       let data = [];
       if (select) {
         data = servers
-          .filter((x: FileServers) => x.enabled)
-          .map((x: FileServers) => {
+          .filter((x: FileServices) => x.enabled)
+          .map((x: FileServices) => {
             return { id: x.id, name: x.name };
           });
       } else {
-        data = servers.map((x: FileServers) => {
+        data = servers.map((x: FileServices) => {
           const configs = JSON.parse(x?.configs || '{}');
           return {
             id: x.id,

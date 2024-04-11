@@ -50,7 +50,8 @@ export const authOptions: AuthOptions = {
           user = await UsersManager.createUser({
             provider: 'keycloak',
             sub: profile?.sub,
-            username: profile?.name!,
+            account: profile?.name,
+            username: profile?.name,
             password: '-',
             role: '-',
             email: profile?.email,

@@ -3,7 +3,7 @@ import { ChatModelManager } from './models';
 import { UsersManager } from './users';
 import { UserModelManager } from './userModels';
 import { SessionsManager } from './sessions';
-import { FileServerManager } from './fileServer';
+import { FileServiceManager } from './fileService';
 import { UserBalancesManager } from './userBalances';
 import { WxPayManager } from './wxPay';
 import { OrdersManager } from './order';
@@ -14,7 +14,7 @@ export {
   UsersManager,
   UserModelManager,
   SessionsManager,
-  FileServerManager,
+  FileServiceManager as FileServerManager,
   UserBalancesManager,
   WxPayManager,
   OrdersManager,

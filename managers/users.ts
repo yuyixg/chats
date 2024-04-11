@@ -6,7 +6,8 @@ import { ProviderType } from '@/types/user';
 import { weChatAuth } from '@/utils/weChat';
 
 export interface CreateUser {
-  username: string;
+  account?: string;
+  username?: string;
   password: string;
   role: string;
   email?: string;
@@ -45,9 +46,9 @@ export class UsersManager {
     return await prisma.users.findFirst({ where: { provider, sub } });
   }
 
-  static async findByUsername(username: string) {
+  static async findByAccount(account: string) {
     return await prisma.users.findFirst({
-      where: { username: username.toLowerCase() },
+      where: { account: account.toLowerCase() },
     });
   }
 
@@ -57,7 +58,7 @@ export class UsersManager {
       where: {
         OR: [
           {
-            username: _value,
+            account: _value,
           },
           {
             phone: _value,
@@ -153,7 +154,8 @@ export class UsersManager {
     );
     if (!user) {
       user = await this.createUser({
-        username: result.openid,
+        account: result.openid,
+        username: '微信用户',
         password: '-',
         role: '-',
         provider: ProviderType.WeChat,

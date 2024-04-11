@@ -2,7 +2,8 @@
 CREATE TABLE "Users" (
     "id" TEXT NOT NULL PRIMARY KEY,
     "avatar" TEXT,
-    "username" TEXT NOT NULL,
+    "account" TEXT,
+    "username" TEXT,
     "password" TEXT NOT NULL,
     "email" TEXT,
     "phone" TEXT,
@@ -15,7 +16,7 @@ CREATE TABLE "Users" (
 );
 
 -- CreateTable
-CREATE TABLE "FileServers" (
+CREATE TABLE "FileServices" (
     "id" TEXT NOT NULL PRIMARY KEY,
     "name" TEXT NOT NULL,
     "enabled" BOOLEAN NOT NULL DEFAULT true,
@@ -110,7 +111,8 @@ CREATE TABLE "Orders" (
     "payH5Url" TEXT,
     "prepayId" TEXT,
     "createdAt" DATETIME NOT NULL DEFAULT CURRENT_TIMESTAMP,
-    "updatedAt" DATETIME NOT NULL
+    "updatedAt" DATETIME NOT NULL,
+    CONSTRAINT "Orders_createUserId_fkey" FOREIGN KEY ("createUserId") REFERENCES "Users" ("id") ON DELETE RESTRICT ON UPDATE CASCADE
 );
 
 -- CreateTable
@@ -121,6 +123,44 @@ CREATE TABLE "Counterfoils" (
     "createdAt" DATETIME NOT NULL DEFAULT CURRENT_TIMESTAMP
 );
 
+-- CreateTable
+CREATE TABLE "LoginServices" (
+    "id" TEXT NOT NULL PRIMARY KEY,
+    "type" TEXT NOT NULL,
+    "configs" TEXT NOT NULL DEFAULT '{}',
+    "createdAt" DATETIME NOT NULL DEFAULT CURRENT_TIMESTAMP,
+    "updatedAt" DATETIME NOT NULL
+);
+
+-- CreateTable
+CREATE TABLE "UserSms" (
+    "id" TEXT NOT NULL PRIMARY KEY,
+    "type" TEXT NOT NULL,
+    "status" TEXT NOT NULL,
+    "code" TEXT NOT NULL,
+    "createdAt" DATETIME NOT NULL DEFAULT CURRENT_TIMESTAMP
+);
+
+-- CreateTable
+CREATE TABLE "PayServices" (
+    "id" TEXT NOT NULL PRIMARY KEY,
+    "type" TEXT NOT NULL,
+    "configs" TEXT NOT NULL DEFAULT '{}',
+    "createdAt" DATETIME NOT NULL DEFAULT CURRENT_TIMESTAMP,
+    "updatedAt" DATETIME NOT NULL
+);
+
+-- CreateTable
+CREATE TABLE "AuditLogs" (
+    "id" TEXT NOT NULL PRIMARY KEY,
+    "userId" TEXT NOT NULL,
+    "url" TEXT NOT NULL,
+    "statusCode" INTEGER NOT NULL,
+    "content" TEXT NOT NULL DEFAULT '{}',
+    "createdAt" DATETIME NOT NULL DEFAULT CURRENT_TIMESTAMP,
+    CONSTRAINT "AuditLogs_userId_fkey" FOREIGN KEY ("userId") REFERENCES "Users" ("id") ON DELETE RESTRICT ON UPDATE CASCADE
+);
+
 -- CreateIndex
 CREATE UNIQUE INDEX "Users_email_key" ON "Users"("email");
 
@@ -128,7 +168,7 @@ CREATE UNIQUE INDEX "Users_email_key" ON "Users"("email");
 CREATE UNIQUE INDEX "Users_phone_key" ON "Users"("phone");
 
 -- CreateIndex
-CREATE UNIQUE INDEX "FileServers_name_key" ON "FileServers"("name");
+CREATE UNIQUE INDEX "FileServices_name_key" ON "FileServices"("name");
 
 -- CreateIndex
 CREATE UNIQUE INDEX "ChatModels_name_key" ON "ChatModels"("name");

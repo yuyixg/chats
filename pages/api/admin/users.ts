@@ -32,6 +32,7 @@ const handler = async (req: NextApiRequest, res: NextApiResponse) => {
         return {
           id: x.id,
           username: x.username,
+          account: x.account,
           role: x.role,
           balance: x.userBalances?.balance,
           avatar: x.avatar,
@@ -60,13 +61,13 @@ const handler = async (req: NextApiRequest, res: NextApiResponse) => {
       });
       return res.send(data);
     } else {
-      const { username, password, role } = req.body;
-      let isFound = await UsersManager.findByUsername(username);
+      const { account, password, role } = req.body;
+      let isFound = await UsersManager.findByAccount(account);
       if (isFound) {
         return res.status(400).send('User existed.');
       }
       const user = await UsersManager.createUser({
-        username,
+        account,
         password,
         role,
       });

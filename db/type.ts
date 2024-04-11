@@ -28,7 +28,8 @@ export interface MessagesRelate {
 export interface UsersRelate {
   id: string;
   avatar: string | null;
-  username: string;
+  account: string | null;
+  username: string | null;
   password: string;
   email: string | null;
   phone: string | null;

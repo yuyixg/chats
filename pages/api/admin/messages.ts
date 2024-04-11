@@ -66,7 +66,7 @@ const handler = async (req: NextApiRequest, res: NextApiResponse) => {
       return res.send(data);
     } else {
       const { username, password, role } = req.body;
-      let isFound = await UsersManager.findByUsername(username);
+      let isFound = await UsersManager.findByAccount(username);
       if (isFound) {
         return res.status(400).send('User existed.');
       }

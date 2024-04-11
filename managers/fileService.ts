@@ -8,9 +8,9 @@ import {
 import AWS from 'aws-sdk';
 import fs from 'fs';
 
-export class FileServerManager {
+export class FileServiceManager {
   static async findById(id: string) {
-    const fileServer = await prisma.fileServers.findUnique({ where: { id } });
+    const fileServer = await prisma.fileServices.findUnique({ where: { id } });
     return {
       ...fileServer,
       configs: JSON.parse(fileServer?.configs || '{}'),
@@ -18,23 +18,23 @@ export class FileServerManager {
   }
 
   static async findByName(name: string) {
-    return await prisma.fileServers.findFirst({ where: { name } });
+    return await prisma.fileServices.findFirst({ where: { name } });
   }
 
   static async createFileServer(params: PostFileServerParams) {
-    return await prisma.fileServers.create({ data: { ...params } });
+    return await prisma.fileServices.create({ data: { ...params } });
   }
 
   static async findFileServers(findAll: boolean = true) {
     const where = { enabled: true };
-    return await prisma.fileServers.findMany({
+    return await prisma.fileServices.findMany({
       where: findAll ? {} : where,
       orderBy: { createdAt: 'desc' },
     });
   }
 
   static async updateFileServer(params: PutFileServerParams) {
-    return await prisma.fileServers.update({
+    return await prisma.fileServices.update({
       where: { id: params.id },
       data: { ...params },
     });

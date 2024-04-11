@@ -13,7 +13,8 @@ datasource db {
 model Users {
   id           String        @id @default(uuid())
   avatar       String?
-  username     String
+  account      String?       @unique
+  username     String?
   password     String
   email        String?       @unique
   phone        String?       @unique
@@ -27,9 +28,11 @@ model Users {
   messages     Messages[]
   userBalances UserBalances?
   UserModels   UserModels[]
+  AuditLogs    AuditLogs[]
+  Orders       Orders[]
 }
 
-model FileServers {
+model FileServices {
   id        String   @id @default(uuid())
   name      String   @unique
   enabled   Boolean  @default(true)
@@ -119,6 +122,7 @@ model Orders {
   prepayId     String?
   createdAt    DateTime @default(now())
   updatedAt    DateTime @updatedAt
+  user         Users    @relation(fields: [createUserId], references: [id])
 }
 
 model Counterfoils {
@@ -126,4 +130,38 @@ model Counterfoils {
   orderId   String
   info      String
   createdAt DateTime @default(now())
+}
+
+model LoginServices {
+  id        String   @id @default(uuid())
+  type      String
+  configs   String   @default("{}")
+  createdAt DateTime @default(now())
+  updatedAt DateTime @updatedAt
+}
+
+model UserSms {
+  id        String   @id @default(uuid())
+  type      String
+  status    String
+  code      String
+  createdAt DateTime @default(now())
+}
+
+model PayServices {
+  id        String   @id @default(uuid())
+  type      String
+  configs   String   @default("{}")
+  createdAt DateTime @default(now())
+  updatedAt DateTime @updatedAt
+}
+
+model AuditLogs {
+  id         String   @id @default(uuid())
+  userId     String
+  url        String
+  statusCode Int
+  content    String   @default("{}")
+  createdAt  DateTime @default(now())
+  user       Users    @relation(fields: [userId], references: [id])
 }
