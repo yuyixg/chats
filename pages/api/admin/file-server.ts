@@ -28,7 +28,7 @@ const handler = async (req: NextApiRequest, res: NextApiResponse) => {
   try {
     if (req.method === 'GET') {
       const { select } = req.query;
-      const servers = await FileServerManager.findFileServers();
+      const servers = await FileServerManager.findFileServices();
       let data = [];
       if (select) {
         data = servers
@@ -74,7 +74,7 @@ const handler = async (req: NextApiRequest, res: NextApiResponse) => {
         configs.accessSecret
       );
 
-      const data = await FileServerManager.updateFileServer({
+      const data = await FileServerManager.updateFileServices({
         id,
         name,
         type,
@@ -89,7 +89,7 @@ const handler = async (req: NextApiRequest, res: NextApiResponse) => {
       if (isFound) {
         return res.status(400).send('Name existed');
       }
-      const fileServer = await FileServerManager.createFileServer({
+      const fileServer = await FileServerManager.createFileServices({
         type,
         name,
         enabled,

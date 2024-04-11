@@ -6,7 +6,7 @@ import {
 } from '@/managers';
 import { getSession } from '@/utils/session';
 import { internalServerError, unauthorized } from '@/utils/error';
-import { ChatModels, FileServers } from '@prisma/client';
+import { ChatModels, FileServices } from '@prisma/client';
 export const config = {
   api: {
     bodyParser: {
@@ -26,12 +26,12 @@ const handler = async (req: NextApiRequest, res: NextApiResponse) => {
       session.userId!
     );
     const models = await ChatModelManager.findModels();
-    const fileServers = await FileServerManager.findFileServers(false);
+    const fileServices = await FileServerManager.findFileServices(false);
     const _models = models
       .filter((m: ChatModels) => userModels.includes(m.id!))
       .map((x: ChatModels) => {
-        const fileServer = fileServers.find(
-          (f: FileServers) => f.id === x.fileServerId
+        const fileServer = fileServices.find(
+          (f: FileServices) => f.id === x.fileServerId
         );
         return {
           id: x.id,

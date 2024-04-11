@@ -1,4 +1,4 @@
-import { getFileServers, postModels } from '@/apis/adminService';
+import { getFileServices, postModels } from '@/apis/adminService';
 import { useTranslation } from 'next-i18next';
 import React, { useEffect, useState } from 'react';
 import toast from 'react-hot-toast';
@@ -20,7 +20,7 @@ import FormTextarea from '../../ui/form/textarea';
 import { Button } from '../../ui/button';
 import FormSelect from '@/components/ui/form/select';
 import { ModelVersions } from '@/types/model';
-import { GetFileServerResult, PostModelParams } from '@/types/admin';
+import { GetFileServicesResult, PostModelParams } from '@/types/admin';
 import {
   getModelApiConfigJson,
   getModelFileConfig,
@@ -39,7 +39,7 @@ interface IProps {
 
 export const AddModelModal = (props: IProps) => {
   const { t } = useTranslation('admin');
-  const [fileServers, setFileServers] = useState<GetFileServerResult[]>([]);
+  const [fileServices, setFileServices] = useState<GetFileServicesResult[]>([]);
   const { isOpen, onClose, onSuccessful } = props;
 
   const formFields: IFormFieldOption[] = [
@@ -99,7 +99,7 @@ export const AddModelModal = (props: IProps) => {
           hidden={
             !getModelFileConfig(form.getValues('modelVersion') as ModelVersions)
           }
-          items={fileServers.map((item) => ({
+          items={fileServices.map((item) => ({
             name: item.name,
             value: item.id,
           }))}
@@ -192,8 +192,8 @@ export const AddModelModal = (props: IProps) => {
 
   useEffect(() => {
     if (isOpen) {
-      getFileServers(true).then((data) => {
-        setFileServers(data);
+      getFileServices(true).then((data) => {
+        setFileServices(data);
       });
       form.reset();
       form.formState.isValid;

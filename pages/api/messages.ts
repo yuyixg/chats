@@ -2,7 +2,7 @@ import type { NextApiRequest, NextApiResponse } from 'next';
 import { ChatMessageManager, FileServerManager } from '@/managers';
 import { getSession } from '@/utils/session';
 import { badRequest, internalServerError } from '@/utils/error';
-import { FileServers } from '@prisma/client';
+import { FileServices } from '@prisma/client';
 import { MessagesRelate } from '@/db/type';
 export const config = {
   api: {
@@ -24,10 +24,10 @@ const handler = async (req: NextApiRequest, res: NextApiResponse) => {
       const messages = await ChatMessageManager.findUserMessages(
         session.userId
       );
-      const fileServers = await FileServerManager.findFileServers(false);
+      const fileServices = await FileServerManager.findFileServices(false);
       const data = messages.map((x: MessagesRelate) => {
-        const fileServer = fileServers.find(
-          (f: FileServers) => f.id === x.chatModel!.fileServerId
+        const fileServer = fileServices.find(
+          (f: FileServices) => f.id === x.chatModel!.fileServerId
         );
         return {
           id: x.id,

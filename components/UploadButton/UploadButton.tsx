@@ -2,7 +2,7 @@ import { useEffect, useRef } from 'react';
 import toast from 'react-hot-toast';
 import { useTranslation } from 'next-i18next';
 import { getFileEndpoint } from '@/utils/apis';
-import { FileServerType } from '@/types/file';
+import { FileServicesType } from '@/types/file';
 import { ChatModelFileConfig } from '@/types/model';
 
 interface Props {
@@ -12,7 +12,7 @@ interface Props {
   children?: React.ReactNode;
   fileServerConfig?: {
     id: string;
-    type: FileServerType;
+    type: FileServicesType;
   };
   fileConfig: ChatModelFileConfig;
   maxFileSize?: number;
@@ -46,7 +46,7 @@ const UploadButton: React.FunctionComponent<Props> = ({
         const { id: serverId, type: serverType } = fileServerConfig!;
         const url = getFileEndpoint(serverType, serverId);
         onUploading && onUploading();
-        if (serverType === FileServerType.Local) {
+        if (serverType === FileServicesType.Local) {
           const fileForm = new FormData();
           fileForm.append('file', file);
           const response = await fetch(url, {

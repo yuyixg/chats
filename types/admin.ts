@@ -1,7 +1,7 @@
 import { ModelVersions, ModelType } from './model';
 import { Paging } from './page';
 import { Message } from './chat';
-import { PutFileServerParams } from './file';
+import { PutFileServicesParams } from './file';
 import Decimal from 'decimal.js';
 
 export const enum UserRole {
@@ -124,7 +124,7 @@ export interface GetMessageDetailsResult {
   messages: Message[];
 }
 
-export interface GetFileServerResult extends PutFileServerParams {
+export interface GetFileServicesResult extends PutFileServicesParams {
   createdAt: string;
   updatedAt: string;
 }

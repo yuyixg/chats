@@ -1,6 +1,6 @@
-import { deleteModels, getFileServers, putModels } from '@/apis/adminService';
+import { deleteModels, getFileServices, putModels } from '@/apis/adminService';
 import {
-  GetFileServerResult,
+  GetFileServicesResult,
   GetModelResult,
   PutModelParams,
 } from '@/types/admin';
@@ -43,7 +43,7 @@ interface IProps {
 export const EditModelModal = (props: IProps) => {
   const { t } = useTranslation('admin');
   const { isOpen, onClose, selected, onSuccessful } = props;
-  const [fileServers, setFileServers] = useState<GetFileServerResult[]>([]);
+  const [fileServices, setFileServices] = useState<GetFileServicesResult[]>([]);
   const [deleting, setDeleting] = useState(false);
   const formFields: IFormFieldOption[] = [
     {
@@ -85,7 +85,7 @@ export const EditModelModal = (props: IProps) => {
       render: (options: IFormFieldOption, field: FormFieldType) => (
         <FormSelect
           hidden={!getModelFileConfig(selected?.modelVersion)}
-          items={fileServers.map((item) => ({
+          items={fileServices.map((item) => ({
             name: item.name,
             value: item.id,
           }))}
@@ -189,8 +189,8 @@ export const EditModelModal = (props: IProps) => {
 
   useEffect(() => {
     if (isOpen) {
-      getFileServers(true).then((data) => {
-        setFileServers(data);
+      getFileServices(true).then((data) => {
+        setFileServices(data);
       });
       form.reset();
       form.formState.isValid;

@@ -1,9 +1,9 @@
 import prisma from '@/db/prisma';
 import {
-  FileServerType,
+  FileServicesType,
   IFileConfig,
-  PostFileServerParams,
-  PutFileServerParams,
+  PostFileServicesParams,
+  PutFileServicesParams,
 } from '@/types/file';
 import AWS from 'aws-sdk';
 import fs from 'fs';
@@ -21,11 +21,11 @@ export class FileServiceManager {
     return await prisma.fileServices.findFirst({ where: { name } });
   }
 
-  static async createFileServer(params: PostFileServerParams) {
+  static async createFileServices(params: PostFileServicesParams) {
     return await prisma.fileServices.create({ data: { ...params } });
   }
 
-  static async findFileServers(findAll: boolean = true) {
+  static async findFileServices(findAll: boolean = true) {
     const where = { enabled: true };
     return await prisma.fileServices.findMany({
       where: findAll ? {} : where,
@@ -33,23 +33,23 @@ export class FileServiceManager {
     });
   }
 
-  static async updateFileServer(params: PutFileServerParams) {
+  static async updateFileServices(params: PutFileServicesParams) {
     return await prisma.fileServices.update({
       where: { id: params.id },
       data: { ...params },
     });
   }
 
-  static async initFileServer(type: FileServerType, configs: IFileConfig) {
+  static async initFileServer(type: FileServicesType, configs: IFileConfig) {
     const { storageFolderName, accessKey, accessSecret, region, bucketName } =
       configs;
-    if (type === FileServerType.Local && storageFolderName) {
+    if (type === FileServicesType.Local && storageFolderName) {
       const isExisted = await fs.existsSync('public/' + storageFolderName);
       if (!isExisted) {
         await fs.mkdirSync('public/' + storageFolderName);
       }
     } else if (
-      type === FileServerType.Aws &&
+      type === FileServicesType.Aws &&
       accessKey &&
       accessSecret &&
       region &&

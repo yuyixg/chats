@@ -1,6 +1,6 @@
 import React, { useEffect, useState } from 'react';
-import { getFileServers } from '@/apis/adminService';
-import { GetFileServerResult } from '@/types/admin';
+import { getFileServices } from '@/apis/adminService';
+import { GetFileServicesResult } from '@/types/admin';
 import { serverSideTranslations } from 'next-i18next/serverSideTranslations';
 import { useTranslation } from 'next-i18next';
 import {
@@ -20,23 +20,23 @@ import { DEFAULT_LANGUAGE } from '@/types/settings';
 export default function FileServer() {
   const { t } = useTranslation('admin');
   const [isOpen, setIsOpen] = useState(false);
-  const [selected, setSelected] = useState<GetFileServerResult | null>(null);
-  const [fileServers, setFileServers] = useState<GetFileServerResult[]>([]);
+  const [selected, setSelected] = useState<GetFileServicesResult | null>(null);
+  const [fileServices, setFileServices] = useState<GetFileServicesResult[]>([]);
   const [loading, setLoading] = useState(true);
   useEffect(() => {
     init();
   }, []);
 
   const init = () => {
-    getFileServers().then((data) => {
-      setFileServers(data);
+    getFileServices().then((data) => {
+      setFileServices(data);
       setIsOpen(false);
       setSelected(null);
       setLoading(false);
     });
   };
 
-  const handleShow = (item: GetFileServerResult) => {
+  const handleShow = (item: GetFileServicesResult) => {
     setSelected(item);
     setIsOpen(true);
   };
@@ -70,8 +70,8 @@ export default function FileServer() {
               <TableHead>{t('Created Time')}</TableHead>
             </TableRow>
           </TableHeader>
-          <TableBody isLoading={loading} isEmpty={fileServers.length === 0}>
-            {fileServers.map((item) => (
+          <TableBody isLoading={loading} isEmpty={fileServices.length === 0}>
+            {fileServices.map((item) => (
               <TableRow
                 className='cursor-pointer'
                 key={item.id}

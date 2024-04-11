@@ -1,4 +1,4 @@
-import { FileServerType } from './file';
+import { FileServicesType } from './file';
 
 export interface Model {
   id: string;
@@ -10,7 +10,7 @@ export interface Model {
   tokenLimit?: number;
   fileServerConfig: {
     id: string;
-    type: FileServerType;
+    type: FileServicesType;
   };
   fileConfig?: ChatModelFileConfig;
   enabled?: boolean;

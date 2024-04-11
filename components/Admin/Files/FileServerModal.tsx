@@ -20,16 +20,16 @@ import FormTextarea from '../../ui/form/textarea';
 import { Button } from '../../ui/button';
 import FormSelect from '@/components/ui/form/select';
 import {
-  FileServerType,
-  PostFileServerParams,
-  PutFileServerParams,
+  FileServicesType,
+  PostFileServicesParams,
+  PutFileServicesParams,
 } from '@/types/file';
 import { getFileConfigs } from '@/utils/file';
-import { GetFileServerResult } from '@/types/admin';
+import { GetFileServicesResult } from '@/types/admin';
 import { mergeConfigs } from '@/utils/model';
 
 interface IProps {
-  selected: GetFileServerResult | null;
+  selected: GetFileServicesResult | null;
   isOpen: boolean;
   onClose: () => void;
   onSuccessful: () => void;
@@ -46,9 +46,9 @@ export const FileServerModal = (props: IProps) => {
       defaultValue: '',
       render: (options: IFormFieldOption, field: FormFieldType) => (
         <FormSelect
-          items={Object.keys(FileServerType).map((key) => ({
-            name: FileServerType[key as keyof typeof FileServerType],
-            value: FileServerType[key as keyof typeof FileServerType],
+          items={Object.keys(FileServicesType).map((key) => ({
+            name: FileServicesType[key as keyof typeof FileServicesType],
+            value: FileServicesType[key as keyof typeof FileServicesType],
           }))}
           options={options}
           field={field}
@@ -109,9 +109,9 @@ export const FileServerModal = (props: IProps) => {
     if (!form.formState.isValid) return;
     let p = null;
     if (selected) {
-      p = putFileServer({ ...values, id: selected.id } as PutFileServerParams);
+      p = putFileServer({ ...values, id: selected.id } as PutFileServicesParams);
     } else {
-      p = postFileServer(values as PostFileServerParams);
+      p = postFileServer(values as PostFileServicesParams);
     }
     p.then(() => {
       onSuccessful();
@@ -144,7 +144,7 @@ export const FileServerModal = (props: IProps) => {
   useEffect(() => {
     const subscription = form.watch((value, { name, type }) => {
       if (name === 'type' && type === 'change') {
-        const type = value.type as FileServerType;
+        const type = value.type as FileServicesType;
         form.setValue(
           'configs',
           JSON.stringify(getFileConfigs(type) || {}, null, 2)

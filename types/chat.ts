@@ -1,4 +1,4 @@
-import { FileServerType } from './file';
+import { FileServicesType } from './file';
 import { Model } from './model';
 
 export type Role = 'assistant' | 'user';
@@ -64,6 +64,6 @@ export interface Conversation {
   isShared: boolean;
   fileServerConfig: {
     id: string;
-    type: FileServerType;
+    type: FileServicesType;
   };
 }

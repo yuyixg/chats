@@ -1,25 +1,25 @@
-import { FileServerType } from '@/types/file';
+import { FileServicesType } from '@/types/file';
 
-export function getFileConfigs(type: FileServerType) {
+export function getFileConfigs(type: FileServicesType) {
   return FileDefaultTemplates[type] as any;
 }
 
 export const FileDefaultTemplates = {
-  [FileServerType.Local]: {
+  [FileServicesType.Local]: {
     storageFolderName: '',
   },
-  [FileServerType.Minio]: {
+  [FileServicesType.Minio]: {
     accessKey: '',
     accessSecret: '',
     endpoint: '',
     bucketName: '',
   },
-  [FileServerType.Aws]: {
+  [FileServicesType.Aws]: {
     accessKey: '',
     accessSecret: '',
     region: '',
     bucketName: '',
   },
-  [FileServerType.Azure]: {},
-  [FileServerType.Aliyun]: {},
+  [FileServicesType.Azure]: {},
+  [FileServicesType.Aliyun]: {},
 };

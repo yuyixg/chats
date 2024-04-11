@@ -1,4 +1,4 @@
-export enum FileServerType {
+export enum FileServicesType {
   Local = 'Local',
   Minio = 'Minio',
   Aws = 'Aws',
@@ -15,13 +15,13 @@ export interface IFileConfig {
   storageFolderName?: string;
 }
 
-export interface PostFileServerParams {
-  type: FileServerType;
+export interface PostFileServicesParams {
+  type: FileServicesType;
   name: string;
   enabled: boolean;
   configs: string;
 }
 
-export interface PutFileServerParams extends PostFileServerParams {
+export interface PutFileServicesParams extends PostFileServicesParams {
   id: string;
 }
