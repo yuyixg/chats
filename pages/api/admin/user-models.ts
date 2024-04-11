@@ -2,7 +2,7 @@ import type { NextApiRequest, NextApiResponse } from 'next';
 import { ChatModelManager, UserModelManager } from '@/managers';
 import { UserRole } from '@/types/admin';
 import { getSession } from '@/utils/session';
-import { internalServerError, modelUnauthorized } from '@/utils/error';
+import { InternalServerError, ModelUnauthorized } from '@/utils/error';
 import { ChatModels, UserModels } from '@prisma/client';
 import { apiHandler } from '@/middleware/api-handler';
 export const config = {
@@ -67,7 +67,7 @@ const handler = async (req: NextApiRequest, res: NextApiResponse) => {
       );
       const model = await ChatModelManager.findModelById(modelId);
       if (!model) {
-        return modelUnauthorized(res);
+        throw new ModelUnauthorized();
       }
       userModels.map((um: UserModels) => {
         const models = JSON.parse(um.models || '[]') as any[];
@@ -86,9 +86,10 @@ const handler = async (req: NextApiRequest, res: NextApiResponse) => {
         await UserModelManager.updateUserModel(um.id!, um.models);
       }
     }
-  } catch (error) {
-    console.error(error);
-    return internalServerError(res);
+  } catch (error: any) {
+    throw new InternalServerError(
+      JSON.stringify({ message: error?.message, stack: error?.stack })
+    );
   }
 };
 

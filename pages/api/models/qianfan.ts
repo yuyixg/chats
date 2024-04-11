@@ -9,9 +9,9 @@ import {
 } from '@/managers';
 import { getSession } from '@/utils/session';
 import {
-  badRequest,
-  internalServerError,
-  modelUnauthorized,
+  BadRequest,
+  InternalServerError,
+  ModelUnauthorized,
 } from '@/utils/error';
 import { verifyModel } from '@/utils/model';
 import { calcTokenPrice } from '@/utils/message';
@@ -30,26 +30,26 @@ const handler = async (req: NextApiRequest, res: NextApiResponse) => {
   try {
     const session = await getSession(req.cookies);
     if (!session) {
-      return modelUnauthorized(res);
+      throw new ModelUnauthorized();
     }
     const { userId } = session;
     const { model, messages, messageId } = req.body as ChatBody;
 
     const chatModel = await ChatModelManager.findModelById(model.id);
     if (!chatModel?.enabled) {
-      return modelUnauthorized(res);
+      throw new ModelUnauthorized();
     }
 
     const { modelConfig, priceConfig } = chatModel;
 
     const userModel = await UserModelManager.findUserModel(userId, model.id);
     if (!userModel || !userModel.enabled) {
-      return modelUnauthorized(res);
+      throw new ModelUnauthorized();
     }
 
     const verifyMessage = verifyModel(userModel, modelConfig);
     if (verifyMessage) {
-      return badRequest(res, verifyMessage);
+      throw new BadRequest(verifyMessage);
     }
 
     let messagesToSend: QianFanMessage[] = [];
@@ -110,13 +110,15 @@ const handler = async (req: NextApiRequest, res: NextApiResponse) => {
       };
 
       streamResponse().catch((error) => {
-        console.error(error);
-        return internalServerError(res);
+        throw new InternalServerError(
+          JSON.stringify({ message: error?.message, stack: error?.stack })
+        );
       });
     }
-  } catch (error) {
-    console.error(error);
-    return internalServerError(res);
+  } catch (error: any) {
+    throw new InternalServerError(
+      JSON.stringify({ message: error?.message, stack: error?.stack })
+    );
   }
 };
 

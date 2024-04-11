@@ -1,6 +1,6 @@
-import { FileServerManager } from '@/managers';
+import { FileServiceManager } from '@/managers';
 import { apiHandler } from '@/middleware/api-handler';
-import { badRequest, internalServerError, unauthorized } from '@/utils/error';
+import { BadRequest, InternalServerError, Unauthorized } from '@/utils/error';
 import { getSession } from '@/utils/session';
 import { IncomingForm } from 'formidable';
 import { promises as fs } from 'fs';
@@ -16,12 +16,12 @@ const handler = async (req: NextApiRequest, res: NextApiResponse) => {
   try {
     const session = await getSession(req.cookies);
     if (!session) {
-      return unauthorized(res);
+      throw new Unauthorized();
     }
     const { id } = req.query as { id: string };
-    const fileServer = await FileServerManager.findById(id);
+    const fileServer = await FileServiceManager.findById(id);
     if (!fileServer || !fileServer.enabled) {
-      return badRequest(res, 'Not found File Server');
+      throw new BadRequest('Not found File Server');
     }
 
     const {
@@ -49,9 +49,10 @@ const handler = async (req: NextApiRequest, res: NextApiResponse) => {
       res.status(400).end('Upload failed!');
       return;
     }
-  } catch (error) {
-    console.error(error);
-    return internalServerError(res);
+  } catch (error: any) {
+    throw new InternalServerError(
+      JSON.stringify({ message: error?.message, stack: error?.stack })
+    );
   }
 };
 

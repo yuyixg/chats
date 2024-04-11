@@ -2,7 +2,7 @@ import type { NextApiRequest, NextApiResponse } from 'next';
 import { UsersManager } from '@/managers';
 import { UserRole } from '@/types/admin';
 import { getSession } from '@/utils/session';
-import { internalServerError } from '@/utils/error';
+import { InternalServerError } from '@/utils/error';
 import { UsersRelate } from '@/db/type';
 import { apiHandler } from '@/middleware/api-handler';
 export const config = {
@@ -75,9 +75,10 @@ const handler = async (req: NextApiRequest, res: NextApiResponse) => {
       await UsersManager.initialUser(user.id!, session.userId);
       return user;
     }
-  } catch (error) {
-    console.error(error);
-    return internalServerError(res);
+  } catch (error: any) {
+    throw new InternalServerError(
+      JSON.stringify({ message: error?.message, stack: error?.stack })
+    );
   }
 };
 

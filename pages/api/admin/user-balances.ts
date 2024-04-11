@@ -1,7 +1,7 @@
 import type { NextApiRequest, NextApiResponse } from 'next';
 import { UserRole } from '@/types/admin';
 import { getSession } from '@/utils/session';
-import { internalServerError } from '@/utils/error';
+import { InternalServerError } from '@/utils/error';
 import { UserBalancesManager } from '@/managers';
 import { apiHandler } from '@/middleware/api-handler';
 export const config = {
@@ -35,9 +35,10 @@ const handler = async (req: NextApiRequest, res: NextApiResponse) => {
       return data;
     } else if (req.method === 'GET') {
     }
-  } catch (error) {
-    console.error(error);
-    return internalServerError(res);
+  } catch (error: any) {
+    throw new InternalServerError(
+      JSON.stringify({ message: error?.message, stack: error?.stack })
+    );
   }
 };
 

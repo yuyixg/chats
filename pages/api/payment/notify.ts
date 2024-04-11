@@ -5,6 +5,7 @@ import { OrderStatus } from '@/types/order';
 import Decimal from 'decimal.js';
 import { centsToYuan } from '@/utils/wxpay/utils';
 import { apiHandler } from '@/middleware/api-handler';
+import { InternalServerError } from '@/utils/error';
 export const config = {
   api: {
     bodyParser: {
@@ -46,9 +47,10 @@ const handler = async (req: NextApiRequest, res: NextApiResponse) => {
         return res.status(400).json({ code: 'FAIL' });
       }
     }
-  } catch (error) {
-    console.error(error);
-    return res.status(400).json({ code: 'FAIL' });
+  } catch (error: any) {
+    throw new InternalServerError(
+      JSON.stringify({ message: error?.message, stack: error?.stack })
+    );
   }
 };
 

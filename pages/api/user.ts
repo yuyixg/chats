@@ -1,6 +1,6 @@
 import { NextApiRequest, NextApiResponse } from 'next';
 import { SessionsManager, UsersManager } from '@/managers';
-import { badRequest, internalServerError } from '@/utils/error';
+import { BadRequest, InternalServerError } from '@/utils/error';
 import bcrypt from 'bcryptjs';
 import { getSession } from '@/utils/session';
 import { apiHandler } from '@/middleware/api-handler';
@@ -33,7 +33,7 @@ async function handler(req: NextApiRequest, res: NextApiResponse) {
           role: user.role,
         };
       }
-      return badRequest(res, 'Username or password incorrect');
+      throw new BadRequest('Username or password incorrect');
     } else if (req.method === 'PUT') {
       const session = await getSession(req.cookies);
       if (!session) {
@@ -42,7 +42,7 @@ async function handler(req: NextApiRequest, res: NextApiResponse) {
       const { newPassword } = req.body;
       const user = await UsersManager.findByUserId(session.userId);
       if (!user) {
-        return badRequest(res, 'User not found');
+        throw new BadRequest('Username or password incorrect');
       }
       const hashPassword = await bcrypt.hashSync(newPassword);
       const result = await UsersManager.updateUserPassword(
@@ -52,7 +52,9 @@ async function handler(req: NextApiRequest, res: NextApiResponse) {
       return result;
     }
   } catch (error: any) {
-    return internalServerError(res);
+    throw new InternalServerError(
+      JSON.stringify({ message: error?.message, stack: error?.stack })
+    );
   }
 }
 

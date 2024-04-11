@@ -2,7 +2,7 @@ import type { NextApiRequest, NextApiResponse } from 'next';
 import { ChatMessageManager, UserModelManager, UsersManager } from '@/managers';
 import { UserRole } from '@/types/admin';
 import { getSession } from '@/utils/session';
-import { internalServerError } from '@/utils/error';
+import { InternalServerError } from '@/utils/error';
 import { apiHandler } from '@/middleware/api-handler';
 export const config = {
   api: {
@@ -82,9 +82,10 @@ const handler = async (req: NextApiRequest, res: NextApiResponse) => {
       });
       return user;
     }
-  } catch (error) {
-    console.error(error);
-    return internalServerError(res);
+  } catch (error: any) {
+    throw new InternalServerError(
+      JSON.stringify({ message: error?.message, stack: error?.stack })
+    );
   }
 };
 

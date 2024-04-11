@@ -1,7 +1,7 @@
 import type { NextApiRequest, NextApiResponse } from 'next';
-import { ChatMessageManager, FileServerManager } from '@/managers';
+import { ChatMessageManager, FileServiceManager } from '@/managers';
 import { getSession } from '@/utils/session';
-import { badRequest, internalServerError } from '@/utils/error';
+import { BadRequest, InternalServerError } from '@/utils/error';
 import { FileServices } from '@prisma/client';
 import { MessagesRelate } from '@/db/type';
 import { apiHandler } from '@/middleware/api-handler';
@@ -25,7 +25,7 @@ const handler = async (req: NextApiRequest, res: NextApiResponse) => {
       const messages = await ChatMessageManager.findUserMessages(
         session.userId
       );
-      const fileServices = await FileServerManager.findFileServices(false);
+      const fileServices = await FileServiceManager.findFileServices(false);
       const data = messages.map((x: MessagesRelate) => {
         const fileServer = fileServices.find(
           (f: FileServices) => f.id === x.chatModel!.fileServerId
@@ -60,7 +60,7 @@ const handler = async (req: NextApiRequest, res: NextApiResponse) => {
         session.userId
       );
       if (!userMessage || userMessage.isDeleted) {
-        return badRequest(res);
+        throw new BadRequest();
       }
       await ChatMessageManager.updateUserMessage(
         id,
@@ -71,9 +71,10 @@ const handler = async (req: NextApiRequest, res: NextApiResponse) => {
       const { id } = req.query as { id: string };
       await ChatMessageManager.deleteMessageById(id);
     }
-  } catch (error) {
-    console.error(error);
-    return internalServerError(res);
+  } catch (error: any) {
+    throw new InternalServerError(
+      JSON.stringify({ message: error?.message, stack: error?.stack })
+    );
   }
 };
 

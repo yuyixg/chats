@@ -1,11 +1,11 @@
 import type { NextApiRequest, NextApiResponse } from 'next';
 import {
   ChatModelManager,
-  FileServerManager,
+  FileServiceManager,
   UserModelManager,
 } from '@/managers';
 import { getSession } from '@/utils/session';
-import { internalServerError, unauthorized } from '@/utils/error';
+import { InternalServerError, Unauthorized } from '@/utils/error';
 import { ChatModels, FileServices } from '@prisma/client';
 import { apiHandler } from '@/middleware/api-handler';
 export const config = {
@@ -21,13 +21,13 @@ const handler = async (req: NextApiRequest, res: NextApiResponse) => {
   try {
     const session = await getSession(req.cookies);
     if (!session) {
-      return unauthorized(res);
+      throw new Unauthorized();
     }
     const userModels = await UserModelManager.findUserEnableModels(
       session.userId!
     );
     const models = await ChatModelManager.findModels();
-    const fileServices = await FileServerManager.findFileServices(false);
+    const fileServices = await FileServiceManager.findFileServices(false);
     const _models = models
       .filter((m: ChatModels) => userModels.includes(m.id!))
       .map((x: ChatModels) => {
@@ -52,9 +52,10 @@ const handler = async (req: NextApiRequest, res: NextApiResponse) => {
         };
       });
     return _models;
-  } catch (error) {
-    console.error(error);
-    return internalServerError(res);
+  } catch (error: any) {
+    throw new InternalServerError(
+      JSON.stringify({ message: error?.message, stack: error?.stack })
+    );
   }
 };
 

@@ -1,20 +1,20 @@
 import { NextApiRequest } from 'next';
 import * as AWS from 'aws-sdk';
 import { getSession } from '@/utils/session';
-import { badRequest, internalServerError, unauthorized } from '@/utils/error';
-import { FileServerManager } from '@/managers';
+import { BadRequest, InternalServerError, Unauthorized } from '@/utils/error';
+import { FileServiceManager } from '@/managers';
 import { apiHandler } from '@/middleware/api-handler';
 
 const handler = async (req: NextApiRequest, res: any) => {
   try {
     const session = await getSession(req.cookies);
     if (!session) {
-      return unauthorized(res);
+      throw new Unauthorized();
     }
     const { id } = req.query as { id: string };
-    const fileServer = await FileServerManager.findById(id);
+    const fileServer = await FileServiceManager.findById(id);
     if (!fileServer || !fileServer.enabled) {
-      return badRequest(res, 'Not found File Server');
+      throw new BadRequest('Not found File Server');
     }
 
     const {
@@ -45,9 +45,10 @@ const handler = async (req: NextApiRequest, res: any) => {
     const putUrl = await s3.getSignedUrlPromise('putObject', params);
     const getUrl = await s3.getSignedUrlPromise('getObject', params);
     return { putUrl, getUrl };
-  } catch (error) {
-    console.error(error);
-    return internalServerError(res);
+  } catch (error: any) {
+    throw new InternalServerError(
+      JSON.stringify({ message: error?.message, stack: error?.stack })
+    );
   }
 };
 

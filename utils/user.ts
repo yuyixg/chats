@@ -1,4 +1,4 @@
-import { getSettingsLanguage } from "./settings";
+import { getSettingsLanguage } from './settings';
 
 export interface UserSession {
   sessionId: string;
@@ -38,3 +38,7 @@ export const clearUserSessionId = () => {
   user &&
     (document.cookie = `sessionId=${user.sessionId}; expires=-2738049600; path=/`);
 };
+
+export function replacePassword(value: string): string {
+  return value.replace(/("password":")([^"]*)"/, '$1"');
+}

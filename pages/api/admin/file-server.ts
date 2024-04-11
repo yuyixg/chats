@@ -1,7 +1,7 @@
 import type { NextApiRequest, NextApiResponse } from 'next';
 import { UserRole } from '@/types/admin';
 import { getSession } from '@/utils/session';
-import { FileServerManager } from '@/managers';
+import { FileServiceManager } from '@/managers';
 import { addAsterisk, checkKey } from '@/utils/common';
 import { FileServices } from '@prisma/client';
 import { apiHandler } from '@/middleware/api-handler';
@@ -29,7 +29,7 @@ const handler = async (req: NextApiRequest, res: NextApiResponse) => {
   try {
     if (req.method === 'GET') {
       const { select } = req.query;
-      const servers = await FileServerManager.findFileServices();
+      const servers = await FileServiceManager.findFileServices();
       let data = [];
       if (select) {
         data = servers
@@ -60,7 +60,7 @@ const handler = async (req: NextApiRequest, res: NextApiResponse) => {
       return data;
     } else if (req.method === 'PUT') {
       const { id, type, name, enabled, configs: configsJSON } = req.body;
-      let fileServer = await FileServerManager.findById(id);
+      let fileServer = await FileServiceManager.findById(id);
       if (!fileServer) {
         return res.status(404).send('File server not found');
       }
@@ -75,32 +75,32 @@ const handler = async (req: NextApiRequest, res: NextApiResponse) => {
         configs.accessSecret
       );
 
-      await FileServerManager.updateFileServices({
+      await FileServiceManager.updateFileServices({
         id,
         name,
         type,
         configs: JSON.stringify(configs),
         enabled,
       });
-      await FileServerManager.initFileServer(type, configs);
+      await FileServiceManager.initFileServer(type, configs);
     } else {
       const { type, name, enabled, configs } = req.body;
-      let isFound = await FileServerManager.findByName(name);
+      let isFound = await FileServiceManager.findByName(name);
       if (isFound) {
         return res.status(400).send('Name existed');
       }
-      const fileServer = await FileServerManager.createFileServices({
+      const fileServer = await FileServiceManager.createFileServices({
         type,
         name,
         enabled,
         configs,
       });
-      await FileServerManager.initFileServer(type, configs);
+      await FileServiceManager.initFileServer(type, configs);
       return fileServer;
     }
   } catch (error: any) {
     throw new InternalServerError(
-      JSON.stringify({ message: error.message, stack: error.stack })
+      JSON.stringify({ message: error?.message, stack: error?.stack })
     );
   }
 };

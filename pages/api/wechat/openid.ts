@@ -1,5 +1,5 @@
 import { NextApiRequest, NextApiResponse } from 'next';
-import { internalServerError } from '@/utils/error';
+import { InternalServerError } from '@/utils/error';
 import { weChatAuth } from '@/utils/weChat';
 import { apiHandler } from '@/middleware/api-handler';
 
@@ -20,7 +20,9 @@ const handler = async (req: NextApiRequest, res: NextApiResponse) => {
       return result?.openid;
     }
   } catch (error: any) {
-    return internalServerError(res);
+    throw new InternalServerError(
+      JSON.stringify({ message: error?.message, stack: error?.stack })
+    );
   }
 };
 

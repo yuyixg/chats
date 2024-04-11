@@ -1,6 +1,6 @@
 import type { NextApiRequest, NextApiResponse } from 'next';
 import { getSession } from '@/utils/session';
-import { internalServerError, unauthorized } from '@/utils/error';
+import { InternalServerError, Unauthorized } from '@/utils/error';
 import { generateOrderTradeNo } from '@/utils/wxpay/utils';
 import { OrdersManager } from '@/managers';
 import { apiHandler } from '@/middleware/api-handler';
@@ -17,7 +17,7 @@ const handler = async (req: NextApiRequest, res: NextApiResponse) => {
   try {
     const session = await getSession(req.cookies);
     if (!session) {
-      return unauthorized(res);
+      throw new Unauthorized();
     }
     if (req.method === 'POST') {
       const { amount } = req.body as { amount: number };
@@ -29,9 +29,10 @@ const handler = async (req: NextApiRequest, res: NextApiResponse) => {
       });
       return order.id;
     }
-  } catch (error) {
-    console.error(error);
-    return internalServerError(res);
+  } catch (error: any) {
+    throw new InternalServerError(
+      JSON.stringify({ message: error?.message, stack: error?.stack })
+    );
   }
 };
 

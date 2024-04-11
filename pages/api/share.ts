@@ -1,5 +1,5 @@
 import { NextApiRequest, NextApiResponse } from 'next';
-import { badRequest, internalServerError } from '@/utils/error';
+import { BadRequest, InternalServerError } from '@/utils/error';
 import { ChatMessageManager } from '@/managers';
 import { apiHandler } from '@/middleware/api-handler';
 
@@ -16,11 +16,11 @@ const handler = async (req: NextApiRequest, res: NextApiResponse) => {
   try {
     const { messageId } = req.query as { messageId: string };
     if (!messageId) {
-      return badRequest(res);
+      throw new BadRequest();
     }
     const message = await ChatMessageManager.findMessageById(messageId);
     if (!message || !message.isShared) {
-      return badRequest(res);
+      throw new BadRequest();
     }
     return {
       name: message?.name,
@@ -28,7 +28,9 @@ const handler = async (req: NextApiRequest, res: NextApiResponse) => {
       messages: JSON.parse(message?.messages || '[]'),
     };
   } catch (error: any) {
-    return internalServerError(res);
+    throw new InternalServerError(
+      JSON.stringify({ message: error?.message, stack: error?.stack })
+    );
   }
 };
 

@@ -1,5 +1,5 @@
 import type { NextApiRequest, NextApiResponse } from 'next';
-import { badRequest, internalServerError } from '@/utils/error';
+import { BadRequest, InternalServerError } from '@/utils/error';
 import requestIp from 'request-ip';
 import { OrdersManager, WxPayManager } from '@/managers';
 import { weChatAuth } from '@/utils/weChat';
@@ -22,12 +22,12 @@ const handler = async (req: NextApiRequest, res: NextApiResponse) => {
       };
       const order = await OrdersManager.findById(orderId);
       if (!order) {
-        return badRequest(res, '订单不存在');
+        throw new BadRequest('订单不存在');
       }
 
       const weChatAuthResult = await weChatAuth(code);
       if (!weChatAuthResult) {
-        return badRequest(res, '微信授权失败');
+        throw new BadRequest('微信授权失败');
       }
 
       const ipAddress = requestIp.getClientIp(req) || '127.0.0.1';
@@ -40,9 +40,10 @@ const handler = async (req: NextApiRequest, res: NextApiResponse) => {
       });
       return result;
     }
-  } catch (error) {
-    console.error(error);
-    return internalServerError(res);
+  } catch (error: any) {
+    throw new InternalServerError(
+      JSON.stringify({ message: error?.message, stack: error?.stack })
+    );
   }
 };
 

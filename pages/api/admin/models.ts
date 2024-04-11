@@ -4,7 +4,7 @@ import { UserRole } from '@/types/admin';
 import { getSession } from '@/utils/session';
 import { ModelDefaultTemplates } from '@/types/template';
 import { ModelVersions } from '@/types/model';
-import { badRequest, internalServerError } from '@/utils/error';
+import { BadRequest, InternalServerError } from '@/utils/error';
 import { addAsterisk, checkKey } from '@/utils/common';
 import { ChatModels } from '@prisma/client';
 import { apiHandler } from '@/middleware/api-handler';
@@ -133,11 +133,12 @@ const handler = async (req: NextApiRequest, res: NextApiResponse) => {
       if (model) {
         await ChatModelManager.deleteModelById(id);
       }
-      return badRequest(res, 'Model is not Found!');
+      throw new BadRequest('Model is not Found!');
     }
-  } catch (error) {
-    console.error(error);
-    return internalServerError(res);
+  } catch (error: any) {
+    throw new InternalServerError(
+      JSON.stringify({ message: error?.message, stack: error?.stack })
+    );
   }
 };
 
