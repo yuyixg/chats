@@ -3,6 +3,7 @@ import { badRequest, internalServerError } from '@/utils/error';
 import requestIp from 'request-ip';
 import { OrdersManager, WxPayManager } from '@/managers';
 import { weChatAuth } from '@/utils/weChat';
+import { apiHandler } from '@/middleware/api-handler';
 export const config = {
   api: {
     bodyParser: {
@@ -37,7 +38,7 @@ const handler = async (req: NextApiRequest, res: NextApiResponse) => {
         amount: order.amount,
         outTradeNo: order.outTradeNo,
       });
-      return res.json(result);
+      return result;
     }
   } catch (error) {
     console.error(error);
@@ -45,4 +46,4 @@ const handler = async (req: NextApiRequest, res: NextApiResponse) => {
   }
 };
 
-export default handler;
+export default apiHandler(handler);

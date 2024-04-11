@@ -16,6 +16,7 @@ import {
 import { verifyModel } from '@/utils/model';
 import { KimiSteamResult, KimiStream } from '@/services/kimi';
 import { calcTokenPrice } from '@/utils/message';
+import { apiHandler } from '@/middleware/api-handler';
 
 export const config = {
   api: {
@@ -112,8 +113,7 @@ const handler = async (req: NextApiRequest, res: NextApiResponse) => {
               chatModel.id!
             );
             await UserBalancesManager.chatUpdateBalance(userId, totalPrice);
-            res.end();
-            break;
+            return res.end();
           }
           res.write(Buffer.from(result.text));
         }
@@ -130,4 +130,4 @@ const handler = async (req: NextApiRequest, res: NextApiResponse) => {
   }
 };
 
-export default handler;
+export default apiHandler(handler);

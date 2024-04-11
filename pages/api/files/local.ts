@@ -1,4 +1,5 @@
 import { FileServerManager } from '@/managers';
+import { apiHandler } from '@/middleware/api-handler';
 import { badRequest, internalServerError, unauthorized } from '@/utils/error';
 import { getSession } from '@/utils/session';
 import { IncomingForm } from 'formidable';
@@ -40,11 +41,11 @@ const handler = async (req: NextApiRequest, res: NextApiResponse) => {
       const pathToWriteImage = `public/${storageFolderName}/${file.originalFilename}`;
       const image = await fs.readFile(imagePath);
       await fs.writeFile(pathToWriteImage, image);
-      res.status(200).json({
+      return {
         getUrl: `${req.headers.origin}/${storageFolderName}/${file.originalFilename}`,
-      });
+      };
     } catch (error) {
-      console.log(error);
+      console.error(error);
       res.status(400).end('Upload failed!');
       return;
     }
@@ -54,4 +55,4 @@ const handler = async (req: NextApiRequest, res: NextApiResponse) => {
   }
 };
 
-export default handler;
+export default apiHandler(handler);

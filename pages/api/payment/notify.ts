@@ -4,6 +4,7 @@ import { OrdersManager, UserBalancesManager } from '@/managers';
 import { OrderStatus } from '@/types/order';
 import Decimal from 'decimal.js';
 import { centsToYuan } from '@/utils/wxpay/utils';
+import { apiHandler } from '@/middleware/api-handler';
 export const config = {
   api: {
     bodyParser: {
@@ -51,4 +52,4 @@ const handler = async (req: NextApiRequest, res: NextApiResponse) => {
   }
 };
 
-export default handler;
+export default apiHandler(handler);

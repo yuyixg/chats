@@ -7,6 +7,7 @@ import { ModelVersions } from '@/types/model';
 import { badRequest, internalServerError } from '@/utils/error';
 import { addAsterisk, checkKey } from '@/utils/common';
 import { ChatModels } from '@prisma/client';
+import { apiHandler } from '@/middleware/api-handler';
 export const config = {
   api: {
     bodyParser: {
@@ -55,7 +56,7 @@ const handler = async (req: NextApiRequest, res: NextApiResponse) => {
           priceConfig: x.priceConfig,
         };
       });
-      return res.json(data);
+      return data;
     } else if (req.method === 'PUT') {
       const {
         modelId,
@@ -88,7 +89,7 @@ const handler = async (req: NextApiRequest, res: NextApiResponse) => {
         modelConfig,
         priceConfig
       );
-      return res.json(data);
+      return data;
     } else if (req.method === 'POST') {
       const {
         modelVersion,
@@ -125,13 +126,12 @@ const handler = async (req: NextApiRequest, res: NextApiResponse) => {
         modelConfig,
         priceConfig
       );
-      return res.json(data);
+      return data;
     } else if (req.method === 'DELETE') {
       const { id } = req.query as { id: string };
       const model = await ChatModelManager.findModelById(id);
       if (model) {
         await ChatModelManager.deleteModelById(id);
-        res.end();
       }
       return badRequest(res, 'Model is not Found!');
     }
@@ -141,4 +141,4 @@ const handler = async (req: NextApiRequest, res: NextApiResponse) => {
   }
 };
 
-export default handler;
+export default apiHandler(handler);

@@ -3,6 +3,7 @@ import { SessionsManager, UsersManager } from '@/managers';
 import { badRequest, internalServerError } from '@/utils/error';
 import bcrypt from 'bcryptjs';
 import { getSession } from '@/utils/session';
+import { apiHandler } from '@/middleware/api-handler';
 
 export const config = {
   api: {
@@ -13,10 +14,7 @@ export const config = {
   maxDuration: 5,
 };
 
-export default async function handler(
-  req: NextApiRequest,
-  res: NextApiResponse
-) {
+async function handler(req: NextApiRequest, res: NextApiResponse) {
   try {
     if (req.method === 'POST') {
       const { username, password, code } = req.body;
@@ -29,11 +27,11 @@ export default async function handler(
 
       if (user) {
         const session = await SessionsManager.generateSession(user.id!);
-        return res.json({
+        return {
           sessionId: session.id,
           username: user.username,
           role: user.role,
-        });
+        };
       }
       return badRequest(res, 'Username or password incorrect');
     } else if (req.method === 'PUT') {
@@ -51,9 +49,11 @@ export default async function handler(
         user.id!,
         hashPassword
       );
-      return res.json(result);
+      return result;
     }
   } catch (error: any) {
     return internalServerError(res);
   }
 }
+
+export default apiHandler(handler);

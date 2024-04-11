@@ -15,6 +15,7 @@ import {
 } from '@/utils/error';
 import { verifyModel } from '@/utils/model';
 import { calcTokenPrice } from '@/utils/message';
+import { apiHandler } from '@/middleware/api-handler';
 
 export const config = {
   api: {
@@ -25,10 +26,7 @@ export const config = {
   maxDuration: 5,
 };
 
-export default async function handler(
-  req: NextApiRequest,
-  res: NextApiResponse
-) {
+const handler = async (req: NextApiRequest, res: NextApiResponse) => {
   try {
     const session = await getSession(req.cookies);
     if (!session) {
@@ -105,8 +103,7 @@ export default async function handler(
               chatModel.id!
             );
             await UserBalancesManager.chatUpdateBalance(userId, totalPrice);
-            res.end();
-            break;
+            return res.end();
           }
           res.write(Buffer.from(result.text));
         }
@@ -121,4 +118,6 @@ export default async function handler(
     console.error(error);
     return internalServerError(res);
   }
-}
+};
+
+export default apiHandler(handler);

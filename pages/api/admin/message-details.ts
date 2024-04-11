@@ -3,6 +3,7 @@ import { ChatMessageManager } from '@/managers';
 import { UserRole } from '@/types/admin';
 import { getSession } from '@/utils/session';
 import { internalServerError } from '@/utils/error';
+import { apiHandler } from '@/middleware/api-handler';
 export const config = {
   api: {
     bodyParser: {
@@ -30,11 +31,11 @@ const handler = async (req: NextApiRequest, res: NextApiResponse) => {
       };
       if (messageId) {
         const message = await ChatMessageManager.findMessageById(messageId);
-        return res.json({
+        return {
           name: message?.name,
           prompt: message?.prompt,
           messages: JSON.parse(message?.messages || '[]'),
-        });
+        };
       }
     }
   } catch (error) {
@@ -43,4 +44,4 @@ const handler = async (req: NextApiRequest, res: NextApiResponse) => {
   }
 };
 
-export default handler;
+export default apiHandler(handler);

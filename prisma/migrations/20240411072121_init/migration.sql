@@ -153,13 +153,18 @@ CREATE TABLE "PayServices" (
 -- CreateTable
 CREATE TABLE "AuditLogs" (
     "id" TEXT NOT NULL PRIMARY KEY,
-    "userId" TEXT NOT NULL,
+    "userId" TEXT,
     "url" TEXT NOT NULL,
+    "method" TEXT NOT NULL,
     "statusCode" INTEGER NOT NULL,
-    "content" TEXT NOT NULL DEFAULT '{}',
+    "body" TEXT NOT NULL DEFAULT '{}',
+    "response" TEXT NOT NULL DEFAULT '{}',
     "createdAt" DATETIME NOT NULL DEFAULT CURRENT_TIMESTAMP,
-    CONSTRAINT "AuditLogs_userId_fkey" FOREIGN KEY ("userId") REFERENCES "Users" ("id") ON DELETE RESTRICT ON UPDATE CASCADE
+    CONSTRAINT "AuditLogs_userId_fkey" FOREIGN KEY ("userId") REFERENCES "Users" ("id") ON DELETE SET NULL ON UPDATE CASCADE
 );
+
+-- CreateIndex
+CREATE UNIQUE INDEX "Users_account_key" ON "Users"("account");
 
 -- CreateIndex
 CREATE UNIQUE INDEX "Users_email_key" ON "Users"("email");

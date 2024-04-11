@@ -140,7 +140,6 @@ export const UserModal = (props: IProps) => {
     // fix bug https://github.com/react-hook-form/react-hook-form/issues/2755
     form.formState.isValid;
     if (user) {
-      console.log('user', user);
       form.setValue('username', user.username);
       form.setValue('enabled', user.enabled);
       form.setValue('phone', user.phone);

@@ -158,10 +158,12 @@ model PayServices {
 
 model AuditLogs {
   id         String   @id @default(uuid())
-  userId     String
+  userId     String?
   url        String
+  method     String
   statusCode Int
-  content    String   @default("{}")
+  request    String   @default("{}")
+  response   String   @default("{}")
   createdAt  DateTime @default(now())
-  user       Users    @relation(fields: [userId], references: [id])
+  user       Users?   @relation(fields: [userId], references: [id])
 }

@@ -95,7 +95,7 @@ const UploadButton: React.FunctionComponent<Props> = ({
         }
       }
     } catch (error) {
-      console.log(error);
+      console.error(error);
     }
   };
 

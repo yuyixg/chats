@@ -1,10 +1,11 @@
 import type { NextApiRequest, NextApiResponse } from 'next';
 import { UserRole } from '@/types/admin';
 import { getSession } from '@/utils/session';
-import { internalServerError } from '@/utils/error';
 import { FileServerManager } from '@/managers';
 import { addAsterisk, checkKey } from '@/utils/common';
 import { FileServices } from '@prisma/client';
+import { apiHandler } from '@/middleware/api-handler';
+import { InternalServerError } from '@/utils/error';
 export const config = {
   api: {
     bodyParser: {
@@ -56,7 +57,7 @@ const handler = async (req: NextApiRequest, res: NextApiResponse) => {
           };
         });
       }
-      return res.json(data);
+      return data;
     } else if (req.method === 'PUT') {
       const { id, type, name, enabled, configs: configsJSON } = req.body;
       let fileServer = await FileServerManager.findById(id);
@@ -74,7 +75,7 @@ const handler = async (req: NextApiRequest, res: NextApiResponse) => {
         configs.accessSecret
       );
 
-      const data = await FileServerManager.updateFileServices({
+      await FileServerManager.updateFileServices({
         id,
         name,
         type,
@@ -82,7 +83,6 @@ const handler = async (req: NextApiRequest, res: NextApiResponse) => {
         enabled,
       });
       await FileServerManager.initFileServer(type, configs);
-      return res.send(data);
     } else {
       const { type, name, enabled, configs } = req.body;
       let isFound = await FileServerManager.findByName(name);
@@ -96,12 +96,13 @@ const handler = async (req: NextApiRequest, res: NextApiResponse) => {
         configs,
       });
       await FileServerManager.initFileServer(type, configs);
-      return res.json(fileServer);
+      return fileServer;
     }
-  } catch (error) {
-    console.error(error);
-    return internalServerError(res);
+  } catch (error: any) {
+    throw new InternalServerError(
+      JSON.stringify({ message: error.message, stack: error.stack })
+    );
   }
 };
 
-export default handler;
+export default apiHandler(handler);

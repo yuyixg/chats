@@ -4,6 +4,7 @@ import { internalServerError, unauthorized } from '@/utils/error';
 import requestIp from 'request-ip';
 import { OrdersManager, WxPayManager } from '@/managers';
 import { generateOrderTradeNo } from '@/utils/wxpay/utils';
+import { apiHandler } from '@/middleware/api-handler';
 export const config = {
   api: {
     bodyParser: {
@@ -42,4 +43,4 @@ const handler = async (req: NextApiRequest, res: NextApiResponse) => {
   }
 };
 
-export default handler;
+export default apiHandler(handler);

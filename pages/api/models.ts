@@ -7,6 +7,7 @@ import {
 import { getSession } from '@/utils/session';
 import { internalServerError, unauthorized } from '@/utils/error';
 import { ChatModels, FileServices } from '@prisma/client';
+import { apiHandler } from '@/middleware/api-handler';
 export const config = {
   api: {
     bodyParser: {
@@ -50,11 +51,11 @@ const handler = async (req: NextApiRequest, res: NextApiResponse) => {
             : null,
         };
       });
-    return res.json(_models);
+    return _models;
   } catch (error) {
     console.error(error);
     return internalServerError(res);
   }
 };
 
-export default handler;
+export default apiHandler(handler);

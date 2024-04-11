@@ -3,6 +3,7 @@ import { UserRole } from '@/types/admin';
 import { getSession } from '@/utils/session';
 import { internalServerError } from '@/utils/error';
 import { UserBalancesManager } from '@/managers';
+import { apiHandler } from '@/middleware/api-handler';
 export const config = {
   api: {
     bodyParser: {
@@ -26,8 +27,12 @@ const handler = async (req: NextApiRequest, res: NextApiResponse) => {
   try {
     if (req.method === 'PUT') {
       const { userId, value } = req.body;
-      await UserBalancesManager.updateBalance(userId, value, session.userId);
-      return res.end();
+      const data = await UserBalancesManager.updateBalance(
+        userId,
+        value,
+        session.userId
+      );
+      return data;
     } else if (req.method === 'GET') {
     }
   } catch (error) {
@@ -36,4 +41,4 @@ const handler = async (req: NextApiRequest, res: NextApiResponse) => {
   }
 };
 
-export default handler;
+export default apiHandler(handler);

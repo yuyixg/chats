@@ -1,6 +1,7 @@
 import { NextApiRequest, NextApiResponse } from 'next';
 import { internalServerError } from '@/utils/error';
 import { weChatAuth } from '@/utils/weChat';
+import { apiHandler } from '@/middleware/api-handler';
 
 export const config = {
   api: {
@@ -11,17 +12,16 @@ export const config = {
   maxDuration: 5,
 };
 
-export default async function handler(
-  req: NextApiRequest,
-  res: NextApiResponse
-) {
+const handler = async (req: NextApiRequest, res: NextApiResponse) => {
   try {
     if (req.method === 'GET') {
       const { code } = req.query as { code: string };
       const result = await weChatAuth(code);
-      return res.send(result?.openid);
+      return result?.openid;
     }
   } catch (error: any) {
     return internalServerError(res);
   }
-}
+};
+
+export default apiHandler(handler);

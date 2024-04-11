@@ -422,7 +422,6 @@ export const Chat = memo(({ stopConversationRef }: Props) => {
                 handleSend(lastMessage, 1);
               } else {
                 if (currentMessage) {
-                  console.log(currentMessage);
                   handleSend(currentMessage, 2);
                 }
               }

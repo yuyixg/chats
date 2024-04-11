@@ -11,7 +11,7 @@ const Custom404 = () => (
 const ErrorPage = ({ statusCode }: { statusCode: number }) => {
   const router = useRouter();
   const currentURL = router.asPath;
-  console.log('ErrorPage', currentURL, statusCode);
+  console.error('ErrorPage', currentURL, statusCode);
   if (statusCode === 404) {
     return <Custom404 />;
   }

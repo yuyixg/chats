@@ -3,6 +3,7 @@ import { ChatMessageManager, UserModelManager, UsersManager } from '@/managers';
 import { UserRole } from '@/types/admin';
 import { getSession } from '@/utils/session';
 import { internalServerError } from '@/utils/error';
+import { apiHandler } from '@/middleware/api-handler';
 export const config = {
   api: {
     bodyParser: {
@@ -50,7 +51,7 @@ const handler = async (req: NextApiRequest, res: NextApiResponse) => {
           updatedAt: x.updatedAt,
         };
       });
-      return res.json({ rows, count: messages.count });
+      return { rows, count: messages.count };
     } else if (req.method === 'PUT') {
       const { id, username, password, role } = req.body;
       let user = await UsersManager.findByUserId(id);
@@ -63,7 +64,7 @@ const handler = async (req: NextApiRequest, res: NextApiResponse) => {
         password: password ? password : user.password,
         role,
       });
-      return res.send(data);
+      return data;
     } else {
       const { username, password, role } = req.body;
       let isFound = await UsersManager.findByAccount(username);
@@ -79,7 +80,7 @@ const handler = async (req: NextApiRequest, res: NextApiResponse) => {
         userId: user.id!,
         models: '[]',
       });
-      return res.json(user);
+      return user;
     }
   } catch (error) {
     console.error(error);
@@ -87,4 +88,4 @@ const handler = async (req: NextApiRequest, res: NextApiResponse) => {
   }
 };
 
-export default handler;
+export default apiHandler(handler);

@@ -3,8 +3,9 @@ import * as AWS from 'aws-sdk';
 import { getSession } from '@/utils/session';
 import { badRequest, internalServerError, unauthorized } from '@/utils/error';
 import { FileServerManager } from '@/managers';
+import { apiHandler } from '@/middleware/api-handler';
 
-export default async function handler(req: NextApiRequest, res: any) {
+const handler = async (req: NextApiRequest, res: any) => {
   try {
     const session = await getSession(req.cookies);
     if (!session) {
@@ -44,9 +45,11 @@ export default async function handler(req: NextApiRequest, res: any) {
 
     const putUrl = await s3.getSignedUrlPromise('putObject', params);
     const getUrl = await s3.getSignedUrlPromise('getObject', params);
-    res.json({ putUrl, getUrl });
+    return { putUrl, getUrl };
   } catch (error) {
     console.error(error);
     return internalServerError(res);
   }
-}
+};
+
+export default apiHandler(handler);

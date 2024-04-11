@@ -4,6 +4,7 @@ import { UserRole } from '@/types/admin';
 import { getSession } from '@/utils/session';
 import { internalServerError } from '@/utils/error';
 import { UsersRelate } from '@/db/type';
+import { apiHandler } from '@/middleware/api-handler';
 export const config = {
   api: {
     bodyParser: {
@@ -43,7 +44,7 @@ const handler = async (req: NextApiRequest, res: NextApiResponse) => {
           createdAt: x.createdAt,
         };
       });
-      return res.json(data);
+      return data;
     } else if (req.method === 'PUT') {
       const { id, username, password, role, enabled, phone, email } = req.body;
       let user = await UsersManager.findByUserId(id);
@@ -59,7 +60,7 @@ const handler = async (req: NextApiRequest, res: NextApiResponse) => {
         phone,
         email,
       });
-      return res.send(data);
+      return data;
     } else {
       const { account, password, role } = req.body;
       let isFound = await UsersManager.findByAccount(account);
@@ -72,7 +73,7 @@ const handler = async (req: NextApiRequest, res: NextApiResponse) => {
         role,
       });
       await UsersManager.initialUser(user.id!, session.userId);
-      return res.json(user);
+      return user;
     }
   } catch (error) {
     console.error(error);
@@ -80,4 +81,4 @@ const handler = async (req: NextApiRequest, res: NextApiResponse) => {
   }
 };
 
-export default handler;
+export default apiHandler(handler);

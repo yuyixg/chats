@@ -4,6 +4,7 @@ import { getSession } from '@/utils/session';
 import { badRequest, internalServerError } from '@/utils/error';
 import { FileServices } from '@prisma/client';
 import { MessagesRelate } from '@/db/type';
+import { apiHandler } from '@/middleware/api-handler';
 export const config = {
   api: {
     bodyParser: {
@@ -51,7 +52,7 @@ const handler = async (req: NextApiRequest, res: NextApiResponse) => {
           isShared: x.isShared,
         };
       });
-      return res.json(data);
+      return data;
     } else if (req.method === 'PUT') {
       const { id, name, isShared } = req.body;
       const userMessage = await ChatMessageManager.findUserMessageById(
@@ -66,11 +67,9 @@ const handler = async (req: NextApiRequest, res: NextApiResponse) => {
         name || userMessage.name,
         isShared
       );
-      res.end();
     } else if (req.method === 'DELETE') {
       const { id } = req.query as { id: string };
       await ChatMessageManager.deleteMessageById(id);
-      res.end();
     }
   } catch (error) {
     console.error(error);
@@ -78,4 +77,4 @@ const handler = async (req: NextApiRequest, res: NextApiResponse) => {
   }
 };
 
-export default handler;
+export default apiHandler(handler);

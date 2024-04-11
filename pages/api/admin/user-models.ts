@@ -4,6 +4,7 @@ import { UserRole } from '@/types/admin';
 import { getSession } from '@/utils/session';
 import { internalServerError, modelUnauthorized } from '@/utils/error';
 import { ChatModels, UserModels } from '@prisma/client';
+import { apiHandler } from '@/middleware/api-handler';
 export const config = {
   api: {
     bodyParser: {
@@ -28,7 +29,6 @@ const handler = async (req: NextApiRequest, res: NextApiResponse) => {
     if (req.method === 'GET') {
       const { query } = req.query as { query: string };
       const userModels = await UserModelManager.findUsersModel(query);
-      console.log(JSON.stringify(userModels));
       const chatModels = await ChatModelManager.findModels(true);
       const data = userModels.map((x: any) => {
         const models = JSON.parse(x.models || '[]') as any[];
@@ -52,14 +52,14 @@ const handler = async (req: NextApiRequest, res: NextApiResponse) => {
             }),
         };
       });
-      return res.json(data);
+      return data;
     } else if (req.method === 'PUT') {
       const { userModelId, models } = req.body;
       const data = await UserModelManager.updateUserModel(
         userModelId,
         JSON.stringify(models)
       );
-      return res.json(data);
+      return data;
     } else if (req.method === 'POST') {
       const { userModelIds, modelId } = req.body;
       const userModels = await UserModelManager.findUserModelByIds(
@@ -85,7 +85,6 @@ const handler = async (req: NextApiRequest, res: NextApiResponse) => {
       for (const um of userModels) {
         await UserModelManager.updateUserModel(um.id!, um.models);
       }
-      return res.end();
     }
   } catch (error) {
     console.error(error);
@@ -93,4 +92,4 @@ const handler = async (req: NextApiRequest, res: NextApiResponse) => {
   }
 };
 
-export default handler;
+export default apiHandler(handler);

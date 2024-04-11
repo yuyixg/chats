@@ -3,6 +3,7 @@ import { getSession } from '@/utils/session';
 import { internalServerError, unauthorized } from '@/utils/error';
 import { generateOrderTradeNo } from '@/utils/wxpay/utils';
 import { OrdersManager } from '@/managers';
+import { apiHandler } from '@/middleware/api-handler';
 export const config = {
   api: {
     bodyParser: {
@@ -26,7 +27,7 @@ const handler = async (req: NextApiRequest, res: NextApiResponse) => {
         amount,
         createUserId: session.userId,
       });
-      return res.json(order.id);
+      return order.id;
     }
   } catch (error) {
     console.error(error);
@@ -34,4 +35,4 @@ const handler = async (req: NextApiRequest, res: NextApiResponse) => {
   }
 };
 
-export default handler;
+export default apiHandler(handler);
