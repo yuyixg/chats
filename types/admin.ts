@@ -22,9 +22,9 @@ export interface UserModelResult {
   modelName?: string;
   modelVersion?: string;
   enabled?: boolean;
-  tokens?: number | null;
-  counts?: number | null;
-  expires?: string | null;
+  tokens: string;
+  counts: string;
+  expires: string;
 }
 
 export interface PutUserModelParams {

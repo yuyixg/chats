@@ -56,7 +56,13 @@ export const AddUserModelModal = (props: IProps) => {
       let models = selectedModel!.models || [];
       const foundModel = models.find((m) => m.modelId === select?.modelId);
       if (!foundModel) {
-        models.push({ modelId: select?.modelId!, enabled: true });
+        models.push({
+          modelId: select?.modelId!,
+          enabled: true,
+          tokens: '-',
+          counts: '-',
+          expires: '-',
+        });
       } else {
         models = models.map((x) => {
           return x.modelId === select?.modelId ? { ...x, enabled: true } : x;

@@ -60,14 +60,14 @@ export const EditUserModelModal = (props: IProps) => {
       name: 'tokens',
       label: t('Remaining Tokens'),
       render: (options: IFormFieldOption, field: FormFieldType) => (
-        <FormInput type='number' options={options} field={field} />
+        <FormInput options={options} field={field} />
       ),
     },
     {
       name: 'counts',
       label: t('Remaining Counts'),
       render: (options: IFormFieldOption, field: FormFieldType) => (
-        <FormInput type='number' options={options} field={field} />
+        <FormInput options={options} field={field} />
       ),
     },
     {
@@ -83,8 +83,8 @@ export const EditUserModelModal = (props: IProps) => {
     modelName: z.string().optional(),
     modelId: z.string().optional(),
     enabled: z.boolean().optional(),
-    tokens: z.union([z.string(), z.null(), z.number()]),
-    counts: z.union([z.string(), z.null(), z.number()]),
+    tokens: z.string(),
+    counts: z.string(),
     expires: z.union([z.string(), z.null(), z.date()]),
   });
 
@@ -106,9 +106,9 @@ export const EditUserModelModal = (props: IProps) => {
       form.setValue('modelId', model?.modelId);
       form.setValue('modelName', model?.modelName);
       form.setValue('enabled', model?.enabled);
-      form.setValue('tokens', model?.tokens || null);
-      form.setValue('counts', model?.counts || null);
-      form.setValue('expires', model?.expires || null);
+      form.setValue('tokens', `${model?.tokens}`);
+      form.setValue('counts', `${model?.counts}`);
+      form.setValue('expires', `${model?.expires}`);
     }
   }, [isOpen]);
 
@@ -116,11 +116,12 @@ export const EditUserModelModal = (props: IProps) => {
     setSubmit(true);
     const models = selectedUserModel?.models.map((x) => {
       if (x.modelId === values?.modelId) {
-        x.tokens = Number(values.tokens) || null;
-        x.counts = Number(values.counts) || null;
-        x.expires = values.expires
-          ? new Date(values.expires).toLocaleDateString()
-          : null;
+        x.tokens = isNaN(+values.tokens) ? '-' : values.tokens;
+        x.counts = isNaN(+values.counts) ? '-' : values.counts;
+        x.expires =
+          values.expires === null || values.expires === '-'
+            ? '-'
+            : new Date(values.expires).toLocaleDateString();
         x.enabled = values.enabled;
       }
       return x;

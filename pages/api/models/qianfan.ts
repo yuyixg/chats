@@ -26,94 +26,88 @@ export const config = {
 };
 
 const handler = async (req: ChatsApiRequest, res: ChatsApiResponse) => {
-  try {
-    const { userId } = req.session;
-    const { model, messages, messageId } = req.body as ChatBody;
+  const { userId } = req.session;
+  const { model, messages, messageId } = req.body as ChatBody;
 
-    const chatModel = await ChatModelManager.findModelById(model.id);
-    if (!chatModel?.enabled) {
-      throw new ModelUnauthorized();
-    }
+  const chatModel = await ChatModelManager.findModelById(model.id);
+  if (!chatModel?.enabled) {
+    throw new ModelUnauthorized();
+  }
 
-    const { modelConfig, priceConfig } = chatModel;
+  const { modelConfig, priceConfig } = chatModel;
 
-    const userModel = await UserModelManager.findUserModel(userId, model.id);
-    if (!userModel || !userModel.enabled) {
-      throw new ModelUnauthorized();
-    }
+  const userModel = await UserModelManager.findUserModel(userId, model.id);
+  if (!userModel || !userModel.enabled) {
+    throw new ModelUnauthorized();
+  }
 
-    const verifyMessage = verifyModel(userModel, modelConfig);
-    if (verifyMessage) {
-      throw new BadRequest(verifyMessage);
-    }
+  const verifyMessage = verifyModel(userModel, modelConfig);
+  if (verifyMessage) {
+    throw new BadRequest(verifyMessage);
+  }
 
-    let messagesToSend: QianFanMessage[] = [];
-    messagesToSend = messages.map((message) => {
-      return {
-        role: message.role,
-        content: message.content.text,
-      } as QianFanMessage;
-    });
+  let messagesToSend: QianFanMessage[] = [];
+  messagesToSend = messages.map((message) => {
+    return {
+      role: message.role,
+      content: message.content.text,
+    } as QianFanMessage;
+  });
 
-    const stream = await QianFanStream(chatModel, messagesToSend, {
-      temperature: 0.8,
-      top_p: 0.7,
-      penalty_socre: 1,
-      user_id: undefined,
-      request_timeout: 60000,
-    });
+  const stream = await QianFanStream(chatModel, messagesToSend, {
+    temperature: 0.8,
+    top_p: 0.7,
+    penalty_socre: 1,
+    user_id: undefined,
+    request_timeout: 60000,
+  });
 
-    let assistantMessage = '';
-    if (stream.getReader) {
-      const reader = stream.getReader();
-      let result = {} as QianFanSteamResult;
-      const streamResponse = async () => {
-        while (true) {
-          const { done, value } = await reader.read();
-          if (value) {
-            result = JSON.parse(value) as QianFanSteamResult;
-            assistantMessage += result.text;
-          }
-          if (done) {
-            const { total_tokens, prompt_tokens, completion_tokens } =
-              result.usage;
-            const tokenCount = total_tokens;
-            const totalPrice = calcTokenPrice(
-              priceConfig,
-              prompt_tokens,
-              completion_tokens
-            );
-            messages.push({
-              role: 'assistant',
-              content: { text: assistantMessage },
-            });
-            await ChatMessageManager.recordChat(
-              messageId,
-              userId,
-              userModel.id!,
-              messages,
-              tokenCount,
-              totalPrice,
-              '',
-              chatModel.id!
-            );
-            await UserBalancesManager.chatUpdateBalance(userId, totalPrice);
-            return res.end();
-          }
-          res.write(Buffer.from(result.text));
+  let assistantMessage = '';
+  if (stream.getReader) {
+    const reader = stream.getReader();
+    let result = {} as QianFanSteamResult;
+    const streamResponse = async () => {
+      while (true) {
+        const { done, value } = await reader.read();
+        if (value) {
+          result = JSON.parse(value) as QianFanSteamResult;
+          assistantMessage += result.text;
         }
-      };
+        if (done) {
+          const { total_tokens, prompt_tokens, completion_tokens } =
+            result.usage;
+          const tokenCount = total_tokens;
+          const totalPrice = calcTokenPrice(
+            priceConfig,
+            prompt_tokens,
+            completion_tokens
+          );
+          messages.push({
+            role: 'assistant',
+            content: { text: assistantMessage },
+          });
+          await ChatMessageManager.recordChat(
+            messageId,
+            userId,
+            userModel.id!,
+            messages,
+            tokenCount,
+            totalPrice,
+            '',
+            chatModel.id!
+          );
+          await UserBalancesManager.chatUpdateBalance(userId, totalPrice);
+          return res.end();
+        }
+        res.write(Buffer.from(result.text));
+      }
+    };
 
-      streamResponse().catch((error) => {
-        throw new InternalServerError(
-          JSON.stringify({ message: error?.message, stack: error?.stack })
-        );
-      });
-    }
-  } catch (error: any) {
-    throw new InternalServerError(
-      JSON.stringify({ message: error?.message, stack: error?.stack })
-    );
+    streamResponse().catch((error) => {
+      throw new InternalServerError(
+        JSON.stringify({ message: error?.message, stack: error?.stack })
+      );
+    });
   }
 };
 

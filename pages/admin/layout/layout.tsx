@@ -11,6 +11,7 @@ import {
   IconFiles,
   IconMessageCircle,
   IconMessages,
+  IconNotes,
   IconSettingsCog,
   IconUserCog,
   IconUsers,
@@ -63,7 +64,7 @@ const AdminLayout = ({
     },
     {
       url: '/admin/request-logs',
-      icon: <IconMessages stroke={1.6} size={22} />,
+      icon: <IconNotes stroke={1.6} size={22} />,
       title: t('Request Logs'),
     },
     {
@@ -84,11 +85,11 @@ const AdminLayout = ({
         className='h-full w-full items-stretch'
       >
         <ResizablePanel
-          defaultSize={120}
+          defaultSize={160}
           collapsedSize={4}
           collapsible={true}
-          minSize={6}
-          maxSize={12}
+          minSize={8}
+          maxSize={14}
           onCollapse={() => {
             setIsCollapsed(true);
           }}

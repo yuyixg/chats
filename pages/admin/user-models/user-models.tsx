@@ -97,7 +97,7 @@ export default function UserModels() {
         className={`cursor-pointer ${hover && 'hover:underline'}`}
         onClick={() => handleEditModal(user, modelId)}
       >
-        {value || '-'}
+        {value}
       </TableCell>
     );
   };

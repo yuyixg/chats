@@ -70,7 +70,6 @@ export function apiHandler(handler: any) {
         logs.statusCode = 500;
         res.status(500).json({ message: 'An unexpected error occurred' });
       }
-      console.log(logs);
       await RequestLogsManager.create(logs);
     }
   };

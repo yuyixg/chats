@@ -1,4 +1,4 @@
-import { BadRequest, InternalServerError } from '@/utils/error';
+import { BadRequest } from '@/utils/error';
 import requestIp from 'request-ip';
 import { OrdersManager, WxPayManager } from '@/managers';
 import { weChatAuth } from '@/utils/weChat';
@@ -14,36 +14,30 @@ export const config = {
 };
 
 const handler = async (req: ChatsApiRequest) => {
-  try {
-    if (req.method === 'POST') {
-      const { orderId, code } = req.body as {
-        orderId: string;
-        code: string;
-      };
-      const order = await OrdersManager.findById(orderId);
-      if (!order) {
-        throw new BadRequest('订单不存在');
-      }
-
-      const weChatAuthResult = await weChatAuth(code);
-      if (!weChatAuthResult) {
-        throw new BadRequest('微信授权失败');
-      }
-
-      const ipAddress = requestIp.getClientIp(req) || '127.0.0.1';
-      const result = await WxPayManager.callWxJSApiPay({
-        openId: weChatAuthResult.openid,
-        ipAddress,
-        orderId: order.id,
-        amount: order.amount,
-        outTradeNo: order.outTradeNo,
-      });
-      return result;
+  if (req.method === 'POST') {
+    const { orderId, code } = req.body as {
+      orderId: string;
+      code: string;
+    };
+    const order = await OrdersManager.findById(orderId);
+    if (!order) {
+      throw new BadRequest('订单不存在');
     }
-  } catch (error: any) {
-    throw new InternalServerError(
-      JSON.stringify({ message: error?.message, stack: error?.stack })
-    );
+
+    const weChatAuthResult = await weChatAuth(code);
+    if (!weChatAuthResult) {
+      throw new BadRequest('微信授权失败');
+    }
+
+    const ipAddress = requestIp.getClientIp(req) || '127.0.0.1';
+    const result = await WxPayManager.callWxJSApiPay({
+      openId: weChatAuthResult.openid,
+      ipAddress,
+      orderId: order.id,
+      amount: order.amount,
+      outTradeNo: order.outTradeNo,
+    });
+    return result;
   }
 };
 
