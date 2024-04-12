@@ -21,7 +21,7 @@ const publicApis = [
   '/api/public/messages',
   '/api/public/notify',
 ];
-const adminApis = ['/api/admin/'];
+const adminApis = '/api/admin/';
 
 async function authMiddleware(req: ChatsApiRequest) {
   const requestUrl = req.url!;
@@ -32,7 +32,7 @@ async function authMiddleware(req: ChatsApiRequest) {
       throw new Unauthorized();
     }
   }
-  if (adminApis.includes(requestUrl)) {
+  if (requestUrl.includes(adminApis)) {
     if (session?.role !== UserRole.admin) {
       throw new Unauthorized();
     }
@@ -62,11 +62,9 @@ export function apiHandler(handler: any) {
       await RequestLogsManager.create(logs);
       return data ? res.status(200).json(data) : res.status(200).end();
     } catch (error) {
-      console.log(logs);
       logs.response = `${error}`;
       if (error instanceof BaseError && error.statusCode !== 500) {
         logs.statusCode = error.statusCode;
-        console.log(logs);
         res.status(error.statusCode).send(error.message);
       } else {
         logs.statusCode = 500;

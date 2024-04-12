@@ -3,7 +3,7 @@ import { BadRequest, InternalServerError } from '@/utils/error';
 import { FileServices } from '@prisma/client';
 import { MessagesRelate } from '@/db/type';
 import { apiHandler } from '@/middleware/api-handler';
-import { ChatsApiRequest, ChatsApiResponse } from '@/types/next-api';
+import { ChatsApiRequest } from '@/types/next-api';
 export const config = {
   api: {
     bodyParser: {
