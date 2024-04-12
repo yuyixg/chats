@@ -1,7 +1,6 @@
 import { ChatMessageManager, FileServiceManager } from '@/managers';
 import { BadRequest } from '@/utils/error';
 import { FileServices } from '@prisma/client';
-import { MessagesRelate } from '@/db/type';
 import { apiHandler } from '@/middleware/api-handler';
 import { ChatsApiRequest } from '@/types/next-api';
 export const config = {
@@ -18,7 +17,7 @@ const handler = async (req: ChatsApiRequest) => {
   if (req.method === 'GET') {
     const messages = await ChatMessageManager.findUserMessages(userId);
     const fileServices = await FileServiceManager.findFileServices(false);
-    const data = messages.map((x: MessagesRelate) => {
+    const data = messages.map((x) => {
       const fileServer = fileServices.find(
         (f: FileServices) => f.id === x.chatModel!.fileServerId
       );

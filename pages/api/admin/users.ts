@@ -1,6 +1,5 @@
 import { UsersManager } from '@/managers';
 import { BadRequest } from '@/utils/error';
-import { UsersRelate } from '@/db/type';
 import { apiHandler } from '@/middleware/api-handler';
 import { ChatsApiRequest } from '@/types/next-api';
 export const config = {
@@ -16,7 +15,7 @@ const handler = async (req: ChatsApiRequest) => {
   if (req.method === 'GET') {
     const { query } = req.query;
     const users = await UsersManager.findUsers(query as string);
-    const data = users.map((x: UsersRelate) => {
+    const data = users.map((x) => {
       return {
         id: x.id,
         username: x.username,
