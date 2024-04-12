@@ -26,7 +26,7 @@ export class WxPayManager {
       WECHAT_PAY_API_V3_KEY,
       WECHAT_PAY_NOTIFY_URL,
     } = process.env;
-    const notifyUrl = WECHAT_PAY_NOTIFY_URL + '/api/payment/notify';
+    const notifyUrl = WECHAT_PAY_NOTIFY_URL + '/api/public/notify';
     const options = {
       description: `Order:${orderId}`,
       payer: {
@@ -68,7 +68,7 @@ export class WxPayManager {
       WECHAT_PAY_API_V3_KEY,
       WECHAT_PAY_NOTIFY_URL,
     } = process.env;
-    const notifyUrl = WECHAT_PAY_NOTIFY_URL + '/api/payment/notify';
+    const notifyUrl = WECHAT_PAY_NOTIFY_URL + '/api/public/notify';
     const options = {
       description: `Order:${orderId}`,
       attach: JSON.stringify({

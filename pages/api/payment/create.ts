@@ -1,9 +1,9 @@
-import type { NextApiRequest, NextApiResponse } from 'next';
 import { BadRequest, InternalServerError } from '@/utils/error';
 import requestIp from 'request-ip';
 import { OrdersManager, WxPayManager } from '@/managers';
 import { weChatAuth } from '@/utils/weChat';
 import { apiHandler } from '@/middleware/api-handler';
+import { ChatsApiRequest } from '@/types/next-api';
 export const config = {
   api: {
     bodyParser: {
@@ -13,7 +13,7 @@ export const config = {
   maxDuration: 5,
 };
 
-const handler = async (req: NextApiRequest, res: NextApiResponse) => {
+const handler = async (req: ChatsApiRequest) => {
   try {
     if (req.method === 'POST') {
       const { orderId, code } = req.body as {

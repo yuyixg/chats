@@ -1,4 +1,4 @@
-import { NextApiRequest, NextApiResponse } from 'next';
+import { NextApiRequest } from 'next';
 import { BadRequest, InternalServerError } from '@/utils/error';
 import { ChatMessageManager } from '@/managers';
 import { apiHandler } from '@/middleware/api-handler';
@@ -12,7 +12,7 @@ export const config = {
   maxDuration: 5,
 };
 
-const handler = async (req: NextApiRequest, res: NextApiResponse) => {
+const handler = async (req: NextApiRequest) => {
   try {
     const { messageId } = req.query as { messageId: string };
     if (!messageId) {

@@ -1,11 +1,11 @@
-import type { NextApiRequest, NextApiResponse } from 'next';
 import { IWxPayNotifyBody, PayEventType } from '@/utils/wxpay/type';
 import { OrdersManager, UserBalancesManager } from '@/managers';
 import { OrderStatus } from '@/types/order';
 import Decimal from 'decimal.js';
 import { centsToYuan } from '@/utils/wxpay/utils';
 import { apiHandler } from '@/middleware/api-handler';
-import { InternalServerError } from '@/utils/error';
+import { BadRequest, InternalServerError } from '@/utils/error';
+import { ChatsApiRequest, ChatsApiResponse } from '@/types/next-api';
 export const config = {
   api: {
     bodyParser: {
@@ -20,7 +20,7 @@ export interface IDecipherAttach {
   requestId: string;
 }
 
-const handler = async (req: NextApiRequest, res: NextApiResponse) => {
+const handler = async (req: ChatsApiRequest) => {
   try {
     if (req.method === 'POST') {
       const { event_type, decipherModel } = req.body as IWxPayNotifyBody;
@@ -42,9 +42,8 @@ const handler = async (req: NextApiRequest, res: NextApiResponse) => {
             order.createUserId
           );
         }
-        return res.status(200).end();
       } else {
-        return res.status(400).json({ code: 'FAIL' });
+        throw new BadRequest(JSON.stringify({ code: 'FAIL' }));
       }
     }
   } catch (error: any) {

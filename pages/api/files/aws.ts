@@ -1,16 +1,11 @@
-import { NextApiRequest } from 'next';
 import * as AWS from 'aws-sdk';
-import { getSession } from '@/utils/session';
-import { BadRequest, InternalServerError, Unauthorized } from '@/utils/error';
+import { BadRequest, InternalServerError } from '@/utils/error';
 import { FileServiceManager } from '@/managers';
 import { apiHandler } from '@/middleware/api-handler';
+import { ChatsApiRequest } from '@/types/next-api';
 
-const handler = async (req: NextApiRequest, res: any) => {
+const handler = async (req: ChatsApiRequest) => {
   try {
-    const session = await getSession(req.cookies);
-    if (!session) {
-      throw new Unauthorized();
-    }
     const { id } = req.query as { id: string };
     const fileServer = await FileServiceManager.findById(id);
     if (!fileServer || !fileServer.enabled) {

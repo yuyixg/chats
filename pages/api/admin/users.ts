@@ -1,10 +1,8 @@
-import type { NextApiRequest, NextApiResponse } from 'next';
 import { UsersManager } from '@/managers';
-import { UserRole } from '@/types/admin';
-import { getSession } from '@/utils/session';
-import { InternalServerError } from '@/utils/error';
+import { BadRequest, InternalServerError } from '@/utils/error';
 import { UsersRelate } from '@/db/type';
 import { apiHandler } from '@/middleware/api-handler';
+import { ChatsApiRequest, ChatsApiResponse } from '@/types/next-api';
 export const config = {
   api: {
     bodyParser: {
@@ -14,17 +12,7 @@ export const config = {
   maxDuration: 5,
 };
 
-const handler = async (req: NextApiRequest, res: NextApiResponse) => {
-  const session = await getSession(req.cookies);
-  if (!session) {
-    return res.status(401).end();
-  }
-  const role = session.role;
-  if (role !== UserRole.admin) {
-    res.status(401).end();
-    return;
-  }
-
+const handler = async (req: ChatsApiRequest, res: ChatsApiResponse) => {
   try {
     if (req.method === 'GET') {
       const { query } = req.query;
@@ -49,7 +37,7 @@ const handler = async (req: NextApiRequest, res: NextApiResponse) => {
       const { id, username, password, role, enabled, phone, email } = req.body;
       let user = await UsersManager.findByUserId(id);
       if (!user) {
-        return res.status(404).send('User not found.');
+        throw new BadRequest('User not found');
       }
       const data = await UsersManager.updateUser({
         id,
@@ -65,14 +53,14 @@ const handler = async (req: NextApiRequest, res: NextApiResponse) => {
       const { account, password, role } = req.body;
       let isFound = await UsersManager.findByAccount(account);
       if (isFound) {
-        return res.status(400).send('User existed.');
+        throw new BadRequest('User existed');
       }
       const user = await UsersManager.createUser({
         account,
         password,
         role,
       });
-      await UsersManager.initialUser(user.id!, session.userId);
+      await UsersManager.initialUser(user.id!, req.session.userId);
       return user;
     }
   } catch (error: any) {

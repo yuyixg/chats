@@ -128,3 +128,22 @@ export interface GetFileServicesResult extends PutFileServicesParams {
   createdAt: string;
   updatedAt: string;
 }
+
+export interface GetRequestLogsParams extends Paging {
+  query?: string;
+  statusCode?: number;
+}
+
+export interface GetRequestLogsListResult {
+  id: string;
+  username: string;
+  url: string;
+  method: string;
+  statusCode: number;
+  createdAt: string;
+}
+
+export interface GetRequestLogsDetailsResult extends GetRequestLogsListResult {
+  request: string;
+  response: string;
+}

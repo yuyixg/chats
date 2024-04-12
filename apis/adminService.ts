@@ -14,6 +14,9 @@ import {
   PutUserModelParams,
   PutUserParams,
   PutUserBalanceParams,
+  GetRequestLogsParams,
+  GetRequestLogsListResult,
+  GetRequestLogsDetailsResult,
 } from '@/types/admin';
 import { PostFileServicesParams, PutFileServicesParams } from '@/types/file';
 import { PageResult } from '@/types/page';
@@ -133,5 +136,19 @@ export const getShareMessage = (
   messageId: string
 ): Promise<GetMessageDetailsResult> => {
   const fetchService = useFetch();
-  return fetchService.get(`/api/share?messageId=${messageId}`);
+  return fetchService.get(`/api/public/share?messageId=${messageId}`);
+};
+
+export const getRequestLogs = (
+  params: GetRequestLogsParams
+): Promise<PageResult<GetRequestLogsListResult[]>> => {
+  const fetchService = useFetch();
+  return fetchService.post(`/api/admin/request-logs`, { body: { ...params } });
+};
+
+export const getRequestLogDetails = (
+  id: string
+): Promise<GetRequestLogsDetailsResult> => {
+  const fetchService = useFetch();
+  return fetchService.get(`/api/admin/request-logs?id=` + id);
 };

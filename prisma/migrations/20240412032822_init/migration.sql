@@ -151,7 +151,7 @@ CREATE TABLE "PayServices" (
 );
 
 -- CreateTable
-CREATE TABLE "AuditLogs" (
+CREATE TABLE "RequestLogs" (
     "id" TEXT NOT NULL PRIMARY KEY,
     "userId" TEXT,
     "url" TEXT NOT NULL,
@@ -159,9 +159,8 @@ CREATE TABLE "AuditLogs" (
     "statusCode" INTEGER NOT NULL,
     "request" TEXT NOT NULL DEFAULT '{}',
     "response" TEXT NOT NULL DEFAULT '{}',
-    "error" TEXT NOT NULL DEFAULT '{}',
     "createdAt" DATETIME NOT NULL DEFAULT CURRENT_TIMESTAMP,
-    CONSTRAINT "AuditLogs_userId_fkey" FOREIGN KEY ("userId") REFERENCES "Users" ("id") ON DELETE SET NULL ON UPDATE CASCADE
+    CONSTRAINT "RequestLogs_userId_fkey" FOREIGN KEY ("userId") REFERENCES "Users" ("id") ON DELETE SET NULL ON UPDATE CASCADE
 );
 
 -- CreateIndex

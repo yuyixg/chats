@@ -1,4 +1,3 @@
-import type { NextApiRequest, NextApiResponse } from 'next';
 import { DEFAULT_TEMPERATURE } from '@/utils/const';
 import { LingYiStream, LingYiSteamResult } from '@/services/lingyi';
 import {
@@ -14,7 +13,6 @@ import {
   UserBalancesManager,
   UserModelManager,
 } from '@/managers';
-import { getSession } from '@/utils/session';
 import {
   BadRequest,
   InternalServerError,
@@ -23,6 +21,7 @@ import {
 import { verifyModel } from '@/utils/model';
 import { calcTokenPrice } from '@/utils/message';
 import { apiHandler } from '@/middleware/api-handler';
+import { ChatsApiRequest, ChatsApiResponse } from '@/types/next-api';
 
 export const config = {
   api: {
@@ -33,13 +32,9 @@ export const config = {
   maxDuration: 5,
 };
 
-const handler = async (req: NextApiRequest, res: NextApiResponse) => {
+const handler = async (req: ChatsApiRequest, res: ChatsApiResponse) => {
   try {
-    const session = await getSession(req.cookies);
-    if (!session) {
-      throw new ModelUnauthorized();
-    }
-    const { userId } = session;
+    const { userId } = req.session;
     const { messageId, model, messages, prompt, temperature } =
       req.body as ChatBody;
 

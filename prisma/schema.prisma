@@ -28,7 +28,7 @@ model Users {
   messages     Messages[]
   userBalances UserBalances?
   UserModels   UserModels[]
-  AuditLogs    AuditLogs[]
+  AuditLogs    RequestLogs[]
   Orders       Orders[]
 }
 
@@ -156,7 +156,7 @@ model PayServices {
   updatedAt DateTime @updatedAt
 }
 
-model AuditLogs {
+model RequestLogs {
   id         String   @id @default(uuid())
   userId     String?
   url        String
@@ -164,7 +164,6 @@ model AuditLogs {
   statusCode Int
   request    String   @default("{}")
   response   String   @default("{}")
-  error      String   @default("{}")
   createdAt  DateTime @default(now())
   user       Users?   @relation(fields: [userId], references: [id])
 }

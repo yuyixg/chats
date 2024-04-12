@@ -7,7 +7,7 @@ import { FileServiceManager } from './fileService';
 import { UserBalancesManager } from './userBalances';
 import { WxPayManager } from './wxPay';
 import { OrdersManager } from './order';
-import { AuditLogsManager } from './auditLogs';
+import { RequestLogsManager } from './requestLogs';
 
 export {
   ChatModelManager,
@@ -19,5 +19,5 @@ export {
   UserBalancesManager,
   WxPayManager,
   OrdersManager,
-  AuditLogsManager,
+  RequestLogsManager,
 };

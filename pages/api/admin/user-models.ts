@@ -1,10 +1,10 @@
-import type { NextApiRequest, NextApiResponse } from 'next';
 import { ChatModelManager, UserModelManager } from '@/managers';
 import { UserRole } from '@/types/admin';
 import { getSession } from '@/utils/session';
 import { InternalServerError, ModelUnauthorized } from '@/utils/error';
 import { ChatModels, UserModels } from '@prisma/client';
 import { apiHandler } from '@/middleware/api-handler';
+import { ChatsApiRequest, ChatsApiResponse } from '@/types/next-api';
 export const config = {
   api: {
     bodyParser: {
@@ -14,17 +14,7 @@ export const config = {
   maxDuration: 5,
 };
 
-const handler = async (req: NextApiRequest, res: NextApiResponse) => {
-  const session = await getSession(req.cookies);
-  if (!session) {
-    return res.status(401).end();
-  }
-  const role = session.role;
-  if (role !== UserRole.admin) {
-    res.status(401).end();
-    return;
-  }
-
+const handler = async (req: ChatsApiRequest, res: ChatsApiResponse) => {
   try {
     if (req.method === 'GET') {
       const { query } = req.query as { query: string };

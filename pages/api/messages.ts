@@ -1,10 +1,9 @@
-import type { NextApiRequest, NextApiResponse } from 'next';
 import { ChatMessageManager, FileServiceManager } from '@/managers';
-import { getSession } from '@/utils/session';
 import { BadRequest, InternalServerError } from '@/utils/error';
 import { FileServices } from '@prisma/client';
 import { MessagesRelate } from '@/db/type';
 import { apiHandler } from '@/middleware/api-handler';
+import { ChatsApiRequest, ChatsApiResponse } from '@/types/next-api';
 export const config = {
   api: {
     bodyParser: {
@@ -14,17 +13,11 @@ export const config = {
   maxDuration: 5,
 };
 
-const handler = async (req: NextApiRequest, res: NextApiResponse) => {
-  const session = await getSession(req.cookies);
-  if (!session) {
-    return res.status(401).end();
-  }
-
+const handler = async (req: ChatsApiRequest) => {
   try {
+    const { userId } = req.session;
     if (req.method === 'GET') {
-      const messages = await ChatMessageManager.findUserMessages(
-        session.userId
-      );
+      const messages = await ChatMessageManager.findUserMessages(userId);
       const fileServices = await FileServiceManager.findFileServices(false);
       const data = messages.map((x: MessagesRelate) => {
         const fileServer = fileServices.find(
@@ -57,7 +50,7 @@ const handler = async (req: NextApiRequest, res: NextApiResponse) => {
       const { id, name, isShared } = req.body;
       const userMessage = await ChatMessageManager.findUserMessageById(
         id,
-        session.userId
+        userId
       );
       if (!userMessage || userMessage.isDeleted) {
         throw new BadRequest();

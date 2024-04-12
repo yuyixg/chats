@@ -1,13 +1,12 @@
-import type { NextApiRequest, NextApiResponse } from 'next';
 import {
   ChatModelManager,
   FileServiceManager,
   UserModelManager,
 } from '@/managers';
-import { getSession } from '@/utils/session';
-import { InternalServerError, Unauthorized } from '@/utils/error';
+import { InternalServerError } from '@/utils/error';
 import { ChatModels, FileServices } from '@prisma/client';
 import { apiHandler } from '@/middleware/api-handler';
+import { ChatsApiRequest } from '@/types/next-api';
 export const config = {
   api: {
     bodyParser: {
@@ -17,15 +16,10 @@ export const config = {
   maxDuration: 5,
 };
 
-const handler = async (req: NextApiRequest, res: NextApiResponse) => {
+const handler = async (req: ChatsApiRequest) => {
   try {
-    const session = await getSession(req.cookies);
-    if (!session) {
-      throw new Unauthorized();
-    }
-    const userModels = await UserModelManager.findUserEnableModels(
-      session.userId!
-    );
+    const { userId } = req.session;
+    const userModels = await UserModelManager.findUserEnableModels(userId);
     const models = await ChatModelManager.findModels();
     const fileServices = await FileServiceManager.findFileServices(false);
     const _models = models

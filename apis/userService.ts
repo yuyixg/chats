@@ -41,5 +41,5 @@ export const getCsrfToken = (): Promise<{ csrfToken: string }> => {
 
 export const singIn = (params: SingInParams): Promise<UserSession> => {
   const fetchServer = useFetch();
-  return fetchServer.post('/api/user', { body: params });
+  return fetchServer.post('/api/public/login', { body: params });
 };

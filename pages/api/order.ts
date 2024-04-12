@@ -1,9 +1,8 @@
-import type { NextApiRequest, NextApiResponse } from 'next';
-import { getSession } from '@/utils/session';
-import { InternalServerError, Unauthorized } from '@/utils/error';
+import { InternalServerError } from '@/utils/error';
 import { generateOrderTradeNo } from '@/utils/wxpay/utils';
 import { OrdersManager } from '@/managers';
 import { apiHandler } from '@/middleware/api-handler';
+import { ChatsApiRequest } from '@/types/next-api';
 export const config = {
   api: {
     bodyParser: {
@@ -13,19 +12,16 @@ export const config = {
   maxDuration: 5,
 };
 
-const handler = async (req: NextApiRequest, res: NextApiResponse) => {
+const handler = async (req: ChatsApiRequest) => {
   try {
-    const session = await getSession(req.cookies);
-    if (!session) {
-      throw new Unauthorized();
-    }
+    const { userId } = req.session;
     if (req.method === 'POST') {
       const { amount } = req.body as { amount: number };
       const outTradeNo = generateOrderTradeNo();
       const order = await OrdersManager.createOrder({
         outTradeNo,
         amount,
-        createUserId: session.userId,
+        createUserId: userId,
       });
       return order.id;
     }

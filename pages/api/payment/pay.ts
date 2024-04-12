@@ -1,10 +1,9 @@
-import type { NextApiRequest, NextApiResponse } from 'next';
-import { getSession } from '@/utils/session';
-import { InternalServerError, Unauthorized } from '@/utils/error';
+import { InternalServerError } from '@/utils/error';
 import requestIp from 'request-ip';
 import { OrdersManager, WxPayManager } from '@/managers';
 import { generateOrderTradeNo } from '@/utils/wxpay/utils';
 import { apiHandler } from '@/middleware/api-handler';
+import { ChatsApiRequest } from '@/types/next-api';
 export const config = {
   api: {
     bodyParser: {
@@ -14,26 +13,22 @@ export const config = {
   maxDuration: 5,
 };
 
-const handler = async (req: NextApiRequest, res: NextApiResponse) => {
+const handler = async (req: ChatsApiRequest) => {
   try {
-    const session = await getSession(req.cookies);
-    if (!session) {
-      throw new Unauthorized();
-    }
     if (req.method === 'POST') {
       const { amount } = req.body as { amount: number };
       const outTradeNo = generateOrderTradeNo();
       const order = await OrdersManager.createOrder({
         outTradeNo,
         amount,
-        createUserId: session.userId,
+        createUserId: req.session.userId,
       });
       const ipAddress = requestIp.getClientIp(req) || '127.0.0.1';
       return await WxPayManager.callWxJSApiPay({
         ipAddress,
         orderId: order.id,
         amount,
-        openId: session.sub!,
+        openId: req.session.sub!,
         outTradeNo,
       });
     }

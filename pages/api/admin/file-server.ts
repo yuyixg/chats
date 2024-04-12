@@ -1,11 +1,9 @@
-import type { NextApiRequest, NextApiResponse } from 'next';
-import { UserRole } from '@/types/admin';
-import { getSession } from '@/utils/session';
 import { FileServiceManager } from '@/managers';
 import { addAsterisk, checkKey } from '@/utils/common';
 import { FileServices } from '@prisma/client';
 import { apiHandler } from '@/middleware/api-handler';
-import { InternalServerError } from '@/utils/error';
+import { BadRequest, InternalServerError } from '@/utils/error';
+import { ChatsApiRequest, ChatsApiResponse } from '@/types/next-api';
 export const config = {
   api: {
     bodyParser: {
@@ -15,17 +13,7 @@ export const config = {
   maxDuration: 5,
 };
 
-const handler = async (req: NextApiRequest, res: NextApiResponse) => {
-  const session = await getSession(req.cookies);
-  if (!session) {
-    return res.status(401).end();
-  }
-  const role = session.role;
-  if (role !== UserRole.admin) {
-    res.status(401).end();
-    return;
-  }
-
+const handler = async (req: ChatsApiRequest, res: ChatsApiResponse) => {
   try {
     if (req.method === 'GET') {
       const { select } = req.query;
@@ -62,7 +50,7 @@ const handler = async (req: NextApiRequest, res: NextApiResponse) => {
       const { id, type, name, enabled, configs: configsJSON } = req.body;
       let fileServer = await FileServiceManager.findById(id);
       if (!fileServer) {
-        return res.status(404).send('File server not found');
+        throw new BadRequest('File server not found');
       }
 
       let configs = JSON.parse(configsJSON);
@@ -87,7 +75,7 @@ const handler = async (req: NextApiRequest, res: NextApiResponse) => {
       const { type, name, enabled, configs } = req.body;
       let isFound = await FileServiceManager.findByName(name);
       if (isFound) {
-        return res.status(400).send('Name existed');
+        throw new BadRequest('Name existed');
       }
       const fileServer = await FileServiceManager.createFileServices({
         type,

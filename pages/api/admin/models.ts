@@ -1,13 +1,11 @@
 import { ChatModelManager } from '@/managers';
-import type { NextApiRequest, NextApiResponse } from 'next';
-import { UserRole } from '@/types/admin';
-import { getSession } from '@/utils/session';
 import { ModelDefaultTemplates } from '@/types/template';
 import { ModelVersions } from '@/types/model';
 import { BadRequest, InternalServerError } from '@/utils/error';
 import { addAsterisk, checkKey } from '@/utils/common';
 import { ChatModels } from '@prisma/client';
 import { apiHandler } from '@/middleware/api-handler';
+import { ChatsApiRequest, ChatsApiResponse } from '@/types/next-api';
 export const config = {
   api: {
     bodyParser: {
@@ -17,17 +15,7 @@ export const config = {
   maxDuration: 5,
 };
 
-const handler = async (req: NextApiRequest, res: NextApiResponse) => {
-  const session = await getSession(req.cookies);
-  if (!session) {
-    return res.status(401).end();
-  }
-  const role = session.role;
-  if (role !== UserRole.admin) {
-    res.status(401).end();
-    return;
-  }
-
+const handler = async (req: ChatsApiRequest, res: ChatsApiResponse) => {
   try {
     if (req.method === 'GET') {
       const { all } = req.query;
@@ -70,8 +58,7 @@ const handler = async (req: NextApiRequest, res: NextApiResponse) => {
       } = req.body;
       const model = await ChatModelManager.findModelById(modelId);
       if (!model) {
-        res.status(400).end('Model is not Found!');
-        return;
+        throw new BadRequest('Model is not Found');
       }
 
       let apiConfig = JSON.parse(apiConfigJson);
@@ -104,15 +91,13 @@ const handler = async (req: NextApiRequest, res: NextApiResponse) => {
 
       const model = await ChatModelManager.findModelByName(name);
       if (model) {
-        res.status(400).end('Model name is exist!');
-        return;
+        throw new BadRequest('Model name is exist');
       }
 
       const template = ModelDefaultTemplates[modelVersion as ModelVersions];
 
       if (!template) {
-        res.status(400).end('Model is not Found!');
-        return;
+        throw new BadRequest('Model is not Found');
       }
 
       const data = await ChatModelManager.createModel(

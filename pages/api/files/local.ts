@@ -1,10 +1,9 @@
 import { FileServiceManager } from '@/managers';
 import { apiHandler } from '@/middleware/api-handler';
-import { BadRequest, InternalServerError, Unauthorized } from '@/utils/error';
-import { getSession } from '@/utils/session';
+import { ChatsApiRequest, ChatsApiResponse } from '@/types/next-api';
+import { BadRequest, InternalServerError } from '@/utils/error';
 import { IncomingForm } from 'formidable';
 import { promises as fs } from 'fs';
-import { NextApiRequest, NextApiResponse } from 'next';
 
 export const config = {
   api: {
@@ -12,12 +11,8 @@ export const config = {
   },
 };
 
-const handler = async (req: NextApiRequest, res: NextApiResponse) => {
+const handler = async (req: ChatsApiRequest, res: ChatsApiResponse) => {
   try {
-    const session = await getSession(req.cookies);
-    if (!session) {
-      throw new Unauthorized();
-    }
     const { id } = req.query as { id: string };
     const fileServer = await FileServiceManager.findById(id);
     if (!fileServer || !fileServer.enabled) {
@@ -44,10 +39,10 @@ const handler = async (req: NextApiRequest, res: NextApiResponse) => {
       return {
         getUrl: `${req.headers.origin}/${storageFolderName}/${file.originalFilename}`,
       };
-    } catch (error) {
-      console.error(error);
-      res.status(400).end('Upload failed!');
-      return;
+    } catch (error: any) {
+      throw new InternalServerError(
+        JSON.stringify({ message: error?.message, stack: error?.stack })
+      );
     }
   } catch (error: any) {
     throw new InternalServerError(

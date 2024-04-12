@@ -1,4 +1,3 @@
-import type { NextApiRequest, NextApiResponse } from 'next';
 import { ChatBody, QianFanMessage } from '@/types/chat';
 import { QianFanStream, QianFanSteamResult } from '@/services/qianfan';
 import {
@@ -7,7 +6,6 @@ import {
   UserBalancesManager,
   UserModelManager,
 } from '@/managers';
-import { getSession } from '@/utils/session';
 import {
   BadRequest,
   InternalServerError,
@@ -16,6 +14,7 @@ import {
 import { verifyModel } from '@/utils/model';
 import { calcTokenPrice } from '@/utils/message';
 import { apiHandler } from '@/middleware/api-handler';
+import { ChatsApiRequest, ChatsApiResponse } from '@/types/next-api';
 
 export const config = {
   api: {
@@ -26,13 +25,9 @@ export const config = {
   maxDuration: 5,
 };
 
-const handler = async (req: NextApiRequest, res: NextApiResponse) => {
+const handler = async (req: ChatsApiRequest, res: ChatsApiResponse) => {
   try {
-    const session = await getSession(req.cookies);
-    if (!session) {
-      throw new ModelUnauthorized();
-    }
-    const { userId } = session;
+    const { userId } = req.session;
     const { model, messages, messageId } = req.body as ChatBody;
 
     const chatModel = await ChatModelManager.findModelById(model.id);

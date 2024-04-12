@@ -1,9 +1,10 @@
 import { NextApiRequest, NextApiResponse } from 'next';
-import { SessionsManager, UsersManager } from '@/managers';
+import { UsersManager } from '@/managers';
 import { BadRequest, InternalServerError } from '@/utils/error';
 import bcrypt from 'bcryptjs';
 import { getSession } from '@/utils/session';
 import { apiHandler } from '@/middleware/api-handler';
+import { ChatsApiRequest, ChatsApiResponse } from '@/types/next-api';
 
 export const config = {
   api: {
@@ -14,33 +15,12 @@ export const config = {
   maxDuration: 5,
 };
 
-async function handler(req: NextApiRequest, res: NextApiResponse) {
+async function handler(req: ChatsApiRequest, res: ChatsApiResponse) {
   try {
-    if (req.method === 'POST') {
-      const { username, password, code } = req.body;
-      let user = null;
-      if (code) {
-        user = await UsersManager.weChatLogin(code);
-      } else {
-        user = await UsersManager.singIn(username, password);
-      }
-
-      if (user) {
-        const session = await SessionsManager.generateSession(user.id!);
-        return {
-          sessionId: session.id,
-          username: user.username,
-          role: user.role,
-        };
-      }
-      throw new BadRequest('Username or password incorrect');
-    } else if (req.method === 'PUT') {
-      const session = await getSession(req.cookies);
-      if (!session) {
-        return res.status(401).end();
-      }
+    const { userId } = req.session;
+    if (req.method === 'PUT') {
       const { newPassword } = req.body;
-      const user = await UsersManager.findByUserId(session.userId);
+      const user = await UsersManager.findByUserId(userId);
       if (!user) {
         throw new BadRequest('Username or password incorrect');
       }

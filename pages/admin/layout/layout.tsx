@@ -62,6 +62,11 @@ const AdminLayout = ({
       title: t('User Messages'),
     },
     {
+      url: '/admin/request-logs',
+      icon: <IconMessages stroke={1.6} size={22} />,
+      title: t('Request Logs'),
+    },
+    {
       url: '/',
       icon: <IconMessageCircle stroke={1.6} size={22} />,
       title: 'Chats',
@@ -96,7 +101,9 @@ const AdminLayout = ({
             'h-full'
           )}
         >
-          <div className={cn('px-4 py-4 overflow-y-auto', isCollapsed && 'px-2')}>
+          <div
+            className={cn('px-4 py-4 overflow-y-auto', isCollapsed && 'px-2')}
+          >
             <a
               onClick={() => {
                 router.push('/admin/dashboard');

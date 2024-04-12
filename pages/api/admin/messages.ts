@@ -1,9 +1,9 @@
-import type { NextApiRequest, NextApiResponse } from 'next';
 import { ChatMessageManager, UserModelManager, UsersManager } from '@/managers';
 import { UserRole } from '@/types/admin';
 import { getSession } from '@/utils/session';
-import { InternalServerError } from '@/utils/error';
+import { BadRequest, InternalServerError } from '@/utils/error';
 import { apiHandler } from '@/middleware/api-handler';
+import { ChatsApiRequest, ChatsApiResponse } from '@/types/next-api';
 export const config = {
   api: {
     bodyParser: {
@@ -13,17 +13,7 @@ export const config = {
   maxDuration: 5,
 };
 
-const handler = async (req: NextApiRequest, res: NextApiResponse) => {
-  const session = await getSession(req.cookies);
-  if (!session) {
-    return res.status(401).end();
-  }
-  const role = session.role;
-  if (role !== UserRole.admin) {
-    res.status(401).end();
-    return;
-  }
-
+const handler = async (req: ChatsApiRequest, res: ChatsApiResponse) => {
   try {
     if (req.method === 'GET') {
       const { query, page, pageSize } = req.query as {
@@ -56,7 +46,7 @@ const handler = async (req: NextApiRequest, res: NextApiResponse) => {
       const { id, username, password, role } = req.body;
       let user = await UsersManager.findByUserId(id);
       if (!user) {
-        return res.status(404).send('User not found.');
+        throw new BadRequest('User not found');
       }
       const data = await UsersManager.updateUser({
         id,
@@ -69,7 +59,7 @@ const handler = async (req: NextApiRequest, res: NextApiResponse) => {
       const { username, password, role } = req.body;
       let isFound = await UsersManager.findByAccount(username);
       if (isFound) {
-        return res.status(400).send('User existed.');
+        throw new BadRequest('User existed');
       }
       const user = await UsersManager.createUser({
         username,
