@@ -1,4 +1,5 @@
 import { useFetch } from '@/hooks/useFetch';
+import { Model } from '@/types/model';
 import { SingInParams } from '@/types/user';
 import { UserSession } from '@/utils/user';
 
@@ -42,4 +43,9 @@ export const getCsrfToken = (): Promise<{ csrfToken: string }> => {
 export const singIn = (params: SingInParams): Promise<UserSession> => {
   const fetchServer = useFetch();
   return fetchServer.post('/api/public/login', { body: params });
+};
+
+export const getUserModels = () => {
+  const fetchServer = useFetch();
+  return fetchServer.get<Model[]>('/api/models');
 };

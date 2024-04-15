@@ -9,17 +9,14 @@ import {
   updateConversation,
 } from '@/utils/conversation';
 import { KeyValuePair } from '@/types/data';
-import { useEffect, useRef, useState } from 'react';
+import { useEffect, useRef } from 'react';
 import Head from 'next/head';
 import { Navbar } from '@/components/Navbar/Navbar';
 import { Chatbar } from '@/components/Chatbar/Chatbar';
 import { Chat } from '@/components/Chat/Chat';
-import { useQuery } from 'react-query';
-import useApiService from '@/apis/useApiService';
 import { serverSideTranslations } from 'next-i18next/serverSideTranslations';
 import { useTranslation } from 'react-i18next';
 import { getSettingsLanguage, getSettings } from '@/utils/settings';
-import Promptbar from '@/components/Promptbar';
 import { getSession } from '@/utils/session';
 import { Session } from '@/types/session';
 import { getLoginUrl, getUserSession } from '@/utils/user';
@@ -31,7 +28,7 @@ import { ErrorMessage } from '@/types/error';
 import { Model } from '@/types/model';
 import { Prompt } from '@/types/prompt';
 import { UserSession } from '@/utils/user';
-import { getUserMessages } from '@/apis/userService';
+import { getUserMessages, getUserModels } from '@/apis/userService';
 import {
   DEFAULT_LANGUAGE,
   DEFAULT_THEME,
@@ -39,6 +36,7 @@ import {
   Themes,
 } from '@/types/settings';
 import { useTheme } from 'next-themes';
+import Spinner from '@/components/Spinner';
 
 interface Props {
   serverSideApiKeyIsSet: boolean;
@@ -124,10 +122,8 @@ const Home = ({ defaultModelId }: Props) => {
     },
     dispatch,
   } = contextValue;
-  const { getModels } = useApiService();
   const stopConversationRef = useRef<boolean>(false);
   const { setTheme } = useTheme();
-  const [loadingText, setLoadingText] = useState('');
 
   const handleNewConversation = () => {
     const lastConversation = conversations[conversations.length - 1];
@@ -202,8 +198,6 @@ const Home = ({ defaultModelId }: Props) => {
   };
 
   useEffect(() => {
-    setLoadingText(t('Loading ...')!);
-
     const settings = getSettings();
     if (settings.theme) {
       dispatch({
@@ -282,32 +276,27 @@ const Home = ({ defaultModelId }: Props) => {
     }
   }, [defaultModelId, models, dispatch]);
 
-  const { data } = useQuery(
-    ['GetModels'],
-    ({ signal }) => {
-      return getModels({}, signal);
-    },
-    {}
-  );
-
   useEffect(() => {
     dispatch({
       field: 'modelsLoading',
       value: true,
     });
-    if (data && data.length > 0) {
-      localStorage.removeItem('selectedConversation');
+
+    getUserModels().then((data) => {
+      if (data && data.length > 0) {
+        localStorage.removeItem('selectedConversation');
+        dispatch({
+          field: 'defaultModelId',
+          value: data[0].id,
+        });
+      }
+      dispatch({ field: 'models', value: data });
       dispatch({
-        field: 'defaultModelId',
-        value: data[0].id,
+        field: 'modelsLoading',
+        value: false,
       });
-    }
-    dispatch({ field: 'models', value: data });
-    dispatch({
-      field: 'modelsLoading',
-      value: false,
     });
-  }, [data, dispatch]);
+  }, [dispatch]);
 
   return (
     <HomeContext.Provider
@@ -334,7 +323,14 @@ const Home = ({ defaultModelId }: Props) => {
           <div
             className={`fixed top-0 left-0 bottom-0 right-0 bg-white dark:bg-[#202123] text-black/80 dark:text-white/80 z-50 text-center text-[12.5px]`}
           >
-            <div className='fixed w-screen h-screen top-1/2'>{loadingText}</div>
+            <div className='fixed w-screen h-screen top-1/2'>
+              <div className='flex justify-center'>
+                <Spinner
+                  size='18'
+                  className='text-gray-500 dark:text-gray-50'
+                />
+              </div>
+            </div>
           </div>
         )}
         <div className={`flex h-screen w-screen flex-col text-sm`}>
