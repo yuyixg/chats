@@ -134,10 +134,9 @@ export interface IWxPayNotifyBody {
   event_type: string;
   summary: string;
   resource: IResource;
-  decipherModel: IPayNotifyDecipher;
 }
 
-interface IResource {
+export interface IResource {
   original_type: string;
   algorithm: string;
   ciphertext: string;

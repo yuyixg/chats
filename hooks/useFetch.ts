@@ -62,7 +62,7 @@ export const useFetch = () => {
 
         const errResult =
           contentType && contentType?.indexOf('application/problem+json') !== -1
-            ? await err.json()
+            ? await err.text()
             : err;
 
         throw errResult;

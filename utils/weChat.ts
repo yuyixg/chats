@@ -1,28 +1,29 @@
-import { useFetch } from '@/hooks/useFetch';
 import { IWeChatAuthResult } from '@/managers/users';
+import { InternalServerError } from './error';
 
 export function redirectToWeChatAuthUrl(redirectUri: string) {
-  // snsapi_userinfo 需要用户手动授权
-  // snsapi_base 默认授权 只能获取openid
   const scope = 'snsapi_base';
-  // const redirectUri = encodeURIComponent(`${origin}/authorizing`);
   location.href = `https://open.weixin.qq.com/connect/oauth2/authorize?appid=wx05e69f4a0aeb8421&redirect_uri=${redirectUri}&response_type=code&scope=${scope}&state=STATE#wechat_redirect`;
 }
 
 export async function weChatAuth(code: string) {
-  const fetchServer = useFetch();
-  const res = await fetchServer.get<IWeChatAuthResult>(
-    `https://api.weixin.qq.com/sns/oauth2/access_token?appid=${process.env.WECHAT_APP_ID}&secret=${process.env.WECHAT_SECRET}&code=${code}&grant_type=authorization_code`,
-    {
-      headers: {
-        'Content-Type': 'application/json',
-      },
+  const { WECHAT_APP_ID, WECHAT_SECRET } = process.env;
+  try {
+    const res = await fetch(
+      `https://api.weixin.qq.com/sns/oauth2/access_token?appid=${WECHAT_APP_ID}&secret=${WECHAT_SECRET}&code=${code}&grant_type=authorization_code`,
+      {
+        method: 'GET',
+        headers: {
+          'Content-Type': 'application/json',
+        },
+      }
+    );
+    const response: IWeChatAuthResult = await res.json();
+    if (response.errcode) {
+      throw new InternalServerError(JSON.stringify(response));
     }
-  );
-  console.log('WeChat Auth Result: ', JSON.stringify(res));
-  if (res.errcode) {
-    console.error('WeChat Auth error', JSON.stringify(res));
-    return null;
+    return response;
+  } catch (error) {
+    throw new InternalServerError(`${error}`);
   }
-  return res;
 }

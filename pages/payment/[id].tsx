@@ -7,12 +7,6 @@ export default function Payment() {
   const router = useRouter();
   const { code, id } = router.query as { id: string; code: string };
   useEffect(() => {
-    // createWeChatPayment(code, id).then((paySign) => {
-    //   toast.success(paySign.h5_url);
-    //   setTimeout(() => {
-    //     window.location.href = paySign.h5_url;
-    //   }, 5000);
-    // });
     if (code) {
       createWeChatPayment(code, id)
         .then((paySign) => {
@@ -22,22 +16,27 @@ export default function Payment() {
             function (res: any) {
               if (res.err_msg === 'get_brand_wcpay_request:ok') {
                 toast.success('支付成功');
+                setTimeout(() => {
+                  router.push('/');
+                }, 2000);
               }
               if (res.err_msg === 'get_brand_wcpay_request:cancel') {
-                toast.error('取消支付');
+                WeixinJSBridge.call('closeWindow');
               }
 
               if (res.err_msg === 'get_brand_wcpay_request:fail') {
-                toast.error('支付失败');
+                WeixinJSBridge.call('closeWindow');
               }
             }
           );
         })
         .catch(() => {
-          toast.error('支付异常');
+          toast.error('支付异常,请稍后再试');
+          setTimeout(() => {
+            WeixinJSBridge.call('closeWindow');
+          }, 1000);
         });
     } else {
-      // localStorage.setItem('callbackUrl', location.pathname);
       const redirectUri = encodeURIComponent(location.href);
       redirectToWeChatAuthUrl(redirectUri);
     }

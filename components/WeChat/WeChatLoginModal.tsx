@@ -30,16 +30,18 @@ const WeChatLoginModal = (props: { isOpen: boolean; onClose: () => void }) => {
   return (
     <Dialog open={isOpen} onOpenChange={onClose}>
       <DialogContent className='w-[340px] h-[320px]'>
+        {status !== 'ready' && (
+          <div className='flex justify-center items-center h-[300px]'>
+            <Spinner
+              size='18'
+              className='mx-auto text-gray-500 dark:text-gray-50'
+            />
+          </div>
+        )}
         <div
           id='wxContainer'
           className='flex justify-center items-center'
         ></div>
-
-        {status !== 'ready' && (
-          <div className='flex justify-center items-center'>
-            <Spinner size='32px' className='mx-auto bg-gray-500' />
-          </div>
-        )}
       </DialogContent>
     </Dialog>
   );

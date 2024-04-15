@@ -1,5 +1,5 @@
 import { IWxPayNotifyBody, PayEventType } from '@/utils/wxpay/type';
-import { OrdersManager, UserBalancesManager } from '@/managers';
+import { OrdersManager, UserBalancesManager, WxPayManager } from '@/managers';
 import { OrderStatus } from '@/types/order';
 import Decimal from 'decimal.js';
 import { centsToYuan } from '@/utils/wxpay/utils';
@@ -22,11 +22,10 @@ export interface IDecipherAttach {
 
 const handler = async (req: ChatsApiRequest) => {
   if (req.method === 'POST') {
-    const { event_type, decipherModel } = req.body as IWxPayNotifyBody;
-    console.log('notify', JSON.stringify(req.body));
-    if (decipherModel && event_type === PayEventType.SUCCESS) {
+    const { event_type, resource } = req.body as IWxPayNotifyBody;
+    if (event_type === PayEventType.SUCCESS) {
+      const decipherModel = await WxPayManager.decipherGCM(resource);
       const attach = JSON.parse(decipherModel.attach) as IDecipherAttach;
-      console.log('notify', decipherModel.attach);
       const { orderId } = attach;
       const order = await OrdersManager.findById(orderId);
       if (order?.status === OrderStatus.Waiting) {
