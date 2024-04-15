@@ -136,7 +136,7 @@ export const getShareMessage = (
   messageId: string
 ): Promise<GetMessageDetailsResult> => {
   const fetchService = useFetch();
-  return fetchService.get(`/api/public/share?messageId=${messageId}`);
+  return fetchService.get(`/api/public/messages?messageId=${messageId}`);
 };
 
 export const getRequestLogs = (

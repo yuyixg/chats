@@ -1,8 +1,7 @@
 import { UsersManager } from '@/managers';
-import { BadRequest, InternalServerError } from '@/utils/error';
-import { UsersRelate } from '@/db/type';
+import { BadRequest } from '@/utils/error';
 import { apiHandler } from '@/middleware/api-handler';
-import { ChatsApiRequest, ChatsApiResponse } from '@/types/next-api';
+import { ChatsApiRequest } from '@/types/next-api';
 export const config = {
   api: {
     bodyParser: {
@@ -12,61 +11,55 @@ export const config = {
   maxDuration: 5,
 };
 
-const handler = async (req: ChatsApiRequest, res: ChatsApiResponse) => {
-  try {
-    if (req.method === 'GET') {
-      const { query } = req.query;
-      const users = await UsersManager.findUsers(query as string);
-      const data = users.map((x: UsersRelate) => {
-        return {
-          id: x.id,
-          username: x.username,
-          account: x.account,
-          role: x.role,
-          balance: x.userBalances?.balance,
-          avatar: x.avatar,
-          phone: x.phone,
-          email: x.email,
-          provider: x.provider,
-          enabled: x.enabled,
-          createdAt: x.createdAt,
-        };
-      });
-      return data;
-    } else if (req.method === 'PUT') {
-      const { id, username, password, role, enabled, phone, email } = req.body;
-      let user = await UsersManager.findByUserId(id);
-      if (!user) {
-        throw new BadRequest('User not found');
-      }
-      const data = await UsersManager.updateUser({
-        id,
-        username,
-        password: password ? password : user.password,
-        role,
-        enabled,
-        phone,
-        email,
-      });
-      return data;
-    } else {
-      const { account, password, role } = req.body;
-      let isFound = await UsersManager.findByAccount(account);
-      if (isFound) {
-        throw new BadRequest('User existed');
-      }
-      const user = await UsersManager.createUser({
-        account,
-        password,
-        role,
-      });
-      await UsersManager.initialUser(user.id!, req.session.userId);
-      return user;
+const handler = async (req: ChatsApiRequest) => {
+  if (req.method === 'GET') {
+    const { query } = req.query;
+    const users = await UsersManager.findUsers(query as string);
+    const data = users.map((x) => {
+      return {
+        id: x.id,
+        username: x.username,
+        account: x.account,
+        role: x.role,
+        balance: x.userBalances?.balance,
+        avatar: x.avatar,
+        phone: x.phone,
+        email: x.email,
+        provider: x.provider,
+        enabled: x.enabled,
+        createdAt: x.createdAt,
+      };
+    });
+    return data;
+  } else if (req.method === 'PUT') {
+    const { id, username, password, role, enabled, phone, email } = req.body;
+    let user = await UsersManager.findByUserId(id);
+    if (!user) {
+      throw new BadRequest('User not found');
     }
-  } catch (error: any) {
-    throw new InternalServerError(
-      JSON.stringify({ message: error?.message, stack: error?.stack })
-    );
+    const data = await UsersManager.updateUser({
+      id,
+      username,
+      password: password ? password : user.password,
+      role,
+      enabled,
+      phone,
+      email,
+    });
+    return data;
+  } else {
+    const { account, password, role } = req.body;
+    let isFound = await UsersManager.findByAccount(account);
+    if (isFound) {
+      throw new BadRequest('User existed');
+    }
+    const user = await UsersManager.createUser({
+      account,
+      password,
+      role,
+    });
+    await UsersManager.initialUser(user.id!, req.session.userId);
+    return user;
   }
 };
 

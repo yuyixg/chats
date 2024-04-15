@@ -4,8 +4,8 @@ import { OrderStatus } from '@/types/order';
 import Decimal from 'decimal.js';
 import { centsToYuan } from '@/utils/wxpay/utils';
 import { apiHandler } from '@/middleware/api-handler';
-import { BadRequest, InternalServerError } from '@/utils/error';
-import { ChatsApiRequest, ChatsApiResponse } from '@/types/next-api';
+import { BadRequest } from '@/utils/error';
+import { ChatsApiRequest } from '@/types/next-api';
 export const config = {
   api: {
     bodyParser: {
@@ -21,35 +21,29 @@ export interface IDecipherAttach {
 }
 
 const handler = async (req: ChatsApiRequest) => {
-  try {
-    if (req.method === 'POST') {
-      const { event_type, decipherModel } = req.body as IWxPayNotifyBody;
-      console.log('notify', JSON.stringify(req.body));
-      if (decipherModel && event_type === PayEventType.SUCCESS) {
-        const attach = JSON.parse(decipherModel.attach) as IDecipherAttach;
-        console.log('notify', decipherModel.attach);
-        const { orderId } = attach;
-        const order = await OrdersManager.findById(orderId);
-        if (order?.status === OrderStatus.Waiting) {
-          await OrdersManager.updateOrderStatus(orderId, OrderStatus.Completed);
-          await OrdersManager.createOrderCounterfoil({
-            orderId,
-            info: JSON.stringify(decipherModel),
-          });
-          await UserBalancesManager.updateBalance(
-            order.createUserId,
-            new Decimal(centsToYuan(order.amount)),
-            order.createUserId
-          );
-        }
-      } else {
-        throw new BadRequest(JSON.stringify({ code: 'FAIL' }));
+  if (req.method === 'POST') {
+    const { event_type, decipherModel } = req.body as IWxPayNotifyBody;
+    console.log('notify', JSON.stringify(req.body));
+    if (decipherModel && event_type === PayEventType.SUCCESS) {
+      const attach = JSON.parse(decipherModel.attach) as IDecipherAttach;
+      console.log('notify', decipherModel.attach);
+      const { orderId } = attach;
+      const order = await OrdersManager.findById(orderId);
+      if (order?.status === OrderStatus.Waiting) {
+        await OrdersManager.updateOrderStatus(orderId, OrderStatus.Completed);
+        await OrdersManager.createOrderCounterfoil({
+          orderId,
+          info: JSON.stringify(decipherModel),
+        });
+        await UserBalancesManager.updateBalance(
+          order.createUserId,
+          new Decimal(centsToYuan(order.amount)),
+          order.createUserId
+        );
       }
+    } else {
+      throw new BadRequest(JSON.stringify({ code: 'FAIL' }));
     }
-  } catch (error: any) {
-    throw new InternalServerError(
-      JSON.stringify({ message: error?.message, stack: error?.stack })
-    );
   }
 };
 

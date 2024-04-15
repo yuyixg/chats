@@ -25,105 +25,99 @@ export const config = {
   maxDuration: 5,
 };
 const handler = async (req: ChatsApiRequest, res: ChatsApiResponse) => {
-  try {
-    const { userId } = req.session;
-    const { messageId, model, messages, prompt, temperature } =
-      req.body as ChatBody;
+  const { userId } = req.session;
+  const { messageId, model, messages, prompt, temperature } =
+    req.body as ChatBody;
 
-    const chatModel = await ChatModelManager.findModelById(model.id);
-    if (!chatModel?.enabled) {
-      throw new ModelUnauthorized();
-    }
+  const chatModel = await ChatModelManager.findModelById(model.id);
+  if (!chatModel?.enabled) {
+    throw new ModelUnauthorized();
+  }
 
-    const { modelConfig, priceConfig } = chatModel;
+  const { modelConfig, priceConfig } = chatModel;
 
-    const userModel = await UserModelManager.findUserModel(userId, model.id);
-    if (!userModel || !userModel.enabled) {
-      throw new ModelUnauthorized();
-    }
+  const userModel = await UserModelManager.findUserModel(userId, model.id);
+  if (!userModel || !userModel.enabled) {
+    throw new ModelUnauthorized();
+  }
 
-    const verifyMessage = verifyModel(userModel, modelConfig);
-    if (verifyMessage) {
-      throw new BadRequest(verifyMessage);
-    }
+  const verifyMessage = verifyModel(userModel, modelConfig);
+  if (verifyMessage) {
+    throw new BadRequest(verifyMessage);
+  }
 
-    let messagesToSend: QianWenMessage[] = [];
+  let messagesToSend: QianWenMessage[] = [];
 
-    messagesToSend = messages.map((message) => {
-      const messageContent = message.content;
-      let content = [] as QianWenContent[];
-      if (messageContent?.image) {
-        messageContent.image.forEach((url) => {
-          content.push({
-            image: url,
-          });
+  messagesToSend = messages.map((message) => {
+    const messageContent = message.content;
+    let content = [] as QianWenContent[];
+    if (messageContent?.image) {
+      messageContent.image.forEach((url) => {
+        content.push({
+          image: url,
         });
-      }
-      if (messageContent?.text) {
-        content.push({ text: messageContent.text });
-      }
-
-      return { role: message.role, content };
-    });
-
-    const stream = await QianWenStream(
-      chatModel,
-      prompt,
-      temperature,
-      messagesToSend
-    );
-
-    let assistantMessage = '';
-    if (stream.getReader) {
-      const reader = stream.getReader();
-      let result = {} as QianWenStreamResult;
-      let tokenCount = 0;
-      const streamResponse = async () => {
-        while (true) {
-          const { done, value } = await reader.read();
-          if (value) {
-            result = JSON.parse(value);
-            assistantMessage += result.text;
-          }
-          if (done) {
-            const { input_tokens, output_tokens, image_tokens } = result.usage;
-            tokenCount += input_tokens + (image_tokens || 0) + output_tokens;
-            const totalPrice = calcTokenPrice(
-              priceConfig,
-              input_tokens + image_tokens,
-              output_tokens
-            );
-            messages.push({
-              role: 'assistant',
-              content: { text: assistantMessage },
-            });
-            await ChatMessageManager.recordChat(
-              messageId,
-              userId,
-              userModel.id!,
-              messages,
-              tokenCount,
-              totalPrice,
-              '',
-              chatModel.id!
-            );
-            await UserBalancesManager.chatUpdateBalance(userId, totalPrice);
-            return res.end();
-          }
-          res.write(Buffer.from(result.text));
-        }
-      };
-
-      streamResponse().catch((error) => {
-        throw new InternalServerError(
-          JSON.stringify({ message: error?.message, stack: error?.stack })
-        );
       });
     }
-  } catch (error: any) {
-    throw new InternalServerError(
-      JSON.stringify({ message: error?.message, stack: error?.stack })
-    );
+    if (messageContent?.text) {
+      content.push({ text: messageContent.text });
+    }
+
+    return { role: message.role, content };
+  });
+
+  const stream = await QianWenStream(
+    chatModel,
+    prompt,
+    temperature,
+    messagesToSend
+  );
+
+  let assistantMessage = '';
+  if (stream.getReader) {
+    const reader = stream.getReader();
+    let result = {} as QianWenStreamResult;
+    let tokenCount = 0;
+    const streamResponse = async () => {
+      while (true) {
+        const { done, value } = await reader.read();
+        if (value) {
+          result = JSON.parse(value);
+          assistantMessage += result.text;
+        }
+        if (done) {
+          const { input_tokens, output_tokens, image_tokens } = result.usage;
+          tokenCount += input_tokens + (image_tokens || 0) + output_tokens;
+          const totalPrice = calcTokenPrice(
+            priceConfig,
+            input_tokens + image_tokens,
+            output_tokens
+          );
+          messages.push({
+            role: 'assistant',
+            content: { text: assistantMessage },
+          });
+          await ChatMessageManager.recordChat(
+            messageId,
+            userId,
+            userModel.id!,
+            messages,
+            tokenCount,
+            totalPrice,
+            '',
+            chatModel.id!
+          );
+          await UserBalancesManager.chatUpdateBalance(userId, totalPrice);
+          return res.end();
+        }
+        res.write(Buffer.from(result.text));
+      }
+    };
+
+    streamResponse().catch((error) => {
+      throw new InternalServerError(
+        JSON.stringify({ message: error?.message, stack: error?.stack })
+      );
+    });
   }
 };
 

@@ -3,7 +3,7 @@ import { FormControl, FormItem, FormLabel, FormMessage } from '../form';
 import { FormFieldType, IFormFieldOption } from './type';
 import { Popover, PopoverContent, PopoverTrigger } from '../popover';
 import { Button } from '../button';
-import { IconCalendar } from '@tabler/icons-react';
+import { IconSquareRoundedX } from '@tabler/icons-react';
 import { Calendar } from '../calendar';
 
 const FormCalendar = ({
@@ -27,11 +27,19 @@ const FormCalendar = ({
               )}
             >
               {field.value ? (
-                new Date(field.value).toLocaleDateString()
+                field.value === '-' ? null : (
+                  new Date(field.value).toLocaleDateString()
+                )
               ) : (
                 <span></span>
               )}
-              <IconCalendar className='ml-auto h-4 w-4 opacity-50' />
+              <IconSquareRoundedX
+                onClick={(e) => {
+                  field.onChange(null);
+                  e.preventDefault();
+                }}
+                className='z-10 ml-auto h-5 w-5 opacity-50'
+              />
             </Button>
           </FormControl>
         </PopoverTrigger>

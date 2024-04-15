@@ -2,7 +2,6 @@ import { ChatModelConfig, ModelConfigType, ModelVersions } from '@/types/model';
 import { ModelDefaultTemplates } from '@/types/template';
 
 export function verifyModel(model: any, config: ChatModelConfig) {
-  const { maxLength = 0 } = config;
   const { tokens, counts, expires } = model;
   const result = {
     tokens: 'Not enough tokens available to send the message',
@@ -10,19 +9,19 @@ export function verifyModel(model: any, config: ChatModelConfig) {
     expires: 'Subscription has expired',
   };
 
-  if (tokens && tokens !== null) {
-    if (tokens < maxLength) {
+  if (tokens !== '-') {
+    if (+tokens <= 0) {
       return result.tokens;
     }
   }
 
-  if (counts && counts !== null) {
-    if (counts < 0) {
+  if (counts !== '-') {
+    if (+counts <= 0) {
       return result.counts;
     }
   }
 
-  if (expires && expires !== null) {
+  if (expires !== '-') {
     if (new Date(expires) < new Date()) {
       return result.expires;
     }
