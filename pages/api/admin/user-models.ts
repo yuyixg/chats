@@ -61,6 +61,9 @@ const handler = async (req: ChatsApiRequest) => {
         models.push({
           modelId: modelId,
           enabled: true,
+          tokens: '-',
+          counts: '-',
+          expires: '-',
         });
         um.models = JSON.stringify(models);
       }

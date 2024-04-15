@@ -116,8 +116,8 @@ export const EditUserModelModal = (props: IProps) => {
     setSubmit(true);
     const models = selectedUserModel?.models.map((x) => {
       if (x.modelId === values?.modelId) {
-        x.tokens = isNaN(+values.tokens) ? '-' : values.tokens;
-        x.counts = isNaN(+values.counts) ? '-' : values.counts;
+        x.tokens = isNaN(+values.tokens) ? '-' : values.tokens || '0';
+        x.counts = isNaN(+values.counts) ? '-' : values.counts || '0';
         x.expires =
           values.expires === null || values.expires === '-'
             ? '-'
