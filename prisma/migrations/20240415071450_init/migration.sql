@@ -33,6 +33,7 @@ CREATE TABLE "ChatModels" (
     "name" TEXT NOT NULL,
     "type" TEXT NOT NULL,
     "rank" INTEGER,
+    "remarks" TEXT,
     "fileServerId" TEXT,
     "fileConfig" TEXT,
     "apiConfig" TEXT NOT NULL DEFAULT '{}',
@@ -97,6 +98,7 @@ CREATE TABLE "BalanceLogs" (
     "userId" TEXT NOT NULL,
     "createUserId" TEXT NOT NULL,
     "value" DECIMAL NOT NULL DEFAULT 0,
+    "type" INTEGER NOT NULL,
     "createdAt" DATETIME NOT NULL DEFAULT CURRENT_TIMESTAMP,
     "updatedAt" DATETIME NOT NULL
 );
@@ -174,9 +176,6 @@ CREATE UNIQUE INDEX "Users_phone_key" ON "Users"("phone");
 
 -- CreateIndex
 CREATE UNIQUE INDEX "FileServices_name_key" ON "FileServices"("name");
-
--- CreateIndex
-CREATE UNIQUE INDEX "ChatModels_name_key" ON "ChatModels"("name");
 
 -- CreateIndex
 CREATE UNIQUE INDEX "UserBalances_userId_key" ON "UserBalances"("userId");

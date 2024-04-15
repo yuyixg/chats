@@ -113,6 +113,14 @@ export const EditModelModal = (props: IProps) => {
       ),
     },
     {
+      name: 'remarks',
+      label: t('Remarks'),
+      defaultValue: '',
+      render: (options: IFormFieldOption, field: FormFieldType) => (
+        <FormTextarea options={options} field={field} />
+      ),
+    },
+    {
       name: 'enabled',
       label: t('Is it enabled'),
       render: (options: IFormFieldOption, field: FormFieldType) => (
@@ -142,6 +150,7 @@ export const EditModelModal = (props: IProps) => {
       .string()
       .min(1, `${t('This field is require')}`)
       .optional(),
+    remarks: z.string(),
   });
 
   const form = useForm<z.infer<typeof formSchema>>({
@@ -199,6 +208,7 @@ export const EditModelModal = (props: IProps) => {
         modelId,
         modelVersion,
         enabled,
+        remarks,
         fileServerId,
         fileConfig,
         apiConfig,
@@ -208,6 +218,7 @@ export const EditModelModal = (props: IProps) => {
       form.setValue('name', name);
       form.setValue('modelId', modelId);
       form.setValue('enabled', enabled);
+      form.setValue('remarks', remarks);
       form.setValue('fileServerId', fileServerId || null);
       fileConfig &&
         form.setValue(

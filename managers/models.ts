@@ -25,10 +25,6 @@ export class ChatModelManager {
     return await prisma.chatModels.delete({ where: { id } });
   }
 
-  static async findModelByName(name: string) {
-    return await prisma.chatModels.findUnique({ where: { name } });
-  }
-
   static async createModel(
     type: ModelType,
     modelVersion: ModelVersions,
@@ -38,7 +34,8 @@ export class ChatModelManager {
     fileConfig: string,
     apiConfig: string,
     modelConfig: string,
-    priceConfig: string
+    priceConfig: string,
+    remarks: string
   ) {
     return await prisma.chatModels.create({
       data: {
@@ -51,6 +48,7 @@ export class ChatModelManager {
         priceConfig,
         modelConfig,
         apiConfig,
+        remarks,
       },
     });
   }
@@ -63,7 +61,8 @@ export class ChatModelManager {
     fileConfig: string,
     apiConfig: string,
     modelConfig: string,
-    priceConfig: string
+    priceConfig: string,
+    remarks: string
   ) {
     return await prisma.chatModels.update({
       where: { id },
@@ -75,6 +74,7 @@ export class ChatModelManager {
         priceConfig,
         modelConfig,
         apiConfig,
+        remarks,
       },
     });
   }

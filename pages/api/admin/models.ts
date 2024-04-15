@@ -28,6 +28,7 @@ const handler = async (req: ChatsApiRequest) => {
         name: x.name,
         type: x.type,
         enabled: x.enabled,
+        remarks: x.remarks,
         fileServerId: x.fileServerId,
         fileConfig: x.fileConfig,
         modelConfig: x.modelConfig,
@@ -54,6 +55,7 @@ const handler = async (req: ChatsApiRequest) => {
       modelConfig,
       apiConfig: apiConfigJson,
       priceConfig,
+      remarks,
     } = req.body;
     const model = await ChatModelManager.findModelById(modelId);
     if (!model) {
@@ -73,7 +75,8 @@ const handler = async (req: ChatsApiRequest) => {
       fileConfig,
       JSON.stringify(apiConfig),
       modelConfig,
-      priceConfig
+      priceConfig,
+      remarks
     );
     return data;
   } else if (req.method === 'POST') {
@@ -86,12 +89,8 @@ const handler = async (req: ChatsApiRequest) => {
       modelConfig,
       apiConfig,
       fileConfig,
+      remarks,
     } = req.body;
-
-    const model = await ChatModelManager.findModelByName(name);
-    if (model) {
-      throw new BadRequest('Model name is exist');
-    }
 
     const template = ModelDefaultTemplates[modelVersion as ModelVersions];
 
@@ -108,7 +107,8 @@ const handler = async (req: ChatsApiRequest) => {
       fileConfig,
       apiConfig,
       modelConfig,
-      priceConfig
+      priceConfig,
+      remarks
     );
     return data;
   } else if (req.method === 'DELETE') {

@@ -1,4 +1,5 @@
 import prisma from '@/db/prisma';
+import { BalanceType } from '@/types/order';
 import Decimal from 'decimal.js';
 
 export class UserBalancesManager {
@@ -11,7 +12,7 @@ export class UserBalancesManager {
       where: { id: userBalance?.id },
       data: { balance: new Decimal(userBalance!.balance).add(_value) },
     });
-    await this.createBalanceLog(userId, _value, userId);
+    await this.createBalanceLog(userId, _value, BalanceType.Consume, userId);
     return result;
   }
 
@@ -21,7 +22,12 @@ export class UserBalancesManager {
     createUserId: string
   ) {
     await prisma.userBalances.create({ data: { userId, balance: value } });
-    await this.createBalanceLog(userId, value, createUserId);
+    await this.createBalanceLog(
+      userId,
+      value,
+      BalanceType.Initial,
+      createUserId
+    );
   }
 
   static async updateBalance(
@@ -36,16 +42,30 @@ export class UserBalancesManager {
       where: { userId },
       data: { userId, balance: userBalance!.balance.add(value) },
     });
-    await this.createBalanceLog(userId, value, createUserId);
+    await this.createBalanceLog(
+      userId,
+      value,
+      BalanceType.Recharge,
+      createUserId
+    );
   }
 
   static async createBalanceLog(
     userId: string,
     value: Decimal,
+    type: BalanceType,
     createUserId: string
   ) {
     await prisma.balanceLogs.create({
-      data: { userId, value, createUserId },
+      data: { userId, value, type, createUserId },
     });
+  }
+
+  static async findUserBalance(userId: string) {
+    const userBalance = await prisma.userBalances.findFirst({
+      where: { userId },
+      select: { balance: true },
+    });
+    return userBalance!.balance;
   }
 }

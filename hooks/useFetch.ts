@@ -1,4 +1,4 @@
-import { getLoginUrl } from "@/utils/user";
+import { getLoginUrl } from '@/utils/user';
 
 export type RequestModel = {
   params?: object;
@@ -62,7 +62,7 @@ export const useFetch = () => {
 
         const errResult =
           contentType && contentType?.indexOf('application/problem+json') !== -1
-            ? await err.text()
+            ? await err.json()
             : err;
 
         throw errResult;

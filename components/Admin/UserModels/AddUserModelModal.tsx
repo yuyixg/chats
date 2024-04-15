@@ -111,6 +111,7 @@ export const AddUserModelModal = (props: IProps) => {
             {models.map((model) => (
               <SelectItem key={model.modelId} value={model.modelId}>
                 {model.name}
+                {model.remarks && ` - ${model.remarks}`}
               </SelectItem>
             ))}
           </SelectContent>

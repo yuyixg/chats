@@ -45,6 +45,11 @@ const handler = async (req: ChatsApiRequest, res: ChatsApiResponse) => {
   if (verifyMessage) {
     throw new BadRequest(verifyMessage);
   }
+  
+  const userBalance = await UserBalancesManager.findUserBalance(userId);
+  if (userBalance.lte(0)) {
+    throw new BadRequest('Insufficient balance');
+  }
 
   let messagesToSend: QianWenMessage[] = [];
 

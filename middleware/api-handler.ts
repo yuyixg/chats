@@ -65,7 +65,7 @@ export function apiHandler(handler: any) {
       logs.response = `${error}`;
       if (error instanceof BaseError && error.statusCode !== 500) {
         logs.statusCode = error.statusCode;
-        res.status(error.statusCode).send(error.message);
+        res.status(error.statusCode).json({ message: error.message });
       } else {
         logs.statusCode = 500;
         res.status(500).json({ message: 'An unexpected error occurred' });

@@ -44,6 +44,8 @@ export interface GetModelResult {
   rank: number;
   type: ModelType;
   enabled: boolean;
+
+  remarks: string;
   apiConfig: string;
   modelConfig: string;
   fileServerId: string;

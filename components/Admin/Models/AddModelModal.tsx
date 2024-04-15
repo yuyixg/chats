@@ -131,6 +131,14 @@ export const AddModelModal = (props: IProps) => {
       ),
     },
     {
+      name: 'remarks',
+      label: t('Remarks'),
+      defaultValue: '',
+      render: (options: IFormFieldOption, field: FormFieldType) => (
+        <FormTextarea options={options} field={field} />
+      ),
+    },
+    {
       name: 'enabled',
       label: t('Is it enabled'),
       defaultValue: true,
@@ -164,6 +172,7 @@ export const AddModelModal = (props: IProps) => {
       .string()
       .min(1, `${t('This field is require')}`)
       .optional(),
+    remarks: z.string(),
   });
 
   const form = useForm<z.infer<typeof formSchema>>({

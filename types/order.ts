@@ -5,3 +5,9 @@ export enum OrderStatus {
   Failed = 'Failed',
   Closed = 'Closed',
 }
+
+export enum BalanceType {
+  Recharge = 1,
+  Consume = 2,
+  Initial = 3,
+}
