@@ -43,7 +43,8 @@
   "The Model does not exist or access is denied.": "模型不存在或没有访问权限。",
   "Unauthorized.": "未授权访问。",
   "Not enough tokens available to send the message": "没有足够的Tokens可用于发送消息",
-  "NNot enough counts available to send the message": "没有足够的聊天次数可用于发送消息",
+  "Not enough counts available to send the message": "没有足够的聊天次数可用于发送消息",
+  "Insufficient balance": "账号余额不足,请先充值",
   "Subscription has expired": "订阅已过期",
   "Save successful": "保存成功",
   "Delete successful": "删除成功",
@@ -52,5 +53,6 @@
   "Close Shared": "关闭分享",
   "Share and Copy Link": "分享并复制链接",
   "Copy Successful": "复制成功",
-  "Copy Link": "复制链接"
+  "Copy Link": "复制链接",
+  "Account Balance": "账户余额"
 }

@@ -62,6 +62,7 @@ export interface Conversation {
   prompt: string;
   temperature: number;
   isShared: boolean;
+  totalPrice?: number;
   fileServerConfig: {
     id: string;
     type: FileServicesType;

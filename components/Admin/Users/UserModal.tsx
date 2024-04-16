@@ -44,7 +44,7 @@ export const UserModal = (props: IProps) => {
   const [submit, setSubmit] = useState(false);
   const formFields: IFormFieldOption[] = [
     {
-      name: 'username',
+      name: 'account',
       label: t('User Name'),
       defaultValue: '',
       render: (options: IFormFieldOption, field: FormFieldType) => (
@@ -98,7 +98,7 @@ export const UserModal = (props: IProps) => {
   ];
 
   const formSchema = z.object({
-    username: z
+    account: z
       .string()
       .min(
         2,
@@ -140,7 +140,7 @@ export const UserModal = (props: IProps) => {
     // fix bug https://github.com/react-hook-form/react-hook-form/issues/2755
     form.formState.isValid;
     if (user) {
-      form.setValue('username', user.username);
+      form.setValue('account', user.username);
       form.setValue('enabled', user.enabled);
       form.setValue('phone', user.phone);
       form.setValue('email', user.email);
@@ -154,7 +154,7 @@ export const UserModal = (props: IProps) => {
     let p = null;
     let params = {
       ...values,
-      username: values.username!,
+      account: values.account!,
       password: values.password!,
       role: values.role!,
     };

@@ -24,6 +24,7 @@ import { ModelSelect } from './ModelSelect';
 import { SystemPrompt } from './SystemPrompt';
 import { HomeContext } from '@/pages/home/home';
 import { SharedMessageModal } from './SharedMessageModal';
+import { AccountBalance } from './AccountBalance';
 
 interface Props {
   stopConversationRef: MutableRefObject<boolean>;
@@ -322,8 +323,8 @@ export const Chat = memo(({ stopConversationRef }: Props) => {
 
                 {hasModel() && (
                   <div className='flex h-full flex-col space-y-4 rounded-lg border border-neutral-200 p-4 dark:border-neutral-600'>
+                    <AccountBalance />
                     <ModelSelect />
-
                     <SystemPrompt
                       conversation={selectedConversation}
                       prompts={prompts}

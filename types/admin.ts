@@ -75,7 +75,7 @@ export interface PostModelParams {
 }
 
 export interface PostUserParams {
-  username: string;
+  account: string;
   password: string;
   role: string;
 }

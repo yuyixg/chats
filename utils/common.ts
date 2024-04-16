@@ -33,8 +33,9 @@ export const checkKey = (
 };
 
 export function formatRMB(number: number) {
-  return new Intl.NumberFormat('zh-CN', {
+  const formatted = new Intl.NumberFormat('zh-CN', {
     style: 'currency',
     currency: 'CNY',
   }).format(number);
+  return formatted.replace(/￥(\d)/, '￥ $1');
 }

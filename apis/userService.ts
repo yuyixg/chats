@@ -49,3 +49,8 @@ export const getUserModels = () => {
   const fetchServer = useFetch();
   return fetchServer.get<Model[]>('/api/models');
 };
+
+export const getUserBalance = () => {
+  const fetchServer = useFetch();
+  return fetchServer.get<number>('/api/user');
+};
