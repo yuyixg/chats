@@ -31,3 +31,10 @@ export const checkKey = (
   }
   return currentValue;
 };
+
+export function formatRMB(number: number) {
+  return new Intl.NumberFormat('zh-CN', {
+    style: 'currency',
+    currency: 'CNY',
+  }).format(number);
+}

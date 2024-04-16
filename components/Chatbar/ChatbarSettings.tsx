@@ -134,9 +134,6 @@ export const ChatBarSettings = () => {
           onClose={() => {
             setIsRechargeModal(false);
           }}
-          onSuccessful={() => {
-            setIsRechargeModal(false);
-          }}
         />
       )}
     </div>

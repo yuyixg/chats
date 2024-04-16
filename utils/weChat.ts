@@ -27,3 +27,8 @@ export async function weChatAuth(code: string) {
     throw new InternalServerError(`${error}`);
   }
 }
+
+export function isWXBrowser() {
+  const ua = navigator.userAgent.toLowerCase();
+  return /micromessenger/.test(ua);
+}
