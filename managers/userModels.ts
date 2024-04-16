@@ -64,10 +64,10 @@ export class UserModelManager {
     let models = JSON.parse(userModel?.models || '[]') as any[];
     models = models.map((m) => {
       if (m.modelId === modelId) {
-        if (m.tokens && m.tokens !== null) {
+        if (m.tokens && m.tokens !== '-') {
           m.tokens -= token;
         }
-        if (m.counts && m.counts !== null) {
+        if (m.counts && m.counts !== '-') {
           m.counts -= 1;
         }
       }
