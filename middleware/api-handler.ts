@@ -5,6 +5,8 @@ import { Session } from '@/types/session';
 import { BaseError, Unauthorized } from '@/utils/error';
 import { getSession } from '@/utils/session';
 import { replacePassword } from '@/utils/user';
+import { IncomingHttpHeaders } from 'http';
+import requestIp from 'request-ip';
 
 const modelApis = [
   '/api/models/kimi',
@@ -23,11 +25,11 @@ const publicApis = [
 ];
 const adminApis = '/api/admin/';
 
-async function authMiddleware(req: ChatsApiRequest) {
-  const requestUrl = req.url!;
+async function authMiddleware(request: ChatsApiRequest) {
+  const requestUrl = request.url!;
   let session: Session | null = null;
   if (!publicApis.includes(requestUrl)) {
-    session = await getSession(req.cookies);
+    session = await getSession(request.cookies);
     if (!session) {
       throw new Unauthorized();
     }
@@ -37,40 +39,61 @@ async function authMiddleware(req: ChatsApiRequest) {
       throw new Unauthorized();
     }
   }
-  return session!;
+  request.session = session!;
+}
+
+function getHeadersLog(headers: IncomingHttpHeaders) {
+  return JSON.stringify({
+    ua: headers['sec-ch-ua'],
+    platform: headers['sec-ch-platform'],
+    mobile: headers['sec-ch-ua-mobile'] === '?0' ? 'Mobile' : 'Desktop',
+    referer: headers['referer'],
+  });
 }
 
 export function apiHandler(handler: any) {
-  return async (req: ChatsApiRequest, res: ChatsApiResponse) => {
-    const requestUrl = req.url!;
+  return async (request: ChatsApiRequest, response: ChatsApiResponse) => {
+    const requestUrl = request.url!;
     let logs = {
+      ip: requestIp.getClientIp(request),
       url: requestUrl,
-      method: req.method!,
+      userId: request?.session?.userId,
+      method: request.method!,
       statusCode: 200,
-      request: replacePassword(JSON.stringify(req.body)),
+      headers: getHeadersLog(request.headers),
+      request: replacePassword(JSON.stringify(request.body)),
+      requestTime: new Date().getTime().toString(),
     } as CreateRequestLogs;
 
     try {
-      let session = await authMiddleware(req);
-      req.session = session;
-      logs.userId = session?.userId;
-      const data = await handler(req, res);
+      await authMiddleware(request);
+      const data = await handler(request, response);
       logs.response = JSON.stringify(data);
-      if (modelApis.includes(req.url!)) {
-        return res.write(Buffer.from(data || ''));
+      if (modelApis.includes(request.url!)) {
+        return response.write(Buffer.from(data || ''));
       }
+      logs.responseTime = new Date().getTime().toString();
       await RequestLogsManager.create(logs);
-      return data ? res.status(200).json(data) : res.status(200).end();
+      return data
+        ? response.status(200).json(data)
+        : response.status(200).end();
     } catch (error) {
       logs.response = `${error}`;
+      logs.responseTime = new Date().getTime().toString();
       if (error instanceof BaseError && error.statusCode !== 500) {
         logs.statusCode = error.statusCode;
-        res.status(error.statusCode).json({ message: error.message });
+        await RequestLogsManager.create(logs);
+        return response
+          .status(error.statusCode)
+          .json({ message: error.message });
       } else {
+        console.log('ERROR: \n', JSON.stringify(logs));
         logs.statusCode = 500;
-        res.status(500).json({ message: 'An unexpected error occurred' });
+        await RequestLogsManager.create(logs);
+        return response
+          .status(500)
+          .json({ message: 'An unexpected error occurred' });
       }
-      await RequestLogsManager.create(logs);
     }
   };
 }

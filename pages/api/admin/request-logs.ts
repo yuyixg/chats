@@ -22,12 +22,11 @@ const handler = async (req: ChatsApiRequest, res: ChatsApiResponse) => {
     const rows = requestLogs.rows.map((x) => {
       return {
         id: x.id,
+        ip: x.ip,
         method: x.method,
         url: x.url,
         statusCode: x.statusCode,
         username: x.user?.username,
-        request: x.request,
-        response: x.response,
         createdAt: x.createdAt,
       };
     });

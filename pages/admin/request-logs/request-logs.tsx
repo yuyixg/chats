@@ -16,11 +16,15 @@ import {
 } from '@/components/ui/table';
 import PaginationContainer from '@/components/Admin/Pagiation/Pagiation';
 import { DEFAULT_LANGUAGE } from '@/types/settings';
-import { Badge } from '@/components/ui/badge';
+import { StatusCodeColor } from '@/types/statusCode';
+import { RequestLogDetailsModal } from '@/components/Admin/RequestLogs/RequestLogDetailsModal';
 
 export default function RequestLogs() {
   const { t } = useTranslation('admin');
   const [loading, setLoading] = useState(true);
+  const [logDetail, setLogDetail] = useState<GetRequestLogsListResult | null>(
+    null
+  );
   const [pagination, setPagination] = useState<Paging>({
     page: 1,
     pageSize: 12,
@@ -58,24 +62,38 @@ export default function RequestLogs() {
         <Table>
           <TableHeader>
             <TableRow>
-              <TableHead>{t('User Name')}</TableHead>
               <TableHead>{t('Url')}</TableHead>
+              <TableHead>{t('User Name')}</TableHead>
+              <TableHead>{t('IP Address')}</TableHead>
               <TableHead>{t('Method')}</TableHead>
               <TableHead>{t('Status Code')}</TableHead>
             </TableRow>
           </TableHeader>
           <TableBody isLoading={loading} isEmpty={requestLogs.count === 0}>
             {requestLogs?.rows.map((item) => (
-              <TableRow key={item.id}>
+              <TableRow
+                key={item.id}
+                onClick={() => {
+                  setLogDetail(item);
+                }}
+              >
+                <TableCell>{item.url}</TableCell>
                 <TableCell
                   onClick={() => {}}
                   className='truncate cursor-pointer'
                 >
                   {item.username}
                 </TableCell>
-                <TableCell>{item.url}</TableCell>
+                <TableCell>{item.ip}</TableCell>
                 <TableCell>{item.method}</TableCell>
-                <TableCell>{item.statusCode}</TableCell>
+                <TableCell>
+                  <div
+                    style={{ background: StatusCodeColor[item.statusCode] }}
+                    className='inline-flex items-center cursor-default rounded-md px-2.5 py-0.5 text-xs text-white'
+                  >
+                    {item.statusCode}
+                  </div>
+                </TableCell>
               </TableRow>
             ))}
           </TableBody>
@@ -92,6 +110,13 @@ export default function RequestLogs() {
           />
         )}
       </Card>
+      <RequestLogDetailsModal
+        isOpen={!!logDetail}
+        requestLogId={logDetail?.id}
+        onClose={() => {
+          setLogDetail(null);
+        }}
+      />
     </>
   );
 }

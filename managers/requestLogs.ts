@@ -1,10 +1,14 @@
 import prisma from '@/db/prisma';
 import { Prisma } from '@prisma/client';
 export interface CreateRequestLogs {
+  ip?: string;
   userId?: string;
   url: string;
   method: string;
   statusCode: number;
+  requestTime: string;
+  responseTime: string;
+  headers?: string;
   request?: string;
   response?: string;
 }

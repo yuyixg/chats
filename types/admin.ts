@@ -3,6 +3,7 @@ import { Paging } from './page';
 import { Message } from './chat';
 import { PutFileServicesParams } from './file';
 import Decimal from 'decimal.js';
+import { StatusCode } from './statusCode';
 
 export const enum UserRole {
   'admin' = 'admin',
@@ -44,7 +45,6 @@ export interface GetModelResult {
   rank: number;
   type: ModelType;
   enabled: boolean;
-
   remarks: string;
   apiConfig: string;
   modelConfig: string;
@@ -138,14 +138,18 @@ export interface GetRequestLogsParams extends Paging {
 
 export interface GetRequestLogsListResult {
   id: string;
+  ip: string;
   username: string;
   url: string;
   method: string;
-  statusCode: number;
+  statusCode: StatusCode;
   createdAt: string;
 }
 
 export interface GetRequestLogsDetailsResult extends GetRequestLogsListResult {
+  headers: string;
   request: string;
   response: string;
+  requestTime: number;
+  responseTime: number;
 }

@@ -6,8 +6,8 @@ generator client {
 }
 
 datasource db {
-  provider = "sqlite"
-  url      = "file:chats.db"
+  provider = "postgresql"
+  url      = env("DATABASE_URL")
 }
 
 model Users {
@@ -159,13 +159,17 @@ model PayServices {
 }
 
 model RequestLogs {
-  id         String   @id @default(uuid())
-  userId     String?
-  url        String
-  method     String
-  statusCode Int
-  request    String   @default("{}")
-  response   String   @default("{}")
-  createdAt  DateTime @default(now())
-  user       Users?   @relation(fields: [userId], references: [id])
+  id           String   @id @default(uuid())
+  ip           String?
+  userId       String?
+  url          String
+  method       String
+  statusCode   Int
+  responseTime String
+  requestTime  String
+  headers      String?
+  request      String?
+  response     String?
+  createdAt    DateTime @default(now())
+  user         Users?   @relation(fields: [userId], references: [id])
 }
