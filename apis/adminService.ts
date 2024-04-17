@@ -17,6 +17,9 @@ import {
   GetRequestLogsParams,
   GetRequestLogsListResult,
   GetRequestLogsDetailsResult,
+  GetLoginServicesResult,
+  PostLoginServicesParams,
+  PutLoginServicesParams,
 } from '@/types/admin';
 import { PostFileServicesParams, PutFileServicesParams } from '@/types/file';
 import { PageResult } from '@/types/page';
@@ -118,14 +121,14 @@ export const getFileServices = (
   );
 };
 
-export const postFileServer = (params: PostFileServicesParams) => {
+export const postFileService = (params: PostFileServicesParams) => {
   const fetchService = useFetch();
   return fetchService.post('/api/admin/file-service', {
     body: params,
   });
 };
 
-export const putFileServer = (params: PutFileServicesParams) => {
+export const putFileService = (params: PutFileServicesParams) => {
   const fetchService = useFetch();
   return fetchService.put('/api/admin/file-service', {
     body: params,
@@ -151,4 +154,23 @@ export const getRequestLogDetails = (
 ): Promise<GetRequestLogsDetailsResult> => {
   const fetchService = useFetch();
   return fetchService.get(`/api/admin/request-logs?id=` + id);
+};
+
+export const getLoginServices = (): Promise<GetLoginServicesResult[]> => {
+  const fetchService = useFetch();
+  return fetchService.get('/api/admin/login-service');
+};
+
+export const postLoginService = (params: PostLoginServicesParams) => {
+  const fetchService = useFetch();
+  return fetchService.post('/api/admin/login-service', {
+    body: params,
+  });
+};
+
+export const putLoginService = (params: PutLoginServicesParams) => {
+  const fetchService = useFetch();
+  return fetchService.put('/api/admin/login-service', {
+    body: params,
+  });
 };

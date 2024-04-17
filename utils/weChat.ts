@@ -6,11 +6,10 @@ export function redirectToWeChatAuthUrl(redirectUri: string) {
   location.href = `https://open.weixin.qq.com/connect/oauth2/authorize?appid=wx05e69f4a0aeb8421&redirect_uri=${redirectUri}&response_type=code&scope=${scope}&state=STATE#wechat_redirect`;
 }
 
-export async function weChatAuth(code: string) {
-  const { WECHAT_APP_ID, WECHAT_SECRET } = process.env;
+export async function weChatAuth(appId: string, secret: string, code: string) {
   try {
     const res = await fetch(
-      `https://api.weixin.qq.com/sns/oauth2/access_token?appid=${WECHAT_APP_ID}&secret=${WECHAT_SECRET}&code=${code}&grant_type=authorization_code`,
+      `https://api.weixin.qq.com/sns/oauth2/access_token?appid=${appId}&secret=${secret}&code=${code}&grant_type=authorization_code`,
       {
         method: 'GET',
         headers: {

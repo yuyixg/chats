@@ -1,4 +1,4 @@
-import { UserBalancesManager, UsersManager } from '@/managers';
+import { UsersManager } from '@/managers';
 import { BadRequest } from '@/utils/error';
 import bcrypt from 'bcryptjs';
 import { apiHandler } from '@/middleware/api-handler';
@@ -27,8 +27,6 @@ async function handler(req: ChatsApiRequest, res: ChatsApiResponse) {
       hashPassword
     );
     return result;
-  } else if (req.method === 'GET') {
-    return await UserBalancesManager.findUserBalance(userId);
   }
 }
 

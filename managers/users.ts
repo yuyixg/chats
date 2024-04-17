@@ -4,6 +4,7 @@ import { UserBalancesManager, UserModelManager } from '.';
 import Decimal from 'decimal.js';
 import { ProviderType } from '@/types/user';
 import { weChatAuth } from '@/utils/weChat';
+import { LoginServiceManager } from './loginService';
 
 export interface CreateUser {
   account?: string;
@@ -144,7 +145,10 @@ export class UsersManager {
   }
 
   static async weChatLogin(code: string) {
-    const result = await weChatAuth(code);
+    const configs = await LoginServiceManager.findConfigsByType(
+      ProviderType.WeChat
+    );
+    const result = await weChatAuth(configs.appId, configs.secret, code);
     if (!result) {
       return null;
     }

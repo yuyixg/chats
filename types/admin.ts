@@ -4,6 +4,7 @@ import { Message } from './chat';
 import { PutFileServicesParams } from './file';
 import Decimal from 'decimal.js';
 import { StatusCode } from './statusCode';
+import { ProviderType } from './user';
 
 export const enum UserRole {
   'admin' = 'admin',
@@ -152,4 +153,22 @@ export interface GetRequestLogsDetailsResult extends GetRequestLogsListResult {
   response: string;
   requestTime: number;
   responseTime: number;
+}
+
+export interface GetLoginServicesResult {
+  id: string;
+  type: ProviderType;
+  enabled: boolean;
+  configs: string;
+  createdAt: string;
+}
+
+export interface PostLoginServicesParams {
+  type: ProviderType;
+  enabled: boolean;
+  configs: string;
+}
+
+export interface PutLoginServicesParams extends PostLoginServicesParams {
+  id: string;
 }

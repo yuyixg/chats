@@ -1,4 +1,4 @@
-import { postFileServer, putFileServer } from '@/apis/adminService';
+import { postFileService, putFileService } from '@/apis/adminService';
 import { useTranslation } from 'next-i18next';
 import React, { useEffect } from 'react';
 import toast from 'react-hot-toast';
@@ -36,7 +36,7 @@ interface IProps {
   saveLoading?: boolean;
 }
 
-export const FileServerModal = (props: IProps) => {
+export const FileServiceModal = (props: IProps) => {
   const { t } = useTranslation('admin');
   const { selected, isOpen, onClose, onSuccessful } = props;
   const formFields: IFormFieldOption[] = [
@@ -109,9 +109,12 @@ export const FileServerModal = (props: IProps) => {
     if (!form.formState.isValid) return;
     let p = null;
     if (selected) {
-      p = putFileServer({ ...values, id: selected.id } as PutFileServicesParams);
+      p = putFileService({
+        ...values,
+        id: selected.id,
+      } as PutFileServicesParams);
     } else {
-      p = postFileServer(values as PostFileServicesParams);
+      p = postFileService(values as PostFileServicesParams);
     }
     p.then(() => {
       onSuccessful();
@@ -158,7 +161,9 @@ export const FileServerModal = (props: IProps) => {
     <Dialog open={isOpen} onOpenChange={onClose}>
       <DialogContent>
         <DialogHeader>
-          <DialogTitle>{t('Add File Service')}</DialogTitle>
+          <DialogTitle>
+            {selected ? t('Edit File Service') : t('Add File Service')}
+          </DialogTitle>
         </DialogHeader>
         <Form {...form}>
           <form onSubmit={form.handleSubmit(onSubmit)}>

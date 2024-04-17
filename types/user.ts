@@ -8,3 +8,10 @@ export interface SingInParams {
   password?: string;
   code?: string;
 }
+
+export interface ProviderResult {
+  type: ProviderType;
+  configs: {
+    appId: string;
+  };
+}

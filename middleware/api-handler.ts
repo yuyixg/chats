@@ -22,6 +22,7 @@ const publicApis = [
   '/api/public/login',
   '/api/public/messages',
   '/api/public/notify',
+  '/api/public/login-provider'
 ];
 const adminApis = '/api/admin/';
 
@@ -87,7 +88,7 @@ export function apiHandler(handler: any) {
           .status(error.statusCode)
           .json({ message: error.message });
       } else {
-        console.log('ERROR: \n', JSON.stringify(logs));
+        console.log('ERROR: \n', error);
         logs.statusCode = 500;
         await RequestLogsManager.create(logs);
         return response

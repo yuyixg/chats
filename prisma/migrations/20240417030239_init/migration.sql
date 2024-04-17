@@ -143,6 +143,7 @@ CREATE TABLE "Counterfoils" (
 CREATE TABLE "LoginServices" (
     "id" TEXT NOT NULL,
     "type" TEXT NOT NULL,
+    "enabled" BOOLEAN NOT NULL DEFAULT true,
     "configs" VARCHAR(2048) NOT NULL DEFAULT '{}',
     "createdAt" TIMESTAMP(3) NOT NULL DEFAULT CURRENT_TIMESTAMP,
     "updatedAt" TIMESTAMP(3) NOT NULL,
@@ -165,6 +166,7 @@ CREATE TABLE "UserSms" (
 CREATE TABLE "PayServices" (
     "id" TEXT NOT NULL,
     "type" TEXT NOT NULL,
+    "enabled" BOOLEAN NOT NULL DEFAULT true,
     "configs" VARCHAR(2048) NOT NULL DEFAULT '{}',
     "createdAt" TIMESTAMP(3) NOT NULL DEFAULT CURRENT_TIMESTAMP,
     "updatedAt" TIMESTAMP(3) NOT NULL,

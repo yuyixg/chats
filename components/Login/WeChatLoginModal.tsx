@@ -3,8 +3,12 @@ import { useEffect } from 'react';
 import { Dialog, DialogContent } from '../ui/dialog';
 import Spinner from '../Spinner';
 
-const WeChatLoginModal = (props: { isOpen: boolean; onClose: () => void }) => {
-  const { isOpen, onClose } = props;
+const WeChatLoginModal = (props: {
+  isOpen: boolean;
+  appId: string;
+  onClose: () => void;
+}) => {
+  const { isOpen, appId, onClose } = props;
   const status = useExternal(
     'https://res.wx.qq.com/connect/zh_CN/htmledition/js/wxLogin.js',
     {
@@ -15,10 +19,11 @@ const WeChatLoginModal = (props: { isOpen: boolean; onClose: () => void }) => {
   );
   useEffect(() => {
     if (isOpen && status === 'ready') {
+      console.log(appId);
       const { origin } = location;
       new WxLogin({
         id: 'wxContainer',
-        appid: 'wxcf07ba9d66de4aca',
+        appid: appId,
         scope: 'snsapi_login',
         response_type: 'code',
         state: 'STATE',

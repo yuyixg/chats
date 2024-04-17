@@ -19,22 +19,18 @@ import FormCheckbox from '@/components/ui/form/checkbox';
 import { clearConversations } from '@/utils/conversation';
 import { DEFAULT_LANGUAGE } from '@/types/settings';
 import Image from 'next/image';
-import { getCsrfToken, singIn } from '@/apis/userService';
-import {
-  Tooltip,
-  TooltipContent,
-  TooltipProvider,
-  TooltipTrigger,
-} from '@/components/ui/tooltip';
-import WeChatLoginModal from '@/components/WeChat/WeChatLoginModal';
+import { getLoginProvider, singIn } from '@/apis/userService';
+import { ProviderResult, ProviderType } from '@/types/user';
+import KeyCloakLogin from '@/components/Login/KeyCloakLogin';
+import WeChatLogin from '@/components/Login/WeChatLogin';
 
 export default function LoginPage() {
   const { t } = useTranslation('login');
   const router = useRouter();
   const [loginLoading, setLoginLoading] = useState(false);
   const [isClient, setIsClient] = useState(false);
-  const [csrfToken, setCsrfToken] = useState<string>('');
-  const [weChatModal, setWeChatModal] = useState(false);
+  const [providers, setProviders] = useState<ProviderResult[]>([]);
+  const [providerTypes, setProviderTypes] = useState<ProviderType[]>([]);
 
   const formFields: IFormFieldOption[] = [
     {
@@ -78,9 +74,11 @@ export default function LoginPage() {
   });
 
   useEffect(() => {
-    getCsrfToken().then((data) => {
-      setCsrfToken(data?.csrfToken);
+    getLoginProvider().then((data) => {
+      setProviders(data);
+      setProviderTypes(data.map((x) => x.type));
     });
+
     clearConversations();
     form.formState.isValid;
     const userInfo = getUserSession();
@@ -177,87 +175,37 @@ export default function LoginPage() {
                           </div>
                         </form>
                       </Form>
-                      <div className='relative'>
-                        <div className='absolute inset-0 flex items-center'>
-                          <span className='w-full border-t' />
+                      {providers.length > 0 && (
+                        <div className='relative'>
+                          <div className='absolute inset-0 flex items-center'>
+                            <span className='w-full border-t' />
+                          </div>
+                          <div className='relative flex justify-center text-xs uppercase'>
+                            <span className='bg-background p-4 text-muted-foreground'>
+                              {t('Or continue with')}
+                            </span>
+                          </div>
                         </div>
-                        <div className='relative flex justify-center text-xs uppercase'>
-                          <span className='bg-background p-4 text-muted-foreground'>
-                            {t('Or continue with')}
-                          </span>
-                        </div>
-                      </div>
+                      )}
                       <div className='flex justify-center gap-2'>
-                        <TooltipProvider>
-                          <Tooltip>
-                            <TooltipTrigger asChild>
-                              <Button
-                                onClick={() => {
-                                  setWeChatModal(true);
-                                }}
-                                className='p-0 w-8 h-8'
-                                disabled={loginLoading}
-                                variant='link'
-                              >
-                                <Image
-                                  src='/wechat.svg'
-                                  alt='WeChat'
-                                  width={0}
-                                  height={0}
-                                  className='h-8 w-8 dark:bg-transparent'
-                                />
-                              </Button>
-                            </TooltipTrigger>
-                            <TooltipContent>微信登录</TooltipContent>
-                          </Tooltip>
-                        </TooltipProvider>
-
-                        <form action='/api/auth/signin/keycloak' method='POST'>
-                          <input
-                            type='hidden'
-                            name='csrfToken'
-                            value={csrfToken}
+                        {providerTypes.includes(ProviderType.WeChat) && (
+                          <WeChatLogin
+                            configs={
+                              providers.find(
+                                (x) => x.type === ProviderType.WeChat
+                              )!.configs
+                            }
+                            loading={loginLoading}
                           />
-                          <input
-                            type='hidden'
-                            name='callbackUrl'
-                            value={`${location.origin}/authorizing`}
-                          />
-                          <TooltipProvider>
-                            <Tooltip>
-                              <TooltipTrigger asChild>
-                                <Button
-                                  className='p-0 w-8 h-8'
-                                  disabled={loginLoading}
-                                  variant='link'
-                                  type='submit'
-                                >
-                                  <Image
-                                    src='/keyCloak.svg'
-                                    alt='KeyCloak'
-                                    width={0}
-                                    height={0}
-                                    className='h-8 w-8 rounded-md dark:bg-white'
-                                  />
-                                </Button>
-                              </TooltipTrigger>
-                              <TooltipContent>KeyCloak</TooltipContent>
-                            </Tooltip>
-                          </TooltipProvider>
-                        </form>
+                        )}
+                        {providerTypes.includes(ProviderType.KeyCloak) && (
+                          <KeyCloakLogin loading={loginLoading} />
+                        )}
                       </div>
                     </div>
                   </div>
                 </div>
               </>
-              {weChatModal && (
-                <WeChatLoginModal
-                  isOpen={weChatModal}
-                  onClose={() => {
-                    setWeChatModal(false);
-                  }}
-                />
-              )}
               <p className='px-8 text-center text-sm text-muted-foreground'>
                 © 2023 Chats™ . All Rights Reserved.
               </p>

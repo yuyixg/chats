@@ -9,6 +9,7 @@ import { cn } from '@/lib/utils';
 import {
   IconChartPie,
   IconFiles,
+  IconKey,
   IconMessageCircle,
   IconMessages,
   IconNotes,
@@ -56,6 +57,11 @@ const AdminLayout = ({
       url: '/admin/file-service',
       icon: <IconFiles stroke={1.6} size={22} />,
       title: t('File Service'),
+    },
+    {
+      url: '/admin/login-service',
+      icon: <IconKey stroke={1.6} size={22} />,
+      title: t('Login Service'),
     },
     {
       url: '/admin/messages',

@@ -13,18 +13,20 @@ const FormSelect = ({
   options,
   field,
   hidden,
+  disabled,
 }: {
   items: { name: string; value: string }[];
   options: IFormFieldOption;
   field: FormFieldType;
   hidden?: boolean;
+  disabled?: boolean;
 }) => {
   return (
     <FormItem className='py-2' hidden={hidden}>
       <FormLabel>{options.label}</FormLabel>
       <Select onValueChange={field.onChange} defaultValue={field.value}>
         <FormControl>
-          <SelectTrigger>
+          <SelectTrigger disabled={disabled}>
             <SelectValue placeholder={options.placeholder} />
           </SelectTrigger>
         </FormControl>

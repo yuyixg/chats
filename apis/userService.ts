@@ -1,11 +1,11 @@
 import { useFetch } from '@/hooks/useFetch';
 import { Model } from '@/types/model';
-import { SingInParams } from '@/types/user';
+import { ProviderResult, SingInParams } from '@/types/user';
 import { UserSession } from '@/utils/user';
 
 export const changeUserPassword = (newPassword: string) => {
   const fetchService = useFetch();
-  return fetchService.put('/api/user', {
+  return fetchService.put('/api/user/change-password', {
     body: { newPassword },
   });
 };
@@ -52,5 +52,10 @@ export const getUserModels = () => {
 
 export const getUserBalance = () => {
   const fetchServer = useFetch();
-  return fetchServer.get<number>('/api/user');
+  return fetchServer.get<number>('/api/user/balance');
+};
+
+export const getLoginProvider = () => {
+  const fetchServer = useFetch();
+  return fetchServer.get<ProviderResult[]>('/api/public/login-provider');
 };

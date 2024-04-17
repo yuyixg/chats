@@ -1,6 +1,6 @@
 import React, { useEffect, useState } from 'react';
-import { getFileServices } from '@/apis/adminService';
-import { GetFileServicesResult } from '@/types/admin';
+import { getLoginServices } from '@/apis/adminService';
+import { GetLoginServicesResult } from '@/types/admin';
 import { serverSideTranslations } from 'next-i18next/serverSideTranslations';
 import { useTranslation } from 'next-i18next';
 import {
@@ -14,29 +14,29 @@ import {
 import { Card } from '@/components/ui/card';
 import { Button } from '@/components/ui/button';
 import { IconPlus } from '@tabler/icons-react';
-import { FileServiceModal } from '@/components/Admin/Files/FileServiceModal';
 import { DEFAULT_LANGUAGE } from '@/types/settings';
+import { LoginServiceModal } from '@/components/Admin/LoginService/LoginServiceModal';
 
-export default function FileService() {
+export default function LoginService() {
   const { t } = useTranslation('admin');
   const [isOpen, setIsOpen] = useState(false);
-  const [selected, setSelected] = useState<GetFileServicesResult | null>(null);
-  const [fileServices, setFileServices] = useState<GetFileServicesResult[]>([]);
+  const [selected, setSelected] = useState<GetLoginServicesResult | null>(null);
+  const [services, setServices] = useState<GetLoginServicesResult[]>([]);
   const [loading, setLoading] = useState(true);
   useEffect(() => {
     init();
   }, []);
 
   const init = () => {
-    getFileServices().then((data) => {
-      setFileServices(data);
+    getLoginServices().then((data) => {
+      setServices(data);
       setIsOpen(false);
       setSelected(null);
       setLoading(false);
     });
   };
 
-  const handleShow = (item: GetFileServicesResult) => {
+  const handleShow = (item: GetLoginServicesResult) => {
     setSelected(item);
     setIsOpen(true);
   };
@@ -57,7 +57,7 @@ export default function FileService() {
             color='primary'
           >
             <IconPlus size={20} />
-            {t('Add File Service')}
+            {t('Add Login Service')}
           </Button>
         </div>
       </div>
@@ -65,13 +65,12 @@ export default function FileService() {
         <Table>
           <TableHeader>
             <TableRow>
-              <TableHead>{t('Service Name')}</TableHead>
-              <TableHead>{t('File Service Type')}</TableHead>
+              <TableHead>{t('Login Service Type')}</TableHead>
               <TableHead>{t('Created Time')}</TableHead>
             </TableRow>
           </TableHeader>
-          <TableBody isLoading={loading} isEmpty={fileServices.length === 0}>
-            {fileServices.map((item) => (
+          <TableBody isLoading={loading} isEmpty={services.length === 0}>
+            {services.map((item) => (
               <TableRow
                 className='cursor-pointer'
                 key={item.id}
@@ -85,9 +84,8 @@ export default function FileService() {
                       item.enabled ? 'bg-green-400' : 'bg-gray-400'
                     }`}
                   ></div>
-                  {item.name}
+                  {item.type}
                 </TableCell>
-                <TableCell>{item.type}</TableCell>
                 <TableCell>
                   {new Date(item.createdAt).toLocaleString()}
                 </TableCell>
@@ -96,8 +94,9 @@ export default function FileService() {
           </TableBody>
         </Table>
       </Card>
-      <FileServiceModal
+      <LoginServiceModal
         selected={selected}
+        types={services.map((x) => x.type)}
         isOpen={isOpen}
         onClose={handleClose}
         onSuccessful={init}

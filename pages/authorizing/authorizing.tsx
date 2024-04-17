@@ -1,14 +1,13 @@
 import { useEffect, useState } from 'react';
 import { useRouter } from 'next/router';
-import { getServerSession } from 'next-auth/next';
-import { authOptions } from '../api/auth/[...nextauth]';
-import { NextApiRequest, NextApiResponse } from 'next';
+import { NextApiRequest } from 'next';
 import { saveUserSession, setUserSessionId } from '@/utils/user';
 import { serverSideTranslations } from 'next-i18next/serverSideTranslations';
 import { DEFAULT_LANGUAGE } from '@/types/settings';
 import { useTranslation } from 'react-i18next';
 import { singIn } from '@/apis/userService';
 import toast from 'react-hot-toast';
+import { getSession } from 'next-auth/react';
 
 export default function Authorizing(props: { session: any }) {
   const { t } = useTranslation('login');
@@ -55,14 +54,12 @@ export default function Authorizing(props: { session: any }) {
 
 export const getServerSideProps = async ({
   req,
-  res,
   locale,
 }: {
   req: NextApiRequest;
-  res: NextApiResponse;
   locale: string;
 }) => {
-  const session = await getServerSession(req, res, authOptions);
+  const session = await getSession({ req });
   return {
     props: {
       session,
