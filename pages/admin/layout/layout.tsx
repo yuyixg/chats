@@ -53,9 +53,9 @@ const AdminLayout = ({
       title: t('Model Configs'),
     },
     {
-      url: '/admin/file-server',
+      url: '/admin/file-service',
       icon: <IconFiles stroke={1.6} size={22} />,
-      title: t('File Server'),
+      title: t('File Service'),
     },
     {
       url: '/admin/messages',

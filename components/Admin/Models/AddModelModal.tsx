@@ -92,7 +92,7 @@ export const AddModelModal = (props: IProps) => {
     },
     {
       name: 'fileServerId',
-      label: t('File Server Type'),
+      label: t('File Service Type'),
       defaultValue: null,
       render: (options: IFormFieldOption, field: FormFieldType) => (
         <FormSelect

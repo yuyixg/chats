@@ -23,7 +23,7 @@ CREATE TABLE "FileServices" (
     "name" TEXT NOT NULL,
     "enabled" BOOLEAN NOT NULL DEFAULT true,
     "type" TEXT NOT NULL,
-    "configs" TEXT NOT NULL DEFAULT '{}',
+    "configs" VARCHAR(2048) NOT NULL DEFAULT '{}',
     "createdAt" TIMESTAMP(3) NOT NULL DEFAULT CURRENT_TIMESTAMP,
     "updatedAt" TIMESTAMP(3) NOT NULL,
 
@@ -39,10 +39,10 @@ CREATE TABLE "ChatModels" (
     "rank" INTEGER,
     "remarks" TEXT,
     "fileServerId" TEXT,
-    "fileConfig" TEXT,
-    "apiConfig" TEXT NOT NULL DEFAULT '{}',
-    "modelConfig" TEXT NOT NULL DEFAULT '{}',
-    "priceConfig" TEXT NOT NULL DEFAULT '{}',
+    "fileConfig" VARCHAR(2048) DEFAULT '{}',
+    "apiConfig" VARCHAR(2048) NOT NULL DEFAULT '{}',
+    "modelConfig" VARCHAR(2048) NOT NULL DEFAULT '{}',
+    "priceConfig" VARCHAR(2048) NOT NULL DEFAULT '{}',
     "enabled" BOOLEAN NOT NULL DEFAULT true,
     "createdAt" TIMESTAMP(3) NOT NULL DEFAULT CURRENT_TIMESTAMP,
     "updatedAt" TIMESTAMP(3) NOT NULL,
@@ -78,7 +78,7 @@ CREATE TABLE "Messages" (
     "chatModelId" TEXT NOT NULL,
     "name" TEXT NOT NULL,
     "prompt" TEXT,
-    "messages" TEXT NOT NULL DEFAULT '[]',
+    "messages" TEXT NOT NULL,
     "tokenCount" INTEGER NOT NULL DEFAULT 0,
     "chatCount" INTEGER NOT NULL DEFAULT 0,
     "totalPrice" DECIMAL(65,30) NOT NULL DEFAULT 0,
@@ -143,7 +143,7 @@ CREATE TABLE "Counterfoils" (
 CREATE TABLE "LoginServices" (
     "id" TEXT NOT NULL,
     "type" TEXT NOT NULL,
-    "configs" TEXT NOT NULL DEFAULT '{}',
+    "configs" VARCHAR(2048) NOT NULL DEFAULT '{}',
     "createdAt" TIMESTAMP(3) NOT NULL DEFAULT CURRENT_TIMESTAMP,
     "updatedAt" TIMESTAMP(3) NOT NULL,
 
@@ -165,7 +165,7 @@ CREATE TABLE "UserSms" (
 CREATE TABLE "PayServices" (
     "id" TEXT NOT NULL,
     "type" TEXT NOT NULL,
-    "configs" TEXT NOT NULL DEFAULT '{}',
+    "configs" VARCHAR(2048) NOT NULL DEFAULT '{}',
     "createdAt" TIMESTAMP(3) NOT NULL DEFAULT CURRENT_TIMESTAMP,
     "updatedAt" TIMESTAMP(3) NOT NULL,
 

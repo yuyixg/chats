@@ -37,7 +37,7 @@ model FileServices {
   name      String   @unique
   enabled   Boolean  @default(true)
   type      String
-  configs   String   @default("{}")
+  configs   String   @default("{}") @db.VarChar(2048)
   createdAt DateTime @default(now())
   updatedAt DateTime @updatedAt
 }
@@ -50,10 +50,10 @@ model ChatModels {
   rank         Int?
   remarks      String?
   fileServerId String?
-  fileConfig   String?
-  apiConfig    String     @default("{}")
-  modelConfig  String     @default("{}")
-  priceConfig  String     @default("{}")
+  fileConfig   String?    @default("{}") @db.VarChar(2048)
+  apiConfig    String     @default("{}") @db.VarChar(2048)
+  modelConfig  String     @default("{}") @db.VarChar(2048)
+  priceConfig  String     @default("{}") @db.VarChar(2048)
   enabled      Boolean    @default(true)
   createdAt    DateTime   @default(now())
   updatedAt    DateTime   @updatedAt
@@ -83,7 +83,7 @@ model Messages {
   chatModelId String
   name        String
   prompt      String?
-  messages    String     @default("[]")
+  messages    String     @db.Text()
   tokenCount  Int        @default(0)
   chatCount   Int        @default(0)
   totalPrice  Decimal    @default(0)
@@ -137,7 +137,7 @@ model Counterfoils {
 model LoginServices {
   id        String   @id @default(uuid())
   type      String
-  configs   String   @default("{}")
+  configs   String   @default("{}") @db.VarChar(2048)
   createdAt DateTime @default(now())
   updatedAt DateTime @updatedAt
 }
@@ -153,7 +153,7 @@ model UserSms {
 model PayServices {
   id        String   @id @default(uuid())
   type      String
-  configs   String   @default("{}")
+  configs   String   @default("{}") @db.VarChar(2048)
   createdAt DateTime @default(now())
   updatedAt DateTime @updatedAt
 }

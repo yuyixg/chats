@@ -80,7 +80,7 @@ export const EditModelModal = (props: IProps) => {
     },
     {
       name: 'fileServerId',
-      label: t('File Server Type'),
+      label: t('File Service Type'),
       defaultValue: '',
       render: (options: IFormFieldOption, field: FormFieldType) => (
         <FormSelect

@@ -57,7 +57,7 @@ export default function FileServer() {
             color='primary'
           >
             <IconPlus size={20} />
-            {t('Add File Server')}
+            {t('Add File Service')}
           </Button>
         </div>
       </div>
@@ -65,8 +65,8 @@ export default function FileServer() {
         <Table>
           <TableHeader>
             <TableRow>
-              <TableHead>{t('Server Name')}</TableHead>
-              <TableHead>{t('File Server Type')}</TableHead>
+              <TableHead>{t('Service Name')}</TableHead>
+              <TableHead>{t('File Service Type')}</TableHead>
               <TableHead>{t('Created Time')}</TableHead>
             </TableRow>
           </TableHeader>

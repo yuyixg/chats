@@ -49,7 +49,7 @@ const handler = async (req: ChatsApiRequest) => {
     const { id, type, name, enabled, configs: configsJSON } = req.body;
     let fileServer = await FileServiceManager.findById(id);
     if (!fileServer) {
-      throw new BadRequest('File server not found');
+      throw new BadRequest('File service not found');
     }
 
     let configs = JSON.parse(configsJSON);

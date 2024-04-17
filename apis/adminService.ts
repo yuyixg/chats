@@ -114,20 +114,20 @@ export const getFileServices = (
 ): Promise<GetFileServicesResult[]> => {
   const fetchService = useFetch();
   return fetchService.get(
-    '/api/admin/file-server?select=' + (!select ? '' : true)
+    '/api/admin/file-service?select=' + (!select ? '' : true)
   );
 };
 
 export const postFileServer = (params: PostFileServicesParams) => {
   const fetchService = useFetch();
-  return fetchService.post('/api/admin/file-server', {
+  return fetchService.post('/api/admin/file-service', {
     body: params,
   });
 };
 
 export const putFileServer = (params: PutFileServicesParams) => {
   const fetchService = useFetch();
-  return fetchService.put('/api/admin/file-server', {
+  return fetchService.put('/api/admin/file-service', {
     body: params,
   });
 };

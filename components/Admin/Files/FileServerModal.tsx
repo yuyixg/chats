@@ -42,7 +42,7 @@ export const FileServerModal = (props: IProps) => {
   const formFields: IFormFieldOption[] = [
     {
       name: 'type',
-      label: t('File Server Type'),
+      label: t('File Service Type'),
       defaultValue: '',
       render: (options: IFormFieldOption, field: FormFieldType) => (
         <FormSelect
@@ -57,7 +57,7 @@ export const FileServerModal = (props: IProps) => {
     },
     {
       name: 'name',
-      label: t('Server Name'),
+      label: t('Service Name'),
       defaultValue: '',
       render: (options: IFormFieldOption, field: FormFieldType) => (
         <FormInput options={options} field={field} />
@@ -73,7 +73,7 @@ export const FileServerModal = (props: IProps) => {
     },
     {
       name: 'configs',
-      label: t('Server Configs'),
+      label: t('Service Configs'),
       defaultValue: '',
       render: (options: IFormFieldOption, field: FormFieldType) => (
         <FormTextarea options={options} field={field} />
@@ -158,7 +158,7 @@ export const FileServerModal = (props: IProps) => {
     <Dialog open={isOpen} onOpenChange={onClose}>
       <DialogContent>
         <DialogHeader>
-          <DialogTitle>{t('Add File Server')}</DialogTitle>
+          <DialogTitle>{t('Add File Service')}</DialogTitle>
         </DialogHeader>
         <Form {...form}>
           <form onSubmit={form.handleSubmit(onSubmit)}>
