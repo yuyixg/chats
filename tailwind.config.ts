@@ -69,12 +69,22 @@ const config = {
           to: { height: '0' },
         },
         'slide-in': {
-          from: { transform: 'translateX(-100%)' },
-          to: { transform: 'translateX(0)' },
+          from: {
+            transform: 'translate3d(-100%, 0, 0)',
+            visibility: 'visible',
+          },
+          to: {
+            transform: 'translate3d(0, 0, 0)',
+          },
         },
         'slide-out': {
-          from: { transform: 'translateX(0)' },
-          to: { transform: 'translateX(-100%)' },
+          from: {
+            transform: 'translate3d(0, 0, 0)',
+          },
+          to: {
+            visibility: 'hidden',
+            transform: 'translate3d(-100%, 0, 0)',
+          },
         },
       },
       animation: {

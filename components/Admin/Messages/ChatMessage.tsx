@@ -74,7 +74,7 @@ export const ChatMessage: FC<Props> = memo(({ message, canOperate = true }) => {
           ) : (
             <div className='flex flex-row'>
               <MemoizedReactMarkdown
-                className='prose dark:prose-invert flex-1 leading-8'
+                className='prose dark:prose-invert flex-1 leading-8 markdown-container'
                 remarkPlugins={[remarkGfm, remarkMath]}
                 rehypePlugins={[rehypeMathjax]}
                 components={{

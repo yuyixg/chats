@@ -346,7 +346,7 @@ const Home = ({ defaultModelId }: Props) => {
 
           <div className='flex h-full w-full pt-[48px] sm:pt-0 dark:bg-[#343541]'>
             <Chatbar />
-            <div className='flex flex-1'>
+            <div className='flex w-full'>
               <Chat stopConversationRef={stopConversationRef} />
             </div>
             {/* <Promptbar /> */}

@@ -9,7 +9,7 @@ import {
 import { Button } from '../ui/button';
 import { ChatMessage } from '../Admin/Messages/ChatMessage';
 import { Conversation } from '@/types/chat';
-import { ScrollArea } from '../ui/scroll-area';
+import { ScrollArea, ScrollBar } from '../ui/scroll-area';
 import { putUserMessages } from '@/apis/userService';
 import toast from 'react-hot-toast';
 
@@ -54,11 +54,9 @@ export const SharedMessageModal = (props: IProps) => {
   const handleCopySharedUrl = () => {
     const { id } = conversation!;
     if (!navigator.clipboard) return;
-    navigator.clipboard
-      .writeText(`${location.origin}/share/${id}`)
-      .then(() => {
-        toast.success(t('Copy Successful'));
-      });
+    navigator.clipboard.writeText(`${location.origin}/share/${id}`).then(() => {
+      toast.success(t('Copy Successful'));
+    });
   };
 
   return (
@@ -74,6 +72,7 @@ export const SharedMessageModal = (props: IProps) => {
                 message={m}
               />
             ))}
+          <ScrollBar orientation='horizontal' />
         </ScrollArea>
         <DialogFooter className='pt-4'>
           {conversation?.isShared ? (

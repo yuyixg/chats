@@ -230,9 +230,9 @@ export const ChatMessage: FC<Props> = memo(
                 )}
               </div>
             ) : (
-              <div className='flex flex-row'>
+              <div className='flex flex-row pr-4'>
                 <MemoizedReactMarkdown
-                  className='prose dark:prose-invert flex-1 leading-8'
+                  className='prose dark:prose-invert flex-1 leading-8 overflow-x-auto'
                   remarkPlugins={[remarkGfm, remarkMath]}
                   rehypePlugins={[rehypeMathjax]}
                   components={{
@@ -256,6 +256,7 @@ export const ChatMessage: FC<Props> = memo(
 
                       return !inline ? (
                         <CodeBlock
+                          style={{ overflowX: 'auto' }}
                           key={Math.random()}
                           language={(match && match[1]) || ''}
                           value={String(children).replace(/\n$/, '')}
@@ -269,7 +270,10 @@ export const ChatMessage: FC<Props> = memo(
                     },
                     table({ children }) {
                       return (
-                        <table className='border-collapse border border-black px-3 py-1 dark:border-white'>
+                        <table
+                          className='border-collapse border border-black px-3 py-1 dark:border-white'
+                          style={{ overflowX: 'auto' }}
+                        >
                           {children}
                         </table>
                       );

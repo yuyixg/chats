@@ -51,10 +51,8 @@ const Sidebar = <T,>({
     <>
       <div
         className={`${
-          isOpen
-            ? 'animate-slide-in w-[260px]'
-            : 'animate-slide-out slide-out-hidden'
-        } fixed top-0 ${side}-0 z-40 flex h-full flex-none flex-col space-y-2 text-black bg-[#f9f9f9] dark:bg-[#202123] dark:text-white p-2 text-[14px] sm:relative sm:top-0`}
+          isOpen ? 'w-[260px]' : 'w-0 hidden'
+        } fixed top-0 ${side}-0 z-40 flex h-full flex-none flex-col space-y-2 text-black bg-[#f9f9f9] dark:bg-[#202123] dark:text-white p-2 text-[14px] sm:relative  sm:top-0`}
       >
         {hasModel() && (
           <div className='flex items-center'>
