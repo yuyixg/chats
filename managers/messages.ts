@@ -16,7 +16,7 @@ export interface CreateMessage {
 
 export class ChatMessageManager {
   static async findMessageById(id: string) {
-    return await prisma.messages.findFirst({ where: { id } });
+    return await prisma.messages.findUnique({ where: { id } });
   }
 
   static async findUserMessageById(id: string, userId: string) {
@@ -94,10 +94,13 @@ export class ChatMessageManager {
   }
 
   static async deleteMessageById(id: string) {
-    return await prisma.messages.update({
-      where: { id },
-      data: { isDeleted: true, isShared: false },
-    });
+    const message = await this.findMessageById(id);
+    if (message) {
+      return await prisma.messages.update({
+        where: { id },
+        data: { isDeleted: true, isShared: false },
+      });
+    }
   }
 
   static async createMessage(params: CreateMessage) {

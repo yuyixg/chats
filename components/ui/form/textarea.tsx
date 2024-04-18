@@ -16,7 +16,6 @@ const FormTextarea = ({
       <FormLabel>{options.label}</FormLabel>
       <FormControl>
         <Textarea
-          className='overflow-hidden'
           placeholder={options.placeholder}
           {...field}
         />

@@ -8,6 +8,7 @@ import { TooltipProvider } from '@/components/ui/tooltip';
 import { cn } from '@/lib/utils';
 import {
   IconChartPie,
+  IconCreditCard,
   IconFiles,
   IconKey,
   IconMessageCircle,
@@ -21,6 +22,7 @@ import { useTranslation } from 'next-i18next';
 import { useRouter } from 'next/router';
 import { useEffect, useState } from 'react';
 import Image from 'next/image';
+import { IconCurrencyYen } from '@tabler/icons-react';
 
 const AdminLayout = ({
   children,
@@ -62,6 +64,11 @@ const AdminLayout = ({
       url: '/admin/login-service',
       icon: <IconKey stroke={1.6} size={22} />,
       title: t('Login Service'),
+    },
+    {
+      url: '/admin/pay-service',
+      icon: <IconCreditCard stroke={1.6} size={22} />,
+      title: t('Pay Service'),
     },
     {
       url: '/admin/messages',

@@ -16,7 +16,7 @@ export const addAsterisk = (value?: string, separator = '*') => {
     value
       .substring(5, value.length - 2)
       .split('')
-      .map((x) => separator)
+      .map(() => separator)
       .join('') +
     value.substring(value.length - 2, value.length)
   );

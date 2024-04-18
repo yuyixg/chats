@@ -155,7 +155,7 @@ model PayServices {
   id        String   @id @default(uuid())
   type      String
   enabled   Boolean  @default(true)
-  configs   String   @default("{}") @db.VarChar(2048)
+  configs   String   @db.Text()
   createdAt DateTime @default(now())
   updatedAt DateTime @updatedAt
 }

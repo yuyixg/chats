@@ -8,6 +8,7 @@ import { UserBalancesManager } from './userBalances';
 import { WxPayManager } from './wxPay';
 import { OrdersManager } from './order';
 import { RequestLogsManager } from './requestLogs';
+import { PayServiceManager } from './payService';
 
 export {
   ChatModelManager,
@@ -20,4 +21,5 @@ export {
   WxPayManager,
   OrdersManager,
   RequestLogsManager,
+  PayServiceManager,
 };

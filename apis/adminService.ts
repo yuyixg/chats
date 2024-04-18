@@ -20,6 +20,9 @@ import {
   GetLoginServicesResult,
   PostLoginServicesParams,
   PutLoginServicesParams,
+  GetPayServicesResult,
+  PostPayServicesParams,
+  PutPayServicesParams,
 } from '@/types/admin';
 import { PostFileServicesParams, PutFileServicesParams } from '@/types/file';
 import { PageResult } from '@/types/page';
@@ -171,6 +174,25 @@ export const postLoginService = (params: PostLoginServicesParams) => {
 export const putLoginService = (params: PutLoginServicesParams) => {
   const fetchService = useFetch();
   return fetchService.put('/api/admin/login-service', {
+    body: params,
+  });
+};
+
+export const getPayServices = (): Promise<GetPayServicesResult[]> => {
+  const fetchService = useFetch();
+  return fetchService.get('/api/admin/pay-service');
+};
+
+export const postPayService = (params: PostPayServicesParams) => {
+  const fetchService = useFetch();
+  return fetchService.post('/api/admin/pay-service', {
+    body: params,
+  });
+};
+
+export const putPayService = (params: PutPayServicesParams) => {
+  const fetchService = useFetch();
+  return fetchService.put('/api/admin/pay-service', {
     body: params,
   });
 };

@@ -5,6 +5,7 @@ import { PutFileServicesParams } from './file';
 import Decimal from 'decimal.js';
 import { StatusCode } from './statusCode';
 import { ProviderType } from './user';
+import { PayServiceType } from './pay';
 
 export const enum UserRole {
   'admin' = 'admin',
@@ -171,5 +172,23 @@ export interface PostLoginServicesParams {
 }
 
 export interface PutLoginServicesParams extends PostLoginServicesParams {
+  id: string;
+}
+
+export interface GetPayServicesResult {
+  id: string;
+  type: PayServiceType;
+  enabled: boolean;
+  configs: string;
+  createdAt: string;
+}
+
+export interface PostPayServicesParams {
+  type: PayServiceType;
+  enabled: boolean;
+  configs: string;
+}
+
+export interface PutPayServicesParams extends PostPayServicesParams {
   id: string;
 }
