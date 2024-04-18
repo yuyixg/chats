@@ -93,5 +93,6 @@
   "User recharge": "用户充值",
   "Recharged successfully": "充值成功",
   "Current Balance": "当前余额",
-  "Recharge Amount": "充值金额"
+  "Recharge Amount": "充值金额",
+  "'-' Indicates unlimited, numbers indicate the number of times or quantities that can be used": "'-' 表示无限制，数字表示可使用的次数或者数量"
 }

@@ -59,6 +59,9 @@ export const EditUserModelModal = (props: IProps) => {
     {
       name: 'tokens',
       label: t('Remaining Tokens'),
+      description: t(
+        "'-' Indicates unlimited, numbers indicate the number of times or quantities that can be used"
+      )!,
       render: (options: IFormFieldOption, field: FormFieldType) => (
         <FormInput options={options} field={field} />
       ),
@@ -66,6 +69,9 @@ export const EditUserModelModal = (props: IProps) => {
     {
       name: 'counts',
       label: t('Remaining Counts'),
+      description: t(
+        "'-' Indicates unlimited, numbers indicate the number of times or quantities that can be used"
+      )!,
       render: (options: IFormFieldOption, field: FormFieldType) => (
         <FormInput options={options} field={field} />
       ),
