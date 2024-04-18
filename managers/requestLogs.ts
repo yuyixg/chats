@@ -51,6 +51,9 @@ export class RequestLogsManager {
   }
 
   static async findByRequestLogsId(id: string) {
-    return await prisma.requestLogs.findUnique({ where: { id } });
+    return await prisma.requestLogs.findUnique({
+      include: { user: { select: { username: true } } },
+      where: { id },
+    });
   }
 }

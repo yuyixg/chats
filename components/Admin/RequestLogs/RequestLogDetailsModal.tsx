@@ -38,29 +38,29 @@ export const RequestLogDetailsModal = (props: IProps) => {
             <div className='pt-6'>
               <dl className='grid gap-3'>
                 <div className='flex items-center'>
-                  <dt className='text-muted-foreground'>{t('Url')}：</dt>
+                  <dt className='text-muted-foreground min-w-[80px]'>{t('Url')}：</dt>
                   <dd>{log?.url}</dd>
                 </div>
                 <div className='flex items-center'>
-                  <dt className='text-muted-foreground'>
+                  <dt className='text-muted-foreground min-w-[80px]'>
                     {t('Status Code')}：
                   </dt>
                   <dd>{log?.statusCode}</dd>
                 </div>
                 <div className='flex items-center'>
-                  <dt className='text-muted-foreground'>{t('Method')}：</dt>
+                  <dt className='text-muted-foreground min-w-[80px]'>{t('Method')}：</dt>
                   <dd>{log?.method}</dd>
                 </div>
                 <div className='flex items-center'>
-                  <dt className='text-muted-foreground'>{t('User Name')}：</dt>
-                  <dd>{log?.username}</dd>
+                  <dt className='text-muted-foreground min-w-[80px]'>{t('User Name')}：</dt>
+                  <dd>{log?.user?.username}</dd>
                 </div>
                 <div className='flex items-center'>
-                  <dt className='text-muted-foreground'>{t('IP Address')}：</dt>
+                  <dt className='text-muted-foreground min-w-[80px]'>{t('IP Address')}：</dt>
                   <dd>{log?.ip}</dd>
                 </div>
                 <div className='flex items-center'>
-                  <dt className='text-muted-foreground'>
+                  <dt className='text-muted-foreground min-w-[80px]'>
                     {t('Response Time')}：
                   </dt>
                   <dd>
@@ -69,24 +69,26 @@ export const RequestLogDetailsModal = (props: IProps) => {
                   </dd>
                 </div>
                 <div className='flex items-center'>
-                  <dt className='text-muted-foreground'>
+                  <dt className='text-muted-foreground min-w-[80px]'>
                     {t('Created Time')}：
                   </dt>
                   <dd>{log?.createdAt.toLocaleString()}</dd>
                 </div>
                 <div className='flex items-center'>
-                  <dt className='text-muted-foreground'>
+                  <dt className='text-muted-foreground min-w-[80px]'>
                     {t('Request Headers')}：
                   </dt>
                   <dd>{log?.headers}</dd>
                 </div>
                 <div className='flex items-center'>
-                  <dt className='text-muted-foreground'>{t('Request')}：</dt>
+                  <dt className='text-muted-foreground min-w-[80px]'>{t('Request')}：</dt>
                   <dd>{log?.request}</dd>
                 </div>
                 <div className='flex items-center'>
-                  <dt className='text-muted-foreground'>{t('Response')}：</dt>
-                  <dd>{log?.response}</dd>
+                  <dt className='text-muted-foreground min-w-[80px]'>
+                    {t('Response')}：
+                  </dt>
+                  <dd className='max-h-96 overflow-auto'>{log?.response}</dd>
                 </div>
               </dl>
             </div>

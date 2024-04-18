@@ -153,6 +153,7 @@ export interface GetRequestLogsDetailsResult extends GetRequestLogsListResult {
   response: string;
   requestTime: number;
   responseTime: number;
+  user: { username: string };
 }
 
 export interface GetLoginServicesResult {

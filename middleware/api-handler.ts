@@ -68,6 +68,7 @@ export function apiHandler(handler: any) {
 
     try {
       await authMiddleware(request);
+      logs.userId = request.session.userId;
       const data = await handler(request, response);
       logs.response = JSON.stringify(data);
       if (modelApis.includes(request.url!)) {
