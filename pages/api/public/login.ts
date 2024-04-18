@@ -1,5 +1,5 @@
 import { NextApiRequest } from 'next';
-import { SessionsManager, UsersManager } from '@/managers';
+import { PayServiceManager, SessionsManager, UsersManager } from '@/managers';
 import { BadRequest } from '@/utils/error';
 import { apiHandler } from '@/middleware/api-handler';
 
@@ -23,11 +23,13 @@ async function handler(req: NextApiRequest) {
     }
 
     if (user) {
+      const pays = await PayServiceManager.findAllEnabled();
       const session = await SessionsManager.generateSession(user.id!);
       return {
         sessionId: session.id,
         username: user.username,
         role: user.role,
+        canRecharge: pays.length > 0,
       };
     }
     throw new BadRequest('Username or password incorrect');

@@ -1,9 +1,10 @@
 import { BadRequest } from '@/utils/error';
 import requestIp from 'request-ip';
-import { OrdersManager, WxPayManager } from '@/managers';
+import { OrdersManager, PayServiceManager, WxPayManager } from '@/managers';
 import { weChatAuth } from '@/utils/weChat';
 import { apiHandler } from '@/middleware/api-handler';
 import { ChatsApiRequest } from '@/types/next-api';
+import { PayServiceType } from '@/types/pay';
 export const config = {
   api: {
     bodyParser: {
@@ -24,7 +25,12 @@ const handler = async (req: ChatsApiRequest) => {
       throw new BadRequest('订单不存在');
     }
 
-    const weChatAuthResult = await weChatAuth(code);
+    const payConfig = await PayServiceManager.findConfigsByType(
+      PayServiceType.WeChatPay
+    );
+    const { appId, secret } = JSON.parse(payConfig);
+
+    const weChatAuthResult = await weChatAuth(appId, secret, code);
     if (!weChatAuthResult) {
       throw new BadRequest('微信授权失败');
     }

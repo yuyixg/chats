@@ -1,6 +1,7 @@
 import { IJsApi, IPayNotifyDecipher, IResource } from '@/utils/wxpay/type';
 import { WxPay } from '@/utils/wxpay/wxpay';
-import fs from 'fs';
+import { PayServiceManager } from '.';
+import { PayServiceType } from '@/types/pay';
 
 export interface CallWxJSApiPay {
   amount: number;
@@ -19,29 +20,26 @@ export interface CallWxH5Pay {
 
 export class WxPayManager {
   private static async weChatPay() {
-    const { WECHAT_PAY_APP_ID, WECHAT_PAY_MCHID, WECHAT_PAY_API_V3_KEY } =
-      process.env;
-    const publicKey = await fs.readFileSync(
-      `${process.cwd()}/cert/apiclient_cert.pem`
+    const payConfig = await PayServiceManager.findConfigsByType(
+      PayServiceType.WeChatPay
     );
-    const privateKey = await fs.readFileSync(
-      `${process.cwd()}/cert/apiclient_key.pem`
-    );
+    const { appId, mchId, apiV3Key, apiClientCert, apiClientKey } =
+      JSON.parse(payConfig);
 
     return new WxPay(
-      WECHAT_PAY_APP_ID!,
-      WECHAT_PAY_MCHID!,
-      publicKey,
-      privateKey,
+      appId!,
+      mchId!,
+      Buffer.from(apiClientCert),
+      Buffer.from(apiClientKey),
       {
-        key: WECHAT_PAY_API_V3_KEY!,
+        key: apiV3Key!,
       }
     );
   }
   static async callWxJSApiPay(params: CallWxJSApiPay) {
     const { amount, orderId, ipAddress, openId, outTradeNo } = params;
-    const { WECHAT_PAY_NOTIFY_URL } = process.env;
-    const notifyUrl = `${WECHAT_PAY_NOTIFY_URL}/api/public/notify`;
+    const { NEXT_URL } = process.env;
+    const notifyUrl = `${NEXT_URL}/api/public/notify`;
     const options = {
       description: `Order:${orderId}`,
       payer: {

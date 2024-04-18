@@ -75,11 +75,13 @@ export const ChatBarSettings = () => {
         />
       )}
 
-      <SidebarButton
-        text={t('账号充值')}
-        icon={<IconMoneybag size={18} />}
-        onClick={() => setIsRechargeModal(true)}
-      />
+      {user?.canRecharge && (
+        <SidebarButton
+          text={t('账号充值')}
+          icon={<IconMoneybag size={18} />}
+          onClick={() => setIsRechargeModal(true)}
+        />
+      )}
 
       {user?.username && (
         <Popover>

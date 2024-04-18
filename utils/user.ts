@@ -5,6 +5,7 @@ export interface UserSession {
   username: string;
   password: string;
   role: string;
+  canRecharge: boolean;
 }
 
 export const saveUserSession = (user: UserSession) => {
