@@ -6,6 +6,7 @@ import { addAsterisk, checkKey } from '@/utils/common';
 import { ChatModels } from '@prisma/client';
 import { apiHandler } from '@/middleware/api-handler';
 import { ChatsApiRequest } from '@/types/next-api';
+import { conversionModelPriceToSave } from '@/utils/model';
 export const config = {
   api: {
     bodyParser: {
@@ -75,7 +76,7 @@ const handler = async (req: ChatsApiRequest) => {
       fileConfig,
       JSON.stringify(apiConfig),
       modelConfig,
-      priceConfig,
+      conversionModelPriceToSave(priceConfig),
       remarks
     );
     return data;
@@ -107,7 +108,7 @@ const handler = async (req: ChatsApiRequest) => {
       fileConfig,
       apiConfig,
       modelConfig,
-      priceConfig,
+      conversionModelPriceToSave(priceConfig),
       remarks
     );
     return data;

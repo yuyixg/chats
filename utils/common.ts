@@ -39,3 +39,10 @@ export function formatRMB(number: number) {
   }).format(number);
   return formatted.replace(/￥(\d)/, '￥ $1');
 }
+
+export function formatNumberAsMoney(amount: number) {
+  return new Intl.NumberFormat('zh-CN', {
+    minimumFractionDigits: 2,
+    maximumFractionDigits: 2,
+  }).format(amount);
+}

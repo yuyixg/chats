@@ -1,4 +1,4 @@
-import { ChatModelConfig, ModelConfigType, ModelVersions } from '@/types/model';
+import { ChatModelConfig, ChatModelPrice, ModelConfigType, ModelVersions } from '@/types/model';
 import { ModelDefaultTemplates } from '@/types/template';
 
 export function verifyModel(model: any, config: ChatModelConfig) {
@@ -82,4 +82,20 @@ export function mergeConfigs(obj1: any, obj2: any) {
     return result;
   }, {});
   return JSON.stringify(config, null, 2);
+}
+
+export const ModelPriceUnit = 100000;
+
+export function conversionModelPriceToDisplay(priceConfig: string) {
+  const configs = JSON.parse(priceConfig) as ChatModelPrice;
+  configs.input = configs.input * ModelPriceUnit;
+  configs.out = configs.out * ModelPriceUnit;
+  return JSON.stringify(configs, null, 2);
+}
+
+export function conversionModelPriceToSave(priceConfig: string) {
+  const configs = JSON.parse(priceConfig) as ChatModelPrice;
+  configs.input = configs.input / ModelPriceUnit;
+  configs.out = configs.out / ModelPriceUnit;
+  return JSON.stringify(configs);
 }

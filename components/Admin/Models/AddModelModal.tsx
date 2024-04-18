@@ -22,6 +22,8 @@ import FormSelect from '@/components/ui/form/select';
 import { ModelVersions } from '@/types/model';
 import { GetFileServicesResult, PostModelParams } from '@/types/admin';
 import {
+  ModelPriceUnit,
+  conversionModelPriceToDisplay,
   getModelApiConfigJson,
   getModelFileConfig,
   getModelFileConfigJson,
@@ -29,6 +31,7 @@ import {
   getModelModelConfigJson,
   getModelPriceConfigJson,
 } from '@/utils/model';
+import { formatNumberAsMoney } from '@/utils/common';
 
 interface IProps {
   isOpen: boolean;
@@ -124,7 +127,9 @@ export const AddModelModal = (props: IProps) => {
     },
     {
       name: 'priceConfig',
-      label: t('Token Price'),
+      label: `${formatNumberAsMoney(ModelPriceUnit)} ${t('Token Price')}(${t(
+        'Yuan'
+      )})`,
       defaultValue: '',
       render: (options: IFormFieldOption, field: FormFieldType) => (
         <FormTextarea options={options} field={field} />
@@ -216,7 +221,10 @@ export const AddModelModal = (props: IProps) => {
         form.setValue('apiConfig', getModelApiConfigJson(modelVersion));
         form.setValue('modelConfig', getModelModelConfigJson(modelVersion));
         form.setValue('fileConfig', getModelFileConfigJson(modelVersion));
-        form.setValue('priceConfig', getModelPriceConfigJson(modelVersion));
+        form.setValue(
+          'priceConfig',
+          conversionModelPriceToDisplay(getModelPriceConfigJson(modelVersion))
+        );
       }
     });
     return () => subscription.unsubscribe();

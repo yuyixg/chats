@@ -24,6 +24,8 @@ import FormSwitch from '../../ui/form/switch';
 import FormTextarea from '../../ui/form/textarea';
 import { Button } from '../../ui/button';
 import {
+  ModelPriceUnit,
+  conversionModelPriceToDisplay,
   getModelApiConfig,
   getModelFileConfig,
   getModelModelConfig,
@@ -31,6 +33,7 @@ import {
   mergeConfigs,
 } from '@/utils/model';
 import FormSelect from '@/components/ui/form/select';
+import { formatNumberAsMoney } from '@/utils/common';
 
 interface IProps {
   isOpen: boolean;
@@ -107,7 +110,9 @@ export const EditModelModal = (props: IProps) => {
     },
     {
       name: 'priceConfig',
-      label: t('Token Price'),
+      label: `${formatNumberAsMoney(ModelPriceUnit)} ${t('Token Price')}(${t(
+        'Yuan'
+      )})`,
       render: (options: IFormFieldOption, field: FormFieldType) => (
         <FormTextarea options={options} field={field} />
       ),
@@ -235,7 +240,12 @@ export const EditModelModal = (props: IProps) => {
       );
       form.setValue(
         'priceConfig',
-        mergeConfigs(getModelPriceConfig(modelVersion), JSON.parse(priceConfig))
+        conversionModelPriceToDisplay(
+          mergeConfigs(
+            getModelPriceConfig(modelVersion),
+            JSON.parse(priceConfig)
+          )
+        )
       );
     }
   }, [isOpen]);
