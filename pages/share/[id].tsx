@@ -23,9 +23,11 @@ export default function ShareMessage() {
   }, []);
   return (
     <>
-      {message.messages.map((m, index) => (
-        <ChatMessage key={'message' + index} message={m} />
-      ))}
+      <div className='w-full'>
+        {message.messages.map((m, index) => (
+          <ChatMessage key={'message' + index} message={m} />
+        ))}
+      </div>
       <div className='h-32'></div>
       <div className='fixed bottom-0 py-4 w-full bg-white dark:bg-black dark:text-white'>
         <div className='flex justify-center pb-2'>
@@ -44,7 +46,10 @@ export default function ShareMessage() {
 export const getServerSideProps = async ({ locale }: { locale: string }) => {
   return {
     props: {
-      ...(await serverSideTranslations(locale ?? DEFAULT_LANGUAGE, ['common', 'markdown'])),
+      ...(await serverSideTranslations(locale ?? DEFAULT_LANGUAGE, [
+        'common',
+        'markdown',
+      ])),
     },
   };
 };
