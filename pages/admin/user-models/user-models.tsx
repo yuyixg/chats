@@ -1,7 +1,7 @@
 import React, { useEffect, useState } from 'react';
 import { getUserModels } from '@/apis/adminService';
 import { GetUserModelResult } from '@/types/admin';
-import { IconDots, IconPlus } from '@tabler/icons-react';
+import { IconDots, IconPlus } from '@/components/Icons/index';
 import { serverSideTranslations } from 'next-i18next/serverSideTranslations';
 import { useTranslation } from 'next-i18next';
 import { useThrottle } from '@/hooks/useThrottle';
@@ -138,7 +138,7 @@ export default function UserModels() {
             }}
             color='primary'
           >
-            <IconPlus size={20} />
+            <IconPlus stroke='white' />
             {t('Batch add Model')}
           </Button>
         </div>
@@ -174,7 +174,7 @@ export default function UserModels() {
           </TableHeader>
 
           {userModels.map((user) => (
-            <TableBody
+            <TableBody emptyText={t('No data')!}
               key={user.userId}
               className='tbody-hover'
               style={{ borderTop: '1px solid hsl(var(--muted))' }}

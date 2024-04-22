@@ -69,7 +69,7 @@ export default function RequestLogs() {
               <TableHead>{t('Status Code')}</TableHead>
             </TableRow>
           </TableHeader>
-          <TableBody isLoading={loading} isEmpty={requestLogs.count === 0}>
+          <TableBody emptyText={t('No data')!} isLoading={loading} isEmpty={requestLogs.count === 0}>
             {requestLogs?.rows.map((item) => (
               <TableRow
                 key={item.id}

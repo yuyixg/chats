@@ -1,4 +1,4 @@
-import { IconCircleX } from '@tabler/icons-react';
+import { IconCircleX } from '@/components/Icons/index';
 import { FC } from 'react';
 
 import { ErrorMessage } from '@/types/error';

@@ -1,4 +1,4 @@
-import prisma from '@/db/prisma';
+import prisma from '@/prisma/prisma';
 import { ModelType, ModelVersions } from '@/types/model';
 
 export class ChatModelManager {

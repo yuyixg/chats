@@ -13,7 +13,7 @@ import {
 } from '@/components/ui/table';
 import { Card } from '@/components/ui/card';
 import { Button } from '@/components/ui/button';
-import { IconPlus } from '@tabler/icons-react';
+import { IconPlus } from '@/components/Icons/index';
 import { FileServiceModal } from '@/components/Admin/Files/FileServiceModal';
 import { DEFAULT_LANGUAGE } from '@/types/settings';
 
@@ -56,7 +56,7 @@ export default function FileService() {
             }}
             color='primary'
           >
-            <IconPlus size={20} />
+            <IconPlus className=' text-red' stroke='white' />
             {t('Add File Service')}
           </Button>
         </div>
@@ -70,7 +70,11 @@ export default function FileService() {
               <TableHead>{t('Created Time')}</TableHead>
             </TableRow>
           </TableHeader>
-          <TableBody isLoading={loading} isEmpty={fileServices.length === 0}>
+          <TableBody
+            emptyText={t('No data')!}
+            isLoading={loading}
+            isEmpty={fileServices.length === 0}
+          >
             {fileServices.map((item) => (
               <TableRow
                 className='cursor-pointer'

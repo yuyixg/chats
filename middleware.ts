@@ -1,6 +1,6 @@
 import { NextApiRequest } from 'next';
 import { getSession } from './utils/session';
-import prisma from './db/prisma';
+import prisma from './prisma/prisma';
 import { NextResponse } from 'next/server';
 export const middleware = async (req: NextApiRequest, res: NextResponse) => {
   if (req.url?.includes('/api/')) {

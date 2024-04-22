@@ -12,7 +12,7 @@ import { useRouter } from 'next/router';
 
 interface IMenu {
   title: string;
-  icon: JSX.Element;
+  icon: (stroke?: string, size?: number) => JSX.Element;
   url: string;
 }
 
@@ -51,7 +51,7 @@ export function Nav({ menus, isCollapsed }: NavProps) {
                       : ''
                   )}
                 >
-                  <span>{menu.icon}</span>
+                  <span>{menu.icon()}</span>
                   <span className='sr-only'>{menu.title}</span>
                 </Link>
               </TooltipTrigger>
@@ -74,7 +74,9 @@ export function Nav({ menus, isCollapsed }: NavProps) {
                 'justify-start'
               )}
             >
-              <span className='mr-2'>{menu.icon}</span>
+              <span className='mr-2'>
+                {menu.icon(active(menu) ? 'white' : '')}
+              </span>
               {menu.title}
             </Link>
           )

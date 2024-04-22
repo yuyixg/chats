@@ -7,7 +7,7 @@ import {
 } from '@/utils/user';
 import toast from 'react-hot-toast';
 import { serverSideTranslations } from 'next-i18next/serverSideTranslations';
-import { useTranslation } from 'react-i18next';
+import { useTranslation } from 'next-i18next';
 import { FormFieldType, IFormFieldOption } from '@/components/ui/form/type';
 import FormInput from '@/components/ui/form/input';
 import { z } from 'zod';

@@ -1,5 +1,5 @@
-import { useContext, useEffect, useState } from 'react';
-import { useTranslation } from 'react-i18next';
+import { useContext, useEffect } from 'react';
+import { useTranslation } from 'next-i18next';
 import { useCreateReducer } from '@/hooks/useCreateReducer';
 import { savePrompts } from '@/utils/prompts';
 import { Prompt } from '@/types/prompt';

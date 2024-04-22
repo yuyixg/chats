@@ -1,4 +1,4 @@
-import { IconShare } from '@tabler/icons-react';
+import { IconShare } from '@/components/Icons/index';
 import {
   MutableRefObject,
   memo,

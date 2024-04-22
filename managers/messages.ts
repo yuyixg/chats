@@ -1,6 +1,6 @@
 import { Message } from '@/types/chat';
 import { UserModelManager } from './userModels';
-import prisma from '@/db/prisma';
+import prisma from '@/prisma/prisma';
 import Decimal from 'decimal.js';
 
 export interface CreateMessage {

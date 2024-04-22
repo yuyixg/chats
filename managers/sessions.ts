@@ -1,4 +1,4 @@
-import prisma from '@/db/prisma';
+import prisma from '@/prisma/prisma';
 
 export class SessionsManager {
   static async generateSession(userId: string) {

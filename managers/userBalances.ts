@@ -1,4 +1,4 @@
-import prisma from '@/db/prisma';
+import prisma from '@/prisma/prisma';
 import { BalanceType } from '@/types/order';
 import Decimal from 'decimal.js';
 

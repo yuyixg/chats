@@ -1,4 +1,4 @@
-import { IconPlus } from '@tabler/icons-react';
+import { IconPlus } from '@/components/Icons/index';
 import { FC } from 'react';
 
 import { Conversation } from '@/types/chat';

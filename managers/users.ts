@@ -1,4 +1,4 @@
-import prisma from '@/db/prisma';
+import prisma from '@/prisma/prisma';
 import bcrypt from 'bcryptjs';
 import { UserBalancesManager, UserModelManager } from '.';
 import Decimal from 'decimal.js';

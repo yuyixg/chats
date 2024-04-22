@@ -13,7 +13,7 @@ import {
 } from '@/components/ui/table';
 import { Card } from '@/components/ui/card';
 import { Button } from '@/components/ui/button';
-import { IconPlus } from '@tabler/icons-react';
+import { IconPlus } from '@/components/Icons/index';
 import { DEFAULT_LANGUAGE } from '@/types/settings';
 import { PayServiceModal } from '@/components/Admin/PayService/PayServiceModal';
 
@@ -56,7 +56,7 @@ export default function PayService() {
             }}
             color='primary'
           >
-            <IconPlus size={20} />
+            <IconPlus stroke='white' />
             {t('Add Pay Service')}
           </Button>
         </div>
@@ -69,7 +69,7 @@ export default function PayService() {
               <TableHead>{t('Created Time')}</TableHead>
             </TableRow>
           </TableHeader>
-          <TableBody isLoading={loading} isEmpty={services.length === 0}>
+          <TableBody emptyText={t('No data')!} isLoading={loading} isEmpty={services.length === 0}>
             {services.map((item) => (
               <TableRow
                 className='cursor-pointer'

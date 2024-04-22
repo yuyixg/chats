@@ -14,7 +14,7 @@ import {
 } from '@/components/ui/table';
 import { Card } from '@/components/ui/card';
 import { Button } from '@/components/ui/button';
-import { IconDots, IconPlus } from '@tabler/icons-react';
+import { IconDots, IconPlus } from '@/components/Icons/index';
 import { AddModelModal } from '@/components/Admin/Models/AddModelModal';
 import { DEFAULT_LANGUAGE } from '@/types/settings';
 import {
@@ -65,7 +65,7 @@ export default function Models() {
             }}
             color='primary'
           >
-            <IconPlus size={20} />
+            <IconPlus stroke='white' />
             {t('Add Model')}
           </Button>
         </div>
@@ -81,7 +81,7 @@ export default function Models() {
               <TableHead className='w-16'></TableHead>
             </TableRow>
           </TableHeader>
-          <TableBody isLoading={loading} isEmpty={models.length === 0}>
+          <TableBody emptyText={t('No data')!} isLoading={loading} isEmpty={models.length === 0}>
             {models.map((item) => (
               <TableRow className='cursor-pointer' key={item.modelId}>
                 <TableCell>{item.rank}</TableCell>

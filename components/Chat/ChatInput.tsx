@@ -6,7 +6,7 @@ import {
   IconRepeat,
   IconSend,
   IconUpload,
-} from '@tabler/icons-react';
+} from '@/components/Icons/index';
 import {
   KeyboardEvent,
   MutableRefObject,

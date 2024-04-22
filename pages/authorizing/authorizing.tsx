@@ -4,7 +4,7 @@ import { NextApiRequest } from 'next';
 import { saveUserSession, setUserSessionId } from '@/utils/user';
 import { serverSideTranslations } from 'next-i18next/serverSideTranslations';
 import { DEFAULT_LANGUAGE } from '@/types/settings';
-import { useTranslation } from 'react-i18next';
+import { useTranslation } from 'next-i18next';
 import { singIn } from '@/apis/userService';
 import toast from 'react-hot-toast';
 import { getSession } from 'next-auth/react';

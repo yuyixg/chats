@@ -15,7 +15,7 @@ import { Navbar } from '@/components/Navbar/Navbar';
 import { Chatbar } from '@/components/Chatbar/Chatbar';
 import { Chat } from '@/components/Chat/Chat';
 import { serverSideTranslations } from 'next-i18next/serverSideTranslations';
-import { useTranslation } from 'react-i18next';
+import { useTranslation } from 'next-i18next';
 import { getSettingsLanguage, getSettings } from '@/utils/settings';
 import { getSession } from '@/utils/session';
 import { Session } from '@/types/session';

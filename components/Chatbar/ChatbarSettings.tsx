@@ -5,7 +5,7 @@ import {
   IconSettings,
   IconUser,
   IconUserCog,
-} from '@tabler/icons-react';
+} from '@/components/Icons/index';
 import { useContext, useState } from 'react';
 import { useTranslation } from 'next-i18next';
 import { SettingDialog } from '@/components/Settings/SettingDialog';

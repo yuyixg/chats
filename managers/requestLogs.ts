@@ -1,4 +1,4 @@
-import prisma from '@/db/prisma';
+import prisma from '@/prisma/prisma';
 import { Prisma } from '@prisma/client';
 export interface CreateRequestLogs {
   ip?: string;

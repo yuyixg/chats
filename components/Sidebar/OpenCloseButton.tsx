@@ -1,4 +1,4 @@
-import { IconMenu, IconX } from '@tabler/icons-react';
+import { IconMenu, IconX } from '@/components/Icons';
 
 interface Props {
   onClick: () => void;
@@ -18,13 +18,12 @@ export const CloseSidebarButton = ({ onClick, side }: Props) => {
           {side === 'right' ? (
             <div className='flex h-6 w-6 flex-col items-center'>
               <IconX
-                size={18}
                 className='text-black dark:text-white'
               />
             </div>
           ) : (
             <div className='flex h-6 w-6 flex-col items-center'>
-              <IconX size={20} className='text-black dark:text-white' />
+              <IconX className='text-black dark:text-white' />
             </div>
           )}
         </div>

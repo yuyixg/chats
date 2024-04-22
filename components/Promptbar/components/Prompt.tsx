@@ -3,7 +3,7 @@ import {
   IconCheck,
   IconTrash,
   IconX,
-} from '@tabler/icons-react';
+} from '@/components/Icons/index';
 import { MouseEventHandler, useContext, useEffect, useState } from 'react';
 
 import { Prompt } from '@/types/prompt';

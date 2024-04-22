@@ -32,11 +32,20 @@ export interface TableBodyProps
   loadingContent?: ReactElement;
   isEmpty?: boolean;
   emptyContent?: ReactElement;
+  emptyText?: ReactElement | string;
 }
 
 const TableBody = React.forwardRef<HTMLTableSectionElement, TableBodyProps>(
   (
-    { className, isLoading, loadingContent, isEmpty, emptyContent, ...props },
+    {
+      className,
+      isLoading,
+      loadingContent,
+      isEmpty,
+      emptyContent,
+      emptyText,
+      ...props
+    },
     ref
   ) =>
     isLoading ? (
@@ -61,7 +70,7 @@ const TableBody = React.forwardRef<HTMLTableSectionElement, TableBodyProps>(
           <td className='text-center align-middle p-4 h-32' colSpan={100}>
             {emptyContent || (
               <div className='flex flex-col space-y-3 text-muted-foreground'>
-                No results.
+                {emptyText || 'No data'}
               </div>
             )}
           </td>

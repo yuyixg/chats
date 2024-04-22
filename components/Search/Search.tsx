@@ -1,4 +1,4 @@
-import { IconX } from '@tabler/icons-react';
+import { IconX } from '@/components/Icons/index';
 import { FC } from 'react';
 
 import { useTranslation } from 'next-i18next';

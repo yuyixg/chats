@@ -1,4 +1,4 @@
-import prisma from '@/db/prisma';
+import prisma from '@/prisma/prisma';
 import { OrderStatus } from '@/types/order';
 
 export interface CreateOrder {

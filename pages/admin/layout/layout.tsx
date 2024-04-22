@@ -11,18 +11,16 @@ import {
   IconCreditCard,
   IconFiles,
   IconKey,
-  IconMessageCircle,
   IconMessages,
   IconNotes,
   IconSettingsCog,
   IconUserCog,
   IconUsers,
-} from '@tabler/icons-react';
+} from '@/components/Icons/index';
 import { useTranslation } from 'next-i18next';
 import { useRouter } from 'next/router';
 import { useEffect, useState } from 'react';
 import Image from 'next/image';
-import { IconCurrencyYen } from '@tabler/icons-react';
 
 const AdminLayout = ({
   children,
@@ -37,53 +35,66 @@ const AdminLayout = ({
   const menus = [
     {
       url: '/admin/dashboard',
-      icon: <IconChartPie stroke={1.6} size={22} />,
+      icon: (stroke?: string) => {
+        return <IconChartPie stroke={stroke} />;
+      },
       title: t('Dashboard'),
     },
     {
       url: '/admin/users',
-      icon: <IconUsers stroke={1.6} size={22} />,
+      icon: (stroke?: string) => {
+        return <IconUsers stroke={stroke} />;
+      },
       title: t('User Management'),
     },
     {
       url: '/admin/user-models',
-      icon: <IconUserCog stroke={1.6} size={22} />,
+      icon: (stroke?: string) => {
+        return <IconUserCog stroke={stroke} />;
+      },
       title: t('User Models'),
     },
     {
       url: '/admin/models',
-      icon: <IconSettingsCog stroke={1.6} size={22} />,
+      icon: (stroke?: string) => {
+        return <IconSettingsCog stroke={stroke} />;
+      },
       title: t('Model Configs'),
     },
     {
       url: '/admin/file-service',
-      icon: <IconFiles stroke={1.6} size={22} />,
+      icon: (stroke?: string) => {
+        return <IconFiles stroke={stroke} />;
+      },
       title: t('File Service'),
     },
     {
       url: '/admin/login-service',
-      icon: <IconKey stroke={1.6} size={22} />,
+      icon: (stroke?: string) => {
+        return <IconKey stroke={stroke} />;
+      },
       title: t('Login Service'),
     },
     {
       url: '/admin/pay-service',
-      icon: <IconCreditCard stroke={1.6} size={22} />,
+      icon: (stroke?: string) => {
+        return <IconCreditCard stroke={stroke} />;
+      },
       title: t('Pay Service'),
     },
     {
       url: '/admin/messages',
-      icon: <IconMessages stroke={1.6} size={22} />,
+      icon: (stroke?: string) => {
+        return <IconMessages stroke={stroke} />;
+      },
       title: t('User Messages'),
     },
     {
       url: '/admin/request-logs',
-      icon: <IconNotes stroke={1.6} size={22} />,
+      icon: (stroke?: string) => {
+        return <IconNotes stroke={stroke} />;
+      },
       title: t('Request Logs'),
-    },
-    {
-      url: '/',
-      icon: <IconMessageCircle stroke={1.6} size={22} />,
-      title: 'Chats',
     },
   ];
 
@@ -120,7 +131,7 @@ const AdminLayout = ({
           >
             <a
               onClick={() => {
-                router.push('/admin/dashboard');
+                router.push('/');
               }}
               className={cn(
                 'flex items-center cursor-pointer',

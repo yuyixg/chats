@@ -55,6 +55,7 @@ const handler = async (req: ChatsApiRequest) => {
     }
     const user = await UsersManager.createUser({
       account,
+      username: account,
       password,
       role,
     });

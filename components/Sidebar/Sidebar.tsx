@@ -1,4 +1,4 @@
-import { IconMistOff, IconPlus } from '@tabler/icons-react';
+import { IconMistOff, IconPlus } from '@/components/Icons/index';
 import { ReactNode } from 'react';
 import { useTranslation } from 'next-i18next';
 import { CloseSidebarButton, OpenSidebarButton } from './OpenCloseButton';
@@ -86,10 +86,10 @@ const Sidebar = <T,>({
               {itemComponent}
             </div>
           ) : (
-            <div className='mt-8 select-none text-center text-white opacity-50'>
+            <div className='mt-8 select-none text-center opacity-50'>
               <IconMistOff className='mx-auto mb-3' />
               <span className='text-[14px] leading-normal'>
-                {t('No data.')}
+                {t('No data')}
               </span>
             </div>
           )}

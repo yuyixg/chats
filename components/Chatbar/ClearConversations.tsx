@@ -1,4 +1,4 @@
-import { IconCheck, IconTrash, IconX } from '@tabler/icons-react';
+import { IconCheck, IconTrash, IconX } from '@/components/Icons/index';
 import { FC, useState } from 'react';
 
 import { useTranslation } from 'next-i18next';

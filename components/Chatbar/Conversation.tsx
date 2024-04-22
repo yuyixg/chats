@@ -5,7 +5,7 @@ import {
   IconPencil,
   IconTrash,
   IconX,
-} from '@tabler/icons-react';
+} from '@/components/Icons/index';
 import {
   DragEvent,
   KeyboardEvent,

@@ -3,7 +3,7 @@ import { FormControl, FormItem, FormLabel, FormMessage } from '../form';
 import { FormFieldType, IFormFieldOption } from './type';
 import { Popover, PopoverContent, PopoverTrigger } from '../popover';
 import { Button } from '../button';
-import { IconSquareRoundedX } from '@tabler/icons-react';
+import { IconSquareRoundedX } from '@/components/Icons/index';
 import { Calendar } from '../calendar';
 
 const FormCalendar = ({
