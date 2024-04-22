@@ -6,7 +6,7 @@ export class ChatModelManager {
     const where = { enabled: true };
     return await prisma.chatModels.findMany({
       where: findAll ? {} : where,
-      orderBy: [{ rank: 'asc' }, { createdAt: 'asc' }],
+      orderBy: [{ enabled: 'desc' }, { rank: 'asc' }, { createdAt: 'asc' }],
     });
   }
 

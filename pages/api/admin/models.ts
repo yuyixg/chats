@@ -37,6 +37,7 @@ const handler = async (req: ChatsApiRequest) => {
           appId: addAsterisk(apiConfig?.appId),
           apiKey: addAsterisk(apiConfig?.apiKey),
           secret: addAsterisk(apiConfig?.secret),
+          deploymentName: apiConfig?.deploymentName,
           version: apiConfig?.version,
           host: apiConfig.host,
           organization: apiConfig?.organization,
