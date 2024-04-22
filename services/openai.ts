@@ -5,7 +5,6 @@ import {
   ReconnectInterval,
   createParser,
 } from 'eventsource-parser';
-import { ModelVersions } from '@/types/model';
 
 export const OpenAIStream = async (
   chatModel: any,
@@ -14,17 +13,16 @@ export const OpenAIStream = async (
   messages: GPT4Message[] | GPT4VisionMessage[]
 ) => {
   const {
-    apiConfig: { host, type, version, apiKey, organization },
+    apiConfig: { host, type, version, apiKey, organization, deploymentName },
     modelVersion,
     modelConfig: { prompt: systemPrompt },
   } = chatModel;
   let url = `${host}/v1/chat/completions`;
   if (type === 'azure') {
     const apiHost = host;
-    url = `${apiHost}/openai/deployments/${modelVersion.replaceAll(
-      '.',
-      ''
-    )}/chat/completions?api-version=${version}`;
+    url = `${apiHost}/openai/deployments/${
+      deploymentName ? deploymentName : modelVersion.replaceAll('.', '')
+    }/chat/completions?api-version=${version}`;
   }
   const body = {
     headers: {
@@ -42,7 +40,7 @@ export const OpenAIStream = async (
     },
     method: 'POST',
     body: JSON.stringify({
-      ...(type === 'openai' && { model: modelVersion }),
+      ...(type === 'openai' && { model: deploymentName || modelVersion }),
       messages: [
         {
           role: 'system',
@@ -50,9 +48,7 @@ export const OpenAIStream = async (
         },
         ...messages,
       ],
-      ...(modelVersion === ModelVersions.GPT_4_Vision
-        ? { max_tokens: 4096 }
-        : {}),
+      max_tokens: 4096,
       temperature: temperature,
       stream: true,
     }),

@@ -33,6 +33,7 @@ const gptDefaultApiConfig = {
   apiKey: '',
   version: '2023-12-01-preview',
   type: 'openai',
+  deploymentName: '',
 };
 
 const qianFanDefaultApiConfig = {
