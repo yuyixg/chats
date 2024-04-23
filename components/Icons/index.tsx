@@ -3,16 +3,25 @@ interface IconProps {
   size?: number;
   strokeWidth?: number;
   stroke?: string;
-  onClick?: () => void;
+  onClick?: (e: React.MouseEvent<SVGSVGElement, MouseEvent>) => void;
+  style?: React.CSSProperties;
 }
 
 const IconX = (props: IconProps) => {
-  const { className, size = 20, strokeWidth = 2, stroke, onClick } = props;
+  const {
+    className,
+    size = 20,
+    strokeWidth = 2,
+    stroke,
+    style,
+    onClick,
+  } = props;
 
   return (
     <svg
       xmlns='http://www.w3.org/2000/svg'
       onClick={onClick}
+      style={style}
       className={className}
       width={size}
       height={size}
