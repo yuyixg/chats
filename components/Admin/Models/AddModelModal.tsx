@@ -1,4 +1,4 @@
-import { getFileServices, postModels } from '@/apis/adminService';
+import { getFileServices, getModelKeys, postModels } from '@/apis/adminService';
 import { useTranslation } from 'next-i18next';
 import React, { useEffect, useState } from 'react';
 import toast from 'react-hot-toast';
@@ -20,11 +20,14 @@ import FormTextarea from '../../ui/form/textarea';
 import { Button } from '../../ui/button';
 import FormSelect from '@/components/ui/form/select';
 import { ModelVersions } from '@/types/model';
-import { GetFileServicesResult, PostModelParams } from '@/types/admin';
+import {
+  GetFileServicesResult,
+  GetModelKeysResult,
+  PostModelParams,
+} from '@/types/admin';
 import {
   ModelPriceUnit,
   conversionModelPriceToDisplay,
-  getModelApiConfigJson,
   getModelFileConfig,
   getModelFileConfigJson,
   getModelModelConfig,
@@ -43,6 +46,7 @@ interface IProps {
 export const AddModelModal = (props: IProps) => {
   const { t } = useTranslation('admin');
   const [fileServices, setFileServices] = useState<GetFileServicesResult[]>([]);
+  const [modelKeys, setModelKeys] = useState<GetModelKeysResult[]>([]);
   const { isOpen, onClose, onSuccessful } = props;
 
   const formFields: IFormFieldOption[] = [
@@ -70,11 +74,18 @@ export const AddModelModal = (props: IProps) => {
       ),
     },
     {
-      name: 'apiConfig',
-      label: t('API Configs'),
+      name: 'modelKeysId',
+      label: t('Model Keys'),
       defaultValue: '',
       render: (options: IFormFieldOption, field: FormFieldType) => (
-        <FormTextarea options={options} field={field} />
+        <FormSelect
+          items={modelKeys.map((keys) => ({
+            name: keys.name,
+            value: keys.id,
+          }))}
+          options={options}
+          field={field}
+        />
       ),
     },
     {
@@ -163,14 +174,11 @@ export const AddModelModal = (props: IProps) => {
       .min(1, `${t('This field is require')}`)
       .optional(),
     enabled: z.boolean().optional(),
-    apiConfig: z
-      .string()
-      .min(1, `${t('This field is require')}`)
-      .optional(),
     modelConfig: z
       .string()
       .min(1, `${t('This field is require')}`)
       .optional(),
+    modelKeysId: z.string().nullable().default(null),
     fileServerId: z.string().nullable().default(null),
     fileConfig: z.string().nullable().default(null),
     priceConfig: z
@@ -209,6 +217,9 @@ export const AddModelModal = (props: IProps) => {
       getFileServices(true).then((data) => {
         setFileServices(data);
       });
+      getModelKeys().then((data) => {
+        setModelKeys(data);
+      });
       form.reset();
       form.formState.isValid;
     }
@@ -218,7 +229,6 @@ export const AddModelModal = (props: IProps) => {
     const subscription = form.watch((value, { name, type }) => {
       if (name === 'modelVersion' && type === 'change') {
         const modelVersion = value.modelVersion as ModelVersions;
-        form.setValue('apiConfig', getModelApiConfigJson(modelVersion));
         form.setValue('modelConfig', getModelModelConfigJson(modelVersion));
         form.setValue('fileConfig', getModelFileConfigJson(modelVersion));
         form.setValue(

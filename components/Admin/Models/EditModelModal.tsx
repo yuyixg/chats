@@ -1,6 +1,7 @@
-import { deleteModels, getFileServices, putModels } from '@/apis/adminService';
+import { deleteModels, getFileServices, getModelKeys, putModels } from '@/apis/adminService';
 import {
   GetFileServicesResult,
+  GetModelKeysResult,
   GetModelResult,
   PutModelParams,
 } from '@/types/admin';
@@ -47,7 +48,7 @@ export const EditModelModal = (props: IProps) => {
   const { t } = useTranslation('admin');
   const { isOpen, onClose, selected, onSuccessful } = props;
   const [fileServices, setFileServices] = useState<GetFileServicesResult[]>([]);
-  const [deleting, setDeleting] = useState(false);
+  const [modelKeys, setModelKeys] = useState<GetModelKeysResult[]>([]);
   const formFields: IFormFieldOption[] = [
     {
       name: 'name',
@@ -57,17 +58,25 @@ export const EditModelModal = (props: IProps) => {
       ),
     },
     {
+      name: 'modelKeysId',
+      label: t('Model Keys'),
+      defaultValue: '',
+      render: (options: IFormFieldOption, field: FormFieldType) => (
+        <FormSelect
+          items={modelKeys.map((keys) => ({
+            name: keys.name,
+            value: keys.id,
+          }))}
+          options={options}
+          field={field}
+        />
+      ),
+    },
+    {
       name: 'modelId',
       label: t('ID'),
       render: (options: IFormFieldOption, field: FormFieldType) => (
         <FormInput hidden options={options} field={field} />
-      ),
-    },
-    {
-      name: 'apiConfig',
-      label: t('API Configs'),
-      render: (options: IFormFieldOption, field: FormFieldType) => (
-        <FormTextarea options={options} field={field} />
       ),
     },
     {
@@ -141,14 +150,11 @@ export const EditModelModal = (props: IProps) => {
       .optional(),
     modelId: z.string().optional(),
     enabled: z.boolean().optional(),
-    apiConfig: z
-      .string()
-      .min(1, `${t('This field is require')}`)
-      .optional(),
     modelConfig: z
       .string()
       .min(1, `${t('This field is require')}`)
       .optional(),
+    modelKeysId: z.string().nullable().default(null),
     fileServerId: z.string().nullable().default(null),
     fileConfig: z.string().nullable().default(null),
     priceConfig: z
@@ -182,29 +188,13 @@ export const EditModelModal = (props: IProps) => {
       });
   }
 
-  function onDelete() {
-    setDeleting(true);
-    deleteModels(form.getValues('modelId')!)
-      .then(() => {
-        onSuccessful();
-        toast.success(t('Delete successful!'));
-      })
-      .catch(() => {
-        toast.error(
-          t(
-            'Operation failed! Please try again later, or contact technical personnel.'
-          )
-        );
-      })
-      .finally(() => {
-        setDeleting(false);
-      });
-  }
-
   useEffect(() => {
     if (isOpen) {
       getFileServices(true).then((data) => {
         setFileServices(data);
+      });
+      getModelKeys().then((data) => {
+        setModelKeys(data);
       });
       form.reset();
       form.formState.isValid;
@@ -214,9 +204,9 @@ export const EditModelModal = (props: IProps) => {
         modelVersion,
         enabled,
         remarks,
+        modelKeysId,
         fileServerId,
         fileConfig,
-        apiConfig,
         modelConfig,
         priceConfig,
       } = selected!;
@@ -225,15 +215,12 @@ export const EditModelModal = (props: IProps) => {
       form.setValue('enabled', enabled);
       form.setValue('remarks', remarks);
       form.setValue('fileServerId', fileServerId || null);
+      form.setValue('modelKeysId', modelKeysId || null);
       fileConfig &&
         form.setValue(
           'fileConfig',
           mergeConfigs(getModelFileConfig(modelVersion), JSON.parse(fileConfig))
         );
-      form.setValue(
-        'apiConfig',
-        mergeConfigs(getModelApiConfig(modelVersion), JSON.parse(apiConfig))
-      );
       form.setValue(
         'modelConfig',
         mergeConfigs(getModelModelConfig(modelVersion), JSON.parse(modelConfig))
@@ -269,13 +256,6 @@ export const EditModelModal = (props: IProps) => {
               ))}
             </div>
             <DialogFooter className='pt-4'>
-              {/* <Button
-                disabled={deleting}
-                variant='destructive'
-                onClick={onDelete}
-              >
-                {t('Delete')}
-              </Button> */}
               <Button type='submit'>{t('Save')}</Button>
             </DialogFooter>
           </form>

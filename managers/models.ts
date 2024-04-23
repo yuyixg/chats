@@ -1,5 +1,6 @@
 import prisma from '@/prisma/prisma';
 import { ModelType, ModelVersions } from '@/types/model';
+import { Prisma } from '@prisma/client';
 
 export class ChatModelManager {
   static async findModels(findAll: boolean = false) {
@@ -15,40 +16,25 @@ export class ChatModelManager {
     return {
       ...model,
       fileConfig: JSON.parse(model?.fileConfig || '{}'),
-      apiConfig: JSON.parse(model?.apiConfig || '{}'),
       modelConfig: JSON.parse(model?.modelConfig || '{}'),
       priceConfig: JSON.parse(model?.priceConfig || '{}'),
     };
+  }
+
+  static async findModelByModelKeyId(modelKeysId: string) {
+    return await prisma.chatModels.findFirst({
+      where: { modelKeysId },
+    });
   }
 
   static async deleteModelById(id: string) {
     return await prisma.chatModels.delete({ where: { id } });
   }
 
-  static async createModel(
-    type: ModelType,
-    modelVersion: ModelVersions,
-    name: string,
-    enabled: boolean,
-    fileServerId: string,
-    fileConfig: string,
-    apiConfig: string,
-    modelConfig: string,
-    priceConfig: string,
-    remarks: string
-  ) {
+  static async createModel(params: Prisma.ChatModelsCreateInput) {
     return await prisma.chatModels.create({
       data: {
-        type,
-        modelVersion,
-        name,
-        enabled,
-        fileServerId,
-        fileConfig,
-        priceConfig,
-        modelConfig,
-        apiConfig,
-        remarks,
+        ...params,
       },
     });
   }
@@ -59,7 +45,6 @@ export class ChatModelManager {
     enabled: boolean,
     fileServerId: string,
     fileConfig: string,
-    apiConfig: string,
     modelConfig: string,
     priceConfig: string,
     remarks: string
@@ -73,7 +58,6 @@ export class ChatModelManager {
         fileConfig,
         priceConfig,
         modelConfig,
-        apiConfig,
         remarks,
       },
     });

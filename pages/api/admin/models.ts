@@ -21,7 +21,6 @@ const handler = async (req: ChatsApiRequest) => {
     const { all } = req.query;
     const models = await ChatModelManager.findModels(!!all);
     const data = models.map((x: ChatModels) => {
-      const apiConfig = JSON.parse(x.apiConfig);
       return {
         rank: x.rank,
         modelId: x.id,
@@ -33,16 +32,6 @@ const handler = async (req: ChatsApiRequest) => {
         fileServerId: x.fileServerId,
         fileConfig: x.fileConfig,
         modelConfig: x.modelConfig,
-        apiConfig: JSON.stringify({
-          appId: addAsterisk(apiConfig?.appId),
-          apiKey: addAsterisk(apiConfig?.apiKey),
-          secret: addAsterisk(apiConfig?.secret),
-          deploymentName: apiConfig?.deploymentName,
-          version: apiConfig?.version,
-          host: apiConfig.host,
-          organization: apiConfig?.organization,
-          type: apiConfig?.type,
-        }),
         priceConfig: x.priceConfig,
       };
     });
@@ -55,7 +44,6 @@ const handler = async (req: ChatsApiRequest) => {
       fileServerId,
       fileConfig,
       modelConfig,
-      apiConfig: apiConfigJson,
       priceConfig,
       remarks,
     } = req.body;
@@ -64,18 +52,12 @@ const handler = async (req: ChatsApiRequest) => {
       throw new BadRequest('Model is not Found');
     }
 
-    let apiConfig = JSON.parse(apiConfigJson);
-    apiConfig.appId = checkKey(model?.apiConfig.apiKey, apiConfig.appId);
-    apiConfig.apiKey = checkKey(model?.apiConfig.apiKey, apiConfig.apiKey);
-    apiConfig.secret = checkKey(model?.apiConfig.secret, apiConfig.secret);
-
     const data = await ChatModelManager.updateModel(
       modelId,
       name,
       enabled,
       fileServerId,
       fileConfig,
-      JSON.stringify(apiConfig),
       modelConfig,
       conversionModelPriceToSave(priceConfig),
       remarks
@@ -89,7 +71,6 @@ const handler = async (req: ChatsApiRequest) => {
       fileServerId,
       priceConfig,
       modelConfig,
-      apiConfig,
       fileConfig,
       remarks,
     } = req.body;
@@ -107,7 +88,6 @@ const handler = async (req: ChatsApiRequest) => {
       enabled,
       fileServerId,
       fileConfig,
-      apiConfig,
       modelConfig,
       conversionModelPriceToSave(priceConfig),
       remarks

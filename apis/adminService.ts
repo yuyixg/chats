@@ -23,6 +23,9 @@ import {
   GetPayServicesResult,
   PostPayServicesParams,
   PutPayServicesParams,
+  GetModelKeysResult,
+  PutModelKeysParams,
+  PostModelKeysParams,
 } from '@/types/admin';
 import { PostFileServicesParams, PutFileServicesParams } from '@/types/file';
 import { PageResult } from '@/types/page';
@@ -195,4 +198,28 @@ export const putPayService = (params: PutPayServicesParams) => {
   return fetchService.put('/api/admin/pay-service', {
     body: params,
   });
+};
+
+export const getModelKeys = (): Promise<GetModelKeysResult[]> => {
+  const fetchService = useFetch();
+  return fetchService.get('/api/admin/model-keys');
+};
+
+export const postModelKeys = (params: PostModelKeysParams) => {
+  const fetchService = useFetch();
+  return fetchService.post('/api/admin/model-keys', {
+    body: params,
+  });
+};
+
+export const putModelKeys = (params: PutModelKeysParams) => {
+  const fetchService = useFetch();
+  return fetchService.put('/api/admin/model-keys', {
+    body: params,
+  });
+};
+
+export const deleteModelKeys = (id: string) => {
+  const fetchService = useFetch();
+  return fetchService.delete('/api/admin/model-keys?id=' + id);
 };

@@ -1,4 +1,9 @@
-import { ChatModelConfig, ChatModelPrice, ModelConfigType, ModelVersions } from '@/types/model';
+import {
+  ChatModelConfig,
+  ChatModelPrice,
+  ModelConfigType,
+  ModelVersions,
+} from '@/types/model';
 import { ModelDefaultTemplates } from '@/types/template';
 
 export function verifyModel(model: any, config: ChatModelConfig) {
@@ -78,7 +83,7 @@ export function getModelPriceConfigJson(
 
 export function mergeConfigs(obj1: any, obj2: any) {
   const config = Object.keys(obj1 || {}).reduce((result: any, key) => {
-    result[key] = obj2[key] === '' ? null : obj2[key];
+    result[key] = obj2[key] === null ? '' : obj2[key];
     return result;
   }, {});
   return JSON.stringify(config, null, 2);

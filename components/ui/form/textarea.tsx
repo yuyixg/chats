@@ -6,19 +6,18 @@ const FormTextarea = ({
   options,
   field,
   hidden,
+  rows,
 }: {
   options: IFormFieldOption;
   field: FormFieldType;
   hidden?: boolean;
+  rows?: number;
 }) => {
   return (
     <FormItem className='py-2' hidden={hidden}>
       <FormLabel>{options.label}</FormLabel>
       <FormControl>
-        <Textarea
-          placeholder={options.placeholder}
-          {...field}
-        />
+        <Textarea rows={rows} placeholder={options.placeholder} {...field} />
       </FormControl>
       <FormMessage />
     </FormItem>
