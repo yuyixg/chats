@@ -2,7 +2,6 @@ import { ChatModelManager } from '@/managers';
 import { ModelDefaultTemplates } from '@/types/template';
 import { ModelVersions } from '@/types/model';
 import { BadRequest } from '@/utils/error';
-import { addAsterisk, checkKey } from '@/utils/common';
 import { ChatModels } from '@prisma/client';
 import { apiHandler } from '@/middleware/api-handler';
 import { ChatsApiRequest } from '@/types/next-api';
@@ -41,6 +40,7 @@ const handler = async (req: ChatsApiRequest) => {
       modelId,
       name,
       enabled,
+      modelKeysId,
       fileServerId,
       fileConfig,
       modelConfig,
@@ -52,22 +52,24 @@ const handler = async (req: ChatsApiRequest) => {
       throw new BadRequest('Model is not Found');
     }
 
-    const data = await ChatModelManager.updateModel(
-      modelId,
+    const data = await ChatModelManager.updateModel({
+      id: modelId,
       name,
       enabled,
+      modelKeysId,
       fileServerId,
       fileConfig,
       modelConfig,
-      conversionModelPriceToSave(priceConfig),
-      remarks
-    );
+      priceConfig: conversionModelPriceToSave(priceConfig),
+      remarks,
+    });
     return data;
   } else if (req.method === 'POST') {
     const {
       modelVersion,
       name,
       enabled,
+      modelKeysId,
       fileServerId,
       priceConfig,
       modelConfig,
@@ -80,18 +82,18 @@ const handler = async (req: ChatsApiRequest) => {
     if (!template) {
       throw new BadRequest('Model is not Found');
     }
-
-    const data = await ChatModelManager.createModel(
-      template.type,
+    const data = await ChatModelManager.createModel({
+      type: template.type,
       modelVersion,
       name,
       enabled,
+      modelKeysId,
       fileServerId,
       fileConfig,
       modelConfig,
-      conversionModelPriceToSave(priceConfig),
-      remarks
-    );
+      priceConfig: conversionModelPriceToSave(priceConfig),
+      remarks,
+    });
     return data;
   } else if (req.method === 'DELETE') {
     const { id } = req.query as { id: string };

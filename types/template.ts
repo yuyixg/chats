@@ -7,27 +7,6 @@ type ChatGPTApiConfig = {
   type: 'openai' | 'azure';
 };
 
-type QianWenPlusApiConfig = {
-  apiKey: string;
-  host: string;
-};
-
-type QianFanApiConfig = {
-  apiKey: string;
-  host: string;
-  secret: string;
-};
-
-type LingYiApiConfig = {
-  apiKey: string;
-  host: string;
-};
-
-type KimiApiConfig = {
-  apiKey: string;
-  host: string;
-};
-
 const gptDefaultApiConfig = {
   host: '',
   apiKey: '',
@@ -55,10 +34,12 @@ const kimiDefaultApiConfig = {
 export const ModelDefaultTemplates = {
   [ModelVersions.GPT_3_5]: {
     type: ModelType.GPT,
-    apiConfig: gptDefaultApiConfig as ChatGPTApiConfig,
     modelConfig: {
       prompt:
         "You are ChatGPT, a large language model trained by OpenAI. Follow the user's instructions carefully. Respond using markdown.",
+      version: '',
+      organization: '',
+      deploymentName: '',
     },
     fileConfig: null,
     priceConfig: {
@@ -68,10 +49,12 @@ export const ModelDefaultTemplates = {
   },
   [ModelVersions.GPT_4]: {
     type: ModelType.GPT,
-    apiConfig: gptDefaultApiConfig as ChatGPTApiConfig,
     modelConfig: {
       prompt:
         "You are ChatGPT, a large language model trained by OpenAI. Follow the user's instructions carefully. Respond using markdown.",
+      version: '',
+      organization: '',
+      deploymentName: '',
     },
     priceConfig: {
       input: 0.00021691,
@@ -80,10 +63,12 @@ export const ModelDefaultTemplates = {
   },
   [ModelVersions.GPT_4_Vision]: {
     type: ModelType.GPT,
-    apiConfig: gptDefaultApiConfig as ChatGPTApiConfig,
     modelConfig: {
       prompt:
         "You are ChatGPT, a large language model trained by OpenAI. Follow the user's instructions carefully. Respond using markdown.",
+      version: '',
+      organization: '',
+      deploymentName: '',
     },
     fileConfig: { count: 5, maxSize: 10240 },
     priceConfig: {
@@ -93,10 +78,6 @@ export const ModelDefaultTemplates = {
   },
   [ModelVersions.QWen_Vl_Plus]: {
     type: ModelType.QianWen,
-    apiConfig: {
-      host: 'https://dashscope.aliyuncs.com/api/v1',
-      apiKey: '',
-    } as QianWenPlusApiConfig,
     modelConfig: {
       prompt:
         "You are an AI assistant with image understanding capabilities, Follow the user's instructions carefully. Respond using markdown.",
@@ -109,7 +90,6 @@ export const ModelDefaultTemplates = {
   },
   [ModelVersions.ERNIE_Bot_4]: {
     type: ModelType.QianFan,
-    apiConfig: qianFanDefaultApiConfig as QianFanApiConfig,
     modelConfig: {
       prompt:
         "You are an AI assistant, Follow the user's instructions carefully. Respond using markdown.",
@@ -121,7 +101,6 @@ export const ModelDefaultTemplates = {
   },
   [ModelVersions.ERNIE_Bot_8K]: {
     type: ModelType.QianFan,
-    apiConfig: qianFanDefaultApiConfig as QianFanApiConfig,
     modelConfig: {
       prompt:
         "You are an AI assistant, Follow the user's instructions carefully. Respond using markdown.",
@@ -133,7 +112,6 @@ export const ModelDefaultTemplates = {
   },
   [ModelVersions.yi_34b_chat_0205]: {
     type: ModelType.LingYi,
-    apiConfig: lingYiDefaultApiConfig as LingYiApiConfig,
     modelConfig: {
       prompt:
         "You are an AI assistant, Follow the user's instructions carefully. Respond using markdown.",
@@ -145,7 +123,6 @@ export const ModelDefaultTemplates = {
   },
   [ModelVersions.yi_34b_chat_200k]: {
     type: ModelType.LingYi,
-    apiConfig: lingYiDefaultApiConfig as LingYiApiConfig,
     modelConfig: {
       prompt:
         "You are an AI assistant, Follow the user's instructions carefully. Respond using markdown.",
@@ -157,7 +134,6 @@ export const ModelDefaultTemplates = {
   },
   [ModelVersions.yi_vl_plus]: {
     type: ModelType.LingYi,
-    apiConfig: lingYiDefaultApiConfig as LingYiApiConfig,
     modelConfig: {
       prompt:
         "You are an AI assistant with image understanding capabilities, Follow the user's instructions carefully. Respond using markdown.",
@@ -170,7 +146,6 @@ export const ModelDefaultTemplates = {
   },
   [ModelVersions.moonshot_v1_8k]: {
     type: ModelType.Kimi,
-    apiConfig: kimiDefaultApiConfig as KimiApiConfig,
     modelConfig: {
       prompt:
         "You are an AI assistant, Follow the user's instructions carefully. Respond using markdown.",
@@ -182,7 +157,6 @@ export const ModelDefaultTemplates = {
   },
   [ModelVersions.moonshot_v1_32k]: {
     type: ModelType.Kimi,
-    apiConfig: kimiDefaultApiConfig as KimiApiConfig,
     modelConfig: {
       prompt:
         "You are an AI assistant, Follow the user's instructions carefully. Respond using markdown.",
@@ -194,7 +168,6 @@ export const ModelDefaultTemplates = {
   },
   [ModelVersions.moonshot_v1_128k]: {
     type: ModelType.Kimi,
-    apiConfig: kimiDefaultApiConfig as KimiApiConfig,
     modelConfig: {
       prompt:
         "You are an AI assistant, Follow the user's instructions carefully. Respond using markdown.",

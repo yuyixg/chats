@@ -73,8 +73,6 @@ const handler = async (req: ChatsApiRequest, res: ChatsApiResponse) => {
 
   const stream = await KimiStream(
     chatModel,
-    promptToSend,
-    temperatureToUse,
     messagesToSend
   );
   let assistantMessage = '';

@@ -1,4 +1,5 @@
 import { QianWenMessage } from '@/types/chat';
+import { ChatModels } from '@/types/chatModel';
 
 import {
   ParsedEvent,
@@ -17,7 +18,7 @@ export interface QianWenStreamResult {
 }
 
 export const QianWenStream = async (
-  chatModel: any,
+  chatModel: ChatModels,
   prompt: string,
   temperature: number,
   messages: QianWenMessage[]

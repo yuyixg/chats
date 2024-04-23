@@ -6,6 +6,7 @@ import {
   createParser,
 } from 'eventsource-parser';
 import { ModelVersions } from '@/types/model';
+import { ChatModels } from '@/types/chatModel';
 
 export const ModelEndpoint: { [key in ModelVersions]?: string } = {
   [ModelVersions.ERNIE_Bot_4]: 'completions_pro',
@@ -42,7 +43,7 @@ async function getAccessTokenAsync(
 }
 
 export const QianFanStream = async (
-  chatModel: any,
+  chatModel: ChatModels,
   messages: QianFanMessage[],
   parameters: any
 ) => {

@@ -66,11 +66,41 @@ export const AddModelModal = (props: IProps) => {
       ),
     },
     {
+      name: 'modelConfig',
+      label: t('Model Configs'),
+      defaultValue: '',
+      render: (options: IFormFieldOption, field: FormFieldType) => (
+        <FormTextarea
+          hidden={
+            !getModelModelConfig(
+              form.getValues('modelVersion') as ModelVersions
+            )
+          }
+          options={options}
+          field={field}
+        />
+      ),
+    },
+    {
       name: 'name',
       label: t('Model Display Name'),
       defaultValue: '',
       render: (options: IFormFieldOption, field: FormFieldType) => (
         <FormInput options={options} field={field} />
+      ),
+    },
+    {
+      name: 'fileConfig',
+      label: t('File Configs'),
+      defaultValue: null,
+      render: (options: IFormFieldOption, field: FormFieldType) => (
+        <FormTextarea
+          hidden={
+            !getModelFileConfig(form.getValues('modelVersion') as ModelVersions)
+          }
+          options={options}
+          field={field}
+        />
       ),
     },
     {
@@ -89,19 +119,13 @@ export const AddModelModal = (props: IProps) => {
       ),
     },
     {
-      name: 'modelConfig',
-      label: t('Model Configs'),
+      name: 'priceConfig',
+      label: `${formatNumberAsMoney(ModelPriceUnit)} ${t('Token Price')}(${t(
+        'Yuan'
+      )})`,
       defaultValue: '',
       render: (options: IFormFieldOption, field: FormFieldType) => (
-        <FormTextarea
-          hidden={
-            !getModelModelConfig(
-              form.getValues('modelVersion') as ModelVersions
-            )
-          }
-          options={options}
-          field={field}
-        />
+        <FormTextarea options={options} field={field} />
       ),
     },
     {
@@ -123,35 +147,11 @@ export const AddModelModal = (props: IProps) => {
       ),
     },
     {
-      name: 'fileConfig',
-      label: t('File Configs'),
-      defaultValue: null,
-      render: (options: IFormFieldOption, field: FormFieldType) => (
-        <FormTextarea
-          hidden={
-            !getModelFileConfig(form.getValues('modelVersion') as ModelVersions)
-          }
-          options={options}
-          field={field}
-        />
-      ),
-    },
-    {
-      name: 'priceConfig',
-      label: `${formatNumberAsMoney(ModelPriceUnit)} ${t('Token Price')}(${t(
-        'Yuan'
-      )})`,
-      defaultValue: '',
-      render: (options: IFormFieldOption, field: FormFieldType) => (
-        <FormTextarea options={options} field={field} />
-      ),
-    },
-    {
       name: 'remarks',
       label: t('Remarks'),
       defaultValue: '',
       render: (options: IFormFieldOption, field: FormFieldType) => (
-        <FormTextarea options={options} field={field} />
+        <FormInput options={options} field={field} />
       ),
     },
     {
@@ -248,16 +248,14 @@ export const AddModelModal = (props: IProps) => {
         </DialogHeader>
         <Form {...form}>
           <form onSubmit={form.handleSubmit(onSubmit)}>
-            <div className='grid grid-cols-2 gap-4'>
-              {formFields.map((item) => (
-                <FormField
-                  key={item.name}
-                  control={form.control}
-                  name={item.name as never}
-                  render={({ field }) => item.render(item, field)}
-                />
-              ))}
-            </div>
+            {formFields.map((item) => (
+              <FormField
+                key={item.name}
+                control={form.control}
+                name={item.name as never}
+                render={({ field }) => item.render(item, field)}
+              />
+            ))}
             <DialogFooter className='pt-4'>
               <Button type='submit'>{t('Save')}</Button>
             </DialogFooter>

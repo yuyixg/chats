@@ -5,7 +5,7 @@ export const ModelKeysDefaultTemplate = {
   type: '',
 };
 
-export interface ModelKeysTemplateAllProperty {
+export interface ModelKeysTemplate {
   host: string;
   apiKey: string;
   secret: string;
