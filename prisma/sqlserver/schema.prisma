@@ -13,11 +13,11 @@ datasource db {
 model Users {
   id           String        @id @default(uuid())
   avatar       String?
-  account      String?       @unique
+  account      String?
   username     String?
   password     String
-  email        String?       @unique
-  phone        String?       @unique
+  email        String?
+  phone        String?
   role         String        @default("-")
   enabled      Boolean       @default(true)
   provider     String?
@@ -34,7 +34,7 @@ model Users {
 
 model FileServices {
   id        String   @id @default(uuid())
-  name      String   @unique
+  name      String
   enabled   Boolean  @default(true)
   type      String
   configs   String   @default("{}") @db.VarChar(2048)
