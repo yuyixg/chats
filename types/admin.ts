@@ -196,7 +196,7 @@ export interface PutPayServicesParams extends PostPayServicesParams {
 export interface GetModelKeysResult {
   id: string;
   name: string;
-  type: string;
+  type: ModelType;
   configs: string;
   createdAt: string;
 }

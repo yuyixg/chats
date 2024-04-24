@@ -37,7 +37,7 @@ export enum ModelType {
   QianFan = 'QianFan',
   Spark = 'Spark',
   LingYi = 'LingYi',
-  Kimi = 'Kimi',
+  Moonshot = 'moonshot',
 }
 
 export interface ChatModelFileConfig {

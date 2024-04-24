@@ -196,6 +196,7 @@ CREATE TABLE "RequestLogs" (
 CREATE TABLE "ModelKeys" (
     "id" TEXT NOT NULL,
     "name" VARCHAR(100) NOT NULL,
+    "type" VARCHAR(50) NOT NULL,
     "configs" VARCHAR(2028) NOT NULL,
     "createdAt" TIMESTAMP(3) NOT NULL DEFAULT CURRENT_TIMESTAMP,
     "updatedAt" TIMESTAMP(3) NOT NULL,

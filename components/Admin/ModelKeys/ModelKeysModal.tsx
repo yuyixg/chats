@@ -30,6 +30,7 @@ import FormInput from '../../ui/form/input';
 import { ModelKeysDefaultTemplate } from '@/types/modelKeys';
 import FormSelect from '@/components/ui/form/select';
 import { ModelType } from '@/types/model';
+import { ModelApiTemplates } from '@/types/template';
 
 interface IProps {
   selected: GetModelKeysResult | null;
@@ -57,11 +58,12 @@ export const ModelKeysModal = (props: IProps) => {
       defaultValue: '',
       render: (options: IFormFieldOption, field: FormFieldType) => (
         <FormSelect
+          disabled={!!selected}
           field={field}
           options={options}
-          items={Object.keys(ModelType).map((key) => ({
-            name: ModelType[key as keyof typeof ModelType],
-            value: ModelType[key as keyof typeof ModelType],
+          items={Object.keys(ModelApiTemplates).map((key) => ({
+            name: ModelApiTemplates[key as ModelType].displayName,
+            value: key,
           }))}
         />
       ),
@@ -69,7 +71,7 @@ export const ModelKeysModal = (props: IProps) => {
     {
       name: 'configs',
       label: t('Configs'),
-      defaultValue: JSON.stringify(ModelKeysDefaultTemplate, null, 2),
+      defaultValue: '',
       render: (options: IFormFieldOption, field: FormFieldType) => (
         <FormTextarea rows={6} options={options} field={field} />
       ),
@@ -130,14 +132,29 @@ export const ModelKeysModal = (props: IProps) => {
   }
 
   useEffect(() => {
+    const subscription = form.watch((value, { name, type }) => {
+      if (name === 'type' && type === 'change') {
+        const modelType = value.type as ModelType;
+        form.setValue(
+          'configs',
+          JSON.stringify(ModelApiTemplates[modelType].apiConfig, null, 2)
+        );
+      }
+    });
+    return () => subscription.unsubscribe();
+  }, [form.watch]);
+
+  useEffect(() => {
     if (isOpen) {
       form.reset();
       form.formState.isValid;
       if (selected) {
-        form.setValue('name', selected.name);
+        const { name, type, configs } = selected;
+        form.setValue('name', name);
+        form.setValue('type', type);
         form.setValue(
           'configs',
-          mergeConfigs(ModelKeysDefaultTemplate, selected.configs)
+          mergeConfigs(ModelApiTemplates[type as ModelType].apiConfig, configs)
         );
       }
     }
