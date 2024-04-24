@@ -13,11 +13,11 @@ datasource db {
 model Users {
   id           String        @id @default(uuid())
   avatar       String?
-  account      String?       @unique
+  account      String?
   username     String?
   password     String
-  email        String?       @unique
-  phone        String?       @unique
+  email        String?
+  phone        String?
   role         String        @default("-")
   enabled      Boolean       @default(true)
   provider     String?
@@ -34,10 +34,10 @@ model Users {
 
 model FileServices {
   id        String   @id @default(uuid())
-  name      String   @unique
+  name      String
   enabled   Boolean  @default(true)
   type      String
-  configs   String   @default("{}") @db.VarChar(2048)
+  configs   String   @default("{}") @db.NVarChar(2048)
   createdAt DateTime @default(now())
   updatedAt DateTime @updatedAt
 }
@@ -49,15 +49,16 @@ model ChatModels {
   type         String
   rank         Int?
   remarks      String?
+  modelKeysId  String?
   fileServerId String?
-  fileConfig   String?    @default("{}") @db.VarChar(2048)
-  apiConfig    String     @default("{}") @db.VarChar(2048)
-  modelConfig  String     @default("{}") @db.VarChar(2048)
-  priceConfig  String     @default("{}") @db.VarChar(2048)
+  fileConfig   String?    @default("{}") @db.NVarChar(2048)
+  modelConfig  String     @default("{}") @db.NVarChar(2048)
+  priceConfig  String     @default("{}") @db.NVarChar(2048)
   enabled      Boolean    @default(true)
   createdAt    DateTime   @default(now())
   updatedAt    DateTime   @updatedAt
   messages     Messages[]
+  ModelKeys    ModelKeys? @relation(fields: [modelKeysId], references: [id])
 }
 
 model Sessions {
@@ -138,7 +139,7 @@ model LoginServices {
   id        String   @id @default(uuid())
   type      String
   enabled   Boolean  @default(true)
-  configs   String   @default("{}") @db.VarChar(2048)
+  configs   String   @default("{}") @db.NVarChar(2048)
   createdAt DateTime @default(now())
   updatedAt DateTime @updatedAt
 }
@@ -174,4 +175,13 @@ model RequestLogs {
   response     String?  @db.Text()
   createdAt    DateTime @default(now())
   user         Users?   @relation(fields: [userId], references: [id])
+}
+
+model ModelKeys {
+  id         String       @id @default(uuid())
+  name       String       @db.NVarChar(100)
+  configs    String       @db.NVarChar(2048)
+  createdAt  DateTime     @default(now())
+  updatedAt  DateTime     @updatedAt
+  ChatModels ChatModels[]
 }

@@ -50,6 +50,9 @@ export interface ChatModelConfig {
   prompt: string;
   maxLength?: number;
   tokenLimit?: number;
+  version?: string;
+  organization?: string;
+  deploymentName?: string;
 }
 
 export interface ChatModelPrice {
@@ -57,4 +60,8 @@ export interface ChatModelPrice {
   out: number;
 }
 
-export type ModelConfigType = 'fileConfig' | 'apiConfig' | 'modelConfig' | 'priceConfig';
+export type ModelConfigType =
+  | 'fileConfig'
+  | 'apiConfig'
+  | 'modelConfig'
+  | 'priceConfig';

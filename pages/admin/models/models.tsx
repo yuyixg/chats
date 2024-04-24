@@ -78,12 +78,21 @@ export default function Models() {
               <TableHead>{t('Model Display Name')}</TableHead>
               <TableHead>{t('Model Version')}</TableHead>
               <TableHead>{t('Model Type')}</TableHead>
+              <TableHead>{t('Remarks')}</TableHead>
               <TableHead className='w-16'></TableHead>
             </TableRow>
           </TableHeader>
-          <TableBody emptyText={t('No data')!} isLoading={loading} isEmpty={models.length === 0}>
+          <TableBody
+            emptyText={t('No data')!}
+            isLoading={loading}
+            isEmpty={models.length === 0}
+          >
             {models.map((item) => (
-              <TableRow className='cursor-pointer' key={item.modelId}>
+              <TableRow
+                className='cursor-pointer'
+                key={item.modelId}
+                onClick={() => handleShow(item)}
+              >
                 <TableCell>{item.rank}</TableCell>
                 <TableCell>
                   <div className='flex items-center gap-1 '>
@@ -97,6 +106,7 @@ export default function Models() {
                 </TableCell>
                 <TableCell>{item.modelVersion}</TableCell>
                 <TableCell>{item.type}</TableCell>
+                <TableCell>{item.remarks}</TableCell>
                 <TableCell>
                   <DropdownMenu>
                     <DropdownMenuTrigger>

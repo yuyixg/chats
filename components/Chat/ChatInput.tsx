@@ -328,7 +328,7 @@ export const ChatInput = ({
                   onFailed={() => setUploading(false)}
                   onSuccessful={(url: string) => {
                     setContent((pre) => {
-                      const image = pre?.image!.concat(url);
+                      const image = pre.image!.concat(url);
                       return {
                         text: pre.text,
                         image,

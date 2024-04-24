@@ -1,4 +1,8 @@
-import { postFileService, putFileService } from '@/apis/adminService';
+import {
+  deleteModelKeys,
+  postModelKeys,
+  putModelKeys,
+} from '@/apis/adminService';
 import { useTranslation } from 'next-i18next';
 import React, { useEffect } from 'react';
 import toast from 'react-hot-toast';
@@ -14,67 +18,41 @@ import { Form, FormField } from '../../ui/form';
 import { zodResolver } from '@hookform/resolvers/zod';
 import { z } from 'zod';
 import { FormFieldType, IFormFieldOption } from '../../ui/form/type';
-import FormInput from '../../ui/form/input';
-import FormSwitch from '../../ui/form/switch';
 import FormTextarea from '../../ui/form/textarea';
 import { Button } from '../../ui/button';
-import FormSelect from '@/components/ui/form/select';
 import {
-  FileServicesType,
-  PostFileServicesParams,
-  PutFileServicesParams,
-} from '@/types/file';
-import { getFileConfigs } from '@/utils/file';
-import { GetFileServicesResult } from '@/types/admin';
+  GetModelKeysResult,
+  PostModelKeysParams,
+  PutModelKeysParams,
+} from '@/types/admin';
 import { mergeConfigs } from '@/utils/model';
+import FormInput from '../../ui/form/input';
+import { ModelKeysDefaultTemplate } from '@/types/modelKeys';
 
 interface IProps {
-  selected: GetFileServicesResult | null;
+  selected: GetModelKeysResult | null;
   isOpen: boolean;
   onClose: () => void;
   onSuccessful: () => void;
   saveLoading?: boolean;
 }
 
-export const FileServiceModal = (props: IProps) => {
+export const ModelKeysModal = (props: IProps) => {
   const { t } = useTranslation('admin');
   const { selected, isOpen, onClose, onSuccessful } = props;
   const formFields: IFormFieldOption[] = [
     {
-      name: 'type',
-      label: t('File Service Type'),
-      defaultValue: '',
-      render: (options: IFormFieldOption, field: FormFieldType) => (
-        <FormSelect
-          items={Object.keys(FileServicesType).map((key) => ({
-            name: FileServicesType[key as keyof typeof FileServicesType],
-            value: FileServicesType[key as keyof typeof FileServicesType],
-          }))}
-          options={options}
-          field={field}
-        />
-      ),
-    },
-    {
       name: 'name',
-      label: t('Service Name'),
+      label: t('Key Name'),
       defaultValue: '',
       render: (options: IFormFieldOption, field: FormFieldType) => (
         <FormInput options={options} field={field} />
       ),
     },
     {
-      name: 'enabled',
-      label: t('Is it enabled'),
-      defaultValue: true,
-      render: (options: IFormFieldOption, field: FormFieldType) => (
-        <FormSwitch options={options} field={field} />
-      ),
-    },
-    {
       name: 'configs',
-      label: t('Service Configs'),
-      defaultValue: '',
+      label: t('Configs'),
+      defaultValue: JSON.stringify(ModelKeysDefaultTemplate, null, 2),
       render: (options: IFormFieldOption, field: FormFieldType) => (
         <FormTextarea rows={6} options={options} field={field} />
       ),
@@ -82,15 +60,10 @@ export const FileServiceModal = (props: IProps) => {
   ];
 
   const formSchema = z.object({
-    type: z
-      .string()
-      .min(1, `${t('This field is require')}`)
-      .optional(),
     name: z
       .string()
       .min(1, `${t('This field is require')}`)
       .optional(),
-    enabled: z.boolean().optional(),
     configs: z
       .string()
       .min(1, `${t('This field is require')}`)
@@ -109,12 +82,12 @@ export const FileServiceModal = (props: IProps) => {
     if (!form.formState.isValid) return;
     let p = null;
     if (selected) {
-      p = putFileService({
+      p = putModelKeys({
         ...values,
         id: selected.id,
-      } as PutFileServicesParams);
+      } as PutModelKeysParams);
     } else {
-      p = postFileService(values as PostFileServicesParams);
+      p = postModelKeys(values as PostModelKeysParams);
     }
     p.then(() => {
       onSuccessful();
@@ -128,41 +101,33 @@ export const FileServiceModal = (props: IProps) => {
     });
   }
 
+  function onDelete() {
+    deleteModelKeys(selected?.id!).then(() => {
+      onSuccessful();
+      toast.success(t('Deleted successful!'));
+    });
+  }
+
   useEffect(() => {
     if (isOpen) {
       form.reset();
       form.formState.isValid;
       if (selected) {
         form.setValue('name', selected.name);
-        form.setValue('type', selected.type);
-        form.setValue('enabled', selected.enabled);
         form.setValue(
           'configs',
-          mergeConfigs(getFileConfigs(selected.type), selected.configs)
+          mergeConfigs(ModelKeysDefaultTemplate, selected.configs)
         );
       }
     }
   }, [isOpen]);
-
-  useEffect(() => {
-    const subscription = form.watch((value, { name, type }) => {
-      if (name === 'type' && type === 'change') {
-        const type = value.type as FileServicesType;
-        form.setValue(
-          'configs',
-          JSON.stringify(getFileConfigs(type) || {}, null, 2)
-        );
-      }
-    });
-    return () => subscription.unsubscribe();
-  }, [form.watch]);
 
   return (
     <Dialog open={isOpen} onOpenChange={onClose}>
       <DialogContent>
         <DialogHeader>
           <DialogTitle>
-            {selected ? t('Edit File Service') : t('Add File Service')}
+            {selected ? t('Edit Model Keys') : t('Add Model Keys')}
           </DialogTitle>
         </DialogHeader>
         <Form {...form}>
@@ -176,6 +141,17 @@ export const FileServiceModal = (props: IProps) => {
               />
             ))}
             <DialogFooter className='pt-4'>
+              {selected && (
+                <Button
+                  variant='destructive'
+                  onClick={(e) => {
+                    onDelete();
+                    e.preventDefault();
+                  }}
+                >
+                  {t('Delete')}
+                </Button>
+              )}
               <Button type='submit'>{t('Save')}</Button>
             </DialogFooter>
           </form>

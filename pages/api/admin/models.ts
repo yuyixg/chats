@@ -2,7 +2,6 @@ import { ChatModelManager } from '@/managers';
 import { ModelDefaultTemplates } from '@/types/template';
 import { ModelVersions } from '@/types/model';
 import { BadRequest } from '@/utils/error';
-import { addAsterisk, checkKey } from '@/utils/common';
 import { ChatModels } from '@prisma/client';
 import { apiHandler } from '@/middleware/api-handler';
 import { ChatsApiRequest } from '@/types/next-api';
@@ -21,7 +20,6 @@ const handler = async (req: ChatsApiRequest) => {
     const { all } = req.query;
     const models = await ChatModelManager.findModels(!!all);
     const data = models.map((x: ChatModels) => {
-      const apiConfig = JSON.parse(x.apiConfig);
       return {
         rank: x.rank,
         modelId: x.id,
@@ -30,19 +28,10 @@ const handler = async (req: ChatsApiRequest) => {
         type: x.type,
         enabled: x.enabled,
         remarks: x.remarks,
+        modelKeysId: x.modelKeysId,
         fileServerId: x.fileServerId,
         fileConfig: x.fileConfig,
         modelConfig: x.modelConfig,
-        apiConfig: JSON.stringify({
-          appId: addAsterisk(apiConfig?.appId),
-          apiKey: addAsterisk(apiConfig?.apiKey),
-          secret: addAsterisk(apiConfig?.secret),
-          deploymentName: apiConfig?.deploymentName,
-          version: apiConfig?.version,
-          host: apiConfig.host,
-          organization: apiConfig?.organization,
-          type: apiConfig?.type,
-        }),
         priceConfig: x.priceConfig,
       };
     });
@@ -52,10 +41,10 @@ const handler = async (req: ChatsApiRequest) => {
       modelId,
       name,
       enabled,
+      modelKeysId,
       fileServerId,
       fileConfig,
       modelConfig,
-      apiConfig: apiConfigJson,
       priceConfig,
       remarks,
     } = req.body;
@@ -64,32 +53,27 @@ const handler = async (req: ChatsApiRequest) => {
       throw new BadRequest('Model is not Found');
     }
 
-    let apiConfig = JSON.parse(apiConfigJson);
-    apiConfig.appId = checkKey(model?.apiConfig.apiKey, apiConfig.appId);
-    apiConfig.apiKey = checkKey(model?.apiConfig.apiKey, apiConfig.apiKey);
-    apiConfig.secret = checkKey(model?.apiConfig.secret, apiConfig.secret);
-
-    const data = await ChatModelManager.updateModel(
-      modelId,
+    const data = await ChatModelManager.updateModel({
+      id: modelId,
       name,
       enabled,
+      modelKeysId,
       fileServerId,
       fileConfig,
-      JSON.stringify(apiConfig),
       modelConfig,
-      conversionModelPriceToSave(priceConfig),
-      remarks
-    );
+      priceConfig: conversionModelPriceToSave(priceConfig),
+      remarks,
+    });
     return data;
   } else if (req.method === 'POST') {
     const {
       modelVersion,
       name,
       enabled,
+      modelKeysId,
       fileServerId,
       priceConfig,
       modelConfig,
-      apiConfig,
       fileConfig,
       remarks,
     } = req.body;
@@ -99,19 +83,18 @@ const handler = async (req: ChatsApiRequest) => {
     if (!template) {
       throw new BadRequest('Model is not Found');
     }
-
-    const data = await ChatModelManager.createModel(
-      template.type,
+    const data = await ChatModelManager.createModel({
+      type: template.type,
       modelVersion,
       name,
       enabled,
+      modelKeysId,
       fileServerId,
       fileConfig,
-      apiConfig,
       modelConfig,
-      conversionModelPriceToSave(priceConfig),
-      remarks
-    );
+      priceConfig: conversionModelPriceToSave(priceConfig),
+      remarks,
+    });
     return data;
   } else if (req.method === 'DELETE') {
     const { id } = req.query as { id: string };

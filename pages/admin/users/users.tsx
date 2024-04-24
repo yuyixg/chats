@@ -106,9 +106,19 @@ export default function Users() {
               <TableHead className='w-16'></TableHead>
             </TableRow>
           </TableHeader>
-          <TableBody emptyText={t('No data')!} isLoading={loading} isEmpty={users.length === 0}>
+          <TableBody
+            emptyText={t('No data')!}
+            isLoading={loading}
+            isEmpty={users.length === 0}
+          >
             {users.map((item) => (
-              <TableRow className='cursor-pointer' key={item.id}>
+              <TableRow
+                className='cursor-pointer'
+                key={item.id}
+                onClick={() => {
+                  handleShowEditModal(item);
+                }}
+              >
                 <TableCell>
                   <div className='flex gap-1 items-center'>
                     <div

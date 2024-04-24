@@ -9,6 +9,7 @@ import { WxPayManager } from './wxPay';
 import { OrdersManager } from './order';
 import { RequestLogsManager } from './requestLogs';
 import { PayServiceManager } from './payService';
+import { ModelKeysManager } from './modelKeys';
 
 export {
   ChatModelManager,
@@ -22,4 +23,5 @@ export {
   OrdersManager,
   RequestLogsManager,
   PayServiceManager,
+  ModelKeysManager
 };

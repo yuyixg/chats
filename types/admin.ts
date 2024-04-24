@@ -48,9 +48,9 @@ export interface GetModelResult {
   type: ModelType;
   enabled: boolean;
   remarks: string;
-  apiConfig: string;
   modelConfig: string;
   fileServerId: string;
+  modelKeysId: string;
   fileConfig: string;
   priceConfig: string;
 }
@@ -59,9 +59,9 @@ export interface PutModelParams {
   modelId: string;
   name: string;
   enabled?: boolean;
-  apiConfig?: string;
   modelConfig: string;
   fileServerId?: string;
+  modelKeysId: string;
   fileConfig?: string;
   priceConfig: string;
 }
@@ -70,8 +70,8 @@ export interface PostModelParams {
   modelVersion: ModelVersions;
   name: string;
   enabled: boolean;
-  apiConfig: string;
   modelConfig: string;
+  modelKeysId: string;
   fileServerId?: string;
   fileConfig?: string;
 }
@@ -190,5 +190,21 @@ export interface PostPayServicesParams {
 }
 
 export interface PutPayServicesParams extends PostPayServicesParams {
+  id: string;
+}
+
+export interface GetModelKeysResult {
+  id: string;
+  name: string;
+  configs: string;
+  createdAt: string;
+}
+
+export interface PostModelKeysParams {
+  name: string;
+  configs: string;
+}
+
+export interface PutModelKeysParams extends PostModelKeysParams {
   id: string;
 }

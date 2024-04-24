@@ -67,9 +67,14 @@ export default function RequestLogs() {
               <TableHead>{t('IP Address')}</TableHead>
               <TableHead>{t('Method')}</TableHead>
               <TableHead>{t('Status Code')}</TableHead>
+              <TableHead>{t('Created Time')}</TableHead>
             </TableRow>
           </TableHeader>
-          <TableBody emptyText={t('No data')!} isLoading={loading} isEmpty={requestLogs.count === 0}>
+          <TableBody
+            emptyText={t('No data')!}
+            isLoading={loading}
+            isEmpty={requestLogs.count === 0}
+          >
             {requestLogs?.rows.map((item) => (
               <TableRow
                 key={item.id}
@@ -93,6 +98,9 @@ export default function RequestLogs() {
                   >
                     {item.statusCode}
                   </div>
+                </TableCell>
+                <TableCell>
+                  {new Date(item.createdAt).toLocaleString()}
                 </TableCell>
               </TableRow>
             ))}

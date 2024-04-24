@@ -1,4 +1,5 @@
 import { GPT4Message, GPT4VisionMessage } from '@/types/chat';
+import { ChatModels } from '@/types/chatModel';
 
 import {
   ParsedEvent,
@@ -7,15 +8,20 @@ import {
 } from 'eventsource-parser';
 
 export const OpenAIStream = async (
-  chatModel: any,
+  chatModel: ChatModels,
   prompt: string,
   temperature: number,
   messages: GPT4Message[] | GPT4VisionMessage[]
 ) => {
   const {
-    apiConfig: { host, type, version, apiKey, organization, deploymentName },
+    apiConfig: { host, type, apiKey },
     modelVersion,
-    modelConfig: { prompt: systemPrompt },
+    modelConfig: {
+      prompt: systemPrompt,
+      version,
+      organization,
+      deploymentName,
+    },
   } = chatModel;
   let url = `${host}/v1/chat/completions`;
   if (type === 'azure') {

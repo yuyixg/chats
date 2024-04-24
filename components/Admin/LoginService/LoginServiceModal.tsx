@@ -71,7 +71,7 @@ export const LoginServiceModal = (props: IProps) => {
       label: t('Service Configs'),
       defaultValue: '',
       render: (options: IFormFieldOption, field: FormFieldType) => (
-        <FormTextarea options={options} field={field} />
+        <FormTextarea rows={5} options={options} field={field} />
       ),
     },
   ];

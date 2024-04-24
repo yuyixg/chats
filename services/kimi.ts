@@ -1,4 +1,5 @@
 import { GPT4Message, GPT4VisionMessage } from '@/types/chat';
+import { ChatModels } from '@/types/chatModel';
 
 import {
   ParsedEvent,
@@ -16,9 +17,7 @@ export interface KimiSteamResult {
 }
 
 export const KimiStream = async (
-  chatModel: any,
-  prompt: string,
-  temperature: number,
+  chatModel: ChatModels,
   messages: GPT4Message[] | GPT4VisionMessage[]
 ) => {
   const {

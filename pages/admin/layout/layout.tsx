@@ -14,6 +14,7 @@ import {
   IconMessages,
   IconNotes,
   IconSettingsCog,
+  IconShieldLock,
   IconUserCog,
   IconUsers,
 } from '@/components/Icons/index';
@@ -55,6 +56,13 @@ const AdminLayout = ({
       title: t('User Models'),
     },
     {
+      url: '/admin/model-keys',
+      icon: (stroke?: string) => {
+        return <IconKey stroke={stroke} />;
+      },
+      title: t('Model Keys'),
+    },
+    {
       url: '/admin/models',
       icon: (stroke?: string) => {
         return <IconSettingsCog stroke={stroke} />;
@@ -71,7 +79,7 @@ const AdminLayout = ({
     {
       url: '/admin/login-service',
       icon: (stroke?: string) => {
-        return <IconKey stroke={stroke} />;
+        return <IconShieldLock stroke={stroke} />;
       },
       title: t('Login Service'),
     },

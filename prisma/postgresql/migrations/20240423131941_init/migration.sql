@@ -38,9 +38,9 @@ CREATE TABLE "ChatModels" (
     "type" TEXT NOT NULL,
     "rank" INTEGER,
     "remarks" TEXT,
+    "modelKeysId" TEXT,
     "fileServerId" TEXT,
     "fileConfig" VARCHAR(2048) DEFAULT '{}',
-    "apiConfig" VARCHAR(2048) NOT NULL DEFAULT '{}',
     "modelConfig" VARCHAR(2048) NOT NULL DEFAULT '{}',
     "priceConfig" VARCHAR(2048) NOT NULL DEFAULT '{}',
     "enabled" BOOLEAN NOT NULL DEFAULT true,
@@ -192,20 +192,22 @@ CREATE TABLE "RequestLogs" (
     CONSTRAINT "RequestLogs_pkey" PRIMARY KEY ("id")
 );
 
--- CreateIndex
-CREATE UNIQUE INDEX "Users_account_key" ON "Users"("account");
+-- CreateTable
+CREATE TABLE "ModelKeys" (
+    "id" TEXT NOT NULL,
+    "name" VARCHAR(100) NOT NULL,
+    "configs" VARCHAR(2028) NOT NULL,
+    "createdAt" TIMESTAMP(3) NOT NULL DEFAULT CURRENT_TIMESTAMP,
+    "updatedAt" TIMESTAMP(3) NOT NULL,
 
--- CreateIndex
-CREATE UNIQUE INDEX "Users_email_key" ON "Users"("email");
-
--- CreateIndex
-CREATE UNIQUE INDEX "Users_phone_key" ON "Users"("phone");
-
--- CreateIndex
-CREATE UNIQUE INDEX "FileServices_name_key" ON "FileServices"("name");
+    CONSTRAINT "ModelKeys_pkey" PRIMARY KEY ("id")
+);
 
 -- CreateIndex
 CREATE UNIQUE INDEX "UserBalances_userId_key" ON "UserBalances"("userId");
+
+-- AddForeignKey
+ALTER TABLE "ChatModels" ADD CONSTRAINT "ChatModels_modelKeysId_fkey" FOREIGN KEY ("modelKeysId") REFERENCES "ModelKeys"("id") ON DELETE SET NULL ON UPDATE CASCADE;
 
 -- AddForeignKey
 ALTER TABLE "Sessions" ADD CONSTRAINT "Sessions_userId_fkey" FOREIGN KEY ("userId") REFERENCES "Users"("id") ON DELETE RESTRICT ON UPDATE CASCADE;
