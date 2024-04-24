@@ -28,6 +28,8 @@ import {
 import { mergeConfigs } from '@/utils/model';
 import FormInput from '../../ui/form/input';
 import { ModelKeysDefaultTemplate } from '@/types/modelKeys';
+import FormSelect from '@/components/ui/form/select';
+import { ModelType } from '@/types/model';
 
 interface IProps {
   selected: GetModelKeysResult | null;
@@ -50,6 +52,21 @@ export const ModelKeysModal = (props: IProps) => {
       ),
     },
     {
+      name: 'type',
+      label: t('Model Type'),
+      defaultValue: '',
+      render: (options: IFormFieldOption, field: FormFieldType) => (
+        <FormSelect
+          field={field}
+          options={options}
+          items={Object.keys(ModelType).map((key) => ({
+            name: ModelType[key as keyof typeof ModelType],
+            value: ModelType[key as keyof typeof ModelType],
+          }))}
+        />
+      ),
+    },
+    {
       name: 'configs',
       label: t('Configs'),
       defaultValue: JSON.stringify(ModelKeysDefaultTemplate, null, 2),
@@ -60,6 +77,10 @@ export const ModelKeysModal = (props: IProps) => {
   ];
 
   const formSchema = z.object({
+    type: z
+      .string()
+      .min(1, `${t('This field is require')}`)
+      .optional(),
     name: z
       .string()
       .min(1, `${t('This field is require')}`)

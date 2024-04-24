@@ -19,6 +19,7 @@ const handler = async (req: ChatsApiRequest) => {
       const configs = JSON.parse(x?.configs || '{}');
       return {
         id: x.id,
+        type: x.type,
         name: x.name,
         configs: {
           host: configs.host,
@@ -46,8 +47,9 @@ const handler = async (req: ChatsApiRequest) => {
       configs: JSON.stringify(configs),
     });
   } else if (req.method === 'POST') {
-    const { name, configs } = req.body;
+    const { name, type, configs } = req.body;
     return await ModelKeysManager.create({
+      type,
       name,
       configs,
     });

@@ -180,6 +180,7 @@ model RequestLogs {
 model ModelKeys {
   id         String       @id @default(uuid())
   name       String       @db.NVarChar(100)
+  type       String       @db.NVarChar(50)
   configs    String       @db.NVarChar(2048)
   createdAt  DateTime     @default(now())
   updatedAt  DateTime     @updatedAt

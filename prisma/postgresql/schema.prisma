@@ -34,7 +34,7 @@ model Users {
 
 model FileServices {
   id        String   @id @default(uuid())
-  name      String   
+  name      String
   enabled   Boolean  @default(true)
   type      String
   configs   String   @default("{}") @db.VarChar(2048)
@@ -180,6 +180,7 @@ model RequestLogs {
 model ModelKeys {
   id         String       @id @default(uuid())
   name       String       @db.VarChar(100)
+  type       String       @db.VarChar(50)
   configs    String       @db.VarChar(2028)
   createdAt  DateTime     @default(now())
   updatedAt  DateTime     @updatedAt
