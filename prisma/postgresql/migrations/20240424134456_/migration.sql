@@ -33,9 +33,9 @@ CREATE TABLE "FileServices" (
 -- CreateTable
 CREATE TABLE "ChatModels" (
     "id" TEXT NOT NULL,
+    "modelProvider" TEXT NOT NULL,
     "modelVersion" TEXT NOT NULL,
     "name" TEXT NOT NULL,
-    "type" TEXT NOT NULL,
     "rank" INTEGER,
     "remarks" TEXT,
     "modelKeysId" TEXT,
@@ -196,6 +196,7 @@ CREATE TABLE "RequestLogs" (
 CREATE TABLE "ModelKeys" (
     "id" TEXT NOT NULL,
     "name" VARCHAR(100) NOT NULL,
+    "type" VARCHAR(50) NOT NULL,
     "configs" VARCHAR(2028) NOT NULL,
     "createdAt" TIMESTAMP(3) NOT NULL DEFAULT CURRENT_TIMESTAMP,
     "updatedAt" TIMESTAMP(3) NOT NULL,

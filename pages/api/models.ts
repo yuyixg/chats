@@ -30,7 +30,7 @@ const handler = async (req: ChatsApiRequest) => {
         id: x.id,
         modelVersion: x.modelVersion,
         name: x.name,
-        type: x.type,
+        modelProvider: x.modelProvider,
         // systemPrompt: x.modelConfig?.prompt,
         // maxLength: x.modelConfig?.maxLength,
         // tokenLimit: x.modelConfig?.tokenLimit,

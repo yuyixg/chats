@@ -1,6 +1,4 @@
 import { ChatModelManager } from '@/managers';
-import { ModelDefaultTemplates } from '@/types/template';
-import { ModelVersions } from '@/types/model';
 import { BadRequest } from '@/utils/error';
 import { ChatModels } from '@prisma/client';
 import { apiHandler } from '@/middleware/api-handler';
@@ -23,9 +21,10 @@ const handler = async (req: ChatsApiRequest) => {
       return {
         rank: x.rank,
         modelId: x.id,
+        modelProvider: x.modelProvider,
         modelVersion: x.modelVersion,
         name: x.name,
-        type: x.type,
+        isDefault: x.isDefault,
         enabled: x.enabled,
         remarks: x.remarks,
         modelKeysId: x.modelKeysId,
@@ -40,6 +39,7 @@ const handler = async (req: ChatsApiRequest) => {
     const {
       modelId,
       name,
+      isDefault,
       enabled,
       modelKeysId,
       fileServerId,
@@ -55,6 +55,7 @@ const handler = async (req: ChatsApiRequest) => {
 
     const data = await ChatModelManager.updateModel({
       id: modelId,
+      isDefault,
       name,
       enabled,
       modelKeysId,
@@ -67,8 +68,10 @@ const handler = async (req: ChatsApiRequest) => {
     return data;
   } else if (req.method === 'POST') {
     const {
+      modelProvider,
       modelVersion,
       name,
+      isDefault,
       enabled,
       modelKeysId,
       fileServerId,
@@ -78,15 +81,11 @@ const handler = async (req: ChatsApiRequest) => {
       remarks,
     } = req.body;
 
-    const template = ModelDefaultTemplates[modelVersion as ModelVersions];
-
-    if (!template) {
-      throw new BadRequest('Model is not Found');
-    }
     const data = await ChatModelManager.createModel({
-      type: template.type,
+      modelProvider,
       modelVersion,
       name,
+      isDefault,
       enabled,
       modelKeysId,
       fileServerId,

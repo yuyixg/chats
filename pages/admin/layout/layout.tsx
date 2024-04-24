@@ -56,18 +56,18 @@ const AdminLayout = ({
       title: t('User Models'),
     },
     {
-      url: '/admin/model-keys',
-      icon: (stroke?: string) => {
-        return <IconKey stroke={stroke} />;
-      },
-      title: t('Model Keys'),
-    },
-    {
       url: '/admin/models',
       icon: (stroke?: string) => {
         return <IconSettingsCog stroke={stroke} />;
       },
       title: t('Model Configs'),
+    },
+    {
+      url: '/admin/model-keys',
+      icon: (stroke?: string) => {
+        return <IconKey stroke={stroke} />;
+      },
+      title: t('Model Keys'),
     },
     {
       url: '/admin/file-service',

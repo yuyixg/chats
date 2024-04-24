@@ -1,6 +1,6 @@
 import prisma from '@/prisma/prisma';
 import bcrypt from 'bcryptjs';
-import { UserBalancesManager, UserModelManager } from '.';
+import { ChatModelManager, UserBalancesManager, UserModelManager } from '.';
 import Decimal from 'decimal.js';
 import { ProviderType } from '@/types/user';
 import { weChatAuth } from '@/utils/weChat';
@@ -133,9 +133,17 @@ export class UsersManager {
   }
 
   static async initialUser(userId: string, createUserId?: string) {
+    const chatModels = await ChatModelManager.findDefaultModels();
+    const userModels = chatModels.map((x) => ({
+      modelId: x.id,
+      enabled: true,
+      tokens: '-',
+      counts: '-',
+      expires: '-',
+    }));
     await UserModelManager.createUserModel({
       userId: userId,
-      models: '[]',
+      models: JSON.stringify(userModels),
     });
     await UserBalancesManager.createBalance(
       userId,

@@ -1,10 +1,11 @@
 import prisma from '@/prisma/prisma';
-import { ModelType, ModelVersions } from '@/types/model';
+import { ModelProviders, ModelType, ModelVersions } from '@/types/model';
 import { InternalServerError } from '@/utils/error';
 
 interface CreateModel {
   name: string;
-  type: ModelType;
+  isDefault: boolean;
+  modelProvider: ModelProviders;
   modelVersion: ModelVersions;
   enabled?: boolean;
   modelKeysId?: string;
@@ -17,6 +18,7 @@ interface CreateModel {
 interface UpdateModel {
   id: string;
   name: string;
+  isDefault: boolean;
   enabled?: boolean;
   modelKeysId?: string;
   fileServerId?: string;
@@ -46,7 +48,8 @@ export class ChatModelManager {
     return {
       id: model.id,
       enabled: model.enabled,
-      modelVersion: model.modelVersion,
+      modelProvider: model.modelProvider as ModelProviders,
+      modelVersion: model.modelVersion as ModelVersions,
       apiConfig: JSON.parse(model.ModelKeys?.configs || '{}'),
       fileConfig: JSON.parse(model.fileConfig || '{}'),
       modelConfig: JSON.parse(model.modelConfig || '{}'),
@@ -57,6 +60,12 @@ export class ChatModelManager {
   static async findModelByModelKeyId(modelKeysId: string) {
     return await prisma.chatModels.findFirst({
       where: { modelKeysId },
+    });
+  }
+
+  static async findDefaultModels() {
+    return await prisma.chatModels.findMany({
+      where: { isDefault: true },
     });
   }
 

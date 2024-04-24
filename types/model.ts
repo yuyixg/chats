@@ -4,7 +4,7 @@ export interface Model {
   id: string;
   modelVersion: ModelVersions;
   name: string;
-  type: ModelType;
+  modelProvider: ModelProviders;
   systemPrompt: string;
   maxLength?: number;
   tokenLimit?: number;
@@ -37,7 +37,17 @@ export enum ModelType {
   QianFan = 'QianFan',
   Spark = 'Spark',
   LingYi = 'LingYi',
-  Kimi = 'Kimi',
+  Moonshot = 'moonshot',
+}
+
+export enum ModelProviders {
+  OpenAI = 'OpenAI',
+  Azure = 'Azure',
+  QianWen = 'QianWen',
+  QianFan = 'QianFan',
+  Spark = 'Spark',
+  LingYi = 'LingYi',
+  Moonshot = 'moonshot',
 }
 
 export interface ChatModelFileConfig {

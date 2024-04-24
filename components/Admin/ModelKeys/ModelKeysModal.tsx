@@ -27,7 +27,9 @@ import {
 } from '@/types/admin';
 import { mergeConfigs } from '@/utils/model';
 import FormInput from '../../ui/form/input';
-import { ModelKeysDefaultTemplate } from '@/types/modelKeys';
+import FormSelect from '@/components/ui/form/select';
+import { ModelProviders } from '@/types/model';
+import { ModelProviderTemplates } from '@/types/template';
 
 interface IProps {
   selected: GetModelKeysResult | null;
@@ -50,9 +52,25 @@ export const ModelKeysModal = (props: IProps) => {
       ),
     },
     {
+      name: 'type',
+      label: t('Model Provider'),
+      defaultValue: '',
+      render: (options: IFormFieldOption, field: FormFieldType) => (
+        <FormSelect
+          disabled={!!selected}
+          field={field}
+          options={options}
+          items={Object.keys(ModelProviderTemplates).map((key) => ({
+            name: ModelProviderTemplates[key as ModelProviders].displayName,
+            value: key,
+          }))}
+        />
+      ),
+    },
+    {
       name: 'configs',
       label: t('Configs'),
-      defaultValue: JSON.stringify(ModelKeysDefaultTemplate, null, 2),
+      defaultValue: '',
       render: (options: IFormFieldOption, field: FormFieldType) => (
         <FormTextarea rows={6} options={options} field={field} />
       ),
@@ -60,6 +78,10 @@ export const ModelKeysModal = (props: IProps) => {
   ];
 
   const formSchema = z.object({
+    type: z
+      .string()
+      .min(1, `${t('This field is require')}`)
+      .optional(),
     name: z
       .string()
       .min(1, `${t('This field is require')}`)
@@ -109,14 +131,36 @@ export const ModelKeysModal = (props: IProps) => {
   }
 
   useEffect(() => {
+    const subscription = form.watch((value, { name, type }) => {
+      if (name === 'type' && type === 'change') {
+        const modelProvider = value.type as ModelProviders;
+        form.setValue(
+          'configs',
+          JSON.stringify(
+            ModelProviderTemplates[modelProvider].apiConfig,
+            null,
+            2
+          )
+        );
+      }
+    });
+    return () => subscription.unsubscribe();
+  }, [form.watch]);
+
+  useEffect(() => {
     if (isOpen) {
       form.reset();
       form.formState.isValid;
       if (selected) {
-        form.setValue('name', selected.name);
+        const { name, type, configs } = selected;
+        form.setValue('name', name);
+        form.setValue('type', type);
         form.setValue(
           'configs',
-          mergeConfigs(ModelKeysDefaultTemplate, selected.configs)
+          mergeConfigs(
+            ModelProviderTemplates[type as ModelProviders].apiConfig,
+            configs
+          )
         );
       }
     }
