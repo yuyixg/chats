@@ -3,15 +3,17 @@ import { Switch } from '../switch';
 import { FormFieldType, IFormFieldOption } from './type';
 
 const FormSwitch = ({
+  label,
   options,
   field,
 }: {
-  options: IFormFieldOption;
+  label?: string;
+  options?: IFormFieldOption;
   field: FormFieldType;
 }) => {
   return (
     <FormItem className='py-2'>
-      <FormLabel>{options.label}</FormLabel>
+      <FormLabel>{options?.label || label}</FormLabel>
       <FormControl className='flex'>
         <Switch checked={field.value} onCheckedChange={field.onChange} />
       </FormControl>

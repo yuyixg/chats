@@ -28,6 +28,7 @@ const handler = async (req: ChatsApiRequest) => {
         type: x.type,
         enabled: x.enabled,
         remarks: x.remarks,
+        modelKeysId: x.modelKeysId,
         fileServerId: x.fileServerId,
         fileConfig: x.fileConfig,
         modelConfig: x.modelConfig,

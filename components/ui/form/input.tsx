@@ -10,13 +10,15 @@ import { FormFieldType, IFormFieldOption } from './type';
 import { HTMLInputTypeAttribute } from 'react';
 
 const FormInput = ({
+  label,
   options,
   field,
   type,
   hidden,
   disabled,
 }: {
-  options: IFormFieldOption;
+  label?: string;
+  options?: IFormFieldOption;
   field: FormFieldType;
   type?: HTMLInputTypeAttribute;
   hidden?: boolean;
@@ -24,12 +26,12 @@ const FormInput = ({
 }) => {
   return (
     <FormItem className='py-2' hidden={hidden}>
-      <FormLabel>{options.label}</FormLabel>
+      <FormLabel>{options?.label || label}</FormLabel>
       <FormControl>
         <Input
           disabled={disabled}
           type={type}
-          placeholder={options.placeholder}
+          placeholder={options?.placeholder}
           {...field}
         />
       </FormControl>

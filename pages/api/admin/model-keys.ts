@@ -22,7 +22,7 @@ const handler = async (req: ChatsApiRequest) => {
         name: x.name,
         configs: {
           host: configs.host,
-          apiKey: configs.apiKey,
+          apiKey: addAsterisk(configs.apiKey),
           secret: addAsterisk(configs.secret),
           type: configs.type,
         },
@@ -37,6 +37,7 @@ const handler = async (req: ChatsApiRequest) => {
     }
 
     let configs = JSON.parse(configsJSON);
+    configs.apiKey = checkKey(modelKey.configs.apiKey, configs.apiKey);
     configs.secret = checkKey(modelKey.configs.secret, configs.secret);
 
     await ModelKeysManager.update({

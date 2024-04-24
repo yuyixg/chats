@@ -1,4 +1,4 @@
-import { deleteModels, getFileServices, getModelKeys, putModels } from '@/apis/adminService';
+import { getFileServices, getModelKeys, putModels } from '@/apis/adminService';
 import {
   GetFileServicesResult,
   GetModelKeysResult,
@@ -27,7 +27,6 @@ import { Button } from '../../ui/button';
 import {
   ModelPriceUnit,
   conversionModelPriceToDisplay,
-  getModelApiConfig,
   getModelFileConfig,
   getModelModelConfig,
   getModelPriceConfig,
@@ -35,6 +34,12 @@ import {
 } from '@/utils/model';
 import FormSelect from '@/components/ui/form/select';
 import { formatNumberAsMoney } from '@/utils/common';
+import { ModelVersions } from '@/types/model';
+import {
+  Popover,
+  PopoverContent,
+  PopoverTrigger,
+} from '@/components/ui/popover';
 
 interface IProps {
   isOpen: boolean;
@@ -49,101 +54,9 @@ export const EditModelModal = (props: IProps) => {
   const { isOpen, onClose, selected, onSuccessful } = props;
   const [fileServices, setFileServices] = useState<GetFileServicesResult[]>([]);
   const [modelKeys, setModelKeys] = useState<GetModelKeysResult[]>([]);
-  const formFields: IFormFieldOption[] = [
-    {
-      name: 'name',
-      label: t('Model Display Name'),
-      render: (options: IFormFieldOption, field: FormFieldType) => (
-        <FormInput options={options} field={field} />
-      ),
-    },
-    {
-      name: 'modelKeysId',
-      label: t('Model Keys'),
-      defaultValue: '',
-      render: (options: IFormFieldOption, field: FormFieldType) => (
-        <FormSelect
-          items={modelKeys.map((keys) => ({
-            name: keys.name,
-            value: keys.id,
-          }))}
-          options={options}
-          field={field}
-        />
-      ),
-    },
-    {
-      name: 'modelId',
-      label: t('ID'),
-      render: (options: IFormFieldOption, field: FormFieldType) => (
-        <FormInput hidden options={options} field={field} />
-      ),
-    },
-    {
-      name: 'modelConfig',
-      label: t('Model Configs'),
-      render: (options: IFormFieldOption, field: FormFieldType) => (
-        <FormTextarea
-          hidden={!getModelModelConfig(selected?.modelVersion)}
-          options={options}
-          field={field}
-        />
-      ),
-    },
-    {
-      name: 'fileServerId',
-      label: t('File Service Type'),
-      defaultValue: '',
-      render: (options: IFormFieldOption, field: FormFieldType) => (
-        <FormSelect
-          hidden={!getModelFileConfig(selected?.modelVersion)}
-          items={fileServices.map((item) => ({
-            name: item.name,
-            value: item.id,
-          }))}
-          options={options}
-          field={field}
-        />
-      ),
-    },
-    {
-      name: 'fileConfig',
-      label: t('File Configs'),
-      render: (options: IFormFieldOption, field: FormFieldType) => (
-        <FormTextarea
-          hidden={!getModelFileConfig(selected?.modelVersion)}
-          options={options}
-          field={field}
-        />
-      ),
-    },
-    {
-      name: 'priceConfig',
-      label: `${formatNumberAsMoney(ModelPriceUnit)} ${t('Token Price')}(${t(
-        'Yuan'
-      )})`,
-      render: (options: IFormFieldOption, field: FormFieldType) => (
-        <FormTextarea options={options} field={field} />
-      ),
-    },
-    {
-      name: 'remarks',
-      label: t('Remarks'),
-      defaultValue: '',
-      render: (options: IFormFieldOption, field: FormFieldType) => (
-        <FormTextarea options={options} field={field} />
-      ),
-    },
-    {
-      name: 'enabled',
-      label: t('Is it enabled'),
-      render: (options: IFormFieldOption, field: FormFieldType) => (
-        <FormSwitch options={options} field={field} />
-      ),
-    },
-  ];
 
   const formSchema = z.object({
+    modelVersion: z.string(),
     name: z
       .string()
       .min(1, `${t('This field is require')}`)
@@ -166,10 +79,18 @@ export const EditModelModal = (props: IProps) => {
 
   const form = useForm<z.infer<typeof formSchema>>({
     resolver: zodResolver(formSchema),
-    defaultValues: formFields.reduce((obj: any, field) => {
-      obj[field.name] = field.defaultValue;
-      return obj;
-    }, {}),
+    defaultValues: {
+      modelVersion: '',
+      name: '',
+      modelId: '',
+      enabled: true,
+      modelConfig: '',
+      modelKeysId: '',
+      fileServerId: '',
+      fileConfig: '',
+      priceConfig: '',
+      remarks: '',
+    },
   });
 
   function onSubmit(values: z.infer<typeof formSchema>) {
@@ -210,6 +131,7 @@ export const EditModelModal = (props: IProps) => {
         modelConfig,
         priceConfig,
       } = selected!;
+      form.setValue('modelVersion', modelVersion);
       form.setValue('name', name);
       form.setValue('modelId', modelId);
       form.setValue('enabled', enabled);
@@ -246,14 +168,164 @@ export const EditModelModal = (props: IProps) => {
         <Form {...form}>
           <form onSubmit={form.handleSubmit(onSubmit)}>
             <div className='grid grid-cols-2 gap-4'>
-              {formFields.map((item) => (
-                <FormField
-                  key={item.name}
-                  control={form.control}
-                  name={item.name as never}
-                  render={({ field }) => item.render(item, field)}
-                />
-              ))}
+              <FormField
+                key='modelVersion'
+                control={form.control}
+                name='modelVersion'
+                render={({ field }) => {
+                  return (
+                    <FormSelect
+                      disabled
+                      field={field}
+                      label={t('Model Version')!}
+                      items={Object.keys(ModelVersions).map((key) => ({
+                        name: ModelVersions[key as keyof typeof ModelVersions],
+                        value: ModelVersions[key as keyof typeof ModelVersions],
+                      }))}
+                    />
+                  );
+                }}
+              ></FormField>
+              <FormField
+                key='name'
+                control={form.control}
+                name='name'
+                render={({ field }) => {
+                  return (
+                    <FormInput field={field} label={t('Model Display Name')!} />
+                  );
+                }}
+              ></FormField>
+            </div>
+            <div className='flex justify-between'>
+              <FormField
+                key='modelKeysId'
+                control={form.control}
+                name='modelKeysId'
+                render={({ field }) => {
+                  return (
+                    <FormSelect
+                      className='w-full'
+                      field={field}
+                      label={t('Model Keys')!}
+                      items={modelKeys.map((keys) => ({
+                        name: keys.name,
+                        value: keys.id,
+                      }))}
+                    />
+                  );
+                }}
+              ></FormField>
+              <div
+                hidden={!form.getValues('modelKeysId')}
+                className='text-sm mt-12 w-36 text-right'
+              >
+                <Popover>
+                  <PopoverTrigger>
+                    <span className='text-primary'>
+                      {t('Click View Configs')}
+                    </span>
+                  </PopoverTrigger>
+                  <PopoverContent className='w-full'>
+                    {JSON.stringify(
+                      modelKeys.find(
+                        (x) => x.id === form.getValues('modelKeysId')
+                      )?.configs,
+                      null,
+                      2
+                    )}
+                  </PopoverContent>
+                </Popover>
+              </div>
+            </div>
+            <div className='grid grid-cols-2 gap-4'>
+              <FormField
+                key='modelConfig'
+                control={form.control}
+                name='modelConfig'
+                render={({ field }) => {
+                  return (
+                    <FormTextarea
+                      rows={7}
+                      hidden={!getModelModelConfig(selected?.modelVersion)}
+                      label={t('Model Configs')!}
+                      field={field}
+                    />
+                  );
+                }}
+              ></FormField>
+              <FormField
+                key='priceConfig'
+                control={form.control}
+                name='priceConfig'
+                render={({ field }) => {
+                  return (
+                    <FormTextarea
+                      rows={7}
+                      hidden={!getModelModelConfig(selected?.modelVersion)}
+                      label={`${formatNumberAsMoney(ModelPriceUnit)} ${t(
+                        'Token Price'
+                      )}(${t('Yuan')})`}
+                      field={field}
+                    />
+                  );
+                }}
+              ></FormField>
+            </div>
+            <div>
+              <FormField
+                key='fileServerId'
+                control={form.control}
+                name='fileServerId'
+                render={({ field }) => {
+                  return (
+                    <FormSelect
+                      field={field}
+                      label={t('File Service Type')!}
+                      hidden={!getModelFileConfig(selected?.modelVersion)}
+                      items={fileServices.map((item) => ({
+                        name: item.name,
+                        value: item.id,
+                      }))}
+                    />
+                  );
+                }}
+              ></FormField>
+              <FormField
+                key='fileConfig'
+                control={form.control}
+                name='fileConfig'
+                render={({ field }) => {
+                  return (
+                    <FormTextarea
+                      rows={4}
+                      hidden={!getModelFileConfig(selected?.modelVersion)}
+                      label={t('File Configs')!}
+                      field={field}
+                    />
+                  );
+                }}
+              ></FormField>
+            </div>
+            <div className='grid grid-cols-2 gap-4'>
+              <FormField
+                key='remarks'
+                control={form.control}
+                name='remarks'
+                render={({ field }) => {
+                  return <FormInput field={field} label={t('Remarks')!} />;
+                }}
+              ></FormField>
+              <FormField
+                key={'enabled'}
+                control={form.control}
+                name={'enabled'}
+                render={({ field }) => {
+                  return (
+                    <FormSwitch label={t('Is it enabled')!} field={field} />
+                  );
+                }}
+              ></FormField>
             </div>
             <DialogFooter className='pt-4'>
               <Button type='submit'>{t('Save')}</Button>

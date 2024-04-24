@@ -10,24 +10,28 @@ import { FormFieldType, IFormFieldOption } from './type';
 
 const FormSelect = ({
   items,
+  label,
   options,
   field,
   hidden,
   disabled,
+  className,
 }: {
   items: { name: string; value: string }[];
-  options: IFormFieldOption;
+  options?: IFormFieldOption;
+  label?: string;
   field: FormFieldType;
   hidden?: boolean;
   disabled?: boolean;
+  className?: string;
 }) => {
   return (
-    <FormItem className='py-2' hidden={hidden}>
-      <FormLabel>{options.label}</FormLabel>
+    <FormItem className={`py-2 ${className}`} hidden={hidden}>
+      <FormLabel>{options?.label || label}</FormLabel>
       <Select onValueChange={field.onChange} defaultValue={field.value}>
         <FormControl>
           <SelectTrigger disabled={disabled}>
-            <SelectValue placeholder={options.placeholder} />
+            <SelectValue placeholder={options?.placeholder} />
           </SelectTrigger>
         </FormControl>
         <SelectContent>
