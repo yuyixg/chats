@@ -1,4 +1,4 @@
-import { ModelType, ModelVersions } from './model';
+import { ModelProviders, ModelType, ModelVersions } from './model';
 
 type ChatGPTApiConfig = {
   host: string;
@@ -62,34 +62,61 @@ const sparkApiConfig: SparkApiConfig = {
   apiKey: '',
 };
 
-export const ModelApiTemplates = {
-  [ModelType.GPT]: {
+export const ModelProviderTemplates = {
+  [ModelProviders.OpenAI]: {
+    models: [
+      ModelVersions.GPT_3_5,
+      ModelVersions.GPT_4,
+      ModelVersions.GPT_4_Vision,
+    ],
     apiConfig: gptApiConfig,
-    displayName: 'GPT',
+    displayName: 'OpenAI',
   },
-  [ModelType.QianWen]: {
+  [ModelProviders.Azure]: {
+    models: [
+      ModelVersions.GPT_3_5,
+      ModelVersions.GPT_4,
+      ModelVersions.GPT_4_Vision,
+    ],
+    apiConfig: gptApiConfig,
+    displayName: 'Azure',
+  },
+  [ModelProviders.QianWen]: {
+    models: [ModelVersions.QWen_Vl_Plus],
     apiConfig: qianWenApiConfig,
     displayName: '通义千问',
   },
-  [ModelType.QianFan]: {
+  [ModelProviders.QianFan]: {
+    models: [ModelVersions.ERNIE_Bot_4, ModelVersions.ERNIE_Bot_8K],
     apiConfig: qianFanApiConfig,
     displayName: '文心一言',
   },
-  [ModelType.LingYi]: {
+  [ModelProviders.LingYi]: {
+    models: [
+      ModelVersions.yi_34b_chat_0205,
+      ModelVersions.yi_34b_chat_200k,
+      ModelVersions.yi_vl_plus,
+    ],
     apiConfig: lingYiApiConfig,
     displayName: '零一万物',
   },
-  [ModelType.Moonshot]: {
+  [ModelProviders.Moonshot]: {
+    models: [
+      ModelVersions.moonshot_v1_8k,
+      ModelVersions.moonshot_v1_32k,
+      ModelVersions.moonshot_v1_128k,
+    ],
     apiConfig: moonshotApiConfig,
     displayName: '月之暗面',
   },
-  [ModelType.Spark]: {
+  [ModelProviders.Spark]: {
+    models: [],
     apiConfig: sparkApiConfig,
     displayName: '讯飞星火',
   },
 };
 
-export const ModelDefaultTemplates = {
+export const ModelTemplates = {
   [ModelVersions.GPT_3_5]: {
     type: ModelType.GPT,
     modelConfig: {

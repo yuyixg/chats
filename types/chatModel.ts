@@ -1,10 +1,16 @@
-import { ChatModelConfig, ChatModelFileConfig } from './model';
+import {
+  ChatModelConfig,
+  ChatModelFileConfig,
+  ModelProviders,
+  ModelVersions,
+} from './model';
 import { ModelKeysTemplate } from './modelKeys';
 
 export interface ChatModels {
   id: string;
   enabled: boolean;
-  modelVersion: string;
+  modelProvider: ModelProviders;
+  modelVersion: ModelVersions;
   apiConfig: ModelKeysTemplate;
   fileConfig: ChatModelFileConfig;
   modelConfig: ChatModelConfig;

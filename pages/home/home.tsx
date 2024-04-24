@@ -129,6 +129,7 @@ const Home = ({ defaultModelId }: Props) => {
     const lastConversation = conversations[conversations.length - 1];
     const _defaultModelId = defaultModelId ?? models[0].id;
     const model = lastConversation?.model || getModel(_defaultModelId);
+    debugger
     const newConversation: Conversation = {
       id: uuidv4(),
       name: t('New Conversation'),

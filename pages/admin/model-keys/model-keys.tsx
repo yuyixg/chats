@@ -17,7 +17,7 @@ import { IconPlus } from '@/components/Icons/index';
 import { DEFAULT_LANGUAGE } from '@/types/settings';
 import { ModelKeysModal } from '@/components/Admin/ModelKeys/ModelKeysModal';
 import { ModelType } from '@/types/model';
-import { ModelApiTemplates } from '@/types/template';
+import { ModelProviderTemplates } from '@/types/template';
 
 export default function ModelKeys() {
   const { t } = useTranslation('admin');
@@ -68,7 +68,7 @@ export default function ModelKeys() {
           <TableHeader>
             <TableRow>
               <TableHead>{t('Key Name')}</TableHead>
-              <TableHead>{t('Model Type')}</TableHead>
+              <TableHead>{t('Model Provider')}</TableHead>
               <TableHead>{t('Created Time')}</TableHead>
             </TableRow>
           </TableHeader>
@@ -88,7 +88,7 @@ export default function ModelKeys() {
                 <TableCell className='flex items-center gap-1'>
                   {item.name}
                 </TableCell>
-                <TableCell>{ModelApiTemplates[item.type].displayName}</TableCell>
+                <TableCell>{ModelProviderTemplates[item.type].displayName}</TableCell>
                 <TableCell>
                   {new Date(item.createdAt).toLocaleString()}
                 </TableCell>

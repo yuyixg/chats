@@ -23,6 +23,7 @@ import {
   DropdownMenuItem,
   DropdownMenuTrigger,
 } from '@/components/ui/dropdown-menu';
+import { ModelProviderTemplates } from '@/types/template';
 
 export default function Models() {
   const { t } = useTranslation('admin');
@@ -76,8 +77,8 @@ export default function Models() {
             <TableRow>
               <TableHead className='w-20'>{t('Rank')}</TableHead>
               <TableHead>{t('Model Display Name')}</TableHead>
+              <TableHead>{t('Model Provider')}</TableHead>
               <TableHead>{t('Model Version')}</TableHead>
-              <TableHead>{t('Model Type')}</TableHead>
               <TableHead>{t('Remarks')}</TableHead>
               <TableHead className='w-16'></TableHead>
             </TableRow>
@@ -104,8 +105,10 @@ export default function Models() {
                     {item.name}
                   </div>
                 </TableCell>
+                <TableCell>
+                  {ModelProviderTemplates[item.modelProvider].displayName}
+                </TableCell>
                 <TableCell>{item.modelVersion}</TableCell>
-                <TableCell>{item.type}</TableCell>
                 <TableCell>{item.remarks}</TableCell>
                 <TableCell>
                   <DropdownMenu>

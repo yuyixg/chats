@@ -31,7 +31,7 @@ const handler = async (req: ChatsApiRequest) => {
           id: x.chatModel.id,
           modelVersion: x.chatModel.modelVersion,
           name: x.chatModel.name,
-          type: x.chatModel.type,
+          modelProvider: x.chatModel.modelProvider,
           // systemPrompt: x.chatModel.systemPrompt,
           fileConfig: x.chatModel.fileConfig,
           fileServerConfig: fileServer

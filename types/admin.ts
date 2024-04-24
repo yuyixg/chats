@@ -1,4 +1,4 @@
-import { ModelVersions, ModelType } from './model';
+import { ModelVersions, ModelType, ModelProviders } from './model';
 import { Paging } from './page';
 import { Message } from './chat';
 import { PutFileServicesParams } from './file';
@@ -42,10 +42,11 @@ export interface PostUserModelParams {
 
 export interface GetModelResult {
   modelId: string;
+  modelProvider: ModelProviders;
   modelVersion: ModelVersions;
   name: string;
+  isDefault: boolean;
   rank: number;
-  type: ModelType;
   enabled: boolean;
   remarks: string;
   modelConfig: string;
@@ -67,6 +68,7 @@ export interface PutModelParams {
 }
 
 export interface PostModelParams {
+  modelProvider: ModelProviders;
   modelVersion: ModelVersions;
   name: string;
   enabled: boolean;
@@ -196,7 +198,7 @@ export interface PutPayServicesParams extends PostPayServicesParams {
 export interface GetModelKeysResult {
   id: string;
   name: string;
-  type: ModelType;
+  type: ModelProviders;
   configs: string;
   createdAt: string;
 }

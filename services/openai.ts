@@ -1,5 +1,6 @@
 import { GPT4Message, GPT4VisionMessage } from '@/types/chat';
 import { ChatModels } from '@/types/chatModel';
+import { ModelProviders } from '@/types/model';
 
 import {
   ParsedEvent,
@@ -14,8 +15,9 @@ export const OpenAIStream = async (
   messages: GPT4Message[] | GPT4VisionMessage[]
 ) => {
   const {
-    apiConfig: { host, type, apiKey },
+    apiConfig: { host, apiKey },
     modelVersion,
+    modelProvider,
     modelConfig: {
       prompt: systemPrompt,
       version,
@@ -24,7 +26,7 @@ export const OpenAIStream = async (
     },
   } = chatModel;
   let url = `${host}/v1/chat/completions`;
-  if (type === 'azure') {
+  if (modelProvider === ModelProviders.Azure) {
     const apiHost = host;
     url = `${apiHost}/openai/deployments/${
       deploymentName ? deploymentName : modelVersion.replaceAll('.', '')
@@ -33,20 +35,22 @@ export const OpenAIStream = async (
   const body = {
     headers: {
       'Content-Type': 'application/json',
-      ...(type === 'openai' && {
+      ...(modelProvider === ModelProviders.OpenAI && {
         Authorization: `Bearer ${apiKey}`,
       }),
-      ...(type === 'azure' && {
+      ...(modelProvider === ModelProviders.Azure && {
         'api-key': apiKey,
       }),
-      ...(type === 'openai' &&
+      ...(modelProvider === ModelProviders.OpenAI &&
         organization && {
           'OpenAI-Organization': organization,
         }),
     },
     method: 'POST',
     body: JSON.stringify({
-      ...(type === 'openai' && { model: deploymentName || modelVersion }),
+      ...(modelProvider === ModelProviders.OpenAI && {
+        model: deploymentName || modelVersion,
+      }),
       messages: [
         {
           role: 'system',

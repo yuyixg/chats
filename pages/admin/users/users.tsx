@@ -115,9 +115,6 @@ export default function Users() {
               <TableRow
                 className='cursor-pointer'
                 key={item.id}
-                onClick={() => {
-                  handleShowEditModal(item);
-                }}
               >
                 <TableCell>
                   <div className='flex gap-1 items-center'>

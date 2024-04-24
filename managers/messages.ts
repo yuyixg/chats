@@ -52,7 +52,7 @@ export class ChatMessageManager {
             id: true,
             modelVersion: true,
             name: true,
-            type: true,
+            modelProvider: true,
             fileServerId: true,
             fileConfig: true,
             modelConfig: true,

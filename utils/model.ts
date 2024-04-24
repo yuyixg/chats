@@ -4,7 +4,7 @@ import {
   ModelConfigType,
   ModelVersions,
 } from '@/types/model';
-import { ModelDefaultTemplates } from '@/types/template';
+import { ModelTemplates } from '@/types/template';
 
 export function verifyModel(model: any, config: ChatModelConfig) {
   const { tokens, counts, expires } = model;
@@ -40,7 +40,7 @@ export function getModelConfigs(
   configType: ModelConfigType
 ) {
   if (!modelVersion) return null;
-  const template = ModelDefaultTemplates[modelVersion] as any;
+  const template = ModelTemplates[modelVersion] as any;
   return template[configType] || null;
 }
 

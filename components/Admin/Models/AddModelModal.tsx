@@ -18,7 +18,7 @@ import FormSwitch from '../../ui/form/switch';
 import FormTextarea from '../../ui/form/textarea';
 import { Button } from '../../ui/button';
 import FormSelect from '@/components/ui/form/select';
-import { ModelVersions } from '@/types/model';
+import { ModelProviders, ModelVersions } from '@/types/model';
 import {
   GetFileServicesResult,
   GetModelKeysResult,
@@ -39,6 +39,7 @@ import {
   PopoverContent,
   PopoverTrigger,
 } from '@/components/ui/popover';
+import { ModelProviderTemplates } from '@/types/template';
 
 interface IProps {
   isOpen: boolean;
@@ -51,9 +52,14 @@ export const AddModelModal = (props: IProps) => {
   const { t } = useTranslation('admin');
   const [fileServices, setFileServices] = useState<GetFileServicesResult[]>([]);
   const [modelKeys, setModelKeys] = useState<GetModelKeysResult[]>([]);
+  const [modelVersions, setModelVersions] = useState<ModelVersions[]>([]);
   const { isOpen, onClose, onSuccessful } = props;
 
   const formSchema = z.object({
+    modelProvider: z
+      .string()
+      .min(1, `${t('This field is require')}`)
+      .optional(),
     modelVersion: z
       .string()
       .min(1, `${t('This field is require')}`)
@@ -62,6 +68,7 @@ export const AddModelModal = (props: IProps) => {
       .string()
       .min(1, `${t('This field is require')}`)
       .optional(),
+    isDefault: z.boolean().optional(),
     enabled: z.boolean().optional(),
     modelConfig: z
       .string()
@@ -80,8 +87,10 @@ export const AddModelModal = (props: IProps) => {
   const form = useForm<z.infer<typeof formSchema>>({
     resolver: zodResolver(formSchema),
     defaultValues: {
+      modelProvider: '',
       modelVersion: '',
       name: '',
+      isDefault: false,
       enabled: true,
       modelConfig: '',
       modelKeysId: '',
@@ -123,6 +132,10 @@ export const AddModelModal = (props: IProps) => {
 
   useEffect(() => {
     const subscription = form.watch((value, { name, type }) => {
+      if (name === 'modelProvider' && type === 'change') {
+        const modelProvider = value.modelProvider as ModelProviders;
+        setModelVersions(ModelProviderTemplates[modelProvider].models);
+      }
       if (name === 'modelVersion' && type === 'change') {
         const modelVersion = value.modelVersion as ModelVersions;
         form.setValue('modelConfig', getModelModelConfigJson(modelVersion));
@@ -146,17 +159,18 @@ export const AddModelModal = (props: IProps) => {
           <form onSubmit={form.handleSubmit(onSubmit)}>
             <div className='grid grid-cols-2 gap-4'>
               <FormField
-                key='modelVersion'
+                key='modelProvider'
                 control={form.control}
-                name='modelVersion'
+                name='modelProvider'
                 render={({ field }) => {
                   return (
                     <FormSelect
                       field={field}
-                      label={t('Model Version')!}
-                      items={Object.keys(ModelVersions).map((key) => ({
-                        name: ModelVersions[key as keyof typeof ModelVersions],
-                        value: ModelVersions[key as keyof typeof ModelVersions],
+                      label={t('Model Provider')!}
+                      items={Object.keys(ModelProviderTemplates).map((key) => ({
+                        name: ModelProviderTemplates[key as ModelProviders]
+                          .displayName,
+                        value: key,
                       }))}
                     />
                   );
@@ -173,45 +187,72 @@ export const AddModelModal = (props: IProps) => {
                 }}
               ></FormField>
             </div>
-            <div className='flex justify-between'>
+            <div className='grid grid-cols-2 gap-4'>
               <FormField
-                key='modelKeysId'
+                key='modelVersion'
                 control={form.control}
-                name='modelKeysId'
+                name='modelVersion'
                 render={({ field }) => {
                   return (
                     <FormSelect
-                      className='w-full'
                       field={field}
-                      label={t('Model Keys')!}
-                      items={modelKeys.map((keys) => ({
-                        name: keys.name,
-                        value: keys.id,
+                      label={t('Model Version')!}
+                      items={modelVersions.map((key) => ({
+                        name: key,
+                        value: key,
                       }))}
                     />
                   );
                 }}
               ></FormField>
-              <div
-                hidden={!form.getValues('modelKeysId')}
-                className='text-sm w-36 mt-12 text-right'
-              >
-                <Popover>
-                  <PopoverTrigger>
-                    <span className='text-primary'>
-                      {t('Click View Configs')}
-                    </span>
-                  </PopoverTrigger>
-                  <PopoverContent className='w-full'>
-                    {JSON.stringify(
-                      modelKeys.find(
-                        (x) => x.id === form.getValues('modelKeysId')
-                      )?.configs,
-                      null,
-                      2
-                    )}
-                  </PopoverContent>
-                </Popover>
+              <div className='flex justify-between'>
+                <FormField
+                  key='modelKeysId'
+                  control={form.control}
+                  name='modelKeysId'
+                  render={({ field }) => {
+                    return (
+                      <FormSelect
+                        className='w-full'
+                        field={field}
+                        label={t('Model Keys')!}
+                        items={modelKeys
+                          .filter(
+                            (x) =>
+                              x.type ===
+                              (form.getValues(
+                                'modelProvider'
+                              ) as ModelProviders)
+                          )
+                          .map((keys) => ({
+                            name: keys.name,
+                            value: keys.id,
+                          }))}
+                      />
+                    );
+                  }}
+                ></FormField>
+                <div
+                  hidden={!form.getValues('modelKeysId')}
+                  className='text-sm w-36 mt-12 text-right'
+                >
+                  <Popover>
+                    <PopoverTrigger>
+                      <span className='text-primary'>
+                        {t('Click View Configs')}
+                      </span>
+                    </PopoverTrigger>
+                    <PopoverContent className='w-full'>
+                      {JSON.stringify(
+                        modelKeys.find(
+                          (x) => x.id === form.getValues('modelKeysId')
+                        )?.configs,
+                        null,
+                        2
+                      )}
+                    </PopoverContent>
+                  </Popover>
+                </div>
               </div>
             </div>
             <div className='grid grid-cols-2 gap-4'>
@@ -308,16 +349,31 @@ export const AddModelModal = (props: IProps) => {
                   return <FormInput field={field} label={t('Remarks')!} />;
                 }}
               ></FormField>
-              <FormField
-                key={'enabled'}
-                control={form.control}
-                name={'enabled'}
-                render={({ field }) => {
-                  return (
-                    <FormSwitch label={t('Is it enabled')!} field={field} />
-                  );
-                }}
-              ></FormField>
+              <div className='flex gap-4'>
+                <FormField
+                  key={'isDefault'}
+                  control={form.control}
+                  name={'isDefault'}
+                  render={({ field }) => {
+                    return (
+                      <FormSwitch
+                        label={t('Provide new User')!}
+                        field={field}
+                      />
+                    );
+                  }}
+                ></FormField>
+                <FormField
+                  key={'enabled'}
+                  control={form.control}
+                  name={'enabled'}
+                  render={({ field }) => {
+                    return (
+                      <FormSwitch label={t('Is it enabled')!} field={field} />
+                    );
+                  }}
+                ></FormField>
+              </div>
             </div>
             <DialogFooter className='pt-4'>
               <Button type='submit'>{t('Save')}</Button>

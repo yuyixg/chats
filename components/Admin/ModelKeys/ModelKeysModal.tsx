@@ -27,10 +27,9 @@ import {
 } from '@/types/admin';
 import { mergeConfigs } from '@/utils/model';
 import FormInput from '../../ui/form/input';
-import { ModelKeysDefaultTemplate } from '@/types/modelKeys';
 import FormSelect from '@/components/ui/form/select';
-import { ModelType } from '@/types/model';
-import { ModelApiTemplates } from '@/types/template';
+import { ModelProviders } from '@/types/model';
+import { ModelProviderTemplates } from '@/types/template';
 
 interface IProps {
   selected: GetModelKeysResult | null;
@@ -54,15 +53,15 @@ export const ModelKeysModal = (props: IProps) => {
     },
     {
       name: 'type',
-      label: t('Model Type'),
+      label: t('Model Provider'),
       defaultValue: '',
       render: (options: IFormFieldOption, field: FormFieldType) => (
         <FormSelect
           disabled={!!selected}
           field={field}
           options={options}
-          items={Object.keys(ModelApiTemplates).map((key) => ({
-            name: ModelApiTemplates[key as ModelType].displayName,
+          items={Object.keys(ModelProviderTemplates).map((key) => ({
+            name: ModelProviderTemplates[key as ModelProviders].displayName,
             value: key,
           }))}
         />
@@ -134,10 +133,14 @@ export const ModelKeysModal = (props: IProps) => {
   useEffect(() => {
     const subscription = form.watch((value, { name, type }) => {
       if (name === 'type' && type === 'change') {
-        const modelType = value.type as ModelType;
+        const modelProvider = value.type as ModelProviders;
         form.setValue(
           'configs',
-          JSON.stringify(ModelApiTemplates[modelType].apiConfig, null, 2)
+          JSON.stringify(
+            ModelProviderTemplates[modelProvider].apiConfig,
+            null,
+            2
+          )
         );
       }
     });
@@ -154,7 +157,10 @@ export const ModelKeysModal = (props: IProps) => {
         form.setValue('type', type);
         form.setValue(
           'configs',
-          mergeConfigs(ModelApiTemplates[type as ModelType].apiConfig, configs)
+          mergeConfigs(
+            ModelProviderTemplates[type as ModelProviders].apiConfig,
+            configs
+          )
         );
       }
     }
