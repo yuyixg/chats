@@ -36,6 +36,7 @@ CREATE TABLE "ChatModels" (
     "modelProvider" TEXT NOT NULL,
     "modelVersion" TEXT NOT NULL,
     "name" TEXT NOT NULL,
+    "isDefault" BOOLEAN NOT NULL DEFAULT false,
     "rank" INTEGER,
     "remarks" TEXT,
     "modelKeysId" TEXT,

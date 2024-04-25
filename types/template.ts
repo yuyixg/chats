@@ -122,7 +122,7 @@ export const ModelTemplates = {
     modelConfig: {
       prompt:
         "You are ChatGPT, a large language model trained by OpenAI. Follow the user's instructions carefully. Respond using markdown.",
-      version: '',
+      version: '2024-02-01',
       organization: '',
       deploymentName: '',
     },
@@ -138,7 +138,7 @@ export const ModelTemplates = {
     modelConfig: {
       prompt:
         "You are ChatGPT, a large language model trained by OpenAI. Follow the user's instructions carefully. Respond using markdown.",
-      version: '',
+      version: '2024-02-01',
       organization: '',
       deploymentName: '',
     },
@@ -153,7 +153,7 @@ export const ModelTemplates = {
     modelConfig: {
       prompt:
         "You are ChatGPT, a large language model trained by OpenAI. Follow the user's instructions carefully. Respond using markdown.",
-      version: '',
+      version: '2024-02-01',
       organization: '',
       deploymentName: '',
     },

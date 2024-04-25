@@ -159,6 +159,16 @@ export const AddModelModal = (props: IProps) => {
           <form onSubmit={form.handleSubmit(onSubmit)}>
             <div className='grid grid-cols-2 gap-4'>
               <FormField
+                key='name'
+                control={form.control}
+                name='name'
+                render={({ field }) => {
+                  return (
+                    <FormInput field={field} label={t('Model Display Name')!} />
+                  );
+                }}
+              ></FormField>
+              <FormField
                 key='modelProvider'
                 control={form.control}
                 name='modelProvider'
@@ -173,16 +183,6 @@ export const AddModelModal = (props: IProps) => {
                         value: key,
                       }))}
                     />
-                  );
-                }}
-              ></FormField>
-              <FormField
-                key='name'
-                control={form.control}
-                name='name'
-                render={({ field }) => {
-                  return (
-                    <FormInput field={field} label={t('Model Display Name')!} />
                   );
                 }}
               ></FormField>
