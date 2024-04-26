@@ -1,6 +1,6 @@
 import {
   ChatModelConfig,
-  ChatModelPrice,
+  ChatModelPriceConfig,
   ModelConfigType,
   ModelVersions,
 } from '@/types/model';
@@ -92,14 +92,14 @@ export function mergeConfigs(obj1: any, obj2: any) {
 export const ModelPriceUnit = 100000;
 
 export function conversionModelPriceToDisplay(priceConfig: string) {
-  const configs = JSON.parse(priceConfig) as ChatModelPrice;
+  const configs = JSON.parse(priceConfig) as ChatModelPriceConfig;
   configs.input = configs.input * ModelPriceUnit;
   configs.out = configs.out * ModelPriceUnit;
   return JSON.stringify(configs, null, 2);
 }
 
 export function conversionModelPriceToSave(priceConfig: string) {
-  const configs = JSON.parse(priceConfig) as ChatModelPrice;
+  const configs = JSON.parse(priceConfig) as ChatModelPriceConfig;
   configs.input = configs.input / ModelPriceUnit;
   configs.out = configs.out / ModelPriceUnit;
   return JSON.stringify(configs);

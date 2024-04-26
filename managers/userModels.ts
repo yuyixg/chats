@@ -56,11 +56,11 @@ export class UserModelManager {
   }
 
   static async updateUserModelTokenCount(
-    id: string,
+    userId: string,
     modelId: string,
     token: number
   ) {
-    const userModel = await prisma.userModels.findUnique({ where: { id } });
+    const userModel = await prisma.userModels.findFirst({ where: { userId } });
     let models = JSON.parse(userModel?.models || '[]') as any[];
     models = models.map((m) => {
       if (m.modelId === modelId) {
@@ -76,7 +76,7 @@ export class UserModelManager {
 
     return await prisma.userModels.update({
       where: {
-        id,
+        id: userModel?.id,
       },
       data: {
         models: JSON.stringify(models),

@@ -1,19 +1,20 @@
 import { Conversation } from '@/types/chat';
 
 import { ConversationComponent } from './Conversation';
+import { ChatResult } from '@/apis/userService';
 
 interface Props {
-  conversations: Conversation[];
+  chats: ChatResult[];
 }
 
-export const Conversations = ({ conversations }: Props) => {
+export const Conversations = ({ chats }: Props) => {
   return (
-    <div className="flex w-full flex-col gap-1">
-      {conversations
+    <div className='flex w-full flex-col gap-1'>
+      {chats
         .slice()
         .reverse()
-        .map((conversation, index) => (
-          <ConversationComponent key={index} conversation={conversation} />
+        .map((chat, index) => (
+          <ConversationComponent key={index} chat={chat} />
         ))}
     </div>
   );

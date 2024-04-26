@@ -1,4 +1,4 @@
-import { ChatMessageManager } from './messages';
+import { ChatMessagesManager } from './chatMessages';
 import { ChatModelManager } from './models';
 import { UsersManager } from './users';
 import { UserModelManager } from './userModels';
@@ -10,10 +10,11 @@ import { OrdersManager } from './order';
 import { RequestLogsManager } from './requestLogs';
 import { PayServiceManager } from './payService';
 import { ModelKeysManager } from './modelKeys';
+import { ChatsManager } from './chats';
 
 export {
   ChatModelManager,
-  ChatMessageManager,
+  ChatMessagesManager,
   UsersManager,
   UserModelManager,
   SessionsManager,
@@ -23,5 +24,6 @@ export {
   OrdersManager,
   RequestLogsManager,
   PayServiceManager,
-  ModelKeysManager
+  ModelKeysManager,
+  ChatsManager,
 };

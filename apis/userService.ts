@@ -3,6 +3,25 @@ import { Model } from '@/types/model';
 import { ProviderResult, SingInParams } from '@/types/user';
 import { UserSession } from '@/utils/user';
 
+export interface ChatResult {
+  id: string;
+  title: string;
+  chatModelId?: string;
+  displayingLeafChatMessageNodeId: string;
+  isShared: boolean;
+}
+
+export interface PostChatParams {
+  title: string;
+  chatModelId?: string;
+}
+
+export interface PutChatParams {
+  id: string;
+  title?: string;
+  isShared?: boolean;
+}
+
 export const changeUserPassword = (newPassword: string) => {
   const fetchService = useFetch();
   return fetchService.put('/api/user/change-password', {
@@ -13,6 +32,26 @@ export const changeUserPassword = (newPassword: string) => {
 export const getUserMessages = () => {
   const fetchService = useFetch();
   return fetchService.get('/api/messages');
+};
+
+export const getChats = (): Promise<ChatResult[]> => {
+  const fetchService = useFetch();
+  return fetchService.get('/api/chats');
+};
+
+export const postChats = (params: PostChatParams): Promise<ChatResult> => {
+  const fetchService = useFetch();
+  return fetchService.post('/api/chats', { body: params });
+};
+
+export const putChats = (params: PutChatParams) => {
+  const fetchService = useFetch();
+  return fetchService.put('/api/chats', { body: params });
+};
+
+export const deleteChats = (id: string) => {
+  const fetchService = useFetch();
+  return fetchService.delete('/api/chats?id=' + id);
 };
 
 export const putUserMessages = (

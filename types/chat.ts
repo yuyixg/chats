@@ -52,6 +52,8 @@ export interface ChatBody {
   messages: Message[];
   prompt: string;
   temperature: number;
+  parentId: string;
+  chatId: string;
 }
 
 export interface Conversation {

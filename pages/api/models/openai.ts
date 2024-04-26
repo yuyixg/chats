@@ -1,4 +1,3 @@
-import { DEFAULT_TEMPERATURE } from '@/utils/const';
 import { OpenAIStream } from '@/services/openai';
 import {
   ChatBody,
@@ -9,8 +8,9 @@ import {
 import { get_encoding } from 'tiktoken';
 import { ModelVersions } from '@/types/model';
 import {
-  ChatMessageManager,
+  ChatMessagesManager,
   ChatModelManager,
+  ChatsManager,
   UserBalancesManager,
   UserModelManager,
 } from '@/managers';
@@ -35,8 +35,7 @@ export const config = {
 
 const handler = async (req: ChatsApiRequest, res: ChatsApiResponse) => {
   const { userId } = req.session;
-  const { messageId, model, messages, prompt, temperature } =
-    req.body as ChatBody;
+  const { chatId, parentId, model, messages } = req.body as ChatBody;
 
   const chatModel = await ChatModelManager.findModelById(model.id);
   if (!chatModel?.enabled) {
@@ -60,30 +59,30 @@ const handler = async (req: ChatsApiRequest, res: ChatsApiResponse) => {
     throw new BadRequest('Insufficient balance');
   }
 
-  let promptToSend = prompt;
-  if (!promptToSend) {
-    promptToSend = modelConfig.prompt;
+  let prompt = null;
+  if (!prompt) {
+    prompt = modelConfig.prompt;
   }
 
-  let temperatureToUse = temperature;
-  if (temperatureToUse == null) {
-    temperatureToUse = DEFAULT_TEMPERATURE;
+  let temperature = null;
+  if (!temperature) {
+    temperature = modelConfig.temperature;
   }
 
   const encoding = get_encoding('cl100k_base');
 
-  const prompt_tokens = encoding.encode(promptToSend);
+  const prompt_tokens = encoding.encode(prompt);
 
-  let tokenCount = prompt_tokens.length;
+  let tokenUsed = prompt_tokens.length;
   let messagesToSend: GPT4Message[] | GPT4VisionMessage[] = [];
 
   for (let i = messages.length - 1; i >= 0; i--) {
     const message = messages[i];
     const sendTokens = encoding.encode(message.content.text!);
-    if (tokenCount + sendTokens.length + 1000 > modelConfig.tokenLimit!) {
+    if (tokenUsed + sendTokens.length + 1000 > modelConfig.tokenLimit!) {
       break;
     }
-    tokenCount += sendTokens.length;
+    tokenUsed += sendTokens.length;
   }
 
   if (chatModel.modelVersion === ModelVersions.GPT_4_Vision) {
@@ -114,8 +113,8 @@ const handler = async (req: ChatsApiRequest, res: ChatsApiResponse) => {
 
   const stream = await OpenAIStream(
     chatModel,
-    promptToSend,
-    temperatureToUse,
+    prompt,
+    temperature,
     messagesToSend
   );
   let assistantMessage = '';
@@ -130,10 +129,10 @@ const handler = async (req: ChatsApiRequest, res: ChatsApiResponse) => {
         }
         if (done) {
           let messageTokens = encoding.encode(assistantMessage).length;
-          tokenCount += messageTokens;
-          const totalPrice = calcTokenPrice(
+          tokenUsed += messageTokens;
+          const calculatedPrice = calcTokenPrice(
             priceConfig,
-            tokenCount,
+            tokenUsed,
             messageTokens
           );
           encoding.free();
@@ -141,17 +140,21 @@ const handler = async (req: ChatsApiRequest, res: ChatsApiResponse) => {
             role: 'assistant',
             content: { text: assistantMessage },
           });
-          await ChatMessageManager.recordChat(
-            messageId,
+          await ChatMessagesManager.create({
+            chatId,
             userId,
-            userModel.id!,
-            messages,
-            tokenCount,
-            totalPrice,
-            promptToSend,
-            chatModel.id!
+            parentId,
+            messages: JSON.stringify(messages),
+            tokenUsed,
+            calculatedPrice,
+          });
+          await UserModelManager.updateUserModelTokenCount(
+            userId,
+            chatModel.id,
+            tokenUsed
           );
-          await UserBalancesManager.chatUpdateBalance(userId, totalPrice);
+          await UserBalancesManager.chatUpdateBalance(userId, calculatedPrice);
+          await ChatsManager.update({ id: chatId, chatModelId: chatModel.id });
           return res.end();
         }
         res.write(Buffer.from(value));

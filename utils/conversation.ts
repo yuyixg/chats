@@ -21,6 +21,18 @@ export const updateConversation = (
   };
 };
 
+export const saveSelectChatId = (chatId: string) => {
+  localStorage.setItem('selectedChatId', chatId);
+};
+
+export const getSelectChatId = () => {
+  localStorage.getItem('selectedChatId');
+};
+
+export const removeSelectChatId = () => {
+  localStorage.removeItem('selectedChatId');
+};
+
 export const saveConversation = (conversation: Conversation) => {
   localStorage.setItem('selectedConversation', JSON.stringify(conversation));
 };
