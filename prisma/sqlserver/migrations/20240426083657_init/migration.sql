@@ -76,7 +76,7 @@ CREATE TABLE [dbo].[Chats] (
     [id] NVARCHAR(1000) NOT NULL,
     [title] NVARCHAR(50) NOT NULL,
     [userId] NVARCHAR(1000) NOT NULL,
-    [chatModelId] NVARCHAR(1000) NOT NULL,
+    [chatModelId] NVARCHAR(1000),
     [userModelConfig] NVARCHAR(1000) NOT NULL CONSTRAINT [Chats_userModelConfig_df] DEFAULT '{}',
     [displayingLeafChatMessageNodeId] NVARCHAR(1000),
     [isShared] BIT NOT NULL CONSTRAINT [Chats_isShared_df] DEFAULT 0,
@@ -91,7 +91,8 @@ CREATE TABLE [dbo].[ChatMessages] (
     [userId] NVARCHAR(1000) NOT NULL,
     [chatId] NVARCHAR(1000) NOT NULL,
     [parentId] NVARCHAR(1000),
-    [messages] NVARCHAR(1000) NOT NULL,
+    [userMessage] TEXT NOT NULL,
+    [assistantResponse] TEXT NOT NULL,
     [calculatedPrice] DECIMAL(32,16) NOT NULL,
     [tokenUsed] INT NOT NULL,
     [isDeleted] BIT NOT NULL CONSTRAINT [ChatMessages_isDeleted_df] DEFAULT 0,
@@ -218,7 +219,7 @@ ALTER TABLE [dbo].[UserModels] ADD CONSTRAINT [UserModels_userId_fkey] FOREIGN K
 ALTER TABLE [dbo].[Chats] ADD CONSTRAINT [Chats_userId_fkey] FOREIGN KEY ([userId]) REFERENCES [dbo].[Users]([id]) ON DELETE NO ACTION ON UPDATE CASCADE;
 
 -- AddForeignKey
-ALTER TABLE [dbo].[Chats] ADD CONSTRAINT [Chats_chatModelId_fkey] FOREIGN KEY ([chatModelId]) REFERENCES [dbo].[ChatModels]([id]) ON DELETE NO ACTION ON UPDATE CASCADE;
+ALTER TABLE [dbo].[Chats] ADD CONSTRAINT [Chats_chatModelId_fkey] FOREIGN KEY ([chatModelId]) REFERENCES [dbo].[ChatModels]([id]) ON DELETE SET NULL ON UPDATE CASCADE;
 
 -- AddForeignKey
 ALTER TABLE [dbo].[ChatMessages] ADD CONSTRAINT [ChatMessages_chatId_fkey] FOREIGN KEY ([chatId]) REFERENCES [dbo].[Chats]([id]) ON DELETE NO ACTION ON UPDATE CASCADE;

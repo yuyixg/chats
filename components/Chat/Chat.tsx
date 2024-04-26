@@ -25,6 +25,7 @@ import { SystemPrompt } from './SystemPrompt';
 import { HomeContext } from '@/pages/home/home';
 import { SharedMessageModal } from './SharedMessageModal';
 import { AccountBalance } from './AccountBalance';
+import { ModelProviders } from '@/types/model';
 
 interface Props {
   stopConversationRef: MutableRefObject<boolean>;
@@ -36,6 +37,7 @@ export const Chat = memo(({ stopConversationRef }: Props) => {
   const {
     state: {
       selectedConversation,
+      selectChatId,
       conversations,
       modelsLoading,
       loading,
@@ -59,7 +61,7 @@ export const Chat = memo(({ stopConversationRef }: Props) => {
 
   const handleSend = useCallback(
     async (message: Message, deleteCount = 0) => {
-      if (selectedConversation) {
+      if (selectChatId) {
         let updatedConversation: Conversation;
         if (deleteCount) {
           const updatedMessages = [...selectedConversation.messages];
@@ -83,14 +85,12 @@ export const Chat = memo(({ stopConversationRef }: Props) => {
         homeDispatch({ field: 'loading', value: true });
         homeDispatch({ field: 'messageIsStreaming', value: true });
         const chatBody: ChatBody = {
-          messageId: updatedConversation.id,
-          model: updatedConversation.model,
-          messages: updatedConversation.messages,
-          prompt: updatedConversation.prompt,
-          temperature: updatedConversation.temperature,
+          chatId: selectChatId!,
+          parentId: undefined,
+          messages: [],
         };
 
-        const endpoint = getModelEndpoint(chatBody.model);
+        const endpoint = getModelEndpoint();
         let body = JSON.stringify(chatBody);
 
         const controller = new AbortController();
@@ -183,7 +183,7 @@ export const Chat = memo(({ stopConversationRef }: Props) => {
         saveConversation(updatedConversation);
         const updatedConversations: Conversation[] = conversations.map(
           (conversation) => {
-            if (conversation.id === selectedConversation.id) {
+            if (conversation.id === selectChatId) {
               return updatedConversation;
             }
             return conversation;

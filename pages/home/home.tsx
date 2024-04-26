@@ -63,6 +63,7 @@ interface HomeInitialState {
   models: Model[];
   chats: ChatResult[];
   selectChatId: string | undefined;
+  messages: [];
   conversations: Conversation[];
   selectedConversation: Conversation | undefined;
   currentMessage: Message | undefined;

@@ -95,16 +95,17 @@ model Chats {
 }
 
 model ChatMessages {
-  id              String   @id @default(uuid())
-  userId          String
-  chatId          String
-  parentId        String?
-  messages        String
-  calculatedPrice Decimal
-  tokenUsed       Int
-  isDeleted       Boolean  @default(false)
-  createdAt       DateTime @default(now())
-  chats           Chats    @relation(fields: [chatId], references: [id])
+  id                String   @id @default(uuid())
+  userId            String
+  chatId            String
+  parentId          String?
+  userMessage       String   @db.Text()
+  assistantResponse String   @db.Text()
+  calculatedPrice   Decimal
+  tokenUsed         Int
+  isDeleted         Boolean  @default(false)
+  createdAt         DateTime @default(now())
+  chats             Chats    @relation(fields: [chatId], references: [id])
 }
 
 model UserBalances {

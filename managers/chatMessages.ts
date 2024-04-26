@@ -6,7 +6,8 @@ export interface CreateChatMessage {
   userId: string;
   chatId: string;
   parentId?: string;
-  messages: string;
+  userMessage: string;
+  assistantResponse: string;
   calculatedPrice: Decimal;
   tokenUsed: number;
 }
