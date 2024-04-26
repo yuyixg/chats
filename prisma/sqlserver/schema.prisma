@@ -25,11 +25,11 @@ model Users {
   createdAt    DateTime      @default(now())
   updatedAt    DateTime      @updatedAt
   sessions     Sessions[]
-  messages     Messages[]
   userBalances UserBalances?
   UserModels   UserModels[]
   AuditLogs    RequestLogs[]
   Orders       Orders[]
+  Chats        Chats[]
 }
 
 model FileServices {
@@ -58,8 +58,8 @@ model ChatModels {
   enabled       Boolean    @default(true)
   createdAt     DateTime   @default(now())
   updatedAt     DateTime   @updatedAt
-  messages      Messages[]
   ModelKeys     ModelKeys? @relation(fields: [modelKeysId], references: [id])
+  Chats         Chats[]
 }
 
 model Sessions {
@@ -79,22 +79,33 @@ model UserModels {
   user      Users    @relation(fields: [userId], references: [id])
 }
 
-model Messages {
-  id          String     @id @default(uuid())
-  userId      String
-  chatModelId String
-  name        String
-  prompt      String?
-  messages    String     @db.Text()
-  tokenCount  Int        @default(0)
-  chatCount   Int        @default(0)
-  totalPrice  Decimal    @default(0)
-  isDeleted   Boolean?   @default(false)
-  isShared    Boolean    @default(false)
-  createdAt   DateTime   @default(now())
-  updatedAt   DateTime   @updatedAt
-  user        Users      @relation(fields: [userId], references: [id])
-  chatModel   ChatModels @relation(fields: [chatModelId], references: [id])
+model Chats {
+  id                              String         @id @default(uuid())
+  title                           String         @db.NVarChar(50)
+  userId                          String
+  chatModelId                     String?
+  userModelConfig                 String         @default("{}")
+  displayingLeafChatMessageNodeId String?
+  isShared                        Boolean        @default(false)
+  isDeleted                       Boolean        @default(false)
+  createdAt                       DateTime       @default(now())
+  user                            Users          @relation(fields: [userId], references: [id])
+  chatModel                       ChatModels?    @relation(fields: [chatModelId], references: [id])
+  ChatMessages                    ChatMessages[]
+}
+
+model ChatMessages {
+  id                String   @id @default(uuid())
+  userId            String
+  chatId            String
+  parentId          String?
+  userMessage       String   @db.Text()
+  assistantResponse String   @db.Text()
+  calculatedPrice   Decimal
+  tokenUsed         Int
+  isDeleted         Boolean  @default(false)
+  createdAt         DateTime @default(now())
+  chats             Chats    @relation(fields: [chatId], references: [id])
 }
 
 model UserBalances {

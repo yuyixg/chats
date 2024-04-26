@@ -1,8 +1,8 @@
-import { ChatModelPrice } from '@/types/model';
+import { ChatModelPriceConfig } from '@/types/model';
 import Decimal from 'decimal.js';
 
 export const calcTokenPrice = (
-  priceConfig: ChatModelPrice,
+  priceConfig: ChatModelPriceConfig,
   inputTokenCount: number,
   outTokenCount: number
 ) => {

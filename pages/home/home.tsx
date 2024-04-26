@@ -28,7 +28,13 @@ import { ErrorMessage } from '@/types/error';
 import { Model } from '@/types/model';
 import { Prompt } from '@/types/prompt';
 import { UserSession } from '@/utils/user';
-import { getUserMessages, getUserModels } from '@/apis/userService';
+import {
+  ChatResult,
+  getChats,
+  getUserMessages,
+  getUserModels,
+  postChats,
+} from '@/apis/userService';
 import {
   DEFAULT_LANGUAGE,
   DEFAULT_THEME,
@@ -55,6 +61,9 @@ interface HomeInitialState {
   modelError: ErrorMessage | null;
   modelsLoading: boolean;
   models: Model[];
+  chats: ChatResult[];
+  selectChatId: string | undefined;
+  messages: [];
   conversations: Conversation[];
   selectedConversation: Conversation | undefined;
   currentMessage: Message | undefined;
@@ -76,6 +85,8 @@ const initialState: HomeInitialState = {
   modelError: null,
   modelsLoading: false,
   models: [],
+  chats: [],
+  selectChatId: undefined,
   conversations: [],
   selectedConversation: undefined,
   currentMessage: undefined,
@@ -91,6 +102,10 @@ const initialState: HomeInitialState = {
 interface HomeContextProps {
   state: HomeInitialState;
   dispatch: Dispatch<ActionType<HomeInitialState>>;
+  handleNewChat: () => void;
+  handleSelectChat: (chatId: string) => void;
+  handleUpdateChatTitle: (id: string, title: string) => void;
+  handleDeleteChat: (id: string) => void;
   handleNewConversation: () => void;
   handleSelectConversation: (conversation: Conversation) => void;
   handleUpdateConversation: (
@@ -114,6 +129,7 @@ const Home = ({ defaultModelId }: Props) => {
 
   const {
     state: {
+      chats,
       conversations,
       selectedConversation,
       models,
@@ -124,6 +140,31 @@ const Home = ({ defaultModelId }: Props) => {
   } = contextValue;
   const stopConversationRef = useRef<boolean>(false);
   const { setTheme } = useTheme();
+
+  const handleNewChat = async () => {
+    const chat = await postChats({ title: t('New Conversation') });
+    dispatch({ field: 'selectChatId', value: chat.id });
+    dispatch({ field: 'chats', value: [...chats, chat] });
+  };
+
+  const handleSelectChat = (chatId: string) => {
+    dispatch({ field: 'selectChatId', value: chatId });
+  };
+
+  const handleUpdateChatTitle = (id: string, title: string) => {
+    const chat = chats.map((x) => {
+      if (x.id === id) x.title = title;
+      return x;
+    });
+    dispatch({ field: 'chats', value: chat });
+  };
+
+  const handleDeleteChat = (id: string) => {
+    const _chats = chats.filter((x) => {
+      return x.id !== id;
+    });
+    dispatch({ field: 'chats', value: _chats });
+  };
 
   const handleNewConversation = () => {
     const lastConversation = conversations[conversations.length - 1];
@@ -247,6 +288,12 @@ const Home = ({ defaultModelId }: Props) => {
   }, [messageIsStreaming]);
 
   useEffect(() => {
+    getChats().then((data) => {
+      dispatch({ field: 'chats', value: data });
+    });
+  }, [messageIsStreaming]);
+
+  useEffect(() => {
     const selectedConversation = localStorage.getItem('selectedConversation');
     if (selectedConversation) {
       const parsedSelectedConversation: Conversation =
@@ -302,6 +349,11 @@ const Home = ({ defaultModelId }: Props) => {
     <HomeContext.Provider
       value={{
         ...contextValue,
+        handleNewChat,
+        handleSelectChat,
+        handleUpdateChatTitle,
+        handleDeleteChat,
+
         handleNewConversation,
         handleSelectConversation,
         handleUpdateConversation,

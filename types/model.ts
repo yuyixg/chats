@@ -56,8 +56,15 @@ export interface ChatModelFileConfig {
   maxCount: number;
 }
 
+export interface ChatModelApiConfig {
+  host: string;
+  apiKey: string;
+  secret: string;
+}
+
 export interface ChatModelConfig {
   prompt: string;
+  temperature: number;
   maxLength?: number;
   tokenLimit?: number;
   version?: string;
@@ -65,7 +72,7 @@ export interface ChatModelConfig {
   deploymentName?: string;
 }
 
-export interface ChatModelPrice {
+export interface ChatModelPriceConfig {
   input: number;
   out: number;
 }
