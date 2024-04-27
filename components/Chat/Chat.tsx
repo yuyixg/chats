@@ -38,11 +38,15 @@ export const Chat = memo(({ stopConversationRef }: Props) => {
     state: {
       selectedConversation,
       selectChatId,
+      selectModelId,
+      currentMessages,
+      chats,
       conversations,
       modelsLoading,
       loading,
       prompts,
     },
+    handleUpdateChatTitle,
     handleUpdateConversation,
     hasModel,
     dispatch: homeDispatch,
@@ -62,32 +66,34 @@ export const Chat = memo(({ stopConversationRef }: Props) => {
   const handleSend = useCallback(
     async (message: Message, deleteCount = 0) => {
       if (selectChatId) {
-        let updatedConversation: Conversation;
-        if (deleteCount) {
-          const updatedMessages = [...selectedConversation.messages];
-          for (let i = 0; i < deleteCount; i++) {
-            updatedMessages.pop();
-          }
-          updatedConversation = {
-            ...selectedConversation,
-            messages: [...updatedMessages, message],
-          };
-        } else {
-          updatedConversation = {
-            ...selectedConversation,
-            messages: [...selectedConversation.messages, message],
-          };
-        }
-        homeDispatch({
-          field: 'selectedConversation',
-          value: updatedConversation,
-        });
-        homeDispatch({ field: 'loading', value: true });
-        homeDispatch({ field: 'messageIsStreaming', value: true });
+        // let updatedConversation: Conversation;
+        // if (deleteCount) {
+        //   const updatedMessages = [...selectedConversation.messages];
+        //   for (let i = 0; i < deleteCount; i++) {
+        //     updatedMessages.pop();
+        //   }
+        //   updatedConversation = {
+        //     ...selectedConversation,
+        //     messages: [...updatedMessages, message],
+        //   };
+        // } else {
+        //   updatedConversation = {
+        //     ...selectedConversation,
+        //     messages: [...selectedConversation.messages, message],
+        //   };
+        // }
+        // homeDispatch({
+        //   field: 'selectedConversation',
+        //   value: updatedConversation,
+        // });
+        // homeDispatch({ field: 'loading', value: true });
+        // homeDispatch({ field: 'messageIsStreaming', value: true });
+        const messageContent = message.content;
         const chatBody: ChatBody = {
+          modelId: selectModelId!,
           chatId: selectChatId!,
-          parentId: undefined,
-          messages: [],
+          parentId: null,
+          userMessage: messageContent,
         };
 
         const endpoint = getModelEndpoint();
@@ -115,18 +121,7 @@ export const Chat = memo(({ stopConversationRef }: Props) => {
           homeDispatch({ field: 'messageIsStreaming', value: false });
           return;
         }
-        if (updatedConversation.messages.length === 1) {
-          const { content } = message;
-          const contentText = content.text || '';
-          const customName =
-            contentText.length > 30
-              ? contentText.substring(0, 30) + '...'
-              : contentText;
-          updatedConversation = {
-            ...updatedConversation,
-            name: customName,
-          };
-        }
+
         homeDispatch({ field: 'loading', value: false });
         let done = false;
         let isFirst = true;
@@ -144,60 +139,62 @@ export const Chat = memo(({ stopConversationRef }: Props) => {
           done = doneReading;
           const chunkValue = decoder.decode(value);
           text += chunkValue;
-          if (isFirst) {
-            isFirst = false;
-            const updatedMessages: Message[] = [
-              ...updatedConversation.messages,
-              { role: 'assistant', content: { text: chunkValue } },
-            ];
-            updatedConversation = {
-              ...updatedConversation,
-              messages: updatedMessages,
-            };
-            homeDispatch({
-              field: 'selectedConversation',
-              value: updatedConversation,
-            });
-          } else {
-            const updatedMessages: Message[] = updatedConversation.messages.map(
-              (message, index) => {
-                if (index === updatedConversation.messages.length - 1) {
-                  return {
-                    ...message,
-                    content: { text },
-                  };
-                }
-                return message;
-              }
-            );
-            updatedConversation = {
-              ...updatedConversation,
-              messages: updatedMessages,
-            };
-            homeDispatch({
-              field: 'selectedConversation',
-              value: updatedConversation,
-            });
-          }
+          console.log(text);
+          // if (isFirst) {
+          //   isFirst = false;
+          //   const updatedMessages: Message[] = [
+          //     ...currentMessages,
+          //     { role: 'assistant', content: { text: chunkValue } },
+          //   ];
+          //   updatedConversation = {
+          //     ...updatedConversation,
+          //     messages: updatedMessages,
+          //   };
+          //   homeDispatch({
+          //     field: 'currentMessages',
+          //     value: updatedConversation,
+          //   });
+          // }
+          // else {
+          //   const updatedMessages: Message[] = updatedConversation.messages.map(
+          //     (message, index) => {
+          //       if (index === updatedConversation.messages.length - 1) {
+          //         return {
+          //           ...message,
+          //           content: { text },
+          //         };
+          //       }
+          //       return message;
+          //     }
+          //   );
+          //   updatedConversation = {
+          //     ...updatedConversation,
+          //     messages: updatedMessages,
+          //   };
+          //   homeDispatch({
+          //     field: 'selectedConversation',
+          //     value: updatedConversation,
+          //   });
+          // }
         }
-        saveConversation(updatedConversation);
-        const updatedConversations: Conversation[] = conversations.map(
-          (conversation) => {
-            if (conversation.id === selectChatId) {
-              return updatedConversation;
-            }
-            return conversation;
-          }
-        );
-        if (updatedConversations.length === 0) {
-          updatedConversations.push(updatedConversation);
-        }
-        homeDispatch({ field: 'conversations', value: updatedConversations });
-        saveConversations(updatedConversations);
+        // saveConversation(updatedConversation);
+        // const updatedConversations: Conversation[] = conversations.map(
+        //   (conversation) => {
+        //     if (conversation.id === selectChatId) {
+        //       return updatedConversation;
+        //     }
+        //     return conversation;
+        //   }
+        // );
+        // if (updatedConversations.length === 0) {
+        //   updatedConversations.push(updatedConversation);
+        // }
+        // homeDispatch({ field: 'conversations', value: updatedConversations });
+        // saveConversations(updatedConversations);
         homeDispatch({ field: 'messageIsStreaming', value: false });
       }
     },
-    [conversations, selectedConversation, stopConversationRef]
+    [chats, selectChatId, stopConversationRef]
   );
 
   const scrollToBottom = useCallback(() => {
@@ -307,7 +304,7 @@ export const Chat = memo(({ stopConversationRef }: Props) => {
           ref={chatContainerRef}
           onScroll={handleScroll}
         >
-          {selectedConversation?.messages.length === 0 ? (
+          {currentMessages?.length === 0 ? (
             <>
               <div className='mx-auto flex flex-col space-y-5 md:space-y-10 px-3 pt-5 md:pt-12 sm:max-w-[600px]'>
                 <div className='text-center text-3xl font-semibold text-gray-800 dark:text-gray-100'>
@@ -321,11 +318,11 @@ export const Chat = memo(({ stopConversationRef }: Props) => {
                   )}
                 </div>
 
-                {hasModel() && (
+                {
                   <div className='flex h-full flex-col space-y-4 rounded-lg border border-neutral-200 p-4 dark:border-neutral-600'>
                     <AccountBalance />
                     <ModelSelect />
-                    <SystemPrompt
+                    {/* <SystemPrompt
                       conversation={selectedConversation}
                       prompts={prompts}
                       onChangePrompt={(prompt) =>
@@ -334,7 +331,7 @@ export const Chat = memo(({ stopConversationRef }: Props) => {
                           value: prompt,
                         })
                       }
-                    />
+                    /> */}
 
                     {/* <TemperatureSlider
                       label={t('Temperature')}
@@ -346,7 +343,7 @@ export const Chat = memo(({ stopConversationRef }: Props) => {
                       }
                     /> */}
                   </div>
-                )}
+                }
               </div>
             </>
           ) : (

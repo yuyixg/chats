@@ -49,7 +49,7 @@ export interface GPT4Message {
 export interface ChatBody {
   modelId: string;
   userMessage: Content;
-  parentId?: string;
+  parentId: string | null;
   chatId: string;
 }
 

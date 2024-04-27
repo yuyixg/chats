@@ -43,6 +43,7 @@ import {
 } from '@/types/settings';
 import { useTheme } from 'next-themes';
 import Spinner from '@/components/Spinner';
+import { ChatMessage } from '@/types/chatMessage';
 
 interface Props {
   serverSideApiKeyIsSet: boolean;
@@ -63,7 +64,8 @@ interface HomeInitialState {
   models: Model[];
   chats: ChatResult[];
   selectChatId: string | undefined;
-  messages: [];
+  selectModelId: string | undefined;
+  currentMessages: ChatMessage[];
   conversations: Conversation[];
   selectedConversation: Conversation | undefined;
   currentMessage: Message | undefined;
@@ -84,8 +86,10 @@ const initialState: HomeInitialState = {
   messageIsStreaming: false,
   modelError: null,
   modelsLoading: false,
+  currentMessages: [],
   models: [],
   chats: [],
+  selectModelId: undefined,
   selectChatId: undefined,
   conversations: [],
   selectedConversation: undefined,
@@ -107,6 +111,7 @@ interface HomeContextProps {
   handleUpdateChatTitle: (id: string, title: string) => void;
   handleDeleteChat: (id: string) => void;
   handleNewConversation: () => void;
+  handleSelectModel: (modelId: string) => void;
   handleSelectConversation: (conversation: Conversation) => void;
   handleUpdateConversation: (
     conversation: Conversation,
@@ -141,14 +146,22 @@ const Home = ({ defaultModelId }: Props) => {
   const stopConversationRef = useRef<boolean>(false);
   const { setTheme } = useTheme();
 
-  const handleNewChat = async () => {
-    const chat = await postChats({ title: t('New Conversation') });
-    dispatch({ field: 'selectChatId', value: chat.id });
-    dispatch({ field: 'chats', value: [...chats, chat] });
+  const handleNewChat = () => {
+    postChats({ title: t('New Conversation') }).then((data) => {
+      dispatch({ field: 'selectChatId', value: data.id });
+      dispatch({ field: 'chats', value: [...chats, data] });
+    });
   };
 
   const handleSelectChat = (chatId: string) => {
     dispatch({ field: 'selectChatId', value: chatId });
+    getUserMessages(chatId).then((data) => {
+      console.log(data);
+    });
+  };
+
+  const handleSelectModel = (modelId: string) => {
+    dispatch({ field: 'selectModelId', value: modelId });
   };
 
   const handleUpdateChatTitle = (id: string, title: string) => {
@@ -280,12 +293,12 @@ const Home = ({ defaultModelId }: Props) => {
     }
   }, []);
 
-  useEffect(() => {
-    !messageIsStreaming &&
-      getUserMessages().then((data) => {
-        dispatch({ field: 'conversations', value: data });
-      });
-  }, [messageIsStreaming]);
+  // useEffect(() => {
+  //   !messageIsStreaming &&
+  //     getUserMessages().then((data) => {
+  //       dispatch({ field: 'conversations', value: data });
+  //     });
+  // }, [messageIsStreaming]);
 
   useEffect(() => {
     getChats().then((data) => {
@@ -293,35 +306,35 @@ const Home = ({ defaultModelId }: Props) => {
     });
   }, [messageIsStreaming]);
 
-  useEffect(() => {
-    const selectedConversation = localStorage.getItem('selectedConversation');
-    if (selectedConversation) {
-      const parsedSelectedConversation: Conversation =
-        JSON.parse(selectedConversation);
+  // useEffect(() => {
+  //   const selectedConversation = localStorage.getItem('selectedConversation');
+  //   if (selectedConversation) {
+  //     const parsedSelectedConversation: Conversation =
+  //       JSON.parse(selectedConversation);
 
-      dispatch({
-        field: 'selectedConversation',
-        value: parsedSelectedConversation,
-      });
-    } else {
-      if (!models || models.length === 0) return;
-      const lastConversation = conversations[conversations.length - 1];
-      const _defaultModelId = defaultModelId ? defaultModelId : models[0]?.id;
-      const model = lastConversation?.model || getModel(_defaultModelId);
-      dispatch({
-        field: 'selectedConversation',
-        value: {
-          id: uuidv4(),
-          name: t('New Conversation'),
-          messages: [],
-          model: model,
-          prompt: t(model.systemPrompt),
-          fileServerConfig: model.fileServerConfig,
-          temperature: DEFAULT_TEMPERATURE,
-        },
-      });
-    }
-  }, [defaultModelId, models, dispatch]);
+  //     dispatch({
+  //       field: 'selectedConversation',
+  //       value: parsedSelectedConversation,
+  //     });
+  //   } else {
+  //     if (!models || models.length === 0) return;
+  //     const lastConversation = conversations[conversations.length - 1];
+  //     const _defaultModelId = defaultModelId ? defaultModelId : models[0]?.id;
+  //     const model = lastConversation?.model || getModel(_defaultModelId);
+  //     dispatch({
+  //       field: 'selectedConversation',
+  //       value: {
+  //         id: uuidv4(),
+  //         name: t('New Conversation'),
+  //         messages: [],
+  //         model: model,
+  //         prompt: t(model.systemPrompt),
+  //         fileServerConfig: model.fileServerConfig,
+  //         temperature: DEFAULT_TEMPERATURE,
+  //       },
+  //     });
+  //   }
+  // }, [defaultModelId, models, dispatch]);
 
   useEffect(() => {
     dispatch({
@@ -331,9 +344,8 @@ const Home = ({ defaultModelId }: Props) => {
 
     getUserModels().then((data) => {
       if (data && data.length > 0) {
-        localStorage.removeItem('selectedConversation');
         dispatch({
-          field: 'defaultModelId',
+          field: 'selectModelId',
           value: data[0].id,
         });
       }
@@ -353,6 +365,7 @@ const Home = ({ defaultModelId }: Props) => {
         handleSelectChat,
         handleUpdateChatTitle,
         handleDeleteChat,
+        handleSelectModel,
 
         handleNewConversation,
         handleSelectConversation,

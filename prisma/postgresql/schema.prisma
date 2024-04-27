@@ -30,6 +30,7 @@ model Users {
   UserModels   UserModels[]
   AuditLogs    RequestLogs[]
   Orders       Orders[]
+  Chats        Chats[]
 }
 
 model FileServices {
@@ -60,6 +61,7 @@ model ChatModels {
   updatedAt     DateTime   @updatedAt
   messages      Messages[]
   ModelKeys     ModelKeys? @relation(fields: [modelKeysId], references: [id])
+  Chats         Chats[]
 }
 
 model Sessions {
@@ -95,6 +97,35 @@ model Messages {
   updatedAt   DateTime   @updatedAt
   user        Users      @relation(fields: [userId], references: [id])
   chatModel   ChatModels @relation(fields: [chatModelId], references: [id])
+}
+
+model Chats {
+  id                              String         @id @default(uuid())
+  title                           String         @db.VarChar(50)
+  userId                          String
+  chatModelId                     String?
+  userModelConfig                 String         @default("{}")
+  displayingLeafChatMessageNodeId String?
+  isShared                        Boolean        @default(false)
+  isDeleted                       Boolean        @default(false)
+  createdAt                       DateTime       @default(now())
+  user                            Users          @relation(fields: [userId], references: [id])
+  chatModel                       ChatModels?    @relation(fields: [chatModelId], references: [id])
+  ChatMessages                    ChatMessages[]
+}
+
+model ChatMessages {
+  id                String   @id @default(uuid())
+  userId            String
+  chatId            String
+  parentId          String?
+  userMessage       String   @db.Text()
+  assistantResponse String   @db.Text()
+  calculatedPrice   Decimal
+  tokenUsed         Int
+  isDeleted         Boolean  @default(false)
+  createdAt         DateTime @default(now())
+  chats             Chats    @relation(fields: [chatId], references: [id])
 }
 
 model UserBalances {

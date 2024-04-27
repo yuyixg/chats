@@ -5,7 +5,7 @@ import Decimal from 'decimal.js';
 export interface CreateChatMessage {
   userId: string;
   chatId: string;
-  parentId?: string;
+  parentId?: string | null;
   userMessage: string;
   assistantResponse: string;
   calculatedPrice: Decimal;

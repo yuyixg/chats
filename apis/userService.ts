@@ -29,9 +29,9 @@ export const changeUserPassword = (newPassword: string) => {
   });
 };
 
-export const getUserMessages = () => {
+export const getUserMessages = (chatId: string) => {
   const fetchService = useFetch();
-  return fetchService.get('/api/messages');
+  return fetchService.get('/api/messages?chatId=' + chatId);
 };
 
 export const getChats = (): Promise<ChatResult[]> => {

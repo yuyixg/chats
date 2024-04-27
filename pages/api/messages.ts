@@ -14,10 +14,10 @@ export const config = {
 const handler = async (req: ChatsApiRequest) => {
   const { userId } = req.session;
   if (req.method === 'GET') {
-    const { chatsId } = req.query as { chatsId: string };
+    const { chatId } = req.query as { chatId: string };
     const chatMessages = await ChatMessagesManager.findUserMessageByChatId(
       userId,
-      chatsId
+      chatId
     );
     return chatMessages;
   } else if (req.method === 'DELETE') {

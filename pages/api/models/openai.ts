@@ -1,13 +1,6 @@
 import { OpenAIStream } from '@/services/openai';
-import {
-  ChatBody,
-  GPT4Message,
-  GPT4VisionMessage,
-  GPT4VisionContent,
-  Content,
-} from '@/types/chat';
+import { ChatBody, GPT4Message, Content } from '@/types/chat';
 import { get_encoding } from 'tiktoken';
-import { ModelVersions } from '@/types/model';
 import {
   ChatMessagesManager,
   ChatModelManager,
@@ -82,7 +75,10 @@ const handler = async (req: ChatsApiRequest, res: ChatsApiResponse) => {
     userId,
     chatId
   );
-  const findParents = (items: ChatMessages[], id?: string): ChatMessages[] => {
+  const findParents = (
+    items: ChatMessages[],
+    id: string | null
+  ): ChatMessages[] => {
     if (!id) return [];
     const currentItem = items.find((item) => item.id === id);
     if (currentItem && currentItem.parentId !== null) {
@@ -91,16 +87,6 @@ const handler = async (req: ChatsApiRequest, res: ChatsApiResponse) => {
     return currentItem ? [currentItem] : [];
   };
   const messages = findParents(chatMessages, parentId);
-  // for (let i = messages.length - 1; i >= 0; i--) {
-  //   const message = messages[i];
-  //   const assistantTokens = encoding.encode(message.assistantResponse);
-  //   const userTokens = encoding.encode(message.userMessage);
-  //   if (tokenUsed + sendTokens.length + 1000 > modelConfig.tokenLimit!) {
-  //     break;
-  //   }
-  //   tokenUsed += sendTokens.length;
-  // }
-
   messages.forEach((message) => {
     const userMessage = {
       role: 'user',
@@ -114,31 +100,24 @@ const handler = async (req: ChatsApiRequest, res: ChatsApiResponse) => {
     messagesToSend = [...messagesToSend, userMessage, assistantResponse];
   });
 
-  if (chatModel.modelVersion === ModelVersions.GPT_4_Vision) {
-    messagesToSend = messages.map((message) => {
-      const messageContent = message.content;
-      let content = [] as GPT4VisionContent[];
-      if (messageContent?.image) {
-        messageContent.image.forEach((url) => {
-          content.push({
-            type: 'image_url',
-            image_url: { url },
-          });
-        });
-      }
-      if (messageContent?.text) {
-        content.push({ type: 'text', text: messageContent.text });
-      }
-      return { role: message.role, content };
-    });
-  } else {
-    messagesToSend = messages.map((message) => {
-      return {
-        role: 'user',
-        content: userMessage.text,
-      } as GPT4Message;
-    });
+  function convertMessageToSend<T>(userMessage: Content) {
+    return { role: 'user', content: userMessage.text } as T;
   }
+
+  // function convertToGPTVisionMessage(userMessage: Content) {
+  //   const message = { role: 'user' } as GPT4VisionMessage;
+  //   message.content.push({ type: 'text', text: userMessage.text });
+  //   userMessage.image?.forEach((url) => {
+  //     message.content.push({
+  //       type: 'image_url',
+  //       image_url: { url },
+  //     });
+  //   });
+  //   return message;
+  // }
+
+  const userMessageToSend = convertMessageToSend<GPT4Message>(userMessage);
+  messagesToSend.push(userMessageToSend);
 
   const stream = await OpenAIStream(
     chatModel,
@@ -165,14 +144,15 @@ const handler = async (req: ChatsApiRequest, res: ChatsApiResponse) => {
             messageTokens
           );
           encoding.free();
-          messages.push({
+          messagesToSend.push({
             role: 'assistant',
-            content: { text: assistantResponse },
+            content: assistantResponse,
           });
-          await ChatMessagesManager.create({
+          const chatMessage = await ChatMessagesManager.create({
             chatId,
             userId,
             parentId,
+            userMessage: JSON.stringify(userMessageToSend),
             assistantResponse,
             tokenUsed,
             calculatedPrice,
@@ -183,7 +163,15 @@ const handler = async (req: ChatsApiRequest, res: ChatsApiResponse) => {
             tokenUsed
           );
           await UserBalancesManager.chatUpdateBalance(userId, calculatedPrice);
-          await ChatsManager.update({ id: chatId, chatModelId: chatModel.id });
+
+          let title = userMessage.text!;
+          title = title.length > 30 ? title.substring(0, 30) + '...' : title;
+          await ChatsManager.update({
+            id: chatId,
+            title: title,
+            displayingLeafChatMessageNodeId: chatMessage.id,
+            chatModelId: chatModel.id,
+          });
           return res.end();
         }
         res.write(Buffer.from(value));
