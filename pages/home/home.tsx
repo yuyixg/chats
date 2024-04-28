@@ -44,6 +44,10 @@ import {
 import { useTheme } from 'next-themes';
 import Spinner from '@/components/Spinner';
 import { ChatMessage } from '@/types/chatMessage';
+interface HandleUpdateChatParams {
+  title?: string;
+  displayingLeafChatMessageNodeId?: string;
+}
 
 interface Props {
   serverSideApiKeyIsSet: boolean;
@@ -66,6 +70,7 @@ interface HomeInitialState {
   selectChatId: string | undefined;
   selectModelId: string | undefined;
   currentMessages: ChatMessage[];
+  selectMessages: ChatMessage[];
   conversations: Conversation[];
   selectedConversation: Conversation | undefined;
   currentMessage: Message | undefined;
@@ -87,6 +92,7 @@ const initialState: HomeInitialState = {
   modelError: null,
   modelsLoading: false,
   currentMessages: [],
+  selectMessages: [],
   models: [],
   chats: [],
   selectModelId: undefined,
@@ -108,7 +114,8 @@ interface HomeContextProps {
   dispatch: Dispatch<ActionType<HomeInitialState>>;
   handleNewChat: () => void;
   handleSelectChat: (chatId: string) => void;
-  handleUpdateChatTitle: (id: string, title: string) => void;
+  handleUpdateChat: (id: string, params: HandleUpdateChatParams) => void;
+  handleUpdateSelectMessage: (chatId: string) => void;
   handleDeleteChat: (id: string) => void;
   handleNewConversation: () => void;
   handleSelectModel: (modelId: string) => void;
@@ -136,6 +143,7 @@ const Home = ({ defaultModelId }: Props) => {
     state: {
       chats,
       conversations,
+      currentMessages,
       selectedConversation,
       models,
       user,
@@ -153,20 +161,65 @@ const Home = ({ defaultModelId }: Props) => {
     });
   };
 
+  function getAncestorsIncludingSelf(
+    nodes: ChatMessage[],
+    lastLeafId: string
+  ): ChatMessage[] {
+    const idToNodeMap = new Map<string, ChatMessage>();
+    nodes.forEach((node) => {
+      idToNodeMap.set(node.id, node);
+    });
+
+    // 初始化结果数组
+    const ancestors: ChatMessage[] = [];
+
+    // 查找给定节点的所有父级节点（包括自身）
+    let currentId: string | null = lastLeafId;
+    while (currentId != null) {
+      const currentNode = idToNodeMap.get(currentId);
+      if (currentNode) {
+        ancestors.unshift(currentNode); // 将节点添加到结果数组的开头（因为我们是从下向上查找的）
+        currentId = currentNode.parentId;
+      } else {
+        // 如果当前节点不存在，则终止循环
+        break;
+      }
+    }
+
+    return ancestors.reverse();
+  }
+
   const handleSelectChat = (chatId: string) => {
     dispatch({ field: 'selectChatId', value: chatId });
-    getUserMessages(chatId).then((data) => {
-      console.log(data);
-    });
+    const chat = chats.find((x) => x.id === chatId);
+    if (chat) {
+      getUserMessages(chatId).then((data) => {
+        dispatch({ field: 'currentMessages', value: data });
+        console.log(
+          'selectMessages',
+          getAncestorsIncludingSelf(data, chat.displayingLeafChatMessageNodeId),
+          chat.displayingLeafChatMessageNodeId
+        );
+        dispatch({
+          field: 'selectMessages',
+          value: getAncestorsIncludingSelf(
+            data,
+            chat.displayingLeafChatMessageNodeId
+          ),
+        });
+      });
+    }
   };
+
+  const handleUpdateSelectMessage = (chatId: string) => {};
 
   const handleSelectModel = (modelId: string) => {
     dispatch({ field: 'selectModelId', value: modelId });
   };
 
-  const handleUpdateChatTitle = (id: string, title: string) => {
+  const handleUpdateChat = (id: string, params: HandleUpdateChatParams) => {
     const chat = chats.map((x) => {
-      if (x.id === id) x.title = title;
+      if (x.id === id) return { ...x, ...params };
       return x;
     });
     dispatch({ field: 'chats', value: chat });
@@ -363,9 +416,10 @@ const Home = ({ defaultModelId }: Props) => {
         ...contextValue,
         handleNewChat,
         handleSelectChat,
-        handleUpdateChatTitle,
+        handleUpdateChat,
         handleDeleteChat,
         handleSelectModel,
+        handleUpdateSelectMessage,
 
         handleNewConversation,
         handleSelectConversation,

@@ -1,4 +1,5 @@
 import prisma from '@/prisma/prisma';
+import { ChatMessagesManager } from './chatMessages';
 
 export interface CreateChat {
   title: string;
@@ -24,6 +25,9 @@ export class ChatsManager {
   }
 
   static async update(params: UpdateChat) {
+    if (!(await ChatMessagesManager.checkIsFirstChat(params.id))) {
+      delete params.title;
+    }
     return await prisma.chats.update({
       where: { id: params.id },
       data: { ...params },

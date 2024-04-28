@@ -16,19 +16,28 @@ import rehypeMathjax from 'rehype-mathjax';
 import remarkGfm from 'remark-gfm';
 import remarkMath from 'remark-math';
 import { HomeContext } from '@/pages/home/home';
+import { useCreateReducer } from '@/hooks/useCreateReducer';
+import { ChatMessageInitialState, initialState } from './ChatMessage.state';
 
 export interface Props {
+  id: string;
+  parentId: string | null;
+  lastLeafId: string;
+  childrenIds: string[];
   message: Message;
-  messageIndex: number;
-  onEdit?: (editedMessage: Message) => void;
+  onEdit?: (editedMessage: Message, parentId: string | null) => void;
 }
 
 export const ChatMessage: FC<Props> = memo(
-  ({ message, messageIndex, onEdit }) => {
+  ({ childrenIds, parentId, message, onEdit }) => {
     const { t } = useTranslation('chat');
-
     const {
-      state: { selectedConversation, conversations, messageIsStreaming },
+      state: {
+        selectChatId,
+        selectedConversation,
+        conversations,
+        messageIsStreaming,
+      },
       dispatch: homeDispatch,
     } = useContext(HomeContext);
 
@@ -58,8 +67,8 @@ export const ChatMessage: FC<Props> = memo(
 
     const handleEditMessage = () => {
       if (message.content != messageContent) {
-        if (selectedConversation && onEdit) {
-          onEdit({ ...message, content: messageContent });
+        if (selectChatId && onEdit) {
+          onEdit({ ...message, content: messageContent }, parentId);
         }
       }
       setIsEditing(false);
@@ -143,7 +152,7 @@ export const ChatMessage: FC<Props> = memo(
 
           <div className='prose mt-[-2px] w-full dark:prose-invert'>
             {message.role === 'user' ? (
-              <div className='flex w-full justify-between'>
+              <>
                 {isEditing ? (
                   <div className='flex w-full flex-col'>
                     <textarea
@@ -213,7 +222,8 @@ export const ChatMessage: FC<Props> = memo(
                 )}
 
                 {!isEditing && (
-                  <div className='md:-mr-8 ml-1 md:ml-0 flex flex-col md:flex-row gap-4 md:gap-1 items-center md:items-start justify-end md:justify-start'>
+                  <div className='flex gap-2'>
+                    <>{childrenIds.length}</>
                     <button
                       className='invisible group-hover:visible focus:visible text-gray-500 hover:text-gray-700 dark:text-gray-400 dark:hover:text-gray-300'
                       onClick={toggleEditing}
@@ -228,82 +238,81 @@ export const ChatMessage: FC<Props> = memo(
                     </button>
                   </div>
                 )}
-              </div>
+              </>
             ) : (
-              <div className='flex flex-row pr-4'>
-                <MemoizedReactMarkdown
-                  className='prose dark:prose-invert flex-1 leading-8 overflow-x-scroll'
-                  remarkPlugins={[remarkGfm, remarkMath]}
-                  rehypePlugins={[rehypeMathjax]}
-                  components={{
-                    code({ node, className, inline, children, ...props }) {
-                      if (children.length) {
-                        if (children[0] == '▍') {
-                          return (
-                            <span className='animate-pulse cursor-default mt-1'>
-                              ▍
-                            </span>
+              <>
+                <div className='flex flex-row pr-4'>
+                  <MemoizedReactMarkdown
+                    className='prose dark:prose-invert flex-1 leading-8 overflow-x-scroll'
+                    remarkPlugins={[remarkGfm, remarkMath]}
+                    rehypePlugins={[rehypeMathjax]}
+                    components={{
+                      code({ node, className, inline, children, ...props }) {
+                        if (children.length) {
+                          if (children[0] == '▍') {
+                            return (
+                              <span className='animate-pulse cursor-default mt-1'>
+                                ▍
+                              </span>
+                            );
+                          }
+
+                          children[0] = (children[0] as string).replace(
+                            '`▍`',
+                            '▍'
                           );
                         }
 
-                        children[0] = (children[0] as string).replace(
-                          '`▍`',
-                          '▍'
+                        const match = /language-(\w+)/.exec(className || '');
+
+                        return !inline ? (
+                          <CodeBlock
+                            key={Math.random()}
+                            language={(match && match[1]) || ''}
+                            value={String(children).replace(/\n$/, '')}
+                            {...props}
+                          />
+                        ) : (
+                          <code className={className} {...props}>
+                            {children}
+                          </code>
                         );
-                      }
+                      },
+                      table({ children }) {
+                        return (
+                          <table className='border-collapse border border-black px-3 py-1 dark:border-white'>
+                            {children}
+                          </table>
+                        );
+                      },
+                      th({ children }) {
+                        return (
+                          <th className='break-words border border-black bg-gray-500 px-3 py-1 text-white dark:border-white'>
+                            {children}
+                          </th>
+                        );
+                      },
+                      td({ children }) {
+                        return (
+                          <td className='break-words border border-black px-3 py-1 dark:border-white'>
+                            {children}
+                          </td>
+                        );
+                      },
+                    }}
+                  >
+                    {`${message.content.text}${
+                      messageIsStreaming
+                        ? // && id == (selectedConversation?.messages.length ?? 0) - 1
+                          '`▍`'
+                        : ''
+                    }`}
+                  </MemoizedReactMarkdown>
+                </div>
 
-                      const match = /language-(\w+)/.exec(className || '');
-
-                      return !inline ? (
-                        <CodeBlock
-                          key={Math.random()}
-                          language={(match && match[1]) || ''}
-                          value={String(children).replace(/\n$/, '')}
-                          {...props}
-                        />
-                      ) : (
-                        <code className={className} {...props}>
-                          {children}
-                        </code>
-                      );
-                    },
-                    table({ children }) {
-                      return (
-                        <table className='border-collapse border border-black px-3 py-1 dark:border-white'>
-                          {children}
-                        </table>
-                      );
-                    },
-                    th({ children }) {
-                      return (
-                        <th className='break-words border border-black bg-gray-500 px-3 py-1 text-white dark:border-white'>
-                          {children}
-                        </th>
-                      );
-                    },
-                    td({ children }) {
-                      return (
-                        <td className='break-words border border-black px-3 py-1 dark:border-white'>
-                          {children}
-                        </td>
-                      );
-                    },
-                  }}
-                >
-                  {`${message.content.text}${
-                    messageIsStreaming &&
-                    messageIndex ==
-                      (selectedConversation?.messages.length ?? 0) - 1
-                      ? '`▍`'
-                      : ''
-                  }`}
-                </MemoizedReactMarkdown>
-
-                <div className='md:-mr-8 ml-1 md:ml-0 flex flex-col md:flex-row gap-4 md:gap-1 items-center md:items-start justify-end md:justify-start'>
+                <div className='flex gap-2'>
                   {messagedCopied ? (
-                    <IconCheck
-                      className='text-green-500 dark:text-green-400'
-                    />
+                    <IconCheck className='text-green-500 dark:text-green-400' />
                   ) : (
                     <button
                       className='invisible group-hover:visible focus:visible text-gray-500 hover:text-gray-700 dark:text-gray-400 dark:hover:text-gray-300'
@@ -313,7 +322,7 @@ export const ChatMessage: FC<Props> = memo(
                     </button>
                   )}
                 </div>
-              </div>
+              </>
             )}
           </div>
         </div>

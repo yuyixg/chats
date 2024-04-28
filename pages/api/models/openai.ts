@@ -87,17 +87,9 @@ const handler = async (req: ChatsApiRequest, res: ChatsApiResponse) => {
     return currentItem ? [currentItem] : [];
   };
   const messages = findParents(chatMessages, parentId);
-  messages.forEach((message) => {
-    const userMessage = {
-      role: 'user',
-      content: message.userMessage,
-    } as GPT4Message;
-    const assistantResponse = {
-      role: 'assistant',
-      content: message.assistantResponse,
-    } as GPT4Message;
-
-    messagesToSend = [...messagesToSend, userMessage, assistantResponse];
+  messages.forEach((m) => {
+    const chatMessages = JSON.parse(m.messages) as GPT4Message[];
+    messagesToSend = [...messagesToSend, ...chatMessages];
   });
 
   function convertMessageToSend<T>(userMessage: Content) {
@@ -117,6 +109,12 @@ const handler = async (req: ChatsApiRequest, res: ChatsApiResponse) => {
   // }
 
   const userMessageToSend = convertMessageToSend<GPT4Message>(userMessage);
+  const currentMessage = [
+    {
+      role: 'user',
+      content: userMessage,
+    },
+  ];
   messagesToSend.push(userMessageToSend);
 
   const stream = await OpenAIStream(
@@ -144,16 +142,15 @@ const handler = async (req: ChatsApiRequest, res: ChatsApiResponse) => {
             messageTokens
           );
           encoding.free();
-          messagesToSend.push({
+          currentMessage.push({
             role: 'assistant',
-            content: assistantResponse,
+            content: { text: assistantResponse },
           });
           const chatMessage = await ChatMessagesManager.create({
             chatId,
             userId,
             parentId,
-            userMessage: JSON.stringify(userMessageToSend),
-            assistantResponse,
+            messages: JSON.stringify(currentMessage),
             tokenUsed,
             calculatedPrice,
           });
@@ -172,7 +169,12 @@ const handler = async (req: ChatsApiRequest, res: ChatsApiResponse) => {
             displayingLeafChatMessageNodeId: chatMessage.id,
             chatModelId: chatModel.id,
           });
-          return res.end();
+          return res.send(
+            `<end>${JSON.stringify({
+              title,
+              displayingLeafChatMessageNodeId: chatMessage.id,
+            })}</end>`
+          );
         }
         res.write(Buffer.from(value));
       }

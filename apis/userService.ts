@@ -1,4 +1,5 @@
 import { useFetch } from '@/hooks/useFetch';
+import { ChatMessage } from '@/types/chatMessage';
 import { Model } from '@/types/model';
 import { ProviderResult, SingInParams } from '@/types/user';
 import { UserSession } from '@/utils/user';
@@ -29,7 +30,7 @@ export const changeUserPassword = (newPassword: string) => {
   });
 };
 
-export const getUserMessages = (chatId: string) => {
+export const getUserMessages = (chatId: string): Promise<ChatMessage[]> => {
   const fetchService = useFetch();
   return fetchService.get('/api/messages?chatId=' + chatId);
 };

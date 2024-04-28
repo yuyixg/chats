@@ -6,8 +6,7 @@ export interface CreateChatMessage {
   userId: string;
   chatId: string;
   parentId?: string | null;
-  userMessage: string;
-  assistantResponse: string;
+  messages: string;
   calculatedPrice: Decimal;
   tokenUsed: number;
 }
@@ -31,5 +30,10 @@ export class ChatMessagesManager {
 
   static async delete(id: string) {
     return await prisma.chatMessages.delete({ where: { id } });
+  }
+
+  static async checkIsFirstChat(chatId: string) {
+    const message = await prisma.chatMessages.findFirst({ where: { chatId } });
+    return !!message;
   }
 }

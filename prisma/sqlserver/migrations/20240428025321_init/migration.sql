@@ -91,8 +91,7 @@ CREATE TABLE [dbo].[ChatMessages] (
     [userId] NVARCHAR(1000) NOT NULL,
     [chatId] NVARCHAR(1000) NOT NULL,
     [parentId] NVARCHAR(1000),
-    [userMessage] TEXT NOT NULL,
-    [assistantResponse] TEXT NOT NULL,
+    [messages] NTEXT NOT NULL,
     [calculatedPrice] DECIMAL(32,16) NOT NULL,
     [tokenUsed] INT NOT NULL,
     [isDeleted] BIT NOT NULL CONSTRAINT [ChatMessages_isDeleted_df] DEFAULT 0,
@@ -141,7 +140,7 @@ CREATE TABLE [dbo].[Orders] (
 CREATE TABLE [dbo].[Counterfoils] (
     [id] NVARCHAR(1000) NOT NULL,
     [orderId] NVARCHAR(1000) NOT NULL,
-    [info] TEXT NOT NULL,
+    [info] NTEXT NOT NULL,
     [createdAt] DATETIME2 NOT NULL CONSTRAINT [Counterfoils_createdAt_df] DEFAULT CURRENT_TIMESTAMP,
     CONSTRAINT [Counterfoils_pkey] PRIMARY KEY CLUSTERED ([id])
 );
@@ -172,7 +171,7 @@ CREATE TABLE [dbo].[PayServices] (
     [id] NVARCHAR(1000) NOT NULL,
     [type] NVARCHAR(1000) NOT NULL,
     [enabled] BIT NOT NULL CONSTRAINT [PayServices_enabled_df] DEFAULT 1,
-    [configs] TEXT NOT NULL,
+    [configs] NTEXT NOT NULL,
     [createdAt] DATETIME2 NOT NULL CONSTRAINT [PayServices_createdAt_df] DEFAULT CURRENT_TIMESTAMP,
     [updatedAt] DATETIME2 NOT NULL,
     CONSTRAINT [PayServices_pkey] PRIMARY KEY CLUSTERED ([id])
@@ -188,9 +187,9 @@ CREATE TABLE [dbo].[RequestLogs] (
     [statusCode] INT NOT NULL,
     [responseTime] NVARCHAR(1000) NOT NULL,
     [requestTime] NVARCHAR(1000) NOT NULL,
-    [headers] TEXT,
-    [request] TEXT,
-    [response] TEXT,
+    [headers] NTEXT,
+    [request] NTEXT,
+    [response] NTEXT,
     [createdAt] DATETIME2 NOT NULL CONSTRAINT [RequestLogs_createdAt_df] DEFAULT CURRENT_TIMESTAMP,
     CONSTRAINT [RequestLogs_pkey] PRIMARY KEY CLUSTERED ([id])
 );

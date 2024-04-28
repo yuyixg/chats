@@ -95,17 +95,16 @@ model Chats {
 }
 
 model ChatMessages {
-  id                String   @id @default(uuid())
-  userId            String
-  chatId            String
-  parentId          String?
-  userMessage       String   @db.Text()
-  assistantResponse String   @db.Text()
-  calculatedPrice   Decimal
-  tokenUsed         Int
-  isDeleted         Boolean  @default(false)
-  createdAt         DateTime @default(now())
-  chats             Chats    @relation(fields: [chatId], references: [id])
+  id              String   @id @default(uuid())
+  userId          String
+  chatId          String
+  parentId        String?
+  messages        String   @db.NText()
+  calculatedPrice Decimal
+  tokenUsed       Int
+  isDeleted       Boolean  @default(false)
+  createdAt       DateTime @default(now())
+  chats           Chats    @relation(fields: [chatId], references: [id])
 }
 
 model UserBalances {
@@ -143,7 +142,7 @@ model Orders {
 model Counterfoils {
   id        String   @id @default(uuid())
   orderId   String
-  info      String   @db.Text()
+  info      String   @db.NText()
   createdAt DateTime @default(now())
 }
 
@@ -168,7 +167,7 @@ model PayServices {
   id        String   @id @default(uuid())
   type      String
   enabled   Boolean  @default(true)
-  configs   String   @db.Text()
+  configs   String   @db.NText()
   createdAt DateTime @default(now())
   updatedAt DateTime @updatedAt
 }
@@ -182,9 +181,9 @@ model RequestLogs {
   statusCode   Int
   responseTime String
   requestTime  String
-  headers      String?  @db.Text()
-  request      String?  @db.Text()
-  response     String?  @db.Text()
+  headers      String?  @db.NText()
+  request      String?  @db.NText()
+  response     String?  @db.NText()
   createdAt    DateTime @default(now())
   user         Users?   @relation(fields: [userId], references: [id])
 }

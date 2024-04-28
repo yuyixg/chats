@@ -26,9 +26,17 @@ import { HomeContext } from '@/pages/home/home';
 import { SharedMessageModal } from './SharedMessageModal';
 import { AccountBalance } from './AccountBalance';
 import { ModelProviders } from '@/types/model';
+import { useCreateReducer } from '@/hooks/useCreateReducer';
+import { ChatMessageInitialState, initialState } from './ChatMessage.state';
+import ChatMessageContext from './ChatMessage.content';
 
 interface Props {
   stopConversationRef: MutableRefObject<boolean>;
+}
+
+interface ExtractChatResult {
+  title: string;
+  displayingLeafChatMessageNodeId: string;
 }
 
 export const Chat = memo(({ stopConversationRef }: Props) => {
@@ -39,18 +47,21 @@ export const Chat = memo(({ stopConversationRef }: Props) => {
       selectedConversation,
       selectChatId,
       selectModelId,
-      currentMessages,
+      selectMessages,
       chats,
       conversations,
       modelsLoading,
       loading,
       prompts,
     },
-    handleUpdateChatTitle,
+    handleUpdateSelectMessage,
+    handleUpdateChat,
     handleUpdateConversation,
     hasModel,
     dispatch: homeDispatch,
   } = useContext(HomeContext);
+
+  console.log(selectMessages);
 
   const [currentMessage, setCurrentMessage] = useState<Message>();
   const [autoScrollEnabled, setAutoScrollEnabled] = useState<boolean>(true);
@@ -62,9 +73,13 @@ export const Chat = memo(({ stopConversationRef }: Props) => {
   const messagesEndRef = useRef<HTMLDivElement>(null);
   const chatContainerRef = useRef<HTMLDivElement>(null);
   const textareaRef = useRef<HTMLTextAreaElement>(null);
+  function extractChatResult(text: string): ExtractChatResult {
+    const match = text.match(/<end>(.*?)<\/end>/);
+    return match ? JSON.parse(match[1]) : {};
+  }
 
   const handleSend = useCallback(
-    async (message: Message, deleteCount = 0) => {
+    async (message: Message, parentId: string | null, deleteCount = 0) => {
       if (selectChatId) {
         // let updatedConversation: Conversation;
         // if (deleteCount) {
@@ -92,7 +107,7 @@ export const Chat = memo(({ stopConversationRef }: Props) => {
         const chatBody: ChatBody = {
           modelId: selectModelId!,
           chatId: selectChatId!,
-          parentId: null,
+          parentId: parentId,
           userMessage: messageContent,
         };
 
@@ -108,6 +123,7 @@ export const Chat = memo(({ stopConversationRef }: Props) => {
           signal: controller.signal,
           body,
         });
+        console.log('response.body', response.body);
         if (!response.ok) {
           homeDispatch({ field: 'loading', value: false });
           homeDispatch({ field: 'messageIsStreaming', value: false });
@@ -139,7 +155,6 @@ export const Chat = memo(({ stopConversationRef }: Props) => {
           done = doneReading;
           const chunkValue = decoder.decode(value);
           text += chunkValue;
-          console.log(text);
           // if (isFirst) {
           //   isFirst = false;
           //   const updatedMessages: Message[] = [
@@ -177,6 +192,11 @@ export const Chat = memo(({ stopConversationRef }: Props) => {
           //   });
           // }
         }
+
+        const chatResult = extractChatResult(text);
+        handleUpdateChat(selectChatId, { ...chatResult });
+
+        console.log('response.body 2', response.body);
         // saveConversation(updatedConversation);
         // const updatedConversations: Conversation[] = conversations.map(
         //   (conversation) => {
@@ -273,6 +293,11 @@ export const Chat = memo(({ stopConversationRef }: Props) => {
   }, [selectedConversation, throttledScrollDown]);
 
   useEffect(() => {
+    console.log(selectChatId);
+    handleUpdateSelectMessage(selectChatId!);
+  }, [selectChatId]);
+
+  useEffect(() => {
     const observer = new IntersectionObserver(
       ([entry]) => {
         setAutoScrollEnabled(entry.isIntersecting);
@@ -304,7 +329,7 @@ export const Chat = memo(({ stopConversationRef }: Props) => {
           ref={chatContainerRef}
           onScroll={handleScroll}
         >
-          {currentMessages?.length === 0 ? (
+          {selectMessages?.length === 0 ? (
             <>
               <div className='mx-auto flex flex-col space-y-5 md:space-y-10 px-3 pt-5 md:pt-12 sm:max-w-[600px]'>
                 <div className='text-center text-3xl font-semibold text-gray-800 dark:text-gray-100'>
@@ -377,21 +402,23 @@ export const Chat = memo(({ stopConversationRef }: Props) => {
                 </div>
               )}
 
-              {selectedConversation?.messages.map((message, index) => (
-                <MemoizedChatMessage
-                  key={index}
-                  message={message}
-                  messageIndex={index}
-                  onEdit={(editedMessage) => {
-                    setCurrentMessage(editedMessage);
-                    // discard edited message and the ones that come after then resend
-                    handleSend(
-                      editedMessage,
-                      selectedConversation?.messages.length - index
-                    );
-                  }}
-                />
-              ))}
+              {selectMessages.map((current) =>
+                current.messages.map((message, index) => (
+                  <MemoizedChatMessage
+                    id={current.id!}
+                    key={current.id + index}
+                    parentId={current.parentId}
+                    lastLeafId={current.lastLeafId}
+                    childrenIds={current.childrenIds}
+                    message={message}
+                    onEdit={(editedMessage, parentId) => {
+                      setCurrentMessage(editedMessage);
+                      // discard edited message and the ones that come after then resend
+                      handleSend(editedMessage, parentId);
+                    }}
+                  />
+                ))
+              )}
 
               {loading && <ChatLoader />}
 
@@ -408,7 +435,7 @@ export const Chat = memo(({ stopConversationRef }: Props) => {
             textareaRef={textareaRef}
             onSend={(message) => {
               setCurrentMessage(message);
-              handleSend(message, 0);
+              handleSend(message, null);
             }}
             onScrollDownClick={handleScrollDown}
             onRegenerate={() => {
@@ -417,10 +444,10 @@ export const Chat = memo(({ stopConversationRef }: Props) => {
                   selectedConversation?.messages.length - 1
                 ];
               if (lastMessage?.role === 'user') {
-                handleSend(lastMessage, 1);
+                handleSend(lastMessage, null);
               } else {
                 if (currentMessage) {
-                  handleSend(currentMessage, 2);
+                  handleSend(currentMessage, null);
                 }
               }
             }}

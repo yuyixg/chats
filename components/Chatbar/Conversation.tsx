@@ -30,7 +30,7 @@ export const ConversationComponent = ({ chat }: Props) => {
   const {
     state: { selectChatId, messageIsStreaming },
     handleSelectChat,
-    handleUpdateChatTitle,
+    handleUpdateChat,
   } = useContext(HomeContext);
 
   const { handleDeleteChat } = useContext(ChatbarContext);
@@ -49,7 +49,7 @@ export const ConversationComponent = ({ chat }: Props) => {
   const handleChangeTitle = (selectChatId: string) => {
     if (title.trim().length > 0) {
       putChats({ id: selectChatId!, title }).then(() => {
-        handleUpdateChatTitle(selectChatId, title);
+        handleUpdateChat(selectChatId, { title });
         toast.success(t('Save successful'));
         setTitle('');
         setTitleChanging(false);

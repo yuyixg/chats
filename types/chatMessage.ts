@@ -1,8 +1,9 @@
-import { Content } from './chat';
+import { Message } from './chat';
 
 export interface ChatMessage {
-  id: string | null;
+  id: string;
   parentId: string | null;
-  userMessage: Content;
-  assistantResponse: string;
+  lastLeafId: string;
+  childrenIds: string[];
+  messages: Message[];
 }
