@@ -23,7 +23,7 @@ export class ChatMessagesManager {
 
   static async findUserMessageByChatId(userId: string, chatId: string) {
     let where: Prisma.ChatMessagesWhereInput = {
-      AND: { isDeleted: false, chatId, userId },
+      chatId,
     };
     return await prisma.chatMessages.findMany({ where });
   }

@@ -19,10 +19,7 @@ interface MessageNode {
 }
 
 function calculateMessages(nodes: MessageNode[]): MessageNode[] {
-  // 创建一个 Map 来保存 parentId 到它对应的 children 的映射
   const parentToChildrenMap = new Map<string, string[]>();
-
-  // 遍历所有节点，构建 parentId 到 children 的映射关系
   nodes.forEach((node) => {
     if (node.parentId !== null) {
       if (!parentToChildrenMap.has(node.parentId)) {
@@ -32,18 +29,14 @@ function calculateMessages(nodes: MessageNode[]): MessageNode[] {
     }
   });
 
-  // 用于查找最后一个子节点的方法
   const findLastLeafId = (nodeId: string): string => {
     const children = parentToChildrenMap.get(nodeId);
     if (!children || children.length === 0) {
-      return nodeId; // 如果一个节点没有子节点，那它就是最后的叶子
+      return nodeId;
     } else {
-      // 否则，我们递归地在它的最后一个子节点中查找最后的叶子
       return findLastLeafId(children[children.length - 1]);
     }
   };
-
-  // 根据构建的映射关系，为每个节点添加 childrenIds 和 lastLeafId 属性
   nodes = nodes.map((node) => {
     const children = parentToChildrenMap.get(node.id);
     node.childrenIds = children || [];

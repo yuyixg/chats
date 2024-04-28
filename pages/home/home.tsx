@@ -169,24 +169,19 @@ const Home = ({ defaultModelId }: Props) => {
     nodes.forEach((node) => {
       idToNodeMap.set(node.id, node);
     });
-
-    // 初始化结果数组
     const ancestors: ChatMessage[] = [];
-
-    // 查找给定节点的所有父级节点（包括自身）
     let currentId: string | null = lastLeafId;
     while (currentId != null) {
       const currentNode = idToNodeMap.get(currentId);
       if (currentNode) {
-        ancestors.unshift(currentNode); // 将节点添加到结果数组的开头（因为我们是从下向上查找的）
+        ancestors.unshift(currentNode);
         currentId = currentNode.parentId;
       } else {
-        // 如果当前节点不存在，则终止循环
         break;
       }
     }
 
-    return ancestors.reverse();
+    return ancestors;
   }
 
   const handleSelectChat = (chatId: string) => {
@@ -195,18 +190,15 @@ const Home = ({ defaultModelId }: Props) => {
     if (chat) {
       getUserMessages(chatId).then((data) => {
         dispatch({ field: 'currentMessages', value: data });
-        console.log(
-          'selectMessages',
-          getAncestorsIncludingSelf(data, chat.displayingLeafChatMessageNodeId),
+        const _selectMessages = getAncestorsIncludingSelf(
+          data,
           chat.displayingLeafChatMessageNodeId
         );
-        dispatch({
-          field: 'selectMessages',
-          value: getAncestorsIncludingSelf(
-            data,
-            chat.displayingLeafChatMessageNodeId
-          ),
-        });
+        console.log('_selectMessages', _selectMessages),
+          dispatch({
+            field: 'selectMessages',
+            value: _selectMessages,
+          });
       });
     }
   };

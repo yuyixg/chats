@@ -61,7 +61,7 @@ export const Chat = memo(({ stopConversationRef }: Props) => {
     dispatch: homeDispatch,
   } = useContext(HomeContext);
 
-  console.log(selectMessages);
+  console.log('selectMessages', selectMessages);
 
   const [currentMessage, setCurrentMessage] = useState<Message>();
   const [autoScrollEnabled, setAutoScrollEnabled] = useState<boolean>(true);
@@ -293,7 +293,6 @@ export const Chat = memo(({ stopConversationRef }: Props) => {
   }, [selectedConversation, throttledScrollDown]);
 
   useEffect(() => {
-    console.log(selectChatId);
     handleUpdateSelectMessage(selectChatId!);
   }, [selectChatId]);
 
@@ -435,7 +434,10 @@ export const Chat = memo(({ stopConversationRef }: Props) => {
             textareaRef={textareaRef}
             onSend={(message) => {
               setCurrentMessage(message);
-              handleSend(message, null);
+              handleSend(
+                message,
+                selectMessages[selectMessages.length - 1]?.id || null
+              );
             }}
             onScrollDownClick={handleScrollDown}
             onRegenerate={() => {

@@ -13,7 +13,7 @@ export interface UpdateChat {
   title?: string;
   chatModelId?: string;
   isShared?: boolean;
-  displayingLeafChatMessageNodeId: string;
+  displayingLeafChatMessageNodeId?: string;
 }
 
 export class ChatsManager {

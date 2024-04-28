@@ -1,5 +1,5 @@
 import { OpenAIStream } from '@/services/openai';
-import { ChatBody, GPT4Message, Content } from '@/types/chat';
+import { ChatBody, GPT4Message, Content, Message } from '@/types/chat';
 import { get_encoding } from 'tiktoken';
 import {
   ChatMessagesManager,
@@ -31,6 +31,7 @@ export const config = {
 const handler = async (req: ChatsApiRequest, res: ChatsApiResponse) => {
   const { userId } = req.session;
   const { chatId, parentId, modelId, userMessage } = req.body as ChatBody;
+  console.log(req.body);
 
   const chatModel = await ChatModelManager.findModelById(modelId);
   if (!chatModel?.enabled) {
@@ -88,8 +89,11 @@ const handler = async (req: ChatsApiRequest, res: ChatsApiResponse) => {
   };
   const messages = findParents(chatMessages, parentId);
   messages.forEach((m) => {
-    const chatMessages = JSON.parse(m.messages) as GPT4Message[];
-    messagesToSend = [...messagesToSend, ...chatMessages];
+    const chatMessages = JSON.parse(m.messages) as Message[];
+    const _messages = chatMessages.map((x) => {
+      return { role: x.role, content: x.content.text } as GPT4Message;
+    });
+    messagesToSend = [...messagesToSend, ..._messages];
   });
 
   function convertMessageToSend<T>(userMessage: Content) {
