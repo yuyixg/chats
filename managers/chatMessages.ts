@@ -25,7 +25,10 @@ export class ChatMessagesManager {
     let where: Prisma.ChatMessagesWhereInput = {
       chatId,
     };
-    return await prisma.chatMessages.findMany({ where });
+    return await prisma.chatMessages.findMany({
+      where,
+      orderBy: { createdAt: 'asc' },
+    });
   }
 
   static async delete(id: string) {
@@ -34,6 +37,6 @@ export class ChatMessagesManager {
 
   static async checkIsFirstChat(chatId: string) {
     const message = await prisma.chatMessages.findFirst({ where: { chatId } });
-    return !!message;
+    return message;
   }
 }

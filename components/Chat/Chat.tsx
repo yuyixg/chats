@@ -9,27 +9,18 @@ import {
   useState,
 } from 'react';
 import toast from 'react-hot-toast';
-
 import { useTranslation } from 'next-i18next';
-
 import { getModelEndpoint } from '@/utils/apis';
-import { saveConversation, saveConversations } from '@/utils/conversation';
 import { throttle } from '@/utils/throttle';
-import { ChatBody, Conversation, Message } from '@/types/chat';
+import { ChatBody, Message } from '@/types/chat';
 import Spinner from '../Spinner';
 import { ChatInput } from './ChatInput';
 import { ChatLoader } from './ChatLoader';
 import { MemoizedChatMessage } from './MemoizedChatMessage';
 import { ModelSelect } from './ModelSelect';
-import { SystemPrompt } from './SystemPrompt';
 import { HomeContext } from '@/pages/home/home';
 import { SharedMessageModal } from './SharedMessageModal';
 import { AccountBalance } from './AccountBalance';
-import { ModelProviders } from '@/types/model';
-import { useCreateReducer } from '@/hooks/useCreateReducer';
-import { ChatMessageInitialState, initialState } from './ChatMessage.state';
-import ChatMessageContext from './ChatMessage.content';
-
 interface Props {
   stopConversationRef: MutableRefObject<boolean>;
 }
@@ -48,11 +39,11 @@ export const Chat = memo(({ stopConversationRef }: Props) => {
       selectChatId,
       selectModelId,
       selectMessages,
+      currentMessages,
+      lastLeafId,
       chats,
-      conversations,
       modelsLoading,
       loading,
-      prompts,
     },
     handleUpdateSelectMessage,
     handleUpdateChat,
@@ -60,8 +51,6 @@ export const Chat = memo(({ stopConversationRef }: Props) => {
     hasModel,
     dispatch: homeDispatch,
   } = useContext(HomeContext);
-
-  console.log('selectMessages', selectMessages);
 
   const [currentMessage, setCurrentMessage] = useState<Message>();
   const [autoScrollEnabled, setAutoScrollEnabled] = useState<boolean>(true);
@@ -292,9 +281,9 @@ export const Chat = memo(({ stopConversationRef }: Props) => {
       );
   }, [selectedConversation, throttledScrollDown]);
 
-  useEffect(() => {
-    handleUpdateSelectMessage(selectChatId!);
-  }, [selectChatId]);
+  // useEffect(() => {
+  //   handleUpdateSelectMessage(selectChatId!);
+  // }, [selectChatId]);
 
   useEffect(() => {
     const observer = new IntersectionObserver(
@@ -401,23 +390,63 @@ export const Chat = memo(({ stopConversationRef }: Props) => {
                 </div>
               )}
 
-              {selectMessages.map((current) =>
-                current.messages.map((message, index) => (
+              {selectMessages.map((current) => {
+                let parentChildrenIds: string[] = [];
+                if (!current.parentId) {
+                  parentChildrenIds = currentMessages
+                    .filter((x) => !x.parentId)
+                    .map((x) => x.id)
+                    .reverse();
+                } else {
+                  parentChildrenIds =
+                    currentMessages.find((x) => x.id === current.parentId)
+                      ?.childrenIds || [];
+                }
+                return current.messages.map((message, index) => (
                   <MemoizedChatMessage
                     id={current.id!}
                     key={current.id + index}
                     parentId={current.parentId}
                     lastLeafId={current.lastLeafId}
                     childrenIds={current.childrenIds}
+                    parentChildrenIds={parentChildrenIds}
                     message={message}
+                    onChangeMessage={(messageId) => {
+                      const findLastLeafId = (
+                        nodes: any[],
+                        parentId: string
+                      ): string => {
+                        const children = nodes.filter(
+                          (node) => node.parentId === parentId
+                        );
+                        if (children.length === 0) {
+                          return parentId;
+                        }
+                        let lastLeafId = parentId;
+                        for (let child of children) {
+                          lastLeafId = findLastLeafId(nodes, child.id);
+                        }
+                        return lastLeafId;
+                      };
+                      const message = currentMessages.find(
+                        (x) => x.id === messageId
+                      );
+                      console.log(
+                        'findLastLeafId(currentMessages, message?.id!);',
+                        findLastLeafId(currentMessages, message?.id!)
+                      );
+                      handleUpdateSelectMessage(
+                        findLastLeafId(currentMessages, message?.id!)
+                      );
+                    }}
                     onEdit={(editedMessage, parentId) => {
                       setCurrentMessage(editedMessage);
                       // discard edited message and the ones that come after then resend
                       handleSend(editedMessage, parentId);
                     }}
                   />
-                ))
-              )}
+                ));
+              })}
 
               {loading && <ChatLoader />}
 
@@ -434,10 +463,7 @@ export const Chat = memo(({ stopConversationRef }: Props) => {
             textareaRef={textareaRef}
             onSend={(message) => {
               setCurrentMessage(message);
-              handleSend(
-                message,
-                selectMessages[selectMessages.length - 1]?.id || null
-              );
+              handleSend(message, lastLeafId);
             }}
             onScrollDownClick={handleScrollDown}
             onRegenerate={() => {

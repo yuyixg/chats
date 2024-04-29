@@ -71,6 +71,7 @@ interface HomeInitialState {
   selectModelId: string | undefined;
   currentMessages: ChatMessage[];
   selectMessages: ChatMessage[];
+  lastLeafId: string;
   conversations: Conversation[];
   selectedConversation: Conversation | undefined;
   currentMessage: Message | undefined;
@@ -93,6 +94,7 @@ const initialState: HomeInitialState = {
   modelsLoading: false,
   currentMessages: [],
   selectMessages: [],
+  lastLeafId: '',
   models: [],
   chats: [],
   selectModelId: undefined,
@@ -115,7 +117,8 @@ interface HomeContextProps {
   handleNewChat: () => void;
   handleSelectChat: (chatId: string) => void;
   handleUpdateChat: (id: string, params: HandleUpdateChatParams) => void;
-  handleUpdateSelectMessage: (chatId: string) => void;
+  handleSelectLastLeafId: (lastLeafId: string) => void;
+  handleUpdateSelectMessage: (lastLeafId: string) => void;
   handleDeleteChat: (id: string) => void;
   handleNewConversation: () => void;
   handleSelectModel: (modelId: string) => void;
@@ -141,6 +144,7 @@ const Home = ({ defaultModelId }: Props) => {
 
   const {
     state: {
+      selectChatId,
       chats,
       conversations,
       currentMessages,
@@ -185,8 +189,10 @@ const Home = ({ defaultModelId }: Props) => {
   }
 
   const handleSelectChat = (chatId: string) => {
+    if (selectChatId === chatId) return;
     dispatch({ field: 'selectChatId', value: chatId });
     const chat = chats.find((x) => x.id === chatId);
+    handleSelectLastLeafId(chat!.displayingLeafChatMessageNodeId);
     if (chat) {
       getUserMessages(chatId).then((data) => {
         dispatch({ field: 'currentMessages', value: data });
@@ -203,7 +209,24 @@ const Home = ({ defaultModelId }: Props) => {
     }
   };
 
-  const handleUpdateSelectMessage = (chatId: string) => {};
+  const handleUpdateSelectMessage = (lastLeafId: string) => {
+    handleSelectLastLeafId(lastLeafId);
+    const _selectMessages = getAncestorsIncludingSelf(
+      currentMessages,
+      lastLeafId
+    );
+    dispatch({
+      field: 'selectMessages',
+      value: _selectMessages,
+    });
+  };
+
+  const handleSelectLastLeafId = (lastLeafId: string) => {
+    dispatch({
+      field: 'lastLeafId',
+      value: lastLeafId,
+    });
+  };
 
   const handleSelectModel = (modelId: string) => {
     dispatch({ field: 'selectModelId', value: modelId });
@@ -215,6 +238,10 @@ const Home = ({ defaultModelId }: Props) => {
       return x;
     });
     dispatch({ field: 'chats', value: chat });
+    dispatch({
+      field: 'lastLeafId',
+      value: params.displayingLeafChatMessageNodeId,
+    });
   };
 
   const handleDeleteChat = (id: string) => {
@@ -412,6 +439,7 @@ const Home = ({ defaultModelId }: Props) => {
         handleDeleteChat,
         handleSelectModel,
         handleUpdateSelectMessage,
+        handleSelectLastLeafId,
 
         handleNewConversation,
         handleSelectConversation,

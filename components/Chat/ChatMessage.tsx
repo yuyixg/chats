@@ -16,23 +16,33 @@ import rehypeMathjax from 'rehype-mathjax';
 import remarkGfm from 'remark-gfm';
 import remarkMath from 'remark-math';
 import { HomeContext } from '@/pages/home/home';
-import { useCreateReducer } from '@/hooks/useCreateReducer';
-import { ChatMessageInitialState, initialState } from './ChatMessage.state';
 
 export interface Props {
   id: string;
   parentId: string | null;
   lastLeafId: string;
   childrenIds: string[];
+  parentChildrenIds: string[];
   message: Message;
+  onChangeMessage?: (messageId: string) => void;
   onEdit?: (editedMessage: Message, parentId: string | null) => void;
 }
 
 export const ChatMessage: FC<Props> = memo(
-  ({ childrenIds, parentId, message, onEdit }) => {
+  ({
+    id,
+    parentChildrenIds,
+    childrenIds,
+    parentId,
+    message,
+    onEdit,
+    onChangeMessage,
+  }) => {
     const { t } = useTranslation('chat');
     const {
       state: {
+        currentMessages,
+        lastLeafId,
         selectChatId,
         selectedConversation,
         conversations,
@@ -41,11 +51,41 @@ export const ChatMessage: FC<Props> = memo(
       dispatch: homeDispatch,
     } = useContext(HomeContext);
 
+    function findRootIdByLastLeafId(
+      nodes: any[],
+      leafId: string
+    ): string | null {
+      const parentIdMap = new Map<string, string>();
+      for (const node of nodes) {
+        parentIdMap.set(node.id, node.parentId);
+      }
+
+      let currentId = leafId;
+      while (true) {
+        const parentId = parentIdMap.get(currentId);
+        if (!parentId || parentId === '') {
+          return currentId;
+        } else {
+          currentId = parentId;
+        }
+      }
+    }
+
     const [isEditing, setIsEditing] = useState<boolean>(false);
     const [isTyping, setIsTyping] = useState<boolean>(false);
     const [messageContent, setMessageContent] = useState(message.content);
     const [messagedCopied, setMessageCopied] = useState(false);
-
+    const [currentIndex, setSelectCurrentIndex] = useState(
+      !parentId
+        ? parentChildrenIds.findIndex(
+            (x) =>
+              x ===
+              findRootIdByLastLeafId(currentMessages.reverse(), lastLeafId)
+          ) || 0
+        : childrenIds
+        ? parentChildrenIds.findIndex((x) => x === id)
+        : 0
+    );
     const textareaRef = useRef<HTMLTextAreaElement>(null);
 
     const toggleEditing = () => {
@@ -150,7 +190,7 @@ export const ChatMessage: FC<Props> = memo(
             )}
           </div>
 
-          <div className='prose mt-[-2px] w-full dark:prose-invert'>
+          <div className='prose mt-[2px] w-full dark:prose-invert'>
             {message.role === 'user' ? (
               <>
                 {isEditing ? (
@@ -223,7 +263,51 @@ export const ChatMessage: FC<Props> = memo(
 
                 {!isEditing && (
                   <div className='flex gap-2'>
-                    <>{childrenIds.length}</>
+                    <>
+                      {parentChildrenIds.length > 1 && (
+                        <div className='flex gap-1 text-sm'>
+                          <button
+                            className={
+                              currentIndex === 0
+                                ? 'text-gray-400'
+                                : 'cursor-pointer'
+                            }
+                            disabled={currentIndex === 0}
+                            onClick={() => {
+                              if (onChangeMessage) {
+                                const index = currentIndex - 1;
+                                setSelectCurrentIndex(index);
+                                onChangeMessage(parentChildrenIds[index]);
+                              }
+                            }}
+                          >
+                            &lt;
+                          </button>
+                          <span>
+                            {`${currentIndex + 1}/${parentChildrenIds.length}`}
+                          </span>
+                          <button
+                            className={
+                              currentIndex === parentChildrenIds.length - 1
+                                ? 'text-gray-400'
+                                : 'cursor-pointer'
+                            }
+                            disabled={
+                              currentIndex === parentChildrenIds.length - 1
+                            }
+                            onClick={() => {
+                              if (onChangeMessage) {
+                                const index = currentIndex + 1;
+                                setSelectCurrentIndex(index);
+                                onChangeMessage(parentChildrenIds[index]);
+                              }
+                            }}
+                          >
+                            &gt;
+                          </button>
+                        </div>
+                      )}
+                    </>
                     <button
                       className='invisible group-hover:visible focus:visible text-gray-500 hover:text-gray-700 dark:text-gray-400 dark:hover:text-gray-300'
                       onClick={toggleEditing}

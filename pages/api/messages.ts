@@ -12,40 +12,37 @@ export const config = {
 };
 interface MessageNode {
   id: string;
-  parentId: string | null;
+  parentId: string;
   messages: any[];
   childrenIds?: string[];
   lastLeafId?: string;
 }
 
-function calculateMessages(nodes: MessageNode[]): MessageNode[] {
-  const parentToChildrenMap = new Map<string, string[]>();
-  nodes.forEach((node) => {
-    if (node.parentId !== null) {
-      if (!parentToChildrenMap.has(node.parentId)) {
-        parentToChildrenMap.set(node.parentId, []);
-      }
-      parentToChildrenMap.get(node.parentId)?.push(node.id);
-    }
-  });
+const findChildren = (nodes: MessageNode[], parentId: string): string[] => {
+  return nodes
+    .filter((node) => node.parentId === parentId)
+    .map((node) => node.id);
+};
 
-  const findLastLeafId = (nodeId: string): string => {
-    const children = parentToChildrenMap.get(nodeId);
-    if (!children || children.length === 0) {
-      return nodeId;
-    } else {
-      return findLastLeafId(children[children.length - 1]);
-    }
-  };
-  nodes = nodes.map((node) => {
-    const children = parentToChildrenMap.get(node.id);
-    node.childrenIds = children || [];
-    node.lastLeafId = children ? findLastLeafId(node.id) : node.id;
-    return node;
-  });
+const findLastLeafId = (nodes: MessageNode[], parentId: string): string => {
+  const children = nodes.filter((node) => node.parentId === parentId);
+  if (children.length === 0) {
+    return parentId;
+  }
+  let lastLeafId = parentId;
+  for (let child of children) {
+    lastLeafId = findLastLeafId(nodes, child.id);
+  }
+  return lastLeafId;
+};
 
-  return nodes;
-}
+const calculateMessages = (nodes: MessageNode[]): MessageNode[] => {
+  return nodes.map((node) => ({
+    ...node,
+    childrenIds: findChildren(nodes, node.id).reverse(),
+    lastLeafId: findLastLeafId(nodes, node.id),
+  }));
+};
 
 const handler = async (req: ChatsApiRequest) => {
   const { userId } = req.session;
@@ -63,7 +60,7 @@ const handler = async (req: ChatsApiRequest) => {
       } as MessageNode;
     });
 
-    return calculateMessages(messages);
+    return calculateMessages(messages.reverse());
   } else if (req.method === 'DELETE') {
     const { id } = req.query as { id: string };
     const message = await ChatMessagesManager.findByUserMessageId(id, userId);

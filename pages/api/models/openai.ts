@@ -31,7 +31,7 @@ export const config = {
 const handler = async (req: ChatsApiRequest, res: ChatsApiResponse) => {
   const { userId } = req.session;
   const { chatId, parentId, modelId, userMessage } = req.body as ChatBody;
-  console.log(req.body);
+  const userMessageText = userMessage.text!;
 
   const chatModel = await ChatModelManager.findModelById(modelId);
   if (!chatModel?.enabled) {
@@ -97,7 +97,7 @@ const handler = async (req: ChatsApiRequest, res: ChatsApiResponse) => {
   });
 
   function convertMessageToSend<T>(userMessage: Content) {
-    return { role: 'user', content: userMessage.text } as T;
+    return { role: 'user', content: userMessageText } as T;
   }
 
   // function convertToGPTVisionMessage(userMessage: Content) {
@@ -150,6 +150,20 @@ const handler = async (req: ChatsApiRequest, res: ChatsApiResponse) => {
             role: 'assistant',
             content: { text: assistantResponse },
           });
+          await UserModelManager.updateUserModelTokenCount(
+            userId,
+            chatModel.id,
+            tokenUsed
+          );
+          await UserBalancesManager.chatUpdateBalance(userId, calculatedPrice);
+
+          let title = null;
+          if (!(await ChatMessagesManager.checkIsFirstChat(chatId))) {
+            title =
+              userMessageText.length > 30
+                ? userMessageText.substring(0, 30) + '...'
+                : userMessageText;
+          }
           const chatMessage = await ChatMessagesManager.create({
             chatId,
             userId,
@@ -158,24 +172,15 @@ const handler = async (req: ChatsApiRequest, res: ChatsApiResponse) => {
             tokenUsed,
             calculatedPrice,
           });
-          await UserModelManager.updateUserModelTokenCount(
-            userId,
-            chatModel.id,
-            tokenUsed
-          );
-          await UserBalancesManager.chatUpdateBalance(userId, calculatedPrice);
-
-          let title = userMessage.text!;
-          title = title.length > 30 ? title.substring(0, 30) + '...' : title;
-          await ChatsManager.update({
+          const chat = await ChatsManager.update({
             id: chatId,
-            title: title,
+            ...(title && { title: title }),
             displayingLeafChatMessageNodeId: chatMessage.id,
             chatModelId: chatModel.id,
           });
           return res.send(
             `<end>${JSON.stringify({
-              title,
+              title: chat.title,
               displayingLeafChatMessageNodeId: chatMessage.id,
             })}</end>`
           );

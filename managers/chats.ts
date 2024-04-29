@@ -25,9 +25,6 @@ export class ChatsManager {
   }
 
   static async update(params: UpdateChat) {
-    if (!(await ChatMessagesManager.checkIsFirstChat(params.id))) {
-      delete params.title;
-    }
     return await prisma.chats.update({
       where: { id: params.id },
       data: { ...params },
@@ -38,6 +35,7 @@ export class ChatsManager {
     return await prisma.chats.findMany({
       where: { userId, isDeleted: false },
       include: { chatModel: true },
+      orderBy: { createdAt: 'asc' },
     });
   }
 
