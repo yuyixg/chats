@@ -189,6 +189,7 @@ const Home = ({ defaultModelId }: Props) => {
   }
 
   const handleSelectChat = (chatId: string) => {
+    debugger
     if (selectChatId === chatId) return;
     dispatch({ field: 'selectChatId', value: chatId });
     const chat = chats.find((x) => x.id === chatId);
@@ -200,16 +201,16 @@ const Home = ({ defaultModelId }: Props) => {
           data,
           chat.displayingLeafChatMessageNodeId
         );
-        console.log('_selectMessages', _selectMessages),
-          dispatch({
-            field: 'selectMessages',
-            value: _selectMessages,
-          });
+        dispatch({
+          field: 'selectMessages',
+          value: _selectMessages,
+        });
       });
     }
   };
 
   const handleUpdateSelectMessage = (lastLeafId: string) => {
+    debugger
     handleSelectLastLeafId(lastLeafId);
     const _selectMessages = getAncestorsIncludingSelf(
       currentMessages,

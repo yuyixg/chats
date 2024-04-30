@@ -1,4 +1,3 @@
-import { IconShare } from '@/components/Icons/index';
 import {
   MutableRefObject,
   memo,
@@ -19,8 +18,8 @@ import { ChatLoader } from './ChatLoader';
 import { MemoizedChatMessage } from './MemoizedChatMessage';
 import { ModelSelect } from './ModelSelect';
 import { HomeContext } from '@/pages/home/home';
-import { SharedMessageModal } from './SharedMessageModal';
 import { AccountBalance } from './AccountBalance';
+import { ChatMessage } from '@/types/chatMessage';
 interface Props {
   stopConversationRef: MutableRefObject<boolean>;
 }
@@ -35,7 +34,6 @@ export const Chat = memo(({ stopConversationRef }: Props) => {
 
   const {
     state: {
-      selectedConversation,
       selectChatId,
       selectModelId,
       selectMessages,
@@ -52,6 +50,7 @@ export const Chat = memo(({ stopConversationRef }: Props) => {
     dispatch: homeDispatch,
   } = useContext(HomeContext);
 
+  console.log('selectMessages', selectMessages);
   const [currentMessage, setCurrentMessage] = useState<Message>();
   const [autoScrollEnabled, setAutoScrollEnabled] = useState<boolean>(true);
   const [showSettings, setShowSettings] = useState<boolean>(false);
@@ -134,6 +133,19 @@ export const Chat = memo(({ stopConversationRef }: Props) => {
         const reader = data.getReader();
         const decoder = new TextDecoder();
 
+        const updatedMessage: ChatMessage = {
+          id: '',
+          lastLeafId: '',
+          parentId,
+          childrenIds: [],
+          messages: [message, { role: 'assistant', content: { text: '' } }],
+        };
+
+        homeDispatch({
+          field: 'selectMessages',
+          value: [...selectMessages, updatedMessage],
+        });
+
         while (!done) {
           if (stopConversationRef.current === true) {
             controller.abort();
@@ -144,6 +156,24 @@ export const Chat = memo(({ stopConversationRef }: Props) => {
           done = doneReading;
           const chunkValue = decoder.decode(value);
           text += chunkValue;
+          console.log('selectMessages', selectMessages);
+          let updatedMessages = selectMessages.map((message, index) => {
+            if (index === selectMessages.length - 1) {
+              return {
+                ...message,
+                content: { text },
+              };
+            }
+            return message;
+          });
+
+          console.log(updatedMessages);
+
+          homeDispatch({
+            field: 'selectMessages',
+            value: updatedMessages,
+          });
+
           // if (isFirst) {
           //   isFirst = false;
           //   const updatedMessages: Message[] = [
@@ -240,24 +270,24 @@ export const Chat = memo(({ stopConversationRef }: Props) => {
     setShowSettings(!showSettings);
   };
 
-  const handleSharedMessage = (isShare: boolean) => {
-    handleUpdateConversation(selectedConversation!, {
-      key: 'isShared',
-      value: isShare,
-    });
-  };
+  // const handleSharedMessage = (isShare: boolean) => {
+  //   handleUpdateConversation(selectedConversation!, {
+  //     key: 'isShared',
+  //     value: isShare,
+  //   });
+  // };
 
-  const onClearAll = () => {
-    if (
-      confirm(t('Are you sure you want to clear all messages?')!) &&
-      selectedConversation
-    ) {
-      handleUpdateConversation(selectedConversation, {
-        key: 'messages',
-        value: [],
-      });
-    }
-  };
+  // const onClearAll = () => {
+  //   if (
+  //     confirm(t('Are you sure you want to clear all messages?')!) &&
+  //     selectedConversation
+  //   ) {
+  //     handleUpdateConversation(selectedConversation, {
+  //       key: 'messages',
+  //       value: [],
+  //     });
+  //   }
+  // };
 
   const scrollDown = () => {
     if (autoScrollEnabled) {
@@ -273,13 +303,13 @@ export const Chat = memo(({ stopConversationRef }: Props) => {
   //   }
   // }, [currentMessage]);
 
-  useEffect(() => {
-    throttledScrollDown();
-    selectedConversation &&
-      setCurrentMessage(
-        selectedConversation.messages[selectedConversation.messages.length - 2]
-      );
-  }, [selectedConversation, throttledScrollDown]);
+  // useEffect(() => {
+  //   throttledScrollDown();
+  //   selectMessages &&
+  //     setCurrentMessage(
+  //       selectMessages[selectMessages.length - 2]
+  //     );
+  // }, [selectMessages, throttledScrollDown]);
 
   // useEffect(() => {
   //   handleUpdateSelectMessage(selectChatId!);
@@ -361,10 +391,10 @@ export const Chat = memo(({ stopConversationRef }: Props) => {
             </>
           ) : (
             <>
-              {selectedConversation && (
+              {/* {selectedConversation && (
                 <div className='sticky top-0 z-10 flex justify-center bg-white py-2 text-sm text-neutral-500 dark:border-none dark:bg-[#343541] dark:text-neutral-200'>
                   {selectedConversation?.model?.name?.toUpperCase()}
-                  {/* {t('Temp')}:{selectedConversation?.temperature} | */}
+                  {t('Temp')}:{selectedConversation?.temperature} |
                   <button
                     className='ml-2 cursor-pointer hover:opacity-50'
                     onClick={() => {
@@ -381,7 +411,8 @@ export const Chat = memo(({ stopConversationRef }: Props) => {
                     />
                   </button>
                 </div>
-              )}
+              )} */}
+
               {showSettings && (
                 <div className='flex flex-col space-y-10 md:mx-auto md:max-w-xl md:gap-6 md:py-3 md:pt-6 lg:max-w-2xl lg:px-0 xl:max-w-3xl'>
                   <div className='flex h-full flex-col space-y-4 border-b border-neutral-200 p-4 dark:border-neutral-600 md:rounded-lg md:border'>
@@ -431,17 +462,12 @@ export const Chat = memo(({ stopConversationRef }: Props) => {
                       const message = currentMessages.find(
                         (x) => x.id === messageId
                       );
-                      console.log(
-                        'findLastLeafId(currentMessages, message?.id!);',
-                        findLastLeafId(currentMessages, message?.id!)
-                      );
                       handleUpdateSelectMessage(
                         findLastLeafId(currentMessages, message?.id!)
                       );
                     }}
                     onEdit={(editedMessage, parentId) => {
                       setCurrentMessage(editedMessage);
-                      // discard edited message and the ones that come after then resend
                       handleSend(editedMessage, parentId);
                     }}
                   />
@@ -467,29 +493,29 @@ export const Chat = memo(({ stopConversationRef }: Props) => {
             }}
             onScrollDownClick={handleScrollDown}
             onRegenerate={() => {
-              const lastMessage =
-                selectedConversation?.messages[
-                  selectedConversation?.messages.length - 1
-                ];
-              if (lastMessage?.role === 'user') {
-                handleSend(lastMessage, null);
-              } else {
-                if (currentMessage) {
-                  handleSend(currentMessage, null);
-                }
-              }
+              // const lastMessage =
+              //   selectedConversation?.messages[
+              //     selectedConversation?.messages.length - 1
+              //   ];
+              // if (lastMessage?.role === 'user') {
+              //   handleSend(lastMessage, null);
+              // } else {
+              //   if (currentMessage) {
+              //     handleSend(currentMessage, null);
+              //   }
+              // }
             }}
             showScrollDownButton={showScrollDownButton}
           />
         )}
-        <SharedMessageModal
+        {/* <SharedMessageModal
           isOpen={showShareModal}
           onClose={() => {
             setShowShareModal(false);
           }}
           conversation={selectedConversation}
           onShareChange={handleSharedMessage}
-        />
+        /> */}
       </>
     </div>
   );

@@ -3,12 +3,10 @@ import {
   IconCopy,
   IconEdit,
   IconRobot,
-  IconTrash,
   IconUser,
 } from '@/components/Icons/index';
 import { FC, memo, useContext, useEffect, useRef, useState } from 'react';
 import { useTranslation } from 'next-i18next';
-import { updateConversation } from '@/utils/conversation';
 import { Message } from '@/types/chat';
 import { CodeBlock } from '../Markdown/CodeBlock';
 import { MemoizedReactMarkdown } from '../Markdown/MemoizedReactMarkdown';
@@ -40,14 +38,7 @@ export const ChatMessage: FC<Props> = memo(
   }) => {
     const { t } = useTranslation('chat');
     const {
-      state: {
-        currentMessages,
-        lastLeafId,
-        selectChatId,
-        selectedConversation,
-        conversations,
-        messageIsStreaming,
-      },
+      state: { currentMessages, lastLeafId, selectChatId, messageIsStreaming },
       dispatch: homeDispatch,
     } = useContext(HomeContext);
 
@@ -112,35 +103,6 @@ export const ChatMessage: FC<Props> = memo(
         }
       }
       setIsEditing(false);
-    };
-
-    const handleDeleteMessage = () => {
-      if (!selectedConversation) return;
-
-      const { messages } = selectedConversation;
-      const findIndex = messages.findIndex((elm) => elm === message);
-
-      if (findIndex < 0) return;
-
-      if (
-        findIndex < messages.length - 1 &&
-        messages[findIndex + 1].role === 'assistant'
-      ) {
-        messages.splice(findIndex, 2);
-      } else {
-        messages.splice(findIndex, 1);
-      }
-      const updatedConversation = {
-        ...selectedConversation,
-        messages,
-      };
-
-      const { single, all } = updateConversation(
-        updatedConversation,
-        conversations
-      );
-      homeDispatch({ field: 'selectedConversation', value: single });
-      homeDispatch({ field: 'conversations', value: all });
     };
 
     const handlePressEnter = (e: React.KeyboardEvent<HTMLTextAreaElement>) => {
@@ -313,12 +275,6 @@ export const ChatMessage: FC<Props> = memo(
                       onClick={toggleEditing}
                     >
                       <IconEdit />
-                    </button>
-                    <button
-                      className='invisible group-hover:visible focus:visible text-gray-500 hover:text-gray-700 dark:text-gray-400 dark:hover:text-gray-300'
-                      onClick={handleDeleteMessage}
-                    >
-                      <IconTrash />
                     </button>
                   </div>
                 )}
