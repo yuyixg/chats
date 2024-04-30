@@ -161,6 +161,9 @@ const Home = ({ defaultModelId }: Props) => {
   const handleNewChat = () => {
     postChats({ title: t('New Conversation') }).then((data) => {
       dispatch({ field: 'selectChatId', value: data.id });
+      dispatch({ field: 'lastLeafId', value: '' });
+      dispatch({ field: 'currentMessages', value: [] });
+      dispatch({ field: 'selectMessages', value: [] });
       dispatch({ field: 'chats', value: [...chats, data] });
     });
   };
@@ -189,31 +192,28 @@ const Home = ({ defaultModelId }: Props) => {
   }
 
   const handleSelectChat = (chatId: string) => {
-    debugger
-    if (selectChatId === chatId) return;
     dispatch({ field: 'selectChatId', value: chatId });
     const chat = chats.find((x) => x.id === chatId);
-    handleSelectLastLeafId(chat!.displayingLeafChatMessageNodeId);
     if (chat) {
       getUserMessages(chatId).then((data) => {
-        dispatch({ field: 'currentMessages', value: data });
-        const _selectMessages = getAncestorsIncludingSelf(
-          data,
-          chat.displayingLeafChatMessageNodeId
-        );
-        dispatch({
-          field: 'selectMessages',
-          value: _selectMessages,
-        });
+        if (data.length > 0) {
+          dispatch({ field: 'currentMessages', value: data });
+          const lastLeafId = data[0].lastLeafId;
+          const _selectMessages = getAncestorsIncludingSelf(data, lastLeafId);
+          handleSelectLastLeafId(lastLeafId);
+          dispatch({
+            field: 'selectMessages',
+            value: _selectMessages,
+          });
+        }
       });
     }
   };
 
   const handleUpdateSelectMessage = (lastLeafId: string) => {
-    debugger
     handleSelectLastLeafId(lastLeafId);
     const _selectMessages = getAncestorsIncludingSelf(
-      currentMessages,
+      currentMessages.reverse(),
       lastLeafId
     );
     dispatch({

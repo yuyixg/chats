@@ -19,7 +19,7 @@ import { MemoizedChatMessage } from './MemoizedChatMessage';
 import { ModelSelect } from './ModelSelect';
 import { HomeContext } from '@/pages/home/home';
 import { AccountBalance } from './AccountBalance';
-import { ChatMessage } from '@/types/chatMessage';
+import { v4 as uuidv4 } from 'uuid';
 interface Props {
   stopConversationRef: MutableRefObject<boolean>;
 }
@@ -45,12 +45,12 @@ export const Chat = memo(({ stopConversationRef }: Props) => {
     },
     handleUpdateSelectMessage,
     handleUpdateChat,
+    handleSelectChat,
     handleUpdateConversation,
     hasModel,
     dispatch: homeDispatch,
   } = useContext(HomeContext);
 
-  console.log('selectMessages', selectMessages);
   const [currentMessage, setCurrentMessage] = useState<Message>();
   const [autoScrollEnabled, setAutoScrollEnabled] = useState<boolean>(true);
   const [showSettings, setShowSettings] = useState<boolean>(false);
@@ -69,6 +69,40 @@ export const Chat = memo(({ stopConversationRef }: Props) => {
   const handleSend = useCallback(
     async (message: Message, parentId: string | null, deleteCount = 0) => {
       if (selectChatId) {
+        const tempUUID = uuidv4();
+        const parentMessage = selectMessages.find((x) => x.id == parentId);
+        parentMessage && parentMessage?.childrenIds.push(tempUUID);
+        const parentMessageIndex = selectMessages.findIndex(
+          (x) => x.id == parentId
+        );
+
+        const newMessage = {
+          id: tempUUID,
+          lastLeafId: '',
+          parentId,
+          childrenIds: [],
+          messages: [
+            message,
+            { role: 'assistant', content: { text: '' } },
+          ] as Message[],
+        };
+        let removeCount = -1;
+        if (parentMessageIndex !== -1) removeCount = selectMessages.length - 1;
+        if (!parentId) {
+          removeCount = 1;
+          homeDispatch({
+            field: 'currentMessages',
+            value: [newMessage, ...currentMessages],
+          });
+        }
+
+        selectMessages.splice(parentMessageIndex + 1, removeCount, newMessage);
+
+        homeDispatch({
+          field: 'selectMessages',
+          value: [...selectMessages],
+        });
+
         // let updatedConversation: Conversation;
         // if (deleteCount) {
         //   const updatedMessages = [...selectedConversation.messages];
@@ -111,7 +145,7 @@ export const Chat = memo(({ stopConversationRef }: Props) => {
           signal: controller.signal,
           body,
         });
-        console.log('response.body', response.body);
+
         if (!response.ok) {
           homeDispatch({ field: 'loading', value: false });
           homeDispatch({ field: 'messageIsStreaming', value: false });
@@ -133,19 +167,6 @@ export const Chat = memo(({ stopConversationRef }: Props) => {
         const reader = data.getReader();
         const decoder = new TextDecoder();
 
-        const updatedMessage: ChatMessage = {
-          id: '',
-          lastLeafId: '',
-          parentId,
-          childrenIds: [],
-          messages: [message, { role: 'assistant', content: { text: '' } }],
-        };
-
-        homeDispatch({
-          field: 'selectMessages',
-          value: [...selectMessages, updatedMessage],
-        });
-
         while (!done) {
           if (stopConversationRef.current === true) {
             controller.abort();
@@ -156,64 +177,35 @@ export const Chat = memo(({ stopConversationRef }: Props) => {
           done = doneReading;
           const chunkValue = decoder.decode(value);
           text += chunkValue;
-          console.log('selectMessages', selectMessages);
-          let updatedMessages = selectMessages.map((message, index) => {
-            if (index === selectMessages.length - 1) {
-              return {
-                ...message,
-                content: { text },
-              };
-            }
-            return message;
-          });
+          // if (isFirst) {
+          //   isFirst = false;
 
-          console.log(updatedMessages);
+          let laseMessages = selectMessages[selectMessages.length - 1];
+          laseMessages.messages = laseMessages.messages.map(
+            (message, index) => {
+              if (index === laseMessages.messages.length - 1) {
+                return {
+                  ...message,
+                  content: { text },
+                };
+              }
+              return message;
+            }
+          );
 
           homeDispatch({
             field: 'selectMessages',
-            value: updatedMessages,
+            value: [...selectMessages],
           });
-
-          // if (isFirst) {
-          //   isFirst = false;
-          //   const updatedMessages: Message[] = [
-          //     ...currentMessages,
-          //     { role: 'assistant', content: { text: chunkValue } },
-          //   ];
-          //   updatedConversation = {
-          //     ...updatedConversation,
-          //     messages: updatedMessages,
-          //   };
-          //   homeDispatch({
-          //     field: 'currentMessages',
-          //     value: updatedConversation,
-          //   });
-          // }
-          // else {
-          //   const updatedMessages: Message[] = updatedConversation.messages.map(
-          //     (message, index) => {
-          //       if (index === updatedConversation.messages.length - 1) {
-          //         return {
-          //           ...message,
-          //           content: { text },
-          //         };
-          //       }
-          //       return message;
-          //     }
-          //   );
-          //   updatedConversation = {
-          //     ...updatedConversation,
-          //     messages: updatedMessages,
-          //   };
-          //   homeDispatch({
-          //     field: 'selectedConversation',
-          //     value: updatedConversation,
-          //   });
-          // }
         }
-
-        const chatResult = extractChatResult(text);
-        handleUpdateChat(selectChatId, { ...chatResult });
+        if (selectMessages.length === 1) {
+          const userMessageText = message.content.text!;
+          const title =
+            userMessageText.length > 30
+              ? userMessageText.substring(0, 30) + '...'
+              : userMessageText;
+          handleUpdateChat(selectChatId, { title });
+        }
 
         console.log('response.body 2', response.body);
         // saveConversation(updatedConversation);
@@ -231,9 +223,10 @@ export const Chat = memo(({ stopConversationRef }: Props) => {
         // homeDispatch({ field: 'conversations', value: updatedConversations });
         // saveConversations(updatedConversations);
         homeDispatch({ field: 'messageIsStreaming', value: false });
+        handleSelectChat(selectChatId);
       }
     },
-    [chats, selectChatId, stopConversationRef]
+    [chats, selectChatId, currentMessages, selectMessages, stopConversationRef]
   );
 
   const scrollToBottom = useCallback(() => {

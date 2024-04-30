@@ -172,18 +172,13 @@ const handler = async (req: ChatsApiRequest, res: ChatsApiResponse) => {
             tokenUsed,
             calculatedPrice,
           });
-          const chat = await ChatsManager.update({
+          await ChatsManager.update({
             id: chatId,
             ...(title && { title: title }),
             displayingLeafChatMessageNodeId: chatMessage.id,
             chatModelId: chatModel.id,
           });
-          return res.send(
-            `<end>${JSON.stringify({
-              title: chat.title,
-              displayingLeafChatMessageNodeId: chatMessage.id,
-            })}</end>`
-          );
+          return res.end();
         }
         res.write(Buffer.from(value));
       }
