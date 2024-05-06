@@ -30,7 +30,8 @@ export const config = {
 
 const handler = async (req: ChatsApiRequest, res: ChatsApiResponse) => {
   const { userId } = req.session;
-  const { chatId, parentId, modelId, userMessage } = req.body as ChatBody;
+  const { chatId, parentId, modelId, userMessage, messageId } =
+    req.body as ChatBody;
   const userMessageText = userMessage.text!;
 
   const chatModel = await ChatModelManager.findModelById(modelId);
@@ -164,7 +165,10 @@ const handler = async (req: ChatsApiRequest, res: ChatsApiResponse) => {
                 ? userMessageText.substring(0, 30) + '...'
                 : userMessageText;
           }
-          const chatMessage = await ChatMessagesManager.create({
+          if (messageId) {
+            await ChatMessagesManager.delete(messageId, userId);
+          }
+          await ChatMessagesManager.create({
             chatId,
             userId,
             parentId,
@@ -175,7 +179,6 @@ const handler = async (req: ChatsApiRequest, res: ChatsApiResponse) => {
           await ChatsManager.update({
             id: chatId,
             ...(title && { title: title }),
-            displayingLeafChatMessageNodeId: chatMessage.id,
             chatModelId: chatModel.id,
           });
           return res.end();

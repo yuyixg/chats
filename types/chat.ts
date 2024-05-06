@@ -50,6 +50,7 @@ export interface ChatBody {
   modelId: string;
   userMessage: Content;
   parentId: string | null;
+  messageId: string;
   chatId: string;
 }
 

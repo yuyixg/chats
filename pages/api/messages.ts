@@ -24,23 +24,10 @@ const findChildren = (nodes: MessageNode[], parentId: string): string[] => {
     .map((node) => node.id);
 };
 
-const findLastLeafId = (nodes: MessageNode[], parentId: string): string => {
-  const children = nodes.filter((node) => node.parentId === parentId);
-  if (children.length === 0) {
-    return parentId;
-  }
-  let lastLeafId = parentId;
-  for (let child of children) {
-    lastLeafId = findLastLeafId(nodes, child.id);
-  }
-  return lastLeafId;
-};
-
 const calculateMessages = (nodes: MessageNode[]): MessageNode[] => {
   return nodes.map((node) => ({
     ...node,
     childrenIds: findChildren(nodes, node.id).reverse(),
-    lastLeafId: findLastLeafId(nodes, node.id),
   }));
 };
 
@@ -57,17 +44,18 @@ const handler = async (req: ChatsApiRequest) => {
         id: x.id,
         parentId: x.parentId,
         messages: JSON.parse(x.messages),
+        createdAt: x.createdAt,
       } as MessageNode;
     });
-
-    return calculateMessages(messages.reverse());
+    console.log(JSON.stringify(calculateMessages(messages), null, 2));
+    return calculateMessages(messages);
   } else if (req.method === 'DELETE') {
     const { id } = req.query as { id: string };
     const message = await ChatMessagesManager.findByUserMessageId(id, userId);
     if (!message) {
       throw new BadRequest();
     }
-    await ChatMessagesManager.delete(id);
+    await ChatMessagesManager.delete(id, userId);
   }
 };
 

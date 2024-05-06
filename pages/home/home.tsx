@@ -46,7 +46,6 @@ import Spinner from '@/components/Spinner';
 import { ChatMessage } from '@/types/chatMessage';
 interface HandleUpdateChatParams {
   title?: string;
-  displayingLeafChatMessageNodeId?: string;
 }
 
 interface Props {
@@ -71,7 +70,7 @@ interface HomeInitialState {
   selectModelId: string | undefined;
   currentMessages: ChatMessage[];
   selectMessages: ChatMessage[];
-  lastLeafId: string;
+  selectMessageId: string;
   conversations: Conversation[];
   selectedConversation: Conversation | undefined;
   currentMessage: Message | undefined;
@@ -94,7 +93,7 @@ const initialState: HomeInitialState = {
   modelsLoading: false,
   currentMessages: [],
   selectMessages: [],
-  lastLeafId: '',
+  selectMessageId: '',
   models: [],
   chats: [],
   selectModelId: undefined,
@@ -161,35 +160,76 @@ const Home = ({ defaultModelId }: Props) => {
   const handleNewChat = () => {
     postChats({ title: t('New Conversation') }).then((data) => {
       dispatch({ field: 'selectChatId', value: data.id });
-      dispatch({ field: 'lastLeafId', value: '' });
+      dispatch({ field: 'selectMessageId', value: '' });
       dispatch({ field: 'currentMessages', value: [] });
       dispatch({ field: 'selectMessages', value: [] });
       dispatch({ field: 'chats', value: [...chats, data] });
     });
   };
 
-  function getAncestorsIncludingSelf(
-    nodes: ChatMessage[],
-    lastLeafId: string
-  ): ChatMessage[] {
-    const idToNodeMap = new Map<string, ChatMessage>();
-    nodes.forEach((node) => {
-      idToNodeMap.set(node.id, node);
-    });
-    const ancestors: ChatMessage[] = [];
-    let currentId: string | null = lastLeafId;
-    while (currentId != null) {
-      const currentNode = idToNodeMap.get(currentId);
-      if (currentNode) {
-        ancestors.unshift(currentNode);
-        currentId = currentNode.parentId;
-      } else {
-        break;
-      }
+  function findMessageChildren(
+    conversations: ChatMessage[],
+    nodeId: string,
+    messages: ChatMessage[]
+  ) {
+    const message = conversations.findLast((x) => x.parentId === nodeId);
+    if (message) {
+      messages.push(message);
+      return findMessageChildren(conversations, message.id, messages);
     }
-
-    return ancestors;
+    return messages;
   }
+
+  function findMessageParent(
+    conversations: ChatMessage[],
+    nodeId: string | null,
+    messages: ChatMessage[]
+  ) {
+    if (!nodeId) return messages;
+    const message = conversations.find((x) => x.id === nodeId);
+    if (message) {
+      messages.push(message);
+      return findMessageParent(conversations, message.parentId, messages);
+    }
+    return messages.reverse();
+  }
+
+  function getSelectMessages(
+    conversations: ChatMessage[],
+    nodeId: string
+  ): ChatMessage[] {
+    let selectMessages: ChatMessage[] = [];
+    const message = conversations.find((node) => node.id === nodeId);
+    if (!message) {
+      return [];
+    }
+    console.log('currentMessageId', nodeId);
+    const messageChildren = findMessageChildren(conversations, message.id, []);
+    console.log('messageChildren', messageChildren);
+    if (!message.parentId) {
+      selectMessages.push(message);
+    } else {
+      const messageParent = findMessageParent(
+        conversations,
+        message.parentId,
+        []
+      );
+      messageParent.reverse();
+      console.log('messageParent', messageParent);
+      selectMessages = selectMessages.concat([...messageParent, message]);
+    }
+    selectMessages = selectMessages.concat(messageChildren);
+    return selectMessages;
+  }
+
+  const getLastNodeRootId = (
+    messages: ChatMessage[],
+    lastNodeId: string | null
+  ): string => {
+    const message = messages.find((x) => x.id === lastNodeId);
+    if (!message?.parentId) return message?.id!;
+    return getLastNodeRootId(messages, message?.parentId);
+  };
 
   const handleSelectChat = (chatId: string) => {
     dispatch({ field: 'selectChatId', value: chatId });
@@ -198,9 +238,9 @@ const Home = ({ defaultModelId }: Props) => {
       getUserMessages(chatId).then((data) => {
         if (data.length > 0) {
           dispatch({ field: 'currentMessages', value: data });
-          const lastLeafId = data[0].lastLeafId;
-          const _selectMessages = getAncestorsIncludingSelf(data, lastLeafId);
-          handleSelectLastLeafId(lastLeafId);
+          const lastMessage = data[data.length - 1];
+          const _selectMessages = getSelectMessages(data, lastMessage.id);
+          console.log('_selectMessages', _selectMessages);
           dispatch({
             field: 'selectMessages',
             value: _selectMessages,
@@ -210,22 +250,21 @@ const Home = ({ defaultModelId }: Props) => {
     }
   };
 
-  const handleUpdateSelectMessage = (lastLeafId: string) => {
-    handleSelectLastLeafId(lastLeafId);
-    const _selectMessages = getAncestorsIncludingSelf(
-      currentMessages.reverse(),
-      lastLeafId
-    );
+  const handleUpdateSelectMessage = (messageId: string) => {
+    handleSelectMessageId(messageId);
+    console.log('handleUpdateSelectMessage', messageId);
+    const _selectMessages = getSelectMessages(currentMessages, messageId);
+    console.log('_selectMessages', _selectMessages);
     dispatch({
       field: 'selectMessages',
       value: _selectMessages,
     });
   };
 
-  const handleSelectLastLeafId = (lastLeafId: string) => {
+  const handleSelectMessageId = (selectMessageId: string) => {
     dispatch({
-      field: 'lastLeafId',
-      value: lastLeafId,
+      field: 'selectMessageId',
+      value: selectMessageId,
     });
   };
 
@@ -239,10 +278,6 @@ const Home = ({ defaultModelId }: Props) => {
       return x;
     });
     dispatch({ field: 'chats', value: chat });
-    dispatch({
-      field: 'lastLeafId',
-      value: params.displayingLeafChatMessageNodeId,
-    });
   };
 
   const handleDeleteChat = (id: string) => {
@@ -440,7 +475,7 @@ const Home = ({ defaultModelId }: Props) => {
         handleDeleteChat,
         handleSelectModel,
         handleUpdateSelectMessage,
-        handleSelectLastLeafId,
+        handleSelectLastLeafId: handleSelectMessageId,
 
         handleNewConversation,
         handleSelectConversation,

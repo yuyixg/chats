@@ -8,7 +8,6 @@ export interface ChatResult {
   id: string;
   title: string;
   chatModelId?: string;
-  displayingLeafChatMessageNodeId: string;
   isShared: boolean;
 }
 

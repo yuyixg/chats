@@ -105,7 +105,6 @@ model Chats {
   userId                          String
   chatModelId                     String?
   userModelConfig                 String         @default("{}")
-  displayingLeafChatMessageNodeId String?
   isShared                        Boolean        @default(false)
   isDeleted                       Boolean        @default(false)
   createdAt                       DateTime       @default(now())

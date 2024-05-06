@@ -18,8 +18,8 @@ import { HomeContext } from '@/pages/home/home';
 export interface Props {
   id: string;
   parentId: string | null;
-  lastLeafId: string;
   childrenIds: string[];
+  currentSelectIndex: number;
   parentChildrenIds: string[];
   message: Message;
   onChangeMessage?: (messageId: string) => void;
@@ -31,6 +31,7 @@ export const ChatMessage: FC<Props> = memo(
     id,
     parentChildrenIds,
     childrenIds,
+    currentSelectIndex,
     parentId,
     message,
     onEdit,
@@ -38,45 +39,15 @@ export const ChatMessage: FC<Props> = memo(
   }) => {
     const { t } = useTranslation('chat');
     const {
-      state: { currentMessages, lastLeafId, selectChatId, messageIsStreaming },
+      state: { currentMessages, selectChatId, messageIsStreaming },
       dispatch: homeDispatch,
     } = useContext(HomeContext);
-
-    function findRootIdByLastLeafId(
-      nodes: any[],
-      leafId: string
-    ): string | null {
-      const parentIdMap = new Map<string, string>();
-      for (const node of nodes) {
-        parentIdMap.set(node.id, node.parentId);
-      }
-
-      let currentId = leafId;
-      while (true) {
-        const parentId = parentIdMap.get(currentId);
-        if (!parentId || parentId === '') {
-          return currentId;
-        } else {
-          currentId = parentId;
-        }
-      }
-    }
 
     const [isEditing, setIsEditing] = useState<boolean>(false);
     const [isTyping, setIsTyping] = useState<boolean>(false);
     const [messageContent, setMessageContent] = useState(message.content);
     const [messagedCopied, setMessageCopied] = useState(false);
-    const [currentIndex, setSelectCurrentIndex] = useState(
-      !parentId
-        ? parentChildrenIds.findIndex(
-            (x) =>
-              x ===
-              findRootIdByLastLeafId(currentMessages.reverse(), lastLeafId)
-          ) || 0
-        : childrenIds
-        ? parentChildrenIds.findIndex((x) => x === id)
-        : 0
-    );
+    const [currentIndex, setSelectCurrentIndex] = useState(currentSelectIndex);
     const textareaRef = useRef<HTMLTextAreaElement>(null);
 
     const toggleEditing = () => {
@@ -228,6 +199,8 @@ export const ChatMessage: FC<Props> = memo(
                     <>
                       {parentChildrenIds.length > 1 && (
                         <div className='flex gap-1 text-sm'>
+                          {parentChildrenIds.map((x) => <span key={x}>{x}</span>)}
+                          {`${currentIndex}-${parentChildrenIds[currentIndex]}`}
                           <button
                             className={
                               currentIndex === 0
@@ -238,7 +211,7 @@ export const ChatMessage: FC<Props> = memo(
                             onClick={() => {
                               if (onChangeMessage) {
                                 const index = currentIndex - 1;
-                                setSelectCurrentIndex(index);
+                                console.log('index', index);
                                 onChangeMessage(parentChildrenIds[index]);
                               }
                             }}
@@ -260,7 +233,7 @@ export const ChatMessage: FC<Props> = memo(
                             onClick={() => {
                               if (onChangeMessage) {
                                 const index = currentIndex + 1;
-                                setSelectCurrentIndex(index);
+                                console.log('index', index);
                                 onChangeMessage(parentChildrenIds[index]);
                               }
                             }}

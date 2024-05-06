@@ -24,6 +24,7 @@ export class ChatMessagesManager {
   static async findUserMessageByChatId(userId: string, chatId: string) {
     let where: Prisma.ChatMessagesWhereInput = {
       chatId,
+      isDeleted: false,
     };
     return await prisma.chatMessages.findMany({
       where,
@@ -31,8 +32,14 @@ export class ChatMessagesManager {
     });
   }
 
-  static async delete(id: string) {
-    return await prisma.chatMessages.delete({ where: { id } });
+  static async delete(id: string, userId: string) {
+    return await prisma.chatMessages.delete({ where: { id, userId } });
+  }
+
+  static async deleteByChatId(chatId: string, userId: string) {
+    return await prisma.chatMessages.deleteMany({
+      where: { chatId, AND: { userId } },
+    });
   }
 
   static async checkIsFirstChat(chatId: string) {

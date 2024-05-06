@@ -1,6 +1,6 @@
 import { apiHandler } from '@/middleware/api-handler';
 import { ChatsApiRequest } from '@/types/next-api';
-import { ChatsManager } from '@/managers';
+import { ChatMessagesManager, ChatsManager } from '@/managers';
 import { BadRequest } from '@/utils/error';
 export const config = {
   api: {
@@ -20,7 +20,6 @@ const handler = async (req: ChatsApiRequest) => {
         id: c.id,
         title: c.title,
         chatModelId: c.chatModelId,
-        displayingLeafChatMessageNodeId: c.displayingLeafChatMessageNodeId,
         isShared: c.isShared,
       };
     });
@@ -40,6 +39,7 @@ const handler = async (req: ChatsApiRequest) => {
     if (!chat) {
       throw new BadRequest();
     }
+    await ChatMessagesManager.deleteByChatId(id, userId);
     return await ChatsManager.delete(id);
   }
 };

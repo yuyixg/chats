@@ -98,7 +98,6 @@ CREATE TABLE "Chats" (
     "userId" TEXT NOT NULL,
     "chatModelId" TEXT,
     "userModelConfig" TEXT NOT NULL DEFAULT '{}',
-    "displayingLeafChatMessageNodeId" TEXT,
     "isShared" BOOLEAN NOT NULL DEFAULT false,
     "isDeleted" BOOLEAN NOT NULL DEFAULT false,
     "createdAt" TIMESTAMP(3) NOT NULL DEFAULT CURRENT_TIMESTAMP,
