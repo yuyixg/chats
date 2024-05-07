@@ -17,11 +17,12 @@ export class ChatMessagesManager {
       where: { id, AND: { userId } },
     });
   }
+  
   static async create(params: CreateChatMessage) {
     return await prisma.chatMessages.create({ data: { ...params } });
   }
 
-  static async findUserMessageByChatId(userId: string, chatId: string) {
+  static async findUserMessageByChatId(chatId: string) {
     let where: Prisma.ChatMessagesWhereInput = {
       chatId,
       isDeleted: false,
@@ -48,5 +49,9 @@ export class ChatMessagesManager {
   static async checkIsFirstChat(chatId: string) {
     const message = await prisma.chatMessages.findFirst({ where: { chatId } });
     return message;
+  }
+
+  static async findMessageById(id: string) {
+    return await prisma.chatMessages.findUnique({ where: { id } });
   }
 }

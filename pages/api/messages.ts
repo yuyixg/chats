@@ -36,7 +36,6 @@ const handler = async (req: ChatsApiRequest) => {
   if (req.method === 'GET') {
     const { chatId } = req.query as { chatId: string };
     const chatMessages = await ChatMessagesManager.findUserMessageByChatId(
-      userId,
       chatId
     );
     const messages = chatMessages.map((x) => {

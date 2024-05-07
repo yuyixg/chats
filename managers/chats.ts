@@ -43,4 +43,8 @@ export class ChatsManager {
       where: { id },
     });
   }
+
+  static async findChatById(id: string) {
+    return await prisma.chats.findUnique({ where: { id } });
+  }
 }

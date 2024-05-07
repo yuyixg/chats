@@ -1,6 +1,6 @@
 import { NextApiRequest } from 'next';
 import { BadRequest } from '@/utils/error';
-import { ChatMessageManager } from '@/managers';
+import { ChatMessagesManager, ChatsManager } from '@/managers';
 import { apiHandler } from '@/middleware/api-handler';
 
 export const config = {
@@ -17,14 +17,17 @@ const handler = async (req: NextApiRequest) => {
   if (!messageId) {
     throw new BadRequest();
   }
-  const message = await ChatMessageManager.findMessageById(messageId);
-  if (!message || !message.isShared) {
+  const chat = await ChatsManager.findChatById(messageId);
+  if (!chat || !chat.isShared) {
     throw new BadRequest();
   }
+
+  const messages = await ChatMessagesManager.findUserMessageByChatId(chat.id);
+
   return {
-    name: message?.name,
-    prompt: message?.prompt,
-    messages: JSON.parse(message?.messages || '[]'),
+    name: chat.title,
+    prompt: chat.userModelConfig,
+    messages: messages,
   };
 };
 
