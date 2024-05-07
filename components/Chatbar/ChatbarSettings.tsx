@@ -36,10 +36,8 @@ export const ChatBarSettings = () => {
   const [isRechargeModalOpen, setIsRechargeModal] = useState<boolean>(false);
 
   const {
-    state: { user, conversations },
+    state: { user },
   } = useContext(HomeContext);
-
-  const { handleClearConversations } = useContext(ChatbarContext);
 
   const logout = () => {
     clearUserSessionId();
