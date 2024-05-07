@@ -47,7 +47,6 @@ const handler = async (req: ChatsApiRequest) => {
         createdAt: x.createdAt,
       } as MessageNode;
     });
-    console.log(JSON.stringify(calculateMessages(messages), null, 2));
     return calculateMessages(messages);
   } else if (req.method === 'DELETE') {
     const { id } = req.query as { id: string };

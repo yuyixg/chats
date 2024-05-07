@@ -157,12 +157,21 @@ const Home = ({ defaultModelId }: Props) => {
   const stopConversationRef = useRef<boolean>(false);
   const { setTheme } = useTheme();
 
+  const getLastChat = () => {
+    if (chats.length === 0) return null;
+    const chatLength = chats.length - 1;
+    return chats[chatLength];
+  };
+
   const handleNewChat = () => {
     postChats({ title: t('New Conversation') }).then((data) => {
       dispatch({ field: 'selectChatId', value: data.id });
       dispatch({ field: 'selectMessageId', value: '' });
       dispatch({ field: 'currentMessages', value: [] });
       dispatch({ field: 'selectMessages', value: [] });
+      const lastChat = getLastChat();
+      lastChat &&
+        dispatch({ field: 'selectModelId', value: lastChat.chatModelId });
       dispatch({ field: 'chats', value: [...chats, data] });
     });
   };
@@ -203,9 +212,7 @@ const Home = ({ defaultModelId }: Props) => {
     if (!message) {
       return [];
     }
-    console.log('currentMessageId', nodeId);
     const messageChildren = findMessageChildren(conversations, message.id, []);
-    console.log('messageChildren', messageChildren);
     if (!message.parentId) {
       selectMessages.push(message);
     } else {
@@ -215,7 +222,6 @@ const Home = ({ defaultModelId }: Props) => {
         []
       );
       messageParent.reverse();
-      console.log('messageParent', messageParent);
       selectMessages = selectMessages.concat([...messageParent, message]);
     }
     selectMessages = selectMessages.concat(messageChildren);
@@ -240,10 +246,14 @@ const Home = ({ defaultModelId }: Props) => {
           dispatch({ field: 'currentMessages', value: data });
           const lastMessage = data[data.length - 1];
           const _selectMessages = getSelectMessages(data, lastMessage.id);
-          console.log('_selectMessages', _selectMessages);
           dispatch({
             field: 'selectMessages',
             value: _selectMessages,
+          });
+        } else {
+          dispatch({
+            field: 'selectMessages',
+            value: [],
           });
         }
       });
@@ -252,9 +262,7 @@ const Home = ({ defaultModelId }: Props) => {
 
   const handleUpdateSelectMessage = (messageId: string) => {
     handleSelectMessageId(messageId);
-    console.log('handleUpdateSelectMessage', messageId);
     const _selectMessages = getSelectMessages(currentMessages, messageId);
-    console.log('_selectMessages', _selectMessages);
     dispatch({
       field: 'selectMessages',
       value: _selectMessages,
@@ -513,7 +521,7 @@ const Home = ({ defaultModelId }: Props) => {
             {selectedConversation && (
               <Navbar
                 selectedConversation={selectedConversation}
-                onNewConversation={handleNewConversation}
+                onNewConversation={handleNewChat}
                 hasModel={hasModel}
               />
             )}

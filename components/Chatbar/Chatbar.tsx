@@ -21,6 +21,7 @@ export const Chatbar = () => {
     state: { chats, showChatbar },
     dispatch: homeDispatch,
     handleDeleteChat: homeHandleDeleteChat,
+    handleSelectChat,
     handleNewChat,
     handleUpdateConversation,
     hasModel,
@@ -37,10 +38,7 @@ export const Chatbar = () => {
     homeHandleDeleteChat(chatId);
     if (_chats.length > 0) {
       const chatId = _chats[_chats.length - 1].id;
-      homeDispatch({
-        field: 'selectChatId',
-        value: chatId,
-      });
+      handleSelectChat(chatId);
       saveSelectChatId(chatId);
     } else {
       removeSelectChatId();

@@ -20,6 +20,7 @@ import { ModelSelect } from './ModelSelect';
 import { HomeContext } from '@/pages/home/home';
 import { AccountBalance } from './AccountBalance';
 import { v4 as uuidv4 } from 'uuid';
+import { postChats } from '@/apis/userService';
 interface Props {
   stopConversationRef: MutableRefObject<boolean>;
 }
@@ -40,12 +41,9 @@ export const Chat = memo(({ stopConversationRef }: Props) => {
     handleUpdateSelectMessage,
     handleUpdateChat,
     handleSelectChat,
-    handleUpdateConversation,
     hasModel,
     dispatch: homeDispatch,
   } = useContext(HomeContext);
-  console.log('selectMessages', selectMessages);
-  console.log('currentMessages', currentMessages);
   const [currentMessage, setCurrentMessage] = useState<Message>();
   const [autoScrollEnabled, setAutoScrollEnabled] = useState<boolean>(true);
   const [showSettings, setShowSettings] = useState<boolean>(false);
@@ -71,145 +69,143 @@ export const Chat = memo(({ stopConversationRef }: Props) => {
 
   const handleSend = useCallback(
     async (message: Message, parentId: string | null, messageId = '') => {
-      if (selectChatId) {
-        if (messageId) {
-          const { lastMessage, selectMessageLength } = getSelectMessagesLast();
-          lastMessage.messages[1].content = {
-            image: [],
-            text: '',
-          };
-          console.log(lastMessage);
-          selectMessages.splice(selectMessageLength, 1, lastMessage);
-        } else {
-          const tempUUID = uuidv4();
-          const parentMessage = selectMessages.find((x) => x.id == parentId);
-          parentMessage && parentMessage?.childrenIds.push(tempUUID);
-          const parentMessageIndex = selectMessages.findIndex(
-            (x) => x.id == parentId
-          );
+      let _selectChatId = selectChatId;
+      if (!selectChatId) {
+        const newChat = await postChats({ title: t('New Conversation') });
+        _selectChatId = newChat.id;
+        homeDispatch({ field: 'selectChatId', value: newChat.id });
+        homeDispatch({ field: 'selectMessageId', value: '' });
+        homeDispatch({ field: 'currentMessages', value: [] });
+        homeDispatch({ field: 'selectMessages', value: [] });
+        homeDispatch({ field: 'chats', value: [...chats, newChat] });
+      }
+      if (messageId) {
+        const { lastMessage, selectMessageLength } = getSelectMessagesLast();
+        lastMessage.messages[1].content = {
+          image: [],
+          text: '',
+        };
+        selectMessages.splice(selectMessageLength, 1, lastMessage);
+      } else {
+        const tempUUID = uuidv4();
+        const parentMessage = selectMessages.find((x) => x.id == parentId);
+        parentMessage && parentMessage?.childrenIds.push(tempUUID);
+        const parentMessageIndex = selectMessages.findIndex(
+          (x) => x.id == parentId
+        );
 
-          const newMessage = {
-            id: tempUUID,
-            lastLeafId: '',
-            parentId,
-            childrenIds: [],
-            messages: [
-              message,
-              { role: 'assistant', content: { text: '' } },
-            ] as Message[],
-          };
-          let removeCount = -1;
-          if (parentMessageIndex !== -1)
-            removeCount = selectMessages.length - 1;
-          if (!parentId) {
-            removeCount = 1;
-            homeDispatch({
-              field: 'currentMessages',
-              value: [newMessage, ...currentMessages],
-            });
-          }
-
-          selectMessages.splice(
-            parentMessageIndex + 1,
-            removeCount,
-            newMessage
-          );
+        const newMessage = {
+          id: tempUUID,
+          lastLeafId: '',
+          parentId,
+          childrenIds: [],
+          messages: [
+            message,
+            { role: 'assistant', content: { text: '' } },
+          ] as Message[],
+        };
+        let removeCount = -1;
+        if (parentMessageIndex !== -1) removeCount = selectMessages.length - 1;
+        if (!parentId) {
+          removeCount = 1;
+          homeDispatch({
+            field: 'currentMessages',
+            value: [newMessage, ...currentMessages],
+          });
         }
 
-        console.log('handle send selectMessages', selectMessages);
+        selectMessages.splice(parentMessageIndex + 1, removeCount, newMessage);
+      }
+
+      homeDispatch({
+        field: 'selectMessages',
+        value: [...selectMessages],
+      });
+      const messageContent = message.content;
+      const chatBody: ChatBody = {
+        modelId: selectModelId!,
+        chatId: _selectChatId!,
+        parentId: parentId,
+        messageId,
+        userMessage: messageContent,
+      };
+
+      const endpoint = getModelEndpoint();
+      let body = JSON.stringify(chatBody);
+
+      const controller = new AbortController();
+      const response = await fetch(endpoint, {
+        method: 'POST',
+        headers: {
+          'Content-Type': 'application/json',
+        },
+        signal: controller.signal,
+        body,
+      });
+
+      if (!response.ok) {
+        homeDispatch({ field: 'loading', value: false });
+        homeDispatch({ field: 'messageIsStreaming', value: false });
+        const result = await response.json();
+        toast.error(t(result?.message) || response.statusText);
+        return;
+      }
+      const data = response.body;
+      if (!data) {
+        homeDispatch({ field: 'loading', value: false });
+        homeDispatch({ field: 'messageIsStreaming', value: false });
+        return;
+      }
+
+      homeDispatch({ field: 'loading', value: false });
+      let done = false;
+      let text = '';
+      const reader = data.getReader();
+      const decoder = new TextDecoder();
+
+      while (!done) {
+        if (stopConversationRef.current === true) {
+          controller.abort();
+          done = true;
+          break;
+        }
+        const { value, done: doneReading } = await reader.read();
+        done = doneReading;
+        const chunkValue = decoder.decode(value);
+        text += chunkValue;
+
+        let laseMessages = selectMessages[selectMessages.length - 1];
+        laseMessages.messages = laseMessages.messages.map((message, index) => {
+          if (index === laseMessages.messages.length - 1) {
+            return {
+              ...message,
+              content: { text },
+            };
+          }
+          return message;
+        });
 
         homeDispatch({
           field: 'selectMessages',
           value: [...selectMessages],
         });
-        const messageContent = message.content;
-        const chatBody: ChatBody = {
-          modelId: selectModelId!,
-          chatId: selectChatId!,
-          parentId: parentId,
-          messageId,
-          userMessage: messageContent,
-        };
-
-        const endpoint = getModelEndpoint();
-        let body = JSON.stringify(chatBody);
-
-        const controller = new AbortController();
-        const response = await fetch(endpoint, {
-          method: 'POST',
-          headers: {
-            'Content-Type': 'application/json',
-          },
-          signal: controller.signal,
-          body,
-        });
-
-        if (!response.ok) {
-          homeDispatch({ field: 'loading', value: false });
-          homeDispatch({ field: 'messageIsStreaming', value: false });
-          const result = await response.json();
-          toast.error(t(result?.message) || response.statusText);
-          return;
-        }
-        const data = response.body;
-        if (!data) {
-          homeDispatch({ field: 'loading', value: false });
-          homeDispatch({ field: 'messageIsStreaming', value: false });
-          return;
-        }
-
-        homeDispatch({ field: 'loading', value: false });
-        let done = false;
-        let text = '';
-        const reader = data.getReader();
-        const decoder = new TextDecoder();
-
-        while (!done) {
-          if (stopConversationRef.current === true) {
-            controller.abort();
-            done = true;
-            break;
-          }
-          const { value, done: doneReading } = await reader.read();
-          done = doneReading;
-          const chunkValue = decoder.decode(value);
-          text += chunkValue;
-
-          let laseMessages = selectMessages[selectMessages.length - 1];
-          laseMessages.messages = laseMessages.messages.map(
-            (message, index) => {
-              if (index === laseMessages.messages.length - 1) {
-                return {
-                  ...message,
-                  content: { text },
-                };
-              }
-              return message;
-            }
-          );
-
-          homeDispatch({
-            field: 'selectMessages',
-            value: [...selectMessages],
-          });
-        }
-        if (selectMessages.length === 1) {
-          const userMessageText = message.content.text!;
-          const title =
-            userMessageText.length > 30
-              ? userMessageText.substring(0, 30) + '...'
-              : userMessageText;
-          handleUpdateChat(selectChatId, { title });
-        }
-
-        homeDispatch({ field: 'messageIsStreaming', value: false });
-        handleSelectChat(selectChatId);
       }
+      if (selectMessages.length === 1) {
+        const userMessageText = message.content.text!;
+        const title =
+          userMessageText.length > 30
+            ? userMessageText.substring(0, 30) + '...'
+            : userMessageText;
+        handleUpdateChat(_selectChatId!, { title });
+      }
+
+      homeDispatch({ field: 'messageIsStreaming', value: false });
+      handleSelectChat(_selectChatId!);
     },
     [chats, selectChatId, currentMessages, selectMessages, stopConversationRef]
   );
 
-  const scrollToBottom = useCallback(() => {
+  useCallback(() => {
     if (autoScrollEnabled) {
       messagesEndRef.current?.scrollIntoView({ behavior: 'smooth' });
       textareaRef.current?.focus();
@@ -250,18 +246,6 @@ export const Chat = memo(({ stopConversationRef }: Props) => {
   //   });
   // };
 
-  // const onClearAll = () => {
-  //   if (
-  //     confirm(t('Are you sure you want to clear all messages?')!) &&
-  //     selectedConversation
-  //   ) {
-  //     handleUpdateConversation(selectedConversation, {
-  //       key: 'messages',
-  //       value: [],
-  //     });
-  //   }
-  // };
-
   const scrollDown = () => {
     if (autoScrollEnabled) {
       messagesEndRef.current?.scrollIntoView(true);
@@ -278,10 +262,6 @@ export const Chat = memo(({ stopConversationRef }: Props) => {
 
   useEffect(() => {
     throttledScrollDown();
-    // selectMessages &&
-    //   setCurrentMessage(
-    //     selectMessages[selectMessages.length - 2]
-    //   );
   }, [selectMessages, throttledScrollDown]);
 
   // useEffect(() => {
@@ -404,13 +384,7 @@ export const Chat = memo(({ stopConversationRef }: Props) => {
                   parentChildrenIds =
                     currentMessages.find((x) => x.id === current.parentId)
                       ?.childrenIds || [];
-                  console.log(
-                    'currentMessageChildren',
-                    currentMessages.find((x) => x.id === current.parentId)
-                      ?.childrenIds || []
-                  );
                   parentChildrenIds = [...parentChildrenIds].reverse();
-                  console.log('parentChildrenIds', parentChildrenIds);
                 }
                 return current.messages.map((message, index) => (
                   <MemoizedChatMessage

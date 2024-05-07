@@ -28,9 +28,7 @@ export interface Props {
 
 export const ChatMessage: FC<Props> = memo(
   ({
-    id,
     parentChildrenIds,
-    childrenIds,
     currentSelectIndex,
     parentId,
     message,
@@ -39,7 +37,7 @@ export const ChatMessage: FC<Props> = memo(
   }) => {
     const { t } = useTranslation('chat');
     const {
-      state: { currentMessages, selectChatId, messageIsStreaming },
+      state: { selectChatId, messageIsStreaming },
       dispatch: homeDispatch,
     } = useContext(HomeContext);
 
@@ -47,7 +45,6 @@ export const ChatMessage: FC<Props> = memo(
     const [isTyping, setIsTyping] = useState<boolean>(false);
     const [messageContent, setMessageContent] = useState(message.content);
     const [messagedCopied, setMessageCopied] = useState(false);
-    const [currentIndex, setSelectCurrentIndex] = useState(currentSelectIndex);
     const textareaRef = useRef<HTMLTextAreaElement>(null);
 
     const toggleEditing = () => {
@@ -199,19 +196,16 @@ export const ChatMessage: FC<Props> = memo(
                     <>
                       {parentChildrenIds.length > 1 && (
                         <div className='flex gap-1 text-sm'>
-                          {parentChildrenIds.map((x) => <span key={x}>{x}</span>)}
-                          {`${currentIndex}-${parentChildrenIds[currentIndex]}`}
                           <button
                             className={
-                              currentIndex === 0
+                              currentSelectIndex === 0
                                 ? 'text-gray-400'
                                 : 'cursor-pointer'
                             }
-                            disabled={currentIndex === 0}
+                            disabled={currentSelectIndex === 0}
                             onClick={() => {
                               if (onChangeMessage) {
-                                const index = currentIndex - 1;
-                                console.log('index', index);
+                                const index = currentSelectIndex - 1;
                                 onChangeMessage(parentChildrenIds[index]);
                               }
                             }}
@@ -219,21 +213,24 @@ export const ChatMessage: FC<Props> = memo(
                             &lt;
                           </button>
                           <span>
-                            {`${currentIndex + 1}/${parentChildrenIds.length}`}
+                            {`${currentSelectIndex + 1}/${
+                              parentChildrenIds.length
+                            }`}
                           </span>
                           <button
                             className={
-                              currentIndex === parentChildrenIds.length - 1
+                              currentSelectIndex ===
+                              parentChildrenIds.length - 1
                                 ? 'text-gray-400'
                                 : 'cursor-pointer'
                             }
                             disabled={
-                              currentIndex === parentChildrenIds.length - 1
+                              currentSelectIndex ===
+                              parentChildrenIds.length - 1
                             }
                             onClick={() => {
                               if (onChangeMessage) {
-                                const index = currentIndex + 1;
-                                console.log('index', index);
+                                const index = currentSelectIndex + 1;
                                 onChangeMessage(parentChildrenIds[index]);
                               }
                             }}
