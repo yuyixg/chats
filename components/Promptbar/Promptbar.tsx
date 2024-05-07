@@ -3,7 +3,6 @@ import { useTranslation } from 'next-i18next';
 import { useCreateReducer } from '@/hooks/useCreateReducer';
 import { savePrompts } from '@/utils/prompts';
 import { Prompt } from '@/types/prompt';
-import { PromptbarSettings } from './components/PromptbarSettings';
 import { Prompts } from './components/Prompts';
 
 import Sidebar from '../Sidebar';
@@ -44,7 +43,7 @@ const Promptbar = () => {
         name: `Prompt ${prompts.length + 1}`,
         description: '',
         content: '',
-        model: getModel(defaultModelId),
+        model: getModel(),
       };
 
       const updatedPrompts = [...prompts, newPrompt];
@@ -131,7 +130,6 @@ const Promptbar = () => {
         }
         toggleOpen={handleTogglePromptbar}
         handleCreateItem={handleCreatePrompt}
-        handleDrop={handleDrop}
       />
     </PromptbarContext.Provider>
   );

@@ -33,7 +33,10 @@ export class ChatMessagesManager {
   }
 
   static async delete(id: string, userId: string) {
-    return await prisma.chatMessages.delete({ where: { id, userId } });
+    const chatMessage = await prisma.chatMessages.findUnique({ where: { id } });
+    if (chatMessage) {
+      await prisma.chatMessages.delete({ where: { id, userId } });
+    }
   }
 
   static async deleteByChatId(chatId: string, userId: string) {

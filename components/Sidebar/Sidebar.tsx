@@ -12,10 +12,10 @@ interface Props<T> {
   itemComponent: ReactNode;
   footerComponent?: ReactNode;
   searchTerm: string;
+  messageIsStreaming?: boolean;
   handleSearchTerm: (searchTerm: string) => void;
   toggleOpen: () => void;
   handleCreateItem: () => void;
-  handleDrop: (e: any) => void;
   hasModel: () => boolean;
 }
 
@@ -27,6 +27,7 @@ const Sidebar = <T,>({
   itemComponent,
   footerComponent,
   searchTerm,
+  messageIsStreaming,
   handleSearchTerm,
   toggleOpen,
   handleCreateItem,
@@ -44,11 +45,14 @@ const Sidebar = <T,>({
         {hasModel() && (
           <div className='flex items-center'>
             <button
-              className='flex w-full flex-shrink-0 cursor-pointer select-none items-center gap-3 rounded-md p-3 text-black dark:text-white hover:bg-[#cdcdcd] hover:dark:bg-[#343541] bg-[#ececec] dark:bg-[#343541]/80'
+              className={`flex w-full flex-shrink-0 cursor-pointer select-none items-center gap-3 rounded-md p-3 text-black dark:text-white hover:bg-[#cdcdcd] hover:dark:bg-[#343541] bg-[#ececec] dark:bg-[#343541]/80 ${
+                messageIsStreaming ? 'disabled:cursor-not-allowed' : ''
+              }`}
               onClick={() => {
                 handleCreateItem();
                 handleSearchTerm('');
               }}
+              disabled={messageIsStreaming}
             >
               <IconPlus size={18} />
               {addItemButtonTitle}

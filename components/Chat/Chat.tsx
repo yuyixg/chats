@@ -35,6 +35,7 @@ export const Chat = memo(({ stopConversationRef }: Props) => {
       selectMessages,
       currentMessages,
       chats,
+      models,
       modelsLoading,
       loading,
     },
@@ -74,7 +75,6 @@ export const Chat = memo(({ stopConversationRef }: Props) => {
         const newChat = await postChats({ title: t('New Conversation') });
         _selectChatId = newChat.id;
         homeDispatch({ field: 'selectChatId', value: newChat.id });
-        homeDispatch({ field: 'selectMessageId', value: '' });
         homeDispatch({ field: 'currentMessages', value: [] });
         homeDispatch({ field: 'selectMessages', value: [] });
         homeDispatch({ field: 'chats', value: [...chats, newChat] });
@@ -85,9 +85,11 @@ export const Chat = memo(({ stopConversationRef }: Props) => {
           image: [],
           text: '',
         };
+        homeDispatch({ field: 'selectMessageLastId', value: messageId });
         selectMessages.splice(selectMessageLength, 1, lastMessage);
       } else {
         const tempUUID = uuidv4();
+        homeDispatch({ field: 'selectMessageLastId', value: tempUUID });
         const parentMessage = selectMessages.find((x) => x.id == parentId);
         parentMessage && parentMessage?.childrenIds.push(tempUUID);
         const parentMessageIndex = selectMessages.findIndex(
@@ -121,6 +123,9 @@ export const Chat = memo(({ stopConversationRef }: Props) => {
         field: 'selectMessages',
         value: [...selectMessages],
       });
+
+      homeDispatch({ field: 'loading', value: true });
+      homeDispatch({ field: 'messageIsStreaming', value: true });
       const messageContent = message.content;
       const chatBody: ChatBody = {
         modelId: selectModelId!,
@@ -157,7 +162,6 @@ export const Chat = memo(({ stopConversationRef }: Props) => {
         return;
       }
 
-      homeDispatch({ field: 'loading', value: false });
       let done = false;
       let text = '';
       const reader = data.getReader();
@@ -199,10 +203,18 @@ export const Chat = memo(({ stopConversationRef }: Props) => {
         handleUpdateChat(_selectChatId!, { title });
       }
 
+      homeDispatch({ field: 'loading', value: false });
       homeDispatch({ field: 'messageIsStreaming', value: false });
       handleSelectChat(_selectChatId!);
     },
-    [chats, selectChatId, currentMessages, selectMessages, stopConversationRef]
+    [
+      chats,
+      selectChatId,
+      currentMessages,
+      selectMessages,
+      selectModelId,
+      stopConversationRef,
+    ]
   );
 
   useCallback(() => {
@@ -264,10 +276,6 @@ export const Chat = memo(({ stopConversationRef }: Props) => {
     throttledScrollDown();
   }, [selectMessages, throttledScrollDown]);
 
-  // useEffect(() => {
-  //   handleUpdateSelectMessage(selectChatId!);
-  // }, [selectChatId]);
-
   useEffect(() => {
     const observer = new IntersectionObserver(
       ([entry]) => {
@@ -309,12 +317,12 @@ export const Chat = memo(({ stopConversationRef }: Props) => {
                       <Spinner size='16px' className='mx-auto' />
                     </div>
                   ) : (
-                    // models.length == 0 && t('No model data.')
+                    // {models.length === 0 && t('No model data.')}
                     <></>
                   )}
                 </div>
 
-                {
+                {models.length !== 0 && (
                   <div className='flex h-full flex-col space-y-4 rounded-lg border border-neutral-200 p-4 dark:border-neutral-600'>
                     <AccountBalance />
                     <ModelSelect />
@@ -339,7 +347,7 @@ export const Chat = memo(({ stopConversationRef }: Props) => {
                       }
                     /> */}
                   </div>
-                }
+                )}
               </div>
             </>
           ) : (
@@ -408,7 +416,7 @@ export const Chat = memo(({ stopConversationRef }: Props) => {
                 ));
               })}
 
-              {loading && <ChatLoader />}
+              {/* {loading && <ChatLoader />} */}
 
               <div
                 className='h-[162px] bg-white dark:bg-[#343541]'

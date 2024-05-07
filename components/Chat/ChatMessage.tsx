@@ -28,6 +28,7 @@ export interface Props {
 
 export const ChatMessage: FC<Props> = memo(
   ({
+    id,
     parentChildrenIds,
     currentSelectIndex,
     parentId,
@@ -37,7 +38,7 @@ export const ChatMessage: FC<Props> = memo(
   }) => {
     const { t } = useTranslation('chat');
     const {
-      state: { selectChatId, messageIsStreaming },
+      state: { selectChatId, messageIsStreaming, selectMessageLastId },
       dispatch: homeDispatch,
     } = useContext(HomeContext);
 
@@ -312,10 +313,7 @@ export const ChatMessage: FC<Props> = memo(
                     }}
                   >
                     {`${message.content.text}${
-                      messageIsStreaming
-                        ? // && id == (selectedConversation?.messages.length ?? 0) - 1
-                          '`▍`'
-                        : ''
+                      messageIsStreaming && id == selectMessageLastId ? '`▍`' : ''
                     }`}
                   </MemoizedReactMarkdown>
                 </div>

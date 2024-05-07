@@ -1,4 +1,4 @@
-import { useContext, useEffect, useState } from 'react';
+import { useContext, useEffect } from 'react';
 import { useTranslation } from 'next-i18next';
 import { useCreateReducer } from '@/hooks/useCreateReducer';
 import { removeSelectChatId, saveSelectChatId } from '@/utils/conversation';
@@ -18,12 +18,11 @@ export const Chatbar = () => {
   });
 
   const {
-    state: { chats, showChatbar },
+    state: { chats, showChatbar, messageIsStreaming },
     dispatch: homeDispatch,
     handleDeleteChat: homeHandleDeleteChat,
     handleSelectChat,
     handleNewChat,
-    handleUpdateConversation,
     hasModel,
   } = useContext(HomeContext);
 
@@ -50,16 +49,6 @@ export const Chatbar = () => {
     localStorage.setItem('showChatbar', JSON.stringify(!showChatbar));
   };
 
-  const handleDrop = (e: any) => {
-    if (e.dataTransfer) {
-      const conversation = JSON.parse(e.dataTransfer.getData('conversation'));
-      handleUpdateConversation(conversation, [
-        { key: 'folderId', value: 0 },
-      ] as any);
-      chatDispatch({ field: 'searchTerm', value: '' });
-      e.target.style.background = 'none';
-    }
-  };
   useEffect(() => {
     if (searchTerm) {
       chatDispatch({
@@ -85,6 +74,7 @@ export const Chatbar = () => {
       }}
     >
       <Sidebar<ChatResult>
+        messageIsStreaming={messageIsStreaming}
         side={'left'}
         isOpen={showChatbar}
         addItemButtonTitle={t('New chat')}
@@ -97,7 +87,6 @@ export const Chatbar = () => {
         }
         toggleOpen={handleToggleChatbar}
         handleCreateItem={handleNewChat}
-        handleDrop={handleDrop}
         footerComponent={<ChatBarSettings />}
       />
     </ChatbarContext.Provider>

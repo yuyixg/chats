@@ -47,17 +47,11 @@ export const ChatInput = ({
   const { t } = useTranslation('chat');
 
   const {
-    state: {
-      selectedConversation,
-      messageIsStreaming,
-      selectMessages,
-      prompts,
-    },
+    state: { selectModelId, messageIsStreaming, selectMessages, prompts },
+    getModel,
   } = useContext(HomeContext);
 
-  const {
-    model: { fileConfig, fileServerConfig },
-  } = selectedConversation || { model: { fileConfig: null } };
+  const { fileConfig, fileServerConfig, maxLength } = getModel();
 
   const [content, setContent] = useState<Content>({
     text: '',
@@ -88,7 +82,6 @@ export const ChatInput = ({
 
   const handleChange = (e: React.ChangeEvent<HTMLTextAreaElement>) => {
     const value = e.target.value;
-    const maxLength = selectedConversation?.model?.maxLength;
     if (maxLength && value.length > maxLength) {
       toast.error(
         t(
@@ -229,7 +222,7 @@ export const ChatInput = ({
 
   useEffect(() => {
     setContent({ text: '', image: [] });
-  }, [selectedConversation?.model]);
+  }, [selectModelId]);
 
   return (
     <div className='absolute bottom-0 left-0 w-full border-transparent bg-gradient-to-b from-transparent via-white to-white pt-6 dark:border-white/20 dark:via-[#343541] dark:to-[#343541] md:pt-2'>

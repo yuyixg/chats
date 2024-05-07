@@ -70,7 +70,7 @@ interface HomeInitialState {
   selectModelId: string | undefined;
   currentMessages: ChatMessage[];
   selectMessages: ChatMessage[];
-  selectMessageId: string;
+  selectMessageLastId: string;
   conversations: Conversation[];
   selectedConversation: Conversation | undefined;
   currentMessage: Message | undefined;
@@ -93,7 +93,7 @@ const initialState: HomeInitialState = {
   modelsLoading: false,
   currentMessages: [],
   selectMessages: [],
-  selectMessageId: '',
+  selectMessageLastId: '',
   models: [],
   chats: [],
   selectModelId: undefined,
@@ -116,18 +116,11 @@ interface HomeContextProps {
   handleNewChat: () => void;
   handleSelectChat: (chatId: string) => void;
   handleUpdateChat: (id: string, params: HandleUpdateChatParams) => void;
-  handleSelectLastLeafId: (lastLeafId: string) => void;
   handleUpdateSelectMessage: (lastLeafId: string) => void;
   handleDeleteChat: (id: string) => void;
-  handleNewConversation: () => void;
   handleSelectModel: (modelId: string) => void;
-  handleSelectConversation: (conversation: Conversation) => void;
-  handleUpdateConversation: (
-    conversation: Conversation,
-    data: KeyValuePair | KeyValuePair[]
-  ) => void;
   hasModel: () => boolean;
-  getModel: (modeId: string) => Model;
+  getModel: () => Model;
 }
 
 const HomeContext = createContext<HomeContextProps>(undefined!);
@@ -143,9 +136,8 @@ const Home = ({ defaultModelId }: Props) => {
 
   const {
     state: {
-      selectChatId,
+      selectModelId,
       chats,
-      conversations,
       currentMessages,
       selectedConversation,
       models,
@@ -166,7 +158,7 @@ const Home = ({ defaultModelId }: Props) => {
   const handleNewChat = () => {
     postChats({ title: t('New Conversation') }).then((data) => {
       dispatch({ field: 'selectChatId', value: data.id });
-      dispatch({ field: 'selectMessageId', value: '' });
+      dispatch({ field: 'selectMessageLastId', value: '' });
       dispatch({ field: 'currentMessages', value: [] });
       dispatch({ field: 'selectMessages', value: [] });
       const lastChat = getLastChat();
@@ -228,15 +220,6 @@ const Home = ({ defaultModelId }: Props) => {
     return selectMessages;
   }
 
-  const getLastNodeRootId = (
-    messages: ChatMessage[],
-    lastNodeId: string | null
-  ): string => {
-    const message = messages.find((x) => x.id === lastNodeId);
-    if (!message?.parentId) return message?.id!;
-    return getLastNodeRootId(messages, message?.parentId);
-  };
-
   const handleSelectChat = (chatId: string) => {
     dispatch({ field: 'selectChatId', value: chatId });
     const chat = chats.find((x) => x.id === chatId);
@@ -251,6 +234,7 @@ const Home = ({ defaultModelId }: Props) => {
             value: _selectMessages,
           });
         } else {
+          dispatch({ field: 'currentMessages', value: [] });
           dispatch({
             field: 'selectMessages',
             value: [],
@@ -261,18 +245,10 @@ const Home = ({ defaultModelId }: Props) => {
   };
 
   const handleUpdateSelectMessage = (messageId: string) => {
-    handleSelectMessageId(messageId);
     const _selectMessages = getSelectMessages(currentMessages, messageId);
     dispatch({
       field: 'selectMessages',
       value: _selectMessages,
-    });
-  };
-
-  const handleSelectMessageId = (selectMessageId: string) => {
-    dispatch({
-      field: 'selectMessageId',
-      value: selectMessageId,
     });
   };
 
@@ -295,76 +271,12 @@ const Home = ({ defaultModelId }: Props) => {
     dispatch({ field: 'chats', value: _chats });
   };
 
-  const handleNewConversation = () => {
-    const lastConversation = conversations[conversations.length - 1];
-    const _defaultModelId = defaultModelId ?? models[0].id;
-    const model = lastConversation?.model || getModel(_defaultModelId);
-    const newConversation: Conversation = {
-      id: uuidv4(),
-      name: t('New Conversation'),
-      messages: [],
-      model: model,
-      prompt: t(model.systemPrompt),
-      fileServerConfig: model.fileServerConfig,
-      isShared: false,
-      temperature: DEFAULT_TEMPERATURE,
-    };
-
-    const updatedConversations = [...conversations, newConversation];
-
-    dispatch({ field: 'selectedConversation', value: newConversation });
-    dispatch({ field: 'conversations', value: updatedConversations });
-
-    saveConversation(newConversation);
-    saveConversations(updatedConversations);
-
-    dispatch({ field: 'loading', value: false });
-  };
-
-  const handleSelectConversation = (conversation: Conversation) => {
-    dispatch({
-      field: 'selectedConversation',
-      value: conversation,
-    });
-
-    saveConversation(conversation);
-  };
-
-  const handleUpdateConversation = (
-    conversation: Conversation,
-    data: KeyValuePair | KeyValuePair[]
-  ) => {
-    let updatedConversation = { ...conversation };
-
-    if (Array.isArray(data)) {
-      data.forEach((pair) => {
-        updatedConversation = {
-          ...updatedConversation,
-          [pair.key]: pair.value,
-        };
-      });
-    } else {
-      updatedConversation = {
-        ...updatedConversation,
-        [data.key]: data.value,
-      };
-    }
-
-    const { single, all } = updateConversation(
-      updatedConversation,
-      conversations
-    );
-
-    dispatch({ field: 'selectedConversation', value: single });
-    dispatch({ field: 'conversations', value: all });
-  };
-
   const hasModel = () => {
     return models?.length > 0;
   };
 
-  const getModel = (modelId: string) => {
-    return models.find((x) => x.id === modelId)!;
+  const getModel = () => {
+    return models.find((x) => x.id === selectModelId)!;
   };
 
   useEffect(() => {
@@ -483,11 +395,6 @@ const Home = ({ defaultModelId }: Props) => {
         handleDeleteChat,
         handleSelectModel,
         handleUpdateSelectMessage,
-        handleSelectLastLeafId: handleSelectMessageId,
-
-        handleNewConversation,
-        handleSelectConversation,
-        handleUpdateConversation,
         hasModel,
         getModel,
       }}

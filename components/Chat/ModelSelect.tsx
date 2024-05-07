@@ -6,14 +6,14 @@ export const ModelSelect = () => {
   const { t } = useTranslation('chat');
 
   const {
-    state: { selectChatId, selectModelId, models },
+    state: { selectModelId, models },
     handleSelectModel,
     dispatch: homeDispatch,
   } = useContext(HomeContext);
 
   const handleChange = (e: React.ChangeEvent<HTMLSelectElement>) => {
     const model = models.find((m) => m.id == e.target.value)!;
-    selectChatId && handleSelectModel(model.id);
+    handleSelectModel(model.id);
   };
 
   return (

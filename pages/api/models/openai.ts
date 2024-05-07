@@ -1,5 +1,12 @@
 import { OpenAIStream } from '@/services/openai';
-import { ChatBody, GPT4Message, Content, Message } from '@/types/chat';
+import {
+  ChatBody,
+  GPT4Message,
+  Content,
+  Message,
+  GPT4VisionMessage,
+  Role,
+} from '@/types/chat';
 import { get_encoding } from 'tiktoken';
 import {
   ChatMessagesManager,
@@ -18,6 +25,7 @@ import { calcTokenPrice } from '@/utils/message';
 import { apiHandler } from '@/middleware/api-handler';
 import { ChatsApiRequest, ChatsApiResponse } from '@/types/next-api';
 import { ChatMessages } from '@prisma/client';
+import { ModelVersions } from '@/types/model';
 
 export const config = {
   api: {
@@ -71,7 +79,7 @@ const handler = async (req: ChatsApiRequest, res: ChatsApiResponse) => {
   const prompt_tokens = encoding.encode(prompt);
 
   let tokenUsed = prompt_tokens.length;
-  let messagesToSend: GPT4Message[] = [];
+  let messagesToSend = [] as any[];
 
   const chatMessages = await ChatMessagesManager.findUserMessageByChatId(
     userId,
@@ -89,37 +97,53 @@ const handler = async (req: ChatsApiRequest, res: ChatsApiResponse) => {
     return currentItem ? [currentItem] : [];
   };
   const messages = findParents(chatMessages, parentId);
+
+  function convertMessageToSend(messageContent: Content, role: Role = 'user') {
+    return { role, content: messageContent.text } as GPT4Message;
+  }
+  function convertToGPTVisionMessage(
+    messageContent: Content,
+    role: Role = 'user'
+  ) {
+    const message = { role, content: [] } as GPT4VisionMessage;
+    message.content.push({ type: 'text', text: messageContent.text });
+    messageContent.image?.forEach((url) => {
+      message.content.push({
+        type: 'image_url',
+        image_url: { url },
+      });
+    });
+    return message;
+  }
+
   messages.forEach((m) => {
     const chatMessages = JSON.parse(m.messages) as Message[];
-    const _messages = chatMessages.map((x) => {
-      return { role: x.role, content: x.content.text } as GPT4Message;
-    });
+    let _messages = [] as GPT4Message[] | GPT4VisionMessage[];
+    if (chatModel.modelVersion === ModelVersions.GPT_4_Vision) {
+      chatMessages.forEach((x) => {
+        const content = convertToGPTVisionMessage(x.content, x.role);
+        _messages.push({ role: x.role, content: content as any });
+      });
+    } else {
+      _messages = chatMessages.map((x) => {
+        return convertMessageToSend(x.content, x.role);
+      });
+    }
     messagesToSend = [...messagesToSend, ..._messages];
   });
 
-  function convertMessageToSend<T>(userMessage: Content) {
-    return { role: 'user', content: userMessageText } as T;
-  }
+  const userMessageToSend =
+    chatModel.modelVersion === ModelVersions.GPT_4_Vision
+      ? convertToGPTVisionMessage(userMessage)
+      : convertMessageToSend(userMessage);
 
-  // function convertToGPTVisionMessage(userMessage: Content) {
-  //   const message = { role: 'user' } as GPT4VisionMessage;
-  //   message.content.push({ type: 'text', text: userMessage.text });
-  //   userMessage.image?.forEach((url) => {
-  //     message.content.push({
-  //       type: 'image_url',
-  //       image_url: { url },
-  //     });
-  //   });
-  //   return message;
-  // }
-
-  const userMessageToSend = convertMessageToSend<GPT4Message>(userMessage);
   const currentMessage = [
     {
       role: 'user',
       content: userMessage,
     },
   ];
+
   messagesToSend.push(userMessageToSend);
 
   const stream = await OpenAIStream(
