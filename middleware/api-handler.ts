@@ -22,7 +22,7 @@ const publicApis = [
   '/api/public/login',
   '/api/public/messages',
   '/api/public/notify',
-  '/api/public/login-provider'
+  '/api/public/login-provider',
 ];
 const adminApis = '/api/admin/';
 
@@ -68,14 +68,10 @@ export function apiHandler(handler: any) {
 
     try {
       await authMiddleware(request);
-      logs.userId = request?.session?.userId;
       const data = await handler(request, response);
-      logs.response = JSON.stringify(data);
       if (modelApis.includes(request.url!)) {
         return response.write(Buffer.from(data || ''));
       }
-      logs.responseTime = new Date().getTime().toString();
-      await RequestLogsManager.create(logs);
       return data
         ? response.status(200).json(data)
         : response.status(200).end();
