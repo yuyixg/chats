@@ -11,7 +11,7 @@ datasource db {
 }
 
 model Users {
-  id           String        @id @default(uuid())
+  id           String        @id @default(uuid()) @db.UniqueIdentifier
   avatar       String?
   account      String?
   username     String?
@@ -33,7 +33,7 @@ model Users {
 }
 
 model FileServices {
-  id        String   @id @default(uuid())
+  id        String   @id @default(uuid()) @db.UniqueIdentifier
   name      String
   enabled   Boolean  @default(true)
   type      String
@@ -43,14 +43,14 @@ model FileServices {
 }
 
 model ChatModels {
-  id            String     @id @default(uuid())
+  id            String     @id @default(uuid()) @db.UniqueIdentifier
   modelProvider String
   modelVersion  String
   name          String
   isDefault     Boolean    @default(false)
   rank          Int?
   remarks       String?
-  modelKeysId   String?
+  modelKeysId   String?    @db.UniqueIdentifier
   fileServerId  String?
   fileConfig    String?    @default("{}") @db.NVarChar(2048)
   modelConfig   String     @default("{}") @db.NVarChar(2048)
@@ -63,16 +63,16 @@ model ChatModels {
 }
 
 model Sessions {
-  id        String   @id @default(uuid())
+  id        String   @id @default(uuid()) @db.UniqueIdentifier
   user      Users    @relation(fields: [userId], references: [id])
-  userId    String
+  userId    String   @db.UniqueIdentifier
   createdAt DateTime @default(now())
   updatedAt DateTime @updatedAt
 }
 
 model UserModels {
-  id        String   @id @default(uuid())
-  userId    String
+  id        String   @id @default(uuid()) @db.UniqueIdentifier
+  userId    String   @db.UniqueIdentifier
   models    String   @default("[]")
   createdAt DateTime @default(now())
   updatedAt DateTime @updatedAt
@@ -80,23 +80,23 @@ model UserModels {
 }
 
 model Chats {
-  id                              String         @id @default(uuid())
-  title                           String         @db.NVarChar(50)
-  userId                          String
-  chatModelId                     String?
-  userModelConfig                 String         @default("{}")
-  isShared                        Boolean        @default(false)
-  isDeleted                       Boolean        @default(false)
-  createdAt                       DateTime       @default(now())
-  user                            Users          @relation(fields: [userId], references: [id])
-  chatModel                       ChatModels?    @relation(fields: [chatModelId], references: [id])
-  ChatMessages                    ChatMessages[]
+  id              String         @id @default(uuid()) @db.UniqueIdentifier
+  title           String         @db.NVarChar(50)
+  userId          String         @db.UniqueIdentifier
+  chatModelId     String?        @db.UniqueIdentifier
+  userModelConfig String         @default("{}")
+  isShared        Boolean        @default(false)
+  isDeleted       Boolean        @default(false)
+  createdAt       DateTime       @default(now())
+  user            Users          @relation(fields: [userId], references: [id])
+  chatModel       ChatModels?    @relation(fields: [chatModelId], references: [id])
+  ChatMessages    ChatMessages[]
 }
 
 model ChatMessages {
-  id              String   @id @default(uuid())
-  userId          String
-  chatId          String
+  id              String   @id @default(uuid()) @db.UniqueIdentifier
+  userId          String   @db.UniqueIdentifier
+  chatId          String   @db.UniqueIdentifier
   parentId        String?
   messages        String   @db.NText()
   calculatedPrice Decimal
@@ -107,17 +107,17 @@ model ChatMessages {
 }
 
 model UserBalances {
-  id        String   @id @default(uuid())
+  id        String   @id @default(uuid()) @db.UniqueIdentifier
   balance   Decimal  @default(0)
-  userId    String   @unique
+  userId    String   @unique @db.UniqueIdentifier
   createdAt DateTime @default(now())
   updatedAt DateTime @updatedAt
   user      Users    @relation(fields: [userId], references: [id])
 }
 
 model BalanceLogs {
-  id           String   @id @default(uuid())
-  userId       String
+  id           String   @id @default(uuid()) @db.UniqueIdentifier
+  userId       String   @db.UniqueIdentifier
   createUserId String
   value        Decimal  @default(0)
   type         Int
@@ -126,8 +126,8 @@ model BalanceLogs {
 }
 
 model Orders {
-  id           String   @id @default(uuid())
-  createUserId String
+  id           String   @id @default(uuid()) @db.UniqueIdentifier
+  createUserId String   @db.UniqueIdentifier
   amount       Int
   outTradeNo   String
   status       String
@@ -139,14 +139,14 @@ model Orders {
 }
 
 model Counterfoils {
-  id        String   @id @default(uuid())
-  orderId   String
+  id        String   @id @default(uuid()) @db.UniqueIdentifier
+  orderId   String   @db.UniqueIdentifier
   info      String   @db.NText()
   createdAt DateTime @default(now())
 }
 
 model LoginServices {
-  id        String   @id @default(uuid())
+  id        String   @id @default(uuid()) @db.UniqueIdentifier
   type      String
   enabled   Boolean  @default(true)
   configs   String   @default("{}") @db.NVarChar(2048)
@@ -155,7 +155,7 @@ model LoginServices {
 }
 
 model UserSms {
-  id        String   @id @default(uuid())
+  id        String   @id @default(uuid()) @db.UniqueIdentifier
   type      String
   status    String
   code      String
@@ -163,7 +163,7 @@ model UserSms {
 }
 
 model PayServices {
-  id        String   @id @default(uuid())
+  id        String   @id @default(uuid()) @db.UniqueIdentifier
   type      String
   enabled   Boolean  @default(true)
   configs   String   @db.NText()
@@ -172,9 +172,9 @@ model PayServices {
 }
 
 model RequestLogs {
-  id           String   @id @default(uuid())
+  id           String   @id @default(uuid()) @db.UniqueIdentifier
   ip           String?
-  userId       String?
+  userId       String?  @db.UniqueIdentifier
   url          String
   method       String
   statusCode   Int
@@ -188,7 +188,7 @@ model RequestLogs {
 }
 
 model ModelKeys {
-  id         String       @id @default(uuid())
+  id         String       @id @default(uuid()) @db.UniqueIdentifier
   name       String       @db.NVarChar(100)
   type       String       @db.NVarChar(50)
   configs    String       @db.NVarChar(2048)

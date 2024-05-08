@@ -71,6 +71,7 @@ export const Chat = memo(({ stopConversationRef }: Props) => {
   const handleSend = useCallback(
     async (message: Message, parentId: string | null, messageId = '') => {
       let _selectChatId = selectChatId;
+      let _selectMessages = [...selectMessages];
       if (!selectChatId) {
         const newChat = await postChats({ title: t('New Conversation') });
         _selectChatId = newChat.id;
@@ -90,9 +91,9 @@ export const Chat = memo(({ stopConversationRef }: Props) => {
       } else {
         const tempUUID = uuidv4();
         homeDispatch({ field: 'selectMessageLastId', value: tempUUID });
-        const parentMessage = selectMessages.find((x) => x.id == parentId);
-        parentMessage && parentMessage?.childrenIds.push(tempUUID);
-        const parentMessageIndex = selectMessages.findIndex(
+        const parentMessage = _selectMessages.find((x) => x.id == parentId);
+        parentMessage && parentMessage?.childrenIds.unshift(tempUUID);
+        const parentMessageIndex = _selectMessages.findIndex(
           (x) => x.id == parentId
         );
 
@@ -107,21 +108,21 @@ export const Chat = memo(({ stopConversationRef }: Props) => {
           ] as Message[],
         };
         let removeCount = -1;
-        if (parentMessageIndex !== -1) removeCount = selectMessages.length - 1;
+        if (parentMessageIndex !== -1) removeCount = _selectMessages.length - 1;
         if (!parentId) {
-          removeCount = 1;
+          removeCount = _selectMessages.length;
           homeDispatch({
             field: 'currentMessages',
             value: [...currentMessages, newMessage],
           });
         }
 
-        selectMessages.splice(parentMessageIndex + 1, removeCount, newMessage);
+        _selectMessages.splice(parentMessageIndex + 1, removeCount, newMessage);
       }
 
       homeDispatch({
         field: 'selectMessages',
-        value: [...selectMessages],
+        value: [..._selectMessages],
       });
 
       homeDispatch({ field: 'loading', value: true });
@@ -177,7 +178,7 @@ export const Chat = memo(({ stopConversationRef }: Props) => {
         const chunkValue = decoder.decode(value);
         text += chunkValue;
 
-        let laseMessages = selectMessages[selectMessages.length - 1];
+        let laseMessages = _selectMessages[_selectMessages.length - 1];
         laseMessages.messages = laseMessages.messages.map((message, index) => {
           if (index === laseMessages.messages.length - 1) {
             return {
@@ -190,10 +191,10 @@ export const Chat = memo(({ stopConversationRef }: Props) => {
 
         homeDispatch({
           field: 'selectMessages',
-          value: [...selectMessages],
+          value: [..._selectMessages],
         });
       }
-      if (selectMessages.length === 1) {
+      if (_selectMessages.length === 1) {
         const userMessageText = message.content.text!;
         const title =
           userMessageText.length > 30
