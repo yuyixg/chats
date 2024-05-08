@@ -1,14 +1,6 @@
 import { useCreateReducer } from '@/hooks/useCreateReducer';
 import { Conversation } from '@/types/chat';
-import { v4 as uuidv4 } from 'uuid';
 import { ModelVersions } from '@/types/model';
-import { DEFAULT_TEMPERATURE } from '@/utils/const';
-import {
-  saveConversation,
-  saveConversations,
-  updateConversation,
-} from '@/utils/conversation';
-import { KeyValuePair } from '@/types/data';
 import { useEffect, useRef } from 'react';
 import Head from 'next/head';
 import { Navbar } from '@/components/Navbar/Navbar';
@@ -127,7 +119,7 @@ const HomeContext = createContext<HomeContextProps>(undefined!);
 
 export { initialState, HomeContext };
 
-const Home = ({ defaultModelId }: Props) => {
+const Home = () => {
   const router = useRouter();
   const { t } = useTranslation('chat');
   const contextValue = useCreateReducer<HomeInitialState>({
@@ -155,15 +147,23 @@ const Home = ({ defaultModelId }: Props) => {
     return chats[chatLength];
   };
 
+  const calcSelectModelId = () => {
+    const lastChat = getLastChat();
+    if (lastChat && lastChat.chatModelId) return lastChat.chatModelId;
+    else return models.length > 0 ? models[0].id : undefined;
+  };
+
+  const getChatModelId = (chatId: string) => {
+    return chats.find((x) => x.id === chatId)?.chatModelId;
+  };
+
   const handleNewChat = () => {
     postChats({ title: t('New Conversation') }).then((data) => {
       dispatch({ field: 'selectChatId', value: data.id });
       dispatch({ field: 'selectMessageLastId', value: '' });
       dispatch({ field: 'currentMessages', value: [] });
       dispatch({ field: 'selectMessages', value: [] });
-      const lastChat = getLastChat();
-      lastChat &&
-        dispatch({ field: 'selectModelId', value: lastChat.chatModelId });
+      dispatch({ field: 'selectModelId', value: calcSelectModelId() });
       dispatch({ field: 'chats', value: [...chats, data] });
     });
   };
@@ -222,27 +222,21 @@ const Home = ({ defaultModelId }: Props) => {
 
   const handleSelectChat = (chatId: string) => {
     dispatch({ field: 'selectChatId', value: chatId });
-    const chat = chats.find((x) => x.id === chatId);
-    if (chat) {
-      handleSelectModel(chat.chatModelId!);
-      getUserMessages(chatId).then((data) => {
-        if (data.length > 0) {
-          dispatch({ field: 'currentMessages', value: data });
-          const lastMessage = data[data.length - 1];
-          const _selectMessages = getSelectMessages(data, lastMessage.id);
-          dispatch({
-            field: 'selectMessages',
-            value: _selectMessages,
-          });
-        } else {
-          dispatch({ field: 'currentMessages', value: [] });
-          dispatch({
-            field: 'selectMessages',
-            value: [],
-          });
-        }
-      });
-    }
+    dispatch({
+      field: 'selectModelId',
+      value: getChatModelId(chatId) || calcSelectModelId(),
+    });
+    getUserMessages(chatId).then((data) => {
+      if (data.length > 0) {
+        dispatch({ field: 'currentMessages', value: data });
+        const lastMessage = data[data.length - 1];
+        const _selectMessages = getSelectMessages(data, lastMessage.id);
+        dispatch({
+          field: 'selectMessages',
+          value: _selectMessages,
+        });
+      }
+    });
   };
 
   const handleUpdateSelectMessage = (messageId: string) => {
@@ -270,6 +264,11 @@ const Home = ({ defaultModelId }: Props) => {
       return x.id !== id;
     });
     dispatch({ field: 'chats', value: _chats });
+    dispatch({ field: 'selectChatId', value: '' });
+    dispatch({ field: 'selectMessageLastId', value: '' });
+    dispatch({ field: 'currentMessages', value: [] });
+    dispatch({ field: 'selectMessages', value: [] });
+    dispatch({ field: 'selectModelId', value: calcSelectModelId() });
   };
 
   const hasModel = () => {
@@ -322,48 +321,12 @@ const Home = ({ defaultModelId }: Props) => {
     }
   }, []);
 
-  // useEffect(() => {
-  //   !messageIsStreaming &&
-  //     getUserMessages().then((data) => {
-  //       dispatch({ field: 'conversations', value: data });
-  //     });
-  // }, [messageIsStreaming]);
-
   useEffect(() => {
-    getChats().then((data) => {
-      dispatch({ field: 'chats', value: data });
-    });
+    !messageIsStreaming &&
+      getChats().then((data) => {
+        dispatch({ field: 'chats', value: data });
+      });
   }, [messageIsStreaming]);
-
-  // useEffect(() => {
-  //   const selectedConversation = localStorage.getItem('selectedConversation');
-  //   if (selectedConversation) {
-  //     const parsedSelectedConversation: Conversation =
-  //       JSON.parse(selectedConversation);
-
-  //     dispatch({
-  //       field: 'selectedConversation',
-  //       value: parsedSelectedConversation,
-  //     });
-  //   } else {
-  //     if (!models || models.length === 0) return;
-  //     const lastConversation = conversations[conversations.length - 1];
-  //     const _defaultModelId = defaultModelId ? defaultModelId : models[0]?.id;
-  //     const model = lastConversation?.model || getModel(_defaultModelId);
-  //     dispatch({
-  //       field: 'selectedConversation',
-  //       value: {
-  //         id: uuidv4(),
-  //         name: t('New Conversation'),
-  //         messages: [],
-  //         model: model,
-  //         prompt: t(model.systemPrompt),
-  //         fileServerConfig: model.fileServerConfig,
-  //         temperature: DEFAULT_TEMPERATURE,
-  //       },
-  //     });
-  //   }
-  // }, [defaultModelId, models, dispatch]);
 
   useEffect(() => {
     dispatch({
@@ -462,7 +425,6 @@ export const getServerSideProps = async ({
     props: {
       locale,
       session,
-      defaultModelId: null,
       ...(await serverSideTranslations(locale ?? DEFAULT_LANGUAGE, [
         'common',
         'chat',
