@@ -47,11 +47,17 @@ export const ChatInput = ({
   const { t } = useTranslation('chat');
 
   const {
-    state: { selectModelId, messageIsStreaming, selectMessages, prompts },
+    state: {
+      selectModelId,
+      messageIsStreaming,
+      selectMessages,
+      prompts,
+      selectChatId,
+    },
     getModel,
   } = useContext(HomeContext);
 
-  const { fileConfig, fileServerConfig, maxLength } = getModel();
+  const { fileConfig, fileServerConfig, maxLength } = getModel() || {};
 
   const [content, setContent] = useState<Content>({
     text: '',
@@ -222,7 +228,7 @@ export const ChatInput = ({
 
   useEffect(() => {
     setContent({ text: '', image: [] });
-  }, [selectModelId]);
+  }, [selectModelId, selectChatId]);
 
   return (
     <div className='absolute bottom-0 left-0 w-full border-transparent bg-gradient-to-b from-transparent via-white to-white pt-6 dark:border-white/20 dark:via-[#343541] dark:to-[#343541] md:pt-2'>

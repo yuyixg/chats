@@ -224,6 +224,7 @@ const Home = ({ defaultModelId }: Props) => {
     dispatch({ field: 'selectChatId', value: chatId });
     const chat = chats.find((x) => x.id === chatId);
     if (chat) {
+      handleSelectModel(chat.chatModelId!);
       getUserMessages(chatId).then((data) => {
         if (data.length > 0) {
           dispatch({ field: 'currentMessages', value: data });

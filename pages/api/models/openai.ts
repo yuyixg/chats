@@ -82,7 +82,6 @@ const handler = async (req: ChatsApiRequest, res: ChatsApiResponse) => {
   let messagesToSend = [] as any[];
 
   const chatMessages = await ChatMessagesManager.findUserMessageByChatId(
-    userId,
     chatId
   );
   const findParents = (

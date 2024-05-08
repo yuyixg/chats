@@ -43,6 +43,7 @@ export const Chat = memo(({ stopConversationRef }: Props) => {
     handleUpdateChat,
     handleSelectChat,
     hasModel,
+    getModel,
     dispatch: homeDispatch,
   } = useContext(HomeContext);
   const [currentMessage, setCurrentMessage] = useState<Message>();
@@ -112,7 +113,7 @@ export const Chat = memo(({ stopConversationRef }: Props) => {
           removeCount = 1;
           homeDispatch({
             field: 'currentMessages',
-            value: [newMessage, ...currentMessages],
+            value: [...currentMessages, newMessage],
           });
         }
 
@@ -134,8 +135,7 @@ export const Chat = memo(({ stopConversationRef }: Props) => {
         messageId,
         userMessage: messageContent,
       };
-
-      const endpoint = getModelEndpoint();
+      const endpoint = getModelEndpoint(getModel().modelProvider);
       let body = JSON.stringify(chatBody);
 
       const controller = new AbortController();
@@ -352,10 +352,10 @@ export const Chat = memo(({ stopConversationRef }: Props) => {
             </>
           ) : (
             <>
-              {/* {selectedConversation && (
+              {selectModelId && (
                 <div className='sticky top-0 z-10 flex justify-center bg-white py-2 text-sm text-neutral-500 dark:border-none dark:bg-[#343541] dark:text-neutral-200'>
-                  {selectedConversation?.model?.name?.toUpperCase()}
-                  {t('Temp')}:{selectedConversation?.temperature} |
+                  {getModel().name?.toUpperCase()}
+                  {/* {t('Temp')}:{selectedConversation?.temperature} |
                   <button
                     className='ml-2 cursor-pointer hover:opacity-50'
                     onClick={() => {
@@ -370,9 +370,9 @@ export const Chat = memo(({ stopConversationRef }: Props) => {
                           : '',
                       }}
                     />
-                  </button>
+                  </button> */}
                 </div>
-              )} */}
+              )}
 
               {showSettings && (
                 <div className='flex flex-col space-y-10 md:mx-auto md:max-w-xl md:gap-6 md:py-3 md:pt-6 lg:max-w-2xl lg:px-0 xl:max-w-3xl'>

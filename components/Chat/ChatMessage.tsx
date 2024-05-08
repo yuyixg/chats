@@ -195,15 +195,17 @@ export const ChatMessage: FC<Props> = memo(
                 {!isEditing && (
                   <div className='flex gap-2'>
                     <>
-                      {!messageIsStreaming && parentChildrenIds.length > 1 && (
+                      {parentChildrenIds.length > 1 && (
                         <div className='flex gap-1 text-sm'>
                           <button
                             className={
-                              currentSelectIndex === 0
+                              currentSelectIndex === 0 || messageIsStreaming
                                 ? 'text-gray-400'
                                 : 'cursor-pointer'
                             }
-                            disabled={currentSelectIndex === 0}
+                            disabled={
+                              currentSelectIndex === 0 || messageIsStreaming
+                            }
                             onClick={() => {
                               if (onChangeMessage) {
                                 const index = currentSelectIndex - 1;
@@ -221,13 +223,15 @@ export const ChatMessage: FC<Props> = memo(
                           <button
                             className={
                               currentSelectIndex ===
-                              parentChildrenIds.length - 1
+                                parentChildrenIds.length - 1 ||
+                              messageIsStreaming
                                 ? 'text-gray-400'
                                 : 'cursor-pointer'
                             }
                             disabled={
                               currentSelectIndex ===
-                              parentChildrenIds.length - 1
+                                parentChildrenIds.length - 1 ||
+                              messageIsStreaming
                             }
                             onClick={() => {
                               if (onChangeMessage) {
