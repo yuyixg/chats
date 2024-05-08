@@ -14,7 +14,6 @@ import { throttle } from '@/utils/throttle';
 import { ChatBody, Message } from '@/types/chat';
 import Spinner from '../Spinner';
 import { ChatInput } from './ChatInput';
-import { ChatLoader } from './ChatLoader';
 import { MemoizedChatMessage } from './MemoizedChatMessage';
 import { ModelSelect } from './ModelSelect';
 import { HomeContext } from '@/pages/home/home';
