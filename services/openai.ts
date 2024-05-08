@@ -1,6 +1,6 @@
 import { GPT4Message, GPT4VisionMessage } from '@/types/chat';
 import { ChatModels } from '@/types/chatModel';
-import { ModelProviders } from '@/types/model';
+import { ModelProviders, ModelVersions } from '@/types/model';
 
 import {
   ParsedEvent,
@@ -58,7 +58,9 @@ export const OpenAIStream = async (
         },
         ...messages,
       ],
-      max_tokens: 4096,
+      ...(modelVersion === ModelVersions.GPT_4_Vision
+        ? { max_tokens: 4096 }
+        : {}),
       temperature: temperature,
       stream: true,
     }),

@@ -19,7 +19,8 @@ import { ModelSelect } from './ModelSelect';
 import { HomeContext } from '@/pages/home/home';
 import { AccountBalance } from './AccountBalance';
 import { v4 as uuidv4 } from 'uuid';
-import { postChats } from '@/apis/userService';
+import { getUserMessages, postChats } from '@/apis/userService';
+import { getSelectMessages } from '@/utils/message';
 interface Props {
   stopConversationRef: MutableRefObject<boolean>;
 }
@@ -205,7 +206,23 @@ export const Chat = memo(({ stopConversationRef }: Props) => {
 
       homeDispatch({ field: 'loading', value: false });
       homeDispatch({ field: 'messageIsStreaming', value: false });
-      handleSelectChat(_selectChatId!);
+      getUserMessages(selectChatId!).then((data) => {
+        if (data.length > 0) {
+          homeDispatch({ field: 'currentMessages', value: data });
+          const lastMessage = data[data.length - 1];
+          const _selectMessages = getSelectMessages(data, lastMessage.id);
+          homeDispatch({
+            field: 'selectMessages',
+            value: _selectMessages,
+          });
+        } else {
+          homeDispatch({ field: 'currentMessages', value: [] });
+          homeDispatch({
+            field: 'selectMessages',
+            value: [],
+          });
+        }
+      });
     },
     [
       chats,

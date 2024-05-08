@@ -36,6 +36,7 @@ import {
 import { useTheme } from 'next-themes';
 import Spinner from '@/components/Spinner';
 import { ChatMessage } from '@/types/chatMessage';
+import { getSelectMessages } from '@/utils/message';
 interface HandleUpdateChatParams {
   title?: string;
 }
@@ -129,6 +130,7 @@ const Home = () => {
   const {
     state: {
       selectModelId,
+      selectChatId,
       chats,
       currentMessages,
       selectedConversation,
@@ -168,58 +170,6 @@ const Home = () => {
     });
   };
 
-  function findMessageChildren(
-    conversations: ChatMessage[],
-    nodeId: string,
-    messages: ChatMessage[]
-  ) {
-    const message = conversations.findLast((x) => x.parentId === nodeId);
-    if (message) {
-      messages.push(message);
-      return findMessageChildren(conversations, message.id, messages);
-    }
-    return messages;
-  }
-
-  function findMessageParent(
-    conversations: ChatMessage[],
-    nodeId: string | null,
-    messages: ChatMessage[]
-  ) {
-    if (!nodeId) return messages;
-    const message = conversations.find((x) => x.id === nodeId);
-    if (message) {
-      messages.push(message);
-      return findMessageParent(conversations, message.parentId, messages);
-    }
-    return messages.reverse();
-  }
-
-  function getSelectMessages(
-    conversations: ChatMessage[],
-    nodeId: string
-  ): ChatMessage[] {
-    let selectMessages: ChatMessage[] = [];
-    const message = conversations.find((node) => node.id === nodeId);
-    if (!message) {
-      return [];
-    }
-    const messageChildren = findMessageChildren(conversations, message.id, []);
-    if (!message.parentId) {
-      selectMessages.push(message);
-    } else {
-      const messageParent = findMessageParent(
-        conversations,
-        message.parentId,
-        []
-      );
-      messageParent.reverse();
-      selectMessages = selectMessages.concat([...messageParent, message]);
-    }
-    selectMessages = selectMessages.concat(messageChildren);
-    return selectMessages;
-  }
-
   const handleSelectChat = (chatId: string) => {
     dispatch({ field: 'selectChatId', value: chatId });
     dispatch({
@@ -234,6 +184,12 @@ const Home = () => {
         dispatch({
           field: 'selectMessages',
           value: _selectMessages,
+        });
+      } else {
+        dispatch({ field: 'currentMessages', value: [] });
+        dispatch({
+          field: 'selectMessages',
+          value: [],
         });
       }
     });
@@ -325,6 +281,11 @@ const Home = () => {
     !messageIsStreaming &&
       getChats().then((data) => {
         dispatch({ field: 'chats', value: data });
+        const chat = data.find((x) => x.id === selectChatId);
+        dispatch({
+          field: 'selectModelId',
+          value: chat?.chatModelId,
+        });
       });
   }, [messageIsStreaming]);
 
