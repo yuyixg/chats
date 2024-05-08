@@ -47,11 +47,11 @@ export interface GPT4Message {
 }
 
 export interface ChatBody {
+  modelId: string;
+  userMessage: Content;
+  parentId: string | null;
   messageId: string;
-  model: Model;
-  messages: Message[];
-  prompt: string;
-  temperature: number;
+  chatId: string;
 }
 
 export interface Conversation {

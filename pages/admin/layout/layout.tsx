@@ -90,13 +90,13 @@ const AdminLayout = ({
       },
       title: t('Pay Service'),
     },
-    {
-      url: '/admin/messages',
-      icon: (stroke?: string) => {
-        return <IconMessages stroke={stroke} />;
-      },
-      title: t('User Messages'),
-    },
+    // {
+    //   url: '/admin/messages',
+    //   icon: (stroke?: string) => {
+    //     return <IconMessages stroke={stroke} />;
+    //   },
+    //   title: t('User Messages'),
+    // },
     {
       url: '/admin/request-logs',
       icon: (stroke?: string) => {

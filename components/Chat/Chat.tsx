@@ -1,4 +1,3 @@
-import { IconShare } from '@/components/Icons/index';
 import {
   MutableRefObject,
   memo,
@@ -9,23 +8,18 @@ import {
   useState,
 } from 'react';
 import toast from 'react-hot-toast';
-
 import { useTranslation } from 'next-i18next';
-
 import { getModelEndpoint } from '@/utils/apis';
-import { saveConversation, saveConversations } from '@/utils/conversation';
 import { throttle } from '@/utils/throttle';
-import { ChatBody, Conversation, Message } from '@/types/chat';
+import { ChatBody, Message } from '@/types/chat';
 import Spinner from '../Spinner';
 import { ChatInput } from './ChatInput';
-import { ChatLoader } from './ChatLoader';
 import { MemoizedChatMessage } from './MemoizedChatMessage';
 import { ModelSelect } from './ModelSelect';
-import { SystemPrompt } from './SystemPrompt';
 import { HomeContext } from '@/pages/home/home';
-import { SharedMessageModal } from './SharedMessageModal';
 import { AccountBalance } from './AccountBalance';
-
+import { v4 as uuidv4 } from 'uuid';
+import { postChats } from '@/apis/userService';
 interface Props {
   stopConversationRef: MutableRefObject<boolean>;
 }
@@ -35,17 +29,22 @@ export const Chat = memo(({ stopConversationRef }: Props) => {
 
   const {
     state: {
-      selectedConversation,
-      conversations,
+      selectChatId,
+      selectModelId,
+      selectMessages,
+      currentMessages,
+      chats,
+      models,
       modelsLoading,
       loading,
-      prompts,
     },
-    handleUpdateConversation,
+    handleUpdateSelectMessage,
+    handleUpdateChat,
+    handleSelectChat,
     hasModel,
+    getModel,
     dispatch: homeDispatch,
   } = useContext(HomeContext);
-
   const [currentMessage, setCurrentMessage] = useState<Message>();
   const [autoScrollEnabled, setAutoScrollEnabled] = useState<boolean>(true);
   const [showSettings, setShowSettings] = useState<boolean>(false);
@@ -57,150 +56,167 @@ export const Chat = memo(({ stopConversationRef }: Props) => {
   const chatContainerRef = useRef<HTMLDivElement>(null);
   const textareaRef = useRef<HTMLTextAreaElement>(null);
 
+  const getSelectMessageParent = () => {
+    const selectMessageLength = selectMessages.length;
+    if (selectMessageLength === 0) return null;
+    return selectMessages[selectMessageLength - 1];
+  };
+
+  const getSelectMessagesLast = () => {
+    const selectMessageLength = selectMessages.length - 1;
+    const lastMessage = { ...selectMessages[selectMessageLength] };
+    return { lastMessage, selectMessageLength };
+  };
+
   const handleSend = useCallback(
-    async (message: Message, deleteCount = 0) => {
-      if (selectedConversation) {
-        let updatedConversation: Conversation;
-        if (deleteCount) {
-          const updatedMessages = [...selectedConversation.messages];
-          for (let i = 0; i < deleteCount; i++) {
-            updatedMessages.pop();
-          }
-          updatedConversation = {
-            ...selectedConversation,
-            messages: [...updatedMessages, message],
-          };
-        } else {
-          updatedConversation = {
-            ...selectedConversation,
-            messages: [...selectedConversation.messages, message],
-          };
-        }
-        homeDispatch({
-          field: 'selectedConversation',
-          value: updatedConversation,
-        });
-        homeDispatch({ field: 'loading', value: true });
-        homeDispatch({ field: 'messageIsStreaming', value: true });
-        const chatBody: ChatBody = {
-          messageId: updatedConversation.id,
-          model: updatedConversation.model,
-          messages: updatedConversation.messages,
-          prompt: updatedConversation.prompt,
-          temperature: updatedConversation.temperature,
-        };
-
-        const endpoint = getModelEndpoint(chatBody.model);
-        let body = JSON.stringify(chatBody);
-
-        const controller = new AbortController();
-        const response = await fetch(endpoint, {
-          method: 'POST',
-          headers: {
-            'Content-Type': 'application/json',
-          },
-          signal: controller.signal,
-          body,
-        });
-        if (!response.ok) {
-          homeDispatch({ field: 'loading', value: false });
-          homeDispatch({ field: 'messageIsStreaming', value: false });
-          const result = await response.json();
-          toast.error(t(result?.message) || response.statusText);
-          return;
-        }
-        const data = response.body;
-        if (!data) {
-          homeDispatch({ field: 'loading', value: false });
-          homeDispatch({ field: 'messageIsStreaming', value: false });
-          return;
-        }
-        if (updatedConversation.messages.length === 1) {
-          const { content } = message;
-          const contentText = content.text || '';
-          const customName =
-            contentText.length > 30
-              ? contentText.substring(0, 30) + '...'
-              : contentText;
-          updatedConversation = {
-            ...updatedConversation,
-            name: customName,
-          };
-        }
-        homeDispatch({ field: 'loading', value: false });
-        let done = false;
-        let isFirst = true;
-        let text = '';
-        const reader = data.getReader();
-        const decoder = new TextDecoder();
-
-        while (!done) {
-          if (stopConversationRef.current === true) {
-            controller.abort();
-            done = true;
-            break;
-          }
-          const { value, done: doneReading } = await reader.read();
-          done = doneReading;
-          const chunkValue = decoder.decode(value);
-          text += chunkValue;
-          if (isFirst) {
-            isFirst = false;
-            const updatedMessages: Message[] = [
-              ...updatedConversation.messages,
-              { role: 'assistant', content: { text: chunkValue } },
-            ];
-            updatedConversation = {
-              ...updatedConversation,
-              messages: updatedMessages,
-            };
-            homeDispatch({
-              field: 'selectedConversation',
-              value: updatedConversation,
-            });
-          } else {
-            const updatedMessages: Message[] = updatedConversation.messages.map(
-              (message, index) => {
-                if (index === updatedConversation.messages.length - 1) {
-                  return {
-                    ...message,
-                    content: { text },
-                  };
-                }
-                return message;
-              }
-            );
-            updatedConversation = {
-              ...updatedConversation,
-              messages: updatedMessages,
-            };
-            homeDispatch({
-              field: 'selectedConversation',
-              value: updatedConversation,
-            });
-          }
-        }
-        saveConversation(updatedConversation);
-        const updatedConversations: Conversation[] = conversations.map(
-          (conversation) => {
-            if (conversation.id === selectedConversation.id) {
-              return updatedConversation;
-            }
-            return conversation;
-          }
-        );
-        if (updatedConversations.length === 0) {
-          updatedConversations.push(updatedConversation);
-        }
-        homeDispatch({ field: 'conversations', value: updatedConversations });
-        saveConversations(updatedConversations);
-        homeDispatch({ field: 'messageIsStreaming', value: false });
+    async (message: Message, parentId: string | null, messageId = '') => {
+      let _selectChatId = selectChatId;
+      if (!selectChatId) {
+        const newChat = await postChats({ title: t('New Conversation') });
+        _selectChatId = newChat.id;
+        homeDispatch({ field: 'selectChatId', value: newChat.id });
+        homeDispatch({ field: 'currentMessages', value: [] });
+        homeDispatch({ field: 'selectMessages', value: [] });
+        homeDispatch({ field: 'chats', value: [...chats, newChat] });
       }
+      if (messageId) {
+        const { lastMessage, selectMessageLength } = getSelectMessagesLast();
+        lastMessage.messages[1].content = {
+          image: [],
+          text: '',
+        };
+        homeDispatch({ field: 'selectMessageLastId', value: messageId });
+        selectMessages.splice(selectMessageLength, 1, lastMessage);
+      } else {
+        const tempUUID = uuidv4();
+        homeDispatch({ field: 'selectMessageLastId', value: tempUUID });
+        const parentMessage = selectMessages.find((x) => x.id == parentId);
+        parentMessage && parentMessage?.childrenIds.push(tempUUID);
+        const parentMessageIndex = selectMessages.findIndex(
+          (x) => x.id == parentId
+        );
+
+        const newMessage = {
+          id: tempUUID,
+          lastLeafId: '',
+          parentId,
+          childrenIds: [],
+          messages: [
+            message,
+            { role: 'assistant', content: { text: '' } },
+          ] as Message[],
+        };
+        let removeCount = -1;
+        if (parentMessageIndex !== -1) removeCount = selectMessages.length - 1;
+        if (!parentId) {
+          removeCount = 1;
+          homeDispatch({
+            field: 'currentMessages',
+            value: [...currentMessages, newMessage],
+          });
+        }
+
+        selectMessages.splice(parentMessageIndex + 1, removeCount, newMessage);
+      }
+
+      homeDispatch({
+        field: 'selectMessages',
+        value: [...selectMessages],
+      });
+
+      homeDispatch({ field: 'loading', value: true });
+      homeDispatch({ field: 'messageIsStreaming', value: true });
+      const messageContent = message.content;
+      const chatBody: ChatBody = {
+        modelId: selectModelId!,
+        chatId: _selectChatId!,
+        parentId: parentId,
+        messageId,
+        userMessage: messageContent,
+      };
+      const endpoint = getModelEndpoint(getModel().modelProvider);
+      let body = JSON.stringify(chatBody);
+
+      const controller = new AbortController();
+      const response = await fetch(endpoint, {
+        method: 'POST',
+        headers: {
+          'Content-Type': 'application/json',
+        },
+        signal: controller.signal,
+        body,
+      });
+
+      if (!response.ok) {
+        homeDispatch({ field: 'loading', value: false });
+        homeDispatch({ field: 'messageIsStreaming', value: false });
+        const result = await response.json();
+        toast.error(t(result?.message) || response.statusText);
+        return;
+      }
+      const data = response.body;
+      if (!data) {
+        homeDispatch({ field: 'loading', value: false });
+        homeDispatch({ field: 'messageIsStreaming', value: false });
+        return;
+      }
+
+      let done = false;
+      let text = '';
+      const reader = data.getReader();
+      const decoder = new TextDecoder();
+
+      while (!done) {
+        if (stopConversationRef.current === true) {
+          controller.abort();
+          done = true;
+          break;
+        }
+        const { value, done: doneReading } = await reader.read();
+        done = doneReading;
+        const chunkValue = decoder.decode(value);
+        text += chunkValue;
+
+        let laseMessages = selectMessages[selectMessages.length - 1];
+        laseMessages.messages = laseMessages.messages.map((message, index) => {
+          if (index === laseMessages.messages.length - 1) {
+            return {
+              ...message,
+              content: { text },
+            };
+          }
+          return message;
+        });
+
+        homeDispatch({
+          field: 'selectMessages',
+          value: [...selectMessages],
+        });
+      }
+      if (selectMessages.length === 1) {
+        const userMessageText = message.content.text!;
+        const title =
+          userMessageText.length > 30
+            ? userMessageText.substring(0, 30) + '...'
+            : userMessageText;
+        handleUpdateChat(_selectChatId!, { title });
+      }
+
+      homeDispatch({ field: 'loading', value: false });
+      homeDispatch({ field: 'messageIsStreaming', value: false });
+      handleSelectChat(_selectChatId!);
     },
-    [conversations, selectedConversation, stopConversationRef]
+    [
+      chats,
+      selectChatId,
+      currentMessages,
+      selectMessages,
+      selectModelId,
+      stopConversationRef,
+    ]
   );
 
-  const scrollToBottom = useCallback(() => {
+  useCallback(() => {
     if (autoScrollEnabled) {
       messagesEndRef.current?.scrollIntoView({ behavior: 'smooth' });
       textareaRef.current?.focus();
@@ -234,24 +250,12 @@ export const Chat = memo(({ stopConversationRef }: Props) => {
     setShowSettings(!showSettings);
   };
 
-  const handleSharedMessage = (isShare: boolean) => {
-    handleUpdateConversation(selectedConversation!, {
-      key: 'isShared',
-      value: isShare,
-    });
-  };
-
-  const onClearAll = () => {
-    if (
-      confirm(t('Are you sure you want to clear all messages?')!) &&
-      selectedConversation
-    ) {
-      handleUpdateConversation(selectedConversation, {
-        key: 'messages',
-        value: [],
-      });
-    }
-  };
+  // const handleSharedMessage = (isShare: boolean) => {
+  //   handleUpdateConversation(selectedConversation!, {
+  //     key: 'isShared',
+  //     value: isShare,
+  //   });
+  // };
 
   const scrollDown = () => {
     if (autoScrollEnabled) {
@@ -269,11 +273,7 @@ export const Chat = memo(({ stopConversationRef }: Props) => {
 
   useEffect(() => {
     throttledScrollDown();
-    selectedConversation &&
-      setCurrentMessage(
-        selectedConversation.messages[selectedConversation.messages.length - 2]
-      );
-  }, [selectedConversation, throttledScrollDown]);
+  }, [selectMessages, throttledScrollDown]);
 
   useEffect(() => {
     const observer = new IntersectionObserver(
@@ -307,7 +307,7 @@ export const Chat = memo(({ stopConversationRef }: Props) => {
           ref={chatContainerRef}
           onScroll={handleScroll}
         >
-          {selectedConversation?.messages.length === 0 ? (
+          {selectMessages?.length === 0 ? (
             <>
               <div className='mx-auto flex flex-col space-y-5 md:space-y-10 px-3 pt-5 md:pt-12 sm:max-w-[600px]'>
                 <div className='text-center text-3xl font-semibold text-gray-800 dark:text-gray-100'>
@@ -316,16 +316,16 @@ export const Chat = memo(({ stopConversationRef }: Props) => {
                       <Spinner size='16px' className='mx-auto' />
                     </div>
                   ) : (
-                    // models.length == 0 && t('No model data.')
+                    // {models.length === 0 && t('No model data.')}
                     <></>
                   )}
                 </div>
 
-                {hasModel() && (
+                {models.length !== 0 && (
                   <div className='flex h-full flex-col space-y-4 rounded-lg border border-neutral-200 p-4 dark:border-neutral-600'>
                     <AccountBalance />
                     <ModelSelect />
-                    <SystemPrompt
+                    {/* <SystemPrompt
                       conversation={selectedConversation}
                       prompts={prompts}
                       onChangePrompt={(prompt) =>
@@ -334,7 +334,7 @@ export const Chat = memo(({ stopConversationRef }: Props) => {
                           value: prompt,
                         })
                       }
-                    />
+                    /> */}
 
                     {/* <TemperatureSlider
                       label={t('Temperature')}
@@ -351,10 +351,10 @@ export const Chat = memo(({ stopConversationRef }: Props) => {
             </>
           ) : (
             <>
-              {selectedConversation && (
+              {selectModelId && (
                 <div className='sticky top-0 z-10 flex justify-center bg-white py-2 text-sm text-neutral-500 dark:border-none dark:bg-[#343541] dark:text-neutral-200'>
-                  {selectedConversation?.model?.name?.toUpperCase()}
-                  {/* {t('Temp')}:{selectedConversation?.temperature} | */}
+                  {getModel().name?.toUpperCase()}
+                  {/* {t('Temp')}:{selectedConversation?.temperature} |
                   <button
                     className='ml-2 cursor-pointer hover:opacity-50'
                     onClick={() => {
@@ -369,9 +369,10 @@ export const Chat = memo(({ stopConversationRef }: Props) => {
                           : '',
                       }}
                     />
-                  </button>
+                  </button> */}
                 </div>
               )}
+
               {showSettings && (
                 <div className='flex flex-col space-y-10 md:mx-auto md:max-w-xl md:gap-6 md:py-3 md:pt-6 lg:max-w-2xl lg:px-0 xl:max-w-3xl'>
                   <div className='flex h-full flex-col space-y-4 border-b border-neutral-200 p-4 dark:border-neutral-600 md:rounded-lg md:border'>
@@ -380,23 +381,41 @@ export const Chat = memo(({ stopConversationRef }: Props) => {
                 </div>
               )}
 
-              {selectedConversation?.messages.map((message, index) => (
-                <MemoizedChatMessage
-                  key={index}
-                  message={message}
-                  messageIndex={index}
-                  onEdit={(editedMessage) => {
-                    setCurrentMessage(editedMessage);
-                    // discard edited message and the ones that come after then resend
-                    handleSend(
-                      editedMessage,
-                      selectedConversation?.messages.length - index
-                    );
-                  }}
-                />
-              ))}
+              {selectMessages.map((current) => {
+                let parentChildrenIds: string[] = [];
+                if (!current.parentId) {
+                  parentChildrenIds = currentMessages
+                    .filter((x) => !x.parentId)
+                    .map((x) => x.id);
+                } else {
+                  parentChildrenIds =
+                    currentMessages.find((x) => x.id === current.parentId)
+                      ?.childrenIds || [];
+                  parentChildrenIds = [...parentChildrenIds].reverse();
+                }
+                return current.messages.map((message, index) => (
+                  <MemoizedChatMessage
+                    currentSelectIndex={parentChildrenIds.findIndex(
+                      (x) => x === current.id
+                    )}
+                    id={current.id!}
+                    key={current.id + index}
+                    parentId={current.parentId}
+                    childrenIds={current.childrenIds}
+                    parentChildrenIds={parentChildrenIds}
+                    message={message}
+                    onChangeMessage={(messageId) => {
+                      handleUpdateSelectMessage(messageId);
+                    }}
+                    onEdit={(editedMessage, parentId) => {
+                      setCurrentMessage(editedMessage);
+                      handleSend(editedMessage, parentId);
+                    }}
+                  />
+                ));
+              })}
 
-              {loading && <ChatLoader />}
+              {/* {loading && <ChatLoader />} */}
 
               <div
                 className='h-[162px] bg-white dark:bg-[#343541]'
@@ -411,33 +430,26 @@ export const Chat = memo(({ stopConversationRef }: Props) => {
             textareaRef={textareaRef}
             onSend={(message) => {
               setCurrentMessage(message);
-              handleSend(message, 0);
+              const parentMessage = getSelectMessageParent();
+              handleSend(message, parentMessage?.id || null);
             }}
             onScrollDownClick={handleScrollDown}
             onRegenerate={() => {
-              const lastMessage =
-                selectedConversation?.messages[
-                  selectedConversation?.messages.length - 1
-                ];
-              if (lastMessage?.role === 'user') {
-                handleSend(lastMessage, 1);
-              } else {
-                if (currentMessage) {
-                  handleSend(currentMessage, 2);
-                }
-              }
+              const { lastMessage } = getSelectMessagesLast();
+              const message = lastMessage.messages;
+              handleSend(message[0], lastMessage.parentId, lastMessage.id);
             }}
             showScrollDownButton={showScrollDownButton}
           />
         )}
-        <SharedMessageModal
+        {/* <SharedMessageModal
           isOpen={showShareModal}
           onClose={() => {
             setShowShareModal(false);
           }}
           conversation={selectedConversation}
           onShareChange={handleSharedMessage}
-        />
+        /> */}
       </>
     </div>
   );

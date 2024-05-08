@@ -180,6 +180,16 @@ export const EditModelModal = (props: IProps) => {
           <form onSubmit={form.handleSubmit(onSubmit)}>
             <div className='grid grid-cols-2 gap-4'>
               <FormField
+                key='name'
+                control={form.control}
+                name='name'
+                render={({ field }) => {
+                  return (
+                    <FormInput field={field} label={t('Model Display Name')!} />
+                  );
+                }}
+              ></FormField>
+              <FormField
                 key='modelProvider'
                 control={form.control}
                 name='modelProvider'
@@ -195,16 +205,6 @@ export const EditModelModal = (props: IProps) => {
                         value: key,
                       }))}
                     />
-                  );
-                }}
-              ></FormField>
-              <FormField
-                key='name'
-                control={form.control}
-                name='name'
-                render={({ field }) => {
-                  return (
-                    <FormInput field={field} label={t('Model Display Name')!} />
                   );
                 }}
               ></FormField>
@@ -353,26 +353,29 @@ export const EditModelModal = (props: IProps) => {
                 }}
               ></FormField>
               <div className='flex gap-4'>
-              <FormField
-                key={'isDefault'}
-                control={form.control}
-                name={'isDefault'}
-                render={({ field }) => {
-                  return (
-                    <FormSwitch label={t('Provide new User')!} field={field} />
-                  );
-                }}
-              ></FormField>
-              <FormField
-                key={'enabled'}
-                control={form.control}
-                name={'enabled'}
-                render={({ field }) => {
-                  return (
-                    <FormSwitch label={t('Is it enabled')!} field={field} />
-                  );
-                }}
-              ></FormField>
+                <FormField
+                  key={'isDefault'}
+                  control={form.control}
+                  name={'isDefault'}
+                  render={({ field }) => {
+                    return (
+                      <FormSwitch
+                        label={t('Provide new User')!}
+                        field={field}
+                      />
+                    );
+                  }}
+                ></FormField>
+                <FormField
+                  key={'enabled'}
+                  control={form.control}
+                  name={'enabled'}
+                  render={({ field }) => {
+                    return (
+                      <FormSwitch label={t('Is it enabled')!} field={field} />
+                    );
+                  }}
+                ></FormField>
               </div>
             </div>
             <DialogFooter className='pt-4'>

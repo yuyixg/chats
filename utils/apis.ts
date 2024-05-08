@@ -1,17 +1,17 @@
 import { FileServicesType } from '@/types/file';
 import { Model, ModelProviders, ModelType } from '@/types/model';
 
-export const getModelEndpoint = (model: Model) => {
+export const getModelEndpoint = (modelProvider: ModelProviders) => {
   const Endpoints = {
     [ModelProviders.Azure]: 'api/models/openai',
     [ModelProviders.OpenAI]: 'api/models/openai',
-    [ModelType.QianFan]: 'api/models/qianfan',
-    [ModelType.QianWen]: 'api/models/qianwen',
-    [ModelType.Spark]: 'api/models/spark',
-    [ModelType.LingYi]: 'api/models/lingyi',
-    [ModelType.Moonshot]: 'api/models/kimi',
+    [ModelProviders.QianFan]: 'api/models/qianfan',
+    [ModelProviders.QianWen]: 'api/models/qianwen',
+    [ModelProviders.Spark]: 'api/models/spark',
+    [ModelProviders.LingYi]: 'api/models/lingyi',
+    [ModelProviders.Moonshot]: 'api/models/kimi',
   };
-  return Endpoints[model.modelProvider];
+  return Endpoints[modelProvider];
 };
 
 export const getFileEndpoint = (file: FileServicesType, serverId: string) => {

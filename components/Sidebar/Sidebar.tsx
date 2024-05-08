@@ -12,10 +12,10 @@ interface Props<T> {
   itemComponent: ReactNode;
   footerComponent?: ReactNode;
   searchTerm: string;
+  messageIsStreaming?: boolean;
   handleSearchTerm: (searchTerm: string) => void;
   toggleOpen: () => void;
   handleCreateItem: () => void;
-  handleDrop: (e: any) => void;
   hasModel: () => boolean;
 }
 
@@ -27,25 +27,13 @@ const Sidebar = <T,>({
   itemComponent,
   footerComponent,
   searchTerm,
+  messageIsStreaming,
   handleSearchTerm,
   toggleOpen,
   handleCreateItem,
-  handleDrop,
   hasModel,
 }: Props<T>) => {
   const { t } = useTranslation('promptbar');
-
-  const allowDrop = (e: any) => {
-    e.preventDefault();
-  };
-
-  const highlightDrop = (e: any) => {
-    e.target.style.background = '#343541';
-  };
-
-  const removeHighlight = (e: any) => {
-    e.target.style.background = 'none';
-  };
 
   return (
     <>
@@ -57,11 +45,14 @@ const Sidebar = <T,>({
         {hasModel() && (
           <div className='flex items-center'>
             <button
-              className='flex w-full flex-shrink-0 cursor-pointer select-none items-center gap-3 rounded-md p-3 text-black dark:text-white hover:bg-[#cdcdcd] hover:dark:bg-[#343541] bg-[#ececec] dark:bg-[#343541]/80'
+              className={`flex w-full flex-shrink-0 cursor-pointer select-none items-center gap-3 rounded-md p-3 text-black dark:text-white hover:bg-[#cdcdcd] hover:dark:bg-[#343541] bg-[#ececec] dark:bg-[#343541]/80 ${
+                messageIsStreaming ? 'disabled:cursor-not-allowed' : ''
+              }`}
               onClick={() => {
                 handleCreateItem();
                 handleSearchTerm('');
               }}
+              disabled={messageIsStreaming}
             >
               <IconPlus size={18} />
               {addItemButtonTitle}
@@ -76,21 +67,11 @@ const Sidebar = <T,>({
 
         <div className='flex-grow overflow-auto'>
           {items?.length > 0 ? (
-            <div
-              className='pt-2'
-              onDrop={handleDrop}
-              onDragOver={allowDrop}
-              onDragEnter={highlightDrop}
-              onDragLeave={removeHighlight}
-            >
-              {itemComponent}
-            </div>
+            <div className='pt-2'>{itemComponent}</div>
           ) : (
             <div className='mt-8 select-none text-center opacity-50'>
               <IconMistOff className='mx-auto mb-3' />
-              <span className='text-[14px] leading-normal'>
-                {t('No data')}
-              </span>
+              <span className='text-[14px] leading-normal'>{t('No data')}</span>
             </div>
           )}
         </div>

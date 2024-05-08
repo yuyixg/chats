@@ -36,6 +36,7 @@ CREATE TABLE "ChatModels" (
     "modelProvider" TEXT NOT NULL,
     "modelVersion" TEXT NOT NULL,
     "name" TEXT NOT NULL,
+    "isDefault" BOOLEAN NOT NULL DEFAULT false,
     "rank" INTEGER,
     "remarks" TEXT,
     "modelKeysId" TEXT,
@@ -88,6 +89,35 @@ CREATE TABLE "Messages" (
     "updatedAt" TIMESTAMP(3) NOT NULL,
 
     CONSTRAINT "Messages_pkey" PRIMARY KEY ("id")
+);
+
+-- CreateTable
+CREATE TABLE "Chats" (
+    "id" TEXT NOT NULL,
+    "title" VARCHAR(50) NOT NULL,
+    "userId" TEXT NOT NULL,
+    "chatModelId" TEXT,
+    "userModelConfig" TEXT NOT NULL DEFAULT '{}',
+    "isShared" BOOLEAN NOT NULL DEFAULT false,
+    "isDeleted" BOOLEAN NOT NULL DEFAULT false,
+    "createdAt" TIMESTAMP(3) NOT NULL DEFAULT CURRENT_TIMESTAMP,
+
+    CONSTRAINT "Chats_pkey" PRIMARY KEY ("id")
+);
+
+-- CreateTable
+CREATE TABLE "ChatMessages" (
+    "id" TEXT NOT NULL,
+    "userId" TEXT NOT NULL,
+    "chatId" TEXT NOT NULL,
+    "parentId" TEXT,
+    "messages" TEXT NOT NULL,
+    "calculatedPrice" DECIMAL(65,30) NOT NULL,
+    "tokenUsed" INTEGER NOT NULL,
+    "isDeleted" BOOLEAN NOT NULL DEFAULT false,
+    "createdAt" TIMESTAMP(3) NOT NULL DEFAULT CURRENT_TIMESTAMP,
+
+    CONSTRAINT "ChatMessages_pkey" PRIMARY KEY ("id")
 );
 
 -- CreateTable
@@ -221,6 +251,15 @@ ALTER TABLE "Messages" ADD CONSTRAINT "Messages_userId_fkey" FOREIGN KEY ("userI
 
 -- AddForeignKey
 ALTER TABLE "Messages" ADD CONSTRAINT "Messages_chatModelId_fkey" FOREIGN KEY ("chatModelId") REFERENCES "ChatModels"("id") ON DELETE RESTRICT ON UPDATE CASCADE;
+
+-- AddForeignKey
+ALTER TABLE "Chats" ADD CONSTRAINT "Chats_userId_fkey" FOREIGN KEY ("userId") REFERENCES "Users"("id") ON DELETE RESTRICT ON UPDATE CASCADE;
+
+-- AddForeignKey
+ALTER TABLE "Chats" ADD CONSTRAINT "Chats_chatModelId_fkey" FOREIGN KEY ("chatModelId") REFERENCES "ChatModels"("id") ON DELETE SET NULL ON UPDATE CASCADE;
+
+-- AddForeignKey
+ALTER TABLE "ChatMessages" ADD CONSTRAINT "ChatMessages_chatId_fkey" FOREIGN KEY ("chatId") REFERENCES "Chats"("id") ON DELETE RESTRICT ON UPDATE CASCADE;
 
 -- AddForeignKey
 ALTER TABLE "UserBalances" ADD CONSTRAINT "UserBalances_userId_fkey" FOREIGN KEY ("userId") REFERENCES "Users"("id") ON DELETE RESTRICT ON UPDATE CASCADE;

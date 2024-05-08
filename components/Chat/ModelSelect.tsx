@@ -6,24 +6,14 @@ export const ModelSelect = () => {
   const { t } = useTranslation('chat');
 
   const {
-    state: { selectedConversation, models, defaultModelId },
-    handleUpdateConversation,
+    state: { selectModelId, models },
+    handleSelectModel,
     dispatch: homeDispatch,
   } = useContext(HomeContext);
 
   const handleChange = (e: React.ChangeEvent<HTMLSelectElement>) => {
-    const model = models.find((m) => m.id == e.target.value);
-    selectedConversation &&
-      handleUpdateConversation(selectedConversation, [
-        {
-          key: 'model',
-          value: model,
-        },
-        {
-          key: 'prompt',
-          value: t(model!.systemPrompt),
-        },
-      ]);
+    const model = models.find((m) => m.id == e.target.value)!;
+    handleSelectModel(model.id);
   };
 
   return (
@@ -35,7 +25,7 @@ export const ModelSelect = () => {
         <select
           className='w-full bg-transparent p-2'
           placeholder={t('Select a model') || ''}
-          value={selectedConversation?.model?.id || models[0]?.id}
+          value={selectModelId}
           onChange={handleChange}
         >
           {models.map((model) => (
