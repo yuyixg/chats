@@ -115,7 +115,7 @@ const handler = async (req: ChatsApiRequest, res: ChatsApiResponse) => {
     if (chatModel.modelVersion === ModelVersions.yi_vl_plus) {
       chatMessages.forEach((x) => {
         const content = convertToGPTVisionMessage(x.content, x.role);
-        _messages.push({ role: x.role, content: content as any });
+        _messages.push(content as any);
       });
     } else {
       _messages = chatMessages.map((x) => {

@@ -121,7 +121,7 @@ const handler = async (req: ChatsApiRequest, res: ChatsApiResponse) => {
     if (chatModel.modelVersion === ModelVersions.GPT_4_Vision) {
       chatMessages.forEach((x) => {
         const content = convertToGPTVisionMessage(x.content, x.role);
-        _messages.push({ role: x.role, content: content as any });
+        _messages.push(content as any);
       });
     } else {
       _messages = chatMessages.map((x) => {
@@ -142,7 +142,7 @@ const handler = async (req: ChatsApiRequest, res: ChatsApiResponse) => {
       content: userMessage,
     },
   ];
-
+  
   messagesToSend.push(userMessageToSend);
 
   const stream = await OpenAIStream(
