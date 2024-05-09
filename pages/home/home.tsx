@@ -39,6 +39,7 @@ import { ChatMessage } from '@/types/chatMessage';
 import { getSelectMessages } from '@/utils/message';
 interface HandleUpdateChatParams {
   title?: string;
+  chatModelId?: string;
 }
 
 interface Props {
@@ -110,6 +111,7 @@ interface HomeContextProps {
   handleSelectChat: (chatId: string) => void;
   handleUpdateChat: (id: string, params: HandleUpdateChatParams) => void;
   handleUpdateSelectMessage: (lastLeafId: string) => void;
+  handleUpdateCurrentMessage: (chatId: string) => void;
   handleDeleteChat: (id: string) => void;
   handleSelectModel: (modelId: string) => void;
   hasModel: () => boolean;
@@ -143,14 +145,8 @@ const Home = () => {
   const stopConversationRef = useRef<boolean>(false);
   const { setTheme } = useTheme();
 
-  const getLastChat = () => {
-    if (chats.length === 0) return null;
-    const chatLength = chats.length - 1;
-    return chats[chatLength];
-  };
-
   const calcSelectModelId = () => {
-    const lastChat = getLastChat();
+    const lastChat = chats.findLast((x) => x.chatModelId);
     if (lastChat && lastChat.chatModelId) return lastChat.chatModelId;
     else return models.length > 0 ? models[0].id : undefined;
   };
@@ -170,12 +166,7 @@ const Home = () => {
     });
   };
 
-  const handleSelectChat = (chatId: string) => {
-    dispatch({ field: 'selectChatId', value: chatId });
-    dispatch({
-      field: 'selectModelId',
-      value: getChatModelId(chatId) || calcSelectModelId(),
-    });
+  const handleUpdateCurrentMessage = (chatId: string) => {
     getUserMessages(chatId).then((data) => {
       if (data.length > 0) {
         dispatch({ field: 'currentMessages', value: data });
@@ -192,6 +183,31 @@ const Home = () => {
           value: [],
         });
       }
+    });
+  };
+
+  const handleSelectChat = (chatId: string) => {
+    dispatch({ field: 'selectChatId', value: chatId });
+    getUserMessages(chatId).then((data) => {
+      if (data.length > 0) {
+        dispatch({ field: 'currentMessages', value: data });
+        const lastMessage = data[data.length - 1];
+        const _selectMessages = getSelectMessages(data, lastMessage.id);
+        dispatch({
+          field: 'selectMessages',
+          value: _selectMessages,
+        });
+      } else {
+        dispatch({ field: 'currentMessages', value: [] });
+        dispatch({
+          field: 'selectMessages',
+          value: [],
+        });
+      }
+      dispatch({
+        field: 'selectModelId',
+        value: getChatModelId(chatId) || calcSelectModelId(),
+      });
     });
   };
 
@@ -278,16 +294,10 @@ const Home = () => {
   }, []);
 
   useEffect(() => {
-    !messageIsStreaming &&
-      getChats().then((data) => {
-        dispatch({ field: 'chats', value: data });
-        const chat = data.find((x) => x.id === selectChatId);
-        dispatch({
-          field: 'selectModelId',
-          value: chat?.chatModelId,
-        });
-      });
-  }, [messageIsStreaming]);
+    getChats().then((data) => {
+      dispatch({ field: 'chats', value: data });
+    });
+  }, []);
 
   useEffect(() => {
     dispatch({
@@ -305,7 +315,7 @@ const Home = () => {
       dispatch({ field: 'models', value: data });
       dispatch({
         field: 'modelsLoading',
-        value: false,
+        value: true,
       });
     });
   }, [dispatch]);
@@ -320,6 +330,7 @@ const Home = () => {
         handleDeleteChat,
         handleSelectModel,
         handleUpdateSelectMessage,
+        handleUpdateCurrentMessage,
         hasModel,
         getModel,
       }}
