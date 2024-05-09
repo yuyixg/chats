@@ -51,7 +51,7 @@ model ChatModels {
   rank          Int?
   remarks       String?
   modelKeysId   String?    @db.UniqueIdentifier
-  fileServerId  String?
+  fileServerId  String?    @db.UniqueIdentifier
   fileConfig    String?    @default("{}") @db.NVarChar(2048)
   modelConfig   String     @default("{}") @db.NVarChar(2048)
   priceConfig   String     @default("{}") @db.NVarChar(2048)

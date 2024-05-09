@@ -93,7 +93,7 @@ export const EditModelModal = (props: IProps) => {
       enabled: true,
       modelConfig: '',
       modelKeysId: '',
-      fileServerId: '',
+      fileServerId: null,
       fileConfig: '',
       priceConfig: '',
       remarks: '',

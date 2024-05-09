@@ -94,7 +94,7 @@ export const AddModelModal = (props: IProps) => {
       enabled: true,
       modelConfig: '',
       modelKeysId: '',
-      fileServerId: '',
+      fileServerId: null,
       fileConfig: '',
       priceConfig: '',
       remarks: '',

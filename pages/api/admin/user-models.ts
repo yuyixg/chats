@@ -32,7 +32,6 @@ const handler = async (req: ChatsApiRequest) => {
               (model: ChatModels) => model.id === item.modelId
             )!;
             return {
-              modelVersion: model.modelVersion,
               modelName: model.name,
               ...item,
             };
