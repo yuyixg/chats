@@ -28,7 +28,7 @@ interface Props {
 export const ConversationComponent = ({ chat }: Props) => {
   const { t } = useTranslation('chat');
   const {
-    state: { selectChatId, messageIsStreaming },
+    state: { selectChatId, messageIsStreaming, chats },
     handleSelectChat,
     handleUpdateChat,
   } = useContext(HomeContext);
@@ -49,7 +49,7 @@ export const ConversationComponent = ({ chat }: Props) => {
   const handleChangeTitle = (selectChatId: string) => {
     if (title.trim().length > 0) {
       putChats({ id: selectChatId!, title }).then(() => {
-        handleUpdateChat(selectChatId, { title });
+        handleUpdateChat(chats, selectChatId, { title });
         toast.success(t('Save successful'));
         setTitle('');
         setTitleChanging(false);
