@@ -1,6 +1,10 @@
 import { apiHandler } from '@/middleware/api-handler';
 import { ChatsApiRequest } from '@/types/next-api';
-import { ChatMessagesManager, ChatsManager } from '@/managers';
+import {
+  ChatMessagesManager,
+  ChatModelManager,
+  ChatsManager,
+} from '@/managers';
 import { BadRequest } from '@/utils/error';
 export const config = {
   api: {
@@ -14,12 +18,32 @@ export const config = {
 const handler = async (req: ChatsApiRequest) => {
   const { userId } = req.session;
   if (req.method === 'GET') {
+    const { id } = req.query as { id: string };
+    const chatModels = await ChatModelManager.findModels(true);
+    if (id) {
+      const chat = await ChatsManager.findByUserChatId(id, userId);
+      if (!chat) throw new BadRequest();
+      const chatModel = chatModels.find((x) => x.id === chat.chatModelId);
+      return {
+        id: chat.id,
+        title: chat.title,
+        chatModelId: chat.chatModelId,
+        modelName: chatModel?.name,
+        modelConfig: JSON.parse(chatModel?.modelConfig || '{}'),
+        userModelConfig: chat.userModelConfig,
+        isShared: chat.isShared,
+      };
+    }
     const chats = await ChatsManager.findUserChats(userId);
     return chats.map((c) => {
+      const chatModel = chatModels.find((x) => x.id === c.chatModelId);
       return {
         id: c.id,
         title: c.title,
         chatModelId: c.chatModelId,
+        modelName: chatModel?.name,
+        modelConfig: JSON.parse(chatModel?.modelConfig || '{}'),
+        userModelConfig: c.userModelConfig,
         isShared: c.isShared,
       };
     });

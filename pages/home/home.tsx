@@ -1,6 +1,5 @@
 import { useCreateReducer } from '@/hooks/useCreateReducer';
 import { Conversation } from '@/types/chat';
-import { ModelVersions } from '@/types/model';
 import { useEffect, useRef } from 'react';
 import Head from 'next/head';
 import { Navbar } from '@/components/Navbar/Navbar';
@@ -43,9 +42,6 @@ interface HandleUpdateChatParams {
 }
 
 interface Props {
-  serverSideApiKeyIsSet: boolean;
-  serverSidePluginKeysSet: boolean;
-  defaultModelId: ModelVersions;
   session: Session;
   locale: string;
 }
@@ -74,7 +70,6 @@ interface HomeInitialState {
   showPromptbar: boolean;
   messageError: boolean;
   searchTerm: string;
-  defaultModelId: string | null;
 }
 
 const initialState: HomeInitialState = {
@@ -101,7 +96,6 @@ const initialState: HomeInitialState = {
   showChatbar: true,
   messageError: false,
   searchTerm: '',
-  defaultModelId: null,
 };
 
 interface HomeContextProps {
@@ -109,7 +103,11 @@ interface HomeContextProps {
   dispatch: Dispatch<ActionType<HomeInitialState>>;
   handleNewChat: () => void;
   handleSelectChat: (chatId: string) => void;
-  handleUpdateChat: (id: string, params: HandleUpdateChatParams) => void;
+  handleUpdateChat: (
+    chats: ChatResult[],
+    id: string,
+    params: HandleUpdateChatParams
+  ) => void;
   handleUpdateSelectMessage: (lastLeafId: string) => void;
   handleUpdateCurrentMessage: (chatId: string) => void;
   handleDeleteChat: (id: string) => void;
@@ -132,13 +130,11 @@ const Home = () => {
   const {
     state: {
       selectModelId,
-      selectChatId,
       chats,
       currentMessages,
       selectedConversation,
       models,
       user,
-      messageIsStreaming,
     },
     dispatch,
   } = contextValue;
@@ -223,13 +219,18 @@ const Home = () => {
     dispatch({ field: 'selectModelId', value: modelId });
   };
 
-  const handleUpdateChat = (id: string, params: HandleUpdateChatParams) => {
-    const chat = chats.map((x) => {
+  function handleUpdateChat(
+    chats: ChatResult[],
+    id: string,
+    params: HandleUpdateChatParams
+  ) {
+    const _chats = chats.map((x) => {
       if (x.id === id) return { ...x, ...params };
       return x;
     });
-    dispatch({ field: 'chats', value: chat });
-  };
+
+    dispatch({ field: 'chats', value: _chats });
+  }
 
   const handleDeleteChat = (id: string) => {
     const _chats = chats.filter((x) => {
@@ -294,15 +295,13 @@ const Home = () => {
   }, []);
 
   useEffect(() => {
-    getChats().then((data) => {
-      dispatch({ field: 'chats', value: data });
-    });
-  }, []);
-
-  useEffect(() => {
     dispatch({
       field: 'modelsLoading',
       value: true,
+    });
+
+    getChats().then((data) => {
+      dispatch({ field: 'chats', value: data });
     });
 
     getUserModels().then((data) => {
@@ -318,7 +317,7 @@ const Home = () => {
         value: true,
       });
     });
-  }, [dispatch]);
+  }, []);
 
   return (
     <HomeContext.Provider

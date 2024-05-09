@@ -12,15 +12,13 @@ import { useTranslation } from 'next-i18next';
 import { getModelEndpoint } from '@/utils/apis';
 import { throttle } from '@/utils/throttle';
 import { ChatBody, Message } from '@/types/chat';
-import Spinner from '../Spinner';
 import { ChatInput } from './ChatInput';
 import { MemoizedChatMessage } from './MemoizedChatMessage';
 import { ModelSelect } from './ModelSelect';
 import { HomeContext } from '@/pages/home/home';
 import { AccountBalance } from './AccountBalance';
 import { v4 as uuidv4 } from 'uuid';
-import { getUserMessages, postChats } from '@/apis/userService';
-import { getSelectMessages } from '@/utils/message';
+import { getChat, postChats } from '@/apis/userService';
 interface Props {
   stopConversationRef: MutableRefObject<boolean>;
 }
@@ -71,13 +69,15 @@ export const Chat = memo(({ stopConversationRef }: Props) => {
     async (message: Message, parentId: string | null, messageId = '') => {
       let _selectChatId = selectChatId;
       let _selectMessages = [...selectMessages];
+      let _chats = chats;
       if (!selectChatId) {
         const newChat = await postChats({ title: t('New Conversation') });
         _selectChatId = newChat.id;
+        _chats.push(newChat);
         homeDispatch({ field: 'selectChatId', value: newChat.id });
         homeDispatch({ field: 'currentMessages', value: [] });
         homeDispatch({ field: 'selectMessages', value: [] });
-        homeDispatch({ field: 'chats', value: [...chats, newChat] });
+        homeDispatch({ field: 'chats', value: [..._chats] });
       }
       if (messageId) {
         const { lastMessage, selectMessageLength } = getSelectMessagesLast();
@@ -198,12 +198,25 @@ export const Chat = memo(({ stopConversationRef }: Props) => {
           userMessageText.length > 30
             ? userMessageText.substring(0, 30) + '...'
             : userMessageText;
-        handleUpdateChat(_selectChatId!, { title, chatModelId: selectModelId });
+        handleUpdateChat(_chats, _selectChatId!, {
+          title,
+          chatModelId: selectModelId,
+        });
       }
-
+      !chats.find((x) => x.id === _selectChatId)?.chatModelId &&
+        getChat(_selectChatId!).then((data) => {
+          const _chats = chats.map((x) => {
+            if (x.id === data.id) {
+              return data;
+            }
+            return x;
+          });
+          homeDispatch({ field: 'chats', value: _chats });
+        });
       homeDispatch({ field: 'loading', value: false });
       homeDispatch({ field: 'messageIsStreaming', value: false });
-      handleUpdateCurrentMessage(_selectChatId!);
+      !stopConversationRef.current &&
+        handleUpdateCurrentMessage(_selectChatId!);
     },
     [
       chats,
@@ -340,9 +353,11 @@ export const Chat = memo(({ stopConversationRef }: Props) => {
             </>
           ) : (
             <>
-              {selectModelId && (
+              {selectChatId && (
                 <div className='sticky top-0 z-10 flex justify-center bg-white py-2 text-sm text-neutral-500 dark:border-none dark:bg-[#343541] dark:text-neutral-200'>
-                  {getModel().name?.toUpperCase()}
+                  {chats
+                    .find((x) => x.id === selectChatId)
+                    ?.modelName?.toUpperCase()}
                   {/* {t('Temp')}:{selectedConversation?.temperature} |
                   <button
                     className='ml-2 cursor-pointer hover:opacity-50'

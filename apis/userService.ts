@@ -8,6 +8,9 @@ export interface ChatResult {
   id: string;
   title: string;
   chatModelId?: string;
+  modelName: string;
+  modelConfig: object;
+  userModelConfig: object;
   isShared: boolean;
 }
 
@@ -37,6 +40,11 @@ export const getUserMessages = (chatId: string): Promise<ChatMessage[]> => {
 export const getChats = (): Promise<ChatResult[]> => {
   const fetchService = useFetch();
   return fetchService.get('/api/chats');
+};
+
+export const getChat = (id: string): Promise<ChatResult> => {
+  const fetchService = useFetch();
+  return fetchService.get('/api/chats?id=' + id);
 };
 
 export const postChats = (params: PostChatParams): Promise<ChatResult> => {
