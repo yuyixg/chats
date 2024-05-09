@@ -19,7 +19,8 @@ import { ModelSelect } from './ModelSelect';
 import { HomeContext } from '@/pages/home/home';
 import { AccountBalance } from './AccountBalance';
 import { v4 as uuidv4 } from 'uuid';
-import { postChats } from '@/apis/userService';
+import { getUserMessages, postChats } from '@/apis/userService';
+import { getSelectMessages } from '@/utils/message';
 interface Props {
   stopConversationRef: MutableRefObject<boolean>;
 }
@@ -35,12 +36,10 @@ export const Chat = memo(({ stopConversationRef }: Props) => {
       currentMessages,
       chats,
       models,
-      modelsLoading,
-      loading,
     },
     handleUpdateSelectMessage,
+    handleUpdateCurrentMessage,
     handleUpdateChat,
-    handleSelectChat,
     hasModel,
     getModel,
     dispatch: homeDispatch,
@@ -124,7 +123,6 @@ export const Chat = memo(({ stopConversationRef }: Props) => {
         field: 'selectMessages',
         value: [..._selectMessages],
       });
-
       homeDispatch({ field: 'loading', value: true });
       homeDispatch({ field: 'messageIsStreaming', value: true });
       const messageContent = message.content;
@@ -200,12 +198,12 @@ export const Chat = memo(({ stopConversationRef }: Props) => {
           userMessageText.length > 30
             ? userMessageText.substring(0, 30) + '...'
             : userMessageText;
-        handleUpdateChat(_selectChatId!, { title });
+        handleUpdateChat(_selectChatId!, { title, chatModelId: selectModelId });
       }
 
       homeDispatch({ field: 'loading', value: false });
       homeDispatch({ field: 'messageIsStreaming', value: false });
-      handleSelectChat(_selectChatId!);
+      handleUpdateCurrentMessage(_selectChatId!);
     },
     [
       chats,
@@ -311,21 +309,11 @@ export const Chat = memo(({ stopConversationRef }: Props) => {
           {selectMessages?.length === 0 ? (
             <>
               <div className='mx-auto flex flex-col space-y-5 md:space-y-10 px-3 pt-5 md:pt-12 sm:max-w-[600px]'>
-                <div className='text-center text-3xl font-semibold text-gray-800 dark:text-gray-100'>
-                  {modelsLoading ? (
-                    <div>
-                      <Spinner size='16px' className='mx-auto' />
-                    </div>
-                  ) : (
-                    // {models.length === 0 && t('No model data.')}
-                    <></>
-                  )}
-                </div>
-
                 {models.length !== 0 && (
                   <div className='flex h-full flex-col space-y-4 rounded-lg border border-neutral-200 p-4 dark:border-neutral-600'>
                     <AccountBalance />
                     <ModelSelect />
+
                     {/* <SystemPrompt
                       conversation={selectedConversation}
                       prompts={prompts}
@@ -415,8 +403,6 @@ export const Chat = memo(({ stopConversationRef }: Props) => {
                   />
                 ));
               })}
-
-              {/* {loading && <ChatLoader />} */}
 
               <div
                 className='h-[162px] bg-white dark:bg-[#343541]'
