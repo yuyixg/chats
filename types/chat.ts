@@ -26,6 +26,11 @@ export interface QianWenMessage {
   content: QianWenContent[];
 }
 
+export interface QianWenMaxMessage {
+  role: Role;
+  content: string;
+}
+
 export interface QianWenContent {
   text?: string;
   image?: string;

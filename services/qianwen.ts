@@ -1,12 +1,12 @@
 import { QianWenMessage } from '@/types/chat';
 import { ChatModels } from '@/types/chatModel';
+import { ModelVersions } from '@/types/model';
 
 import {
   ParsedEvent,
   ReconnectInterval,
   createParser,
 } from 'eventsource-parser';
-
 
 export interface QianWenStreamResult {
   text: string;
@@ -26,9 +26,11 @@ export const QianWenStream = async (
   const {
     apiConfig: { host, apiKey },
     modelVersion,
-    modelConfig: { prompt: systemPrompt },
+    modelConfig: { prompt: systemPrompt, version },
   } = chatModel;
-  let url = `${host}/services/aigc/multimodal-generation/generation`;
+  let url = `${host}/services/aigc/${
+    modelVersion === ModelVersions.QWen_Max ? 'text' : 'multimodal'
+  }-generation/generation`;
   const body = {
     headers: {
       'Content-Type': 'application/json',
@@ -37,7 +39,10 @@ export const QianWenStream = async (
     },
     method: 'POST',
     body: JSON.stringify({
-      model: modelVersion,
+      model:
+        modelVersion === ModelVersions.QWen_Max
+          ? modelVersion + '-' + version
+          : modelVersion,
       input: {
         messages: [
           {
@@ -57,6 +62,7 @@ export const QianWenStream = async (
       },
     }),
   };
+  console.log('body', body);
   const res = await fetch(url, body);
   const decoder = new TextDecoder();
 

@@ -3,6 +3,7 @@ import {
   Content,
   Message,
   QianWenContent,
+  QianWenMaxMessage,
   QianWenMessage,
   Role,
 } from '@/types/chat';
@@ -24,6 +25,7 @@ import { calcTokenPrice } from '@/utils/message';
 import { apiHandler } from '@/middleware/api-handler';
 import { ChatsApiRequest, ChatsApiResponse } from '@/types/next-api';
 import { ChatMessages } from '@prisma/client';
+import { ModelVersions } from '@/types/model';
 
 export const config = {
   api: {
@@ -71,7 +73,7 @@ const handler = async (req: ChatsApiRequest, res: ChatsApiResponse) => {
     temperature = modelConfig.temperature;
   }
 
-  let messagesToSend: QianWenMessage[] = [];
+  let messagesToSend = [] as any[];
 
   const chatMessages = await ChatMessagesManager.findUserMessageByChatId(
     chatId
@@ -104,17 +106,32 @@ const handler = async (req: ChatsApiRequest, res: ChatsApiResponse) => {
     return { role, content: content } as QianWenMessage;
   }
 
+  function convertMessageTextToSend(
+    messageContent: Content,
+    role: Role = 'user'
+  ) {
+    return { role, content: messageContent.text } as QianWenMaxMessage;
+  }
+
   messages.forEach((m) => {
     const chatMessages = JSON.parse(m.messages) as Message[];
-    let _messages = [] as QianWenMessage[];
-
-    _messages = chatMessages.map((x) => {
-      return convertMessageToSend(x.content, x.role);
-    });
-
+    let _messages = [] as any[];
+    if (chatModel.modelVersion === ModelVersions.QWen_Max) {
+      _messages = chatMessages.map((x) => {
+        return convertMessageTextToSend(x.content, x.role);
+      });
+    } else {
+      chatMessages.forEach((x) => {
+        const content = convertMessageToSend(x.content, x.role);
+        _messages.push(content as any);
+      });
+    }
     messagesToSend = [...messagesToSend, ..._messages];
   });
-  const userMessageToSend = convertMessageToSend(userMessage);
+  const userMessageToSend =
+    chatModel.modelVersion === ModelVersions.QWen_Max
+      ? convertMessageTextToSend(userMessage)
+      : convertMessageToSend(userMessage);
 
   const currentMessage = [
     {
@@ -149,7 +166,7 @@ const handler = async (req: ChatsApiRequest, res: ChatsApiResponse) => {
           tokenUsed += input_tokens + (image_tokens || 0) + output_tokens;
           const calculatedPrice = calcTokenPrice(
             priceConfig,
-            input_tokens + image_tokens,
+            input_tokens + (image_tokens || 0),
             output_tokens
           );
           currentMessage.push({

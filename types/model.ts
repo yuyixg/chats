@@ -23,6 +23,8 @@ export enum ModelVersions {
   ERNIE_Bot_4 = 'ERNIE-Bot-4',
   ERNIE_Bot_8K = 'ERNIE-Bot-8K',
   QWen_Vl_Plus = 'qwen-vl-plus',
+  QWen_VL_Max = 'qwen-vl-max',
+  QWen_Max = 'qwen-max',
   yi_34b_chat_0205 = 'yi-34b-chat-0205',
   yi_34b_chat_200k = 'yi-34b-chat-200k',
   yi_vl_plus = 'yi-vl-plus',
