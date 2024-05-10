@@ -1,8 +1,6 @@
 import { useCreateReducer } from '@/hooks/useCreateReducer';
-import { Conversation } from '@/types/chat';
 import { useEffect, useRef } from 'react';
 import Head from 'next/head';
-import { Navbar } from '@/components/Navbar/Navbar';
 import { Chatbar } from '@/components/Chatbar/Chatbar';
 import { Chat } from '@/components/Chat/Chat';
 import { serverSideTranslations } from 'next-i18next/serverSideTranslations';
@@ -15,7 +13,6 @@ import { useRouter } from 'next/router';
 import { Dispatch, createContext } from 'react';
 import { ActionType } from '@/hooks/useCreateReducer';
 import { Message } from '@/types/chat';
-import { ErrorMessage } from '@/types/error';
 import { Model } from '@/types/model';
 import { Prompt } from '@/types/prompt';
 import { UserSession } from '@/utils/user';
@@ -41,19 +38,12 @@ interface HandleUpdateChatParams {
   chatModelId?: string;
 }
 
-interface Props {
-  session: Session;
-  locale: string;
-}
-
 interface HomeInitialState {
   user: UserSession | null;
   loading: boolean;
   theme: (typeof Themes)[number];
   language: (typeof Languages)[number];
   messageIsStreaming: boolean;
-  modelError: ErrorMessage | null;
-  modelsLoading: boolean;
   models: Model[];
   chats: ChatResult[];
   selectChatId: string | undefined;
@@ -77,8 +67,6 @@ const initialState: HomeInitialState = {
   theme: DEFAULT_THEME,
   language: DEFAULT_LANGUAGE,
   messageIsStreaming: false,
-  modelError: null,
-  modelsLoading: false,
   currentMessages: [],
   userModelConfig: {},
   selectMessages: [],
@@ -308,11 +296,6 @@ const Home = () => {
   }, []);
 
   useEffect(() => {
-    dispatch({
-      field: 'modelsLoading',
-      value: true,
-    });
-
     getChats().then((data) => {
       dispatch({ field: 'chats', value: data });
     });
@@ -325,10 +308,6 @@ const Home = () => {
         });
       }
       dispatch({ field: 'models', value: data });
-      dispatch({
-        field: 'modelsLoading',
-        value: true,
-      });
     });
   }, []);
 
