@@ -5,12 +5,16 @@ import { HomeContext } from '@/pages/home/home';
 interface Props {
   label: string;
   defaultTemperature: number;
+  min: number;
+  max: number;
   onChangeTemperature: (temperature: number) => void;
 }
 
 export const TemperatureSlider: FC<Props> = ({
   label,
   defaultTemperature,
+  min,
+  max,
   onChangeTemperature,
 }) => {
   const {
@@ -44,8 +48,8 @@ export const TemperatureSlider: FC<Props> = ({
       <input
         className='cursor-pointer'
         type='range'
-        min={0}
-        max={1}
+        min={min}
+        max={max}
         step={0.1}
         value={temperature}
         onChange={handleChange}

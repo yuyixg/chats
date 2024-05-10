@@ -19,7 +19,8 @@ import { HomeContext } from '@/pages/home/home';
 import { v4 as uuidv4 } from 'uuid';
 import { getChat, postChats } from '@/apis/userService';
 import { TemperatureSlider } from './Temperature';
-import { ModelConfig } from '@/types/model';
+import { ModelApiConfig, ModelConfig } from '@/types/model';
+import { ModelTemplates } from '@/types/template';
 interface Props {
   stopConversationRef: MutableRefObject<boolean>;
 }
@@ -45,7 +46,6 @@ export const Chat = memo(({ stopConversationRef }: Props) => {
     getModel,
     dispatch: homeDispatch,
   } = useContext(HomeContext);
-  const [currentMessage, setCurrentMessage] = useState<Message>();
   const [autoScrollEnabled, setAutoScrollEnabled] = useState<boolean>(true);
   const [showSettings, setShowSettings] = useState<boolean>(false);
   const [showScrollDownButton, setShowScrollDownButton] =
@@ -53,6 +53,9 @@ export const Chat = memo(({ stopConversationRef }: Props) => {
   const [showShareModal, setShowShareModal] = useState(false);
   const [currentModel, setCurrentModel] = useState<ModelConfig>(
     {} as ModelConfig
+  );
+  const [modeApiConfig, setModelApiConfig] = useState<ModelApiConfig>(
+    {} as ModelApiConfig
   );
   const currentSelectChat = chats.find((x) => x.id === selectChatId);
 
@@ -325,13 +328,14 @@ export const Chat = memo(({ stopConversationRef }: Props) => {
   }, [messagesEndRef]);
 
   useEffect(() => {
-    const { modelConfig } = getModel() || {};
+    const { modelConfig, modelVersion } = getModel() || {};
     setCurrentModel({
       ...modelConfig,
       temperature:
         currentSelectChat?.userModelConfig?.temperature ||
         modelConfig?.temperature,
     });
+    setModelApiConfig(ModelTemplates[modelVersion]?.config as any);
   }, [selectModelId]);
 
   return (
@@ -361,6 +365,8 @@ export const Chat = memo(({ stopConversationRef }: Props) => {
                     {currentModel.temperature && (
                       <TemperatureSlider
                         label={t('Temperature')}
+                        min={modeApiConfig.temperature.min}
+                        max={modeApiConfig.temperature.max}
                         defaultTemperature={currentModel.temperature}
                         onChangeTemperature={(temperature) =>
                           handleUpdateUserModelConfig({
@@ -449,7 +455,6 @@ export const Chat = memo(({ stopConversationRef }: Props) => {
                       );
                     }}
                     onEdit={(editedMessage, parentId) => {
-                      setCurrentMessage(editedMessage);
                       handleSend(editedMessage, parentId);
                     }}
                   />
@@ -468,7 +473,6 @@ export const Chat = memo(({ stopConversationRef }: Props) => {
             stopConversationRef={stopConversationRef}
             textareaRef={textareaRef}
             onSend={(message) => {
-              setCurrentMessage(message);
               const parentMessage = getSelectMessageParent();
               handleSend(message, parentMessage?.id || null);
             }}

@@ -87,3 +87,10 @@ export type ModelConfigType =
   | 'apiConfig'
   | 'modelConfig'
   | 'priceConfig';
+
+export interface ModelApiConfig {
+  temperature: {
+    min: number;
+    max: number;
+  };
+}
