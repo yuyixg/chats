@@ -16,7 +16,7 @@ import { Dispatch, createContext } from 'react';
 import { ActionType } from '@/hooks/useCreateReducer';
 import { Message } from '@/types/chat';
 import { ErrorMessage } from '@/types/error';
-import { Model, UserModelConfigKey } from '@/types/model';
+import { Model } from '@/types/model';
 import { Prompt } from '@/types/prompt';
 import { UserSession } from '@/utils/user';
 import {
@@ -221,6 +221,7 @@ const Home = () => {
 
   const handleSelectModel = (modelId: string) => {
     dispatch({ field: 'selectModelId', value: modelId });
+    dispatch({ field: 'userModelConfig', value: {} });
   };
 
   function handleUpdateChat(
@@ -330,10 +331,6 @@ const Home = () => {
       });
     });
   }, []);
-
-  useEffect(() => {
-    console.log(userModelConfig);
-  }, [userModelConfig]);
 
   return (
     <HomeContext.Provider

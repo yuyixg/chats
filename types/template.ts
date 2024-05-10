@@ -82,11 +82,7 @@ export const ModelProviderTemplates = {
     displayName: 'Azure',
   },
   [ModelProviders.QianWen]: {
-    models: [
-      ModelVersions.QWen_Max,
-      ModelVersions.QWen_VL_Max,
-      ModelVersions.QWen_Vl_Plus,
-    ],
+    models: [ModelVersions.QWen, ModelVersions.QWen_Vl],
     apiConfig: qianWenApiConfig,
     displayName: '通义千问',
   },
@@ -171,13 +167,13 @@ export const ModelTemplates = {
       out: 0.00021691,
     },
   },
-  [ModelVersions.QWen_Max]: {
+  [ModelVersions.QWen]: {
     type: ModelType.QianWen,
     modelConfig: {
       prompt:
         "You are an AI assistant with image understanding capabilities, Follow the user's instructions carefully. Respond using markdown.",
       temperature: 0.85,
-      version: 'longcontext',
+      version: 'qwen-max-longcontext',
     },
     apiConfig: qianWenApiConfig,
     priceConfig: {
@@ -185,24 +181,12 @@ export const ModelTemplates = {
       out: 0,
     },
   },
-  [ModelVersions.QWen_VL_Max]: {
+  [ModelVersions.QWen_Vl]: {
     type: ModelType.QianWen,
     modelConfig: {
       prompt:
         "You are an AI assistant with image understanding capabilities, Follow the user's instructions carefully. Respond using markdown.",
-    },
-    apiConfig: qianWenApiConfig,
-    fileConfig: { count: 5, maxSize: 10240 },
-    priceConfig: {
-      input: 0,
-      out: 0,
-    },
-  },
-  [ModelVersions.QWen_Vl_Plus]: {
-    type: ModelType.QianWen,
-    modelConfig: {
-      prompt:
-        "You are an AI assistant with image understanding capabilities, Follow the user's instructions carefully. Respond using markdown.",
+      version: 'qwen-vl-max',
     },
     apiConfig: qianWenApiConfig,
     fileConfig: { count: 5, maxSize: 10240 },

@@ -115,7 +115,7 @@ const handler = async (req: ChatsApiRequest, res: ChatsApiResponse) => {
   messages.forEach((m) => {
     const chatMessages = JSON.parse(m.messages) as Message[];
     let _messages = [] as any[];
-    if (chatModel.modelVersion === ModelVersions.QWen_Max) {
+    if (chatModel.modelVersion === ModelVersions.QWen) {
       _messages = chatMessages.map((x) => {
         return convertMessageTextToSend(x.content, x.role);
       });
@@ -128,7 +128,7 @@ const handler = async (req: ChatsApiRequest, res: ChatsApiResponse) => {
     messagesToSend = [...messagesToSend, ..._messages];
   });
   const userMessageToSend =
-    chatModel.modelVersion === ModelVersions.QWen_Max
+    chatModel.modelVersion === ModelVersions.QWen
       ? convertMessageTextToSend(userMessage)
       : convertMessageToSend(userMessage);
 

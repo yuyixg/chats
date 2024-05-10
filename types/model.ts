@@ -1,15 +1,17 @@
 import { FileServicesType } from './file';
 
+export interface ModelConfig {
+  prompt: string;
+  maxLength: number;
+  temperature?: number;
+}
+
 export interface Model {
   id: string;
   modelVersion: ModelVersions;
   name: string;
   modelProvider: ModelProviders;
-  modelConfig: {
-    prompt: string;
-    maxLength: number;
-    temperature?: number;
-  };
+  modelConfig: ModelConfig;
   fileServerConfig: {
     id: string;
     type: FileServicesType;
@@ -24,9 +26,8 @@ export enum ModelVersions {
   GPT_4_Vision = 'gpt-4-vision',
   ERNIE_Bot_4 = 'ERNIE-Bot-4',
   ERNIE_Bot_8K = 'ERNIE-Bot-8K',
-  QWen_Vl_Plus = 'qwen-vl-plus',
-  QWen_VL_Max = 'qwen-vl-max',
-  QWen_Max = 'qwen-max',
+  QWen = 'qwen',
+  QWen_Vl = 'qwen-vl',
   yi_34b_chat_0205 = 'yi-34b-chat-0205',
   yi_34b_chat_200k = 'yi-34b-chat-200k',
   yi_vl_plus = 'yi-vl-plus',
@@ -86,5 +87,3 @@ export type ModelConfigType =
   | 'apiConfig'
   | 'modelConfig'
   | 'priceConfig';
-
-export type UserModelConfigKey = 'prompt' | 'temperature';

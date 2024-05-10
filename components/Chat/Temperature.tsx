@@ -1,4 +1,4 @@
-import { FC, useContext, useState } from 'react';
+import { FC, useContext, useEffect, useState } from 'react';
 import { useTranslation } from 'next-i18next';
 import { HomeContext } from '@/pages/home/home';
 
@@ -23,6 +23,10 @@ export const TemperatureSlider: FC<Props> = ({
     setTemperature(newValue);
     onChangeTemperature(newValue);
   };
+
+  useEffect(() => {
+    setTemperature(defaultTemperature);
+  }, [defaultTemperature]);
 
   return (
     <div className='flex flex-col'>

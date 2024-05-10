@@ -26,10 +26,10 @@ export const QianWenStream = async (
   const {
     apiConfig: { host, apiKey },
     modelVersion,
-    modelConfig: { prompt: systemPrompt, version },
+    modelConfig: { version },
   } = chatModel;
   let url = `${host}/services/aigc/${
-    modelVersion === ModelVersions.QWen_Max ? 'text' : 'multimodal'
+    modelVersion === ModelVersions.QWen ? 'text' : 'multimodal'
   }-generation/generation`;
   const body = {
     headers: {
@@ -39,30 +39,28 @@ export const QianWenStream = async (
     },
     method: 'POST',
     body: JSON.stringify({
-      model:
-        modelVersion === ModelVersions.QWen_Max
-          ? modelVersion + '-' + version
-          : modelVersion,
+      model: version,
       input: {
         messages: [
-          {
-            role: 'system',
-            content: [
-              {
-                text: prompt || systemPrompt,
-              },
-            ],
-          },
+          // {
+          //   role: 'system',
+          //   content: [
+          //     {
+          //       text: prompt || systemPrompt,
+          //     },
+          //   ],
+          // },
           ...messages,
         ],
       },
-      ...(modelVersion === ModelVersions.QWen_Max && { temperature }),
       parameters: {
+        temperature,
         seed: 1646251034,
         incremental_output: true,
       },
     }),
   };
+  console.log(url, '\n', body);
   const res = await fetch(url, body);
   const decoder = new TextDecoder();
 
@@ -82,20 +80,34 @@ export const QianWenStream = async (
             if (json?.code) {
               throw new Error(JSON.stringify(json));
             }
-            if (json.output?.choices.length > 0) {
-              const text =
-                (json.output.choices[0].message?.content.length > 0 &&
-                  json.output.choices[0].message?.content[0].text) ||
-                '';
+            if (modelVersion === ModelVersions.QWen) {
+              const text = json.output.text;
               controller.enqueue(
                 JSON.stringify({
                   text,
                   usage: json.usage,
                 })
               );
-              if (json.output?.choices[0]?.finish_reason === 'stop') {
+              if (json.output.finish_reason === 'stop') {
                 controller.close();
                 return;
+              }
+            } else {
+              if (json.output.choices.length > 0) {
+                const text =
+                  (json.output.choices[0].message?.content.length > 0 &&
+                    json.output.choices[0].message?.content[0].text) ||
+                  '';
+                controller.enqueue(
+                  JSON.stringify({
+                    text,
+                    usage: json.usage,
+                  })
+                );
+                if (json.output.finish_reason === 'stop') {
+                  controller.close();
+                  return;
+                }
               }
             }
           } catch (e) {
