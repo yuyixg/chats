@@ -409,6 +409,11 @@ export const Chat = memo(({ stopConversationRef }: Props) => {
                     onChangeMessage={(messageId) => {
                       handleUpdateSelectMessage(messageId);
                     }}
+                    onRegenerate={() => {
+                      const { lastMessage } = getSelectMessagesLast();
+                      const message = lastMessage.messages;
+                      handleSend(message[0], lastMessage.parentId, lastMessage.id);
+                    }}
                     onEdit={(editedMessage, parentId) => {
                       setCurrentMessage(editedMessage);
                       handleSend(editedMessage, parentId);
@@ -434,11 +439,6 @@ export const Chat = memo(({ stopConversationRef }: Props) => {
               handleSend(message, parentMessage?.id || null);
             }}
             onScrollDownClick={handleScrollDown}
-            onRegenerate={() => {
-              const { lastMessage } = getSelectMessagesLast();
-              const message = lastMessage.messages;
-              handleSend(message[0], lastMessage.parentId, lastMessage.id);
-            }}
             showScrollDownButton={showScrollDownButton}
           />
         )}

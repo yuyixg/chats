@@ -172,6 +172,7 @@ const Home = () => {
           field: 'selectMessages',
           value: _selectMessages,
         });
+        dispatch({ field: 'selectMessageLastId', value: lastMessage.id });
       } else {
         dispatch({ field: 'currentMessages', value: [] });
         dispatch({
@@ -193,6 +194,7 @@ const Home = () => {
           field: 'selectMessages',
           value: _selectMessages,
         });
+        dispatch({ field: 'selectMessageLastId', value: lastMessage.id });
       } else {
         dispatch({ field: 'currentMessages', value: [] });
         dispatch({
