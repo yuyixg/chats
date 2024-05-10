@@ -139,12 +139,6 @@ const handler = async (req: ChatsApiRequest, res: ChatsApiResponse) => {
             role: 'assistant',
             content: { text: assistantResponse },
           });
-          await UserModelManager.updateUserModelTokenCount(
-            userId,
-            chatModel.id,
-            tokenUsed
-          );
-          await UserBalancesManager.chatUpdateBalance(userId, calculatedPrice);
 
           let title = null;
           if (!(await ChatMessagesManager.checkIsFirstChat(chatId))) {
@@ -156,7 +150,7 @@ const handler = async (req: ChatsApiRequest, res: ChatsApiResponse) => {
           if (messageId) {
             await ChatMessagesManager.delete(messageId, userId);
           }
-          await ChatMessagesManager.create({
+          const chatMessage = await ChatMessagesManager.create({
             chatId,
             userId,
             parentId,
@@ -164,6 +158,16 @@ const handler = async (req: ChatsApiRequest, res: ChatsApiResponse) => {
             tokenUsed,
             calculatedPrice,
           });
+          await UserModelManager.updateUserModelTokenCount(
+            userId,
+            chatModel.id,
+            tokenUsed
+          );
+          await UserBalancesManager.chatUpdateBalance(
+            userId,
+            calculatedPrice,
+            chatMessage.id
+          );
           await ChatsManager.update({
             id: chatId,
             ...(title && { title: title }),

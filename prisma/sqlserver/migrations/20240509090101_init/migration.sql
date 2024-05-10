@@ -42,7 +42,7 @@ CREATE TABLE [dbo].[ChatModels] (
     [rank] INT,
     [remarks] NVARCHAR(1000),
     [modelKeysId] UNIQUEIDENTIFIER,
-    [fileServerId] UNIQUEIDENTIFIER,
+    [fileServiceId] UNIQUEIDENTIFIER,
     [fileConfig] NVARCHAR(2048) CONSTRAINT [ChatModels_fileConfig_df] DEFAULT '{}',
     [modelConfig] NVARCHAR(2048) NOT NULL CONSTRAINT [ChatModels_modelConfig_df] DEFAULT '{}',
     [priceConfig] NVARCHAR(2048) NOT NULL CONSTRAINT [ChatModels_priceConfig_df] DEFAULT '{}',

@@ -50,7 +50,7 @@ export interface GetModelResult {
   enabled: boolean;
   remarks: string;
   modelConfig: string;
-  fileServerId: string;
+  fileServiceId: string;
   modelKeysId: string;
   fileConfig: string;
   priceConfig: string;
@@ -61,7 +61,7 @@ export interface PutModelParams {
   name: string;
   enabled?: boolean;
   modelConfig: string;
-  fileServerId?: string;
+  fileServiceId?: string;
   modelKeysId: string;
   fileConfig?: string;
   priceConfig: string;
@@ -74,7 +74,7 @@ export interface PostModelParams {
   enabled: boolean;
   modelConfig: string;
   modelKeysId: string;
-  fileServerId?: string;
+  fileServiceId?: string;
   fileConfig?: string;
 }
 

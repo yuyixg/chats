@@ -41,9 +41,18 @@ const handler = async (req: ChatsApiRequest) => {
     return data;
   } else if (req.method === 'PUT') {
     const { userModelId, models } = req.body;
+    const _models = models.map((x: any) => {
+      return {
+        modelId: x.modelId,
+        enabled: x.enabled,
+        tokens: x.tokens,
+        counts: x.counts,
+        expires: x.expires,
+      };
+    });
     const data = await UserModelManager.updateUserModel(
       userModelId,
-      JSON.stringify(models)
+      JSON.stringify(_models)
     );
     return data;
   } else if (req.method === 'POST') {

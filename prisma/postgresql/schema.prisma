@@ -52,7 +52,7 @@ model ChatModels {
   rank          Int?
   remarks       String?
   modelKeysId   String?
-  fileServerId  String?
+  fileServiceId String?
   fileConfig    String?    @default("{}") @db.VarChar(2048)
   modelConfig   String     @default("{}") @db.VarChar(2048)
   priceConfig   String     @default("{}") @db.VarChar(2048)
@@ -100,17 +100,17 @@ model Messages {
 }
 
 model Chats {
-  id                              String         @id @default(uuid())
-  title                           String         @db.VarChar(50)
-  userId                          String
-  chatModelId                     String?
-  userModelConfig                 String         @default("{}")
-  isShared                        Boolean        @default(false)
-  isDeleted                       Boolean        @default(false)
-  createdAt                       DateTime       @default(now())
-  user                            Users          @relation(fields: [userId], references: [id])
-  chatModel                       ChatModels?    @relation(fields: [chatModelId], references: [id])
-  ChatMessages                    ChatMessages[]
+  id              String         @id @default(uuid())
+  title           String         @db.VarChar(50)
+  userId          String
+  chatModelId     String?
+  userModelConfig String         @default("{}")
+  isShared        Boolean        @default(false)
+  isDeleted       Boolean        @default(false)
+  createdAt       DateTime       @default(now())
+  user            Users          @relation(fields: [userId], references: [id])
+  chatModel       ChatModels?    @relation(fields: [chatModelId], references: [id])
+  ChatMessages    ChatMessages[]
 }
 
 model ChatMessages {
@@ -138,6 +138,7 @@ model UserBalances {
 model BalanceLogs {
   id           String   @id @default(uuid())
   userId       String
+  messageId    String?
   createUserId String
   value        Decimal  @default(0)
   type         Int

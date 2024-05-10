@@ -24,7 +24,7 @@ const handler = async (req: ChatsApiRequest) => {
     .filter((m: ChatModels) => userModels.includes(m.id!))
     .map((x: ChatModels) => {
       const fileServer = fileServices.find(
-        (f: FileServices) => f.id === x.fileServerId
+        (f: FileServices) => f.id === x.fileServiceId
       );
       return {
         id: x.id,

@@ -16,7 +16,6 @@ import { ChatInput } from './ChatInput';
 import { MemoizedChatMessage } from './MemoizedChatMessage';
 import { ModelSelect } from './ModelSelect';
 import { HomeContext } from '@/pages/home/home';
-import { AccountBalance } from './AccountBalance';
 import { v4 as uuidv4 } from 'uuid';
 import { getChat, postChats } from '@/apis/userService';
 interface Props {
@@ -324,7 +323,6 @@ export const Chat = memo(({ stopConversationRef }: Props) => {
               <div className='mx-auto flex flex-col space-y-5 md:space-y-10 px-3 pt-5 md:pt-12 sm:max-w-[600px]'>
                 {models.length !== 0 && (
                   <div className='flex h-full flex-col space-y-4 rounded-lg border border-neutral-200 p-4 dark:border-neutral-600'>
-                    <AccountBalance />
                     <ModelSelect />
 
                     {/* <SystemPrompt

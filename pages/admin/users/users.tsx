@@ -112,10 +112,7 @@ export default function Users() {
             isEmpty={users.length === 0}
           >
             {users.map((item) => (
-              <TableRow
-                className='cursor-pointer'
-                key={item.id}
-              >
+              <TableRow className='cursor-pointer' key={item.id}>
                 <TableCell>
                   <div className='flex gap-1 items-center'>
                     <div
@@ -176,7 +173,8 @@ export default function Users() {
       <EditUserBalanceModal
         onSuccessful={init}
         onClose={handleClose}
-        user={selectedUser}
+        userId={selectedUser?.id}
+        userBalance={selectedUser?.balance}
         isOpen={isOpenModal.recharge}
       />
     </>

@@ -26,6 +26,7 @@ import {
 } from '@/types/admin';
 import {
   ModelPriceUnit,
+  conversionModelPriceToCreate,
   conversionModelPriceToDisplay,
   getModelFileConfig,
   getModelFileConfigJson,
@@ -75,7 +76,7 @@ export const AddModelModal = (props: IProps) => {
       .min(1, `${t('This field is require')}`)
       .optional(),
     modelKeysId: z.string().nullable().default(null),
-    fileServerId: z.string().nullable().default(null),
+    fileServiceId: z.string().nullable().default(null),
     fileConfig: z.string().nullable().default(null),
     priceConfig: z
       .string()
@@ -94,7 +95,7 @@ export const AddModelModal = (props: IProps) => {
       enabled: true,
       modelConfig: '',
       modelKeysId: '',
-      fileServerId: null,
+      fileServiceId: null,
       fileConfig: '',
       priceConfig: '',
       remarks: '',
@@ -142,7 +143,7 @@ export const AddModelModal = (props: IProps) => {
         form.setValue('fileConfig', getModelFileConfigJson(modelVersion));
         form.setValue(
           'priceConfig',
-          conversionModelPriceToDisplay(getModelPriceConfigJson(modelVersion))
+          conversionModelPriceToCreate(getModelPriceConfigJson(modelVersion))
         );
       }
     });
@@ -299,9 +300,9 @@ export const AddModelModal = (props: IProps) => {
             </div>
             <div>
               <FormField
-                key='fileServerId'
+                key='fileServiceId'
                 control={form.control}
-                name='fileServerId'
+                name='fileServiceId'
                 render={({ field }) => {
                   return (
                     <FormSelect

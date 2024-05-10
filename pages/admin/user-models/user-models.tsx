@@ -25,10 +25,15 @@ import {
   DropdownMenuItem,
   DropdownMenuTrigger,
 } from '@/components/ui/dropdown-menu';
+import { EditUserBalanceModal } from '@/components/Admin/Users/EditUserBalanceModel';
 
 export default function UserModels() {
   const { t } = useTranslation('admin');
-  const [isOpen, setIsOpen] = useState({ add: false, edit: false });
+  const [isOpen, setIsOpen] = useState({
+    add: false,
+    edit: false,
+    recharge: false,
+  });
   const [selectedUserModel, setSelectedUserModel] =
     useState<GetUserModelResult | null>(null);
   const [selectedModelId, setSelectedModelId] = useState<string>();
@@ -40,7 +45,7 @@ export default function UserModels() {
   const init = () => {
     getUserModels(query).then((data) => {
       setUserModels(data);
-      setIsOpen({ add: false, edit: false });
+      setIsOpen({ add: false, edit: false, recharge: false });
       setSelectedUserModel(null);
       setLoading(false);
     });
@@ -52,23 +57,28 @@ export default function UserModels() {
 
   const handleShowAddModal = (item: GetUserModelResult | null) => {
     setSelectedUserModel(item);
-    setIsOpen({ add: true, edit: false });
+    setIsOpen({ add: true, edit: false, recharge: false });
   };
 
   const handleEditModal = (item: GetUserModelResult, modelId: string) => {
     setSelectedModelId(modelId);
     setSelectedUserModel(item);
-    setIsOpen({ add: false, edit: true });
+    setIsOpen({ add: false, edit: true, recharge: false });
   };
 
   const handleClose = () => {
-    setIsOpen({ add: false, edit: false });
+    setIsOpen({ add: false, edit: false, recharge: false });
     setSelectedUserModel(null);
+  };
+
+  const handleShowRechargeModal = (item: GetUserModelResult | null) => {
+    setSelectedUserModel(item);
+    setIsOpen({ add: false, edit: false, recharge: true });
   };
 
   const UserNameCell = (user: GetUserModelResult, rowSpan: number = 1) => {
     return (
-      <TableCell rowSpan={rowSpan} className='capitalize'>
+      <TableCell rowSpan={rowSpan}>
         <div className='flex items-center gap-2'>
           <div>{user.userName}</div>
         </div>
@@ -78,7 +88,11 @@ export default function UserModels() {
 
   const UserBalanceCell = (user: GetUserModelResult, rowSpan: number = 1) => {
     return (
-      <TableCell rowSpan={rowSpan}>
+      <TableCell
+        rowSpan={rowSpan}
+        className='cursor-pointer hover:underline'
+        onClick={() => handleShowRechargeModal(user)}
+      >
         <div className='flex items-center gap-2'>
           <div>{(+user.balance).toFixed(2)}</div>
         </div>
@@ -102,21 +116,23 @@ export default function UserModels() {
     );
   };
 
+  const EditModelCell = (user: GetUserModelResult, modelId: string) => {
+    return (
+      <TableCell
+        className='text-primary hover:underline underline-offset-4 cursor-pointer'
+        onClick={() => handleEditModal(user, modelId)}
+      >
+        {t('Edit')}
+      </TableCell>
+    );
+  };
+
   const ActionCell = (user: GetUserModelResult, rowSpan: number = 1) => {
     return (
       <TableCell rowSpan={rowSpan}>
-        <DropdownMenu>
-          <DropdownMenuTrigger>
-            <Button variant='ghost'>
-              <IconDots size={16} />
-            </Button>
-          </DropdownMenuTrigger>
-          <DropdownMenuContent>
-            <DropdownMenuItem onClick={() => handleShowAddModal(user)}>
-              {t('Add User Model')}
-            </DropdownMenuItem>
-          </DropdownMenuContent>
-        </DropdownMenu>
+        <Button variant='link' onClick={() => handleShowAddModal(user)}>
+          {t('Add Model')}
+        </Button>
       </TableCell>
     );
   };
@@ -154,15 +170,15 @@ export default function UserModels() {
               >
                 {t('Balance')}
               </TableHead>
-              <TableHead colSpan={4} className='text-center'>
+              <TableHead colSpan={5} className='text-center'>
                 {t('Models')}
               </TableHead>
               <TableHead
                 rowSpan={2}
                 style={{ borderLeft: '1px solid hsl(var(--muted))' }}
-                className='w-16'
+                className='w-16 text-center'
               >
-                操作
+                {t('Actions')}
               </TableHead>
             </TableRow>
             <TableRow className='pointer-events-none'>
@@ -170,11 +186,13 @@ export default function UserModels() {
               <TableHead>{t('Remaining Tokens')}</TableHead>
               <TableHead>{t('Remaining Counts')}</TableHead>
               <TableHead>{t('Expiration Time')}</TableHead>
+              <TableHead>{t('Actions')}</TableHead>
             </TableRow>
           </TableHeader>
 
           {userModels.map((user) => (
-            <TableBody emptyText={t('No data')!}
+            <TableBody
+              emptyText={t('No data')!}
               key={user.userId}
               className='tbody-hover'
               style={{ borderTop: '1px solid hsl(var(--muted))' }}
@@ -194,6 +212,7 @@ export default function UserModels() {
                       {ModelCell(user, model.modelId, model.tokens)}
                       {ModelCell(user, model.modelId, model.counts)}
                       {ModelCell(user, model.modelId, model.expires)}
+                      {EditModelCell(user, model.modelId)}
                       {index === 0 && ActionCell(user, user.models.length)}
                     </TableRow>
                   );
@@ -204,9 +223,9 @@ export default function UserModels() {
                   className='cursor-pointer'
                   onClick={() => handleShowAddModal(user)}
                 >
-                  {UserNameCell(user)}
                   {UserBalanceCell(user)}
-                  <TableCell className='text-center text-gray-500' colSpan={5}>
+                  {UserNameCell(user)}
+                  <TableCell className='text-center text-gray-500' colSpan={6}>
                     {t('Click set model')}
                   </TableCell>
                 </TableRow>
@@ -221,15 +240,21 @@ export default function UserModels() {
         onSuccessful={init}
         onClose={handleClose}
         isOpen={isOpen.add}
-      ></AddUserModelModal>
-
+      />
       <EditUserModelModal
         selectedModelId={selectedModelId!}
         selectedUserModel={selectedUserModel}
         onSuccessful={init}
         onClose={handleClose}
         isOpen={isOpen.edit}
-      ></EditUserModelModal>
+      />
+      <EditUserBalanceModal
+        onSuccessful={init}
+        onClose={handleClose}
+        userId={selectedUserModel?.userId}
+        userBalance={selectedUserModel?.balance}
+        isOpen={isOpen.recharge}
+      />
     </>
   );
 }

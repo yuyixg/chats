@@ -53,7 +53,7 @@
 //             modelVersion: true,
 //             name: true,
 //             modelProvider: true,
-//             fileServerId: true,
+//             fileServiceId: true,
 //             fileConfig: true,
 //             modelConfig: true,
 //           },

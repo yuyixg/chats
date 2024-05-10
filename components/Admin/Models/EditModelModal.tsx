@@ -73,7 +73,7 @@ export const EditModelModal = (props: IProps) => {
       .min(1, `${t('This field is require')}`)
       .optional(),
     modelKeysId: z.string().nullable().default(null),
-    fileServerId: z.string().nullable().default(null),
+    fileServiceId: z.string().nullable().default(null),
     fileConfig: z.string().nullable().default(null),
     priceConfig: z
       .string()
@@ -93,7 +93,7 @@ export const EditModelModal = (props: IProps) => {
       enabled: true,
       modelConfig: '',
       modelKeysId: '',
-      fileServerId: null,
+      fileServiceId: null,
       fileConfig: '',
       priceConfig: '',
       remarks: '',
@@ -135,7 +135,7 @@ export const EditModelModal = (props: IProps) => {
         enabled,
         remarks,
         modelKeysId,
-        fileServerId,
+        fileServiceId,
         fileConfig,
         modelConfig,
         priceConfig,
@@ -147,7 +147,7 @@ export const EditModelModal = (props: IProps) => {
       form.setValue('modelId', modelId);
       form.setValue('enabled', enabled);
       form.setValue('remarks', remarks);
-      form.setValue('fileServerId', fileServerId || null);
+      form.setValue('fileServiceId', fileServiceId || null);
       form.setValue('modelKeysId', modelKeysId || null);
       fileConfig &&
         form.setValue(
@@ -310,9 +310,9 @@ export const EditModelModal = (props: IProps) => {
             </div>
             <div>
               <FormField
-                key='fileServerId'
+                key='fileServiceId'
                 control={form.control}
-                name='fileServerId'
+                name='fileServiceId'
                 render={({ field }) => {
                   return (
                     <FormSelect

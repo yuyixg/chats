@@ -16,7 +16,7 @@ interface CreateModel {
   modelVersion: ModelVersions;
   enabled?: boolean;
   modelKeysId?: string;
-  fileServerId?: string;
+  fileServiceId?: string;
   fileConfig?: string;
   modelConfig?: string;
   priceConfig?: string;
@@ -28,7 +28,7 @@ interface UpdateModel {
   isDefault: boolean;
   enabled?: boolean;
   modelKeysId?: string;
-  fileServerId?: string;
+  fileServiceId?: string;
   fileConfig?: string;
   modelConfig: string;
   priceConfig: string;

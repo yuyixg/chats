@@ -51,7 +51,7 @@ model ChatModels {
   rank          Int?
   remarks       String?
   modelKeysId   String?    @db.UniqueIdentifier
-  fileServerId  String?    @db.UniqueIdentifier
+  fileServiceId String?    @db.UniqueIdentifier
   fileConfig    String?    @default("{}") @db.NVarChar(2048)
   modelConfig   String     @default("{}") @db.NVarChar(2048)
   priceConfig   String     @default("{}") @db.NVarChar(2048)
@@ -118,6 +118,7 @@ model UserBalances {
 model BalanceLogs {
   id           String   @id @default(uuid()) @db.UniqueIdentifier
   userId       String   @db.UniqueIdentifier
+  messageId    String?  @db.UniqueIdentifier
   createUserId String
   value        Decimal  @default(0)
   type         Int
