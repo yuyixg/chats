@@ -10,7 +10,7 @@ export interface ChatResult {
   chatModelId?: string;
   modelName: string;
   modelConfig: object;
-  userModelConfig: object;
+  userModelConfig: any;
   isShared: boolean;
 }
 

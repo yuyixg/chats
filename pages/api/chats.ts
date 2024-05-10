@@ -30,7 +30,7 @@ const handler = async (req: ChatsApiRequest) => {
         chatModelId: chat.chatModelId,
         modelName: chatModel?.name,
         modelConfig: JSON.parse(chatModel?.modelConfig || '{}'),
-        userModelConfig: chat.userModelConfig,
+        userModelConfig: JSON.parse(chat.userModelConfig || '{}'),
         isShared: chat.isShared,
       };
     }
@@ -43,7 +43,7 @@ const handler = async (req: ChatsApiRequest) => {
         chatModelId: c.chatModelId,
         modelName: chatModel?.name,
         modelConfig: JSON.parse(chatModel?.modelConfig || '{}'),
-        userModelConfig: c.userModelConfig,
+        userModelConfig: JSON.parse(c.userModelConfig || '{}'),
         isShared: c.isShared,
       };
     });

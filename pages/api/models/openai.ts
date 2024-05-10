@@ -38,7 +38,7 @@ export const config = {
 
 const handler = async (req: ChatsApiRequest, res: ChatsApiResponse) => {
   const { userId } = req.session;
-  const { chatId, parentId, modelId, userMessage, messageId } =
+  const { chatId, parentId, modelId, userMessage, messageId, userModelConfig } =
     req.body as ChatBody;
   const userMessageText = userMessage.text!;
 
@@ -66,13 +66,12 @@ const handler = async (req: ChatsApiRequest, res: ChatsApiResponse) => {
 
   let prompt = null;
   if (!prompt) {
-    prompt = modelConfig.prompt;
+    prompt = userModelConfig?.prompt || modelConfig.prompt;
   }
 
-  let temperature = null;
-  if (!temperature) {
-    temperature = modelConfig.temperature;
-  }
+  const temperature = +(
+    userModelConfig?.temperature || modelConfig.temperature
+  );
 
   const encoding = get_encoding('cl100k_base');
 
@@ -208,6 +207,7 @@ const handler = async (req: ChatsApiRequest, res: ChatsApiResponse) => {
           await ChatsManager.update({
             id: chatId,
             ...(title && { title: title }),
+            userModelConfig: JSON.stringify(userModelConfig),
             chatModelId: chatModel.id,
           });
           return res.end();

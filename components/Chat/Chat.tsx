@@ -18,6 +18,9 @@ import { ModelSelect } from './ModelSelect';
 import { HomeContext } from '@/pages/home/home';
 import { v4 as uuidv4 } from 'uuid';
 import { getChat, postChats } from '@/apis/userService';
+import { TemperatureSlider } from './Temperature';
+import { Separator } from '../ui/separator';
+import { IconShare } from '../Icons';
 interface Props {
   stopConversationRef: MutableRefObject<boolean>;
 }
@@ -33,10 +36,12 @@ export const Chat = memo(({ stopConversationRef }: Props) => {
       currentMessages,
       chats,
       models,
+      userModelConfig,
     },
     handleUpdateSelectMessage,
     handleUpdateCurrentMessage,
     handleUpdateChat,
+    handleUpdateUserModelConfig,
     hasModel,
     getModel,
     dispatch: homeDispatch,
@@ -51,6 +56,11 @@ export const Chat = memo(({ stopConversationRef }: Props) => {
   const messagesEndRef = useRef<HTMLDivElement>(null);
   const chatContainerRef = useRef<HTMLDivElement>(null);
   const textareaRef = useRef<HTMLTextAreaElement>(null);
+
+  const { modelConfig } = getModel() || {};
+  const currentSelectChat = chats.find((x) => x.id === selectChatId);
+  const currentTemperature =
+    currentSelectChat?.userModelConfig?.temperature || modelConfig?.temperature;
 
   const getSelectMessageParent = () => {
     const selectMessageLength = selectMessages.length;
@@ -131,6 +141,7 @@ export const Chat = memo(({ stopConversationRef }: Props) => {
         parentId: parentId,
         messageId,
         userMessage: messageContent,
+        userModelConfig,
       };
       const endpoint = getModelEndpoint(getModel().modelProvider);
       let body = JSON.stringify(chatBody);
@@ -210,6 +221,10 @@ export const Chat = memo(({ stopConversationRef }: Props) => {
             }
             return x;
           });
+          homeDispatch({
+            field: 'userModelConfig',
+            value: data.userModelConfig,
+          });
           homeDispatch({ field: 'chats', value: _chats });
         });
       homeDispatch({ field: 'loading', value: false });
@@ -218,6 +233,7 @@ export const Chat = memo(({ stopConversationRef }: Props) => {
         handleUpdateCurrentMessage(_selectChatId!);
     },
     [
+      userModelConfig,
       chats,
       selectChatId,
       currentMessages,
@@ -320,11 +336,10 @@ export const Chat = memo(({ stopConversationRef }: Props) => {
         >
           {selectMessages?.length === 0 ? (
             <>
-              <div className='mx-auto flex flex-col space-y-5 md:space-y-10 px-3 pt-5 md:pt-12 sm:max-w-[600px]'>
+              <div className='mx-auto flex flex-col space-y-5 md:space-y-10 px-3 pt-8 md:pt-12 sm:max-w-[600px]'>
                 {models.length !== 0 && (
                   <div className='flex h-full flex-col space-y-4 rounded-lg border border-neutral-200 p-4 dark:border-neutral-600'>
                     <ModelSelect />
-
                     {/* <SystemPrompt
                       conversation={selectedConversation}
                       prompts={prompts}
@@ -335,43 +350,50 @@ export const Chat = memo(({ stopConversationRef }: Props) => {
                         })
                       }
                     /> */}
-
-                    {/* <TemperatureSlider
-                      label={t('Temperature')}
-                      onChangeTemperature={(temperature) =>
-                        handleUpdateConversation(selectedConversation, {
-                          key: 'temperature',
-                          value: temperature,
-                        })
-                      }
-                    /> */}
+                    {modelConfig?.temperature && (
+                      <TemperatureSlider
+                        label={t('Temperature')}
+                        defaultTemperature={modelConfig.temperature}
+                        onChangeTemperature={(temperature) =>
+                          handleUpdateUserModelConfig({
+                            temperature: temperature,
+                          })
+                        }
+                      />
+                    )}
                   </div>
                 )}
               </div>
             </>
           ) : (
             <>
-              {selectChatId && (
-                <div className='sticky top-0 z-10 flex justify-center bg-white py-2 text-sm text-neutral-500 dark:border-none dark:bg-[#343541] dark:text-neutral-200'>
-                  {chats
-                    .find((x) => x.id === selectChatId)
-                    ?.modelName?.toUpperCase()}
-                  {/* {t('Temp')}:{selectedConversation?.temperature} |
-                  <button
-                    className='ml-2 cursor-pointer hover:opacity-50'
-                    onClick={() => {
-                      setShowShareModal(true);
-                    }}
-                  >
-                    <IconShare
-                      size={18}
-                      style={{
-                        color: selectedConversation?.isShared
-                          ? 'hsl(var(--primary))'
-                          : '',
-                      }}
-                    />
-                  </button> */}
+              {currentSelectChat && (
+                <div className='sticky top-0 z-10 bg-white py-2 text-sm text-neutral-500 dark:border-none dark:bg-[#343541] dark:text-neutral-200'>
+                  <div className='mt-[6px] md:mt-3 flex justify-center gap-1'>
+                    <div>{currentSelectChat?.modelName?.toUpperCase()}</div>
+                    {currentTemperature && (
+                      <div>
+                        {t('Temp')}:{currentTemperature}
+                      </div>
+                    )}
+                    {/* <div>
+                      <button
+                        className='ml-2 cursor-pointer hover:opacity-50'
+                        onClick={() => {
+                          setShowShareModal(true);
+                        }}
+                      >
+                        <IconShare
+                          size={18}
+                          stroke={
+                            currentSelectChat?.isShared
+                              ? 'hsl(var(--primary))'
+                              : '#737373'
+                          }
+                        />
+                      </button>
+                    </div> */}
+                  </div>
                 </div>
               )}
 
@@ -412,7 +434,11 @@ export const Chat = memo(({ stopConversationRef }: Props) => {
                     onRegenerate={() => {
                       const { lastMessage } = getSelectMessagesLast();
                       const message = lastMessage.messages;
-                      handleSend(message[0], lastMessage.parentId, lastMessage.id);
+                      handleSend(
+                        message[0],
+                        lastMessage.parentId,
+                        lastMessage.id
+                      );
                     }}
                     onEdit={(editedMessage, parentId) => {
                       setCurrentMessage(editedMessage);

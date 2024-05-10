@@ -16,7 +16,7 @@ import { Dispatch, createContext } from 'react';
 import { ActionType } from '@/hooks/useCreateReducer';
 import { Message } from '@/types/chat';
 import { ErrorMessage } from '@/types/error';
-import { Model } from '@/types/model';
+import { Model, UserModelConfigKey } from '@/types/model';
 import { Prompt } from '@/types/prompt';
 import { UserSession } from '@/utils/user';
 import {
@@ -61,9 +61,8 @@ interface HomeInitialState {
   currentMessages: ChatMessage[];
   selectMessages: ChatMessage[];
   selectMessageLastId: string;
-  conversations: Conversation[];
-  selectedConversation: Conversation | undefined;
   currentMessage: Message | undefined;
+  userModelConfig: Object;
   prompts: Prompt[];
   temperature: number;
   showChatbar: boolean;
@@ -81,14 +80,13 @@ const initialState: HomeInitialState = {
   modelError: null,
   modelsLoading: false,
   currentMessages: [],
+  userModelConfig: {},
   selectMessages: [],
   selectMessageLastId: '',
   models: [],
   chats: [],
   selectModelId: undefined,
   selectChatId: undefined,
-  conversations: [],
-  selectedConversation: undefined,
   currentMessage: undefined,
   prompts: [],
   temperature: 1,
@@ -112,6 +110,7 @@ interface HomeContextProps {
   handleUpdateCurrentMessage: (chatId: string) => void;
   handleDeleteChat: (id: string) => void;
   handleSelectModel: (modelId: string) => void;
+  handleUpdateUserModelConfig: (value: any) => void;
   hasModel: () => boolean;
   getModel: () => Model;
 }
@@ -132,9 +131,9 @@ const Home = () => {
       selectModelId,
       chats,
       currentMessages,
-      selectedConversation,
       models,
       user,
+      userModelConfig,
     },
     dispatch,
   } = contextValue;
@@ -159,6 +158,7 @@ const Home = () => {
       dispatch({ field: 'selectMessages', value: [] });
       dispatch({ field: 'selectModelId', value: calcSelectModelId() });
       dispatch({ field: 'chats', value: [...chats, data] });
+      dispatch({ field: 'userModelConfig', value: {} });
     });
   };
 
@@ -185,6 +185,8 @@ const Home = () => {
 
   const handleSelectChat = (chatId: string) => {
     dispatch({ field: 'selectChatId', value: chatId });
+    const chat = chats.find((x) => x.id === chatId)!;
+    dispatch({ field: 'userModelConfig', value: chat.userModelConfig });
     getUserMessages(chatId).then((data) => {
       if (data.length > 0) {
         dispatch({ field: 'currentMessages', value: data });
@@ -244,6 +246,14 @@ const Home = () => {
     dispatch({ field: 'currentMessages', value: [] });
     dispatch({ field: 'selectMessages', value: [] });
     dispatch({ field: 'selectModelId', value: calcSelectModelId() });
+    dispatch({ field: 'userModelConfig', value: {} });
+  };
+
+  const handleUpdateUserModelConfig = (value: any) => {
+    dispatch({
+      field: 'userModelConfig',
+      value: { ...userModelConfig, ...value },
+    });
   };
 
   const hasModel = () => {
@@ -321,6 +331,10 @@ const Home = () => {
     });
   }, []);
 
+  useEffect(() => {
+    console.log(userModelConfig);
+  }, [userModelConfig]);
+
   return (
     <HomeContext.Provider
       value={{
@@ -332,6 +346,7 @@ const Home = () => {
         handleSelectModel,
         handleUpdateSelectMessage,
         handleUpdateCurrentMessage,
+        handleUpdateUserModelConfig,
         hasModel,
         getModel,
       }}
@@ -361,7 +376,7 @@ const Home = () => {
           </div>
         )}
         <div className={`flex h-screen w-screen flex-col text-sm`}>
-          <div className='fixed top-0 w-full sm:hidden'>
+          {/* <div className='fixed top-0 w-full sm:hidden'>
             {selectedConversation && (
               <Navbar
                 selectedConversation={selectedConversation}
@@ -369,9 +384,9 @@ const Home = () => {
                 hasModel={hasModel}
               />
             )}
-          </div>
+          </div> */}
 
-          <div className='flex h-full w-full pt-[48px] sm:pt-0 dark:bg-[#343541]'>
+          <div className='flex h-full w-full dark:bg-[#343541]'>
             <Chatbar />
             <div className='flex w-full'>
               <Chat stopConversationRef={stopConversationRef} />

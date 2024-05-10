@@ -36,7 +36,7 @@ export const config = {
 
 const handler = async (req: ChatsApiRequest, res: ChatsApiResponse) => {
   const { userId } = req.session;
-  const { chatId, parentId, modelId, userMessage, messageId } =
+  const { chatId, parentId, modelId, userMessage, messageId, userModelConfig } =
     req.body as ChatBody;
   const userMessageText = userMessage.text!;
 
@@ -66,11 +66,10 @@ const handler = async (req: ChatsApiRequest, res: ChatsApiResponse) => {
   if (!prompt) {
     prompt = modelConfig.prompt;
   }
-
-  let temperature = null;
-  if (!temperature) {
-    temperature = modelConfig.temperature;
-  }
+  
+  const temperature = +(
+    userModelConfig?.temperature || modelConfig.temperature
+  );
 
   let messagesToSend = [] as any[];
 
@@ -114,7 +113,7 @@ const handler = async (req: ChatsApiRequest, res: ChatsApiResponse) => {
   ];
   messagesToSend.push(userMessageToSend);
 
-  const stream = await KimiStream(chatModel, messagesToSend);
+  const stream = await KimiStream(chatModel, temperature, messagesToSend);
   let assistantResponse = '';
   if (stream.getReader) {
     const reader = stream.getReader();

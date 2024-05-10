@@ -18,12 +18,7 @@ export const OpenAIStream = async (
     apiConfig: { host, apiKey },
     modelVersion,
     modelProvider,
-    modelConfig: {
-      prompt: systemPrompt,
-      version,
-      organization,
-      deploymentName,
-    },
+    modelConfig: { version, organization, deploymentName },
   } = chatModel;
   let url = `${host}/v1/chat/completions`;
   if (modelProvider === ModelProviders.Azure) {
@@ -54,14 +49,12 @@ export const OpenAIStream = async (
       messages: [
         {
           role: 'system',
-          content: prompt || systemPrompt,
+          content: prompt,
         },
         ...messages,
       ],
-      ...(modelVersion === ModelVersions.GPT_4_Vision
-        ? { max_tokens: 4096 }
-        : {}),
-      temperature: temperature,
+      ...(modelVersion === ModelVersions.GPT_4_Vision && { max_tokens: 4096 }),
+      temperature,
       stream: true,
     }),
   };

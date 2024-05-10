@@ -37,7 +37,7 @@ export const config = {
 };
 const handler = async (req: ChatsApiRequest, res: ChatsApiResponse) => {
   const { userId } = req.session;
-  const { chatId, parentId, modelId, userMessage, messageId } =
+  const { chatId, parentId, modelId, userMessage, messageId, userModelConfig } =
     req.body as ChatBody;
   const userMessageText = userMessage.text!;
 
@@ -68,10 +68,9 @@ const handler = async (req: ChatsApiRequest, res: ChatsApiResponse) => {
     prompt = modelConfig.prompt;
   }
 
-  let temperature = null;
-  if (!temperature) {
-    temperature = modelConfig.temperature;
-  }
+  const temperature = +(
+    userModelConfig?.temperature || modelConfig.temperature
+  );
 
   let messagesToSend = [] as any[];
 

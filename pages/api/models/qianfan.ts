@@ -29,7 +29,7 @@ export const config = {
 
 const handler = async (req: ChatsApiRequest, res: ChatsApiResponse) => {
   const { userId } = req.session;
-  const { chatId, parentId, modelId, userMessage, messageId } =
+  const { chatId, parentId, modelId, userMessage, messageId, userModelConfig } =
     req.body as ChatBody;
   const userMessageText = userMessage.text!;
 
@@ -60,11 +60,9 @@ const handler = async (req: ChatsApiRequest, res: ChatsApiResponse) => {
     prompt = modelConfig.prompt;
   }
 
-  let temperature = null;
-  if (!temperature) {
-    temperature = modelConfig.temperature;
-  }
-
+  const temperature = +(
+    userModelConfig?.temperature || modelConfig.temperature
+  );
   let messagesToSend: QianFanMessage[] = [];
 
   const chatMessages = await ChatMessagesManager.findUserMessageByChatId(
@@ -109,7 +107,7 @@ const handler = async (req: ChatsApiRequest, res: ChatsApiResponse) => {
   messagesToSend.push(userMessageToSend);
 
   const stream = await QianFanStream(chatModel, messagesToSend, {
-    temperature: 0.8,
+    temperature,
     top_p: 0.7,
     penalty_socre: 1,
     user_id: undefined,

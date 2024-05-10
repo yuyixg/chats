@@ -1,5 +1,4 @@
 import prisma from '@/prisma/prisma';
-import { ChatMessagesManager } from './chatMessages';
 
 export interface CreateChat {
   title: string;
@@ -12,6 +11,7 @@ export interface UpdateChat {
   id: string;
   title?: string;
   chatModelId?: string;
+  userModelConfig?: string;
   isShared?: boolean;
 }
 

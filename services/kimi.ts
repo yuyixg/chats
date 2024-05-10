@@ -18,6 +18,7 @@ export interface KimiSteamResult {
 
 export const KimiStream = async (
   chatModel: ChatModels,
+  temperature: number,
   messages: GPT4Message[] | GPT4VisionMessage[]
 ) => {
   const {
@@ -35,7 +36,7 @@ export const KimiStream = async (
       model: modelVersion,
       messages: [...messages],
       stream: true,
-      temperature: 0.7,
+      temperature,
     }),
   };
 

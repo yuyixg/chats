@@ -6,6 +6,7 @@ import {
 import { ChatModels, FileServices } from '@prisma/client';
 import { apiHandler } from '@/middleware/api-handler';
 import { ChatsApiRequest } from '@/types/next-api';
+import { ChatModelConfig } from '@/types/model';
 export const config = {
   api: {
     bodyParser: {
@@ -26,11 +27,17 @@ const handler = async (req: ChatsApiRequest) => {
       const fileServer = fileServices.find(
         (f: FileServices) => f.id === x.fileServiceId
       );
+      const modelConfig = JSON.parse(x.modelConfig) as ChatModelConfig;
       return {
         id: x.id,
         modelVersion: x.modelVersion,
         name: x.name,
         modelProvider: x.modelProvider,
+        modelConfig: {
+          prompt: modelConfig.prompt,
+          temperature: modelConfig.temperature,
+          maxLength: modelConfig.maxLength,
+        },
         // systemPrompt: x.modelConfig?.prompt,
         // maxLength: x.modelConfig?.maxLength,
         // tokenLimit: x.modelConfig?.tokenLimit,

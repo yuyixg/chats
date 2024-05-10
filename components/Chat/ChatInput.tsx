@@ -53,7 +53,7 @@ export const ChatInput = ({
     getModel,
   } = useContext(HomeContext);
 
-  const { fileConfig, fileServerConfig, maxLength } = getModel() || {};
+  const { fileConfig, fileServerConfig, modelConfig } = getModel() || {};
 
   const [content, setContent] = useState<Content>({
     text: '',
@@ -84,11 +84,11 @@ export const ChatInput = ({
 
   const handleChange = (e: React.ChangeEvent<HTMLTextAreaElement>) => {
     const value = e.target.value;
-    if (maxLength && value.length > maxLength) {
+    if (modelConfig && value.length > modelConfig.maxLength) {
       toast.error(
         t(
           `Message limit is {{maxLength}} characters. You have entered {{valueLength}} characters.`,
-          { maxLength, valueLength: value.length }
+          { maxLength: modelConfig.maxLength, valueLength: value.length }
         )
       );
       return;

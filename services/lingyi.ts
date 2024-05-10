@@ -42,7 +42,7 @@ export const LingYiStream = async (
         ? { max_tokens: 4096 }
         : {}),
       stream: true,
-      temperature: 0.7,
+      temperature,
     }),
   };
 

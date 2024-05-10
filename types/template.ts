@@ -126,6 +126,7 @@ export const ModelTemplates = {
     modelConfig: {
       prompt:
         "You are ChatGPT, a large language model trained by OpenAI. Follow the user's instructions carefully. Respond using markdown.",
+      temperature: 0.5,
       version: '2024-02-01',
       organization: '',
       deploymentName: '',
@@ -142,6 +143,7 @@ export const ModelTemplates = {
     modelConfig: {
       prompt:
         "You are ChatGPT, a large language model trained by OpenAI. Follow the user's instructions carefully. Respond using markdown.",
+      temperature: 0.5,
       version: '2024-02-01',
       organization: '',
       deploymentName: '',
@@ -157,6 +159,7 @@ export const ModelTemplates = {
     modelConfig: {
       prompt:
         "You are ChatGPT, a large language model trained by OpenAI. Follow the user's instructions carefully. Respond using markdown.",
+      temperature: 0.5,
       version: '2024-02-01',
       organization: '',
       deploymentName: '',
@@ -173,6 +176,7 @@ export const ModelTemplates = {
     modelConfig: {
       prompt:
         "You are an AI assistant with image understanding capabilities, Follow the user's instructions carefully. Respond using markdown.",
+      temperature: 0.85,
       version: 'longcontext',
     },
     apiConfig: qianWenApiConfig,
@@ -212,6 +216,7 @@ export const ModelTemplates = {
     modelConfig: {
       prompt:
         "You are an AI assistant, Follow the user's instructions carefully. Respond using markdown.",
+      temperature: 0.8,
     },
     apiConfig: qianFanApiConfig,
     priceConfig: {
@@ -224,6 +229,7 @@ export const ModelTemplates = {
     modelConfig: {
       prompt:
         "You are an AI assistant, Follow the user's instructions carefully. Respond using markdown.",
+      temperature: 0.8,
     },
     apiConfig: qianFanApiConfig,
     priceConfig: {
@@ -236,6 +242,7 @@ export const ModelTemplates = {
     modelConfig: {
       prompt:
         "You are an AI assistant, Follow the user's instructions carefully. Respond using markdown.",
+      temperature: 0.8,
     },
     apiConfig: lingYiApiConfig,
     priceConfig: {
@@ -248,6 +255,7 @@ export const ModelTemplates = {
     modelConfig: {
       prompt:
         "You are an AI assistant, Follow the user's instructions carefully. Respond using markdown.",
+      temperature: 0.8,
     },
     apiConfig: lingYiApiConfig,
     priceConfig: {
@@ -273,6 +281,7 @@ export const ModelTemplates = {
     modelConfig: {
       prompt:
         "You are an AI assistant, Follow the user's instructions carefully. Respond using markdown.",
+      temperature: 0.8,
     },
     apiConfig: moonshotApiConfig,
     priceConfig: {
@@ -285,6 +294,7 @@ export const ModelTemplates = {
     modelConfig: {
       prompt:
         "You are an AI assistant, Follow the user's instructions carefully. Respond using markdown.",
+      temperature: 0.8,
     },
     apiConfig: moonshotApiConfig,
     priceConfig: {
@@ -297,6 +307,7 @@ export const ModelTemplates = {
     modelConfig: {
       prompt:
         "You are an AI assistant, Follow the user's instructions carefully. Respond using markdown.",
+      temperature: 0.8,
     },
     apiConfig: moonshotApiConfig,
     priceConfig: {

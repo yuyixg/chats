@@ -57,6 +57,7 @@ export interface ChatBody {
   parentId: string | null;
   messageId: string;
   chatId: string;
+  userModelConfig: any;
 }
 
 export interface Conversation {

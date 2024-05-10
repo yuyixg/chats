@@ -5,9 +5,11 @@ export interface Model {
   modelVersion: ModelVersions;
   name: string;
   modelProvider: ModelProviders;
-  systemPrompt: string;
-  maxLength?: number;
-  tokenLimit?: number;
+  modelConfig: {
+    prompt: string;
+    maxLength: number;
+    temperature?: number;
+  };
   fileServerConfig: {
     id: string;
     type: FileServicesType;
@@ -84,3 +86,5 @@ export type ModelConfigType =
   | 'apiConfig'
   | 'modelConfig'
   | 'priceConfig';
+
+export type UserModelConfigKey = 'prompt' | 'temperature';

@@ -56,6 +56,7 @@ export const QianWenStream = async (
           ...messages,
         ],
       },
+      ...(modelVersion === ModelVersions.QWen_Max && { temperature }),
       parameters: {
         seed: 1646251034,
         incremental_output: true,
