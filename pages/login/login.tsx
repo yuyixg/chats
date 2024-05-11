@@ -16,7 +16,6 @@ import { zodResolver } from '@hookform/resolvers/zod';
 import { Form, FormField } from '@/components/ui/form';
 import { Button } from '@/components/ui/button';
 import FormCheckbox from '@/components/ui/form/checkbox';
-import { clearConversations } from '@/utils/conversation';
 import { DEFAULT_LANGUAGE } from '@/types/settings';
 import Image from 'next/image';
 import { getLoginProvider, singIn } from '@/apis/userService';
@@ -79,7 +78,6 @@ export default function LoginPage() {
       setProviderTypes(data.map((x) => x.type));
     });
 
-    clearConversations();
     form.formState.isValid;
     const userInfo = getUserSession();
     if (userInfo) {

@@ -190,7 +190,7 @@ export const ModelTemplates = {
     config: {
       temperature: {
         min: 0,
-        max: 2,
+        max: 1.99,
       },
     },
     modelConfig: {
@@ -207,12 +207,7 @@ export const ModelTemplates = {
   },
   [ModelVersions.QWen_Vl]: {
     type: ModelType.QianWen,
-    config: {
-      temperature: {
-        min: 0,
-        max: 2,
-      },
-    },
+    config: {},
     modelConfig: {
       prompt:
         "You are an AI assistant with image understanding capabilities, Follow the user's instructions carefully. Respond using markdown.",
@@ -326,7 +321,7 @@ export const ModelTemplates = {
     modelConfig: {
       prompt:
         "You are an AI assistant, Follow the user's instructions carefully. Respond using markdown.",
-      temperature: 0.8,
+      temperature: 0.3,
     },
     apiConfig: moonshotApiConfig,
     priceConfig: {
@@ -345,7 +340,7 @@ export const ModelTemplates = {
     modelConfig: {
       prompt:
         "You are an AI assistant, Follow the user's instructions carefully. Respond using markdown.",
-      temperature: 0.8,
+      temperature: 0.3,
     },
     apiConfig: moonshotApiConfig,
     priceConfig: {
@@ -364,7 +359,7 @@ export const ModelTemplates = {
     modelConfig: {
       prompt:
         "You are an AI assistant, Follow the user's instructions carefully. Respond using markdown.",
-      temperature: 0.8,
+      temperature: 0.3,
     },
     apiConfig: moonshotApiConfig,
     priceConfig: {
