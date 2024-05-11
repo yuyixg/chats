@@ -1,6 +1,8 @@
 import { useFetch } from '@/hooks/useFetch';
+import { PostPromptParams, PutPromptParams } from '@/types/admin';
 import { ChatMessage } from '@/types/chatMessage';
 import { Model } from '@/types/model';
+import { Prompt } from '@/types/prompt';
 import { ProviderResult, SingInParams } from '@/types/user';
 import { UserSession } from '@/utils/user';
 
@@ -9,7 +11,7 @@ export interface ChatResult {
   title: string;
   chatModelId?: string;
   modelName: string;
-  modelConfig: object;
+  modelConfig: any;
   userModelConfig: any;
   isShared: boolean;
 }
@@ -105,4 +107,24 @@ export const getUserBalance = () => {
 export const getLoginProvider = () => {
   const fetchServer = useFetch();
   return fetchServer.get<ProviderResult[]>('/api/public/login-provider');
+};
+
+export const getUserPrompts = () => {
+  const fetchServer = useFetch();
+  return fetchServer.get<Prompt[]>('/api/prompts');
+};
+
+export const postUserPrompts = (params: PostPromptParams) => {
+  const fetchServer = useFetch();
+  return fetchServer.post('/api/prompts', { body: params });
+};
+
+export const putUserPrompts = (params: PutPromptParams) => {
+  const fetchServer = useFetch();
+  return fetchServer.put('/api/prompts', { body: params });
+};
+
+export const deleteUserPrompts = (id: string) => {
+  const fetchServer = useFetch();
+  return fetchServer.delete('/api/prompts?id=' + id);
 };

@@ -4,3 +4,8 @@ export interface Prompt {
   description: string;
   content: string;
 }
+
+export enum PromptType {
+  Public = 1,
+  Private = 2,
+}

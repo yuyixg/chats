@@ -94,3 +94,7 @@ export interface ModelApiConfig {
     max: number;
   };
 }
+
+export interface CurrentModel extends ModelConfig {
+  name: string;
+}

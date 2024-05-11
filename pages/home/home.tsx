@@ -21,6 +21,7 @@ import {
   getChats,
   getUserMessages,
   getUserModels,
+  getUserPrompts,
   postChats,
 } from '@/apis/userService';
 import {
@@ -33,6 +34,7 @@ import { useTheme } from 'next-themes';
 import Spinner from '@/components/Spinner';
 import { ChatMessage } from '@/types/chatMessage';
 import { getSelectMessages } from '@/utils/message';
+import PromptBar from '@/components/Promptbar';
 interface HandleUpdateChatParams {
   title?: string;
   chatModelId?: string;
@@ -100,7 +102,7 @@ interface HomeContextProps {
   handleSelectModel: (modelId: string) => void;
   handleUpdateUserModelConfig: (value: any) => void;
   hasModel: () => boolean;
-  getModel: () => Model;
+  getModel: (models: Model[], selectModelId: string) => Model;
 }
 
 const HomeContext = createContext<HomeContextProps>(undefined!);
@@ -249,7 +251,7 @@ const Home = () => {
     return models?.length > 0;
   };
 
-  const getModel = () => {
+  const getModel = (models: Model[], selectModelId: string) => {
     return models.find((x) => x.id === selectModelId)!;
   };
 
@@ -268,11 +270,6 @@ const Home = () => {
         field: 'language',
         value: settings.language,
       });
-    }
-
-    const prompts = localStorage.getItem('prompts');
-    if (prompts) {
-      dispatch({ field: 'prompts', value: JSON.parse(prompts) });
     }
 
     const showChatbar = localStorage.getItem('showChatbar');
@@ -301,13 +298,17 @@ const Home = () => {
     });
 
     getUserModels().then((data) => {
+      dispatch({ field: 'models', value: data });
       if (data && data.length > 0) {
         dispatch({
           field: 'selectModelId',
           value: data[0].id,
         });
       }
-      dispatch({ field: 'models', value: data });
+    });
+
+    getUserPrompts().then((data) => {
+      dispatch({ field: 'prompts', value: data });
     });
   }, []);
 
@@ -367,7 +368,7 @@ const Home = () => {
             <div className='flex w-full'>
               <Chat stopConversationRef={stopConversationRef} />
             </div>
-            {/* <Promptbar /> */}
+            <PromptBar />
           </div>
         </div>
       </main>
@@ -394,7 +395,7 @@ export const getServerSideProps = async ({
         'chat',
         'sidebar',
         'markdown',
-        'promptbar',
+        'prompt',
         'settings',
       ])),
     },

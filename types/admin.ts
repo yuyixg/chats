@@ -211,3 +211,13 @@ export interface PostModelKeysParams {
 export interface PutModelKeysParams extends PostModelKeysParams {
   id: string;
 }
+
+export interface PostPromptParams {
+  name: string;
+  content: string;
+  description: string;
+}
+
+export interface PutPromptParams {
+  id: string;
+}

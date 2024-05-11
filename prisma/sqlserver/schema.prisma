@@ -30,6 +30,7 @@ model Users {
   AuditLogs    RequestLogs[]
   Orders       Orders[]
   Chats        Chats[]
+  Prompts      Prompts[]
 }
 
 model FileServices {
@@ -196,4 +197,17 @@ model ModelKeys {
   createdAt  DateTime     @default(now())
   updatedAt  DateTime     @updatedAt
   ChatModels ChatModels[]
+}
+
+model Prompts {
+  id           String   @id @default(uuid()) @db.UniqueIdentifier
+  name         String   @db.NVarChar(100)
+  type         Int      @db.SmallInt
+  content      String?  @db.NVarChar(2048)
+  description  String?  @db.NVarChar(100)
+  createUserId String   @db.UniqueIdentifier
+  isDeleted    Boolean  @default(false)
+  createdAt    DateTime @default(now())
+  updatedAt    DateTime @updatedAt
+  user         Users?   @relation(fields: [createUserId], references: [id])
 }

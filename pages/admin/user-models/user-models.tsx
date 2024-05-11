@@ -223,9 +223,9 @@ export default function UserModels() {
                   className='cursor-pointer'
                   onClick={() => handleShowAddModal(user)}
                 >
-                  {UserBalanceCell(user)}
                   {UserNameCell(user)}
-                  <TableCell className='text-center text-gray-500' colSpan={6}>
+                  {UserBalanceCell(user)}
+                  <TableCell className='text-center text-gray-500' colSpan={5}>
                     {t('Click set model')}
                   </TableCell>
                 </TableRow>

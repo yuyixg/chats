@@ -43,17 +43,12 @@ export const ChatInput = ({
   const { t } = useTranslation('chat');
 
   const {
-    state: {
-      selectModelId,
-      messageIsStreaming,
-      selectMessages,
-      prompts,
-      selectChatId,
-    },
+    state: { selectModelId, messageIsStreaming, models, prompts, selectChatId },
     getModel,
   } = useContext(HomeContext);
 
-  const { fileConfig, fileServerConfig, modelConfig } = getModel() || {};
+  const { fileConfig, fileServerConfig, modelConfig } =
+    getModel(models, selectModelId!) || {};
 
   const [content, setContent] = useState<Content>({
     text: '',

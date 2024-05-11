@@ -2,31 +2,34 @@ import {
   FC,
   KeyboardEvent,
   useCallback,
+  useContext,
   useEffect,
   useRef,
   useState,
 } from 'react';
 
 import { useTranslation } from 'next-i18next';
-import { DEFAULT_SYSTEM_PROMPT } from '@/utils/const';
-import { Conversation } from '@/types/chat';
 import { Prompt } from '@/types/prompt';
 import { PromptList } from './PromptList';
 import { VariableModal } from './VariableModal';
 import toast from 'react-hot-toast';
+import { HomeContext } from '@/pages/home/home';
 
 interface Props {
-  conversation: Conversation;
+  currentPrompt: string;
   prompts: Prompt[];
   onChangePrompt: (prompt: string) => void;
 }
 
 export const SystemPrompt: FC<Props> = ({
-  conversation,
+  currentPrompt,
   prompts,
   onChangePrompt,
 }) => {
   const { t } = useTranslation('chat');
+  const {
+    state: { selectModelId },
+  } = useContext(HomeContext);
 
   const [value, setValue] = useState<string>('');
   const [activePromptIndex, setActivePromptIndex] = useState(0);
@@ -44,7 +47,7 @@ export const SystemPrompt: FC<Props> = ({
 
   const handleChange = (e: React.ChangeEvent<HTMLTextAreaElement>) => {
     const value = e.target.value;
-    // const maxLength = conversation.model.maxLength!;
+    /// const maxLength = conversation.model.maxLength!;
 
     // if (value.length > maxLength) {
     //   toast.error(
@@ -56,8 +59,8 @@ export const SystemPrompt: FC<Props> = ({
     //   return;
     // }
 
-    // setValue(value);
-    // updatePromptListVisibility(value);
+    setValue(value);
+    updatePromptListVisibility(value);
 
     if (value.length > 0) {
       onChangePrompt(value);
@@ -88,7 +91,6 @@ export const SystemPrompt: FC<Props> = ({
 
   const updatePromptListVisibility = useCallback((text: string) => {
     const match = text.match(/\/\w*$/);
-
     if (match) {
       setShowPromptList(true);
       setPromptInputValue(match[0].slice(1));
@@ -165,12 +167,8 @@ export const SystemPrompt: FC<Props> = ({
   }, [value]);
 
   useEffect(() => {
-    if (conversation.prompt) {
-      setValue(conversation.prompt);
-    } else {
-      setValue(DEFAULT_SYSTEM_PROMPT);
-    }
-  }, [conversation]);
+    setValue(currentPrompt);
+  }, [selectModelId]);
 
   useEffect(() => {
     const handleOutsideClick = (e: MouseEvent) => {

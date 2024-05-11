@@ -5,6 +5,7 @@ import { CloseSidebarButton, OpenSidebarButton } from './OpenCloseButton';
 import Search from '../Search';
 
 interface Props<T> {
+  showOpenButton?: boolean;
   isOpen: boolean;
   addItemButtonTitle: string;
   side: 'left' | 'right';
@@ -20,6 +21,7 @@ interface Props<T> {
 }
 
 const Sidebar = <T,>({
+  showOpenButton = true,
   isOpen,
   addItemButtonTitle,
   side,
@@ -33,7 +35,7 @@ const Sidebar = <T,>({
   handleCreateItem,
   hasModel,
 }: Props<T>) => {
-  const { t } = useTranslation('promptbar');
+  const { t } = useTranslation('prompt');
 
   return (
     <>
@@ -79,7 +81,9 @@ const Sidebar = <T,>({
         <CloseSidebarButton onClick={toggleOpen} side={side} />
       </div>
 
-      {!isOpen && <OpenSidebarButton onClick={toggleOpen} side={side} />}
+      {!isOpen && showOpenButton && (
+        <OpenSidebarButton onClick={toggleOpen} side={side} />
+      )}
     </>
   );
 };

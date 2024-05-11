@@ -1,4 +1,5 @@
 import {
+  IconBulbFilled,
   IconLogout,
   IconMoneybag,
   IconPasswordUser,
@@ -9,11 +10,7 @@ import {
 import { useContext, useState } from 'react';
 import { useTranslation } from 'next-i18next';
 import { SettingDialog } from '@/components/Settings/SettingDialog';
-
 import { SidebarButton } from '../Sidebar/SidebarButton';
-// import ChatbarContext from '../Chatbar.context';
-import { ClearConversations } from './ClearConversations';
-import ChatbarContext from './Chatbar.context';
 import { useRouter } from 'next/router';
 import { UserRole } from '@/types/admin';
 import {
@@ -37,6 +34,7 @@ export const ChatBarSettings = () => {
 
   const {
     state: { user },
+    dispatch: homeDispatch,
   } = useContext(HomeContext);
 
   const logout = () => {
@@ -93,13 +91,20 @@ export const ChatBarSettings = () => {
           </PopoverTrigger>
           <PopoverContent className='w-[244px]'>
             <SidebarButton
+              text={t('Prompt Management')}
+              icon={<IconBulbFilled size={18} />}
+              onClick={() => {
+                homeDispatch({ field: 'showPromptbar', value: true });
+              }}
+            />
+            <Separator className='my-2' />
+            <SidebarButton
               text={t('Change Password')}
               icon={<IconPasswordUser size={18} />}
               onClick={() => {
                 setIsChangePasswordModal(true);
               }}
             />
-            <Separator className='my-2' />
             <SidebarButton
               text={t('Log out')}
               icon={<IconLogout size={18} />}

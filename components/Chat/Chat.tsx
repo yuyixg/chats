@@ -19,8 +19,9 @@ import { HomeContext } from '@/pages/home/home';
 import { v4 as uuidv4 } from 'uuid';
 import { getChat, postChats } from '@/apis/userService';
 import { TemperatureSlider } from './Temperature';
-import { ModelApiConfig, ModelConfig } from '@/types/model';
+import { CurrentModel, ModelApiConfig, ModelConfig } from '@/types/model';
 import { ModelTemplates } from '@/types/template';
+import { SystemPrompt } from './SystemPrompt';
 interface Props {
   stopConversationRef: MutableRefObject<boolean>;
 }
@@ -36,6 +37,7 @@ export const Chat = memo(({ stopConversationRef }: Props) => {
       currentMessages,
       chats,
       models,
+      prompts,
       userModelConfig,
     },
     handleUpdateSelectMessage,
@@ -51,8 +53,8 @@ export const Chat = memo(({ stopConversationRef }: Props) => {
   const [showScrollDownButton, setShowScrollDownButton] =
     useState<boolean>(false);
   const [showShareModal, setShowShareModal] = useState(false);
-  const [currentModel, setCurrentModel] = useState<ModelConfig>(
-    {} as ModelConfig
+  const [currentModel, setCurrentModel] = useState<CurrentModel>(
+    {} as CurrentModel
   );
   const [modeApiConfig, setModelApiConfig] = useState<ModelApiConfig>(
     {} as ModelApiConfig
@@ -144,7 +146,9 @@ export const Chat = memo(({ stopConversationRef }: Props) => {
         userMessage: messageContent,
         userModelConfig,
       };
-      const endpoint = getModelEndpoint(getModel().modelProvider);
+      const endpoint = getModelEndpoint(
+        getModel(models, selectModelId!).modelProvider
+      );
       let body = JSON.stringify(chatBody);
 
       const controller = new AbortController();
@@ -292,13 +296,6 @@ export const Chat = memo(({ stopConversationRef }: Props) => {
   };
   const throttledScrollDown = throttle(scrollDown, 250);
 
-  // useEffect(() => {
-  //   if (currentMessage) {
-  //     handleSend(currentMessage);
-  //     homeDispatch({ field: 'currentMessage', value: undefined });
-  //   }
-  // }, [currentMessage]);
-
   useEffect(() => {
     throttledScrollDown();
   }, [selectMessages, throttledScrollDown]);
@@ -328,12 +325,15 @@ export const Chat = memo(({ stopConversationRef }: Props) => {
   }, [messagesEndRef]);
 
   useEffect(() => {
-    const { modelConfig, modelVersion } = getModel() || {};
+    const { name, modelConfig, modelVersion } =
+      getModel(models, selectModelId!) || {};
     setCurrentModel({
+      name,
       ...modelConfig,
       temperature:
         currentSelectChat?.userModelConfig?.temperature ||
         modelConfig?.temperature,
+      prompt: currentSelectChat?.userModelConfig?.prompt || modelConfig?.prompt,
     });
     setModelApiConfig(ModelTemplates[modelVersion]?.config as any);
   }, [selectModelId]);
@@ -352,16 +352,15 @@ export const Chat = memo(({ stopConversationRef }: Props) => {
                 {models.length !== 0 && (
                   <div className='flex h-full flex-col space-y-4 rounded-lg border border-neutral-200 p-4 dark:border-neutral-600'>
                     <ModelSelect />
-                    {/* <SystemPrompt
-                      conversation={selectedConversation}
-                      prompts={prompts}
-                      onChangePrompt={(prompt) =>
-                        handleUpdateConversation(selectedConversation, {
-                          key: 'prompt',
-                          value: prompt,
-                        })
-                      }
-                    /> */}
+                    {currentModel?.prompt && (
+                      <SystemPrompt
+                        currentPrompt={currentModel?.prompt}
+                        prompts={prompts}
+                        onChangePrompt={(prompt) => {
+                          handleUpdateUserModelConfig({ prompt });
+                        }}
+                      />
+                    )}
                     {currentModel.temperature && (
                       <TemperatureSlider
                         label={t('Temperature')}
@@ -381,14 +380,12 @@ export const Chat = memo(({ stopConversationRef }: Props) => {
             </>
           ) : (
             <>
-              {selectChatId && (
+              {currentSelectChat && (
                 <div className='sticky top-0 z-10 bg-white py-2 text-sm text-neutral-500 dark:border-none dark:bg-[#343541] dark:text-neutral-200'>
                   <div className='mt-[6px] md:mt-3 flex justify-center gap-1'>
-                    <div>{currentSelectChat?.modelName?.toUpperCase()}</div>
+                    <div>{currentModel.name}</div>
                     {currentModel?.temperature && (
-                      <div>
-                        {t('Temp')}:{currentModel.temperature}
-                      </div>
+                      <div className='flex'>{currentModel.temperature}­°C</div>
                     )}
                     {/* <div>
                       <button

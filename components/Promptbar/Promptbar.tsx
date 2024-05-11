@@ -1,7 +1,6 @@
 import { useContext, useEffect } from 'react';
 import { useTranslation } from 'next-i18next';
 import { useCreateReducer } from '@/hooks/useCreateReducer';
-import { savePrompts } from '@/utils/prompts';
 import { Prompt } from '@/types/prompt';
 import { Prompts } from './components/Prompts';
 
@@ -11,9 +10,15 @@ import { PromptbarInitialState, initialState } from './Promptbar.state';
 
 import { v4 as uuidv4 } from 'uuid';
 import { HomeContext } from '@/pages/home/home';
+import {
+  deleteUserPrompts,
+  postUserPrompts,
+  putUserPrompts,
+} from '@/apis/userService';
+import toast from 'react-hot-toast';
 
-const Promptbar = () => {
-  const { t } = useTranslation('promptbar');
+const PromptBar = () => {
+  const { t } = useTranslation('prompt');
 
   const promptBarContextValue = useCreateReducer<PromptbarInitialState>({
     initialState,
@@ -23,7 +28,6 @@ const Promptbar = () => {
     state: { prompts, showPromptbar },
     dispatch: homeDispatch,
     hasModel,
-    getModel,
   } = useContext(HomeContext);
 
   const {
@@ -42,49 +46,34 @@ const Promptbar = () => {
       name: `Prompt ${prompts.length + 1}`,
       description: '',
       content: '',
-      model: getModel(),
     };
 
-    const updatedPrompts = [...prompts, newPrompt];
-
-    homeDispatch({ field: 'prompts', value: updatedPrompts });
-
-    savePrompts(updatedPrompts);
+    postUserPrompts(newPrompt).then((data) => {
+      const updatedPrompts = [...prompts, data];
+      homeDispatch({ field: 'prompts', value: updatedPrompts });
+      toast.success(t('Created successful!'));
+    });
   };
 
   const handleDeletePrompt = (prompt: Prompt) => {
-    const updatedPrompts = prompts.filter((p) => p.id !== prompt.id);
-
-    homeDispatch({ field: 'prompts', value: updatedPrompts });
-    savePrompts(updatedPrompts);
+    deleteUserPrompts(prompt.id).then(() => {
+      const updatedPrompts = prompts.filter((p) => p.id !== prompt.id);
+      homeDispatch({ field: 'prompts', value: updatedPrompts });
+      toast.success(t('Deleted successful!'));
+    });
   };
 
   const handleUpdatePrompt = (prompt: Prompt) => {
-    const updatedPrompts = prompts.map((p) => {
-      if (p.id === prompt.id) {
-        return prompt;
-      }
-
-      return p;
+    putUserPrompts(prompt).then(() => {
+      const updatedPrompts = prompts.map((p) => {
+        if (p.id === prompt.id) {
+          return prompt;
+        }
+        return p;
+      });
+      homeDispatch({ field: 'prompts', value: updatedPrompts });
+      toast.success(t('Updated successful!'));
     });
-    homeDispatch({ field: 'prompts', value: updatedPrompts });
-
-    savePrompts(updatedPrompts);
-  };
-
-  const handleDrop = (e: any) => {
-    if (e.dataTransfer) {
-      const prompt = JSON.parse(e.dataTransfer.getData('prompt'));
-
-      const updatedPrompt = {
-        ...prompt,
-        folderId: e.target.dataset.folderId,
-      };
-
-      handleUpdatePrompt(updatedPrompt);
-
-      e.target.style.background = 'none';
-    }
   };
 
   useEffect(() => {
@@ -118,6 +107,7 @@ const Promptbar = () => {
       <Sidebar<Prompt>
         hasModel={hasModel}
         side={'right'}
+        showOpenButton={false}
         isOpen={showPromptbar}
         addItemButtonTitle={t('New prompt')}
         itemComponent={<Prompts prompts={filteredPrompts} />}
@@ -133,4 +123,4 @@ const Promptbar = () => {
   );
 };
 
-export default Promptbar;
+export default PromptBar;

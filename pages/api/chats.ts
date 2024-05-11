@@ -59,7 +59,7 @@ const handler = async (req: ChatsApiRequest) => {
     return await ChatsManager.update({ id, title, isShared });
   } else if (req.method === 'DELETE') {
     const { id } = req.query as { id: string };
-    const chat = ChatsManager.findByUserChatId(id, userId);
+    const chat = await ChatsManager.findByUserChatId(id, userId);
     if (!chat) {
       throw new BadRequest();
     }

@@ -62,11 +62,7 @@ const handler = async (req: ChatsApiRequest, res: ChatsApiResponse) => {
     throw new BadRequest('Insufficient balance');
   }
 
-  let prompt = null;
-  if (!prompt) {
-    prompt = modelConfig.prompt;
-  }
-  
+  const prompt = userModelConfig?.prompt || modelConfig.prompt;
   const temperature = +(
     userModelConfig?.temperature || modelConfig.temperature
   );
@@ -113,7 +109,12 @@ const handler = async (req: ChatsApiRequest, res: ChatsApiResponse) => {
   ];
   messagesToSend.push(userMessageToSend);
 
-  const stream = await KimiStream(chatModel, temperature, messagesToSend);
+  const stream = await KimiStream(
+    chatModel,
+    prompt,
+    temperature,
+    messagesToSend
+  );
   let assistantResponse = '';
   if (stream.getReader) {
     const reader = stream.getReader();

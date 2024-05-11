@@ -64,11 +64,7 @@ const handler = async (req: ChatsApiRequest, res: ChatsApiResponse) => {
     throw new BadRequest('Insufficient balance');
   }
 
-  let prompt = null;
-  if (!prompt) {
-    prompt = userModelConfig?.prompt || modelConfig.prompt;
-  }
-
+  const prompt = userModelConfig?.prompt || modelConfig.prompt;
   const temperature = +(
     userModelConfig?.temperature || modelConfig.temperature
   );
