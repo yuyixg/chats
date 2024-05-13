@@ -226,7 +226,6 @@ model Prompts {
   content      String?  @db.VarChar(2048)
   description  String?  @db.VarChar(100)
   createUserId String   @db.Uuid()
-  isDeleted    Boolean  @default(false)
   createdAt    DateTime @default(now())
   updatedAt    DateTime @updatedAt
   user         Users?   @relation(fields: [createUserId], references: [id])

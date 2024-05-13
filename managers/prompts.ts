@@ -16,7 +16,7 @@ interface UpdatePrompt extends CreatePrompt {
 export class PromptsManager {
   static async findUserPrompts(createUserId: string) {
     return await prisma.prompts.findMany({
-      where: { createUserId, isDeleted: false },
+      where: { createUserId },
       orderBy: { createdAt: 'desc' },
     });
   }
