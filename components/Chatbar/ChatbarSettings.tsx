@@ -13,11 +13,7 @@ import { SettingDialog } from '@/components/Settings/SettingDialog';
 import { SidebarButton } from '../Sidebar/SidebarButton';
 import { useRouter } from 'next/router';
 import { UserRole } from '@/types/admin';
-import {
-  clearUserInfo,
-  getLoginUrl,
-  clearUserSessionId,
-} from '@/utils/user';
+import { clearUserInfo, getLoginUrl, clearUserSessionId } from '@/utils/user';
 import { HomeContext } from '@/pages/home/home';
 import { Popover, PopoverContent, PopoverTrigger } from '../ui/popover';
 import { Separator } from '../ui/separator';
@@ -44,7 +40,7 @@ export const ChatBarSettings = () => {
   };
 
   return (
-    <div className='flex flex-col items-center space-y-1 border-t border-white/20 pt-1 text-sm'>
+    <div className='flex flex-col items-center space-y-1 border-t border-black/5 dark:border-white/10 pt-2 text-sm'>
       {/* {conversations.length > 0 ? (
         <ClearConversations onClearConversations={handleClearConversations} />
       ) : null} */}
@@ -54,13 +50,6 @@ export const ChatBarSettings = () => {
         icon={<IconFileExport size={18} />}
         onClick={() => handleExportData()}
       /> */}
-
-      <SidebarButton
-        text={t('Settings')}
-        icon={<IconSettings size={18} />}
-        onClick={() => setIsSettingModal(true)}
-      />
-
       {user?.role === UserRole.admin && (
         <SidebarButton
           text={t('Admin Panel')}
@@ -96,6 +85,11 @@ export const ChatBarSettings = () => {
               onClick={() => {
                 homeDispatch({ field: 'showPromptbar', value: true });
               }}
+            />
+            <SidebarButton
+              text={t('Settings')}
+              icon={<IconSettings size={18} />}
+              onClick={() => setIsSettingModal(true)}
             />
             <Separator className='my-2' />
             <SidebarButton
