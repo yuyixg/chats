@@ -1,7 +1,7 @@
 import { useEffect, useState } from 'react';
 import { useRouter } from 'next/router';
 import { NextApiRequest } from 'next';
-import { saveUserSession, setUserSessionId } from '@/utils/user';
+import { saveUserInfo, setUserSessionId } from '@/utils/user';
 import { serverSideTranslations } from 'next-i18next/serverSideTranslations';
 import { DEFAULT_LANGUAGE } from '@/types/settings';
 import { useTranslation } from 'next-i18next';
@@ -25,7 +25,7 @@ export default function Authorizing(props: { session: any }) {
       singIn({ code })
         .then((response) => {
           setUserSessionId(response.sessionId);
-          saveUserSession({
+          saveUserInfo({
             ...response,
           });
           router.push('/');
@@ -35,7 +35,7 @@ export default function Authorizing(props: { session: any }) {
         });
     } else if (session) {
       setUserSessionId(session.sessionId);
-      saveUserSession({
+      saveUserInfo({
         ...session,
       });
       router.push('/');

@@ -33,7 +33,7 @@ export const ChatMessage: FC<Props> = memo(({ message, canOperate = true }) => {
 
   return (
     <div
-      className={`group md:px-4 ${
+      className={`group md:px-4 mt-[6px] ${
         message.role === 'assistant'
           ? 'text-gray-800 dark:text-gray-100'
           : 'text-gray-800 dark:text-gray-100'

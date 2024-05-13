@@ -14,7 +14,7 @@ import { SidebarButton } from '../Sidebar/SidebarButton';
 import { useRouter } from 'next/router';
 import { UserRole } from '@/types/admin';
 import {
-  clearUserSession,
+  clearUserInfo,
   getLoginUrl,
   clearUserSessionId,
 } from '@/utils/user';
@@ -39,7 +39,7 @@ export const ChatBarSettings = () => {
 
   const logout = () => {
     clearUserSessionId();
-    clearUserSession();
+    clearUserInfo();
     router.push(getLoginUrl());
   };
 

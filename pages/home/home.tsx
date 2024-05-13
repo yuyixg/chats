@@ -7,7 +7,7 @@ import { serverSideTranslations } from 'next-i18next/serverSideTranslations';
 import { useTranslation } from 'next-i18next';
 import { getSettingsLanguage, getSettings } from '@/utils/settings';
 import { getSession } from '@/utils/session';
-import { getLoginUrl, getUserSession, getUserSessionId } from '@/utils/user';
+import { getLoginUrl, getUserInfo, getUserSessionId } from '@/utils/user';
 import { useRouter } from 'next/router';
 import { Dispatch, createContext } from 'react';
 import { ActionType } from '@/hooks/useCreateReducer';
@@ -283,7 +283,7 @@ const Home = () => {
   }, []);
 
   useEffect(() => {
-    const session = getUserSession();
+    const session = getUserInfo();
     const sessionId = getUserSessionId();
     if (session && sessionId) {
       setTimeout(() => {

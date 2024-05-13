@@ -9,19 +9,25 @@ export interface UserSession {
   canRecharge: boolean;
 }
 
-export const saveUserSession = (user: UserSession) => {
+export interface UserInfo {
+  username: string;
+  role: string;
+  canRecharge: boolean;
+}
+
+export const saveUserInfo = (user: UserInfo) => {
   localStorage.setItem('user', JSON.stringify(user));
 };
-export const clearUserSession = () => {
+export const clearUserInfo = () => {
   localStorage.removeItem('user');
 };
 
-export const getUserSession = () => {
+export const getUserInfo = () => {
   const user = localStorage.getItem('user');
   if (!user) {
     return null;
   }
-  return JSON.parse(user) as UserSession;
+  return JSON.parse(user) as UserInfo;
 };
 
 export const getLoginUrl = (locale?: string) => {
@@ -40,7 +46,7 @@ export const getUserSessionId = () => {
 };
 
 export const clearUserSessionId = () => {
-  const user = getUserSession();
+  const user = getUserInfo();
   user && Cookies.removeItem('sessionId', '/');
 };
 

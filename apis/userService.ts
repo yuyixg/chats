@@ -3,8 +3,8 @@ import { PostPromptParams, PutPromptParams } from '@/types/admin';
 import { ChatMessage } from '@/types/chatMessage';
 import { Model } from '@/types/model';
 import { Prompt } from '@/types/prompt';
-import { ProviderResult, SingInParams } from '@/types/user';
-import { UserSession } from '@/utils/user';
+import { ProviderResult, SingInParams, SingInResult } from '@/types/user';
+import { UserInfo } from '@/utils/user';
 
 export interface ChatResult {
   id: string;
@@ -89,7 +89,7 @@ export const getCsrfToken = (): Promise<{ csrfToken: string }> => {
   return fetchServer.get('/api/auth/csrf');
 };
 
-export const singIn = (params: SingInParams): Promise<UserSession> => {
+export const singIn = (params: SingInParams): Promise<SingInResult> => {
   const fetchServer = useFetch();
   return fetchServer.post('/api/public/login', { body: params });
 };

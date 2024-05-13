@@ -1,10 +1,6 @@
 import { useEffect, useState } from 'react';
 import { useRouter } from 'next/router';
-import {
-  getUserSession,
-  saveUserSession,
-  setUserSessionId,
-} from '@/utils/user';
+import { getUserInfo, saveUserInfo, setUserSessionId } from '@/utils/user';
 import toast from 'react-hot-toast';
 import { serverSideTranslations } from 'next-i18next/serverSideTranslations';
 import { useTranslation } from 'next-i18next';
@@ -37,7 +33,7 @@ export default function LoginPage() {
       label: t('Your username'),
       defaultValue: '',
       render: (options: IFormFieldOption, field: FormFieldType) => (
-        <FormInput options={options} field={field} />
+        <FormInput autocomplete='on' options={options} field={field} />
       ),
     },
     {
@@ -45,7 +41,12 @@ export default function LoginPage() {
       label: t('Your password'),
       defaultValue: '',
       render: (options: IFormFieldOption, field: FormFieldType) => (
-        <FormInput type='password' options={options} field={field} />
+        <FormInput
+          autocomplete='on'
+          type='password'
+          options={options}
+          field={field}
+        />
       ),
     },
     {
@@ -79,11 +80,10 @@ export default function LoginPage() {
     });
 
     form.formState.isValid;
-    const userInfo = getUserSession();
+    const userInfo = getUserInfo();
     if (userInfo) {
-      const { username, password } = userInfo;
+      const { username } = userInfo;
       form.setValue('username', username);
-      form.setValue('password', password);
     }
     setIsClient(true);
   }, []);
@@ -95,9 +95,10 @@ export default function LoginPage() {
     singIn({ username, password })
       .then((response) => {
         setUserSessionId(response.sessionId);
-        saveUserSession({
-          ...response,
-          password: remember ? `${password}` : '',
+        saveUserInfo({
+          canRecharge: response.canRecharge,
+          role: response.role,
+          username: response.username,
         });
         router.push('/');
       })
