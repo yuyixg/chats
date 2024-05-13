@@ -11,7 +11,7 @@ datasource db {
 }
 
 model Users {
-  id           String        @id @default(uuid())
+  id           String        @id @default(uuid()) @db.Uuid()
   avatar       String?
   account      String?
   username     String?
@@ -31,10 +31,11 @@ model Users {
   AuditLogs    RequestLogs[]
   Orders       Orders[]
   Chats        Chats[]
+  Prompts      Prompts[]
 }
 
 model FileServices {
-  id        String   @id @default(uuid())
+  id        String   @id @default(uuid()) @db.Uuid()
   name      String
   enabled   Boolean  @default(true)
   type      String
@@ -44,15 +45,15 @@ model FileServices {
 }
 
 model ChatModels {
-  id            String     @id @default(uuid())
+  id            String     @id @default(uuid()) @db.Uuid()
   modelProvider String
   modelVersion  String
   name          String
   isDefault     Boolean    @default(false)
   rank          Int?
   remarks       String?
-  modelKeysId   String?
-  fileServiceId String?
+  modelKeysId   String?    @db.Uuid()
+  fileServiceId String?    @db.Uuid()
   fileConfig    String?    @default("{}") @db.VarChar(2048)
   modelConfig   String     @default("{}") @db.VarChar(2048)
   priceConfig   String     @default("{}") @db.VarChar(2048)
@@ -65,16 +66,16 @@ model ChatModels {
 }
 
 model Sessions {
-  id        String   @id @default(uuid())
+  id        String   @id @default(uuid()) @db.Uuid()
   user      Users    @relation(fields: [userId], references: [id])
-  userId    String
+  userId    String   @db.Uuid()
   createdAt DateTime @default(now())
   updatedAt DateTime @updatedAt
 }
 
 model UserModels {
-  id        String   @id @default(uuid())
-  userId    String
+  id        String   @id @default(uuid()) @db.Uuid()
+  userId    String   @db.Uuid()
   models    String   @default("[]")
   createdAt DateTime @default(now())
   updatedAt DateTime @updatedAt
@@ -82,9 +83,9 @@ model UserModels {
 }
 
 model Messages {
-  id          String     @id @default(uuid())
-  userId      String
-  chatModelId String
+  id          String     @id @default(uuid()) @db.Uuid()
+  userId      String     @db.Uuid()
+  chatModelId String     @db.Uuid()
   name        String
   prompt      String?
   messages    String     @db.Text()
@@ -100,10 +101,10 @@ model Messages {
 }
 
 model Chats {
-  id              String         @id @default(uuid())
+  id              String         @id @default(uuid()) @db.Uuid()
   title           String         @db.VarChar(50)
-  userId          String
-  chatModelId     String?
+  userId          String         @db.Uuid()
+  chatModelId     String?        @db.Uuid()
   userModelConfig String         @default("{}")
   isShared        Boolean        @default(false)
   isDeleted       Boolean        @default(false)
@@ -114,10 +115,10 @@ model Chats {
 }
 
 model ChatMessages {
-  id              String   @id @default(uuid())
-  userId          String
-  chatId          String
-  parentId        String?
+  id              String   @id @default(uuid()) @db.Uuid()
+  userId          String   @db.Uuid()
+  chatId          String   @db.Uuid()
+  parentId        String?  @db.Uuid()
   messages        String   @db.Text()
   calculatedPrice Decimal
   tokenUsed       Int
@@ -127,19 +128,19 @@ model ChatMessages {
 }
 
 model UserBalances {
-  id        String   @id @default(uuid())
+  id        String   @id @default(uuid()) @db.Uuid()
   balance   Decimal  @default(0)
-  userId    String   @unique
+  userId    String   @unique @db.Uuid()
   createdAt DateTime @default(now())
   updatedAt DateTime @updatedAt
   user      Users    @relation(fields: [userId], references: [id])
 }
 
 model BalanceLogs {
-  id           String   @id @default(uuid())
-  userId       String
-  messageId    String?
-  createUserId String
+  id           String   @id @default(uuid()) @db.Uuid()
+  userId       String   @db.Uuid()
+  messageId    String?  @db.Uuid()
+  createUserId String   @db.Uuid()
   value        Decimal  @default(0)
   type         Int
   createdAt    DateTime @default(now())
@@ -147,27 +148,27 @@ model BalanceLogs {
 }
 
 model Orders {
-  id           String   @id @default(uuid())
-  createUserId String
+  id           String   @id @default(uuid()) @db.Uuid()
+  createUserId String   @db.Uuid()
   amount       Int
   outTradeNo   String
   status       String
   payH5Url     String?
-  prepayId     String?
+  prepayId     String?  @db.Uuid()
   createdAt    DateTime @default(now())
   updatedAt    DateTime @updatedAt
   user         Users    @relation(fields: [createUserId], references: [id])
 }
 
 model Counterfoils {
-  id        String   @id @default(uuid())
-  orderId   String
+  id        String   @id @default(uuid()) @db.Uuid()
+  orderId   String   @db.Uuid()
   info      String   @db.Text()
   createdAt DateTime @default(now())
 }
 
 model LoginServices {
-  id        String   @id @default(uuid())
+  id        String   @id @default(uuid()) @db.Uuid()
   type      String
   enabled   Boolean  @default(true)
   configs   String   @default("{}") @db.VarChar(2048)
@@ -176,7 +177,7 @@ model LoginServices {
 }
 
 model UserSms {
-  id        String   @id @default(uuid())
+  id        String   @id @default(uuid()) @db.Uuid()
   type      String
   status    String
   code      String
@@ -184,7 +185,7 @@ model UserSms {
 }
 
 model PayServices {
-  id        String   @id @default(uuid())
+  id        String   @id @default(uuid()) @db.Uuid()
   type      String
   enabled   Boolean  @default(true)
   configs   String   @db.Text()
@@ -193,9 +194,9 @@ model PayServices {
 }
 
 model RequestLogs {
-  id           String   @id @default(uuid())
+  id           String   @id @default(uuid()) @db.Uuid()
   ip           String?
-  userId       String?
+  userId       String?  @db.Uuid()
   url          String
   method       String
   statusCode   Int
@@ -209,11 +210,24 @@ model RequestLogs {
 }
 
 model ModelKeys {
-  id         String       @id @default(uuid())
+  id         String       @id @default(uuid()) @db.Uuid()
   name       String       @db.VarChar(100)
   type       String       @db.VarChar(50)
   configs    String       @db.VarChar(2028)
   createdAt  DateTime     @default(now())
   updatedAt  DateTime     @updatedAt
   ChatModels ChatModels[]
+}
+
+model Prompts {
+  id           String   @id @default(uuid()) @db.Uuid()
+  name         String   @db.VarChar(100)
+  type         Int      @db.SmallInt
+  content      String?  @db.VarChar(2048)
+  description  String?  @db.VarChar(100)
+  createUserId String   @db.Uuid()
+  isDeleted    Boolean  @default(false)
+  createdAt    DateTime @default(now())
+  updatedAt    DateTime @updatedAt
+  user         Users?   @relation(fields: [createUserId], references: [id])
 }

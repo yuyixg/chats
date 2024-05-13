@@ -1,6 +1,6 @@
 -- CreateTable
 CREATE TABLE "Users" (
-    "id" TEXT NOT NULL,
+    "id" UUID NOT NULL,
     "avatar" TEXT,
     "account" TEXT,
     "username" TEXT,
@@ -19,7 +19,7 @@ CREATE TABLE "Users" (
 
 -- CreateTable
 CREATE TABLE "FileServices" (
-    "id" TEXT NOT NULL,
+    "id" UUID NOT NULL,
     "name" TEXT NOT NULL,
     "enabled" BOOLEAN NOT NULL DEFAULT true,
     "type" TEXT NOT NULL,
@@ -32,15 +32,15 @@ CREATE TABLE "FileServices" (
 
 -- CreateTable
 CREATE TABLE "ChatModels" (
-    "id" TEXT NOT NULL,
+    "id" UUID NOT NULL,
     "modelProvider" TEXT NOT NULL,
     "modelVersion" TEXT NOT NULL,
     "name" TEXT NOT NULL,
     "isDefault" BOOLEAN NOT NULL DEFAULT false,
     "rank" INTEGER,
     "remarks" TEXT,
-    "modelKeysId" TEXT,
-    "fileServiceId" TEXT,
+    "modelKeysId" UUID,
+    "fileServiceId" UUID,
     "fileConfig" VARCHAR(2048) DEFAULT '{}',
     "modelConfig" VARCHAR(2048) NOT NULL DEFAULT '{}',
     "priceConfig" VARCHAR(2048) NOT NULL DEFAULT '{}',
@@ -53,8 +53,8 @@ CREATE TABLE "ChatModels" (
 
 -- CreateTable
 CREATE TABLE "Sessions" (
-    "id" TEXT NOT NULL,
-    "userId" TEXT NOT NULL,
+    "id" UUID NOT NULL,
+    "userId" UUID NOT NULL,
     "createdAt" TIMESTAMP(3) NOT NULL DEFAULT CURRENT_TIMESTAMP,
     "updatedAt" TIMESTAMP(3) NOT NULL,
 
@@ -63,8 +63,8 @@ CREATE TABLE "Sessions" (
 
 -- CreateTable
 CREATE TABLE "UserModels" (
-    "id" TEXT NOT NULL,
-    "userId" TEXT NOT NULL,
+    "id" UUID NOT NULL,
+    "userId" UUID NOT NULL,
     "models" TEXT NOT NULL DEFAULT '[]',
     "createdAt" TIMESTAMP(3) NOT NULL DEFAULT CURRENT_TIMESTAMP,
     "updatedAt" TIMESTAMP(3) NOT NULL,
@@ -74,9 +74,9 @@ CREATE TABLE "UserModels" (
 
 -- CreateTable
 CREATE TABLE "Messages" (
-    "id" TEXT NOT NULL,
-    "userId" TEXT NOT NULL,
-    "chatModelId" TEXT NOT NULL,
+    "id" UUID NOT NULL,
+    "userId" UUID NOT NULL,
+    "chatModelId" UUID NOT NULL,
     "name" TEXT NOT NULL,
     "prompt" TEXT,
     "messages" TEXT NOT NULL,
@@ -93,10 +93,10 @@ CREATE TABLE "Messages" (
 
 -- CreateTable
 CREATE TABLE "Chats" (
-    "id" TEXT NOT NULL,
+    "id" UUID NOT NULL,
     "title" VARCHAR(50) NOT NULL,
-    "userId" TEXT NOT NULL,
-    "chatModelId" TEXT,
+    "userId" UUID NOT NULL,
+    "chatModelId" UUID,
     "userModelConfig" TEXT NOT NULL DEFAULT '{}',
     "isShared" BOOLEAN NOT NULL DEFAULT false,
     "isDeleted" BOOLEAN NOT NULL DEFAULT false,
@@ -107,10 +107,10 @@ CREATE TABLE "Chats" (
 
 -- CreateTable
 CREATE TABLE "ChatMessages" (
-    "id" TEXT NOT NULL,
-    "userId" TEXT NOT NULL,
-    "chatId" TEXT NOT NULL,
-    "parentId" TEXT,
+    "id" UUID NOT NULL,
+    "userId" UUID NOT NULL,
+    "chatId" UUID NOT NULL,
+    "parentId" UUID,
     "messages" TEXT NOT NULL,
     "calculatedPrice" DECIMAL(65,30) NOT NULL,
     "tokenUsed" INTEGER NOT NULL,
@@ -122,9 +122,9 @@ CREATE TABLE "ChatMessages" (
 
 -- CreateTable
 CREATE TABLE "UserBalances" (
-    "id" TEXT NOT NULL,
+    "id" UUID NOT NULL,
     "balance" DECIMAL(65,30) NOT NULL DEFAULT 0,
-    "userId" TEXT NOT NULL,
+    "userId" UUID NOT NULL,
     "createdAt" TIMESTAMP(3) NOT NULL DEFAULT CURRENT_TIMESTAMP,
     "updatedAt" TIMESTAMP(3) NOT NULL,
 
@@ -133,10 +133,10 @@ CREATE TABLE "UserBalances" (
 
 -- CreateTable
 CREATE TABLE "BalanceLogs" (
-    "id" TEXT NOT NULL,
-    "userId" TEXT NOT NULL,
-    "messageId" TEXT,
-    "createUserId" TEXT NOT NULL,
+    "id" UUID NOT NULL,
+    "userId" UUID NOT NULL,
+    "messageId" UUID,
+    "createUserId" UUID NOT NULL,
     "value" DECIMAL(65,30) NOT NULL DEFAULT 0,
     "type" INTEGER NOT NULL,
     "createdAt" TIMESTAMP(3) NOT NULL DEFAULT CURRENT_TIMESTAMP,
@@ -147,13 +147,13 @@ CREATE TABLE "BalanceLogs" (
 
 -- CreateTable
 CREATE TABLE "Orders" (
-    "id" TEXT NOT NULL,
-    "createUserId" TEXT NOT NULL,
+    "id" UUID NOT NULL,
+    "createUserId" UUID NOT NULL,
     "amount" INTEGER NOT NULL,
     "outTradeNo" TEXT NOT NULL,
     "status" TEXT NOT NULL,
     "payH5Url" TEXT,
-    "prepayId" TEXT,
+    "prepayId" UUID,
     "createdAt" TIMESTAMP(3) NOT NULL DEFAULT CURRENT_TIMESTAMP,
     "updatedAt" TIMESTAMP(3) NOT NULL,
 
@@ -162,8 +162,8 @@ CREATE TABLE "Orders" (
 
 -- CreateTable
 CREATE TABLE "Counterfoils" (
-    "id" TEXT NOT NULL,
-    "orderId" TEXT NOT NULL,
+    "id" UUID NOT NULL,
+    "orderId" UUID NOT NULL,
     "info" TEXT NOT NULL,
     "createdAt" TIMESTAMP(3) NOT NULL DEFAULT CURRENT_TIMESTAMP,
 
@@ -172,7 +172,7 @@ CREATE TABLE "Counterfoils" (
 
 -- CreateTable
 CREATE TABLE "LoginServices" (
-    "id" TEXT NOT NULL,
+    "id" UUID NOT NULL,
     "type" TEXT NOT NULL,
     "enabled" BOOLEAN NOT NULL DEFAULT true,
     "configs" VARCHAR(2048) NOT NULL DEFAULT '{}',
@@ -184,7 +184,7 @@ CREATE TABLE "LoginServices" (
 
 -- CreateTable
 CREATE TABLE "UserSms" (
-    "id" TEXT NOT NULL,
+    "id" UUID NOT NULL,
     "type" TEXT NOT NULL,
     "status" TEXT NOT NULL,
     "code" TEXT NOT NULL,
@@ -195,7 +195,7 @@ CREATE TABLE "UserSms" (
 
 -- CreateTable
 CREATE TABLE "PayServices" (
-    "id" TEXT NOT NULL,
+    "id" UUID NOT NULL,
     "type" TEXT NOT NULL,
     "enabled" BOOLEAN NOT NULL DEFAULT true,
     "configs" TEXT NOT NULL,
@@ -207,9 +207,9 @@ CREATE TABLE "PayServices" (
 
 -- CreateTable
 CREATE TABLE "RequestLogs" (
-    "id" TEXT NOT NULL,
+    "id" UUID NOT NULL,
     "ip" TEXT,
-    "userId" TEXT,
+    "userId" UUID,
     "url" TEXT NOT NULL,
     "method" TEXT NOT NULL,
     "statusCode" INTEGER NOT NULL,
@@ -225,7 +225,7 @@ CREATE TABLE "RequestLogs" (
 
 -- CreateTable
 CREATE TABLE "ModelKeys" (
-    "id" TEXT NOT NULL,
+    "id" UUID NOT NULL,
     "name" VARCHAR(100) NOT NULL,
     "type" VARCHAR(50) NOT NULL,
     "configs" VARCHAR(2028) NOT NULL,
@@ -233,6 +233,21 @@ CREATE TABLE "ModelKeys" (
     "updatedAt" TIMESTAMP(3) NOT NULL,
 
     CONSTRAINT "ModelKeys_pkey" PRIMARY KEY ("id")
+);
+
+-- CreateTable
+CREATE TABLE "Prompts" (
+    "id" UUID NOT NULL,
+    "name" VARCHAR(100) NOT NULL,
+    "type" SMALLINT NOT NULL,
+    "content" VARCHAR(2048),
+    "description" VARCHAR(100),
+    "createUserId" UUID NOT NULL,
+    "isDeleted" BOOLEAN NOT NULL DEFAULT false,
+    "createdAt" TIMESTAMP(3) NOT NULL DEFAULT CURRENT_TIMESTAMP,
+    "updatedAt" TIMESTAMP(3) NOT NULL,
+
+    CONSTRAINT "Prompts_pkey" PRIMARY KEY ("id")
 );
 
 -- CreateIndex
@@ -270,3 +285,6 @@ ALTER TABLE "Orders" ADD CONSTRAINT "Orders_createUserId_fkey" FOREIGN KEY ("cre
 
 -- AddForeignKey
 ALTER TABLE "RequestLogs" ADD CONSTRAINT "RequestLogs_userId_fkey" FOREIGN KEY ("userId") REFERENCES "Users"("id") ON DELETE SET NULL ON UPDATE CASCADE;
+
+-- AddForeignKey
+ALTER TABLE "Prompts" ADD CONSTRAINT "Prompts_createUserId_fkey" FOREIGN KEY ("createUserId") REFERENCES "Users"("id") ON DELETE RESTRICT ON UPDATE CASCADE;
