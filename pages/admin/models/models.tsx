@@ -77,6 +77,7 @@ export default function Models() {
             <TableRow>
               <TableHead className='w-20'>{t('Rank')}</TableHead>
               <TableHead>{t('Model Display Name')}</TableHead>
+              <TableHead>{t('Provide new User')}</TableHead>
               <TableHead>{t('Model Provider')}</TableHead>
               <TableHead>{t('Model Version')}</TableHead>
               <TableHead>{t('Remarks')}</TableHead>
@@ -105,6 +106,7 @@ export default function Models() {
                     {item.name}
                   </div>
                 </TableCell>
+                <TableCell>{t(item.isDefault ? 'Yes' : 'No')}</TableCell>
                 <TableCell>
                   {ModelProviderTemplates[item.modelProvider].displayName}
                 </TableCell>
