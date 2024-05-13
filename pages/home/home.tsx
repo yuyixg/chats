@@ -7,8 +7,7 @@ import { serverSideTranslations } from 'next-i18next/serverSideTranslations';
 import { useTranslation } from 'next-i18next';
 import { getSettingsLanguage, getSettings } from '@/utils/settings';
 import { getSession } from '@/utils/session';
-import { Session } from '@/types/session';
-import { getLoginUrl, getUserSession } from '@/utils/user';
+import { getLoginUrl, getUserSession, getUserSessionId } from '@/utils/user';
 import { useRouter } from 'next/router';
 import { Dispatch, createContext } from 'react';
 import { ActionType } from '@/hooks/useCreateReducer';
@@ -281,35 +280,37 @@ const Home = () => {
     if (showPromptbar) {
       dispatch({ field: 'showPromptbar', value: showPromptbar === 'true' });
     }
+  }, []);
 
+  useEffect(() => {
     const session = getUserSession();
-    if (session) {
+    const sessionId = getUserSessionId();
+    if (session && sessionId) {
       setTimeout(() => {
         dispatch({ field: 'user', value: session });
       }, 1000);
     } else {
       router.push(getLoginUrl(getSettingsLanguage()));
     }
-  }, []);
+    if (sessionId) {
+      getChats().then((data) => {
+        dispatch({ field: 'chats', value: data });
+      });
 
-  useEffect(() => {
-    getChats().then((data) => {
-      dispatch({ field: 'chats', value: data });
-    });
+      getUserModels().then((data) => {
+        dispatch({ field: 'models', value: data });
+        if (data && data.length > 0) {
+          dispatch({
+            field: 'selectModelId',
+            value: data[0].id,
+          });
+        }
+      });
 
-    getUserModels().then((data) => {
-      dispatch({ field: 'models', value: data });
-      if (data && data.length > 0) {
-        dispatch({
-          field: 'selectModelId',
-          value: data[0].id,
-        });
-      }
-    });
-
-    getUserPrompts().then((data) => {
-      dispatch({ field: 'prompts', value: data });
-    });
+      getUserPrompts().then((data) => {
+        dispatch({ field: 'prompts', value: data });
+      });
+    }
   }, []);
 
   return (

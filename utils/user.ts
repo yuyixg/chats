@@ -1,3 +1,4 @@
+import Cookies from './cookie';
 import { getSettingsLanguage } from './settings';
 
 export interface UserSession {
@@ -30,14 +31,17 @@ export const getLoginUrl = (locale?: string) => {
 
 export const setUserSessionId = (sessionId: string) => {
   let expires = new Date();
-  expires.setDate(expires.getDate() + 1);
-  document.cookie = `sessionId=${sessionId}; expires=${expires.toUTCString()}; path=/`;
+  expires.setHours(expires.getHours() + 12);
+  Cookies.setItem('sessionId', sessionId, expires, '/');
+};
+
+export const getUserSessionId = () => {
+  return Cookies.getItem('sessionId');
 };
 
 export const clearUserSessionId = () => {
   const user = getUserSession();
-  user &&
-    (document.cookie = `sessionId=${user.sessionId}; expires=-2738049600; path=/`);
+  user && Cookies.removeItem('sessionId', '/');
 };
 
 export function replacePassword(value: string): string {
