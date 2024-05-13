@@ -115,16 +115,16 @@ export const ChatMessage: FC<Props> = memo(
         }`}
         style={{ overflowWrap: 'anywhere' }}
       >
-        <div className='relative m-auto flex px-4 py-1 text-base md:max-w-2xl md:gap-6 lg:max-w-2xl lg:px-0 xl:max-w-5xl'>
-          <div className='min-w-[40px] text-right font-bold'>
+        <div className='relative m-auto flex px-4 py-1 text-base md:max-w-2xl lg:max-w-2xl lg:px-0 xl:max-w-3xl'>
+          <div className='min-w-[28px] text-right font-bold'>
             {message.role === 'assistant' ? (
-              <IconRobot size={30} />
+              <IconRobot size={28} />
             ) : (
-              <IconUser size={30} />
+              <IconUser size={28} />
             )}
           </div>
 
-          <div className='prose mt-[2px] w-full dark:prose-invert'>
+          <div className='prose mt-[2px] px-4 w-full dark:prose-invert'>
             {message.role === 'user' ? (
               <>
                 {isEditing ? (
@@ -260,7 +260,7 @@ export const ChatMessage: FC<Props> = memo(
               </>
             ) : (
               <>
-                <div className='flex flex-row'>
+                <div className='pr-4 md:pr-0'>
                   <MemoizedReactMarkdown
                     className='prose dark:prose-invert flex-1'
                     remarkPlugins={[remarkGfm, remarkMath]}
