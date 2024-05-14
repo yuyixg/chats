@@ -353,16 +353,6 @@ const Home = () => {
           </div>
         )}
         <div className={`flex h-screen w-screen flex-col text-sm`}>
-          {/* <div className='fixed top-0 w-full sm:hidden'>
-            {selectedConversation && (
-              <Navbar
-                selectedConversation={selectedConversation}
-                onNewConversation={handleNewChat}
-                hasModel={hasModel}
-              />
-            )}
-          </div> */}
-
           <div className='flex h-full w-full dark:bg-[#343541]'>
             <Chatbar />
             <div className='flex w-full'>
