@@ -1,7 +1,7 @@
 import React, { useEffect, useState } from 'react';
 import { getUsers } from '@/apis/adminService';
 import { GetUsersResult } from '@/types/admin';
-import { IconDots, IconPlus } from '@/components/Icons/index';
+import { IconDots } from '@/components/Icons/index';
 import { serverSideTranslations } from 'next-i18next/serverSideTranslations';
 import { useTranslation } from 'next-i18next';
 import { useThrottle } from '@/hooks/useThrottle';
@@ -86,7 +86,6 @@ export default function Users() {
             }}
           />
           <Button onClick={() => handleShowAddModal()} color='primary'>
-            <IconPlus stroke='white' />
             {t('Add User')}
           </Button>
         </div>

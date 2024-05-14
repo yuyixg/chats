@@ -117,7 +117,6 @@ const Home = () => {
 
   const {
     state: {
-      selectModelId,
       chats,
       currentMessages,
       models,

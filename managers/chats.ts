@@ -1,4 +1,5 @@
 import prisma from '@/prisma/prisma';
+import { Prisma } from '@prisma/client';
 
 export interface CreateChat {
   title: string;
@@ -46,5 +47,33 @@ export class ChatsManager {
 
   static async findChatById(id: string) {
     return await prisma.chats.findUnique({ where: { id } });
+  }
+
+  static async findChatIncludeAllById(id: string) {
+    return await prisma.chats.findUnique({
+      include: { chatModel: { select: { name: true, modelConfig: true } } },
+      where: { id },
+    });
+  }
+
+  static async findChatsByPage(query: string, page: number, pageSize: number) {
+    const where: Prisma.ChatsWhereInput = {};
+    if (query) {
+      where.title = { contains: query };
+    }
+    const chats = await prisma.chats.findMany({
+      where,
+      include: {
+        user: { select: { username: true } },
+        chatModel: { select: { name: true } },
+      },
+      skip: (page - 1) * pageSize,
+      take: pageSize,
+      orderBy: { createdAt: 'desc' },
+    });
+    const count = await prisma.chats.count({
+      where,
+    });
+    return { rows: chats, count };
   }
 }

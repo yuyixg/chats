@@ -110,7 +110,6 @@ export const Chat = memo(({ stopConversationRef }: Props) => {
 
         const newMessage = {
           id: tempUUID,
-          lastLeafId: '',
           parentId,
           childrenIds: [],
           messages: [

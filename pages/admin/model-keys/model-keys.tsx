@@ -13,10 +13,8 @@ import {
 } from '@/components/ui/table';
 import { Card } from '@/components/ui/card';
 import { Button } from '@/components/ui/button';
-import { IconPlus } from '@/components/Icons/index';
 import { DEFAULT_LANGUAGE } from '@/types/settings';
 import { ModelKeysModal } from '@/components/Admin/ModelKeys/ModelKeysModal';
-import { ModelType } from '@/types/model';
 import { ModelProviderTemplates } from '@/types/template';
 
 export default function ModelKeys() {
@@ -58,7 +56,6 @@ export default function ModelKeys() {
             }}
             color='primary'
           >
-            <IconPlus stroke='white' />
             {t('Add Model Keys')}
           </Button>
         </div>

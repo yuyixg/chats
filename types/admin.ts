@@ -1,4 +1,4 @@
-import { ModelVersions, ModelType, ModelProviders } from './model';
+import { ModelVersions, ModelType, ModelProviders, ModelConfig } from './model';
 import { Paging } from './page';
 import { Message } from './chat';
 import { PutFileServicesParams } from './file';
@@ -6,6 +6,7 @@ import Decimal from 'decimal.js';
 import { StatusCode } from './statusCode';
 import { ProviderType } from './user';
 import { PayServiceType } from './pay';
+import { ChatMessage } from './chatMessage';
 
 export const enum UserRole {
   'admin' = 'admin',
@@ -111,23 +112,21 @@ export interface GetUserMessageParams extends Paging {
 }
 
 export interface GetUserMessageResult {
-  messageId: string;
+  id: string;
   username: string;
-  chatCount: number;
-  totalPrice: Decimal;
-  tokenCount: number;
   isDeleted: boolean;
   isShared: boolean;
-  name: string;
+  title: string;
   modelName: string;
   createdAt: string;
-  updatedAt: string;
 }
 
 export interface GetMessageDetailsResult {
   name: string;
-  prompt: string;
-  messages: Message[];
+  modelName?: string;
+  modelTemperature?: number;
+  modelPrompt?: number;
+  messages: ChatMessage[];
 }
 
 export interface GetFileServicesResult extends PutFileServicesParams {

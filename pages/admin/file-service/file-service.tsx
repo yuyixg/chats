@@ -13,7 +13,6 @@ import {
 } from '@/components/ui/table';
 import { Card } from '@/components/ui/card';
 import { Button } from '@/components/ui/button';
-import { IconPlus } from '@/components/Icons/index';
 import { FileServiceModal } from '@/components/Admin/Files/FileServiceModal';
 import { DEFAULT_LANGUAGE } from '@/types/settings';
 
@@ -56,7 +55,6 @@ export default function FileService() {
             }}
             color='primary'
           >
-            <IconPlus className=' text-red' stroke='white' />
             {t('Add File Service')}
           </Button>
         </div>

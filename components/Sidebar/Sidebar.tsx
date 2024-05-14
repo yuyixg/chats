@@ -1,4 +1,4 @@
-import { IconMistOff, IconPlus } from '@/components/Icons/index';
+import { IconMistOff } from '@/components/Icons/index';
 import { ReactNode } from 'react';
 import { useTranslation } from 'next-i18next';
 import { CloseSidebarButton, OpenSidebarButton } from './OpenCloseButton';
@@ -56,7 +56,6 @@ const Sidebar = <T,>({
               }}
               disabled={messageIsStreaming}
             >
-              <IconPlus size={18} />
               {addItemButtonTitle}
             </button>
           </div>

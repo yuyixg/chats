@@ -1,4 +1,4 @@
-import { ChatMessage } from '@/types/chatMessage';
+import { ChatMessage, MessageNode } from '@/types/chatMessage';
 import { ChatModelPriceConfig } from '@/types/model';
 import Decimal from 'decimal.js';
 
@@ -75,3 +75,16 @@ export function getSelectMessages(
   selectMessages = selectMessages.concat(messageChildren);
   return selectMessages;
 }
+
+const findChildren = (nodes: MessageNode[], parentId: string): string[] => {
+  return nodes
+    .filter((node) => node.parentId === parentId)
+    .map((node) => node.id);
+};
+
+export const calculateMessages = (nodes: MessageNode[]): MessageNode[] => {
+  return nodes.map((node) => ({
+    ...node,
+    childrenIds: findChildren(nodes, node.id).reverse(),
+  }));
+};

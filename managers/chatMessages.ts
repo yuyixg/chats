@@ -1,4 +1,6 @@
 import prisma from '@/prisma/prisma';
+import { MessageNode } from '@/types/chatMessage';
+import { calculateMessages } from '@/utils/message';
 import { Prisma } from '@prisma/client';
 import Decimal from 'decimal.js';
 
@@ -31,6 +33,21 @@ export class ChatMessagesManager {
       where,
       orderBy: { createdAt: 'asc' },
     });
+  }
+
+  static async findUserMessageDetailByChatId(chatId: string) {
+    const chatMessages = await this.findUserMessageByChatId(chatId);
+    const messages = chatMessages.map((x) => {
+      return {
+        id: x.id,
+        parentId: x.parentId,
+        messages: JSON.parse(x.messages),
+        createdAt: x.createdAt,
+        tokenUsed: x.tokenUsed,
+        calculatedPrice: x.calculatedPrice,
+      } as MessageNode;
+    });
+    return calculateMessages(messages);
   }
 
   static async delete(id: string, userId: string) {

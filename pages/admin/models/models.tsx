@@ -14,7 +14,7 @@ import {
 } from '@/components/ui/table';
 import { Card } from '@/components/ui/card';
 import { Button } from '@/components/ui/button';
-import { IconDots, IconPlus } from '@/components/Icons/index';
+import { IconDots } from '@/components/Icons/index';
 import { AddModelModal } from '@/components/Admin/Models/AddModelModal';
 import { DEFAULT_LANGUAGE } from '@/types/settings';
 import {
@@ -66,7 +66,6 @@ export default function Models() {
             }}
             color='primary'
           >
-            <IconPlus stroke='white' />
             {t('Add Model')}
           </Button>
         </div>
