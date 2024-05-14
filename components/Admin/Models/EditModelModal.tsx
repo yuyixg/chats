@@ -56,10 +56,6 @@ export const EditModelModal = (props: IProps) => {
   const [modelKeys, setModelKeys] = useState<GetModelKeysResult[]>([]);
 
   const formSchema = z.object({
-    modelProvider: z
-      .string()
-      .min(1, `${t('This field is require')}`)
-      .optional(),
     modelVersion: z.string(),
     name: z
       .string()
@@ -85,7 +81,6 @@ export const EditModelModal = (props: IProps) => {
   const form = useForm<z.infer<typeof formSchema>>({
     resolver: zodResolver(formSchema),
     defaultValues: {
-      modelProvider: '',
       modelVersion: '',
       name: '',
       isDefault: false,
@@ -127,7 +122,6 @@ export const EditModelModal = (props: IProps) => {
       form.reset();
       form.formState.isValid;
       const {
-        modelProvider,
         name,
         isDefault,
         modelId,
@@ -140,7 +134,6 @@ export const EditModelModal = (props: IProps) => {
         modelConfig,
         priceConfig,
       } = selected!;
-      form.setValue('modelProvider', modelProvider);
       form.setValue('modelVersion', modelVersion);
       form.setValue('name', name);
       form.setValue('isDefault', isDefault);
@@ -189,41 +182,6 @@ export const EditModelModal = (props: IProps) => {
                   );
                 }}
               ></FormField>
-              <FormField
-                key='modelProvider'
-                control={form.control}
-                name='modelProvider'
-                render={({ field }) => {
-                  return (
-                    <FormSelect
-                      disabled
-                      field={field}
-                      label={t('Model Provider')!}
-                      items={Object.keys(ModelProviderTemplates).map((key) => ({
-                        name: ModelProviderTemplates[key as ModelProviders]
-                          .displayName,
-                        value: key,
-                      }))}
-                    />
-                  );
-                }}
-              ></FormField>
-            </div>
-            <div className='grid grid-cols-2 gap-4'>
-              <FormField
-                key='modelVersion'
-                control={form.control}
-                name='modelVersion'
-                render={({ field }) => {
-                  return (
-                    <FormInput
-                      disabled
-                      field={field}
-                      label={t('Model Version')!}
-                    />
-                  );
-                }}
-              ></FormField>
               <div className='flex justify-between'>
                 <FormField
                   key='modelKeysId'
@@ -239,9 +197,7 @@ export const EditModelModal = (props: IProps) => {
                           .filter(
                             (x) =>
                               x.type ===
-                              (form.getValues(
-                                'modelProvider'
-                              ) as ModelProviders)
+                              (selected?.modelProvider as ModelProviders)
                           )
                           .map((keys) => ({
                             name: keys.name,
@@ -273,6 +229,30 @@ export const EditModelModal = (props: IProps) => {
                   </Popover>
                 </div>
               </div>
+            </div>
+            <div className='grid grid-cols-2 gap-4'>
+              <FormField
+                key='modelVersion'
+                control={form.control}
+                name='modelVersion'
+                render={({ field }) => {
+                  return (
+                    <FormInput
+                      disabled
+                      field={field}
+                      label={t('Model Version')!}
+                    />
+                  );
+                }}
+              ></FormField>
+              <FormField
+                key='remarks'
+                control={form.control}
+                name='remarks'
+                render={({ field }) => {
+                  return <FormInput field={field} label={t('Remarks')!} />;
+                }}
+              ></FormField>
             </div>
             <div className='grid grid-cols-2 gap-4'>
               <FormField
@@ -344,14 +324,6 @@ export const EditModelModal = (props: IProps) => {
               ></FormField>
             </div>
             <div className='grid grid-cols-2 gap-4'>
-              <FormField
-                key='remarks'
-                control={form.control}
-                name='remarks'
-                render={({ field }) => {
-                  return <FormInput field={field} label={t('Remarks')!} />;
-                }}
-              ></FormField>
               <div className='flex gap-4'>
                 <FormField
                   key={'isDefault'}

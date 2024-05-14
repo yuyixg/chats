@@ -55,12 +55,9 @@ export const AddModelModal = (props: IProps) => {
   const [modelKeys, setModelKeys] = useState<GetModelKeysResult[]>([]);
   const [modelVersions, setModelVersions] = useState<ModelVersions[]>([]);
   const { isOpen, onClose, onSuccessful } = props;
+  const [loading, setLoading] = useState(true);
 
   const formSchema = z.object({
-    modelProvider: z
-      .string()
-      .min(1, `${t('This field is require')}`)
-      .optional(),
     modelVersion: z
       .string()
       .min(1, `${t('This field is require')}`)
@@ -88,7 +85,6 @@ export const AddModelModal = (props: IProps) => {
   const form = useForm<z.infer<typeof formSchema>>({
     resolver: zodResolver(formSchema),
     defaultValues: {
-      modelProvider: '',
       modelVersion: '',
       name: '',
       isDefault: false,
@@ -104,7 +100,10 @@ export const AddModelModal = (props: IProps) => {
 
   function onSubmit(values: z.infer<typeof formSchema>) {
     if (!form.formState.isValid) return;
-    postModels(values as PostModelParams)
+    const modelProvider = modelKeys.find(
+      (x) => x.id === form.getValues('modelKeysId')
+    )?.type;
+    postModels({ ...values, modelProvider } as PostModelParams)
       .then(() => {
         onSuccessful();
         toast.success(t('Save successful!'));
@@ -119,12 +118,14 @@ export const AddModelModal = (props: IProps) => {
   }
 
   useEffect(() => {
+    setLoading(true);
     if (isOpen) {
       getFileServices(true).then((data) => {
         setFileServices(data);
       });
       getModelKeys().then((data) => {
         setModelKeys(data);
+        setLoading(false);
       });
       form.reset();
       form.formState.isValid;
@@ -132,23 +133,30 @@ export const AddModelModal = (props: IProps) => {
   }, [isOpen]);
 
   useEffect(() => {
-    const subscription = form.watch((value, { name, type }) => {
-      if (name === 'modelProvider' && type === 'change') {
-        const modelProvider = value.modelProvider as ModelProviders;
-        setModelVersions(ModelProviderTemplates[modelProvider].models);
-      }
-      if (name === 'modelVersion' && type === 'change') {
-        const modelVersion = value.modelVersion as ModelVersions;
-        form.setValue('modelConfig', getModelModelConfigJson(modelVersion));
-        form.setValue('fileConfig', getModelFileConfigJson(modelVersion));
-        form.setValue(
-          'priceConfig',
-          conversionModelPriceToCreate(getModelPriceConfigJson(modelVersion))
-        );
-      }
-    });
-    return () => subscription.unsubscribe();
-  }, [form.watch]);
+    let subscription = null;
+    if (!loading) {
+      subscription = form.watch((value, { name, type }) => {
+        if (name === 'modelKeysId' && type === 'change') {
+          form.setValue('modelVersion', '');
+          const modelKeysId = value.modelKeysId as string;
+          const modelProvider = modelKeys.find(
+            (x) => x.id === modelKeysId
+          )?.type;
+          setModelVersions(ModelProviderTemplates[modelProvider!].models);
+        }
+        if (name === 'modelVersion' && type === 'change') {
+          const modelVersion = value.modelVersion as ModelVersions;
+          form.setValue('modelConfig', getModelModelConfigJson(modelVersion));
+          form.setValue('fileConfig', getModelFileConfigJson(modelVersion));
+          form.setValue(
+            'priceConfig',
+            conversionModelPriceToCreate(getModelPriceConfigJson(modelVersion))
+          );
+        }
+      });
+    }
+    return () => subscription?.unsubscribe();
+  }, [form.watch, loading]);
 
   return (
     <Dialog open={isOpen} onOpenChange={onClose}>
@@ -169,43 +177,6 @@ export const AddModelModal = (props: IProps) => {
                   );
                 }}
               ></FormField>
-              <FormField
-                key='modelProvider'
-                control={form.control}
-                name='modelProvider'
-                render={({ field }) => {
-                  return (
-                    <FormSelect
-                      field={field}
-                      label={t('Model Provider')!}
-                      items={Object.keys(ModelProviderTemplates).map((key) => ({
-                        name: ModelProviderTemplates[key as ModelProviders]
-                          .displayName,
-                        value: key,
-                      }))}
-                    />
-                  );
-                }}
-              ></FormField>
-            </div>
-            <div className='grid grid-cols-2 gap-4'>
-              <FormField
-                key='modelVersion'
-                control={form.control}
-                name='modelVersion'
-                render={({ field }) => {
-                  return (
-                    <FormSelect
-                      field={field}
-                      label={t('Model Version')!}
-                      items={modelVersions.map((key) => ({
-                        name: key,
-                        value: key,
-                      }))}
-                    />
-                  );
-                }}
-              ></FormField>
               <div className='flex justify-between'>
                 <FormField
                   key='modelKeysId'
@@ -217,18 +188,13 @@ export const AddModelModal = (props: IProps) => {
                         className='w-full'
                         field={field}
                         label={t('Model Keys')!}
-                        items={modelKeys
-                          .filter(
-                            (x) =>
-                              x.type ===
-                              (form.getValues(
-                                'modelProvider'
-                              ) as ModelProviders)
-                          )
-                          .map((keys) => ({
-                            name: keys.name,
-                            value: keys.id,
-                          }))}
+                        items={modelKeys.map((keys) => ({
+                          name: `${keys.name}(${
+                            ModelProviderTemplates[keys.type as ModelProviders]
+                              .displayName
+                          })`,
+                          value: keys.id,
+                        }))}
                       />
                     );
                   }}
@@ -255,6 +221,33 @@ export const AddModelModal = (props: IProps) => {
                   </Popover>
                 </div>
               </div>
+            </div>
+            <div className='grid grid-cols-2 gap-4'>
+              <FormField
+                key='modelVersion'
+                control={form.control}
+                name='modelVersion'
+                render={({ field }) => {
+                  return (
+                    <FormSelect
+                      field={field}
+                      label={t('Model Version')!}
+                      items={modelVersions.map((key) => ({
+                        name: key,
+                        value: key,
+                      }))}
+                    />
+                  );
+                }}
+              ></FormField>
+              <FormField
+                key='remarks'
+                control={form.control}
+                name='remarks'
+                render={({ field }) => {
+                  return <FormInput field={field} label={t('Remarks')!} />;
+                }}
+              ></FormField>
             </div>
             <div className='grid grid-cols-2 gap-4'>
               <FormField
@@ -342,14 +335,6 @@ export const AddModelModal = (props: IProps) => {
               ></FormField>
             </div>
             <div className='grid grid-cols-2 gap-4'>
-              <FormField
-                key='remarks'
-                control={form.control}
-                name='remarks'
-                render={({ field }) => {
-                  return <FormInput field={field} label={t('Remarks')!} />;
-                }}
-              ></FormField>
               <div className='flex gap-4'>
                 <FormField
                   key={'isDefault'}
