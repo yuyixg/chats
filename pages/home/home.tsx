@@ -116,13 +116,7 @@ const Home = () => {
   });
 
   const {
-    state: {
-      chats,
-      currentMessages,
-      models,
-      user,
-      userModelConfig,
-    },
+    state: { chats, currentMessages, models, user, userModelConfig },
     dispatch,
   } = contextValue;
   const stopConversationRef = useRef<boolean>(false);
@@ -192,9 +186,11 @@ const Home = () => {
           value: [],
         });
       }
+      const selectModelId = getChatModelId(chatId) || calcSelectModelId();
+      selectModelId && localStorage.setItem('selectModelId', selectModelId);
       dispatch({
         field: 'selectModelId',
-        value: getChatModelId(chatId) || calcSelectModelId(),
+        value: selectModelId,
       });
     });
   };
@@ -299,9 +295,11 @@ const Home = () => {
       getUserModels().then((data) => {
         dispatch({ field: 'models', value: data });
         if (data && data.length > 0) {
+          const selectModelId = localStorage.getItem('selectModelId');
+          const model = data.find((x) => x.id === selectModelId);
           dispatch({
             field: 'selectModelId',
-            value: data[0].id,
+            value: model?.id || data[0].id,
           });
         }
       });
