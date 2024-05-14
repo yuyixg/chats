@@ -60,7 +60,6 @@ export const QianWenStream = async (
       },
     }),
   };
-  console.log(url, '\n', body);
   const res = await fetch(url, body);
   const decoder = new TextDecoder();
 

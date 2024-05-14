@@ -9,7 +9,7 @@ import {
 import {
   ChatMessagesManager,
   ChatModelManager,
-  ChatsManager,
+  ChatModelRecordManager,
   UserBalancesManager,
   UserModelManager,
 } from '@/managers';
@@ -72,6 +72,7 @@ const handler = async (req: ChatsApiRequest, res: ChatsApiResponse) => {
   const chatMessages = await ChatMessagesManager.findUserMessageByChatId(
     chatId
   );
+
   const findParents = (
     items: ChatMessages[],
     id: string | null
@@ -122,56 +123,49 @@ const handler = async (req: ChatsApiRequest, res: ChatsApiResponse) => {
     const streamResponse = async () => {
       while (true) {
         const { done, value } = await reader.read();
+
         if (value) {
           result = JSON.parse(value) as KimiSteamResult;
           assistantResponse += result.text;
         }
+
         if (done) {
           const { total_tokens, prompt_tokens, completion_tokens } =
             result.usage;
+
           const tokenUsed = total_tokens;
           const calculatedPrice = calcTokenPrice(
             priceConfig,
             prompt_tokens,
             completion_tokens
           );
+
           currentMessage.push({
             role: 'assistant',
             content: { text: assistantResponse },
           });
 
-          let title = null;
-          if (!(await ChatMessagesManager.checkIsFirstChat(chatId))) {
-            title =
-              userMessageText.length > 30
-                ? userMessageText.substring(0, 30) + '...'
-                : userMessageText;
-          }
-          if (messageId) {
-            await ChatMessagesManager.delete(messageId, userId);
-          }
-          const chatMessage = await ChatMessagesManager.create({
+          await ChatModelRecordManager.recordTransfer({
+            messageId,
+            userId,
             chatId,
-            userId,
-            parentId,
-            messages: JSON.stringify(currentMessage),
             tokenUsed,
+            userMessageText,
             calculatedPrice,
-          });
-          await UserModelManager.updateUserModelTokenCount(
-            userId,
-            chatModel.id,
-            tokenUsed
-          );
-          await UserBalancesManager.chatUpdateBalance(
-            userId,
-            calculatedPrice,
-            chatMessage.id
-          );
-          await ChatsManager.update({
-            id: chatId,
-            ...(title && { title: title }),
             chatModelId: chatModel.id,
+            createChatMessageParams: {
+              chatId,
+              userId,
+              parentId,
+              messages: JSON.stringify(currentMessage),
+              tokenUsed,
+              calculatedPrice,
+            },
+            updateChatParams: {
+              id: chatId,
+              chatModelId: chatModel.id,
+              userModelConfig: JSON.stringify(userModelConfig),
+            },
           });
           return res.end();
         }

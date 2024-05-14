@@ -11,7 +11,7 @@ import { get_encoding } from 'tiktoken';
 import {
   ChatMessagesManager,
   ChatModelManager,
-  ChatsManager,
+  ChatModelRecordManager,
   UserBalancesManager,
   UserModelManager,
 } from '@/managers';
@@ -170,42 +170,29 @@ const handler = async (req: ChatsApiRequest, res: ChatsApiResponse) => {
             content: { text: assistantResponse },
           });
 
-          let title = null;
-          if (!(await ChatMessagesManager.checkIsFirstChat(chatId))) {
-            title =
-              userMessageText.length > 30
-                ? userMessageText.substring(0, 30) + '...'
-                : userMessageText;
-          }
-          if (messageId) {
-            await ChatMessagesManager.delete(messageId, userId);
-          }
-          const chatMessage = await ChatMessagesManager.create({
+          await ChatModelRecordManager.recordTransfer({
+            messageId,
+            userId,
             chatId,
-            userId,
-            parentId,
-            messages: JSON.stringify(currentMessage),
             tokenUsed,
+            userMessageText,
             calculatedPrice,
-          });
-
-          await UserModelManager.updateUserModelTokenCount(
-            userId,
-            chatModel.id,
-            tokenUsed
-          );
-          await UserBalancesManager.chatUpdateBalance(
-            userId,
-            calculatedPrice,
-            chatMessage.id
-          );
-
-          await ChatsManager.update({
-            id: chatId,
-            ...(title && { title: title }),
-            userModelConfig: JSON.stringify(userModelConfig),
             chatModelId: chatModel.id,
+            createChatMessageParams: {
+              chatId,
+              userId,
+              parentId,
+              messages: JSON.stringify(currentMessage),
+              tokenUsed,
+              calculatedPrice,
+            },
+            updateChatParams: {
+              id: chatId,
+              chatModelId: chatModel.id,
+              userModelConfig: JSON.stringify(userModelConfig),
+            },
           });
+
           return res.end();
         }
         res.write(Buffer.from(value));
