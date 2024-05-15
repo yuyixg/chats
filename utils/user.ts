@@ -31,8 +31,9 @@ export const getUserInfo = () => {
 };
 
 export const getLoginUrl = (locale?: string) => {
-  const _locale = locale || getSettingsLanguage();
-  return (_locale ? '/' + _locale : '') + '/login';
+  // const _locale = locale || getSettingsLanguage();
+  // return (_locale ? '/' + _locale : '') + '/login';
+  return '/login';
 };
 
 export const setUserSessionId = (sessionId: string) => {
