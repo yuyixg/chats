@@ -20,7 +20,8 @@ export interface QianWenStreamResult {
 export const QianWenStream = async (
   chatModel: ChatModels,
   temperature: number,
-  messages: QianWenMessage[]
+  messages: QianWenMessage[],
+  enableSearch: boolean = false
 ) => {
   const {
     apiConfig: { host, apiKey },
@@ -43,12 +44,16 @@ export const QianWenStream = async (
         messages: messages,
       },
       parameters: {
+        ...(modelVersion === ModelVersions.QWen && {
+          enable_search: enableSearch,
+        }),
         temperature,
         seed: 1646251034,
         incremental_output: true,
       },
     }),
   };
+  console.log(body);
   const res = await fetch(url, body);
   const decoder = new TextDecoder();
 

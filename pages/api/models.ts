@@ -34,13 +34,11 @@ const handler = async (req: ChatsApiRequest) => {
         name: x.name,
         modelProvider: x.modelProvider,
         modelConfig: {
-          prompt: modelConfig.prompt,
-          temperature: modelConfig.temperature,
-          maxLength: modelConfig.maxLength,
+          prompt: modelConfig?.prompt,
+          temperature: modelConfig?.temperature,
+          maxLength: modelConfig?.maxLength,
+          enableSearch: modelConfig?.enableSearch,
         },
-        // systemPrompt: x.modelConfig?.prompt,
-        // maxLength: x.modelConfig?.maxLength,
-        // tokenLimit: x.modelConfig?.tokenLimit,
         fileConfig: x.fileConfig,
         fileServerConfig: fileServer
           ? {

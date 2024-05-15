@@ -88,6 +88,10 @@ const handler = async (req: ChatsApiRequest, res: ChatsApiResponse) => {
   const temperature = +(
     userModelConfig?.temperature || modelConfig.temperature
   );
+  const enableSearch =
+    userModelConfig?.enableSearch != undefined
+      ? userModelConfig?.enableSearch
+      : modelConfig?.enableSearch;
 
   let messagesToSend = [] as any[];
   const promptToSend =
@@ -141,7 +145,12 @@ const handler = async (req: ChatsApiRequest, res: ChatsApiResponse) => {
   messagesToSend.push(userMessageToSend);
   messagesToSend.unshift(promptToSend);
 
-  const stream = await QianWenStream(chatModel, temperature, messagesToSend);
+  const stream = await QianWenStream(
+    chatModel,
+    temperature,
+    messagesToSend,
+    enableSearch
+  );
 
   let assistantResponse = '';
   if (stream.getReader) {

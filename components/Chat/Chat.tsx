@@ -22,6 +22,7 @@ import { TemperatureSlider } from './Temperature';
 import { CurrentModel, ModelApiConfig, ModelConfig } from '@/types/model';
 import { ModelTemplates } from '@/types/template';
 import { SystemPrompt } from './SystemPrompt';
+import EnableNetworkSearch from './EnableNetworkSearch';
 interface Props {
   stopConversationRef: MutableRefObject<boolean>;
 }
@@ -333,6 +334,7 @@ export const Chat = memo(({ stopConversationRef }: Props) => {
         currentSelectChat?.userModelConfig?.temperature ||
         modelConfig?.temperature,
       prompt: currentSelectChat?.userModelConfig?.prompt || modelConfig?.prompt,
+      enableSearch: currentSelectChat?.userModelConfig?.enableSearch || modelConfig?.enableSearch,
     });
     setModelApiConfig(ModelTemplates[modelVersion]?.config as any);
   }, [selectModelId]);
@@ -371,6 +373,18 @@ export const Chat = memo(({ stopConversationRef }: Props) => {
                             temperature,
                           })
                         }
+                      />
+                    )}
+                    {currentModel?.enableSearch != undefined && (
+                      <EnableNetworkSearch
+                        label={t('互联网搜索')}
+                        enable={currentModel.enableSearch}
+                        onChange={(enableSearch) => {
+                          console.log(enableSearch);
+                          handleUpdateUserModelConfig({
+                            enableSearch,
+                          });
+                        }}
                       />
                     )}
                   </div>

@@ -4,6 +4,7 @@ export interface ModelConfig {
   prompt: string;
   maxLength: number;
   temperature?: number;
+  enableSearch?: boolean;
 }
 
 export interface Model {
@@ -75,6 +76,7 @@ export interface ChatModelConfig {
   version?: string;
   organization?: string;
   deploymentName?: string;
+  enableSearch?: boolean;
 }
 
 export interface ChatModelPriceConfig {
