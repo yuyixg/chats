@@ -19,7 +19,6 @@ export interface QianWenStreamResult {
 
 export const QianWenStream = async (
   chatModel: ChatModels,
-  prompt: string,
   temperature: number,
   messages: QianWenMessage[]
 ) => {
@@ -41,17 +40,7 @@ export const QianWenStream = async (
     body: JSON.stringify({
       model: version,
       input: {
-        messages: [
-          // {
-          //   role: 'system',
-          //   content: [
-          //     {
-          //       text: prompt || systemPrompt,
-          //     },
-          //   ],
-          // },
-          ...messages,
-        ],
+        messages: messages,
       },
       parameters: {
         temperature,
@@ -103,7 +92,7 @@ export const QianWenStream = async (
                     usage: json.usage,
                   })
                 );
-                if (json.output.finish_reason === 'stop') {
+                if (json.output.choices[0].finish_reason === 'stop') {
                   controller.close();
                   return;
                 }

@@ -125,7 +125,7 @@ const handler = async (req: ChatsApiRequest, res: ChatsApiResponse) => {
   });
 
   const userMessageToSend =
-    chatModel.modelVersion === ModelVersions.GPT_4_Vision
+    chatModel.modelVersion === ModelVersions.yi_vl_plus
       ? convertToGPTVisionMessage(userMessage)
       : convertMessageToSend(userMessage);
 
@@ -136,11 +136,16 @@ const handler = async (req: ChatsApiRequest, res: ChatsApiResponse) => {
     },
   ];
 
+  const promptToSend =
+    chatModel.modelVersion === ModelVersions.yi_vl_plus
+      ? convertToGPTVisionMessage({ text: prompt }, 'system')
+      : convertMessageToSend({ text: prompt }, 'system');
+
   messagesToSend.push(userMessageToSend);
+  messagesToSend.unshift(promptToSend);
 
   const stream = await LingYiStream(
     chatModel,
-    prompt,
     temperature,
     messagesToSend
   );

@@ -1,7 +1,7 @@
 import { FileServicesType } from './file';
 import { Model } from './model';
 
-export type Role = 'assistant' | 'user';
+export type Role = 'assistant' | 'user' | 'system';
 
 export interface GPT4VisionMessage {
   role: Role;

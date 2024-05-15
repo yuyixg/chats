@@ -10,7 +10,6 @@ import {
 
 export const OpenAIStream = async (
   chatModel: ChatModels,
-  prompt: string,
   temperature: number,
   messages: GPT4Message[] | GPT4VisionMessage[]
 ) => {
@@ -46,13 +45,7 @@ export const OpenAIStream = async (
       ...(modelProvider === ModelProviders.OpenAI && {
         model: deploymentName || modelVersion,
       }),
-      messages: [
-        {
-          role: 'system',
-          content: prompt,
-        },
-        ...messages,
-      ],
+      messages: messages,
       ...(modelVersion === ModelVersions.GPT_4_Vision && { max_tokens: 4096 }),
       temperature,
       stream: true,
@@ -60,7 +53,7 @@ export const OpenAIStream = async (
   };
 
   const res = await fetch(url, body);
-
+  
   const contentType = res.headers.get('content-type');
   const decoder = new TextDecoder();
   if (res.status !== 200) {

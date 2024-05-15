@@ -12,7 +12,6 @@ import {
   ChatMessagesManager,
   ChatModelManager,
   ChatModelRecordManager,
-  ChatsManager,
   UserBalancesManager,
   UserModelManager,
 } from '@/managers';
@@ -64,16 +63,37 @@ const handler = async (req: ChatsApiRequest, res: ChatsApiResponse) => {
     throw new BadRequest('Insufficient balance');
   }
 
-  let prompt = null;
-  if (!prompt) {
-    prompt = modelConfig.prompt;
+  function convertMessageToSend(messageContent: Content, role: Role = 'user') {
+    const content = [] as QianWenContent[];
+    if (messageContent?.image) {
+      messageContent.image.forEach((url) => {
+        content.push({
+          image: url,
+        });
+      });
+    }
+    if (messageContent?.text) {
+      content.push({ text: messageContent.text });
+    }
+    return { role, content: content } as QianWenMessage;
+  }
+  function convertMessageTextToSend(
+    messageContent: Content,
+    role: Role = 'user'
+  ) {
+    return { role, content: messageContent.text } as QianWenMaxMessage;
   }
 
+  const prompt = userModelConfig?.prompt || modelConfig.prompt;
   const temperature = +(
     userModelConfig?.temperature || modelConfig.temperature
   );
 
   let messagesToSend = [] as any[];
+  const promptToSend =
+    chatModel.modelVersion === ModelVersions.QWen
+      ? convertMessageTextToSend({ text: prompt }, 'system')
+      : convertMessageToSend({ text: prompt }, 'system');
 
   const chatMessages = await ChatMessagesManager.findUserMessageByChatId(
     chatId
@@ -90,28 +110,6 @@ const handler = async (req: ChatsApiRequest, res: ChatsApiResponse) => {
     return currentItem ? [currentItem] : [];
   };
   const messages = findParents(chatMessages, parentId);
-
-  function convertMessageToSend(messageContent: Content, role: Role = 'user') {
-    const content = [] as QianWenContent[];
-    if (messageContent?.image) {
-      messageContent.image.forEach((url) => {
-        content.push({
-          image: url,
-        });
-      });
-    }
-    if (messageContent?.text) {
-      content.push({ text: messageContent.text });
-    }
-    return { role, content: content } as QianWenMessage;
-  }
-
-  function convertMessageTextToSend(
-    messageContent: Content,
-    role: Role = 'user'
-  ) {
-    return { role, content: messageContent.text } as QianWenMaxMessage;
-  }
 
   messages.forEach((m) => {
     const chatMessages = JSON.parse(m.messages) as Message[];
@@ -141,13 +139,9 @@ const handler = async (req: ChatsApiRequest, res: ChatsApiResponse) => {
   ];
 
   messagesToSend.push(userMessageToSend);
+  messagesToSend.unshift(promptToSend);
 
-  const stream = await QianWenStream(
-    chatModel,
-    prompt,
-    temperature,
-    messagesToSend
-  );
+  const stream = await QianWenStream(chatModel, temperature, messagesToSend);
 
   let assistantResponse = '';
   if (stream.getReader) {

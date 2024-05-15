@@ -138,14 +138,15 @@ const handler = async (req: ChatsApiRequest, res: ChatsApiResponse) => {
     },
   ];
 
-  messagesToSend.push(userMessageToSend);
+  const promptToSend =
+    chatModel.modelVersion === ModelVersions.GPT_4_Vision
+      ? convertToGPTVisionMessage({ text: prompt }, 'system')
+      : convertMessageToSend({ text: prompt }, 'system');
 
-  const stream = await OpenAIStream(
-    chatModel,
-    prompt,
-    temperature,
-    messagesToSend
-  );
+  messagesToSend.push(userMessageToSend);
+  messagesToSend.unshift(promptToSend);
+
+  const stream = await OpenAIStream(chatModel, temperature, messagesToSend);
   let assistantResponse = '';
   res.setHeader('Content-Type', 'application/octet-stream');
   if (stream.getReader) {

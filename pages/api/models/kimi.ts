@@ -109,13 +109,10 @@ const handler = async (req: ChatsApiRequest, res: ChatsApiResponse) => {
     },
   ];
   messagesToSend.push(userMessageToSend);
+  let promptToSend = convertMessageToSend({ text: prompt }, 'system');
+  messagesToSend.unshift(promptToSend);
 
-  const stream = await KimiStream(
-    chatModel,
-    prompt,
-    temperature,
-    messagesToSend
-  );
+  const stream = await KimiStream(chatModel, temperature, messagesToSend);
   let assistantResponse = '';
   if (stream.getReader) {
     const reader = stream.getReader();
