@@ -34,7 +34,11 @@ import Spinner from '@/components/Spinner';
 import { ChatMessage } from '@/types/chatMessage';
 import { getSelectMessages } from '@/utils/message';
 import PromptBar from '@/components/Promptbar';
-import { getSelectChatId, saveSelectChatId } from '@/utils/conversation';
+import {
+  getPathChatId,
+  getSelectChatId,
+  saveSelectChatId,
+} from '@/utils/conversation';
 interface HandleUpdateChatParams {
   title?: string;
   chatModelId?: string;
@@ -123,7 +127,7 @@ const Home = () => {
   const stopConversationRef = useRef<boolean>(false);
   const { setTheme } = useTheme();
 
-  const calcSelectModelId = () => {
+  const calcSelectModelId = (chats: ChatResult[], models: Model[]) => {
     const lastChat = chats.findLast((x) => x.chatModelId);
     if (lastChat && lastChat.chatModelId) return lastChat.chatModelId;
     else return models.length > 0 ? models[0].id : undefined;
@@ -139,9 +143,13 @@ const Home = () => {
       dispatch({ field: 'selectMessageLastId', value: '' });
       dispatch({ field: 'currentMessages', value: [] });
       dispatch({ field: 'selectMessages', value: [] });
-      dispatch({ field: 'selectModelId', value: calcSelectModelId() });
+      dispatch({
+        field: 'selectModelId',
+        value: calcSelectModelId(chats, models),
+      });
       dispatch({ field: 'chats', value: [...chats, data] });
       dispatch({ field: 'userModelConfig', value: {} });
+      router.push('#/' + data.id);
     });
   };
 
@@ -187,13 +195,15 @@ const Home = () => {
           value: [],
         });
       }
-      const selectModelId = getChatModelId(chatId) || calcSelectModelId();
+      const selectModelId =
+        getChatModelId(chatId) || calcSelectModelId(chats, models);
       selectModelId && localStorage.setItem('selectModelId', selectModelId);
       dispatch({
         field: 'selectModelId',
         value: selectModelId,
       });
     });
+    router.push('#/' + chat.id);
     saveSelectChatId(chatId);
   };
 
@@ -232,7 +242,10 @@ const Home = () => {
     dispatch({ field: 'selectMessageLastId', value: '' });
     dispatch({ field: 'currentMessages', value: [] });
     dispatch({ field: 'selectMessages', value: [] });
-    dispatch({ field: 'selectModelId', value: calcSelectModelId() });
+    dispatch({
+      field: 'selectModelId',
+      value: calcSelectModelId(chats, models),
+    });
     dispatch({ field: 'userModelConfig', value: {} });
   };
 
@@ -249,6 +262,39 @@ const Home = () => {
 
   const getModel = (models: Model[], selectModelId: string) => {
     return models.find((x) => x.id === selectModelId)!;
+  };
+
+  const selectChat = (chatList: ChatResult[], chatId: string | null) => {
+    const chat = chatList.find((x) => x.id === chatId);
+    if (chat) {
+      dispatch({ field: 'selectChatId', value: chatId });
+      dispatch({
+        field: 'userModelConfig',
+        value: chat?.userModelConfig || {},
+      });
+      getUserMessages(chat.id).then((data) => {
+        if (data.length > 0) {
+          dispatch({ field: 'currentMessages', value: data });
+          const lastMessage = data[data.length - 1];
+          const _selectMessages = getSelectMessages(data, lastMessage.id);
+          dispatch({
+            field: 'selectMessages',
+            value: _selectMessages,
+          });
+          dispatch({ field: 'selectMessageLastId', value: lastMessage.id });
+        } else {
+          dispatch({ field: 'currentMessages', value: [] });
+          dispatch({
+            field: 'selectMessages',
+            value: [],
+          });
+        }
+        dispatch({
+          field: 'selectModelId',
+          value: chat?.chatModelId || calcSelectModelId(chatList, models),
+        });
+      });
+    }
   };
 
   useEffect(() => {
@@ -290,38 +336,6 @@ const Home = () => {
       router.push(getLoginUrl(getSettingsLanguage()));
     }
     if (sessionId) {
-      getChats().then((data) => {
-        dispatch({ field: 'chats', value: data });
-        const selectChatId = getSelectChatId();
-        const chat = data.find((x) => x.id === selectChatId);
-        if (chat && chat.chatModelId) {
-          dispatch({ field: 'selectChatId', value: selectChatId });
-          dispatch({ field: 'userModelConfig', value: chat.userModelConfig });
-          getUserMessages(chat.id).then((data) => {
-            if (data.length > 0) {
-              dispatch({ field: 'currentMessages', value: data });
-              const lastMessage = data[data.length - 1];
-              const _selectMessages = getSelectMessages(data, lastMessage.id);
-              dispatch({
-                field: 'selectMessages',
-                value: _selectMessages,
-              });
-              dispatch({ field: 'selectMessageLastId', value: lastMessage.id });
-            } else {
-              dispatch({ field: 'currentMessages', value: [] });
-              dispatch({
-                field: 'selectMessages',
-                value: [],
-              });
-            }
-            dispatch({
-              field: 'selectModelId',
-              value: chat.chatModelId,
-            });
-          });
-        }
-      });
-
       getUserModels().then((data) => {
         dispatch({ field: 'models', value: data });
         if (data && data.length > 0) {
@@ -334,11 +348,30 @@ const Home = () => {
         }
       });
 
+      getChats().then((data) => {
+        dispatch({ field: 'chats', value: data });
+        const selectChatId = getPathChatId(router.asPath) || getSelectChatId();
+        selectChat(data, selectChatId);
+      });
+
       getUserPrompts().then((data) => {
         dispatch({ field: 'prompts', value: data });
       });
     }
   }, []);
+
+  useEffect(() => {
+    const handlePopState = (event: PopStateEvent) => {
+      const chatId = getPathChatId(event.state.as);
+      selectChat(chats, chatId);
+    };
+
+    window.addEventListener('popstate', handlePopState);
+
+    return () => {
+      window.removeEventListener('popstate', handlePopState);
+    };
+  }, [chats]);
 
   return (
     <HomeContext.Provider

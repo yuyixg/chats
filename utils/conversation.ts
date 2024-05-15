@@ -9,3 +9,7 @@ export const getSelectChatId = () => {
 export const removeSelectChatId = () => {
   localStorage.removeItem('selectedChatId');
 };
+
+export const getPathChatId = (path: string) => {
+  return path.substring(3);
+};
