@@ -3,7 +3,7 @@ export const saveSelectChatId = (chatId: string) => {
 };
 
 export const getSelectChatId = () => {
-  localStorage.getItem('selectedChatId');
+  return localStorage.getItem('selectedChatId');
 };
 
 export const removeSelectChatId = () => {

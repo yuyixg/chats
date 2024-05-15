@@ -34,6 +34,7 @@ import Spinner from '@/components/Spinner';
 import { ChatMessage } from '@/types/chatMessage';
 import { getSelectMessages } from '@/utils/message';
 import PromptBar from '@/components/Promptbar';
+import { getSelectChatId, saveSelectChatId } from '@/utils/conversation';
 interface HandleUpdateChatParams {
   title?: string;
   chatModelId?: string;
@@ -193,6 +194,7 @@ const Home = () => {
         value: selectModelId,
       });
     });
+    saveSelectChatId(chatId);
   };
 
   const handleUpdateSelectMessage = (messageId: string) => {
@@ -290,6 +292,34 @@ const Home = () => {
     if (sessionId) {
       getChats().then((data) => {
         dispatch({ field: 'chats', value: data });
+        const selectChatId = getSelectChatId();
+        const chat = data.find((x) => x.id === selectChatId);
+        if (chat && chat.chatModelId) {
+          dispatch({ field: 'selectChatId', value: selectChatId });
+          dispatch({ field: 'userModelConfig', value: chat.userModelConfig });
+          getUserMessages(chat.id).then((data) => {
+            if (data.length > 0) {
+              dispatch({ field: 'currentMessages', value: data });
+              const lastMessage = data[data.length - 1];
+              const _selectMessages = getSelectMessages(data, lastMessage.id);
+              dispatch({
+                field: 'selectMessages',
+                value: _selectMessages,
+              });
+              dispatch({ field: 'selectMessageLastId', value: lastMessage.id });
+            } else {
+              dispatch({ field: 'currentMessages', value: [] });
+              dispatch({
+                field: 'selectMessages',
+                value: [],
+              });
+            }
+            dispatch({
+              field: 'selectModelId',
+              value: chat.chatModelId,
+            });
+          });
+        }
       });
 
       getUserModels().then((data) => {
