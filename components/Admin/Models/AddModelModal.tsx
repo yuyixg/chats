@@ -133,7 +133,7 @@ export const AddModelModal = (props: IProps) => {
   }, [isOpen]);
 
   useEffect(() => {
-    let subscription = null;
+    let subscription: any = null;
     if (!loading) {
       subscription = form.watch((value, { name, type }) => {
         if (name === 'modelKeysId' && type === 'change') {
