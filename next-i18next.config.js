@@ -5,8 +5,6 @@ module.exports = {
             'en',
             'zh',
         ],
-        localeSubpaths: {
-        },
     },
     react: { useSuspense: false },
     localePath:
