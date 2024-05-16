@@ -52,6 +52,7 @@
 @layer base {
   * {
     @apply border-border;
+    --tw-prose-pre-bg: #282c34;
   }
   body {
     @apply bg-background text-foreground;
