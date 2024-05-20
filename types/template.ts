@@ -37,7 +37,7 @@ const gptApiConfig: ChatGPTApiConfig = {
 };
 
 const qianWenApiConfig: QianWenApiConfig = {
-  host: 'https://api.moonshot.cn',
+  host: 'https://dashscope.aliyuncs.com/api/v1',
   apiKey: '',
 };
 

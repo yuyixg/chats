@@ -48,7 +48,7 @@ export const QianWenStream = async (
           enable_search: enableSearch,
         }),
         temperature,
-        seed: 1646251034,
+        seed: Math.floor(Math.random() * 2147483647),
         incremental_output: true,
       },
     }),
