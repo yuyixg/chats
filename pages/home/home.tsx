@@ -57,13 +57,10 @@ interface HomeInitialState {
   currentMessages: ChatMessage[];
   selectMessages: ChatMessage[];
   selectMessageLastId: string;
-  currentMessage: Message | undefined;
   userModelConfig: Object;
   prompts: Prompt[];
-  temperature: number;
   showChatbar: boolean;
   showPromptbar: boolean;
-  messageError: boolean;
   searchTerm: string;
 }
 
@@ -81,12 +78,9 @@ const initialState: HomeInitialState = {
   chats: [],
   selectModelId: undefined,
   selectChatId: undefined,
-  currentMessage: undefined,
   prompts: [],
-  temperature: 1,
   showPromptbar: false,
   showChatbar: true,
-  messageError: false,
   searchTerm: '',
 };
 
