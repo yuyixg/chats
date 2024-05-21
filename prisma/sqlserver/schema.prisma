@@ -99,10 +99,11 @@ model ChatMessages {
   userId          String   @db.UniqueIdentifier
   chatId          String   @db.UniqueIdentifier
   parentId        String?
+  chatModelId     String?
+  role            String
   messages        String   @db.NText()
-  calculatedPrice Decimal
-  tokenUsed       Int
-  isDeleted       Boolean  @default(false)
+  calculatedPrice Decimal  @default(0)
+  tokenUsed       Int      @default(0)
   createdAt       DateTime @default(now())
   chats           Chats    @relation(fields: [chatId], references: [id])
 }

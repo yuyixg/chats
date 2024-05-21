@@ -1,16 +1,19 @@
 import prisma from '@/prisma/prisma';
+import { Role } from '@/types/chat';
 import { MessageNode } from '@/types/chatMessage';
 import { calculateMessages } from '@/utils/message';
 import { Prisma } from '@prisma/client';
 import Decimal from 'decimal.js';
 
 export interface CreateChatMessage {
+  role: Role;
   userId: string;
   chatId: string;
-  parentId?: string | null;
   messages: string;
-  calculatedPrice: Decimal;
-  tokenUsed: number;
+  parentId?: string | null;
+  calculatedPrice?: Decimal;
+  tokenUsed?: number;
+  chatModelId?: string;
 }
 
 export class ChatMessagesManager {
@@ -27,7 +30,6 @@ export class ChatMessagesManager {
   static async findUserMessageByChatId(chatId: string) {
     let where: Prisma.ChatMessagesWhereInput = {
       chatId,
-      isDeleted: false,
     };
     return await prisma.chatMessages.findMany({
       where,
@@ -48,16 +50,6 @@ export class ChatMessagesManager {
       } as MessageNode;
     });
     return calculateMessages(messages);
-  }
-
-  static async delete(id: string, userId: string) {
-    const chatMessage = await prisma.chatMessages.findUnique({ where: { id } });
-    if (chatMessage) {
-      await prisma.chatMessages.update({
-        where: { id, userId },
-        data: { isDeleted: true },
-      });
-    }
   }
 
   static async deleteByChatId(chatId: string, userId: string) {

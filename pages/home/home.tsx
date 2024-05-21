@@ -270,6 +270,7 @@ const Home = () => {
         if (data.length > 0) {
           dispatch({ field: 'currentMessages', value: data });
           const lastMessage = data[data.length - 1];
+          debugger
           const _selectMessages = getSelectMessages(data, lastMessage.id);
           dispatch({
             field: 'selectMessages',

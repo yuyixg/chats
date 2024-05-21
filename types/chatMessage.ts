@@ -1,11 +1,12 @@
 import Decimal from 'decimal.js';
-import { Message } from './chat';
+import { Content, Message, Role } from './chat';
 
 export interface ChatMessage {
   id: string;
   parentId: string | null;
   childrenIds: string[];
-  messages: Message[];
+  content: Content;
+  role: Role;
   tokenUsed?: number;
   calculatedPrice?: Decimal;
 }

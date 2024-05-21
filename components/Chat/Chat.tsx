@@ -11,7 +11,7 @@ import toast from 'react-hot-toast';
 import { useTranslation } from 'next-i18next';
 import { getModelEndpoint } from '@/utils/apis';
 import { throttle } from '@/utils/throttle';
-import { ChatBody, Message } from '@/types/chat';
+import { ChatBody, Message, Role } from '@/types/chat';
 import { ChatInput } from './ChatInput';
 import { MemoizedChatMessage } from './MemoizedChatMessage';
 import { ModelSelect } from './ModelSelect';
@@ -79,7 +79,8 @@ export const Chat = memo(({ stopConversationRef }: Props) => {
   };
 
   const handleSend = useCallback(
-    async (message: Message, parentId: string | null, messageId = '') => {
+    async (message: Message, parentId: string | null, messageId: string) => {
+      debugger;
       let _selectChatId = selectChatId;
       let _selectMessages = [...selectMessages];
       let _chats = chats;
@@ -94,7 +95,7 @@ export const Chat = memo(({ stopConversationRef }: Props) => {
       }
       if (messageId) {
         const { lastMessage, selectMessageLength } = getSelectMessagesLast();
-        lastMessage.messages[1].content = {
+        lastMessage.content = {
           image: [],
           text: '',
         };
@@ -110,13 +111,11 @@ export const Chat = memo(({ stopConversationRef }: Props) => {
         );
 
         const newMessage = {
+          role: 'user' as Role,
           id: tempUUID,
           parentId,
           childrenIds: [],
-          messages: [
-            message,
-            { role: 'assistant', content: { text: '' } },
-          ] as Message[],
+          content: message.content,
         };
         let removeCount = -1;
         if (parentMessageIndex !== -1) removeCount = _selectMessages.length - 1;
@@ -192,15 +191,10 @@ export const Chat = memo(({ stopConversationRef }: Props) => {
         text += chunkValue;
 
         let laseMessages = _selectMessages[_selectMessages.length - 1];
-        laseMessages.messages = laseMessages.messages.map((message, index) => {
-          if (index === laseMessages.messages.length - 1) {
-            return {
-              ...message,
-              content: { text },
-            };
-          }
-          return message;
-        });
+        laseMessages = {
+          ...laseMessages,
+          content: { text },
+        };
 
         homeDispatch({
           field: 'selectMessages',
@@ -334,7 +328,9 @@ export const Chat = memo(({ stopConversationRef }: Props) => {
         currentSelectChat?.userModelConfig?.temperature ||
         modelConfig?.temperature,
       prompt: currentSelectChat?.userModelConfig?.prompt || modelConfig?.prompt,
-      enableSearch: currentSelectChat?.userModelConfig?.enableSearch || modelConfig?.enableSearch,
+      enableSearch:
+        currentSelectChat?.userModelConfig?.enableSearch ||
+        modelConfig?.enableSearch,
     });
     setModelApiConfig(ModelTemplates[modelVersion]?.config as any);
   }, [selectModelId]);
@@ -429,7 +425,7 @@ export const Chat = memo(({ stopConversationRef }: Props) => {
                 </div>
               )}
 
-              {selectMessages.map((current) => {
+              {selectMessages.map((current, index) => {
                 let parentChildrenIds: string[] = [];
                 if (!current.parentId) {
                   parentChildrenIds = currentMessages
@@ -441,7 +437,7 @@ export const Chat = memo(({ stopConversationRef }: Props) => {
                       ?.childrenIds || [];
                   parentChildrenIds = [...parentChildrenIds].reverse();
                 }
-                return current.messages.map((message, index) => (
+                return (
                   <MemoizedChatMessage
                     currentSelectIndex={parentChildrenIds.findIndex(
                       (x) => x === current.id
@@ -451,24 +447,23 @@ export const Chat = memo(({ stopConversationRef }: Props) => {
                     parentId={current.parentId}
                     childrenIds={current.childrenIds}
                     parentChildrenIds={parentChildrenIds}
-                    message={message}
+                    message={{ role: current.role, content: current.content }}
                     onChangeMessage={(messageId) => {
                       handleUpdateSelectMessage(messageId);
                     }}
                     onRegenerate={() => {
                       const { lastMessage } = getSelectMessagesLast();
-                      const message = lastMessage.messages;
                       handleSend(
-                        message[0],
+                        lastMessage,
                         lastMessage.parentId,
-                        lastMessage.id
+                        lastMessage.parentId || ''
                       );
                     }}
                     onEdit={(editedMessage, parentId) => {
-                      handleSend(editedMessage, parentId);
+                      handleSend(editedMessage, parentId, parentId || '');
                     }}
                   />
-                ));
+                );
               })}
 
               <div
@@ -483,8 +478,8 @@ export const Chat = memo(({ stopConversationRef }: Props) => {
             stopConversationRef={stopConversationRef}
             textareaRef={textareaRef}
             onSend={(message) => {
-              const parentMessage = getSelectMessageParent();
-              handleSend(message, parentMessage?.id || null);
+              const { lastMessage } = getSelectMessagesLast();
+              handleSend(message, lastMessage?.parentId, lastMessage?.id);
             }}
             onScrollDownClick={handleScrollDown}
             showScrollDownButton={showScrollDownButton}

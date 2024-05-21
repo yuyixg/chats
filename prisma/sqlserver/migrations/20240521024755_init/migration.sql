@@ -90,10 +90,11 @@ CREATE TABLE [dbo].[ChatMessages] (
     [userId] UNIQUEIDENTIFIER NOT NULL,
     [chatId] UNIQUEIDENTIFIER NOT NULL,
     [parentId] NVARCHAR(1000),
+    [chatModelId] NVARCHAR(1000),
+    [role] NVARCHAR(1000) NOT NULL,
     [messages] NTEXT NOT NULL,
-    [calculatedPrice] DECIMAL(32,16) NOT NULL,
-    [tokenUsed] INT NOT NULL,
-    [isDeleted] BIT NOT NULL CONSTRAINT [ChatMessages_isDeleted_df] DEFAULT 0,
+    [calculatedPrice] DECIMAL(32,16) NOT NULL CONSTRAINT [ChatMessages_calculatedPrice_df] DEFAULT 0,
+    [tokenUsed] INT NOT NULL CONSTRAINT [ChatMessages_tokenUsed_df] DEFAULT 0,
     [createdAt] DATETIME2 NOT NULL CONSTRAINT [ChatMessages_createdAt_df] DEFAULT CURRENT_TIMESTAMP,
     CONSTRAINT [ChatMessages_pkey] PRIMARY KEY CLUSTERED ([id])
 );
@@ -113,6 +114,7 @@ CREATE TABLE [dbo].[UserBalances] (
 CREATE TABLE [dbo].[BalanceLogs] (
     [id] UNIQUEIDENTIFIER NOT NULL,
     [userId] UNIQUEIDENTIFIER NOT NULL,
+    [messageId] UNIQUEIDENTIFIER,
     [createUserId] NVARCHAR(1000) NOT NULL,
     [value] DECIMAL(32,16) NOT NULL CONSTRAINT [BalanceLogs_value_df] DEFAULT 0,
     [type] INT NOT NULL,
@@ -204,6 +206,19 @@ CREATE TABLE [dbo].[ModelKeys] (
     CONSTRAINT [ModelKeys_pkey] PRIMARY KEY CLUSTERED ([id])
 );
 
+-- CreateTable
+CREATE TABLE [dbo].[Prompts] (
+    [id] UNIQUEIDENTIFIER NOT NULL,
+    [name] NVARCHAR(100) NOT NULL,
+    [type] SMALLINT NOT NULL,
+    [content] NVARCHAR(2048),
+    [description] NVARCHAR(100),
+    [createUserId] UNIQUEIDENTIFIER NOT NULL,
+    [createdAt] DATETIME2 NOT NULL CONSTRAINT [Prompts_createdAt_df] DEFAULT CURRENT_TIMESTAMP,
+    [updatedAt] DATETIME2 NOT NULL,
+    CONSTRAINT [Prompts_pkey] PRIMARY KEY CLUSTERED ([id])
+);
+
 -- AddForeignKey
 ALTER TABLE [dbo].[ChatModels] ADD CONSTRAINT [ChatModels_modelKeysId_fkey] FOREIGN KEY ([modelKeysId]) REFERENCES [dbo].[ModelKeys]([id]) ON DELETE SET NULL ON UPDATE CASCADE;
 
@@ -230,6 +245,9 @@ ALTER TABLE [dbo].[Orders] ADD CONSTRAINT [Orders_createUserId_fkey] FOREIGN KEY
 
 -- AddForeignKey
 ALTER TABLE [dbo].[RequestLogs] ADD CONSTRAINT [RequestLogs_userId_fkey] FOREIGN KEY ([userId]) REFERENCES [dbo].[Users]([id]) ON DELETE SET NULL ON UPDATE CASCADE;
+
+-- AddForeignKey
+ALTER TABLE [dbo].[Prompts] ADD CONSTRAINT [Prompts_createUserId_fkey] FOREIGN KEY ([createUserId]) REFERENCES [dbo].[Users]([id]) ON DELETE NO ACTION ON UPDATE CASCADE;
 
 COMMIT TRAN;
 

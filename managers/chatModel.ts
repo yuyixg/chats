@@ -41,7 +41,7 @@ export class ChatModelRecordManager {
         tx,
         createChatMessageParams
       );
-      await this.deleteChatMessage(tx, userId, messageId);
+      // await this.deleteChatMessage(tx, userId, messageId);
       await this.updateUserModelTokenCount(tx, userId, chatModelId, tokenUsed);
       await this.chatUpdateBalance(tx, userId, calculatedPrice, chatMessage.id);
     });
@@ -55,12 +55,12 @@ export class ChatModelRecordManager {
   static async deleteChatMessage(tx: TX, userId: string, id?: string) {
     if (!id) return;
     const chatMessage = await tx.chatMessages.findUnique({ where: { id } });
-    if (chatMessage) {
-      await tx.chatMessages.update({
-        where: { id, userId },
-        data: { isDeleted: true },
-      });
-    }
+    // if (chatMessage) {
+    //   await tx.chatMessages.update({
+    //     where: { id, userId },
+    //     data: { isDeleted: true },
+    //   });
+    // }
   }
 
   static async createChatMessage(tx: TX, params: CreateChatMessage) {

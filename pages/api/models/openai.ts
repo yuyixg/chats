@@ -38,8 +38,9 @@ export const config = {
 
 const handler = async (req: ChatsApiRequest, res: ChatsApiResponse) => {
   const { userId } = req.session;
-  const { chatId, parentId, modelId, userMessage, messageId, userModelConfig } =
+  const { chatId, modelId, userMessage, messageId, userModelConfig } =
     req.body as ChatBody;
+  console.log(req.body);
   const userMessageText = userMessage.text!;
 
   const chatModel = await ChatModelManager.findModelById(modelId);
@@ -79,6 +80,38 @@ const handler = async (req: ChatsApiRequest, res: ChatsApiResponse) => {
   const chatMessages = await ChatMessagesManager.findUserMessageByChatId(
     chatId
   );
+  let lastMessage = null;
+  let resParentId = messageId;
+  if (messageId) {
+    lastMessage = await ChatMessagesManager.findByUserMessageId(
+      messageId,
+      userId
+    );
+
+    if (lastMessage?.role === 'assistant') {
+      lastMessage = await ChatMessagesManager.create({
+        role: 'user',
+        messages: JSON.stringify(userMessage),
+        userId,
+        chatId,
+        parentId: messageId,
+      });
+      resParentId = lastMessage.id;
+      chatMessages.push(lastMessage);
+    } else {
+      chatMessages.pop();
+    }
+  } else {
+    lastMessage = await ChatMessagesManager.create({
+      role: 'user',
+      messages: JSON.stringify(userMessage),
+      userId,
+      chatId,
+    });
+    resParentId = lastMessage.id;
+    chatMessages.push(lastMessage);
+  }
+
   const findParents = (
     items: ChatMessages[],
     id: string | null
@@ -90,7 +123,7 @@ const handler = async (req: ChatsApiRequest, res: ChatsApiResponse) => {
     }
     return currentItem ? [currentItem] : [];
   };
-  const messages = findParents(chatMessages, parentId);
+  const messages = findParents(chatMessages, messageId);
 
   function convertMessageToSend(messageContent: Content, role: Role = 'user') {
     return { role, content: messageContent.text } as GPT4Message;
@@ -110,19 +143,16 @@ const handler = async (req: ChatsApiRequest, res: ChatsApiResponse) => {
     return message;
   }
 
-  messages.forEach((m) => {
-    const chatMessages = JSON.parse(m.messages) as Message[];
+  messages.reverse().forEach((m) => {
+    const chatMessages = JSON.parse(m.messages) as Content;
     let _messages = [] as GPT4Message[] | GPT4VisionMessage[];
+    let content = {} as GPT4Message | GPT4VisionMessage;
     if (chatModel.modelVersion === ModelVersions.GPT_4_Vision) {
-      chatMessages.forEach((x) => {
-        const content = convertToGPTVisionMessage(x.content, x.role);
-        _messages.push(content as any);
-      });
+      content = convertToGPTVisionMessage(chatMessages, m.role as Role);
     } else {
-      _messages = chatMessages.map((x) => {
-        return convertMessageToSend(x.content, x.role);
-      });
+      content = convertMessageToSend(chatMessages, m.role as Role);
     }
+    _messages.push(content as any);
     messagesToSend = [...messagesToSend, ..._messages];
   });
 
@@ -130,13 +160,6 @@ const handler = async (req: ChatsApiRequest, res: ChatsApiResponse) => {
     chatModel.modelVersion === ModelVersions.GPT_4_Vision
       ? convertToGPTVisionMessage(userMessage)
       : convertMessageToSend(userMessage);
-
-  const currentMessage = [
-    {
-      role: 'user',
-      content: userMessage,
-    },
-  ];
 
   const promptToSend =
     chatModel.modelVersion === ModelVersions.GPT_4_Vision
@@ -146,66 +169,66 @@ const handler = async (req: ChatsApiRequest, res: ChatsApiResponse) => {
   messagesToSend.push(userMessageToSend);
   messagesToSend.unshift(promptToSend);
 
-  const stream = await OpenAIStream(chatModel, temperature, messagesToSend);
-  let assistantResponse = '';
-  res.setHeader('Content-Type', 'application/octet-stream');
-  if (stream.getReader) {
-    const reader = stream.getReader();
-    const streamResponse = async () => {
-      while (true) {
-        const { done, value } = await reader.read();
-        if (value) {
-          assistantResponse += value;
-        }
-        if (done) {
-          let messageTokens = encoding.encode(assistantResponse).length;
-          tokenUsed += messageTokens;
-          const calculatedPrice = calcTokenPrice(
-            priceConfig,
-            tokenUsed,
-            messageTokens
-          );
-          encoding.free();
-          currentMessage.push({
-            role: 'assistant',
-            content: { text: assistantResponse },
-          });
+  console.log('messagesToSend', JSON.stringify(messagesToSend));
 
-          await ChatModelRecordManager.recordTransfer({
-            messageId,
-            userId,
-            chatId,
-            tokenUsed,
-            userMessageText,
-            calculatedPrice,
-            chatModelId: chatModel.id,
-            createChatMessageParams: {
-              chatId,
-              userId,
-              parentId,
-              messages: JSON.stringify(currentMessage),
-              tokenUsed,
-              calculatedPrice,
-            },
-            updateChatParams: {
-              id: chatId,
-              chatModelId: chatModel.id,
-              userModelConfig: JSON.stringify(userModelConfig),
-            },
-          });
+  // const stream = await OpenAIStream(chatModel, temperature, messagesToSend);
+  // let assistantResponse = '';
+  // res.setHeader('Content-Type', 'application/octet-stream');
+  // if (stream.getReader) {
+  //   const reader = stream.getReader();
+  //   const streamResponse = async () => {
+  //     while (true) {
+  //       const { done, value } = await reader.read();
+  //       if (value) {
+  //         assistantResponse += value;
+  //       }
+  //       if (done) {
+  //         let messageTokens = encoding.encode(assistantResponse).length;
+  //         tokenUsed += messageTokens;
+  //         const calculatedPrice = calcTokenPrice(
+  //           priceConfig,
+  //           tokenUsed,
+  //           messageTokens
+  //         );
+  //         encoding.free();
 
-          return res.end();
-        }
-        res.write(Buffer.from(value));
-      }
-    };
+  //         await ChatModelRecordManager.recordTransfer({
+  //           messageId,
+  //           userId,
+  //           chatId,
+  //           tokenUsed,
+  //           userMessageText,
+  //           calculatedPrice,
+  //           chatModelId: chatModel.id,
+  //           createChatMessageParams: {
+  //             role: 'assistant',
+  //             chatId,
+  //             userId,
+  //             chatModelId: modelId,
+  //             parentId: resParentId,
+  //             messages: JSON.stringify({ text: assistantResponse }),
+  //             tokenUsed,
+  //             calculatedPrice,
+  //           },
+  //           updateChatParams: {
+  //             id: chatId,
+  //             chatModelId: chatModel.id,
+  //             userModelConfig: JSON.stringify(userModelConfig),
+  //           },
+  //         });
 
-    streamResponse().catch((error) => {
-      throw new InternalServerError(
-        JSON.stringify({ message: error?.message, stack: error?.stack })
-      );
-    });
-  }
+  //         return res.end();
+  //       }
+  //       res.write(Buffer.from(value));
+  //     }
+  //   };
+
+  //   streamResponse().catch((error) => {
+  //     throw new InternalServerError(
+  //       JSON.stringify({ message: error?.message, stack: error?.stack })
+  //     );
+  //   });
+  // }
 };
 
 export default apiHandler(handler);
