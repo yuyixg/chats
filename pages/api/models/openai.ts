@@ -80,6 +80,7 @@ const handler = async (req: ChatsApiRequest, res: ChatsApiResponse) => {
   const chatMessages = await ChatMessagesManager.findUserMessageByChatId(
     chatId
   );
+  const isFirstChat = await ChatMessagesManager.checkIsFirstChat(chatId);
   let lastMessage = null;
   let resParentId = messageId;
   if (messageId) {
@@ -98,8 +99,6 @@ const handler = async (req: ChatsApiRequest, res: ChatsApiResponse) => {
       });
       resParentId = lastMessage.id;
       chatMessages.push(lastMessage);
-    } else {
-      chatMessages.pop();
     }
   } else {
     lastMessage = await ChatMessagesManager.create({
@@ -124,6 +123,9 @@ const handler = async (req: ChatsApiRequest, res: ChatsApiResponse) => {
     return currentItem ? [currentItem] : [];
   };
   const messages = findParents(chatMessages, messageId);
+  if (lastMessage?.role === 'user') {
+    messages.pop();
+  }
 
   function convertMessageToSend(messageContent: Content, role: Role = 'user') {
     return { role, content: messageContent.text } as GPT4Message;
@@ -171,64 +173,64 @@ const handler = async (req: ChatsApiRequest, res: ChatsApiResponse) => {
 
   console.log('messagesToSend', JSON.stringify(messagesToSend));
 
-  // const stream = await OpenAIStream(chatModel, temperature, messagesToSend);
-  // let assistantResponse = '';
-  // res.setHeader('Content-Type', 'application/octet-stream');
-  // if (stream.getReader) {
-  //   const reader = stream.getReader();
-  //   const streamResponse = async () => {
-  //     while (true) {
-  //       const { done, value } = await reader.read();
-  //       if (value) {
-  //         assistantResponse += value;
-  //       }
-  //       if (done) {
-  //         let messageTokens = encoding.encode(assistantResponse).length;
-  //         tokenUsed += messageTokens;
-  //         const calculatedPrice = calcTokenPrice(
-  //           priceConfig,
-  //           tokenUsed,
-  //           messageTokens
-  //         );
-  //         encoding.free();
+  const stream = await OpenAIStream(chatModel, temperature, messagesToSend);
+  let assistantResponse = '';
+  res.setHeader('Content-Type', 'application/octet-stream');
+  if (stream.getReader) {
+    const reader = stream.getReader();
+    const streamResponse = async () => {
+      while (true) {
+        const { done, value } = await reader.read();
+        if (value) {
+          assistantResponse += value;
+        }
+        if (done) {
+          let messageTokens = encoding.encode(assistantResponse).length;
+          tokenUsed += messageTokens;
+          const calculatedPrice = calcTokenPrice(
+            priceConfig,
+            tokenUsed,
+            messageTokens
+          );
+          encoding.free();
 
-  //         await ChatModelRecordManager.recordTransfer({
-  //           messageId,
-  //           userId,
-  //           chatId,
-  //           tokenUsed,
-  //           userMessageText,
-  //           calculatedPrice,
-  //           chatModelId: chatModel.id,
-  //           createChatMessageParams: {
-  //             role: 'assistant',
-  //             chatId,
-  //             userId,
-  //             chatModelId: modelId,
-  //             parentId: resParentId,
-  //             messages: JSON.stringify({ text: assistantResponse }),
-  //             tokenUsed,
-  //             calculatedPrice,
-  //           },
-  //           updateChatParams: {
-  //             id: chatId,
-  //             chatModelId: chatModel.id,
-  //             userModelConfig: JSON.stringify(userModelConfig),
-  //           },
-  //         });
+          await ChatModelRecordManager.recordTransfer({
+            isFirstChat,
+            userId,
+            chatId,
+            tokenUsed,
+            userMessageText,
+            calculatedPrice,
+            chatModelId: chatModel.id,
+            createChatMessageParams: {
+              role: 'assistant',
+              chatId,
+              userId,
+              chatModelId: modelId,
+              parentId: resParentId,
+              messages: JSON.stringify({ text: assistantResponse }),
+              tokenUsed,
+              calculatedPrice,
+            },
+            updateChatParams: {
+              id: chatId,
+              chatModelId: chatModel.id,
+              userModelConfig: JSON.stringify(userModelConfig),
+            },
+          });
 
-  //         return res.end();
-  //       }
-  //       res.write(Buffer.from(value));
-  //     }
-  //   };
+          return res.end();
+        }
+        res.write(Buffer.from(value));
+      }
+    };
 
-  //   streamResponse().catch((error) => {
-  //     throw new InternalServerError(
-  //       JSON.stringify({ message: error?.message, stack: error?.stack })
-  //     );
-  //   });
-  // }
+    streamResponse().catch((error) => {
+      throw new InternalServerError(
+        JSON.stringify({ message: error?.message, stack: error?.stack })
+      );
+    });
+  }
 };
 
 export default apiHandler(handler);

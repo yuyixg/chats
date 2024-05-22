@@ -17,7 +17,7 @@ export interface ChatRecord {
   calculatedPrice: Decimal;
   userMessageText: string;
   chatId: string;
-  messageId?: string;
+  isFirstChat: boolean;
   chatModelId: string;
   updateChatParams: UpdateChat;
   createChatMessageParams: CreateChatMessage;
@@ -27,7 +27,7 @@ export class ChatModelRecordManager {
   static async recordTransfer(params: ChatRecord) {
     const {
       userId,
-      messageId,
+      isFirstChat,
       chatModelId,
       tokenUsed,
       calculatedPrice,
@@ -36,12 +36,17 @@ export class ChatModelRecordManager {
       updateChatParams,
     } = params;
     prisma.$transaction(async (tx) => {
-      await this.updateChat(tx, userMessageText, updateChatParams);
+      if (isFirstChat) {
+        updateChatParams.title =
+          userMessageText.length > 30
+            ? userMessageText.substring(0, 30) + '...'
+            : userMessageText;
+      }
+      await this.updateChat(tx, updateChatParams);
       const chatMessage = await this.createChatMessage(
         tx,
         createChatMessageParams
       );
-      // await this.deleteChatMessage(tx, userId, messageId);
       await this.updateUserModelTokenCount(tx, userId, chatModelId, tokenUsed);
       await this.chatUpdateBalance(tx, userId, calculatedPrice, chatMessage.id);
     });
@@ -50,17 +55,6 @@ export class ChatModelRecordManager {
   static async getIsFirstChat(tx: TX, chatId: string) {
     const count = await tx.chatMessages.count({ where: { chatId } });
     return count === 0;
-  }
-
-  static async deleteChatMessage(tx: TX, userId: string, id?: string) {
-    if (!id) return;
-    const chatMessage = await tx.chatMessages.findUnique({ where: { id } });
-    // if (chatMessage) {
-    //   await tx.chatMessages.update({
-    //     where: { id, userId },
-    //     data: { isDeleted: true },
-    //   });
-    // }
   }
 
   static async createChatMessage(tx: TX, params: CreateChatMessage) {
@@ -123,13 +117,7 @@ export class ChatModelRecordManager {
     return result;
   }
 
-  static async updateChat(tx: TX, userMessageText: string, params: UpdateChat) {
-    if (await this.getIsFirstChat(tx, params.id)) {
-      params.title =
-        userMessageText.length > 30
-          ? userMessageText.substring(0, 30) + '...'
-          : userMessageText;
-    }
+  static async updateChat(tx: TX, params: UpdateChat) {
     return await tx.chats.update({
       where: { id: params.id },
       data: { ...params },

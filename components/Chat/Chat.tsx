@@ -19,7 +19,7 @@ import { HomeContext } from '@/pages/home/home';
 import { v4 as uuidv4 } from 'uuid';
 import { getChat, postChats } from '@/apis/userService';
 import { TemperatureSlider } from './Temperature';
-import { CurrentModel, ModelApiConfig, ModelConfig } from '@/types/model';
+import { CurrentModel, ModelApiConfig } from '@/types/model';
 import { ModelTemplates } from '@/types/template';
 import { SystemPrompt } from './SystemPrompt';
 import EnableNetworkSearch from './EnableNetworkSearch';
@@ -66,12 +66,6 @@ export const Chat = memo(({ stopConversationRef }: Props) => {
   const chatContainerRef = useRef<HTMLDivElement>(null);
   const textareaRef = useRef<HTMLTextAreaElement>(null);
 
-  const getSelectMessageParent = () => {
-    const selectMessageLength = selectMessages.length;
-    if (selectMessageLength === 0) return null;
-    return selectMessages[selectMessageLength - 1];
-  };
-
   const getSelectMessagesLast = () => {
     const selectMessageLength = selectMessages.length - 1;
     const lastMessage = { ...selectMessages[selectMessageLength] };
@@ -79,11 +73,17 @@ export const Chat = memo(({ stopConversationRef }: Props) => {
   };
 
   const handleSend = useCallback(
-    async (message: Message, parentId: string | null, messageId: string) => {
-      debugger;
+    async (
+      message: Message,
+      parentId: string | null,
+      messageId: string,
+      isRegenerate: boolean,
+      modelId: string = ''
+    ) => {
       let _selectChatId = selectChatId;
       let _selectMessages = [...selectMessages];
       let _chats = chats;
+      let assistantParentId = messageId;
       if (!selectChatId) {
         const newChat = await postChats({ title: t('New Conversation') });
         _selectChatId = newChat.id;
@@ -93,42 +93,64 @@ export const Chat = memo(({ stopConversationRef }: Props) => {
         homeDispatch({ field: 'selectMessages', value: [] });
         homeDispatch({ field: 'chats', value: [..._chats] });
       }
-      if (messageId) {
-        const { lastMessage, selectMessageLength } = getSelectMessagesLast();
-        lastMessage.content = {
-          image: [],
-          text: '',
-        };
-        homeDispatch({ field: 'selectMessageLastId', value: messageId });
-        selectMessages.splice(selectMessageLength, 1, lastMessage);
-      } else {
-        const tempUUID = uuidv4();
-        homeDispatch({ field: 'selectMessageLastId', value: tempUUID });
-        const parentMessage = _selectMessages.find((x) => x.id == parentId);
-        parentMessage && parentMessage?.childrenIds.unshift(tempUUID);
-        const parentMessageIndex = _selectMessages.findIndex(
-          (x) => x.id == parentId
+      if (messageId && isRegenerate) {
+        const messageIndex = _selectMessages.findIndex(
+          (x) => x.id === messageId
         );
-
-        const newMessage = {
+        homeDispatch({ field: 'selectMessageLastId', value: messageId });
+        _selectMessages.splice(messageIndex + 1, _selectMessages.length);
+      } else {
+        const userTempId = uuidv4();
+        assistantParentId = userTempId;
+        homeDispatch({ field: 'selectMessageLastId', value: userTempId });
+        const parentMessage = _selectMessages.find((x) => x.id == messageId);
+        parentMessage && parentMessage?.childrenIds.unshift(userTempId);
+        const parentMessageIndex = _selectMessages.findIndex(
+          (x) => x.id == messageId
+        );
+        const newUserMessage = {
+          id: userTempId,
           role: 'user' as Role,
-          id: tempUUID,
-          parentId,
+          parentId: messageId,
           childrenIds: [],
+          assistantChildrenIds: [],
           content: message.content,
         };
         let removeCount = -1;
         if (parentMessageIndex !== -1) removeCount = _selectMessages.length - 1;
-        if (!parentId) {
+        if (!messageId) {
           removeCount = _selectMessages.length;
           homeDispatch({
             field: 'currentMessages',
-            value: [...currentMessages, newMessage],
+            value: [...currentMessages, newUserMessage],
           });
         }
 
-        _selectMessages.splice(parentMessageIndex + 1, removeCount, newMessage);
+        _selectMessages.splice(
+          parentMessageIndex + 1,
+          removeCount,
+          newUserMessage
+        );
       }
+
+      const assistantTempId = uuidv4();
+      const newAssistantMessage = {
+        id: assistantTempId,
+        role: 'assistant' as Role,
+        parentId: assistantParentId,
+        childrenIds: [],
+        assistantChildrenIds: [],
+        content: {
+          image: [],
+          text: '',
+        },
+      };
+
+      homeDispatch({
+        field: 'currentChatMessageId',
+        value: assistantTempId,
+      });
+      _selectMessages.push(newAssistantMessage);
 
       homeDispatch({
         field: 'selectMessages',
@@ -190,11 +212,13 @@ export const Chat = memo(({ stopConversationRef }: Props) => {
         const chunkValue = decoder.decode(value);
         text += chunkValue;
 
-        let laseMessages = _selectMessages[_selectMessages.length - 1];
-        laseMessages = {
-          ...laseMessages,
+        let lastMessages = _selectMessages[_selectMessages.length - 1];
+        lastMessages = {
+          ...lastMessages,
           content: { text },
         };
+
+        _selectMessages.splice(-1, 1, lastMessages);
 
         homeDispatch({
           field: 'selectMessages',
@@ -447,20 +471,35 @@ export const Chat = memo(({ stopConversationRef }: Props) => {
                     parentId={current.parentId}
                     childrenIds={current.childrenIds}
                     parentChildrenIds={parentChildrenIds}
+                    assistantChildrenIds={current.assistantChildrenIds}
+                    assistantCurrentSelectIndex={current.assistantChildrenIds.findIndex(
+                      (x) => x === current.id
+                    )}
+                    modelName={current.modelName}
                     message={{ role: current.role, content: current.content }}
                     onChangeMessage={(messageId) => {
                       handleUpdateSelectMessage(messageId);
                     }}
                     onRegenerate={() => {
-                      const { lastMessage } = getSelectMessagesLast();
+                      console.log(current);
+                      const message = currentMessages.find(
+                        (x) => x.id === current.parentId
+                      );
+                      if (!message) return;
                       handleSend(
-                        lastMessage,
-                        lastMessage.parentId,
-                        lastMessage.parentId || ''
+                        { role: 'user', content: message.content },
+                        current.parentId,
+                        current.parentId || '',
+                        true
                       );
                     }}
                     onEdit={(editedMessage, parentId) => {
-                      handleSend(editedMessage, parentId, parentId || '');
+                      handleSend(
+                        editedMessage,
+                        parentId,
+                        parentId || '',
+                        false
+                      );
                     }}
                   />
                 );
@@ -479,7 +518,12 @@ export const Chat = memo(({ stopConversationRef }: Props) => {
             textareaRef={textareaRef}
             onSend={(message) => {
               const { lastMessage } = getSelectMessagesLast();
-              handleSend(message, lastMessage?.parentId, lastMessage?.id);
+              handleSend(
+                message,
+                lastMessage?.parentId,
+                lastMessage?.id,
+                false
+              );
             }}
             onScrollDownClick={handleScrollDown}
             showScrollDownButton={showScrollDownButton}

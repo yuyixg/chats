@@ -20,8 +20,11 @@ export interface Props {
   id: string;
   parentId: string | null;
   childrenIds: string[];
+  assistantChildrenIds: string[];
   currentSelectIndex: number;
+  assistantCurrentSelectIndex: number;
   parentChildrenIds: string[];
+  modelName?: string;
   message: Message;
   onChangeMessage?: (messageId: string) => void;
   onEdit?: (editedMessage: Message, parentId: string | null) => void;
@@ -32,8 +35,11 @@ export const ChatMessage: FC<Props> = memo(
   ({
     id,
     parentChildrenIds,
+    assistantChildrenIds,
     currentSelectIndex,
+    assistantCurrentSelectIndex,
     parentId,
+    modelName,
     message,
     onEdit,
     onChangeMessage,
@@ -41,7 +47,7 @@ export const ChatMessage: FC<Props> = memo(
   }) => {
     const { t } = useTranslation('chat');
     const {
-      state: { selectChatId, messageIsStreaming, selectMessageLastId },
+      state: { selectChatId, messageIsStreaming, currentChatMessageId },
       dispatch: homeDispatch,
     } = useContext(HomeContext);
 
@@ -321,25 +327,76 @@ export const ChatMessage: FC<Props> = memo(
                     }}
                   >
                     {`${message.content.text}${
-                      messageIsStreaming && id == selectMessageLastId
+                      messageIsStreaming && id == currentChatMessageId
                         ? '`▍`'
                         : ''
                     }`}
                   </MemoizedReactMarkdown>
                 </div>
 
-                <div className='flex gap-2'>
-                  {messagedCopied ? (
-                    <IconCheck className='text-green-500 dark:text-green-400' />
-                  ) : (
-                    <button
-                      className='invisible group-hover:visible focus:visible text-gray-500 hover:text-gray-700 dark:text-gray-400 dark:hover:text-gray-300'
-                      onClick={copyOnClick}
-                    >
-                      <IconCopy />
-                    </button>
-                  )}
-                  {id == selectMessageLastId && !messageIsStreaming && (
+                {!messageIsStreaming && (
+                  <div className='flex gap-2'>
+                    {assistantChildrenIds.length > 1 && (
+                      <div className='flex gap-1 text-sm'>
+                        <button
+                          className={
+                            assistantCurrentSelectIndex === 0 ||
+                            messageIsStreaming
+                              ? 'text-gray-400'
+                              : 'cursor-pointer'
+                          }
+                          disabled={
+                            assistantCurrentSelectIndex === 0 ||
+                            messageIsStreaming
+                          }
+                          onClick={() => {
+                            if (onChangeMessage) {
+                              const index = assistantCurrentSelectIndex - 1;
+                              onChangeMessage(assistantChildrenIds[index]);
+                            }
+                          }}
+                        >
+                          &lt;
+                        </button>
+                        <span>
+                          {`${assistantCurrentSelectIndex + 1}/${
+                            assistantChildrenIds.length
+                          }`}
+                        </span>
+                        <button
+                          className={
+                            assistantCurrentSelectIndex ===
+                              assistantChildrenIds.length - 1 ||
+                            messageIsStreaming
+                              ? 'text-gray-400'
+                              : 'cursor-pointer'
+                          }
+                          disabled={
+                            assistantCurrentSelectIndex ===
+                              assistantChildrenIds.length - 1 ||
+                            messageIsStreaming
+                          }
+                          onClick={() => {
+                            if (onChangeMessage) {
+                              const index = assistantCurrentSelectIndex + 1;
+                              onChangeMessage(assistantChildrenIds[index]);
+                            }
+                          }}
+                        >
+                          &gt;
+                        </button>
+                      </div>
+                    )}
+                    {messagedCopied ? (
+                      <IconCheck className='text-green-500 dark:text-green-400' />
+                    ) : (
+                      <button
+                        className='invisible group-hover:visible focus:visible text-gray-500 hover:text-gray-700 dark:text-gray-400 dark:hover:text-gray-300'
+                        onClick={copyOnClick}
+                      >
+                        <IconCopy />
+                      </button>
+                    )}
                     <button
                       className='invisible group-hover:visible focus:visible text-gray-500 hover:text-gray-700 dark:text-gray-400 dark:hover:text-gray-300'
                       onClick={() => {
@@ -348,8 +405,11 @@ export const ChatMessage: FC<Props> = memo(
                     >
                       <IconRefresh />
                     </button>
-                  )}
-                </div>
+                    <button className='invisible group-hover:visible focus:visible text-sm'>
+                      {modelName}
+                    </button>
+                  </div>
+                )}
               </>
             )}
           </div>

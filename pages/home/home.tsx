@@ -57,6 +57,7 @@ interface HomeInitialState {
   currentMessages: ChatMessage[];
   selectMessages: ChatMessage[];
   selectMessageLastId: string;
+  currentChatMessageId: string;
   userModelConfig: Object;
   prompts: Prompt[];
   showChatbar: boolean;
@@ -74,6 +75,7 @@ const initialState: HomeInitialState = {
   userModelConfig: {},
   selectMessages: [],
   selectMessageLastId: '',
+  currentChatMessageId: '',
   models: [],
   chats: [],
   selectModelId: undefined,
@@ -270,7 +272,6 @@ const Home = () => {
         if (data.length > 0) {
           dispatch({ field: 'currentMessages', value: data });
           const lastMessage = data[data.length - 1];
-          debugger
           const _selectMessages = getSelectMessages(data, lastMessage.id);
           dispatch({
             field: 'selectMessages',

@@ -59,8 +59,8 @@ export class ChatMessagesManager {
   }
 
   static async checkIsFirstChat(chatId: string) {
-    const message = await prisma.chatMessages.findFirst({ where: { chatId } });
-    return message;
+    const count = await prisma.chatMessages.count({ where: { chatId } });
+    return count === 0;
   }
 
   static async findMessageById(id: string) {

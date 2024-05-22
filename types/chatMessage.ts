@@ -5,7 +5,9 @@ export interface ChatMessage {
   id: string;
   parentId: string | null;
   childrenIds: string[];
+  assistantChildrenIds: string[];
   content: Content;
+  modelName?: string;
   role: Role;
   tokenUsed?: number;
   calculatedPrice?: Decimal;

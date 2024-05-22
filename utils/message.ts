@@ -61,7 +61,6 @@ export function getSelectMessages(
     return [];
   }
   const messageChildren = findMessageChildren(conversations, message.id, []);
-  debugger
   if (!message.parentId) {
     selectMessages.push(message);
   } else {
@@ -73,7 +72,6 @@ export function getSelectMessages(
     messageParent.reverse();
     selectMessages = selectMessages.concat([...messageParent, message]);
   }
-  debugger
   selectMessages = selectMessages.concat(messageChildren);
   return selectMessages;
 }
