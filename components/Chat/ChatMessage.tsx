@@ -15,9 +15,11 @@ import rehypeMathjax from 'rehype-mathjax';
 import remarkGfm from 'remark-gfm';
 import remarkMath from 'remark-math';
 import { HomeContext } from '@/pages/home/home';
+import ChangeModel from './ChangeModel';
 
 export interface Props {
   id: string;
+  isLastMessage: boolean;
   parentId: string | null;
   childrenIds: string[];
   assistantChildrenIds: string[];
@@ -28,12 +30,13 @@ export interface Props {
   message: Message;
   onChangeMessage?: (messageId: string) => void;
   onEdit?: (editedMessage: Message, parentId: string | null) => void;
-  onRegenerate?: () => void;
+  onRegenerate?: (modelId?: string) => void;
 }
 
 export const ChatMessage: FC<Props> = memo(
   ({
     id,
+    isLastMessage,
     parentChildrenIds,
     assistantChildrenIds,
     currentSelectIndex,
@@ -335,7 +338,7 @@ export const ChatMessage: FC<Props> = memo(
                 </div>
 
                 {!messageIsStreaming && (
-                  <div className='flex gap-2'>
+                  <div className='flex gap-2 pt-2'>
                     {assistantChildrenIds.length > 1 && (
                       <div className='flex gap-1 text-sm'>
                         <button
@@ -387,27 +390,38 @@ export const ChatMessage: FC<Props> = memo(
                         </button>
                       </div>
                     )}
-                    {messagedCopied ? (
-                      <IconCheck className='text-green-500 dark:text-green-400' />
-                    ) : (
-                      <button
-                        className='invisible group-hover:visible focus:visible text-gray-500 hover:text-gray-700 dark:text-gray-400 dark:hover:text-gray-300'
-                        onClick={copyOnClick}
-                      >
-                        <IconCopy />
-                      </button>
-                    )}
-                    <button
-                      className='invisible group-hover:visible focus:visible text-gray-500 hover:text-gray-700 dark:text-gray-400 dark:hover:text-gray-300'
-                      onClick={() => {
-                        onRegenerate && onRegenerate();
-                      }}
+                    <div
+                      className={`flex gap-2 ${
+                        isLastMessage ? 'visible' : 'invisible'
+                      } group-hover:visible focus:visible`}
                     >
-                      <IconRefresh />
-                    </button>
-                    <button className='invisible group-hover:visible focus:visible text-sm'>
-                      {modelName}
-                    </button>
+                      {messagedCopied ? (
+                        <IconCheck className='text-green-500 dark:text-green-400' />
+                      ) : (
+                        <button
+                          className='text-gray-500 hover:text-gray-700 dark:text-gray-400 dark:hover:text-gray-300'
+                          onClick={copyOnClick}
+                        >
+                          <IconCopy />
+                        </button>
+                      )}
+                      <button
+                        className='text-gray-500 hover:text-gray-700 dark:text-gray-400 dark:hover:text-gray-300'
+                        onClick={() => {
+                          onRegenerate && onRegenerate();
+                        }}
+                      >
+                        <IconRefresh />
+                      </button>
+                      <button className='text-sm'>
+                        <ChangeModel
+                          onChangeModel={(modelId) => {
+                            onRegenerate && onRegenerate(modelId);
+                          }}
+                          modelName={modelName!}
+                        />
+                      </button>
+                    </div>
                   </div>
                 )}
               </>

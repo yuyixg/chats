@@ -466,6 +466,7 @@ export const Chat = memo(({ stopConversationRef }: Props) => {
                     currentSelectIndex={parentChildrenIds.findIndex(
                       (x) => x === current.id
                     )}
+                    isLastMessage={selectMessages.length - 1 === index}
                     id={current.id!}
                     key={current.id + index}
                     parentId={current.parentId}
@@ -480,8 +481,7 @@ export const Chat = memo(({ stopConversationRef }: Props) => {
                     onChangeMessage={(messageId) => {
                       handleUpdateSelectMessage(messageId);
                     }}
-                    onRegenerate={() => {
-                      console.log(current);
+                    onRegenerate={(modelId?: string) => {
                       const message = currentMessages.find(
                         (x) => x.id === current.parentId
                       );
@@ -490,7 +490,8 @@ export const Chat = memo(({ stopConversationRef }: Props) => {
                         { role: 'user', content: message.content },
                         current.parentId,
                         current.parentId || '',
-                        true
+                        true,
+                        modelId
                       );
                     }}
                     onEdit={(editedMessage, parentId) => {
