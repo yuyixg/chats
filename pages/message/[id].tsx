@@ -75,22 +75,23 @@ export default function MessageDetails() {
                 ?.childrenIds || [];
             parentChildrenIds = [...parentChildrenIds].reverse();
           }
-          return current.messages.map((message: any, index: number) => (
-            <ChatMessageComponent
-              currentSelectIndex={parentChildrenIds.findIndex(
-                (x) => x === current.id
-              )}
-              id={current.id!}
-              key={current.id + index}
-              parentId={current.parentId}
-              onChangeMessage={(messageId: string) => {
-                onMessageChange(messageId);
-              }}
-              childrenIds={current.childrenIds}
-              parentChildrenIds={parentChildrenIds}
-              message={message}
-            />
-          ));
+          return <></>
+          // return current.map((message: any, index: number) => (
+          //   <ChatMessageComponent
+          //     currentSelectIndex={parentChildrenIds.findIndex(
+          //       (x) => x === current.id
+          //     )}
+          //     id={current.id!}
+          //     key={current.id + index}
+          //     parentId={current.parentId}
+          //     onChangeMessage={(messageId: string) => {
+          //       onMessageChange(messageId);
+          //     }}
+          //     childrenIds={current.childrenIds}
+          //     parentChildrenIds={parentChildrenIds}
+          //     message={message}
+          //   />
+          // ));
         })}
     </>
   );

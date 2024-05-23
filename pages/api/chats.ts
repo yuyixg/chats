@@ -63,7 +63,6 @@ const handler = async (req: ChatsApiRequest) => {
     if (!chat) {
       throw new BadRequest();
     }
-    await ChatMessagesManager.deleteByChatId(id, userId);
     return await ChatsManager.delete(id);
   }
 };

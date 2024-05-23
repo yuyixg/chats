@@ -23,7 +23,7 @@ const ChangeModel = ({
       <PopoverContent>
         <div className='grid grid-1 items-center gap-4'>
           {models.map((x) => (
-            <p onClick={() => onChangeModel(x.id)}>{x.name}</p>
+            <p key={x.id} onClick={() => onChangeModel(x.id)}>{x.name}</p>
           ))}
         </div>
       </PopoverContent>
