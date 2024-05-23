@@ -337,7 +337,7 @@ export const ChatMessage: FC<Props> = memo(
                   </MemoizedReactMarkdown>
                 </div>
 
-                {!messageIsStreaming && (
+                {!messageIsStreaming ? (
                   <div className='flex gap-2 pt-2'>
                     {assistantChildrenIds.length > 1 && (
                       <div className='flex gap-1 text-sm'>
@@ -423,6 +423,8 @@ export const ChatMessage: FC<Props> = memo(
                       </button>
                     </div>
                   </div>
+                ) : (
+                  <div className='min-h-[20px]'></div>
                 )}
               </>
             )}

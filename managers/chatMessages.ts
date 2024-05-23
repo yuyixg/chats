@@ -27,9 +27,14 @@ export class ChatMessagesManager {
     return await prisma.chatMessages.create({ data: { ...params } });
   }
 
-  static async findUserMessageByChatId(chatId: string) {
+  static async findUserMessageByChatId(chatId: string, all: boolean = false) {
     let where: Prisma.ChatMessagesWhereInput = {
       chatId,
+      ...(!all && {
+        role: {
+          notIn: ['system'],
+        },
+      }),
     };
     return await prisma.chatMessages.findMany({
       where,

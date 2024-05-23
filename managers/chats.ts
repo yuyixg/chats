@@ -40,8 +40,9 @@ export class ChatsManager {
   }
 
   static async delete(id: string) {
-    return await prisma.chats.delete({
+    return await prisma.chats.update({
       where: { id },
+      data: { isDeleted: true },
     });
   }
 

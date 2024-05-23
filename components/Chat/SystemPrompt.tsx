@@ -208,7 +208,7 @@ export const SystemPrompt: FC<Props> = ({
         placeholder={
           t(`Enter a prompt or type "/" to select a prompt...`) || ''
         }
-        value={t(value) || ''}
+        value={value || ''}
         rows={1}
         onChange={handleChange}
         onKeyDown={handleKeyDown}

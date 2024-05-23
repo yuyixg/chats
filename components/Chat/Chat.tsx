@@ -160,7 +160,7 @@ export const Chat = memo(({ stopConversationRef }: Props) => {
       homeDispatch({ field: 'messageIsStreaming', value: true });
       const messageContent = message.content;
       const chatBody: ChatBody = {
-        modelId: selectModelId!,
+        modelId: modelId || selectModelId!,
         chatId: _selectChatId!,
         parentId: parentId,
         messageId,
@@ -168,7 +168,7 @@ export const Chat = memo(({ stopConversationRef }: Props) => {
         userModelConfig,
       };
       const endpoint = getModelEndpoint(
-        getModel(models, selectModelId!).modelProvider
+        getModel(models, modelId || selectModelId!).modelProvider
       );
       let body = JSON.stringify(chatBody);
 

@@ -94,57 +94,92 @@ const handler = async (req: ChatsApiRequest, res: ChatsApiResponse) => {
       : modelConfig?.enableSearch;
 
   let messagesToSend = [] as any[];
-  const promptToSend =
-    chatModel.modelVersion === ModelVersions.QWen
-      ? convertMessageTextToSend({ text: prompt }, 'system')
-      : convertMessageToSend({ text: prompt }, 'system');
 
+  const isFirstChat = await ChatMessagesManager.checkIsFirstChat(chatId);
+  if (isFirstChat) {
+    await ChatMessagesManager.create({
+      role: 'system',
+      messages: JSON.stringify({ text: prompt }),
+      chatId,
+      userId,
+    });
+  }
   const chatMessages = await ChatMessagesManager.findUserMessageByChatId(
-    chatId
+    chatId,
+    true
   );
+
+  let lastMessage = null;
+  let resParentId = messageId;
+  if (messageId) {
+    lastMessage = await ChatMessagesManager.findByUserMessageId(
+      messageId,
+      userId
+    );
+
+    if (lastMessage?.role === 'assistant') {
+      lastMessage = await ChatMessagesManager.create({
+        role: 'user',
+        messages: JSON.stringify(userMessage),
+        userId,
+        chatId,
+        parentId: messageId,
+      });
+      resParentId = lastMessage.id;
+      chatMessages.push(lastMessage);
+    }
+  } else {
+    lastMessage = await ChatMessagesManager.create({
+      role: 'user',
+      messages: JSON.stringify(userMessage),
+      userId,
+      chatId,
+    });
+    resParentId = lastMessage.id;
+    chatMessages.push(lastMessage);
+  }
+
   const findParents = (
     items: ChatMessages[],
-    id: string | null
+    id: string | null,
+    foundItems: ChatMessages[]
   ): ChatMessages[] => {
     if (!id) return [];
     const currentItem = items.find((item) => item.id === id);
+    currentItem && foundItems.push(currentItem);
     if (currentItem && currentItem.parentId !== null) {
-      return [currentItem, ...findParents(items, currentItem.parentId)];
+      return findParents(items, currentItem.parentId, foundItems);
     }
-    return currentItem ? [currentItem] : [];
+    return foundItems;
   };
-  const messages = findParents(chatMessages, parentId);
+  const messages = findParents(chatMessages, resParentId, []);
 
-  messages.forEach((m) => {
-    const chatMessages = JSON.parse(m.messages) as Message[];
+  const systemMessages = chatMessages.filter((x) => x.role === 'system');
+  const allMessages = [...messages, ...systemMessages].reverse();
+  allMessages.forEach((m) => {
+    const chatMessages = JSON.parse(m.messages) as Content;
     let _messages = [] as any[];
+    let content = {} as QianWenMessage | QianWenMaxMessage;
     if (chatModel.modelVersion === ModelVersions.QWen) {
-      _messages = chatMessages.map((x) => {
-        return convertMessageTextToSend(x.content, x.role);
-      });
+      content = convertMessageTextToSend(chatMessages, m.role as Role);
     } else {
-      chatMessages.forEach((x) => {
-        const content = convertMessageToSend(x.content, x.role);
-        _messages.push(content as any);
-      });
+      content = convertMessageToSend(chatMessages, m.role as Role);
     }
-    messagesToSend = [...messagesToSend, ..._messages];
+    _messages.push(content as any);
+    messagesToSend.push(..._messages);
   });
+
   const userMessageToSend =
     chatModel.modelVersion === ModelVersions.QWen
       ? convertMessageTextToSend(userMessage)
       : convertMessageToSend(userMessage);
 
-  const currentMessage = [
-    {
-      role: 'user',
-      content: userMessage,
-    },
-  ];
-
   messagesToSend.push(userMessageToSend);
-  messagesToSend.unshift(promptToSend);
 
+  if (lastMessage?.role === 'user') {
+    messagesToSend.pop();
+  }
+  console.log('messagesToSend \n', messagesToSend);
   const stream = await QianWenStream(
     chatModel,
     temperature,
@@ -172,13 +207,9 @@ const handler = async (req: ChatsApiRequest, res: ChatsApiResponse) => {
             input_tokens + (image_tokens || 0),
             output_tokens
           );
-          currentMessage.push({
-            role: 'assistant',
-            content: { text: assistantResponse },
-          });
 
           await ChatModelRecordManager.recordTransfer({
-            messageId,
+            isFirstChat,
             userId,
             chatId,
             tokenUsed,
@@ -186,10 +217,12 @@ const handler = async (req: ChatsApiRequest, res: ChatsApiResponse) => {
             calculatedPrice,
             chatModelId: chatModel.id,
             createChatMessageParams: {
+              role: 'assistant',
               chatId,
               userId,
-              parentId,
-              messages: JSON.stringify(currentMessage),
+              chatModelId: modelId,
+              parentId: resParentId,
+              messages: JSON.stringify({ text: assistantResponse }),
               tokenUsed,
               calculatedPrice,
             },
