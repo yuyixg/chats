@@ -74,21 +74,65 @@ const handler = async (req: ChatsApiRequest, res: ChatsApiResponse) => {
 
   let messagesToSend = [] as any[];
 
+  const isFirstChat = await ChatMessagesManager.checkIsFirstChat(chatId);
+  if (isFirstChat) {
+    await ChatMessagesManager.create({
+      role: 'system',
+      messages: JSON.stringify({ text: prompt }),
+      chatId,
+      userId,
+    });
+  }
   const chatMessages = await ChatMessagesManager.findUserMessageByChatId(
-    chatId
+    chatId,
+    true
   );
+  let lastMessage = null;
+  let resParentId = messageId;
+  if (messageId) {
+    lastMessage = await ChatMessagesManager.findByUserMessageId(
+      messageId,
+      userId
+    );
+
+    if (lastMessage?.role === 'assistant') {
+      lastMessage = await ChatMessagesManager.create({
+        role: 'user',
+        messages: JSON.stringify(userMessage),
+        userId,
+        chatId,
+        parentId: messageId,
+      });
+      resParentId = lastMessage.id;
+      chatMessages.push(lastMessage);
+    }
+  } else {
+    lastMessage = await ChatMessagesManager.create({
+      role: 'user',
+      messages: JSON.stringify(userMessage),
+      userId,
+      chatId,
+    });
+    resParentId = lastMessage.id;
+    chatMessages.push(lastMessage);
+  }
+
   const findParents = (
     items: ChatMessages[],
-    id: string | null
+    id: string | null,
+    foundItems: ChatMessages[]
   ): ChatMessages[] => {
     if (!id) return [];
     const currentItem = items.find((item) => item.id === id);
+    currentItem && foundItems.push(currentItem);
     if (currentItem && currentItem.parentId !== null) {
-      return [currentItem, ...findParents(items, currentItem.parentId)];
+      return findParents(items, currentItem.parentId, foundItems);
     }
-    return currentItem ? [currentItem] : [];
+    return foundItems;
   };
-  const messages = findParents(chatMessages, parentId);
+  const messages = findParents(chatMessages, resParentId, []);
+
+  const systemMessages = chatMessages.filter((x) => x.role === 'system');
 
   function convertMessageToSend(messageContent: Content, role: Role = 'user') {
     return { role, content: messageContent.text } as GPT4Message;
@@ -108,20 +152,18 @@ const handler = async (req: ChatsApiRequest, res: ChatsApiResponse) => {
     return message;
   }
 
-  messages.forEach((m) => {
-    const chatMessages = JSON.parse(m.messages) as Message[];
+  const allMessages = [...messages, ...systemMessages].reverse();
+  allMessages.forEach((m) => {
+    const chatMessages = JSON.parse(m.messages) as Content;
     let _messages = [] as GPT4Message[] | GPT4VisionMessage[];
+    let content = {} as GPT4Message | GPT4VisionMessage;
     if (chatModel.modelVersion === ModelVersions.yi_vl_plus) {
-      chatMessages.forEach((x) => {
-        const content = convertToGPTVisionMessage(x.content, x.role);
-        _messages.push(content as any);
-      });
+      content = convertToGPTVisionMessage(chatMessages, m.role as Role);
     } else {
-      _messages = chatMessages.map((x) => {
-        return convertMessageToSend(x.content, x.role);
-      });
+      content = convertMessageToSend(chatMessages, m.role as Role);
     }
-    messagesToSend = [...messagesToSend, ..._messages];
+    _messages.push(content as any);
+    messagesToSend.push(..._messages);
   });
 
   const userMessageToSend =
@@ -129,27 +171,13 @@ const handler = async (req: ChatsApiRequest, res: ChatsApiResponse) => {
       ? convertToGPTVisionMessage(userMessage)
       : convertMessageToSend(userMessage);
 
-  const currentMessage = [
-    {
-      role: 'user',
-      content: userMessage,
-    },
-  ];
-
-  const promptToSend =
-    chatModel.modelVersion === ModelVersions.yi_vl_plus
-      ? convertToGPTVisionMessage({ text: prompt }, 'system')
-      : convertMessageToSend({ text: prompt }, 'system');
-
   messagesToSend.push(userMessageToSend);
-  messagesToSend.unshift(promptToSend);
+  if (lastMessage?.role === 'user') {
+    messagesToSend.pop();
+  }
 
-  const stream = await LingYiStream(
-    chatModel,
-    temperature,
-    messagesToSend
-  );
-  let assistantMessage = '';
+  const stream = await LingYiStream(chatModel, temperature, messagesToSend);
+  let assistantResponse = '';
   res.setHeader('Content-Type', 'application/octet-stream');
   if (stream.getReader) {
     const reader = stream.getReader();
@@ -159,7 +187,7 @@ const handler = async (req: ChatsApiRequest, res: ChatsApiResponse) => {
         const { done, value } = await reader.read();
         if (value) {
           result = JSON.parse(value) as LingYiSteamResult;
-          assistantMessage += result.text;
+          assistantResponse += result.text;
         }
         if (done) {
           const { total_tokens, prompt_tokens, completion_tokens } =
@@ -170,13 +198,9 @@ const handler = async (req: ChatsApiRequest, res: ChatsApiResponse) => {
             prompt_tokens,
             completion_tokens
           );
-          currentMessage.push({
-            role: 'assistant',
-            content: { text: assistantMessage },
-          });
 
           await ChatModelRecordManager.recordTransfer({
-            messageId,
+            isFirstChat,
             userId,
             chatId,
             tokenUsed,
@@ -184,10 +208,12 @@ const handler = async (req: ChatsApiRequest, res: ChatsApiResponse) => {
             calculatedPrice,
             chatModelId: chatModel.id,
             createChatMessageParams: {
+              role: 'assistant',
               chatId,
               userId,
-              parentId,
-              messages: JSON.stringify(currentMessage),
+              chatModelId: modelId,
+              parentId: resParentId,
+              messages: JSON.stringify({ text: assistantResponse }),
               tokenUsed,
               calculatedPrice,
             },

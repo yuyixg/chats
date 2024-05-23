@@ -134,13 +134,9 @@ const handler = async (req: ChatsApiRequest, res: ChatsApiResponse) => {
   const allMessages = [...messages, ...systemMessages].reverse();
   allMessages.forEach((m) => {
     const chatMessages = JSON.parse(m.messages) as Content;
-    let _messages = [] as GPT4Message[] | GPT4VisionMessage[];
     const content = convertMessageToSend(chatMessages, m.role as Role);
-    _messages.push(content as any);
-    messagesToSend.push(..._messages);
+    messagesToSend.push(content);
   });
-
-  console.log('messagesToSend\n', messagesToSend);
 
   const userMessageToSend = convertMessageToSend(userMessage);
 

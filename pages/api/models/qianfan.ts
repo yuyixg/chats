@@ -66,46 +66,83 @@ const handler = async (req: ChatsApiRequest, res: ChatsApiResponse) => {
   );
   let messagesToSend: QianFanMessage[] = [];
 
+  const isFirstChat = await ChatMessagesManager.checkIsFirstChat(chatId);
+  if (isFirstChat) {
+    await ChatMessagesManager.create({
+      role: 'system',
+      messages: JSON.stringify({ text: prompt }),
+      chatId,
+      userId,
+    });
+  }
   const chatMessages = await ChatMessagesManager.findUserMessageByChatId(
-    chatId
+    chatId,
+    true
   );
+  let lastMessage = null;
+  let resParentId = messageId;
+  if (messageId) {
+    lastMessage = await ChatMessagesManager.findByUserMessageId(
+      messageId,
+      userId
+    );
+
+    if (lastMessage?.role === 'assistant') {
+      lastMessage = await ChatMessagesManager.create({
+        role: 'user',
+        messages: JSON.stringify(userMessage),
+        userId,
+        chatId,
+        parentId: messageId,
+      });
+      resParentId = lastMessage.id;
+      chatMessages.push(lastMessage);
+    }
+  } else {
+    lastMessage = await ChatMessagesManager.create({
+      role: 'user',
+      messages: JSON.stringify(userMessage),
+      userId,
+      chatId,
+    });
+    resParentId = lastMessage.id;
+    chatMessages.push(lastMessage);
+  }
+
   const findParents = (
     items: ChatMessages[],
-    id: string | null
+    id: string | null,
+    foundItems: ChatMessages[]
   ): ChatMessages[] => {
     if (!id) return [];
     const currentItem = items.find((item) => item.id === id);
+    currentItem && foundItems.push(currentItem);
     if (currentItem && currentItem.parentId !== null) {
-      return [currentItem, ...findParents(items, currentItem.parentId)];
+      return findParents(items, currentItem.parentId, foundItems);
     }
-    return currentItem ? [currentItem] : [];
+    return foundItems;
   };
-  const messages = findParents(chatMessages, parentId);
+  const messages = findParents(chatMessages, resParentId, []);
+
+  const systemMessages = chatMessages.filter((x) => x.role === 'system');
 
   function convertMessageToSend(messageContent: Content, role: Role = 'user') {
     return { role, content: messageContent.text } as QianFanMessage;
   }
 
-  messages.forEach((m) => {
-    const chatMessages = JSON.parse(m.messages) as Message[];
-    let _messages = [] as QianFanMessage[];
-
-    _messages = chatMessages.map((x) => {
-      return convertMessageToSend(x.content, x.role);
-    });
-
-    messagesToSend = [...messagesToSend, ..._messages];
+  const allMessages = [...messages, ...systemMessages].reverse();
+  allMessages.forEach((m) => {
+    const chatMessages = JSON.parse(m.messages) as Content;
+    let content = {} as QianFanMessage;
+    content = convertMessageToSend(chatMessages, m.role as Role);
+    messagesToSend.push(content);
   });
   const userMessageToSend = convertMessageToSend(userMessage);
 
-  const currentMessage = [
-    {
-      role: 'user',
-      content: userMessage,
-    },
-  ];
-
   messagesToSend.push(userMessageToSend);
+  if (lastMessage?.role === 'user') {
+    messagesToSend.pop();
+  }
 
   const stream = await QianFanStream(chatModel, messagesToSend, {
     temperature,
@@ -135,13 +172,8 @@ const handler = async (req: ChatsApiRequest, res: ChatsApiResponse) => {
             prompt_tokens,
             completion_tokens
           );
-          currentMessage.push({
-            role: 'assistant',
-            content: { text: assistantResponse },
-          });
-
           await ChatModelRecordManager.recordTransfer({
-            messageId,
+            isFirstChat,
             userId,
             chatId,
             tokenUsed,
@@ -149,10 +181,12 @@ const handler = async (req: ChatsApiRequest, res: ChatsApiResponse) => {
             calculatedPrice,
             chatModelId: chatModel.id,
             createChatMessageParams: {
+              role: 'assistant',
               chatId,
               userId,
-              parentId,
-              messages: JSON.stringify(currentMessage),
+              chatModelId: modelId,
+              parentId: resParentId,
+              messages: JSON.stringify({ text: assistantResponse }),
               tokenUsed,
               calculatedPrice,
             },
@@ -162,7 +196,7 @@ const handler = async (req: ChatsApiRequest, res: ChatsApiResponse) => {
               userModelConfig: JSON.stringify(userModelConfig),
             },
           });
-          
+
           return res.end();
         }
         res.write(Buffer.from(result.text));

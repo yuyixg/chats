@@ -157,15 +157,13 @@ const handler = async (req: ChatsApiRequest, res: ChatsApiResponse) => {
   const allMessages = [...messages, ...systemMessages].reverse();
   allMessages.forEach((m) => {
     const chatMessages = JSON.parse(m.messages) as Content;
-    let _messages = [] as GPT4Message[] | GPT4VisionMessage[];
     let content = {} as GPT4Message | GPT4VisionMessage;
     if (chatModel.modelVersion === ModelVersions.GPT_4_Vision) {
       content = convertToGPTVisionMessage(chatMessages, m.role as Role);
     } else {
       content = convertMessageToSend(chatMessages, m.role as Role);
     }
-    _messages.push(content as any);
-    messagesToSend.push(..._messages);
+    messagesToSend.push(content);
   });
 
   const userMessageToSend =
@@ -177,7 +175,6 @@ const handler = async (req: ChatsApiRequest, res: ChatsApiResponse) => {
   if (lastMessage?.role === 'user') {
     messagesToSend.pop();
   }
-  console.log('messagesToSend \n', messagesToSend);
 
   const stream = await OpenAIStream(chatModel, temperature, messagesToSend);
   let assistantResponse = '';

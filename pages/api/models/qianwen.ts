@@ -158,15 +158,13 @@ const handler = async (req: ChatsApiRequest, res: ChatsApiResponse) => {
   const allMessages = [...messages, ...systemMessages].reverse();
   allMessages.forEach((m) => {
     const chatMessages = JSON.parse(m.messages) as Content;
-    let _messages = [] as any[];
     let content = {} as QianWenMessage | QianWenMaxMessage;
     if (chatModel.modelVersion === ModelVersions.QWen) {
       content = convertMessageTextToSend(chatMessages, m.role as Role);
     } else {
       content = convertMessageToSend(chatMessages, m.role as Role);
     }
-    _messages.push(content as any);
-    messagesToSend.push(..._messages);
+    messagesToSend.push(content);
   });
 
   const userMessageToSend =
@@ -179,7 +177,6 @@ const handler = async (req: ChatsApiRequest, res: ChatsApiResponse) => {
   if (lastMessage?.role === 'user') {
     messagesToSend.pop();
   }
-  console.log('messagesToSend \n', messagesToSend);
   const stream = await QianWenStream(
     chatModel,
     temperature,
