@@ -168,7 +168,7 @@ export const SystemPrompt: FC<Props> = ({
 
   useEffect(() => {
     setValue(currentPrompt);
-  }, [selectModelId]);
+  }, [currentPrompt]);
 
   useEffect(() => {
     const handleOutsideClick = (e: MouseEvent) => {

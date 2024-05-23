@@ -356,6 +356,17 @@ export const Chat = memo(({ stopConversationRef }: Props) => {
         currentSelectChat?.userModelConfig?.enableSearch ||
         modelConfig?.enableSearch,
     });
+    console.log({
+      name,
+      ...modelConfig,
+      temperature:
+        currentSelectChat?.userModelConfig?.temperature ||
+        modelConfig?.temperature,
+      prompt: currentSelectChat?.userModelConfig?.prompt || modelConfig?.prompt,
+      enableSearch:
+        currentSelectChat?.userModelConfig?.enableSearch ||
+        modelConfig?.enableSearch,
+    });
     setModelApiConfig(ModelTemplates[modelVersion]?.config as any);
   }, [selectModelId]);
 
