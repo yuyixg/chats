@@ -11,7 +11,7 @@ datasource db {
 }
 
 model Users {
-  id           String        @id @default(uuid())
+  id           String        @id @default(uuid()) @db.UniqueIdentifier
   avatar       String?
   account      String?
   username     String?
@@ -30,10 +30,11 @@ model Users {
   AuditLogs    RequestLogs[]
   Orders       Orders[]
   Chats        Chats[]
+  Prompts      Prompts[]
 }
 
 model FileServices {
-  id        String   @id @default(uuid())
+  id        String   @id @default(uuid()) @db.UniqueIdentifier
   name      String
   enabled   Boolean  @default(true)
   type      String
@@ -43,15 +44,15 @@ model FileServices {
 }
 
 model ChatModels {
-  id            String     @id @default(uuid())
+  id            String     @id @default(uuid()) @db.UniqueIdentifier
   modelProvider String
   modelVersion  String
   name          String
   isDefault     Boolean    @default(false)
   rank          Int?
   remarks       String?
-  modelKeysId   String?
-  fileServerId  String?
+  modelKeysId   String?    @db.UniqueIdentifier
+  fileServiceId String?    @db.UniqueIdentifier
   fileConfig    String?    @default("{}") @db.NVarChar(2048)
   modelConfig   String     @default("{}") @db.NVarChar(2048)
   priceConfig   String     @default("{}") @db.NVarChar(2048)
@@ -63,16 +64,16 @@ model ChatModels {
 }
 
 model Sessions {
-  id        String   @id @default(uuid())
+  id        String   @id @default(uuid()) @db.UniqueIdentifier
   user      Users    @relation(fields: [userId], references: [id])
-  userId    String
+  userId    String   @db.UniqueIdentifier
   createdAt DateTime @default(now())
   updatedAt DateTime @updatedAt
 }
 
 model UserModels {
-  id        String   @id @default(uuid())
-  userId    String
+  id        String   @id @default(uuid()) @db.UniqueIdentifier
+  userId    String   @db.UniqueIdentifier
   models    String   @default("[]")
   createdAt DateTime @default(now())
   updatedAt DateTime @updatedAt
@@ -80,46 +81,46 @@ model UserModels {
 }
 
 model Chats {
-  id                              String         @id @default(uuid())
-  title                           String         @db.NVarChar(50)
-  userId                          String
-  chatModelId                     String?
-  userModelConfig                 String         @default("{}")
-  displayingLeafChatMessageNodeId String?
-  isShared                        Boolean        @default(false)
-  isDeleted                       Boolean        @default(false)
-  createdAt                       DateTime       @default(now())
-  user                            Users          @relation(fields: [userId], references: [id])
-  chatModel                       ChatModels?    @relation(fields: [chatModelId], references: [id])
-  ChatMessages                    ChatMessages[]
+  id              String         @id @default(uuid()) @db.UniqueIdentifier
+  title           String         @db.NVarChar(50)
+  userId          String         @db.UniqueIdentifier
+  chatModelId     String?        @db.UniqueIdentifier
+  userModelConfig String         @default("{}")
+  isShared        Boolean        @default(false)
+  isDeleted       Boolean        @default(false)
+  createdAt       DateTime       @default(now())
+  user            Users          @relation(fields: [userId], references: [id])
+  chatModel       ChatModels?    @relation(fields: [chatModelId], references: [id])
+  ChatMessages    ChatMessages[]
 }
 
 model ChatMessages {
-  id                String   @id @default(uuid())
-  userId            String
-  chatId            String
-  parentId          String?
-  userMessage       String   @db.Text()
-  assistantResponse String   @db.Text()
-  calculatedPrice   Decimal
-  tokenUsed         Int
-  isDeleted         Boolean  @default(false)
-  createdAt         DateTime @default(now())
-  chats             Chats    @relation(fields: [chatId], references: [id])
+  id              String   @id @default(uuid()) @db.UniqueIdentifier
+  userId          String   @db.UniqueIdentifier
+  chatId          String   @db.UniqueIdentifier
+  parentId        String?
+  chatModelId     String?
+  role            String
+  messages        String   @db.NText()
+  calculatedPrice Decimal  @default(0)
+  tokenUsed       Int      @default(0)
+  createdAt       DateTime @default(now())
+  chats           Chats    @relation(fields: [chatId], references: [id])
 }
 
 model UserBalances {
-  id        String   @id @default(uuid())
+  id        String   @id @default(uuid()) @db.UniqueIdentifier
   balance   Decimal  @default(0)
-  userId    String   @unique
+  userId    String   @unique @db.UniqueIdentifier
   createdAt DateTime @default(now())
   updatedAt DateTime @updatedAt
   user      Users    @relation(fields: [userId], references: [id])
 }
 
 model BalanceLogs {
-  id           String   @id @default(uuid())
-  userId       String
+  id           String   @id @default(uuid()) @db.UniqueIdentifier
+  userId       String   @db.UniqueIdentifier
+  messageId    String?  @db.UniqueIdentifier
   createUserId String
   value        Decimal  @default(0)
   type         Int
@@ -128,8 +129,8 @@ model BalanceLogs {
 }
 
 model Orders {
-  id           String   @id @default(uuid())
-  createUserId String
+  id           String   @id @default(uuid()) @db.UniqueIdentifier
+  createUserId String   @db.UniqueIdentifier
   amount       Int
   outTradeNo   String
   status       String
@@ -141,14 +142,14 @@ model Orders {
 }
 
 model Counterfoils {
-  id        String   @id @default(uuid())
-  orderId   String
-  info      String   @db.Text()
+  id        String   @id @default(uuid()) @db.UniqueIdentifier
+  orderId   String   @db.UniqueIdentifier
+  info      String   @db.NText()
   createdAt DateTime @default(now())
 }
 
 model LoginServices {
-  id        String   @id @default(uuid())
+  id        String   @id @default(uuid()) @db.UniqueIdentifier
   type      String
   enabled   Boolean  @default(true)
   configs   String   @default("{}") @db.NVarChar(2048)
@@ -157,7 +158,7 @@ model LoginServices {
 }
 
 model UserSms {
-  id        String   @id @default(uuid())
+  id        String   @id @default(uuid()) @db.UniqueIdentifier
   type      String
   status    String
   code      String
@@ -165,36 +166,48 @@ model UserSms {
 }
 
 model PayServices {
-  id        String   @id @default(uuid())
+  id        String   @id @default(uuid()) @db.UniqueIdentifier
   type      String
   enabled   Boolean  @default(true)
-  configs   String   @db.Text()
+  configs   String   @db.NText()
   createdAt DateTime @default(now())
   updatedAt DateTime @updatedAt
 }
 
 model RequestLogs {
-  id           String   @id @default(uuid())
+  id           String   @id @default(uuid()) @db.UniqueIdentifier
   ip           String?
-  userId       String?
+  userId       String?  @db.UniqueIdentifier
   url          String
   method       String
   statusCode   Int
   responseTime String
   requestTime  String
-  headers      String?  @db.Text()
-  request      String?  @db.Text()
-  response     String?  @db.Text()
+  headers      String?  @db.NText()
+  request      String?  @db.NText()
+  response     String?  @db.NText()
   createdAt    DateTime @default(now())
   user         Users?   @relation(fields: [userId], references: [id])
 }
 
 model ModelKeys {
-  id         String       @id @default(uuid())
+  id         String       @id @default(uuid()) @db.UniqueIdentifier
   name       String       @db.NVarChar(100)
   type       String       @db.NVarChar(50)
   configs    String       @db.NVarChar(2048)
   createdAt  DateTime     @default(now())
   updatedAt  DateTime     @updatedAt
   ChatModels ChatModels[]
+}
+
+model Prompts {
+  id           String   @id @default(uuid()) @db.UniqueIdentifier
+  name         String   @db.NVarChar(100)
+  type         Int      @db.SmallInt
+  content      String?  @db.NVarChar(2048)
+  description  String?  @db.NVarChar(100)
+  createUserId String   @db.UniqueIdentifier
+  createdAt    DateTime @default(now())
+  updatedAt    DateTime @updatedAt
+  user         Users?   @relation(fields: [createUserId], references: [id])
 }

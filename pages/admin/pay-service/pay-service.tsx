@@ -13,7 +13,6 @@ import {
 } from '@/components/ui/table';
 import { Card } from '@/components/ui/card';
 import { Button } from '@/components/ui/button';
-import { IconPlus } from '@/components/Icons/index';
 import { DEFAULT_LANGUAGE } from '@/types/settings';
 import { PayServiceModal } from '@/components/Admin/PayService/PayServiceModal';
 
@@ -56,7 +55,6 @@ export default function PayService() {
             }}
             color='primary'
           >
-            <IconPlus stroke='white' />
             {t('Add Pay Service')}
           </Button>
         </div>

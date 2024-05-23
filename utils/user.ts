@@ -1,3 +1,4 @@
+import Cookies from './cookie';
 import { getSettingsLanguage } from './settings';
 
 export interface UserSession {
@@ -8,36 +9,46 @@ export interface UserSession {
   canRecharge: boolean;
 }
 
-export const saveUserSession = (user: UserSession) => {
+export interface UserInfo {
+  username: string;
+  role: string;
+  canRecharge: boolean;
+}
+
+export const saveUserInfo = (user: UserInfo) => {
   localStorage.setItem('user', JSON.stringify(user));
 };
-export const clearUserSession = () => {
+export const clearUserInfo = () => {
   localStorage.removeItem('user');
 };
 
-export const getUserSession = () => {
+export const getUserInfo = () => {
   const user = localStorage.getItem('user');
   if (!user) {
     return null;
   }
-  return JSON.parse(user) as UserSession;
+  return JSON.parse(user) as UserInfo;
 };
 
 export const getLoginUrl = (locale?: string) => {
-  const _locale = locale || getSettingsLanguage();
-  return (_locale ? '/' + _locale : '') + '/login';
+  // const _locale = locale || getSettingsLanguage();
+  // return (_locale ? '/' + _locale : '') + '/login';
+  return '/login';
 };
 
 export const setUserSessionId = (sessionId: string) => {
   let expires = new Date();
-  expires.setDate(expires.getDate() + 1);
-  document.cookie = `sessionId=${sessionId}; expires=${expires.toUTCString()}; path=/`;
+  expires.setHours(expires.getHours() + 12);
+  Cookies.setItem('sessionId', sessionId, expires, '/');
+};
+
+export const getUserSessionId = () => {
+  return Cookies.getItem('sessionId');
 };
 
 export const clearUserSessionId = () => {
-  const user = getUserSession();
-  user &&
-    (document.cookie = `sessionId=${user.sessionId}; expires=-2738049600; path=/`);
+  const user = getUserInfo();
+  user && Cookies.removeItem('sessionId', '/');
 };
 
 export function replacePassword(value: string): string {

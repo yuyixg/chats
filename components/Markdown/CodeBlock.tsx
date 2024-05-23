@@ -1,11 +1,8 @@
-import { IconCheck, IconClipboard, IconDownload } from '@/components/Icons/index';
+import { IconCheck, IconClipboard } from '@/components/Icons/index';
 import { FC, memo, useState } from 'react';
 import { Prism as SyntaxHighlighter } from 'react-syntax-highlighter';
 import { oneDark } from 'react-syntax-highlighter/dist/cjs/styles/prism';
-
 import { useTranslation } from 'next-i18next';
-
-import { generateRandomString, programmingLanguages } from '@/utils/codeblock';
 
 interface Props {
   language: string;
@@ -29,36 +26,10 @@ export const CodeBlock: FC<Props> = memo(({ language, value }) => {
       }, 2000);
     });
   };
-  const downloadAsFile = () => {
-    const fileExtension = programmingLanguages[language] || '.file';
-    const suggestedFileName = `file-${generateRandomString(
-      3,
-      true
-    )}${fileExtension}`;
-    const fileName = window.prompt(
-      t('Enter file name') || '',
-      suggestedFileName
-    );
 
-    if (!fileName) {
-      // user pressed cancel on prompt
-      return;
-    }
-
-    const blob = new Blob([value], { type: 'text/plain' });
-    const url = URL.createObjectURL(blob);
-    const link = document.createElement('a');
-    link.download = fileName;
-    link.href = url;
-    link.style.display = 'none';
-    document.body.appendChild(link);
-    link.click();
-    document.body.removeChild(link);
-    URL.revokeObjectURL(url);
-  };
   return (
-    <div className='codeblock rounded-lg bg-gray-950 relative font-sans text-[16px]'>
-      <div className='flex items-center justify-between py-1.5 px-4'>
+    <div className='codeblock relative font-sans text-[16px]'>
+      <div className='flex items-center justify-between pb-2 px-2'>
         <span className='text-xs lowercase text-white'>{language}</span>
 
         <div className='flex items-center'>
@@ -66,14 +37,12 @@ export const CodeBlock: FC<Props> = memo(({ language, value }) => {
             className='flex gap-1.5 items-center rounded bg-none p-1 text-xs text-white'
             onClick={copyToClipboard}
           >
-            {isCopied ? <IconCheck size={18} /> : <IconClipboard size={18} />}
+            {isCopied ? (
+              <IconCheck stroke={'white'} size={18} />
+            ) : (
+              <IconClipboard stroke={'white'} size={18} />
+            )}
             {isCopied ? t('Copied!') : t('Copy code')}
-          </button>
-          <button
-            className='flex items-center rounded bg-none p-1 text-xs text-white'
-            onClick={downloadAsFile}
-          >
-            <IconDownload size={18} />
           </button>
         </div>
       </div>

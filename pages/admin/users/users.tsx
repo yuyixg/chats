@@ -1,7 +1,7 @@
 import React, { useEffect, useState } from 'react';
 import { getUsers } from '@/apis/adminService';
 import { GetUsersResult } from '@/types/admin';
-import { IconDots, IconPlus } from '@/components/Icons/index';
+import { IconDots } from '@/components/Icons/index';
 import { serverSideTranslations } from 'next-i18next/serverSideTranslations';
 import { useTranslation } from 'next-i18next';
 import { useThrottle } from '@/hooks/useThrottle';
@@ -86,7 +86,6 @@ export default function Users() {
             }}
           />
           <Button onClick={() => handleShowAddModal()} color='primary'>
-            <IconPlus stroke='white' />
             {t('Add User')}
           </Button>
         </div>
@@ -112,10 +111,7 @@ export default function Users() {
             isEmpty={users.length === 0}
           >
             {users.map((item) => (
-              <TableRow
-                className='cursor-pointer'
-                key={item.id}
-              >
+              <TableRow className='cursor-pointer' key={item.id}>
                 <TableCell>
                   <div className='flex gap-1 items-center'>
                     <div
@@ -176,7 +172,8 @@ export default function Users() {
       <EditUserBalanceModal
         onSuccessful={init}
         onClose={handleClose}
-        user={selectedUser}
+        userId={selectedUser?.id}
+        userBalance={selectedUser?.balance}
         isOpen={isOpenModal.recharge}
       />
     </>

@@ -56,6 +56,13 @@ const AdminLayout = ({
       title: t('User Models'),
     },
     {
+      url: '/admin/model-keys',
+      icon: (stroke?: string) => {
+        return <IconKey stroke={stroke} />;
+      },
+      title: t('Model Keys'),
+    },
+    {
       url: '/admin/models',
       icon: (stroke?: string) => {
         return <IconSettingsCog stroke={stroke} />;
@@ -63,11 +70,11 @@ const AdminLayout = ({
       title: t('Model Configs'),
     },
     {
-      url: '/admin/model-keys',
+      url: '/admin/messages',
       icon: (stroke?: string) => {
-        return <IconKey stroke={stroke} />;
+        return <IconMessages stroke={stroke} />;
       },
-      title: t('Model Keys'),
+      title: t('User Messages'),
     },
     {
       url: '/admin/file-service',
@@ -89,13 +96,6 @@ const AdminLayout = ({
         return <IconCreditCard stroke={stroke} />;
       },
       title: t('Pay Service'),
-    },
-    {
-      url: '/admin/messages',
-      icon: (stroke?: string) => {
-        return <IconMessages stroke={stroke} />;
-      },
-      title: t('User Messages'),
     },
     {
       url: '/admin/request-logs',

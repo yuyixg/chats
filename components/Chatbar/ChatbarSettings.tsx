@@ -1,4 +1,5 @@
 import {
+  IconBulbFilled,
   IconLogout,
   IconMoneybag,
   IconPasswordUser,
@@ -9,18 +10,10 @@ import {
 import { useContext, useState } from 'react';
 import { useTranslation } from 'next-i18next';
 import { SettingDialog } from '@/components/Settings/SettingDialog';
-
 import { SidebarButton } from '../Sidebar/SidebarButton';
-// import ChatbarContext from '../Chatbar.context';
-import { ClearConversations } from './ClearConversations';
-import ChatbarContext from './Chatbar.context';
 import { useRouter } from 'next/router';
 import { UserRole } from '@/types/admin';
-import {
-  clearUserSession,
-  getLoginUrl,
-  clearUserSessionId,
-} from '@/utils/user';
+import { clearUserInfo, getLoginUrl, clearUserSessionId } from '@/utils/user';
 import { HomeContext } from '@/pages/home/home';
 import { Popover, PopoverContent, PopoverTrigger } from '../ui/popover';
 import { Separator } from '../ui/separator';
@@ -36,19 +29,18 @@ export const ChatBarSettings = () => {
   const [isRechargeModalOpen, setIsRechargeModal] = useState<boolean>(false);
 
   const {
-    state: { user, conversations },
+    state: { user },
+    dispatch: homeDispatch,
   } = useContext(HomeContext);
-
-  const { handleClearConversations } = useContext(ChatbarContext);
 
   const logout = () => {
     clearUserSessionId();
-    clearUserSession();
+    clearUserInfo();
     router.push(getLoginUrl());
   };
 
   return (
-    <div className='flex flex-col items-center space-y-1 border-t border-white/20 pt-1 text-sm'>
+    <div className='flex flex-col items-center space-y-1 border-t border-black/5 dark:border-white/10 pt-2 text-sm'>
       {/* {conversations.length > 0 ? (
         <ClearConversations onClearConversations={handleClearConversations} />
       ) : null} */}
@@ -58,13 +50,6 @@ export const ChatBarSettings = () => {
         icon={<IconFileExport size={18} />}
         onClick={() => handleExportData()}
       /> */}
-
-      <SidebarButton
-        text={t('Settings')}
-        icon={<IconSettings size={18} />}
-        onClick={() => setIsSettingModal(true)}
-      />
-
       {user?.role === UserRole.admin && (
         <SidebarButton
           text={t('Admin Panel')}
@@ -95,13 +80,25 @@ export const ChatBarSettings = () => {
           </PopoverTrigger>
           <PopoverContent className='w-[244px]'>
             <SidebarButton
+              text={t('Prompt Management')}
+              icon={<IconBulbFilled size={18} />}
+              onClick={() => {
+                homeDispatch({ field: 'showPromptbar', value: true });
+              }}
+            />
+            <SidebarButton
+              text={t('Settings')}
+              icon={<IconSettings size={18} />}
+              onClick={() => setIsSettingModal(true)}
+            />
+            <Separator className='my-2' />
+            <SidebarButton
               text={t('Change Password')}
               icon={<IconPasswordUser size={18} />}
               onClick={() => {
                 setIsChangePasswordModal(true);
               }}
             />
-            <Separator className='my-2' />
             <SidebarButton
               text={t('Log out')}
               icon={<IconLogout size={18} />}

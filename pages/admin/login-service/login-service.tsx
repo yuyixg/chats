@@ -13,7 +13,6 @@ import {
 } from '@/components/ui/table';
 import { Card } from '@/components/ui/card';
 import { Button } from '@/components/ui/button';
-import { IconPlus } from '@/components/Icons/index';
 import { DEFAULT_LANGUAGE } from '@/types/settings';
 import { LoginServiceModal } from '@/components/Admin/LoginService/LoginServiceModal';
 
@@ -56,7 +55,6 @@ export default function LoginService() {
             }}
             color='primary'
           >
-            <IconPlus stroke='white' />
             {t('Add Login Service')}
           </Button>
         </div>

@@ -19,5 +19,6 @@
   "Must contain at least {{length}} character(s)": "必须至少包含{{length}}个字符",
   "Contain at most {{length}} character(s)": "最多包含{{length}}个字符",
   "Save": "保存",
-  "Yuan": "元"
+  "Yuan": "元",
+  "Prompt Management": "提示词管理"
 }

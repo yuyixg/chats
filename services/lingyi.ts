@@ -19,7 +19,6 @@ export interface LingYiSteamResult {
 
 export const LingYiStream = async (
   chatModel: ChatModels,
-  prompt: string,
   temperature: number,
   messages: GPT4Message[] | GPT4VisionMessage[]
 ) => {
@@ -37,12 +36,12 @@ export const LingYiStream = async (
     method: 'POST',
     body: JSON.stringify({
       model: modelVersion,
-      messages: [...messages],
+      messages: messages,
       ...(modelVersion === ModelVersions.yi_vl_plus
         ? { max_tokens: 4096 }
         : {}),
       stream: true,
-      temperature: 0.7,
+      temperature,
     }),
   };
 

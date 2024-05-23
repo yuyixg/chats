@@ -112,10 +112,10 @@ export const getMessages = (
 };
 
 export const getMessageDetails = (
-  messageId: string
+  chatId: string
 ): Promise<GetMessageDetailsResult> => {
   const fetchService = useFetch();
-  return fetchService.get(`/api/admin/message-details?messageId=${messageId}`);
+  return fetchService.get(`/api/admin/message-details?chatId=${chatId}`);
 };
 
 export const getFileServices = (

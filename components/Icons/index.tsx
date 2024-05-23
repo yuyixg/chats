@@ -107,8 +107,8 @@ const IconCopy = (props: IconProps) => {
       strokeLinejoin='round'
     >
       <path stroke='none' d='M0 0h24v24H0z' fill='none' />
-      <path d='M7 7m0 2.667a2.667 2.667 0 0 1 2.667 -2.667h8.666a2.667 2.667 0 0 1 2.667 2.667v8.666a2.667 2.667 0 0 1 -2.667 2.667h-8.666a2.667 2.667 0 0 1 -2.667 -2.667z' />
-      <path d='M4.012 16.737a2.005 2.005 0 0 1 -1.012 -1.737v-10c0 -1.1 .9 -2 2 -2h10c.75 0 1.158 .385 1.5 1' />
+      <path d='M9 5h-2a2 2 0 0 0 -2 2v12a2 2 0 0 0 2 2h10a2 2 0 0 0 2 -2v-12a2 2 0 0 0 -2 -2h-2' />
+      <path d='M9 3m0 2a2 2 0 0 1 2 -2h2a2 2 0 0 1 2 2v0a2 2 0 0 1 -2 2h-2a2 2 0 0 1 -2 -2z' />
     </svg>
   );
 };
@@ -274,76 +274,6 @@ const IconCircleX = (props: IconProps) => {
   );
 };
 
-const IconLoader2 = (props: IconProps) => {
-  const { className, size = 20, strokeWidth = 2, stroke, onClick } = props;
-
-  return (
-    <svg
-      xmlns='http://www.w3.org/2000/svg'
-      onClick={onClick}
-      className={className}
-      width={size}
-      height={size}
-      strokeWidth={strokeWidth}
-      stroke={stroke || 'hsl(var(--foreground))'}
-      viewBox='0 0 24 24'
-      fill='none'
-      strokeLinecap='round'
-      strokeLinejoin='round'
-    >
-      <path stroke='none' d='M0 0h24v24H0z' fill='none' />
-      <path d='M12 3a9 9 0 1 0 9 9' />
-    </svg>
-  );
-};
-
-const IconPlayerStop = (props: IconProps) => {
-  const { className, size = 20, strokeWidth = 2, stroke, onClick } = props;
-
-  return (
-    <svg
-      xmlns='http://www.w3.org/2000/svg'
-      onClick={onClick}
-      className={className}
-      width={size}
-      height={size}
-      strokeWidth={strokeWidth}
-      stroke={stroke || 'hsl(var(--foreground))'}
-      viewBox='0 0 24 24'
-      fill='none'
-      strokeLinecap='round'
-      strokeLinejoin='round'
-    >
-      <path stroke='none' d='M0 0h24v24H0z' fill='none' />
-      <path d='M5 5m0 2a2 2 0 0 1 2 -2h10a2 2 0 0 1 2 2v10a2 2 0 0 1 -2 2h-10a2 2 0 0 1 -2 -2z' />
-    </svg>
-  );
-};
-
-const IconRepeat = (props: IconProps) => {
-  const { className, size = 20, strokeWidth = 2, stroke, onClick } = props;
-
-  return (
-    <svg
-      xmlns='http://www.w3.org/2000/svg'
-      onClick={onClick}
-      className={className}
-      width={size}
-      height={size}
-      strokeWidth={strokeWidth}
-      stroke={stroke || 'hsl(var(--foreground))'}
-      viewBox='0 0 24 24'
-      fill='none'
-      strokeLinecap='round'
-      strokeLinejoin='round'
-    >
-      <path stroke='none' d='M0 0h24v24H0z' fill='none' />
-      <path d='M4 12v-3a3 3 0 0 1 3 -3h13m-3 -3l3 3l-3 3' />
-      <path d='M20 12v3a3 3 0 0 1 -3 3h-13m3 3l-3 -3l3 -3' />
-    </svg>
-  );
-};
-
 const IconSend = (props: IconProps) => {
   const { className, size = 20, strokeWidth = 2, stroke, onClick } = props;
 
@@ -411,9 +341,8 @@ const IconEdit = (props: IconProps) => {
       strokeLinejoin='round'
     >
       <path stroke='none' d='M0 0h24v24H0z' fill='none' />
-      <path d='M7 7h-1a2 2 0 0 0 -2 2v9a2 2 0 0 0 2 2h9a2 2 0 0 0 2 -2v-1' />
-      <path d='M20.385 6.585a2.1 2.1 0 0 0 -2.97 -2.97l-8.415 8.385v3h3l8.385 -8.415z' />
-      <path d='M16 5l3 3' />
+      <path d='M4 20h4l10.5 -10.5a2.828 2.828 0 1 0 -4 -4l-10.5 10.5v4' />
+      <path d='M13.5 6.5l4 4' />
     </svg>
   );
 };
@@ -642,30 +571,7 @@ const IconClipboard = (props: IconProps) => {
     </svg>
   );
 };
-const IconDownload = (props: IconProps) => {
-  const { className, size = 20, strokeWidth = 2, stroke, onClick } = props;
 
-  return (
-    <svg
-      xmlns='http://www.w3.org/2000/svg'
-      onClick={onClick}
-      className={className}
-      width={size}
-      height={size}
-      strokeWidth={strokeWidth}
-      stroke={stroke || 'hsl(var(--foreground))'}
-      viewBox='0 0 24 24'
-      fill='none'
-      strokeLinecap='round'
-      strokeLinejoin='round'
-    >
-      <path stroke='none' d='M0 0h24v24H0z' fill='none' />
-      <path d='M4 17v2a2 2 0 0 0 2 2h12a2 2 0 0 0 2 -2v-2' />
-      <path d='M7 11l5 5l5 -5' />
-      <path d='M12 4l0 12' />
-    </svg>
-  );
-};
 const IconBulbFilled = (props: IconProps) => {
   const { className, size = 20, strokeWidth = 2, stroke, onClick } = props;
 
@@ -1017,6 +923,106 @@ const IconDots = (props: IconProps) => {
   );
 };
 
+var IconShieldLock = (props: IconProps) => {
+  const { className, size = 20, strokeWidth = 2, stroke, onClick } = props;
+
+  return (
+    <svg
+      xmlns='http://www.w3.org/2000/svg'
+      onClick={onClick}
+      className={className}
+      width={size}
+      height={size}
+      strokeWidth={strokeWidth}
+      stroke={stroke || 'hsl(var(--foreground))'}
+      viewBox='0 0 24 24'
+      fill='none'
+      strokeLinecap='round'
+      strokeLinejoin='round'
+    >
+      <path stroke='none' d='M0 0h24v24H0z' fill='none' />
+      <path d='M12 3a12 12 0 0 0 8.5 3a12 12 0 0 1 -8.5 15a12 12 0 0 1 -8.5 -15a12 12 0 0 0 8.5 -3' />
+      <path d='M12 11m-1 0a1 1 0 1 0 2 0a1 1 0 1 0 -2 0' />
+      <path d='M12 12l0 2.5' />
+    </svg>
+  );
+};
+
+var IconRefresh = (props: IconProps) => {
+  const { className, size = 20, strokeWidth = 2, stroke, onClick } = props;
+
+  return (
+    <svg
+      xmlns='http://www.w3.org/2000/svg'
+      onClick={onClick}
+      className={className}
+      width={size}
+      height={size}
+      strokeWidth={strokeWidth}
+      stroke={stroke || 'hsl(var(--foreground))'}
+      viewBox='0 0 24 24'
+      fill='none'
+      strokeLinecap='round'
+      strokeLinejoin='round'
+    >
+      <path stroke='none' d='M0 0h24v24H0z' fill='none' />
+      <path d='M20 11a8.1 8.1 0 0 0 -15.5 -2m-.5 -4v4h4' />
+      <path d='M4 13a8.1 8.1 0 0 0 15.5 2m.5 4v-4h-4' />
+    </svg>
+  );
+};
+
+var IconStopFilled = (props: IconProps) => {
+  const { className, size = 20, strokeWidth = 2, stroke, onClick } = props;
+
+  return (
+    <svg
+      xmlns='http://www.w3.org/2000/svg'
+      onClick={onClick}
+      className={className}
+      width={size}
+      height={size}
+      strokeWidth={strokeWidth}
+      stroke={stroke || 'hsl(var(--foreground))'}
+      viewBox='0 0 24 24'
+      fill='none'
+      strokeLinecap='round'
+      strokeLinejoin='round'
+    >
+      <path stroke='none' d='M0 0h24v24H0z' fill='none' />
+      <path
+        d='M17 4h-10a3 3 0 0 0 -3 3v10a3 3 0 0 0 3 3h10a3 3 0 0 0 3 -3v-10a3 3 0 0 0 -3 -3z'
+        strokeWidth='0'
+        fill='currentColor'
+      />
+    </svg>
+  );
+};
+
+var IconArrowsExchange = (props: IconProps) => {
+  const { className, size = 20, strokeWidth = 2, stroke, onClick } = props;
+
+  return (
+    <svg
+      xmlns='http://www.w3.org/2000/svg'
+      onClick={onClick}
+      className={className}
+      width={size}
+      height={size}
+      strokeWidth={strokeWidth}
+      stroke={stroke || 'hsl(var(--foreground))'}
+      viewBox='0 0 24 24'
+      fill='none'
+      strokeLinecap='round'
+      strokeLinejoin='round'
+    >
+      <path stroke='none' d='M0 0h24v24H0z' fill='none' />
+      <path d='M4 12v-3a3 3 0 0 1 3 -3h13m-3 -3l3 3l-3 3' />
+      <path d='M20 12v3a3 3 0 0 1 -3 3h-13m3 3l-3 -3l3 -3' />
+    </svg>
+  );
+};
+
 var Base = (props: IconProps) => {
   const { className, size = 20, strokeWidth = 2, stroke, onClick } = props;
 
@@ -1037,32 +1043,6 @@ var Base = (props: IconProps) => {
   );
 };
 
-var IconShieldLock = (props: IconProps) => {
-  const { className, size = 20, strokeWidth = 2, stroke, onClick } = props;
-
-  return (
-    <svg
-      xmlns='http://www.w3.org/2000/svg'
-      onClick={onClick}
-      className={className}
-      width={size}
-      height={size}
-      strokeWidth={strokeWidth}
-      stroke={stroke || 'hsl(var(--foreground))'}
-      viewBox='0 0 24 24'
-      fill='none'
-      strokeLinecap='round'
-      strokeLinejoin='round'
-    >
-      {' '}
-      <path stroke='none' d='M0 0h24v24H0z' fill='none' />
-      <path d='M12 3a12 12 0 0 0 8.5 3a12 12 0 0 1 -8.5 15a12 12 0 0 1 -8.5 -15a12 12 0 0 0 8.5 -3' />
-      <path d='M12 11m-1 0a1 1 0 1 0 2 0a1 1 0 1 0 -2 0' />
-      <path d='M12 12l0 2.5' />
-    </svg>
-  );
-};
-
 export {
   IconShare,
   IconCheck,
@@ -1071,9 +1051,6 @@ export {
   IconUser,
   IconArrowDown,
   IconCircleX,
-  IconLoader2,
-  IconPlayerStop,
-  IconRepeat,
   IconSend,
   IconUpload,
   IconEdit,
@@ -1088,7 +1065,6 @@ export {
   IconPencil,
   IconX,
   IconClipboard,
-  IconDownload,
   IconBulbFilled,
   IconMenu,
   IconMistOff,
@@ -1104,4 +1080,7 @@ export {
   IconUsers,
   IconDots,
   IconShieldLock,
+  IconRefresh,
+  IconStopFilled,
+  IconArrowsExchange,
 };

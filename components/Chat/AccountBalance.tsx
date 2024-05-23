@@ -8,14 +8,14 @@ export const AccountBalance = () => {
   const { t } = useTranslation('chat');
   const [balance, setBalance] = useState(0);
   const {
-    state: { selectedConversation },
+    state: {},
   } = useContext(HomeContext);
 
   useEffect(() => {
     getUserBalance().then((data) => {
       setBalance(data);
     });
-  }, [selectedConversation]);
+  }, []);
 
   return (
     <div className='flex flex-col'>

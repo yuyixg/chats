@@ -8,6 +8,7 @@ export default async function auth(req: NextApiRequest, res: NextApiResponse) {
   const providers = [keyCloak];
   return await NextAuth(req, res, {
     providers,
+    secret: 'bmV4dC1hdXRoLXNlY3JldA==',
     callbacks: {
       async signIn(params: { user: any; account: any }) {
         const { account, user } = params;

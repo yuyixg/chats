@@ -1,7 +1,6 @@
-import { ChatMessageManager } from '@/managers';
-import { InternalServerError } from '@/utils/error';
+import { ChatMessagesManager, ChatsManager } from '@/managers';
 import { apiHandler } from '@/middleware/api-handler';
-import { ChatsApiRequest, ChatsApiResponse } from '@/types/next-api';
+import { ChatsApiRequest } from '@/types/next-api';
 export const config = {
   api: {
     bodyParser: {
@@ -13,15 +12,22 @@ export const config = {
 
 const handler = async (req: ChatsApiRequest) => {
   if (req.method === 'GET') {
-    const { messageId } = req.query as {
-      messageId: string;
+    const { chatId } = req.query as {
+      chatId: string;
     };
-    if (messageId) {
-      const message = await ChatMessageManager.findMessageById(messageId);
+    if (chatId) {
+      const chat = await ChatsManager.findChatIncludeAllById(chatId);
+      const chatMessages =
+        await ChatMessagesManager.findUserMessageDetailByChatId(chatId);
+      const modelConfig = JSON.parse(chat?.chatModel?.modelConfig || '{}');
+      const userModelConfig = JSON.parse(chat?.userModelConfig || '{}');
       return {
-        name: message?.name,
-        prompt: message?.prompt,
-        messages: JSON.parse(message?.messages || '[]'),
+        name: chat?.title,
+        modelName: chat?.chatModel?.name,
+        modelTemperature:
+          userModelConfig?.temperature || modelConfig?.temperature,
+        modelPrompt: userModelConfig?.prompt || modelConfig?.prompt,
+        messages: chatMessages,
       };
     }
   }

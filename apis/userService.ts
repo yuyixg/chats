@@ -1,13 +1,18 @@
 import { useFetch } from '@/hooks/useFetch';
+import { PostPromptParams, PutPromptParams } from '@/types/admin';
+import { ChatMessage } from '@/types/chatMessage';
 import { Model } from '@/types/model';
-import { ProviderResult, SingInParams } from '@/types/user';
-import { UserSession } from '@/utils/user';
+import { Prompt } from '@/types/prompt';
+import { ProviderResult, SingInParams, SingInResult } from '@/types/user';
+import { UserInfo } from '@/utils/user';
 
 export interface ChatResult {
   id: string;
   title: string;
   chatModelId?: string;
-  displayingLeafChatMessageNodeId: string;
+  modelName: string;
+  modelConfig: any;
+  userModelConfig: any;
   isShared: boolean;
 }
 
@@ -29,14 +34,19 @@ export const changeUserPassword = (newPassword: string) => {
   });
 };
 
-export const getUserMessages = () => {
+export const getUserMessages = (chatId: string): Promise<ChatMessage[]> => {
   const fetchService = useFetch();
-  return fetchService.get('/api/messages');
+  return fetchService.get('/api/messages?chatId=' + chatId);
 };
 
 export const getChats = (): Promise<ChatResult[]> => {
   const fetchService = useFetch();
   return fetchService.get('/api/chats');
+};
+
+export const getChat = (id: string): Promise<ChatResult> => {
+  const fetchService = useFetch();
+  return fetchService.get('/api/chats?id=' + id);
 };
 
 export const postChats = (params: PostChatParams): Promise<ChatResult> => {
@@ -79,7 +89,7 @@ export const getCsrfToken = (): Promise<{ csrfToken: string }> => {
   return fetchServer.get('/api/auth/csrf');
 };
 
-export const singIn = (params: SingInParams): Promise<UserSession> => {
+export const singIn = (params: SingInParams): Promise<SingInResult> => {
   const fetchServer = useFetch();
   return fetchServer.post('/api/public/login', { body: params });
 };
@@ -97,4 +107,24 @@ export const getUserBalance = () => {
 export const getLoginProvider = () => {
   const fetchServer = useFetch();
   return fetchServer.get<ProviderResult[]>('/api/public/login-provider');
+};
+
+export const getUserPrompts = () => {
+  const fetchServer = useFetch();
+  return fetchServer.get<Prompt[]>('/api/prompts');
+};
+
+export const postUserPrompts = (params: PostPromptParams) => {
+  const fetchServer = useFetch();
+  return fetchServer.post('/api/prompts', { body: params });
+};
+
+export const putUserPrompts = (params: PutPromptParams) => {
+  const fetchServer = useFetch();
+  return fetchServer.put('/api/prompts', { body: params });
+};
+
+export const deleteUserPrompts = (id: string) => {
+  const fetchServer = useFetch();
+  return fetchServer.delete('/api/prompts?id=' + id);
 };

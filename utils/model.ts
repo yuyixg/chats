@@ -89,7 +89,14 @@ export function mergeConfigs(obj1: any, obj2: any) {
   return JSON.stringify(config, null, 2);
 }
 
-export const ModelPriceUnit = 100000;
+export const ModelPriceUnit = 1000000;
+
+export function conversionModelPriceToCreate(priceConfig: string) {
+  const configs = JSON.parse(priceConfig) as ChatModelPriceConfig;
+  configs.input = Number((configs.input * ModelPriceUnit).toFixed(2));
+  configs.out = Number((configs.out * ModelPriceUnit).toFixed(2));
+  return JSON.stringify(configs, null, 2);
+}
 
 export function conversionModelPriceToDisplay(priceConfig: string) {
   const configs = JSON.parse(priceConfig) as ChatModelPriceConfig;

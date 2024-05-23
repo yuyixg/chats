@@ -11,6 +11,8 @@ import { RequestLogsManager } from './requestLogs';
 import { PayServiceManager } from './payService';
 import { ModelKeysManager } from './modelKeys';
 import { ChatsManager } from './chats';
+import { PromptsManager } from './prompts';
+import { ChatModelRecordManager } from './chatModel';
 
 export {
   ChatModelManager,
@@ -26,4 +28,6 @@ export {
   PayServiceManager,
   ModelKeysManager,
   ChatsManager,
+  PromptsManager,
+  ChatModelRecordManager,
 };

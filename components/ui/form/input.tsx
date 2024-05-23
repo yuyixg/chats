@@ -16,6 +16,7 @@ const FormInput = ({
   type,
   hidden,
   disabled,
+  autocomplete,
 }: {
   label?: string;
   options?: IFormFieldOption;
@@ -23,12 +24,14 @@ const FormInput = ({
   type?: HTMLInputTypeAttribute;
   hidden?: boolean;
   disabled?: boolean;
+  autocomplete?: string;
 }) => {
   return (
     <FormItem className='py-2' hidden={hidden}>
       <FormLabel>{options?.label || label}</FormLabel>
       <FormControl>
         <Input
+          autoComplete={autocomplete}
           disabled={disabled}
           type={type}
           placeholder={options?.placeholder}

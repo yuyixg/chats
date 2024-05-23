@@ -1,31 +1,36 @@
-import { FC, useContext, useState } from 'react';
+import { FC, useContext, useEffect, useState } from 'react';
 import { useTranslation } from 'next-i18next';
-import { DEFAULT_TEMPERATURE } from '@/utils/const';
 import { HomeContext } from '@/pages/home/home';
-
 
 interface Props {
   label: string;
+  defaultTemperature: number;
+  min: number;
+  max: number;
   onChangeTemperature: (temperature: number) => void;
 }
 
 export const TemperatureSlider: FC<Props> = ({
   label,
+  defaultTemperature,
+  min,
+  max,
   onChangeTemperature,
 }) => {
   const {
-    state: { conversations },
+    state: {},
   } = useContext(HomeContext);
-  const lastConversation = conversations[conversations.length - 1];
-  const [temperature, setTemperature] = useState(
-    lastConversation?.temperature ?? DEFAULT_TEMPERATURE
-  );
+  const [temperature, setTemperature] = useState(defaultTemperature);
   const { t } = useTranslation('chat');
   const handleChange = (event: React.ChangeEvent<HTMLInputElement>) => {
     const newValue = parseFloat(event.target.value);
     setTemperature(newValue);
     onChangeTemperature(newValue);
   };
+
+  useEffect(() => {
+    setTemperature(defaultTemperature);
+  }, [defaultTemperature]);
 
   return (
     <div className='flex flex-col'>
@@ -38,14 +43,14 @@ export const TemperatureSlider: FC<Props> = ({
         )}
       </span>
       <span className='mt-2 mb-1 text-center text-neutral-900 dark:text-neutral-100'>
-        {temperature.toFixed(1)}
+        {temperature.toFixed(2)}
       </span>
       <input
         className='cursor-pointer'
         type='range'
-        min={0}
-        max={1}
-        step={0.1}
+        min={min}
+        max={max}
+        step={0.01}
         value={temperature}
         onChange={handleChange}
       />

@@ -1,5 +1,4 @@
 import { putUserBalance } from '@/apis/adminService';
-import { GetUsersResult } from '@/types/admin';
 import { z } from 'zod';
 import { useTranslation } from 'next-i18next';
 import React, { useEffect, useState } from 'react';
@@ -17,9 +16,11 @@ import FormInput from '../../ui/form/input';
 import { useForm } from 'react-hook-form';
 import { zodResolver } from '@hookform/resolvers/zod';
 import { Button } from '../../ui/button';
+import Decimal from 'decimal.js';
 
 interface IProps {
-  user?: GetUsersResult | null;
+  userId?: string;
+  userBalance?: Decimal;
   isOpen: boolean;
   onClose: () => void;
   onSuccessful: () => void;
@@ -27,7 +28,7 @@ interface IProps {
 
 export const EditUserBalanceModal = (props: IProps) => {
   const { t } = useTranslation('admin');
-  const { user, isOpen, onClose, onSuccessful } = props;
+  const { userId, userBalance, isOpen, onClose, onSuccessful } = props;
   const [loading, setLoading] = useState(false);
   const formFields: IFormFieldOption[] = [
     {
@@ -71,7 +72,7 @@ export const EditUserBalanceModal = (props: IProps) => {
   const onSubmit = (values: z.infer<typeof formSchema>) => {
     if (!form.formState.isValid) return;
     setLoading(true);
-    putUserBalance({ userId: user!.id, value: values.value })
+    putUserBalance({ userId: userId!, value: values.value })
       .then(() => {
         toast.success(t('Recharged successfully'));
         onSuccessful();
@@ -96,7 +97,7 @@ export const EditUserBalanceModal = (props: IProps) => {
             <DialogTitle>{t('User recharge')}</DialogTitle>
           </DialogHeader>
           <p className='text-sm text-muted-foreground'>
-            {t('Current Balance')}: {(+user!.balance).toFixed(2)} {t('Yuan')}
+            {t('Current Balance')}: {(+userBalance!).toFixed(2)} {t('Yuan')}
           </p>
           <Form {...form}>
             <form onSubmit={form.handleSubmit(onSubmit)}>

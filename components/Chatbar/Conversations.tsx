@@ -1,5 +1,3 @@
-import { Conversation } from '@/types/chat';
-
 import { ConversationComponent } from './Conversation';
 import { ChatResult } from '@/apis/userService';
 

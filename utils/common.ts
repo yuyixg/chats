@@ -41,8 +41,5 @@ export function formatRMB(number: number) {
 }
 
 export function formatNumberAsMoney(amount: number) {
-  return new Intl.NumberFormat('zh-CN', {
-    minimumFractionDigits: 2,
-    maximumFractionDigits: 2,
-  }).format(amount);
+  return new Intl.NumberFormat('zh-CN').format(amount);
 }

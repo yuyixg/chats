@@ -66,11 +66,11 @@ export const SharedMessageModal = (props: IProps) => {
         <ScrollArea className='max-h-64 w-full rounded-md border'>
           {conversation?.messages &&
             conversation.messages.map((m, index) => (
-              <ChatMessage
-                canOperate={false}
-                key={'message' + index}
-                message={m}
-              />
+              // <ChatMessage
+              //   key={'message' + index}
+              //   message={m}
+              // />
+              <></>
             ))}
           <ScrollBar orientation='horizontal' />
         </ScrollArea>

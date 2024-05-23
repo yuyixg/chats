@@ -1,4 +1,4 @@
-import { ModelVersions, ModelType, ModelProviders } from './model';
+import { ModelVersions, ModelType, ModelProviders, ModelConfig } from './model';
 import { Paging } from './page';
 import { Message } from './chat';
 import { PutFileServicesParams } from './file';
@@ -6,6 +6,7 @@ import Decimal from 'decimal.js';
 import { StatusCode } from './statusCode';
 import { ProviderType } from './user';
 import { PayServiceType } from './pay';
+import { ChatMessage } from './chatMessage';
 
 export const enum UserRole {
   'admin' = 'admin',
@@ -50,7 +51,7 @@ export interface GetModelResult {
   enabled: boolean;
   remarks: string;
   modelConfig: string;
-  fileServerId: string;
+  fileServiceId: string;
   modelKeysId: string;
   fileConfig: string;
   priceConfig: string;
@@ -61,7 +62,7 @@ export interface PutModelParams {
   name: string;
   enabled?: boolean;
   modelConfig: string;
-  fileServerId?: string;
+  fileServiceId?: string;
   modelKeysId: string;
   fileConfig?: string;
   priceConfig: string;
@@ -74,7 +75,7 @@ export interface PostModelParams {
   enabled: boolean;
   modelConfig: string;
   modelKeysId: string;
-  fileServerId?: string;
+  fileServiceId?: string;
   fileConfig?: string;
 }
 
@@ -111,23 +112,21 @@ export interface GetUserMessageParams extends Paging {
 }
 
 export interface GetUserMessageResult {
-  messageId: string;
+  id: string;
   username: string;
-  chatCount: number;
-  totalPrice: Decimal;
-  tokenCount: number;
   isDeleted: boolean;
   isShared: boolean;
-  name: string;
+  title: string;
   modelName: string;
   createdAt: string;
-  updatedAt: string;
 }
 
 export interface GetMessageDetailsResult {
   name: string;
-  prompt: string;
-  messages: Message[];
+  modelName?: string;
+  modelTemperature?: number;
+  modelPrompt?: number;
+  messages: ChatMessage[];
 }
 
 export interface GetFileServicesResult extends PutFileServicesParams {
@@ -209,5 +208,15 @@ export interface PostModelKeysParams {
 }
 
 export interface PutModelKeysParams extends PostModelKeysParams {
+  id: string;
+}
+
+export interface PostPromptParams {
+  name: string;
+  content: string;
+  description: string;
+}
+
+export interface PutPromptParams {
   id: string;
 }

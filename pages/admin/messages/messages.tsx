@@ -59,33 +59,29 @@ export default function Messages() {
               <TableHead>{t('Title')}</TableHead>
               <TableHead>{t('Model Display Name')}</TableHead>
               <TableHead>{t('User Name')}</TableHead>
-              <TableHead>{t('Consume tokens')}</TableHead>
-              <TableHead>{t('Consume price')}</TableHead>
-              <TableHead>{t('Chat Counts')}</TableHead>
-              <TableHead>{t('Updated Time')}</TableHead>
+              <TableHead>{t('Created Time')}</TableHead>
               <TableHead>{t('Status')}</TableHead>
             </TableRow>
           </TableHeader>
-          <TableBody emptyText={t('No data')!} isLoading={loading} isEmpty={messages.count === 0}>
+          <TableBody
+            emptyText={t('No data')!}
+            isLoading={loading}
+            isEmpty={messages.count === 0}
+          >
             {messages?.rows.map((item) => (
-              <TableRow key={item.messageId}>
+              <TableRow key={item.id}>
                 <TableCell
                   onClick={() => {
-                    window.open('/message/' + item.messageId, '_blank');
+                    window.open('/message/' + item.id, '_blank');
                   }}
                   className='truncate cursor-pointer'
                 >
-                  {item.name}
+                  {item.title}
                 </TableCell>
                 <TableCell>{item.modelName}</TableCell>
                 <TableCell>{item.username}</TableCell>
-                <TableCell>{item.tokenCount}</TableCell>
                 <TableCell>
-                  {(+item.totalPrice)?.toFixed(2) || '0.00'}
-                </TableCell>
-                <TableCell>{item.chatCount}</TableCell>
-                <TableCell>
-                  {new Date(item.updatedAt).toLocaleString()}
+                  {new Date(item.createdAt).toLocaleString()}
                 </TableCell>
                 <TableCell>
                   {item.isDeleted && (

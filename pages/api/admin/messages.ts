@@ -1,5 +1,4 @@
-import { ChatMessageManager, UserModelManager, UsersManager } from '@/managers';
-import { BadRequest } from '@/utils/error';
+import { ChatsManager } from '@/managers';
 import { apiHandler } from '@/middleware/api-handler';
 import { ChatsApiRequest } from '@/types/next-api';
 export const config = {
@@ -18,56 +17,24 @@ const handler = async (req: ChatsApiRequest) => {
       page: string;
       pageSize: string;
     };
-    const messages = await ChatMessageManager.findMessages(
+    const chats = await ChatsManager.findChatsByPage(
       query,
       parseInt(page),
       parseInt(pageSize)
     );
-    const rows = messages.rows.map((x: any) => {
+    const rows = chats.rows.map((x) => {
       return {
-        messageId: x.id,
+        id: x.id,
         username: x.user.username,
-        chatCount: x.chatCount,
-        tokenCount: x.tokenCount,
-        name: x.name,
-        modelName: x.chatModel.name,
+        title: x.title,
+        modelName: x?.chatModel?.name,
         isDeleted: x.isDeleted,
         isShared: x.isShared,
-        totalPrice: x.totalPrice,
+        userModelConfig: JSON.parse(x.userModelConfig || '{}'),
         createdAt: x.createdAt,
-        updatedAt: x.updatedAt,
       };
     });
-    return { rows, count: messages.count };
-  } else if (req.method === 'PUT') {
-    const { id, username, password, role } = req.body;
-    let user = await UsersManager.findByUserId(id);
-    if (!user) {
-      throw new BadRequest('User not found');
-    }
-    const data = await UsersManager.updateUser({
-      id,
-      username,
-      password: password ? password : user.password,
-      role,
-    });
-    return data;
-  } else {
-    const { username, password, role } = req.body;
-    let isFound = await UsersManager.findByAccount(username);
-    if (isFound) {
-      throw new BadRequest('User existed');
-    }
-    const user = await UsersManager.createUser({
-      username,
-      password,
-      role,
-    });
-    await UserModelManager.createUserModel({
-      userId: user.id!,
-      models: '[]',
-    });
-    return user;
+    return { rows, count: chats.count };
   }
 };
 

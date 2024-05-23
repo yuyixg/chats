@@ -1,6 +1,6 @@
 import { GPT4Message, GPT4VisionMessage } from '@/types/chat';
 import { ChatModels } from '@/types/chatModel';
-import { ModelProviders } from '@/types/model';
+import { ModelProviders, ModelVersions } from '@/types/model';
 
 import {
   ParsedEvent,
@@ -10,7 +10,6 @@ import {
 
 export const OpenAIStream = async (
   chatModel: ChatModels,
-  prompt: string,
   temperature: number,
   messages: GPT4Message[] | GPT4VisionMessage[]
 ) => {
@@ -18,12 +17,7 @@ export const OpenAIStream = async (
     apiConfig: { host, apiKey },
     modelVersion,
     modelProvider,
-    modelConfig: {
-      prompt: systemPrompt,
-      version,
-      organization,
-      deploymentName,
-    },
+    modelConfig: { version, organization, deploymentName },
   } = chatModel;
   let url = `${host}/v1/chat/completions`;
   if (modelProvider === ModelProviders.Azure) {
@@ -51,21 +45,15 @@ export const OpenAIStream = async (
       ...(modelProvider === ModelProviders.OpenAI && {
         model: deploymentName || modelVersion,
       }),
-      messages: [
-        {
-          role: 'system',
-          content: prompt || systemPrompt,
-        },
-        ...messages,
-      ],
-      max_tokens: 4096,
-      temperature: temperature,
+      messages: messages,
+      ...(modelVersion === ModelVersions.GPT_4_Vision && { max_tokens: 4096 }),
+      temperature,
       stream: true,
     }),
   };
 
   const res = await fetch(url, body);
-
+  
   const contentType = res.headers.get('content-type');
   const decoder = new TextDecoder();
   if (res.status !== 200) {

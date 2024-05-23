@@ -12,7 +12,6 @@ export default function ShareMessage() {
   const { id } = router.query as { id: string };
   const [message, setMessage] = useState<GetMessageDetailsResult>({
     name: '',
-    prompt: '',
     messages: [],
   });
   useEffect(() => {
@@ -25,7 +24,7 @@ export default function ShareMessage() {
     <>
       <div className='w-full'>
         {message.messages.map((m, index) => (
-          <ChatMessage key={'message' + index} message={m} />
+          <></>
         ))}
       </div>
       <div className='h-32'></div>

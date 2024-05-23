@@ -1,10 +1,11 @@
-import { IconMistOff, IconPlus } from '@/components/Icons/index';
+import { IconMistOff } from '@/components/Icons/index';
 import { ReactNode } from 'react';
 import { useTranslation } from 'next-i18next';
 import { CloseSidebarButton, OpenSidebarButton } from './OpenCloseButton';
 import Search from '../Search';
 
 interface Props<T> {
+  showOpenButton?: boolean;
   isOpen: boolean;
   addItemButtonTitle: string;
   side: 'left' | 'right';
@@ -12,14 +13,15 @@ interface Props<T> {
   itemComponent: ReactNode;
   footerComponent?: ReactNode;
   searchTerm: string;
+  messageIsStreaming?: boolean;
   handleSearchTerm: (searchTerm: string) => void;
   toggleOpen: () => void;
   handleCreateItem: () => void;
-  handleDrop: (e: any) => void;
   hasModel: () => boolean;
 }
 
 const Sidebar = <T,>({
+  showOpenButton = true,
   isOpen,
   addItemButtonTitle,
   side,
@@ -27,12 +29,13 @@ const Sidebar = <T,>({
   itemComponent,
   footerComponent,
   searchTerm,
+  messageIsStreaming,
   handleSearchTerm,
   toggleOpen,
   handleCreateItem,
   hasModel,
 }: Props<T>) => {
-  const { t } = useTranslation('promptbar');
+  const { t } = useTranslation('prompt');
 
   return (
     <>
@@ -44,13 +47,15 @@ const Sidebar = <T,>({
         {hasModel() && (
           <div className='flex items-center'>
             <button
-              className='flex w-full flex-shrink-0 cursor-pointer select-none items-center gap-3 rounded-md p-3 text-black dark:text-white hover:bg-[#cdcdcd] hover:dark:bg-[#343541] bg-[#ececec] dark:bg-[#343541]/80'
+              className={`flex w-full flex-shrink-0 cursor-pointer select-none items-center gap-3 rounded-md p-3 text-black dark:text-white hover:bg-[#cdcdcd] hover:dark:bg-[#343541] bg-[#ececec] dark:bg-[#343541]/80 ${
+                messageIsStreaming ? 'disabled:cursor-not-allowed' : ''
+              }`}
               onClick={() => {
                 handleCreateItem();
                 handleSearchTerm('');
               }}
+              disabled={messageIsStreaming}
             >
-              <IconPlus size={18} />
               {addItemButtonTitle}
             </button>
           </div>
@@ -75,7 +80,9 @@ const Sidebar = <T,>({
         <CloseSidebarButton onClick={toggleOpen} side={side} />
       </div>
 
-      {!isOpen && <OpenSidebarButton onClick={toggleOpen} side={side} />}
+      {!isOpen && showOpenButton && (
+        <OpenSidebarButton onClick={toggleOpen} side={side} />
+      )}
     </>
   );
 };

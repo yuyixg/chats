@@ -1,8 +1,15 @@
-import { DEFAULT_TEMPERATURE } from '@/utils/const';
-import { ChatBody, GPT4Message, GPT4VisionMessage } from '@/types/chat';
 import {
-  ChatMessageManager,
+  ChatBody,
+  Content,
+  GPT4Message,
+  GPT4VisionMessage,
+  Message,
+  Role,
+} from '@/types/chat';
+import {
+  ChatMessagesManager,
   ChatModelManager,
+  ChatModelRecordManager,
   UserBalancesManager,
   UserModelManager,
 } from '@/managers';
@@ -16,6 +23,7 @@ import { KimiSteamResult, KimiStream } from '@/services/kimi';
 import { calcTokenPrice } from '@/utils/message';
 import { apiHandler } from '@/middleware/api-handler';
 import { ChatsApiRequest, ChatsApiResponse } from '@/types/next-api';
+import { ChatMessages } from '@prisma/client';
 
 export const config = {
   api: {
@@ -28,16 +36,18 @@ export const config = {
 
 const handler = async (req: ChatsApiRequest, res: ChatsApiResponse) => {
   const { userId } = req.session;
-  const { messageId, model, messages, prompt, temperature } =
+  const { chatId, modelId, userMessage, messageId, userModelConfig } =
     req.body as ChatBody;
+  const userMessageText = userMessage.text!;
 
-  const chatModel = await ChatModelManager.findModelById(model.id);
+  const chatModel = await ChatModelManager.findModelById(modelId);
   if (!chatModel?.enabled) {
     throw new ModelUnauthorized();
   }
+
   const { modelConfig, priceConfig } = chatModel;
 
-  const userModel = await UserModelManager.findUserModel(userId, model.id);
+  const userModel = await UserModelManager.findUserModel(userId, modelId);
   if (!userModel || !userModel.enabled) {
     throw new ModelUnauthorized();
   }
@@ -52,64 +62,135 @@ const handler = async (req: ChatsApiRequest, res: ChatsApiResponse) => {
     throw new BadRequest('Insufficient balance');
   }
 
-  let promptToSend = prompt;
-  if (!promptToSend) {
-    promptToSend = modelConfig.prompt;
+  const prompt = userModelConfig?.prompt || modelConfig.prompt;
+  const temperature = +(
+    userModelConfig?.temperature || modelConfig.temperature
+  );
+
+  let messagesToSend = [] as any[];
+
+  const isFirstChat = await ChatMessagesManager.checkIsFirstChat(chatId);
+  if (isFirstChat) {
+    await ChatMessagesManager.create({
+      role: 'system',
+      messages: JSON.stringify({ text: prompt }),
+      chatId,
+      userId,
+    });
+  }
+  const chatMessages = await ChatMessagesManager.findUserMessageByChatId(
+    chatId,
+    true
+  );
+  let lastMessage = null;
+  let resParentId = messageId;
+  if (messageId) {
+    lastMessage = await ChatMessagesManager.findByUserMessageId(
+      messageId,
+      userId
+    );
+
+    if (lastMessage?.role === 'assistant') {
+      lastMessage = await ChatMessagesManager.create({
+        role: 'user',
+        messages: JSON.stringify(userMessage),
+        userId,
+        chatId,
+        parentId: messageId,
+      });
+      resParentId = lastMessage.id;
+      chatMessages.push(lastMessage);
+    }
+  } else {
+    lastMessage = await ChatMessagesManager.create({
+      role: 'user',
+      messages: JSON.stringify(userMessage),
+      userId,
+      chatId,
+    });
+    resParentId = lastMessage.id;
+    chatMessages.push(lastMessage);
   }
 
-  let temperatureToUse = temperature;
-  if (temperatureToUse == null) {
-    temperatureToUse = DEFAULT_TEMPERATURE;
+  const findParents = (
+    items: ChatMessages[],
+    id: string | null,
+    foundItems: ChatMessages[]
+  ): ChatMessages[] => {
+    if (!id) return [];
+    const currentItem = items.find((item) => item.id === id);
+    currentItem && foundItems.push(currentItem);
+    if (currentItem && currentItem.parentId !== null) {
+      return findParents(items, currentItem.parentId, foundItems);
+    }
+    return foundItems;
+  };
+  const messages = findParents(chatMessages, resParentId, []);
+  const systemMessages = chatMessages.filter((x) => x.role === 'system');
+
+  function convertMessageToSend(messageContent: Content, role: Role = 'user') {
+    return { role, content: messageContent.text } as GPT4Message;
   }
-
-  let messagesToSend: GPT4Message[] | GPT4VisionMessage[] = [];
-
-  messagesToSend = messages.map((message) => {
-    return {
-      role: message.role,
-      content: message.content.text,
-    } as GPT4Message;
+  const allMessages = [...messages, ...systemMessages].reverse();
+  allMessages.forEach((m) => {
+    const chatMessages = JSON.parse(m.messages) as Content;
+    const content = convertMessageToSend(chatMessages, m.role as Role);
+    messagesToSend.push(content);
   });
 
-  const stream = await KimiStream(
-    chatModel,
-    messagesToSend
-  );
-  let assistantMessage = '';
+  const userMessageToSend = convertMessageToSend(userMessage);
+
+  messagesToSend.push(userMessageToSend);
+
+  const stream = await KimiStream(chatModel, temperature, messagesToSend);
+  let assistantResponse = '';
   if (stream.getReader) {
     const reader = stream.getReader();
     let result = {} as KimiSteamResult;
     const streamResponse = async () => {
       while (true) {
         const { done, value } = await reader.read();
+
         if (value) {
           result = JSON.parse(value) as KimiSteamResult;
-          assistantMessage += result.text;
+          assistantResponse += result.text;
         }
+
         if (done) {
           const { total_tokens, prompt_tokens, completion_tokens } =
             result.usage;
-          const tokenCount = total_tokens;
-          const totalPrice = calcTokenPrice(
+
+          const tokenUsed = total_tokens;
+          const calculatedPrice = calcTokenPrice(
             priceConfig,
             prompt_tokens,
             completion_tokens
           );
-          messages.push({
-            role: 'assistant',
-            content: { text: assistantMessage },
-          });
-          await ChatMessageManager.recordChat(
-            messageId,
+
+          await ChatModelRecordManager.recordTransfer({
+            isFirstChat,
             userId,
-            userModel.id!,
-            messages,
-            tokenCount,
-            totalPrice,
-            '',
-            chatModel.id!
-          );
-          await UserBalancesManager.chatUpdateBalance(userId, totalPrice);
+            chatId,
+            tokenUsed,
+            userMessageText,
+            calculatedPrice,
+            chatModelId: chatModel.id,
+            createChatMessageParams: {
+              role: 'assistant',
+              chatId,
+              userId,
+              chatModelId: modelId,
+              parentId: resParentId,
+              messages: JSON.stringify({ text: assistantResponse }),
+              tokenUsed,
+              calculatedPrice,
+            },
+            updateChatParams: {
+              id: chatId,
+              chatModelId: chatModel.id,
+              userModelConfig: JSON.stringify(userModelConfig),
+            },
+          });
           return res.end();
         }
         res.write(Buffer.from(result.text));

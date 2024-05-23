@@ -2,7 +2,9 @@ import { LoginServiceManager } from '@/managers/loginService';
 import { ProviderType } from '@/types/user';
 
 export async function KeyCloakProvider(): Promise<any> {
-  const configs = await LoginServiceManager.findConfigsByType(ProviderType.KeyCloak);
+  const configs = await LoginServiceManager.findConfigsByType(
+    ProviderType.KeyCloak
+  );
   return {
     id: 'keycloak',
     name: 'Keycloak',

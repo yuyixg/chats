@@ -52,6 +52,7 @@
 @layer base {
   * {
     @apply border-border;
+    --tw-prose-pre-bg: #282c34;
   }
   body {
     @apply bg-background text-foreground;
@@ -92,6 +93,10 @@ html {
   .group:hover .group-hover\:-rotate-left {
     transform: translateY(-0.15rem) rotate(-15deg) translateZ(0px);
   }
+}
+
+.prose {
+  max-width: 100ch !important;
 }
 
 .truncate {

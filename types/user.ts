@@ -9,6 +9,13 @@ export interface SingInParams {
   code?: string;
 }
 
+export interface SingInResult {
+  sessionId: string;
+  username: string;
+  role: string;
+  canRecharge: boolean;
+}
+
 export interface ProviderResult {
   type: ProviderType;
   configs: {

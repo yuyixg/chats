@@ -1,7 +1,7 @@
 import { FileServicesType } from './file';
 import { Model } from './model';
 
-export type Role = 'assistant' | 'user';
+export type Role = 'assistant' | 'user' | 'system';
 
 export interface GPT4VisionMessage {
   role: Role;
@@ -24,6 +24,11 @@ export interface QianFanMessage {
 export interface QianWenMessage {
   role: Role;
   content: QianWenContent[];
+}
+
+export interface QianWenMaxMessage {
+  role: Role;
+  content: string;
 }
 
 export interface QianWenContent {
@@ -49,8 +54,10 @@ export interface GPT4Message {
 export interface ChatBody {
   modelId: string;
   userMessage: Content;
-  parentId?: string;
+  parentId: string | null;
+  messageId: string;
   chatId: string;
+  userModelConfig: any;
 }
 
 export interface Conversation {

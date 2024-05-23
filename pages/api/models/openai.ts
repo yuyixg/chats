@@ -2,16 +2,15 @@ import { OpenAIStream } from '@/services/openai';
 import {
   ChatBody,
   GPT4Message,
-  GPT4VisionMessage,
-  GPT4VisionContent,
   Content,
+  GPT4VisionMessage,
+  Role,
 } from '@/types/chat';
 import { get_encoding } from 'tiktoken';
-import { ModelVersions } from '@/types/model';
 import {
   ChatMessagesManager,
   ChatModelManager,
-  ChatsManager,
+  ChatModelRecordManager,
   UserBalancesManager,
   UserModelManager,
 } from '@/managers';
@@ -25,6 +24,7 @@ import { calcTokenPrice } from '@/utils/message';
 import { apiHandler } from '@/middleware/api-handler';
 import { ChatsApiRequest, ChatsApiResponse } from '@/types/next-api';
 import { ChatMessages } from '@prisma/client';
+import { ModelVersions } from '@/types/model';
 
 export const config = {
   api: {
@@ -37,7 +37,9 @@ export const config = {
 
 const handler = async (req: ChatsApiRequest, res: ChatsApiResponse) => {
   const { userId } = req.session;
-  const { chatId, parentId, modelId, userMessage } = req.body as ChatBody;
+  const { chatId, modelId, userMessage, messageId, userModelConfig } =
+    req.body as ChatBody;
+  const userMessageText = userMessage.text!;
 
   const chatModel = await ChatModelManager.findModelById(modelId);
   if (!chatModel?.enabled) {
@@ -61,91 +63,120 @@ const handler = async (req: ChatsApiRequest, res: ChatsApiResponse) => {
     throw new BadRequest('Insufficient balance');
   }
 
-  let prompt = null;
-  if (!prompt) {
-    prompt = modelConfig.prompt;
-  }
-
-  let temperature = null;
-  if (!temperature) {
-    temperature = modelConfig.temperature;
-  }
+  const prompt = userModelConfig?.prompt || modelConfig.prompt;
+  const temperature = +(
+    userModelConfig?.temperature || modelConfig.temperature
+  );
 
   const encoding = get_encoding('cl100k_base');
 
   const prompt_tokens = encoding.encode(prompt);
 
   let tokenUsed = prompt_tokens.length;
-  let messagesToSend: GPT4Message[] = [];
+  let messagesToSend = [] as any[];
 
-  const chatMessages = await ChatMessagesManager.findUserMessageByChatId(
-    userId,
-    chatId
-  );
-  const findParents = (items: ChatMessages[], id?: string): ChatMessages[] => {
-    if (!id) return [];
-    const currentItem = items.find((item) => item.id === id);
-    if (currentItem && currentItem.parentId !== null) {
-      return [currentItem, ...findParents(items, currentItem.parentId)];
-    }
-    return currentItem ? [currentItem] : [];
-  };
-  const messages = findParents(chatMessages, parentId);
-  // for (let i = messages.length - 1; i >= 0; i--) {
-  //   const message = messages[i];
-  //   const assistantTokens = encoding.encode(message.assistantResponse);
-  //   const userTokens = encoding.encode(message.userMessage);
-  //   if (tokenUsed + sendTokens.length + 1000 > modelConfig.tokenLimit!) {
-  //     break;
-  //   }
-  //   tokenUsed += sendTokens.length;
-  // }
-
-  messages.forEach((message) => {
-    const userMessage = {
-      role: 'user',
-      content: message.userMessage,
-    } as GPT4Message;
-    const assistantResponse = {
-      role: 'assistant',
-      content: message.assistantResponse,
-    } as GPT4Message;
-
-    messagesToSend = [...messagesToSend, userMessage, assistantResponse];
-  });
-
-  if (chatModel.modelVersion === ModelVersions.GPT_4_Vision) {
-    messagesToSend = messages.map((message) => {
-      const messageContent = message.content;
-      let content = [] as GPT4VisionContent[];
-      if (messageContent?.image) {
-        messageContent.image.forEach((url) => {
-          content.push({
-            type: 'image_url',
-            image_url: { url },
-          });
-        });
-      }
-      if (messageContent?.text) {
-        content.push({ type: 'text', text: messageContent.text });
-      }
-      return { role: message.role, content };
-    });
-  } else {
-    messagesToSend = messages.map((message) => {
-      return {
-        role: 'user',
-        content: userMessage.text,
-      } as GPT4Message;
+  const isFirstChat = await ChatMessagesManager.checkIsFirstChat(chatId);
+  if (isFirstChat) {
+    await ChatMessagesManager.create({
+      role: 'system',
+      messages: JSON.stringify({ text: prompt }),
+      chatId,
+      userId,
     });
   }
-
-  const stream = await OpenAIStream(
-    chatModel,
-    prompt,
-    temperature,
-    messagesToSend
+  const chatMessages = await ChatMessagesManager.findUserMessageByChatId(
+    chatId,
+    true
   );
+  let lastMessage = null;
+  let resParentId = messageId;
+  if (messageId) {
+    lastMessage = await ChatMessagesManager.findByUserMessageId(
+      messageId,
+      userId
+    );
+
+    if (lastMessage?.role === 'assistant') {
+      lastMessage = await ChatMessagesManager.create({
+        role: 'user',
+        messages: JSON.stringify(userMessage),
+        userId,
+        chatId,
+        parentId: messageId,
+      });
+      resParentId = lastMessage.id;
+      chatMessages.push(lastMessage);
+    }
+  } else {
+    lastMessage = await ChatMessagesManager.create({
+      role: 'user',
+      messages: JSON.stringify(userMessage),
+      userId,
+      chatId,
+    });
+    resParentId = lastMessage.id;
+    chatMessages.push(lastMessage);
+  }
+
+  const findParents = (
+    items: ChatMessages[],
+    id: string | null,
+    foundItems: ChatMessages[]
+  ): ChatMessages[] => {
+    if (!id) return [];
+    const currentItem = items.find((item) => item.id === id);
+    currentItem && foundItems.push(currentItem);
+    if (currentItem && currentItem.parentId !== null) {
+      return findParents(items, currentItem.parentId, foundItems);
+    }
+    return foundItems;
+  };
+  const messages = findParents(chatMessages, resParentId, []);
+
+  const systemMessages = chatMessages.filter((x) => x.role === 'system');
+
+  function convertMessageToSend(messageContent: Content, role: Role = 'user') {
+    return { role, content: messageContent.text } as GPT4Message;
+  }
+
+  function convertToGPTVisionMessage(
+    messageContent: Content,
+    role: Role = 'user'
+  ) {
+    const message = { role, content: [] } as GPT4VisionMessage;
+    message.content.push({ type: 'text', text: messageContent.text });
+    messageContent.image?.forEach((url) => {
+      message.content.push({
+        type: 'image_url',
+        image_url: { url },
+      });
+    });
+    return message;
+  }
+
+  const allMessages = [...messages, ...systemMessages].reverse();
+  allMessages.forEach((m) => {
+    const chatMessages = JSON.parse(m.messages) as Content;
+    let content = {} as GPT4Message | GPT4VisionMessage;
+    if (chatModel.modelVersion === ModelVersions.GPT_4_Vision) {
+      content = convertToGPTVisionMessage(chatMessages, m.role as Role);
+    } else {
+      content = convertMessageToSend(chatMessages, m.role as Role);
+    }
+    messagesToSend.push(content);
+  });
+
+  const userMessageToSend =
+    chatModel.modelVersion === ModelVersions.GPT_4_Vision
+      ? convertToGPTVisionMessage(userMessage)
+      : convertMessageToSend(userMessage);
+
+  messagesToSend.push(userMessageToSend);
+  if (lastMessage?.role === 'user') {
+    messagesToSend.pop();
+  }
+
+  const stream = await OpenAIStream(chatModel, temperature, messagesToSend);
   let assistantResponse = '';
   res.setHeader('Content-Type', 'application/octet-stream');
   if (stream.getReader) {
@@ -165,25 +196,32 @@ const handler = async (req: ChatsApiRequest, res: ChatsApiResponse) => {
             messageTokens
           );
           encoding.free();
-          messages.push({
-            role: 'assistant',
-            content: { text: assistantResponse },
-          });
-          await ChatMessagesManager.create({
+
+          await ChatModelRecordManager.recordTransfer({
+            isFirstChat,
+            userId,
             chatId,
-            userId,
-            parentId,
-            assistantResponse,
             tokenUsed,
+            userMessageText,
             calculatedPrice,
+            chatModelId: chatModel.id,
+            createChatMessageParams: {
+              role: 'assistant',
+              chatId,
+              userId,
+              chatModelId: modelId,
+              parentId: resParentId,
+              messages: JSON.stringify({ text: assistantResponse }),
+              tokenUsed,
+              calculatedPrice,
+            },
+            updateChatParams: {
+              id: chatId,
+              chatModelId: chatModel.id,
+              userModelConfig: JSON.stringify(userModelConfig),
+            },
           });
-          await UserModelManager.updateUserModelTokenCount(
-            userId,
-            chatModel.id,
-            tokenUsed
-          );
-          await UserBalancesManager.chatUpdateBalance(userId, calculatedPrice);
-          await ChatsManager.update({ id: chatId, chatModelId: chatModel.id });
+
           return res.end();
         }
         res.write(Buffer.from(value));

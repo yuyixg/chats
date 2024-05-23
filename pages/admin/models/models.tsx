@@ -14,7 +14,7 @@ import {
 } from '@/components/ui/table';
 import { Card } from '@/components/ui/card';
 import { Button } from '@/components/ui/button';
-import { IconDots, IconPlus } from '@/components/Icons/index';
+import { IconDots } from '@/components/Icons/index';
 import { AddModelModal } from '@/components/Admin/Models/AddModelModal';
 import { DEFAULT_LANGUAGE } from '@/types/settings';
 import {
@@ -66,7 +66,6 @@ export default function Models() {
             }}
             color='primary'
           >
-            <IconPlus stroke='white' />
             {t('Add Model')}
           </Button>
         </div>
@@ -77,6 +76,7 @@ export default function Models() {
             <TableRow>
               <TableHead className='w-20'>{t('Rank')}</TableHead>
               <TableHead>{t('Model Display Name')}</TableHead>
+              <TableHead>{t('Provide new User')}</TableHead>
               <TableHead>{t('Model Provider')}</TableHead>
               <TableHead>{t('Model Version')}</TableHead>
               <TableHead>{t('Remarks')}</TableHead>
@@ -105,6 +105,7 @@ export default function Models() {
                     {item.name}
                   </div>
                 </TableCell>
+                <TableCell>{t(item.isDefault ? 'Yes' : 'No')}</TableCell>
                 <TableCell>
                   {ModelProviderTemplates[item.modelProvider].displayName}
                 </TableCell>

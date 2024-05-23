@@ -37,7 +37,7 @@ const gptApiConfig: ChatGPTApiConfig = {
 };
 
 const qianWenApiConfig: QianWenApiConfig = {
-  host: 'https://api.moonshot.cn',
+  host: 'https://dashscope.aliyuncs.com/api/v1',
   apiKey: '',
 };
 
@@ -82,7 +82,7 @@ export const ModelProviderTemplates = {
     displayName: 'Azure',
   },
   [ModelProviders.QianWen]: {
-    models: [ModelVersions.QWen_Vl_Plus],
+    models: [ModelVersions.QWen, ModelVersions.QWen_Vl],
     apiConfig: qianWenApiConfig,
     displayName: '通义千问',
   },
@@ -119,9 +119,16 @@ export const ModelProviderTemplates = {
 export const ModelTemplates = {
   [ModelVersions.GPT_3_5]: {
     type: ModelType.GPT,
+    config: {
+      temperature: {
+        min: 0,
+        max: 2,
+      },
+    },
     modelConfig: {
       prompt:
         "You are ChatGPT, a large language model trained by OpenAI. Follow the user's instructions carefully. Respond using markdown.",
+      temperature: 0.5,
       version: '2024-02-01',
       organization: '',
       deploymentName: '',
@@ -135,9 +142,16 @@ export const ModelTemplates = {
   },
   [ModelVersions.GPT_4]: {
     type: ModelType.GPT,
+    config: {
+      temperature: {
+        min: 0,
+        max: 2,
+      },
+    },
     modelConfig: {
       prompt:
         "You are ChatGPT, a large language model trained by OpenAI. Follow the user's instructions carefully. Respond using markdown.",
+      temperature: 0.5,
       version: '2024-02-01',
       organization: '',
       deploymentName: '',
@@ -150,9 +164,16 @@ export const ModelTemplates = {
   },
   [ModelVersions.GPT_4_Vision]: {
     type: ModelType.GPT,
+    config: {
+      temperature: {
+        min: 0,
+        max: 2,
+      },
+    },
     modelConfig: {
       prompt:
         "You are ChatGPT, a large language model trained by OpenAI. Follow the user's instructions carefully. Respond using markdown.",
+      temperature: 0.5,
       version: '2024-02-01',
       organization: '',
       deploymentName: '',
@@ -164,11 +185,34 @@ export const ModelTemplates = {
       out: 0.00021691,
     },
   },
-  [ModelVersions.QWen_Vl_Plus]: {
+  [ModelVersions.QWen]: {
     type: ModelType.QianWen,
+    config: {
+      temperature: {
+        min: 0,
+        max: 1.99,
+      },
+    },
     modelConfig: {
       prompt:
         "You are an AI assistant with image understanding capabilities, Follow the user's instructions carefully. Respond using markdown.",
+      temperature: 0.85,
+      version: 'qwen-max-longcontext',
+      enableSearch: false,
+    },
+    apiConfig: qianWenApiConfig,
+    priceConfig: {
+      input: 0,
+      out: 0,
+    },
+  },
+  [ModelVersions.QWen_Vl]: {
+    type: ModelType.QianWen,
+    config: {},
+    modelConfig: {
+      prompt:
+        "You are an AI assistant with image understanding capabilities, Follow the user's instructions carefully. Respond using markdown.",
+      version: 'qwen-vl-max',
     },
     apiConfig: qianWenApiConfig,
     fileConfig: { count: 5, maxSize: 10240 },
@@ -179,9 +223,16 @@ export const ModelTemplates = {
   },
   [ModelVersions.ERNIE_Bot_4]: {
     type: ModelType.QianFan,
+    config: {
+      temperature: {
+        min: 0,
+        max: 2,
+      },
+    },
     modelConfig: {
       prompt:
         "You are an AI assistant, Follow the user's instructions carefully. Respond using markdown.",
+      temperature: 0.8,
     },
     apiConfig: qianFanApiConfig,
     priceConfig: {
@@ -191,9 +242,16 @@ export const ModelTemplates = {
   },
   [ModelVersions.ERNIE_Bot_8K]: {
     type: ModelType.QianFan,
+    config: {
+      temperature: {
+        min: 0,
+        max: 2,
+      },
+    },
     modelConfig: {
       prompt:
         "You are an AI assistant, Follow the user's instructions carefully. Respond using markdown.",
+      temperature: 0.8,
     },
     apiConfig: qianFanApiConfig,
     priceConfig: {
@@ -203,9 +261,16 @@ export const ModelTemplates = {
   },
   [ModelVersions.yi_34b_chat_0205]: {
     type: ModelType.LingYi,
+    config: {
+      temperature: {
+        min: 0,
+        max: 2,
+      },
+    },
     modelConfig: {
       prompt:
         "You are an AI assistant, Follow the user's instructions carefully. Respond using markdown.",
+      temperature: 0.8,
     },
     apiConfig: lingYiApiConfig,
     priceConfig: {
@@ -215,9 +280,16 @@ export const ModelTemplates = {
   },
   [ModelVersions.yi_34b_chat_200k]: {
     type: ModelType.LingYi,
+    config: {
+      temperature: {
+        min: 0,
+        max: 2,
+      },
+    },
     modelConfig: {
       prompt:
         "You are an AI assistant, Follow the user's instructions carefully. Respond using markdown.",
+      temperature: 0.8,
     },
     apiConfig: lingYiApiConfig,
     priceConfig: {
@@ -227,6 +299,7 @@ export const ModelTemplates = {
   },
   [ModelVersions.yi_vl_plus]: {
     type: ModelType.LingYi,
+    config: {},
     modelConfig: {
       prompt:
         "You are an AI assistant with image understanding capabilities, Follow the user's instructions carefully. Respond using markdown.",
@@ -240,9 +313,16 @@ export const ModelTemplates = {
   },
   [ModelVersions.moonshot_v1_8k]: {
     type: ModelType.Moonshot,
+    config: {
+      temperature: {
+        min: 0,
+        max: 1,
+      },
+    },
     modelConfig: {
       prompt:
         "You are an AI assistant, Follow the user's instructions carefully. Respond using markdown.",
+      temperature: 0.3,
     },
     apiConfig: moonshotApiConfig,
     priceConfig: {
@@ -252,9 +332,16 @@ export const ModelTemplates = {
   },
   [ModelVersions.moonshot_v1_32k]: {
     type: ModelType.Moonshot,
+    config: {
+      temperature: {
+        min: 0,
+        max: 1,
+      },
+    },
     modelConfig: {
       prompt:
         "You are an AI assistant, Follow the user's instructions carefully. Respond using markdown.",
+      temperature: 0.3,
     },
     apiConfig: moonshotApiConfig,
     priceConfig: {
@@ -264,9 +351,16 @@ export const ModelTemplates = {
   },
   [ModelVersions.moonshot_v1_128k]: {
     type: ModelType.Moonshot,
+    config: {
+      temperature: {
+        min: 0,
+        max: 1,
+      },
+    },
     modelConfig: {
       prompt:
         "You are an AI assistant, Follow the user's instructions carefully. Respond using markdown.",
+      temperature: 0.3,
     },
     apiConfig: moonshotApiConfig,
     priceConfig: {

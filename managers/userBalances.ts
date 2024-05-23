@@ -3,7 +3,11 @@ import { BalanceType } from '@/types/order';
 import Decimal from 'decimal.js';
 
 export class UserBalancesManager {
-  static async chatUpdateBalance(userId: string, value: Decimal) {
+  static async chatUpdateBalance(
+    userId: string,
+    value: Decimal,
+    messageId: string
+  ) {
     const userBalance = await prisma.userBalances.findFirst({
       where: { userId },
     });
@@ -12,7 +16,7 @@ export class UserBalancesManager {
       where: { id: userBalance?.id },
       data: { balance: new Decimal(userBalance!.balance).add(_value) },
     });
-    await this.createBalanceLog(userId, _value, BalanceType.Consume, userId);
+    await this.createChatMessageBalanceLog(userId, _value, userId, messageId);
     return result;
   }
 
@@ -48,6 +52,23 @@ export class UserBalancesManager {
       BalanceType.Recharge,
       createUserId
     );
+  }
+
+  static async createChatMessageBalanceLog(
+    userId: string,
+    value: Decimal,
+    createUserId: string,
+    messageId: string
+  ) {
+    await prisma.balanceLogs.create({
+      data: {
+        userId,
+        value,
+        type: BalanceType.Consume,
+        createUserId,
+        messageId,
+      },
+    });
   }
 
   static async createBalanceLog(
