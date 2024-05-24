@@ -78,7 +78,16 @@ export function getSelectMessages(
 
 const findChildren = (nodes: MessageNode[], parentId: string): string[] => {
   return nodes
-    .filter((node) => node.parentId === parentId)
+    .filter((node) => node.parentId === parentId && node.role === 'user')
+    .map((node) => node.id);
+};
+
+const findResponseChildren = (
+  nodes: MessageNode[],
+  parentId: string | null
+): string[] => {
+  return nodes
+    .filter((node) => node.parentId === parentId && node.role === 'assistant')
     .map((node) => node.id);
 };
 
@@ -86,5 +95,6 @@ export const calculateMessages = (nodes: MessageNode[]): MessageNode[] => {
   return nodes.map((node) => ({
     ...node,
     childrenIds: findChildren(nodes, node.id).reverse(),
+    assistantChildrenIds: findResponseChildren(nodes, node.parentId),
   }));
 };

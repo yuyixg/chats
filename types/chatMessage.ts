@@ -6,18 +6,21 @@ export interface ChatMessage {
   parentId: string | null;
   childrenIds: string[];
   assistantChildrenIds: string[];
+  role: Role;
   content: Content;
   modelName?: string;
-  role: Role;
   tokenUsed?: number;
   calculatedPrice?: Decimal;
 }
 
 export interface MessageNode {
   id: string;
-  parentId: string;
-  messages: any[];
+  parentId: string | null;
+  content: Content;
   childrenIds?: string[];
+  assistantChildrenIds?: string[];
+  modelName?: string;
+  role: Role;
   tokenUsed: number;
   calculatedPrice: Decimal;
 }

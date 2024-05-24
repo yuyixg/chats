@@ -187,6 +187,7 @@ export const ModelKeysModal = (props: IProps) => {
             <DialogFooter className='pt-4'>
               {selected && (
                 <Button
+                  type='button'
                   variant='destructive'
                   onClick={(e) => {
                     onDelete();

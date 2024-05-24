@@ -61,9 +61,8 @@ export default function MessageDetails() {
           </div>
         </div>
       )}
-      <div className='flex justify-center my-2'>{chat?.modelPrompt}</div>
       {chat &&
-        selectMessages.map((current) => {
+        selectMessages.map((current, index) => {
           let parentChildrenIds: string[] = [];
           if (!current.parentId) {
             parentChildrenIds = currentMessages
@@ -75,23 +74,28 @@ export default function MessageDetails() {
                 ?.childrenIds || [];
             parentChildrenIds = [...parentChildrenIds].reverse();
           }
-          return <></>
-          // return current.map((message: any, index: number) => (
-          //   <ChatMessageComponent
-          //     currentSelectIndex={parentChildrenIds.findIndex(
-          //       (x) => x === current.id
-          //     )}
-          //     id={current.id!}
-          //     key={current.id + index}
-          //     parentId={current.parentId}
-          //     onChangeMessage={(messageId: string) => {
-          //       onMessageChange(messageId);
-          //     }}
-          //     childrenIds={current.childrenIds}
-          //     parentChildrenIds={parentChildrenIds}
-          //     message={message}
-          //   />
-          // ));
+          return (
+            <ChatMessageComponent
+              currentSelectIndex={parentChildrenIds.findIndex(
+                (x) => x === current.id
+              )}
+              isLastMessage={selectMessages.length - 1 === index}
+              id={current.id!}
+              key={current.id + index}
+              parentId={current.parentId}
+              onChangeMessage={(messageId: string) => {
+                onMessageChange(messageId);
+              }}
+              childrenIds={current.childrenIds}
+              parentChildrenIds={parentChildrenIds}
+              assistantChildrenIds={current.assistantChildrenIds}
+              assistantCurrentSelectIndex={current.assistantChildrenIds.findIndex(
+                (x) => x === current.id
+              )}
+              modelName={current.modelName}
+              message={{ role: current.role, content: current.content }}
+            />
+          );
         })}
     </>
   );
