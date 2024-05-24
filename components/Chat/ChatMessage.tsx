@@ -1,5 +1,7 @@
 import {
   IconCheck,
+  IconChevronLeft,
+  IconChevronRight,
   IconCopy,
   IconEdit,
   IconRefresh,
@@ -16,6 +18,7 @@ import remarkGfm from 'remark-gfm';
 import remarkMath from 'remark-math';
 import { HomeContext } from '@/pages/home/home';
 import ChangeModel from './ChangeModel';
+import { Button } from '../ui/button';
 
 export interface Props {
   id: string;
@@ -124,7 +127,7 @@ export const ChatMessage: FC<Props> = memo(
         }`}
         style={{ overflowWrap: 'anywhere' }}
       >
-        <div className='relative m-auto flex px-4 py-1 text-base md:max-w-2xl lg:max-w-2xl lg:px-0 xl:max-w-5xl'>
+        <div className='relative m-auto flex px-4 py-[10px] text-base md:max-w-2xl lg:max-w-2xl lg:px-0 xl:max-w-5xl'>
           <div className='min-w-[28px] text-right font-bold'>
             {message.role === 'assistant' ? (
               <IconRobot size={28} />
@@ -140,7 +143,7 @@ export const ChatMessage: FC<Props> = memo(
                   <div className='flex w-full flex-col'>
                     <textarea
                       ref={textareaRef}
-                      className='w-full resize-none whitespace-pre-wrap border-none dark:bg-[#343541]'
+                      className='w-full outline-none resize-none whitespace-pre-wrap border-none rounded-md bg-[#ececec] dark:bg-[#343541]'
                       value={messageContent.text}
                       onChange={handleInputChange}
                       onKeyDown={handlePressEnter}
@@ -150,23 +153,25 @@ export const ChatMessage: FC<Props> = memo(
                         fontFamily: 'inherit',
                         fontSize: 'inherit',
                         lineHeight: 'inherit',
-                        padding: '0',
+                        padding: '8px',
                         margin: '0',
                         overflow: 'hidden',
                       }}
                     />
 
                     <div className='mt-10 flex justify-center space-x-4'>
-                      <button
-                        className='h-[40px] rounded-md bg-blue-500 px-4 py-1 text-sm font-medium text-white enabled:hover:bg-blue-600 disabled:opacity-50'
+                      <Button
+                        variant='default'
+                        className='h-[40px] rounded-md px-4 py-1 text-sm font-medium'
                         onClick={handleEditMessage}
                         disabled={
                           (messageContent.text || '')?.trim().length <= 0
                         }
                       >
-                        {t('Save & Submit')}
-                      </button>
-                      <button
+                        {t('Send')}
+                      </Button>
+                      <Button
+                        variant='outline'
                         className='h-[40px] rounded-md border border-neutral-300 px-4 py-1 text-sm font-medium text-neutral-700 hover:bg-neutral-100 dark:border-neutral-700 dark:text-neutral-300 dark:hover:bg-neutral-800'
                         onClick={() => {
                           setMessageContent(message.content);
@@ -174,7 +179,7 @@ export const ChatMessage: FC<Props> = memo(
                         }}
                       >
                         {t('Cancel')}
-                      </button>
+                      </Button>
                     </div>
                   </div>
                 ) : (
@@ -205,16 +210,13 @@ export const ChatMessage: FC<Props> = memo(
                 )}
 
                 {!isEditing && (
-                  <div className='flex gap-2'>
+                  <div className='flex'>
                     <>
                       {parentChildrenIds.length > 1 && (
-                        <div className='flex gap-1 text-sm'>
-                          <button
-                            className={
-                              currentSelectIndex === 0 || messageIsStreaming
-                                ? 'text-gray-400'
-                                : 'cursor-pointer'
-                            }
+                        <div className='flex text-sm items-center ml-[-8px]'>
+                          <Button
+                            variant='ghost'
+                            className='p-1 m-0 h-auto disabled:opacity-50'
                             disabled={
                               currentSelectIndex === 0 || messageIsStreaming
                             }
@@ -225,21 +227,16 @@ export const ChatMessage: FC<Props> = memo(
                               }
                             }}
                           >
-                            &lt;
-                          </button>
-                          <span>
+                            <IconChevronLeft stroke='#7d7d7d' />
+                          </Button>
+                          <span className='font-bold text-[#7d7d7d]'>
                             {`${currentSelectIndex + 1}/${
                               parentChildrenIds.length
                             }`}
                           </span>
-                          <button
-                            className={
-                              currentSelectIndex ===
-                                parentChildrenIds.length - 1 ||
-                              messageIsStreaming
-                                ? 'text-gray-400'
-                                : 'cursor-pointer'
-                            }
+                          <Button
+                            variant='ghost'
+                            className='p-1 m-0 h-auto disabled:opacity-50'
                             disabled={
                               currentSelectIndex ===
                                 parentChildrenIds.length - 1 ||
@@ -252,18 +249,19 @@ export const ChatMessage: FC<Props> = memo(
                               }
                             }}
                           >
-                            &gt;
-                          </button>
+                            <IconChevronRight stroke='#7d7d7d' />
+                          </Button>
                         </div>
                       )}
                     </>
-                    <button
+                    <Button
+                      variant='ghost'
                       disabled={messageIsStreaming}
-                      className='invisible group-hover:visible focus:visible text-gray-500 hover:text-gray-700 dark:text-gray-400 dark:hover:text-gray-300'
+                      className='p-1 m-0 h-auto invisible group-hover:visible focus:visible'
                       onClick={toggleEditing}
                     >
-                      <IconEdit />
-                    </button>
+                      <IconEdit stroke='#7d7d7d' />
+                    </Button>
                   </div>
                 )}
               </>
@@ -338,16 +336,12 @@ export const ChatMessage: FC<Props> = memo(
                 </div>
 
                 {!messageIsStreaming ? (
-                  <div className='flex gap-2 pt-2'>
+                  <div className='flex gap-1 pt-2'>
                     {assistantChildrenIds.length > 1 && (
-                      <div className='flex gap-1 text-sm'>
-                        <button
-                          className={
-                            assistantCurrentSelectIndex === 0 ||
-                            messageIsStreaming
-                              ? 'text-gray-400'
-                              : 'cursor-pointer'
-                          }
+                      <div className='flex text-sm items-center ml-[-8px]'>
+                        <Button
+                          variant='ghost'
+                          className='p-1 m-0 h-auto disabled:opacity-50'
                           disabled={
                             assistantCurrentSelectIndex === 0 ||
                             messageIsStreaming
@@ -359,21 +353,16 @@ export const ChatMessage: FC<Props> = memo(
                             }
                           }}
                         >
-                          &lt;
-                        </button>
-                        <span>
+                          <IconChevronLeft stroke='#7d7d7d' />
+                        </Button>
+                        <span className='font-bold text-[#7d7d7d]'>
                           {`${assistantCurrentSelectIndex + 1}/${
                             assistantChildrenIds.length
                           }`}
                         </span>
-                        <button
-                          className={
-                            assistantCurrentSelectIndex ===
-                              assistantChildrenIds.length - 1 ||
-                            messageIsStreaming
-                              ? 'text-gray-400'
-                              : 'cursor-pointer'
-                          }
+                        <Button
+                          variant='ghost'
+                          className='p-1 m-0 h-auto'
                           disabled={
                             assistantCurrentSelectIndex ===
                               assistantChildrenIds.length - 1 ||
@@ -386,41 +375,46 @@ export const ChatMessage: FC<Props> = memo(
                             }
                           }}
                         >
-                          &gt;
-                        </button>
+                          <IconChevronRight stroke='#7d7d7d' />
+                        </Button>
                       </div>
                     )}
                     <div
-                      className={`flex gap-2 ${
+                      className={`flex gap-1 ${
                         isLastMessage ? 'visible' : 'invisible'
                       } group-hover:visible focus:visible`}
                     >
                       {messagedCopied ? (
-                        <IconCheck className='text-green-500 dark:text-green-400' />
+                        <Button variant='ghost' className='p-1 m-0 h-auto'>
+                          <IconCheck
+                            stroke='#7d7d7d'
+                            className='text-green-500 dark:text-green-400'
+                          />
+                        </Button>
                       ) : (
-                        <button
-                          className='text-gray-500 hover:text-gray-700 dark:text-gray-400 dark:hover:text-gray-300'
+                        <Button
+                          variant='ghost'
+                          className='p-1 m-0 h-auto'
                           onClick={copyOnClick}
                         >
-                          <IconCopy />
-                        </button>
+                          <IconCopy stroke='#7d7d7d' />
+                        </Button>
                       )}
-                      <button
-                        className='text-gray-500 hover:text-gray-700 dark:text-gray-400 dark:hover:text-gray-300'
+                      <Button
+                        variant='ghost'
+                        className='p-1 m-0 h-auto'
                         onClick={() => {
                           onRegenerate && onRegenerate();
                         }}
                       >
-                        <IconRefresh />
-                      </button>
-                      <button className='text-sm'>
-                        <ChangeModel
-                          onChangeModel={(modelId) => {
-                            onRegenerate && onRegenerate(modelId);
-                          }}
-                          modelName={modelName!}
-                        />
-                      </button>
+                        <IconRefresh stroke='#7d7d7d' />
+                      </Button>
+                      <ChangeModel
+                        onChangeModel={(modelId) => {
+                          onRegenerate && onRegenerate(modelId);
+                        }}
+                        modelName={modelName!}
+                      />
                     </div>
                   </div>
                 ) : (
