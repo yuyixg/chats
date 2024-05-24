@@ -4,6 +4,7 @@ import { MessageNode } from '@/types/chatMessage';
 import { calculateMessages } from '@/utils/message';
 import { Prisma } from '@prisma/client';
 import Decimal from 'decimal.js';
+import { ChatModelManager } from './models';
 
 export interface CreateChatMessage {
   role: Role;
@@ -44,14 +45,17 @@ export class ChatMessagesManager {
 
   static async findUserMessageDetailByChatId(chatId: string) {
     const chatMessages = await this.findUserMessageByChatId(chatId);
+    const chatModels = await ChatModelManager.findModels(true);
     const messages = chatMessages.map((x) => {
       return {
         id: x.id,
         parentId: x.parentId,
-        messages: JSON.parse(x.messages),
         createdAt: x.createdAt,
         tokenUsed: x.tokenUsed,
         calculatedPrice: x.calculatedPrice,
+        role: x.role,
+        content: JSON.parse(x.messages),
+        modelName: chatModels.find((m) => m.id === x.chatModelId)?.name,
       } as MessageNode;
     });
     return calculateMessages(messages);
@@ -60,6 +64,12 @@ export class ChatMessagesManager {
   static async deleteByChatId(chatId: string, userId: string) {
     return await prisma.chatMessages.deleteMany({
       where: { chatId, AND: { userId } },
+    });
+  }
+
+  static async delete(id: string, userId: string) {
+    return await prisma.chatMessages.delete({
+      where: { id, userId },
     });
   }
 

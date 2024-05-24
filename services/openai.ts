@@ -53,7 +53,7 @@ export const OpenAIStream = async (
   };
 
   const res = await fetch(url, body);
-  
+
   const contentType = res.headers.get('content-type');
   const decoder = new TextDecoder();
   if (res.status !== 200) {

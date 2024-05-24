@@ -999,7 +999,7 @@ var IconStopFilled = (props: IconProps) => {
   );
 };
 
-var IconArrowsExchange = (props: IconProps) => {
+var IconChevronLeft = (props: IconProps) => {
   const { className, size = 20, strokeWidth = 2, stroke, onClick } = props;
 
   return (
@@ -1017,8 +1017,78 @@ var IconArrowsExchange = (props: IconProps) => {
       strokeLinejoin='round'
     >
       <path stroke='none' d='M0 0h24v24H0z' fill='none' />
-      <path d='M4 12v-3a3 3 0 0 1 3 -3h13m-3 -3l3 3l-3 3' />
-      <path d='M20 12v3a3 3 0 0 1 -3 3h-13m3 3l-3 -3l3 -3' />
+      <path d='M15 6l-6 6l6 6' />
+    </svg>
+  );
+};
+
+var IconChevronRight = (props: IconProps) => {
+  const { className, size = 20, strokeWidth = 2, stroke, onClick } = props;
+
+  return (
+    <svg
+      xmlns='http://www.w3.org/2000/svg'
+      onClick={onClick}
+      className={className}
+      width={size}
+      height={size}
+      strokeWidth={strokeWidth}
+      stroke={stroke || 'hsl(var(--foreground))'}
+      viewBox='0 0 24 24'
+      fill='none'
+      strokeLinecap='round'
+      strokeLinejoin='round'
+    >
+      <path stroke='none' d='M0 0h24v24H0z' fill='none' />
+      <path d='M9 6l6 6l-6 6' />
+    </svg>
+  );
+};
+
+var IconChevronDown = (props: IconProps) => {
+  const { className, size = 20, strokeWidth = 2, stroke, onClick } = props;
+
+  return (
+    <svg
+      xmlns='http://www.w3.org/2000/svg'
+      onClick={onClick}
+      className={className}
+      width={size}
+      height={size}
+      strokeWidth={strokeWidth}
+      stroke={stroke || 'hsl(var(--foreground))'}
+      viewBox='0 0 24 24'
+      fill='none'
+      strokeLinecap='round'
+      strokeLinejoin='round'
+    >
+      <path stroke='none' d='M0 0h24v24H0z' fill='none' />
+      <path d='M6 9l6 6l6 -6' />
+    </svg>
+  );
+};
+
+var IconError = (props: IconProps) => {
+  const { className, size = 20, strokeWidth = 2, stroke, onClick } = props;
+
+  return (
+    <svg
+      xmlns='http://www.w3.org/2000/svg'
+      onClick={onClick}
+      className={className}
+      width={size}
+      height={size}
+      strokeWidth={strokeWidth}
+      stroke={stroke || 'hsl(var(--foreground))'}
+      viewBox='0 0 24 24'
+      fill='none'
+      strokeLinecap='round'
+      strokeLinejoin='round'
+    >
+      <path stroke='none' d='M0 0h24v24H0z' fill='none' />
+      <path d='M12 12m-9 0a9 9 0 1 0 18 0a9 9 0 1 0 -18 0' />
+      <path d='M12 9v4' />
+      <path d='M12 16v.01' />
     </svg>
   );
 };
@@ -1082,5 +1152,8 @@ export {
   IconShieldLock,
   IconRefresh,
   IconStopFilled,
-  IconArrowsExchange,
+  IconChevronLeft,
+  IconChevronRight,
+  IconChevronDown,
+  IconError,
 };

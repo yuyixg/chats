@@ -20,7 +20,7 @@
   "AI": "AI",
   "You": "你",
   "Cancel": "取消",
-  "Save & Submit": "保存并提交",
+  "Send": "发送",
   "Make sure your OpenAI API key is set in the bottom left of the sidebar.": "请确保您的 OpenAI API 密钥已在侧边栏左下角设置。",
   "If you completed this step, OpenAI may be experiencing issues.": "如果您已完成此步骤，OpenAI 可能遇到了问题。",
   "click if using a .env.local file": "click if using a .env.local file",
@@ -51,8 +51,15 @@
   "Share Message": "分享聊天",
   "Share": "分享",
   "Close Shared": "关闭分享",
+  "Copy": "复制",
+  "Change Model": "更改模型",
+  "Regenerate": "重新生成",
+  "Edit message": "编辑消息",
   "Share and Copy Link": "分享并复制链接",
   "Copy Successful": "复制成功",
   "Copy Link": "复制链接",
-  "Account Balance": "账户余额"
+  "Account Balance": "账户余额",
+  "Internet Search": "互联网搜索",
+  "There were some errors during the chat. You can switch models or try again later.": "聊天中出现了一些错误，你可以切换模型或者稍后再试。",
+  "Error generating response, click to regenerate response.": "生成响应时出错，点击以重新生成响应。"
 }

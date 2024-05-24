@@ -11,7 +11,7 @@ import { getLoginUrl, getUserInfo, getUserSessionId } from '@/utils/user';
 import { useRouter } from 'next/router';
 import { Dispatch, createContext } from 'react';
 import { ActionType } from '@/hooks/useCreateReducer';
-import { Message } from '@/types/chat';
+import { v4 as uuidv4 } from 'uuid';
 import { Model } from '@/types/model';
 import { Prompt } from '@/types/prompt';
 import { UserSession } from '@/utils/user';
@@ -39,6 +39,7 @@ import {
   getSelectChatId,
   saveSelectChatId,
 } from '@/utils/conversation';
+import { Role } from '@/types/chat';
 interface HandleUpdateChatParams {
   title?: string;
   chatModelId?: string;
@@ -59,6 +60,7 @@ interface HomeInitialState {
   selectMessageLastId: string;
   currentChatMessageId: string;
   userModelConfig: Object;
+  chatError: boolean;
   prompts: Prompt[];
   showChatbar: boolean;
   showPromptbar: boolean;
@@ -80,6 +82,7 @@ const initialState: HomeInitialState = {
   chats: [],
   selectModelId: undefined,
   selectChatId: undefined,
+  chatError: false,
   prompts: [],
   showPromptbar: false,
   showChatbar: true,
@@ -133,12 +136,24 @@ const Home = () => {
     return chats.find((x) => x.id === chatId)?.chatModelId;
   };
 
+  const chatErrorMessage = (message: ChatMessage) => {
+    return {
+      id: uuidv4(),
+      parentId: message.id,
+      childrenIds: [],
+      assistantChildrenIds: [],
+      role: 'assistant' as Role,
+      content: { text: '', image: [] },
+    };
+  };
+
   const handleNewChat = () => {
     postChats({ title: t('New Conversation') }).then((data) => {
       dispatch({ field: 'selectChatId', value: data.id });
       dispatch({ field: 'selectMessageLastId', value: '' });
       dispatch({ field: 'currentMessages', value: [] });
       dispatch({ field: 'selectMessages', value: [] });
+      dispatch({ field: 'chatError', value: false });
       dispatch({
         field: 'selectModelId',
         value: calcSelectModelId(chats, models),
@@ -171,6 +186,10 @@ const Home = () => {
   };
 
   const handleSelectChat = (chatId: string) => {
+    dispatch({
+      field: 'chatError',
+      value: false,
+    });
     dispatch({ field: 'selectChatId', value: chatId });
     const chat = chats.find((x) => x.id === chatId)!;
     dispatch({ field: 'userModelConfig', value: chat.userModelConfig });
@@ -179,6 +198,14 @@ const Home = () => {
         dispatch({ field: 'currentMessages', value: data });
         const lastMessage = data[data.length - 1];
         const _selectMessages = getSelectMessages(data, lastMessage.id);
+        if (lastMessage.role !== 'assistant') {
+          dispatch({
+            field: 'chatError',
+            value: true,
+          });
+          _selectMessages.push(chatErrorMessage(lastMessage));
+        }
+
         dispatch({
           field: 'selectMessages',
           value: _selectMessages,
@@ -273,6 +300,13 @@ const Home = () => {
           dispatch({ field: 'currentMessages', value: data });
           const lastMessage = data[data.length - 1];
           const _selectMessages = getSelectMessages(data, lastMessage.id);
+          if (lastMessage.role !== 'assistant') {
+            dispatch({
+              field: 'chatError',
+              value: true,
+            });
+            _selectMessages.push(chatErrorMessage(lastMessage));
+          }
           dispatch({
             field: 'selectMessages',
             value: _selectMessages,
