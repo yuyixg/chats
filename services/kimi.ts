@@ -77,7 +77,7 @@ export const KimiStream = async (
       };
 
       const parser = createParser(onParse);
-
+      
       for await (const chunk of res.body as any) {
         parser.feed(decoder.decode(chunk));
       }

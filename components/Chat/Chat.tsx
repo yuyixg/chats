@@ -80,6 +80,7 @@ export const Chat = memo(({ stopConversationRef }: Props) => {
       isRegenerate: boolean,
       modelId: string = ''
     ) => {
+      homeDispatch({ field: 'chatError', value: false });
       let _selectChatId = selectChatId;
       let _selectMessages = [...selectMessages];
       let _chats = chats;
@@ -185,6 +186,7 @@ export const Chat = memo(({ stopConversationRef }: Props) => {
       if (!response.ok) {
         homeDispatch({ field: 'loading', value: false });
         homeDispatch({ field: 'messageIsStreaming', value: false });
+        homeDispatch({ field: 'chatError', value: true });
         const result = await response.json();
         toast.error(t(result?.message) || response.statusText);
         return;
@@ -193,6 +195,7 @@ export const Chat = memo(({ stopConversationRef }: Props) => {
       if (!data) {
         homeDispatch({ field: 'loading', value: false });
         homeDispatch({ field: 'messageIsStreaming', value: false });
+        homeDispatch({ field: 'chatError', value: true });
         return;
       }
 
@@ -356,17 +359,6 @@ export const Chat = memo(({ stopConversationRef }: Props) => {
         currentSelectChat?.userModelConfig?.enableSearch ||
         modelConfig?.enableSearch,
     });
-    console.log({
-      name,
-      ...modelConfig,
-      temperature:
-        currentSelectChat?.userModelConfig?.temperature ||
-        modelConfig?.temperature,
-      prompt: currentSelectChat?.userModelConfig?.prompt || modelConfig?.prompt,
-      enableSearch:
-        currentSelectChat?.userModelConfig?.enableSearch ||
-        modelConfig?.enableSearch,
-    });
     setModelApiConfig(ModelTemplates[modelVersion]?.config as any);
   }, [selectModelId]);
 
@@ -408,10 +400,9 @@ export const Chat = memo(({ stopConversationRef }: Props) => {
                     )}
                     {currentModel?.enableSearch != undefined && (
                       <EnableNetworkSearch
-                        label={t('互联网搜索')}
+                        label={t('Internet Search')}
                         enable={currentModel.enableSearch}
                         onChange={(enableSearch) => {
-                          console.log(enableSearch);
                           handleUpdateUserModelConfig({
                             enableSearch,
                           });

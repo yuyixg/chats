@@ -17,7 +17,7 @@ const ChangeModel = ({
 
   return (
     <Popover>
-      <PopoverTrigger className='flex '>
+      <PopoverTrigger className='flex'>
         <Button variant='ghost' className='p-1 m-0 h-auto'>
           <span className='text-[#7d7d7d] text-sm font-bold'>{modelName}</span>
           <IconChevronDown stroke='#7d7d7d' />

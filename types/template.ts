@@ -195,7 +195,7 @@ export const ModelTemplates = {
     },
     modelConfig: {
       prompt:
-        "You are an AI assistant with image understanding capabilities, Follow the user's instructions carefully. Respond using markdown.",
+        "You are an AI assistant, Follow the user's instructions carefully. Respond using markdown.",
       temperature: 0.85,
       version: 'qwen-max-longcontext',
       enableSearch: false,

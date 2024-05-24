@@ -19,6 +19,8 @@ import remarkMath from 'remark-math';
 import { HomeContext } from '@/pages/home/home';
 import ChangeModel from './ChangeModel';
 import { Button } from '../ui/button';
+import ChatError from './ChatError';
+import ChatButtonToolTip from './ChatButtonTooltip';
 
 export interface Props {
   id: string;
@@ -53,8 +55,12 @@ export const ChatMessage: FC<Props> = memo(
   }) => {
     const { t } = useTranslation('chat');
     const {
-      state: { selectChatId, messageIsStreaming, currentChatMessageId },
-      dispatch: homeDispatch,
+      state: {
+        selectChatId,
+        messageIsStreaming,
+        currentChatMessageId,
+        chatError,
+      },
     } = useContext(HomeContext);
 
     const [isEditing, setIsEditing] = useState<boolean>(false);
@@ -254,14 +260,19 @@ export const ChatMessage: FC<Props> = memo(
                         </div>
                       )}
                     </>
-                    <Button
-                      variant='ghost'
-                      disabled={messageIsStreaming}
-                      className='p-1 m-0 h-auto invisible group-hover:visible focus:visible'
-                      onClick={toggleEditing}
-                    >
-                      <IconEdit stroke='#7d7d7d' />
-                    </Button>
+                    <ChatButtonToolTip
+                      trigger={
+                        <Button
+                          variant='ghost'
+                          disabled={messageIsStreaming}
+                          className='p-1 m-0 h-auto invisible group-hover:visible focus:visible'
+                          onClick={toggleEditing}
+                        >
+                          <IconEdit stroke='#7d7d7d' />
+                        </Button>
+                      }
+                      content={t('Edit message')!}
+                    ></ChatButtonToolTip>
                   </div>
                 )}
               </>
@@ -335,6 +346,8 @@ export const ChatMessage: FC<Props> = memo(
                   </MemoizedReactMarkdown>
                 </div>
 
+                {chatError && isLastMessage && <ChatError />}
+
                 {!messageIsStreaming ? (
                   <div className='flex gap-1 pt-2'>
                     {assistantChildrenIds.length > 1 && (
@@ -380,7 +393,7 @@ export const ChatMessage: FC<Props> = memo(
                       </div>
                     )}
                     <div
-                      className={`flex gap-1 ${
+                      className={`flex gap-0 items-center ${
                         isLastMessage ? 'visible' : 'invisible'
                       } group-hover:visible focus:visible`}
                     >
@@ -392,28 +405,43 @@ export const ChatMessage: FC<Props> = memo(
                           />
                         </Button>
                       ) : (
-                        <Button
-                          variant='ghost'
-                          className='p-1 m-0 h-auto'
-                          onClick={copyOnClick}
-                        >
-                          <IconCopy stroke='#7d7d7d' />
-                        </Button>
+                        <ChatButtonToolTip
+                          trigger={
+                            <Button
+                              variant='ghost'
+                              className='p-1 m-0 h-auto'
+                              onClick={copyOnClick}
+                            >
+                              <IconCopy stroke='#7d7d7d' />
+                            </Button>
+                          }
+                          content={t('Copy')!}
+                        />
                       )}
-                      <Button
-                        variant='ghost'
-                        className='p-1 m-0 h-auto'
-                        onClick={() => {
-                          onRegenerate && onRegenerate();
-                        }}
-                      >
-                        <IconRefresh stroke='#7d7d7d' />
-                      </Button>
-                      <ChangeModel
-                        onChangeModel={(modelId) => {
-                          onRegenerate && onRegenerate(modelId);
-                        }}
-                        modelName={modelName!}
+                      <ChatButtonToolTip
+                        trigger={
+                          <Button
+                            variant='ghost'
+                            className='p-1 m-0 h-auto'
+                            onClick={() => {
+                              onRegenerate && onRegenerate();
+                            }}
+                          >
+                            <IconRefresh stroke='#7d7d7d' />
+                          </Button>
+                        }
+                        content={t('Regenerate')!}
+                      />
+                      <ChatButtonToolTip
+                        trigger={
+                          <ChangeModel
+                            onChangeModel={(modelId) => {
+                              onRegenerate && onRegenerate(modelId);
+                            }}
+                            modelName={modelName!}
+                          />
+                        }
+                        content={t('Change Model')!}
                       />
                     </div>
                   </div>

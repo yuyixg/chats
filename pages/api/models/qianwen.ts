@@ -177,70 +177,80 @@ const handler = async (req: ChatsApiRequest, res: ChatsApiResponse) => {
   if (lastMessage?.role === 'user') {
     messagesToSend.pop();
   }
-  const stream = await QianWenStream(
-    chatModel,
-    temperature,
-    messagesToSend,
-    enableSearch
-  );
+  
+  try {
+    const stream = await QianWenStream(
+      chatModel,
+      temperature,
+      messagesToSend,
+      enableSearch
+    );
 
-  let assistantResponse = '';
-  if (stream.getReader) {
-    const reader = stream.getReader();
-    let result = {} as QianWenStreamResult;
-    let tokenUsed = 0;
-    const streamResponse = async () => {
-      while (true) {
-        const { done, value } = await reader.read();
-        if (value) {
-          result = JSON.parse(value);
-          assistantResponse += result.text;
-        }
-        if (done) {
-          const { input_tokens, output_tokens, image_tokens } = result.usage;
-          tokenUsed += input_tokens + (image_tokens || 0) + output_tokens;
-          const calculatedPrice = calcTokenPrice(
-            priceConfig,
-            input_tokens + (image_tokens || 0),
-            output_tokens
-          );
+    let assistantResponse = '';
+    if (stream.getReader) {
+      const reader = stream.getReader();
+      let result = {} as QianWenStreamResult;
+      let tokenUsed = 0;
+      const streamResponse = async () => {
+        while (true) {
+          const { done, value } = await reader.read();
+          if (value) {
+            result = JSON.parse(value);
+            assistantResponse += result.text;
+          }
+          if (done) {
+            const { input_tokens, output_tokens, image_tokens } = result.usage;
+            tokenUsed += input_tokens + (image_tokens || 0) + output_tokens;
+            const calculatedPrice = calcTokenPrice(
+              priceConfig,
+              input_tokens + (image_tokens || 0),
+              output_tokens
+            );
 
-          await ChatModelRecordManager.recordTransfer({
-            isFirstChat,
-            userId,
-            chatId,
-            tokenUsed,
-            userMessageText,
-            calculatedPrice,
-            chatModelId: chatModel.id,
-            createChatMessageParams: {
-              role: 'assistant',
-              chatId,
+            await ChatModelRecordManager.recordTransfer({
+              isFirstChat,
               userId,
-              chatModelId: modelId,
-              parentId: resParentId,
-              messages: JSON.stringify({ text: assistantResponse }),
+              chatId,
               tokenUsed,
+              userMessageText,
               calculatedPrice,
-            },
-            updateChatParams: {
-              id: chatId,
               chatModelId: chatModel.id,
-              userModelConfig: JSON.stringify(userModelConfig),
-            },
-          });
+              createChatMessageParams: {
+                role: 'assistant',
+                chatId,
+                userId,
+                chatModelId: modelId,
+                parentId: resParentId,
+                messages: JSON.stringify({ text: assistantResponse }),
+                tokenUsed,
+                calculatedPrice,
+              },
+              updateChatParams: {
+                id: chatId,
+                chatModelId: chatModel.id,
+                userModelConfig: JSON.stringify(userModelConfig),
+              },
+            });
 
-          return res.end();
+            return res.end();
+          }
+          res.write(Buffer.from(result.text));
         }
-        res.write(Buffer.from(result.text));
-      }
-    };
+      };
 
-    streamResponse().catch((error) => {
-      throw new InternalServerError(
-        JSON.stringify({ message: error?.message, stack: error?.stack })
-      );
-    });
+      streamResponse().catch((error) => {
+        throw new InternalServerError(
+          JSON.stringify({ message: error?.message, stack: error?.stack })
+        );
+      });
+    }
+  } catch (error: any) {
+    if (lastMessage && lastMessage.id !== messageId) {
+      await ChatMessagesManager.delete(lastMessage.id, userId);
+    }
+    throw new InternalServerError(
+      JSON.stringify({ message: error?.message, stack: error?.stack })
+    );
   }
 };
 

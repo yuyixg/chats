@@ -175,64 +175,73 @@ const handler = async (req: ChatsApiRequest, res: ChatsApiResponse) => {
   if (lastMessage?.role === 'user') {
     messagesToSend.pop();
   }
-
-  const stream = await OpenAIStream(chatModel, temperature, messagesToSend);
-  let assistantResponse = '';
-  res.setHeader('Content-Type', 'application/octet-stream');
-  if (stream.getReader) {
-    const reader = stream.getReader();
-    const streamResponse = async () => {
-      while (true) {
-        const { done, value } = await reader.read();
-        if (value) {
-          assistantResponse += value;
-        }
-        if (done) {
-          let messageTokens = encoding.encode(assistantResponse).length;
-          tokenUsed += messageTokens;
-          const calculatedPrice = calcTokenPrice(
-            priceConfig,
-            tokenUsed,
-            messageTokens
-          );
-          encoding.free();
-
-          await ChatModelRecordManager.recordTransfer({
-            isFirstChat,
-            userId,
-            chatId,
-            tokenUsed,
-            userMessageText,
-            calculatedPrice,
-            chatModelId: chatModel.id,
-            createChatMessageParams: {
-              role: 'assistant',
-              chatId,
-              userId,
-              chatModelId: modelId,
-              parentId: resParentId,
-              messages: JSON.stringify({ text: assistantResponse }),
+  
+  try {
+    const stream = await OpenAIStream(chatModel, temperature, messagesToSend);
+    let assistantResponse = '';
+    res.setHeader('Content-Type', 'application/octet-stream');
+    if (stream.getReader) {
+      const reader = stream.getReader();
+      const streamResponse = async () => {
+        while (true) {
+          const { done, value } = await reader.read();
+          if (value) {
+            assistantResponse += value;
+          }
+          if (done) {
+            let messageTokens = encoding.encode(assistantResponse).length;
+            tokenUsed += messageTokens;
+            const calculatedPrice = calcTokenPrice(
+              priceConfig,
               tokenUsed,
+              messageTokens
+            );
+            encoding.free();
+
+            await ChatModelRecordManager.recordTransfer({
+              isFirstChat,
+              userId,
+              chatId,
+              tokenUsed,
+              userMessageText,
               calculatedPrice,
-            },
-            updateChatParams: {
-              id: chatId,
               chatModelId: chatModel.id,
-              userModelConfig: JSON.stringify(userModelConfig),
-            },
-          });
+              createChatMessageParams: {
+                role: 'assistant',
+                chatId,
+                userId,
+                chatModelId: modelId,
+                parentId: resParentId,
+                messages: JSON.stringify({ text: assistantResponse }),
+                tokenUsed,
+                calculatedPrice,
+              },
+              updateChatParams: {
+                id: chatId,
+                chatModelId: chatModel.id,
+                userModelConfig: JSON.stringify(userModelConfig),
+              },
+            });
 
-          return res.end();
+            return res.end();
+          }
+          res.write(Buffer.from(value));
         }
-        res.write(Buffer.from(value));
-      }
-    };
+      };
 
-    streamResponse().catch((error) => {
-      throw new InternalServerError(
-        JSON.stringify({ message: error?.message, stack: error?.stack })
-      );
-    });
+      streamResponse().catch((error) => {
+        throw new InternalServerError(
+          JSON.stringify({ message: error?.message, stack: error?.stack })
+        );
+      });
+    }
+  } catch (error: any) {
+    if (lastMessage && lastMessage.id !== messageId) {
+      await ChatMessagesManager.delete(lastMessage.id, userId);
+    }
+    throw new InternalServerError(
+      JSON.stringify({ message: error?.message, stack: error?.stack })
+    );
   }
 };
 

@@ -67,6 +67,12 @@ export class ChatMessagesManager {
     });
   }
 
+  static async delete(id: string, userId: string) {
+    return await prisma.chatMessages.delete({
+      where: { id, userId },
+    });
+  }
+
   static async checkIsFirstChat(chatId: string) {
     const count = await prisma.chatMessages.count({ where: { chatId } });
     return count === 0;
