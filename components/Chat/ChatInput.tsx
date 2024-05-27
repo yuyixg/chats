@@ -226,7 +226,7 @@ export const ChatInput = ({
   }, [content]);
 
   useEffect(() => {
-    setContent({ text: '', image: [] });
+    setContent({ ...content, image: [] });
   }, [selectModelId, selectChatId]);
 
   return (
