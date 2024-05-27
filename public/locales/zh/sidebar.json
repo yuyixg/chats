@@ -6,7 +6,7 @@
   "Import data": "导入对话",
   "Are you sure?": "确定吗？",
   "Clear conversations": "清空对话",
-  "Settings": "偏好设置",
+  "Account Settings": "用户设置",
   "Export data": "导出对话",
   "Admin Panel": "后台管理",
   "Log out": "退出登录",
@@ -19,6 +19,10 @@
   "Must contain at least {{length}} character(s)": "必须至少包含{{length}}个字符",
   "Contain at most {{length}} character(s)": "最多包含{{length}}个字符",
   "Save": "保存",
+  "Modified successfully!": "修改成功！",
+  "Confirm": "确认",
+  "General": "通用设置",
+  "Account balance": "账户余额",
   "Yuan": "元",
   "Prompt Management": "提示词管理"
 }
