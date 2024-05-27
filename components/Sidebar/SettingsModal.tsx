@@ -5,6 +5,7 @@ import { IconMoneybag, IconPasswordUser, IconSettings } from '../Icons';
 import { ChangePasswordTabContent } from './ChangePasswordTabContent';
 import SettingsTabContent from './SettingsTabCotent';
 import { useState } from 'react';
+import UserBalanceTabContent from './UserBalanceTabContent';
 
 interface IProps {
   isOpen: boolean;
@@ -65,10 +66,9 @@ const SettingsModal = (props: IProps) => {
           <TabsContent className='min-w-full mt-[-4px]' value={TabKey.Settings}>
             <SettingsTabContent />
           </TabsContent>
-          <TabsContent
-            className='min-w-full mt-[-4px]'
-            value={TabKey.Balance}
-          ></TabsContent>
+          <TabsContent className='min-w-full mt-[4px]' value={TabKey.Balance}>
+            <UserBalanceTabContent />
+          </TabsContent>
           <TabsContent
             className='min-w-full mt-[-4px]'
             value={TabKey.ChangePassword}

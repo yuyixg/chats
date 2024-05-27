@@ -3,10 +3,11 @@ import { useTranslation } from 'next-i18next';
 import { HomeContext } from '@/pages/home/home';
 import { formatRMB } from '@/utils/common';
 import { getUserBalance } from '@/apis/userService';
+import { GetUserBalanceResult } from '@/types/user';
 
 export const AccountBalance = () => {
   const { t } = useTranslation('chat');
-  const [balance, setBalance] = useState(0);
+  const [balance, setBalance] = useState<GetUserBalanceResult>();
   const {
     state: {},
   } = useContext(HomeContext);
@@ -23,7 +24,7 @@ export const AccountBalance = () => {
         {t('Account Balance')}
       </label>
       <div className='w-full focus:outline-none active:outline-none bg-transparent pr-2 text-neutral-900 dark:border-neutral-600 dark:text-white font-semibold'>
-        {formatRMB(balance)}
+        {formatRMB(balance?.balance!)}
       </div>
     </div>
   );

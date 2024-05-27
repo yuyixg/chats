@@ -3,8 +3,7 @@ import { PostPromptParams, PutPromptParams } from '@/types/admin';
 import { ChatMessage } from '@/types/chatMessage';
 import { Model } from '@/types/model';
 import { Prompt } from '@/types/prompt';
-import { ProviderResult, SingInParams, SingInResult } from '@/types/user';
-import { UserInfo } from '@/utils/user';
+import { GetUserBalanceResult, ProviderResult, SingInParams, SingInResult } from '@/types/user';
 
 export interface ChatResult {
   id: string;
@@ -101,7 +100,7 @@ export const getUserModels = () => {
 
 export const getUserBalance = () => {
   const fetchServer = useFetch();
-  return fetchServer.get<number>('/api/user/balance');
+  return fetchServer.get<GetUserBalanceResult>('/api/user/balance');
 };
 
 export const getLoginProvider = () => {

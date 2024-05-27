@@ -14,7 +14,13 @@ export const config = {
 async function handler(req: ChatsApiRequest, res: ChatsApiResponse) {
   const { userId } = req.session;
   if (req.method === 'GET') {
-    return await UserBalancesManager.findUserBalance(userId);
+    const data = await UserBalancesManager.findUserBalanceAndLogs(userId);
+    return {
+      balance: data.balance,
+      logs: data.balanceLogs.map((x) => {
+        return { value: x.value, date: x.createdAt };
+      }),
+    };
   }
 }
 
