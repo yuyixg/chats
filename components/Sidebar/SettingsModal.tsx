@@ -25,20 +25,20 @@ const SettingsModal = (props: IProps) => {
 
   return (
     <Dialog open={isOpen} onOpenChange={onClose}>
-      <DialogContent className='w-1/2'>
+      <DialogContent className='w-full w- max-w-2xl'>
         <DialogHeader className='mb-[16px]'>
           <DialogTitle>{t('Account Settings')}</DialogTitle>
         </DialogHeader>
         <Tabs
           defaultValue={TabKey.Settings}
           orientation='horizontal'
-          className='w-1/2 p-0 m-0'
+          className='w-1/2 p-0 m-0 min-h-[320px]'
         >
           <TabsList className='bg-transparent min-w-[160px] gap-2 p-0 m-0'>
             <TabsTrigger
               value={TabKey.Settings}
               onClick={() => setCurrentTab(TabKey.Settings)}
-              className='flex w-full data-[state=active]:bg-[#ececec] data-[state=active]:dark:bg-[#343541]/90 data-[state=active]:shadow-none'
+              className='flex w-full data-[state=active]:bg-[#ececec] data-[state=active]:dark:bg-[#262630]/90 data-[state=active]:shadow-none'
             >
               <div className='flex gap-1'>
                 <IconSettings /> {t('General')}
@@ -47,7 +47,7 @@ const SettingsModal = (props: IProps) => {
             <TabsTrigger
               value={TabKey.Balance}
               onClick={() => setCurrentTab(TabKey.Balance)}
-              className='flex w-full data-[state=active]:bg-[#ececec] data-[state=active]:dark:bg-[#343541]/90 data-[state=active]:shadow-none'
+              className='flex w-full data-[state=active]:bg-[#ececec] data-[state=active]:dark:bg-[#262630]/90 data-[state=active]:shadow-none'
             >
               <div className='flex gap-1'>
                 <IconMoneybag /> {t('Account balance')}
@@ -56,7 +56,7 @@ const SettingsModal = (props: IProps) => {
             <TabsTrigger
               value={TabKey.ChangePassword}
               onClick={() => setCurrentTab(TabKey.ChangePassword)}
-              className='flex w-full data-[state=active]:bg-[#ececec] data-[state=active]:dark:bg-[#343541]/90 data-[state=active]:shadow-none'
+              className='flex w-full data-[state=active]:bg-[#ececec] data-[state=active]:dark:bg-[#262630]/90 data-[state=active]:shadow-none'
             >
               <div className='flex gap-1'>
                 <IconPasswordUser /> {t('Change Password')}

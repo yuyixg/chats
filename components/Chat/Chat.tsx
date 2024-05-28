@@ -363,7 +363,7 @@ export const Chat = memo(({ stopConversationRef }: Props) => {
   }, [selectModelId]);
 
   return (
-    <div className='relative flex-1 overflow-hidden bg-white dark:bg-[#343541]'>
+    <div className='relative flex-1 overflow-hidden bg-white dark:bg-[#262630]'>
       <>
         <div
           className='max-h-full overflow-x-hidden'
@@ -416,7 +416,7 @@ export const Chat = memo(({ stopConversationRef }: Props) => {
           ) : (
             <>
               {currentSelectChat && (
-                <div className='sticky top-0 z-10 bg-white py-2 text-sm text-neutral-500 dark:border-none dark:bg-[#343541] dark:text-neutral-200'>
+                <div className='sticky top-0 z-10 bg-white py-2 text-sm text-neutral-500 dark:border-none dark:bg-[#262630] dark:text-neutral-200'>
                   <div className='mt-[6px] md:mt-3 flex justify-center gap-1'>
                     <div>{currentModel.name}</div>
                     {currentModel?.temperature && (
@@ -509,7 +509,7 @@ export const Chat = memo(({ stopConversationRef }: Props) => {
               })}
 
               <div
-                className='h-[162px] bg-white dark:bg-[#343541]'
+                className='h-[162px] bg-white dark:bg-[#262630]'
                 ref={messagesEndRef}
               />
             </>

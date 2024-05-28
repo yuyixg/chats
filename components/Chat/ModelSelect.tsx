@@ -31,7 +31,7 @@ export const ModelSelect = () => {
             <option
               key={model.id}
               value={model.id}
-              className='dark:bg-[#343541] dark:text-white'
+              className='dark:bg-[#262630] dark:text-white'
             >
               {model.name}
             </option>

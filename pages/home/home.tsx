@@ -444,7 +444,7 @@ const Home = () => {
           </div>
         )}
         <div className={`flex h-screen w-screen flex-col text-sm`}>
-          <div className='flex h-full w-full dark:bg-[#343541]'>
+          <div className='flex h-full w-full dark:bg-[#262630]'>
             <Chatbar />
             <div className='flex w-full'>
               <Chat stopConversationRef={stopConversationRef} />

@@ -43,15 +43,17 @@ const UserBalanceTabContent = () => {
         <Table>
           <TableHeader>
             <TableRow>
-              <TableHead>{t('Date')}</TableHead>
-              <TableHead>{t('Amount')}</TableHead>
+              <TableHead className='h-8 py-2'>{t('Date')}</TableHead>
+              <TableHead className='h-8 py-2'>{t('Amount')}</TableHead>
             </TableRow>
           </TableHeader>
           <TableBody>
             {balanceData?.logs.map((log) => (
               <TableRow key={log.date}>
-                <TableCell>{log.date}</TableCell>
-                <TableCell>{(+(log?.value || 0)).toFixed(2)}</TableCell>
+                <TableCell className='h-8 py-2'>{log.date}</TableCell>
+                <TableCell className='h-8 py-2'>
+                  {(+(log?.value || 0)).toFixed(2)}
+                </TableCell>
               </TableRow>
             ))}
           </TableBody>

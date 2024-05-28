@@ -47,7 +47,7 @@ const Sidebar = <T,>({
         {hasModel() && (
           <div className='flex items-center'>
             <button
-              className={`flex w-full flex-shrink-0 cursor-pointer select-none items-center gap-3 rounded-md p-3 text-black dark:text-white hover:bg-[#cdcdcd] hover:dark:bg-[#343541] bg-[#ececec] dark:bg-[#343541]/80 ${
+              className={`flex w-full flex-shrink-0 cursor-pointer select-none items-center gap-3 rounded-md p-3 text-black dark:text-white hover:bg-[#cdcdcd] hover:dark:bg-[#262630] bg-[#ececec] dark:bg-[#262630]/80 ${
                 messageIsStreaming ? 'disabled:cursor-not-allowed' : ''
               }`}
               onClick={() => {
