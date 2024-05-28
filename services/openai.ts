@@ -84,7 +84,16 @@ export const OpenAIStream = async (
             }
             const text =
               (json.choices.length > 0 && json.choices[0].delta?.content) || '';
-            controller.enqueue(text);
+            controller.enqueue(
+              JSON.stringify({
+                text,
+                usage: {
+                  inputTokens: 0,
+                  outputTokens: 0,
+                  totalTokens: 0,
+                },
+              })
+            );
           }
         }
       };

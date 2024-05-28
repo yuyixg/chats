@@ -1,5 +1,4 @@
 import Cookies from './cookie';
-import { getSettingsLanguage } from './settings';
 
 export interface UserSession {
   sessionId: string;

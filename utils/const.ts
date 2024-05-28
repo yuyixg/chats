@@ -1,5 +1,4 @@
-export const DEFAULT_TEMPERATURE = parseFloat(
-  process.env.NEXT_PUBLIC_DEFAULT_TEMPERATURE || '1'
-);
-
-export const DEFAULT_SYSTEM_PROMPT = 'You are an AI assistant, Follow the user\'s instructions carefully. Respond using markdown.';
+export const AWS_ACCESS_KEY = process.env.AWS_ACCESS_KEY || '';
+export const AWS_SECRET = process.env.AWS_SECRET || '';
+export const AWS_BUCKET_NAME = process.env.AWS_BUCKET_NAME || '';
+export const AWS_ENDPOINT = process.env.AWS_ENDPOINT || '';

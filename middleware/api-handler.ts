@@ -8,15 +8,7 @@ import { replacePassword } from '@/utils/user';
 import { IncomingHttpHeaders } from 'http';
 import requestIp from 'request-ip';
 
-const modelApis = [
-  '/api/models/kimi',
-  '/api/models/openai',
-  '/api/models/lingyi',
-  '/api/models/qianwen',
-  '/api/models/qianfan',
-  '/api/models/openai',
-  '/api/models/spark',
-];
+const modelApis = ['/api/chats'];
 
 const publicApis = [
   '/api/public/login',

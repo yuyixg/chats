@@ -13,15 +13,6 @@ export const ModelEndpoint: { [key in ModelVersions]?: string } = {
   [ModelVersions.ERNIE_Bot_8K]: 'ernie_bot_8k',
 };
 
-export interface QianFanSteamResult {
-  text: string;
-  usage: {
-    prompt_tokens: number;
-    completion_tokens: number;
-    total_tokens: number;
-  };
-}
-
 async function getAccessTokenAsync(
   apiHost: string,
   apiKey: string,
@@ -84,10 +75,16 @@ export const QianFanStream = async (
           try {
             const json = JSON.parse(data);
             const text = json.result;
+            const { prompt_tokens, completion_tokens, total_tokens } =
+              json?.usage || {};
             controller.enqueue(
               JSON.stringify({
                 text,
-                usage: json.usage,
+                usage: {
+                  inputTokens: prompt_tokens,
+                  outputTokens: completion_tokens,
+                  totalTokens: total_tokens,
+                },
               })
             );
             if (json.is_end) {

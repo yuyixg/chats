@@ -19,7 +19,6 @@ const WeChatLoginModal = (props: {
   );
   useEffect(() => {
     if (isOpen && status === 'ready') {
-      console.log(appId);
       const { origin } = location;
       new WxLogin({
         id: 'wxContainer',

@@ -9,7 +9,6 @@ import {
 } from 'react';
 import toast from 'react-hot-toast';
 import { useTranslation } from 'next-i18next';
-import { getModelEndpoint } from '@/utils/apis';
 import { throttle } from '@/utils/throttle';
 import { ChatBody, Message, Role } from '@/types/chat';
 import { ChatInput } from './ChatInput';
@@ -40,6 +39,7 @@ export const Chat = memo(({ stopConversationRef }: Props) => {
       models,
       prompts,
       userModelConfig,
+      canChat,
     },
     handleUpdateSelectMessage,
     handleUpdateCurrentMessage,
@@ -60,6 +60,7 @@ export const Chat = memo(({ stopConversationRef }: Props) => {
   const [modeApiConfig, setModelApiConfig] = useState<ModelApiConfig>(
     {} as ModelApiConfig
   );
+  const [messageCanChat, setMessageCanChat] = useState(canChat);
   const currentSelectChat = chats.find((x) => x.id === selectChatId);
 
   const messagesEndRef = useRef<HTMLDivElement>(null);
@@ -75,7 +76,6 @@ export const Chat = memo(({ stopConversationRef }: Props) => {
   const handleSend = useCallback(
     async (
       message: Message,
-      parentId: string | null,
       messageId: string,
       isRegenerate: boolean,
       modelId: string = ''
@@ -163,18 +163,14 @@ export const Chat = memo(({ stopConversationRef }: Props) => {
       const chatBody: ChatBody = {
         modelId: modelId || selectModelId!,
         chatId: _selectChatId!,
-        parentId: parentId,
         messageId,
         userMessage: messageContent,
         userModelConfig,
       };
-      const endpoint = getModelEndpoint(
-        getModel(models, modelId || selectModelId!).modelProvider
-      );
       let body = JSON.stringify(chatBody);
 
       const controller = new AbortController();
-      const response = await fetch(endpoint, {
+      const response = await fetch('api/chats', {
         method: 'POST',
         headers: {
           'Content-Type': 'application/json',
@@ -362,6 +358,10 @@ export const Chat = memo(({ stopConversationRef }: Props) => {
     setModelApiConfig(ModelTemplates[modelVersion]?.config as any);
   }, [selectModelId]);
 
+  useEffect(() => {
+    setMessageCanChat(canChat);
+  }, [canChat]);
+
   return (
     <div className='relative flex-1 overflow-hidden bg-white dark:bg-[#262630]'>
       <>
@@ -490,19 +490,13 @@ export const Chat = memo(({ stopConversationRef }: Props) => {
                       if (!message) return;
                       handleSend(
                         { role: 'user', content: message.content },
-                        current.parentId,
                         current.parentId || '',
                         true,
                         modelId
                       );
                     }}
                     onEdit={(editedMessage, parentId) => {
-                      handleSend(
-                        editedMessage,
-                        parentId,
-                        parentId || '',
-                        false
-                      );
+                      handleSend(editedMessage, parentId || '', false);
                     }}
                   />
                 );
@@ -515,18 +509,13 @@ export const Chat = memo(({ stopConversationRef }: Props) => {
             </>
           )}
         </div>
-        {hasModel() && (
+        {messageCanChat && (
           <ChatInput
             stopConversationRef={stopConversationRef}
             textareaRef={textareaRef}
             onSend={(message) => {
               const { lastMessage } = getSelectMessagesLast();
-              handleSend(
-                message,
-                lastMessage?.parentId,
-                lastMessage?.id,
-                false
-              );
+              handleSend(message, lastMessage?.id, false);
             }}
             onScrollDownClick={handleScrollDown}
             showScrollDownButton={showScrollDownButton}

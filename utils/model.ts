@@ -111,3 +111,11 @@ export function conversionModelPriceToSave(priceConfig: string) {
   configs.out = configs.out / ModelPriceUnit;
   return JSON.stringify(configs);
 }
+
+export function getStorageModelId() {
+  return localStorage.getItem('selectModelId');
+}
+
+export function setStorageModelId(modelId: string) {
+  return localStorage.setItem('selectModelId', modelId);
+}

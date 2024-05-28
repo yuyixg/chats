@@ -40,27 +40,27 @@ export const getUserMessages = (chatId: string): Promise<ChatMessage[]> => {
 
 export const getChats = (): Promise<ChatResult[]> => {
   const fetchService = useFetch();
-  return fetchService.get('/api/chats');
+  return fetchService.get('/api/user/chats');
 };
 
 export const getChat = (id: string): Promise<ChatResult> => {
   const fetchService = useFetch();
-  return fetchService.get('/api/chats?id=' + id);
+  return fetchService.get('/api/user/chats?id=' + id);
 };
 
 export const postChats = (params: PostChatParams): Promise<ChatResult> => {
   const fetchService = useFetch();
-  return fetchService.post('/api/chats', { body: params });
+  return fetchService.post('/api/user/chats', { body: params });
 };
 
 export const putChats = (params: PutChatParams) => {
   const fetchService = useFetch();
-  return fetchService.put('/api/chats', { body: params });
+  return fetchService.put('/api/user/chats', { body: params });
 };
 
 export const deleteChats = (id: string) => {
   const fetchService = useFetch();
-  return fetchService.delete('/api/chats?id=' + id);
+  return fetchService.delete('/api/user/chats?id=' + id);
 };
 
 export const putUserMessages = (

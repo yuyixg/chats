@@ -95,7 +95,7 @@ export class UserBalancesManager {
       where: { userId },
       select: { balance: true },
     });
-    
+
     const now = new Date();
     const SevenDaysAgo = new Date(now);
     SevenDaysAgo.setDate(now.getDate() - 7);
@@ -105,6 +105,7 @@ export class UserBalancesManager {
           gte: SevenDaysAgo,
           lt: now,
         },
+        type: BalanceType.Consume,
         userId,
       },
       skip: 0,

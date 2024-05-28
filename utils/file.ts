@@ -23,3 +23,14 @@ export const FileDefaultTemplates = {
   [FileServicesType.Azure]: {},
   [FileServicesType.Aliyun]: {},
 };
+
+export const getFileEndpoint = (file: FileServicesType, serverId: string) => {
+  const Endpoints = {
+    [FileServicesType.Local]: 'api/files/local',
+    [FileServicesType.Minio]: 'api/files/minio',
+    [FileServicesType.Aws]: 'api/files/aws',
+    [FileServicesType.Azure]: 'api/files/azure',
+    [FileServicesType.Aliyun]: 'api/files/aliyun',
+  };
+  return Endpoints[file] + '?id=' + serverId;
+};

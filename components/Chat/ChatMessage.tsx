@@ -54,6 +54,7 @@ export const ChatMessage: FC<Props> = memo(
     onRegenerate,
   }) => {
     const { t } = useTranslation('chat');
+    console.log('props', id, isLastMessage);
     const {
       state: {
         selectChatId,

@@ -7,15 +7,6 @@ import {
   createParser,
 } from 'eventsource-parser';
 
-export interface KimiSteamResult {
-  text: string;
-  usage: {
-    prompt_tokens: number;
-    completion_tokens: number;
-    total_tokens: number;
-  };
-}
-
 export const KimiStream = async (
   chatModel: ChatModels,
   temperature: number,
@@ -66,10 +57,16 @@ export const KimiStream = async (
             const json = JSON.parse(data);
             const text =
               (json.choices.length > 0 && json.choices[0].delta?.content) || '';
+            const { prompt_tokens, completion_tokens, total_tokens } =
+              json?.choices[0]?.usage || {};
             controller.enqueue(
               JSON.stringify({
                 text,
-                usage: json?.choices[0]?.usage,
+                usage: {
+                  inputTokens: prompt_tokens,
+                  outputTokens: completion_tokens,
+                  totalTokens: total_tokens,
+                },
               })
             );
           }
@@ -77,7 +74,7 @@ export const KimiStream = async (
       };
 
       const parser = createParser(onParse);
-      
+
       for await (const chunk of res.body as any) {
         parser.feed(decoder.decode(chunk));
       }

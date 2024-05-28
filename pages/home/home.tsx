@@ -38,8 +38,9 @@ import {
   getPathChatId,
   getSelectChatId,
   saveSelectChatId,
-} from '@/utils/conversation';
+} from '@/utils/chats';
 import { Role } from '@/types/chat';
+import { getStorageModelId, setStorageModelId } from '@/utils/model';
 interface HandleUpdateChatParams {
   title?: string;
   chatModelId?: string;
@@ -65,6 +66,7 @@ interface HomeInitialState {
   showChatbar: boolean;
   showPromptbar: boolean;
   searchTerm: string;
+  canChat: boolean;
 }
 
 const initialState: HomeInitialState = {
@@ -87,6 +89,7 @@ const initialState: HomeInitialState = {
   showPromptbar: false,
   showChatbar: true,
   searchTerm: '',
+  canChat: false,
 };
 
 interface HomeContextProps {
@@ -128,7 +131,8 @@ const Home = () => {
 
   const calcSelectModelId = (chats: ChatResult[], models: Model[]) => {
     const lastChat = chats.findLast((x) => x.chatModelId);
-    if (lastChat && lastChat.chatModelId) return lastChat.chatModelId;
+    const model = models.find((x) => x.id === lastChat?.chatModelId);
+    if (lastChat && lastChat.chatModelId && model) return lastChat.chatModelId;
     else return models.length > 0 ? models[0].id : undefined;
   };
 
@@ -218,9 +222,15 @@ const Home = () => {
           value: [],
         });
       }
+      dispatch({
+        field: 'canChat',
+        value:
+          (hasModel() && data.length === 0) ||
+          models.find((x) => x.id === chat?.chatModelId),
+      });
       const selectModelId =
         getChatModelId(chatId) || calcSelectModelId(chats, models);
-      selectModelId && localStorage.setItem('selectModelId', selectModelId);
+      selectModelId && setStorageModelId(selectModelId);
       dispatch({
         field: 'selectModelId',
         value: selectModelId,
@@ -287,7 +297,11 @@ const Home = () => {
     return models.find((x) => x.id === selectModelId)!;
   };
 
-  const selectChat = (chatList: ChatResult[], chatId: string | null) => {
+  const selectChat = (
+    chatList: ChatResult[],
+    chatId: string | null,
+    models: Model[]
+  ) => {
     const chat = chatList.find((x) => x.id === chatId);
     if (chat) {
       dispatch({ field: 'selectChatId', value: chatId });
@@ -319,9 +333,18 @@ const Home = () => {
             value: [],
           });
         }
+        const hasModel = models.length > 0;
+        dispatch({
+          field: 'canChat',
+          value:
+            (hasModel && data.length === 0) ||
+            models.find((x) => x.id === chat?.chatModelId),
+        });
+        const modelId =
+          chat?.chatModelId || calcSelectModelId(chatList, models);
         dispatch({
           field: 'selectModelId',
-          value: chat?.chatModelId || calcSelectModelId(chatList, models),
+          value: modelId,
         });
       });
     }
@@ -366,22 +389,25 @@ const Home = () => {
       router.push(getLoginUrl(getSettingsLanguage()));
     }
     if (sessionId) {
-      getUserModels().then((data) => {
-        dispatch({ field: 'models', value: data });
-        if (data && data.length > 0) {
-          const selectModelId = localStorage.getItem('selectModelId');
-          const model = data.find((x) => x.id === selectModelId);
+      getUserModels().then((modelData) => {
+        dispatch({ field: 'models', value: modelData });
+        if (modelData && modelData.length > 0) {
+          const selectModelId = getStorageModelId();
+          const model = modelData.find((x) => x.id === selectModelId);
+          const modelId = model?.id || modelData[0].id;
+          setStorageModelId(modelId);
           dispatch({
             field: 'selectModelId',
-            value: model?.id || data[0].id,
+            value: modelId,
           });
         }
-      });
 
-      getChats().then((data) => {
-        dispatch({ field: 'chats', value: data });
-        const selectChatId = getPathChatId(router.asPath) || getSelectChatId();
-        selectChat(data, selectChatId);
+        getChats().then((data) => {
+          dispatch({ field: 'chats', value: data });
+          const selectChatId =
+            getPathChatId(router.asPath) || getSelectChatId();
+          selectChat(data, selectChatId, modelData);
+        });
       });
 
       getUserPrompts().then((data) => {
@@ -393,7 +419,7 @@ const Home = () => {
   useEffect(() => {
     const handlePopState = (event: PopStateEvent) => {
       const chatId = getPathChatId(event.state.as);
-      selectChat(chats, chatId);
+      selectChat(chats, chatId, models);
     };
 
     window.addEventListener('popstate', handlePopState);
