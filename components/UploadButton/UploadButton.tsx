@@ -1,7 +1,7 @@
 import { useEffect, useRef } from 'react';
 import toast from 'react-hot-toast';
 import { useTranslation } from 'next-i18next';
-import { getFileEndpoint } from '@/utils/apis';
+import { getFileEndpoint } from '@/utils/file';
 import { FileServicesType } from '@/types/file';
 import { ChatModelFileConfig } from '@/types/model';
 

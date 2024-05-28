@@ -70,10 +70,16 @@ export const LingYiStream = async (
             const json = JSON.parse(data);
             const text =
               (json.choices.length > 0 && json.choices[0].delta?.content) || '';
+            const { prompt_tokens, completion_tokens, total_tokens } =
+              json?.usage || {};
             controller.enqueue(
               JSON.stringify({
                 text,
-                usage: json?.usage,
+                usage: {
+                  promptTokens: prompt_tokens,
+                  completionTokens: completion_tokens,
+                  totalTokens: total_tokens,
+                },
               })
             );
             if (json.choices[0]?.finish_reason === 'stop') {

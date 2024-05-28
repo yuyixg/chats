@@ -1,3 +1,5 @@
+import Decimal from 'decimal.js';
+
 export enum ProviderType {
   'KeyCloak' = 'KeyCloak',
   'WeChat' = 'WeChat',
@@ -21,4 +23,14 @@ export interface ProviderResult {
   configs: {
     appId: string;
   };
+}
+
+export interface GetUserBalanceLogsResult {
+  date: string;
+  value: number;
+}
+
+export interface GetUserBalanceResult {
+  balance: number;
+  logs: GetUserBalanceLogsResult[];
 }

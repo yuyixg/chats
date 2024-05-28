@@ -1,12 +1,7 @@
 import { useTranslation } from 'next-i18next';
 import React, { useEffect, useState } from 'react';
 import { z } from 'zod';
-import {
-  Dialog,
-  DialogContent,
-  DialogFooter,
-  DialogHeader,
-} from '../ui/dialog';
+import { DialogFooter } from '../ui/dialog';
 import { Button } from '../ui/button';
 import { FormFieldType, IFormFieldOption } from '../ui/form/type';
 import FormInput from '../ui/form/input';
@@ -15,16 +10,12 @@ import { zodResolver } from '@hookform/resolvers/zod';
 import { Form, FormField } from '../ui/form';
 import toast from 'react-hot-toast';
 import { changeUserPassword } from '@/apis/userService';
+import { useRouter } from 'next/router';
+import { clearUserInfo, clearUserSessionId, getLoginUrl } from '@/utils/user';
 
-interface IProps {
-  isOpen: boolean;
-  onClose: () => void;
-  onSuccessful: () => void;
-}
-
-export const ChangePasswordModal = (props: IProps) => {
+export const ChangePasswordTabContent = () => {
   const { t } = useTranslation('sidebar');
-  const { isOpen, onClose, onSuccessful } = props;
+  const router = useRouter();
   const [loading, setLoading] = useState(false);
 
   const formFields: IFormFieldOption[] = [
@@ -85,8 +76,10 @@ export const ChangePasswordModal = (props: IProps) => {
     setLoading(true);
     changeUserPassword(password)
       .then(() => {
-        toast.success(t('Save successful!'));
-        onSuccessful();
+        toast.success(t('Modified successfully!'));
+        clearUserSessionId();
+        clearUserInfo();
+        router.push(getLoginUrl());
         setLoading(false);
       })
       .catch(() => {
@@ -108,27 +101,22 @@ export const ChangePasswordModal = (props: IProps) => {
   }, []);
 
   return (
-    <Dialog open={isOpen} onOpenChange={onClose}>
-      <DialogContent className='w-5/6 sm:w-4/5 lg:w-[650px]'>
-        <DialogHeader>{t('Change Password')}</DialogHeader>
-        <Form {...form}>
-          <form onSubmit={form.handleSubmit(onSubmit)}>
-            {formFields.map((item) => (
-              <FormField
-                key={item.name}
-                control={form.control}
-                name={item.name as never}
-                render={({ field }) => item.render(item, field)}
-              />
-            ))}
-            <DialogFooter className='pt-4'>
-              <Button disabled={loading} type='submit'>
-                {t('Save')}
-              </Button>
-            </DialogFooter>
-          </form>
-        </Form>
-      </DialogContent>
-    </Dialog>
+    <Form {...form}>
+      <form onSubmit={form.handleSubmit(onSubmit)}>
+        {formFields.map((item) => (
+          <FormField
+            key={item.name}
+            control={form.control}
+            name={item.name as never}
+            render={({ field }) => item.render(item, field)}
+          />
+        ))}
+        <DialogFooter className='pt-4'>
+          <Button disabled={loading} type='submit'>
+            {t('Confirm')}
+          </Button>
+        </DialogFooter>
+      </form>
+    </Form>
   );
 };

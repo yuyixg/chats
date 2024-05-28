@@ -8,15 +8,6 @@ import {
   createParser,
 } from 'eventsource-parser';
 
-export interface QianWenStreamResult {
-  text: string;
-  usage: {
-    input_tokens: number;
-    output_tokens: number;
-    image_tokens: number;
-  };
-}
-
 export const QianWenStream = async (
   chatModel: ChatModels,
   temperature: number,
@@ -75,10 +66,19 @@ export const QianWenStream = async (
             }
             if (modelVersion === ModelVersions.QWen) {
               const text = json.output.text;
+              const { input_tokens, output_tokens, image_tokens } =
+                json?.usage || {};
               controller.enqueue(
                 JSON.stringify({
                   text,
-                  usage: json.usage,
+                  usage: {
+                    inputTokens: input_tokens,
+                    outputTokens: output_tokens,
+                    totalTokens:
+                      +(input_tokens || 0) +
+                      +(output_tokens || 0) +
+                      +(image_tokens || 0),
+                  },
                 })
               );
               if (json.output.finish_reason === 'stop') {
@@ -91,10 +91,19 @@ export const QianWenStream = async (
                   (json.output.choices[0].message?.content.length > 0 &&
                     json.output.choices[0].message?.content[0].text) ||
                   '';
+                const { input_tokens, output_tokens, image_tokens } =
+                  json?.usage || {};
                 controller.enqueue(
                   JSON.stringify({
                     text,
-                    usage: json.usage,
+                    usage: {
+                      inputTokens: input_tokens,
+                      outputTokens: output_tokens,
+                      totalTokens:
+                        +(input_tokens || 0) +
+                        +(output_tokens || 0) +
+                        +(image_tokens || 0),
+                    },
                   })
                 );
                 if (json.output.choices[0].finish_reason === 'stop') {

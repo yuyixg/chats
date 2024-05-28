@@ -2,14 +2,12 @@ import {
   IconBulbFilled,
   IconLogout,
   IconMoneybag,
-  IconPasswordUser,
   IconSettings,
   IconUser,
   IconUserCog,
 } from '@/components/Icons/index';
 import { useContext, useState } from 'react';
 import { useTranslation } from 'next-i18next';
-import { SettingDialog } from '@/components/Settings/SettingDialog';
 import { SidebarButton } from '../Sidebar/SidebarButton';
 import { useRouter } from 'next/router';
 import { UserRole } from '@/types/admin';
@@ -17,15 +15,13 @@ import { clearUserInfo, getLoginUrl, clearUserSessionId } from '@/utils/user';
 import { HomeContext } from '@/pages/home/home';
 import { Popover, PopoverContent, PopoverTrigger } from '../ui/popover';
 import { Separator } from '../ui/separator';
-import { ChangePasswordModal } from '../Sidebar/ChangePasswordModal';
 import { RechargeModal } from '../UserRecharge/RechargeModal';
+import SettingsModal from '../Sidebar/SettingsModal';
 
 export const ChatBarSettings = () => {
   const router = useRouter();
   const { t } = useTranslation('sidebar');
   const [isSettingModalOpen, setIsSettingModal] = useState<boolean>(false);
-  const [isChangePasswordModalOpen, setIsChangePasswordModal] =
-    useState<boolean>(false);
   const [isRechargeModalOpen, setIsRechargeModal] = useState<boolean>(false);
 
   const {
@@ -87,18 +83,11 @@ export const ChatBarSettings = () => {
               }}
             />
             <SidebarButton
-              text={t('Settings')}
+              text={t('Account Settings')}
               icon={<IconSettings size={18} />}
               onClick={() => setIsSettingModal(true)}
             />
             <Separator className='my-2' />
-            <SidebarButton
-              text={t('Change Password')}
-              icon={<IconPasswordUser size={18} />}
-              onClick={() => {
-                setIsChangePasswordModal(true);
-              }}
-            />
             <SidebarButton
               text={t('Log out')}
               icon={<IconLogout size={18} />}
@@ -109,23 +98,13 @@ export const ChatBarSettings = () => {
       )}
 
       {isSettingModalOpen && (
-        <SettingDialog
+        <SettingsModal
           isOpen={isSettingModalOpen}
           onClose={() => {
             setIsSettingModal(false);
           }}
         />
       )}
-      <ChangePasswordModal
-        isOpen={isChangePasswordModalOpen}
-        onClose={() => {
-          setIsChangePasswordModal(false);
-        }}
-        onSuccessful={() => {
-          setIsChangePasswordModal(false);
-          logout();
-        }}
-      />
 
       {isRechargeModalOpen && (
         <RechargeModal

@@ -99,6 +99,10 @@ html {
   max-width: 100ch !important;
 }
 
+.prose > pre {
+  padding: 0;
+}
+
 .truncate {
   overflow: hidden;
   text-overflow: ellipsis;

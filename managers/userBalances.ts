@@ -89,4 +89,32 @@ export class UserBalancesManager {
     });
     return userBalance!.balance;
   }
+
+  static async findUserBalanceAndLogs(userId: string) {
+    const userBalance = await prisma.userBalances.findFirst({
+      where: { userId },
+      select: { balance: true },
+    });
+
+    const now = new Date();
+    const SevenDaysAgo = new Date(now);
+    SevenDaysAgo.setDate(now.getDate() - 7);
+    const balanceLogs = await prisma.balanceLogs.findMany({
+      where: {
+        createdAt: {
+          gte: SevenDaysAgo,
+          lt: now,
+        },
+        type: BalanceType.Consume,
+        userId,
+      },
+      skip: 0,
+      take: 7,
+      orderBy: { createdAt: 'desc' },
+    });
+    return {
+      balance: userBalance?.balance,
+      balanceLogs,
+    };
+  }
 }

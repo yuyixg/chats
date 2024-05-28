@@ -100,7 +100,7 @@ export const ConversationComponent = ({ chat }: Props) => {
   return (
     <div className='relative flex items-center'>
       {isChanging && selectChatId === chat.id ? (
-        <div className='flex w-full items-center gap-3 rounded-lg text-black dark:text-white dark:bg-[#343541]/90 p-3'>
+        <div className='flex w-full items-center gap-3 rounded-lg text-black dark:text-white dark:bg-[#262630]/90 p-3'>
           <IconMessage size={18} />
           <input
             className='mr-12 flex-1 overflow-hidden overflow-ellipsis border-neutral-400 bg-transparent text-left text-[12.5px] leading-3 outline-none text-black dark:text-white'
@@ -113,10 +113,10 @@ export const ConversationComponent = ({ chat }: Props) => {
         </div>
       ) : (
         <button
-          className={`flex w-full cursor-pointer items-center gap-3 rounded-lg p-3 text-sm transition-colors duration-200 hover:bg-[#cdcdcd] hover:dark:bg-[#343541] ${
+          className={`flex w-full cursor-pointer items-center gap-3 rounded-lg p-3 text-sm transition-colors duration-200 hover:bg-[#cdcdcd] hover:dark:bg-[#262630] ${
             messageIsStreaming ? 'disabled:cursor-not-allowed' : ''
           } ${
-            selectChatId === chat.id ? 'bg-[#ececec] dark:bg-[#343541]/90' : ''
+            selectChatId === chat.id ? 'bg-[#ececec] dark:bg-[#262630]/90' : ''
           }`}
           onClick={() => handleSelectChat(chat.id)}
           disabled={messageIsStreaming}

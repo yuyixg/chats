@@ -1,7 +1,7 @@
 import { useContext, useEffect } from 'react';
 import { useTranslation } from 'next-i18next';
 import { useCreateReducer } from '@/hooks/useCreateReducer';
-import { removeSelectChatId, saveSelectChatId } from '@/utils/conversation';
+import { removeSelectChatId, saveSelectChatId } from '@/utils/chats';
 import Sidebar from '../Sidebar';
 import ChatbarContext from './Chatbar.context';
 import { ChatbarInitialState, initialState } from './Chatbar.state';

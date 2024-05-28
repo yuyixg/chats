@@ -98,14 +98,17 @@ model ChatMessages {
   id              String   @id @default(uuid()) @db.UniqueIdentifier
   userId          String   @db.UniqueIdentifier
   chatId          String   @db.UniqueIdentifier
-  parentId        String?
-  chatModelId     String?
+  parentId        String?  @db.UniqueIdentifier
+  chatModelId     String?  @db.UniqueIdentifier
   role            String
   messages        String   @db.NText()
   calculatedPrice Decimal  @default(0)
   tokenUsed       Int      @default(0)
   createdAt       DateTime @default(now())
   chats           Chats    @relation(fields: [chatId], references: [id])
+  // chatModel       ChatModels @relation(fields: [chatModelId], references: [id])
+  // parent          ChatMessages?  @relation(fields: [parentId], references: [id])
+  // ChatMessages    ChatMessages[]
 }
 
 model UserBalances {

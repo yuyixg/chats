@@ -3,8 +3,7 @@ import { PostPromptParams, PutPromptParams } from '@/types/admin';
 import { ChatMessage } from '@/types/chatMessage';
 import { Model } from '@/types/model';
 import { Prompt } from '@/types/prompt';
-import { ProviderResult, SingInParams, SingInResult } from '@/types/user';
-import { UserInfo } from '@/utils/user';
+import { GetUserBalanceResult, ProviderResult, SingInParams, SingInResult } from '@/types/user';
 
 export interface ChatResult {
   id: string;
@@ -41,27 +40,27 @@ export const getUserMessages = (chatId: string): Promise<ChatMessage[]> => {
 
 export const getChats = (): Promise<ChatResult[]> => {
   const fetchService = useFetch();
-  return fetchService.get('/api/chats');
+  return fetchService.get('/api/user/chats');
 };
 
 export const getChat = (id: string): Promise<ChatResult> => {
   const fetchService = useFetch();
-  return fetchService.get('/api/chats?id=' + id);
+  return fetchService.get('/api/user/chats?id=' + id);
 };
 
 export const postChats = (params: PostChatParams): Promise<ChatResult> => {
   const fetchService = useFetch();
-  return fetchService.post('/api/chats', { body: params });
+  return fetchService.post('/api/user/chats', { body: params });
 };
 
 export const putChats = (params: PutChatParams) => {
   const fetchService = useFetch();
-  return fetchService.put('/api/chats', { body: params });
+  return fetchService.put('/api/user/chats', { body: params });
 };
 
 export const deleteChats = (id: string) => {
   const fetchService = useFetch();
-  return fetchService.delete('/api/chats?id=' + id);
+  return fetchService.delete('/api/user/chats?id=' + id);
 };
 
 export const putUserMessages = (
@@ -101,7 +100,7 @@ export const getUserModels = () => {
 
 export const getUserBalance = () => {
   const fetchServer = useFetch();
-  return fetchServer.get<number>('/api/user/balance');
+  return fetchServer.get<GetUserBalanceResult>('/api/user/balance');
 };
 
 export const getLoginProvider = () => {

@@ -1,7 +1,7 @@
 // Next.js API route support: https://nextjs.org/docs/api-routes/introduction
 import { NextApiRequest } from 'next';
 
-import { AWS_ACCESS_KEY, AWS_BUCKET_NAME, AWS_ENDPOINT, AWS_SECRET } from '@/utils/app/const';
+import { AWS_ACCESS_KEY, AWS_BUCKET_NAME, AWS_ENDPOINT, AWS_SECRET } from '@/utils/const';
 
 import * as AWS from 'aws-sdk';
 
