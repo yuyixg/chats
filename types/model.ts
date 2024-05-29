@@ -44,7 +44,7 @@ export enum ModelType {
   QianFan = 'QianFan',
   Spark = 'Spark',
   LingYi = 'LingYi',
-  Moonshot = 'moonshot',
+  Moonshot = 'Moonshot',
 }
 
 export enum ModelProviders {
@@ -54,7 +54,7 @@ export enum ModelProviders {
   QianFan = 'QianFan',
   Spark = 'Spark',
   LingYi = 'LingYi',
-  Moonshot = 'moonshot',
+  Moonshot = 'Moonshot',
 }
 
 export interface ChatModelFileConfig {
