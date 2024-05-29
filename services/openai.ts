@@ -7,6 +7,7 @@ import {
   ReconnectInterval,
   createParser,
 } from 'eventsource-parser';
+import { get_encoding } from 'tiktoken';
 
 export const OpenAIStream = async (
   chatModel: ChatModels,
@@ -66,6 +67,15 @@ export const OpenAIStream = async (
     throw new Error(JSON.stringify(errors));
   }
 
+  let outPutTokens = 0;
+  const encoding = get_encoding('cl100k_base');
+  const inputMessage = messages
+    .map((x) => {
+      return typeof x.content === 'string' ? x.content : x.content[0].text;
+    })
+    .join('');
+  const inputTokens = encoding.encode(inputMessage).length;
+
   const stream = new ReadableStream({
     async start(controller) {
       const onParse = (event: ParsedEvent | ReconnectInterval) => {
@@ -79,18 +89,20 @@ export const OpenAIStream = async (
               json.choices[0]?.finish_details != null ||
               json.choices[0]?.finish_reason != null
             ) {
+              encoding.free();
               controller.close();
               return;
             }
             const text =
               (json.choices.length > 0 && json.choices[0].delta?.content) || '';
+            outPutTokens += encoding.encode(text).length;
             controller.enqueue(
               JSON.stringify({
                 text,
                 usage: {
-                  inputTokens: 0,
-                  outputTokens: 0,
-                  totalTokens: 0,
+                  inputTokens: inputTokens,
+                  outputTokens: outPutTokens,
+                  totalTokens: inputTokens + outPutTokens,
                 },
               }),
             );
