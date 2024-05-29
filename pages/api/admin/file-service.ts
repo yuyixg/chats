@@ -1,9 +1,12 @@
-import { FileServiceManager } from '@/managers';
 import { addAsterisk, checkKey } from '@/utils/common';
-import { FileServices } from '@prisma/client';
-import { apiHandler } from '@/middleware/api-handler';
 import { BadRequest } from '@/utils/error';
+
 import { ChatsApiRequest } from '@/types/next-api';
+
+import { FileServiceManager } from '@/managers';
+import { apiHandler } from '@/middleware/api-handler';
+import { FileServices } from '@prisma/client';
+
 export const config = {
   api: {
     bodyParser: {
@@ -55,11 +58,11 @@ const handler = async (req: ChatsApiRequest) => {
     let configs = JSON.parse(configsJSON);
     configs.accessKey = checkKey(
       fileServer.configs.accessKey,
-      configs.accessKey
+      configs.accessKey,
     );
     configs.accessSecret = checkKey(
       fileServer.configs.accessSecret,
-      configs.accessSecret
+      configs.accessSecret,
     );
 
     await FileServiceManager.updateFileServices({

@@ -14,16 +14,14 @@ export const CloseSidebarButton = ({ onClick, side }: Props) => {
       onClick={onClick}
     >
       <button>
-        <div className='flex h-[32px] w-8 items-center justify-center'>
+        <div className="flex h-[32px] w-8 items-center justify-center">
           {side === 'right' ? (
-            <div className='flex h-6 w-6 flex-col items-center'>
-              <IconX
-                className='text-black dark:text-white'
-              />
+            <div className="flex h-6 w-6 flex-col items-center">
+              <IconX className="text-black dark:text-white" />
             </div>
           ) : (
-            <div className='flex h-6 w-6 flex-col items-center'>
-              <IconX className='text-black dark:text-white' />
+            <div className="flex h-6 w-6 flex-col items-center">
+              <IconX className="text-black dark:text-white" />
             </div>
           )}
         </div>
@@ -39,16 +37,16 @@ export const OpenSidebarButton = ({ onClick, side }: Props) => {
       onClick={onClick}
       style={{ top: '10px' }}
     >
-      <button className='pt-0 sm:pt-1'>
-        <span data-state='closed'>
-          <div className='flex h-[32px] w-8 items-center justify-center'>
+      <button className="pt-0 sm:pt-1">
+        <span data-state="closed">
+          <div className="flex h-[32px] w-8 items-center justify-center">
             {side === 'right' ? (
-              <div className='flex h-6 w-6 flex-col items-center'>
-                <IconMenu className='text-black dark:text-white' />
+              <div className="flex h-6 w-6 flex-col items-center">
+                <IconMenu className="text-black dark:text-white" />
               </div>
             ) : (
-              <div className='flex h-6 w-6 flex-col items-center'>
-                <IconMenu className='text-black dark:text-white' />
+              <div className="flex h-6 w-6 flex-col items-center">
+                <IconMenu className="text-black dark:text-white" />
               </div>
             )}
           </div>

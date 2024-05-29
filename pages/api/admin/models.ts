@@ -1,9 +1,12 @@
-import { ChatModelManager } from '@/managers';
 import { BadRequest } from '@/utils/error';
-import { ChatModels } from '@prisma/client';
-import { apiHandler } from '@/middleware/api-handler';
-import { ChatsApiRequest } from '@/types/next-api';
 import { conversionModelPriceToSave } from '@/utils/model';
+
+import { ChatsApiRequest } from '@/types/next-api';
+
+import { ChatModelManager } from '@/managers';
+import { apiHandler } from '@/middleware/api-handler';
+import { ChatModels } from '@prisma/client';
+
 export const config = {
   api: {
     bodyParser: {

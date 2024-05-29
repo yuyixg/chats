@@ -1,4 +1,5 @@
-import prisma from '@/prisma/prisma';
+import { InternalServerError } from '@/utils/error';
+
 import {
   ChatModelConfig,
   ChatModelFileConfig,
@@ -7,7 +8,8 @@ import {
   ModelType,
   ModelVersions,
 } from '@/types/model';
-import { InternalServerError } from '@/utils/error';
+
+import prisma from '@/prisma/prisma';
 
 interface CreateModel {
   name: string;
@@ -61,7 +63,7 @@ export class ChatModelManager {
       fileConfig: JSON.parse(model.fileConfig || '{}') as ChatModelFileConfig,
       modelConfig: JSON.parse(model.modelConfig || '{}') as ChatModelConfig,
       priceConfig: JSON.parse(
-        model.priceConfig || '{}'
+        model.priceConfig || '{}',
       ) as ChatModelPriceConfig,
     };
   }

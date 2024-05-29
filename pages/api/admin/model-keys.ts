@@ -1,8 +1,11 @@
-import { apiHandler } from '@/middleware/api-handler';
-import { BadRequest } from '@/utils/error';
-import { ChatsApiRequest } from '@/types/next-api';
 import { addAsterisk, checkKey } from '@/utils/common';
+import { BadRequest } from '@/utils/error';
+
+import { ChatsApiRequest } from '@/types/next-api';
+
 import { ModelKeysManager } from '@/managers';
+import { apiHandler } from '@/middleware/api-handler';
+
 export const config = {
   api: {
     bodyParser: {

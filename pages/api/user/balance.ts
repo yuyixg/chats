@@ -1,6 +1,7 @@
+import { ChatsApiRequest, ChatsApiResponse } from '@/types/next-api';
+
 import { UserBalancesManager } from '@/managers';
 import { apiHandler } from '@/middleware/api-handler';
-import { ChatsApiRequest, ChatsApiResponse } from '@/types/next-api';
 
 export const config = {
   api: {

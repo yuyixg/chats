@@ -1,7 +1,9 @@
 import { IJsApi, IPayNotifyDecipher, IResource } from '@/utils/wxpay/type';
 import { WxPay } from '@/utils/wxpay/wxpay';
-import { PayServiceManager } from '.';
+
 import { PayServiceType } from '@/types/pay';
+
+import { PayServiceManager } from '.';
 
 export interface CallWxJSApiPay {
   amount: number;
@@ -21,7 +23,7 @@ export interface CallWxH5Pay {
 export class WxPayManager {
   private static async weChatPay() {
     const payConfig = await PayServiceManager.findConfigsByType(
-      PayServiceType.WeChatPay
+      PayServiceType.WeChatPay,
     );
     const { appId, mchId, apiV3Key, apiClientCert, apiClientKey } =
       JSON.parse(payConfig);
@@ -33,7 +35,7 @@ export class WxPayManager {
       Buffer.from(apiClientKey),
       {
         key: apiV3Key!,
-      }
+      },
     );
   }
   static async callWxJSApiPay(params: CallWxJSApiPay) {
@@ -65,7 +67,7 @@ export class WxPayManager {
     const decipherModel = weChatPay.decipher_gcm<IPayNotifyDecipher>(
       ciphertext,
       associated_data,
-      nonce
+      nonce,
     );
     return decipherModel;
   }

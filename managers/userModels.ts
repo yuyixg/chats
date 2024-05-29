@@ -58,7 +58,7 @@ export class UserModelManager {
   static async updateUserModelTokenCount(
     userId: string,
     modelId: string,
-    token: number
+    token: number,
   ) {
     const userModel = await prisma.userModels.findFirst({ where: { userId } });
     let models = JSON.parse(userModel?.models || '[]') as any[];

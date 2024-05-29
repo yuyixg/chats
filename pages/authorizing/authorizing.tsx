@@ -1,13 +1,17 @@
-import { useEffect, useState } from 'react';
-import { useRouter } from 'next/router';
-import { NextApiRequest } from 'next';
-import { saveUserInfo, setUserSessionId } from '@/utils/user';
-import { serverSideTranslations } from 'next-i18next/serverSideTranslations';
-import { DEFAULT_LANGUAGE } from '@/types/settings';
-import { useTranslation } from 'next-i18next';
-import { singIn } from '@/apis/userService';
-import toast from 'react-hot-toast';
 import { getSession } from 'next-auth/react';
+import { useEffect, useState } from 'react';
+import toast from 'react-hot-toast';
+
+import { NextApiRequest } from 'next';
+import { useTranslation } from 'next-i18next';
+import { serverSideTranslations } from 'next-i18next/serverSideTranslations';
+import { useRouter } from 'next/router';
+
+import { saveUserInfo, setUserSessionId } from '@/utils/user';
+
+import { DEFAULT_LANGUAGE } from '@/types/settings';
+
+import { singIn } from '@/apis/userService';
 
 export default function Authorizing(props: { session: any }) {
   const { t } = useTranslation('login');
@@ -44,7 +48,7 @@ export default function Authorizing(props: { session: any }) {
   return (
     <>
       {isClient && (
-        <div className='w-full text-center mt-8 text-gray-600 text-[12.5px]'>
+        <div className="w-full text-center mt-8 text-gray-600 text-[12.5px]">
           {t('Logging in...')}
         </div>
       )}

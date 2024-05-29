@@ -1,21 +1,26 @@
 import { useContext, useEffect } from 'react';
+import toast from 'react-hot-toast';
+
 import { useTranslation } from 'next-i18next';
+
 import { useCreateReducer } from '@/hooks/useCreateReducer';
+
 import { Prompt } from '@/types/prompt';
+
+import { HomeContext } from '@/pages/home/home';
+
 import { Prompts } from './components/Prompts';
 
 import Sidebar from '../Sidebar';
 import PromptbarContext from './PromptBar.context';
 import { PromptbarInitialState, initialState } from './Promptbar.state';
 
-import { v4 as uuidv4 } from 'uuid';
-import { HomeContext } from '@/pages/home/home';
 import {
   deleteUserPrompts,
   postUserPrompts,
   putUserPrompts,
 } from '@/apis/userService';
-import toast from 'react-hot-toast';
+import { v4 as uuidv4 } from 'uuid';
 
 const PromptBar = () => {
   const { t } = useTranslation('prompt');

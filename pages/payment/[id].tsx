@@ -1,8 +1,12 @@
-import { createWeChatPayment } from '@/apis/payApiService';
-import { redirectToWeChatAuthUrl } from '@/utils/weChat';
-import { useRouter } from 'next/router';
 import { useEffect } from 'react';
 import toast from 'react-hot-toast';
+
+import { useRouter } from 'next/router';
+
+import { redirectToWeChatAuthUrl } from '@/utils/weChat';
+
+import { createWeChatPayment } from '@/apis/payApiService';
+
 export default function Payment() {
   const router = useRouter();
   const { code, id } = router.query as { id: string; code: string };
@@ -27,7 +31,7 @@ export default function Payment() {
               if (res.err_msg === 'get_brand_wcpay_request:fail') {
                 WeixinJSBridge.call('closeWindow');
               }
-            }
+            },
           );
         })
         .catch(() => {

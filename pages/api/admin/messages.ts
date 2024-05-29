@@ -1,6 +1,8 @@
+import { ChatsApiRequest } from '@/types/next-api';
+
 import { ChatsManager } from '@/managers';
 import { apiHandler } from '@/middleware/api-handler';
-import { ChatsApiRequest } from '@/types/next-api';
+
 export const config = {
   api: {
     bodyParser: {
@@ -20,7 +22,7 @@ const handler = async (req: ChatsApiRequest) => {
     const chats = await ChatsManager.findChatsByPage(
       query,
       parseInt(page),
-      parseInt(pageSize)
+      parseInt(pageSize),
     );
     const rows = chats.rows.map((x) => {
       return {

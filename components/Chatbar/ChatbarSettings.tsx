@@ -1,3 +1,14 @@
+import { useContext, useState } from 'react';
+
+import { useTranslation } from 'next-i18next';
+import { useRouter } from 'next/router';
+
+import { clearUserInfo, clearUserSessionId, getLoginUrl } from '@/utils/user';
+
+import { UserRole } from '@/types/admin';
+
+import { HomeContext } from '@/pages/home/home';
+
 import {
   IconBulbFilled,
   IconLogout,
@@ -6,17 +17,12 @@ import {
   IconUser,
   IconUserCog,
 } from '@/components/Icons/index';
-import { useContext, useState } from 'react';
-import { useTranslation } from 'next-i18next';
+
+import SettingsModal from '../Sidebar/SettingsModal';
 import { SidebarButton } from '../Sidebar/SidebarButton';
-import { useRouter } from 'next/router';
-import { UserRole } from '@/types/admin';
-import { clearUserInfo, getLoginUrl, clearUserSessionId } from '@/utils/user';
-import { HomeContext } from '@/pages/home/home';
+import { RechargeModal } from '../UserRecharge/RechargeModal';
 import { Popover, PopoverContent, PopoverTrigger } from '../ui/popover';
 import { Separator } from '../ui/separator';
-import { RechargeModal } from '../UserRecharge/RechargeModal';
-import SettingsModal from '../Sidebar/SettingsModal';
 
 export const ChatBarSettings = () => {
   const router = useRouter();
@@ -36,7 +42,7 @@ export const ChatBarSettings = () => {
   };
 
   return (
-    <div className='flex flex-col items-center space-y-1 border-t border-black/5 dark:border-white/10 pt-2 text-sm'>
+    <div className="flex flex-col items-center space-y-1 border-t border-black/5 dark:border-white/10 pt-2 text-sm">
       {/* {conversations.length > 0 ? (
         <ClearConversations onClearConversations={handleClearConversations} />
       ) : null} */}
@@ -66,15 +72,15 @@ export const ChatBarSettings = () => {
 
       {user?.username && (
         <Popover>
-          <PopoverTrigger className='w-full'>
+          <PopoverTrigger className="w-full">
             <SidebarButton
-              className='capitalize'
+              className="capitalize"
               text={user?.username}
               icon={<IconUser size={18} />}
               onClick={() => {}}
             />
           </PopoverTrigger>
-          <PopoverContent className='w-[244px]'>
+          <PopoverContent className="w-[244px]">
             <SidebarButton
               text={t('Prompt Management')}
               icon={<IconBulbFilled size={18} />}
@@ -87,7 +93,7 @@ export const ChatBarSettings = () => {
               icon={<IconSettings size={18} />}
               onClick={() => setIsSettingModal(true)}
             />
-            <Separator className='my-2' />
+            <Separator className="my-2" />
             <SidebarButton
               text={t('Log out')}
               icon={<IconLogout size={18} />}

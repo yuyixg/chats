@@ -1,11 +1,16 @@
 import React, { useEffect, useState } from 'react';
-import { serverSideTranslations } from 'next-i18next/serverSideTranslations';
+
 import { useTranslation } from 'next-i18next';
-import { getMessages } from '@/apis/adminService';
-import { PageResult, Paging } from '@/types/page';
+import { serverSideTranslations } from 'next-i18next/serverSideTranslations';
+
 import { GetUserMessageResult } from '@/types/admin';
-import { Input } from '@/components/ui/input';
+import { PageResult, Paging } from '@/types/page';
+import { DEFAULT_LANGUAGE } from '@/types/settings';
+
+import PaginationContainer from '@/components/Admin/Pagiation/Pagiation';
+import { Badge } from '@/components/ui/badge';
 import { Card } from '@/components/ui/card';
+import { Input } from '@/components/ui/input';
 import {
   Table,
   TableBody,
@@ -14,9 +19,8 @@ import {
   TableHeader,
   TableRow,
 } from '@/components/ui/table';
-import PaginationContainer from '@/components/Admin/Pagiation/Pagiation';
-import { DEFAULT_LANGUAGE } from '@/types/settings';
-import { Badge } from '@/components/ui/badge';
+
+import { getMessages } from '@/apis/adminService';
 
 export default function Messages() {
   const { t } = useTranslation('admin');
@@ -40,10 +44,10 @@ export default function Messages() {
 
   return (
     <>
-      <div className='flex flex-col gap-4 mb-4'>
-        <div className='flex justify-between gap-3 items-center'>
+      <div className="flex flex-col gap-4 mb-4">
+        <div className="flex justify-between gap-3 items-center">
           <Input
-            className='w-full'
+            className="w-full"
             placeholder={t('Search...')!}
             value={query}
             onChange={(e) => {
@@ -74,7 +78,7 @@ export default function Messages() {
                   onClick={() => {
                     window.open('/message/' + item.id, '_blank');
                   }}
-                  className='truncate cursor-pointer'
+                  className="truncate cursor-pointer"
                 >
                   {item.title}
                 </TableCell>
@@ -85,10 +89,10 @@ export default function Messages() {
                 </TableCell>
                 <TableCell>
                   {item.isDeleted && (
-                    <Badge variant='destructive'>{t('Deleted')}</Badge>
+                    <Badge variant="destructive">{t('Deleted')}</Badge>
                   )}
                   {item.isShared && (
-                    <Badge className=' bg-green-600'>{t('Shared')}</Badge>
+                    <Badge className=" bg-green-600">{t('Shared')}</Badge>
                   )}
                 </TableCell>
               </TableRow>

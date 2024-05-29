@@ -1,4 +1,5 @@
 import { ReactElement } from 'react';
+
 import {
   Tooltip,
   TooltipContent,
@@ -16,7 +17,7 @@ const ChatButtonToolTip = ({
   return (
     <TooltipProvider>
       <Tooltip>
-        <TooltipTrigger className='h-[28px]'>{trigger}</TooltipTrigger>
+        <TooltipTrigger className="h-[28px]">{trigger}</TooltipTrigger>
         <TooltipContent>{content}</TooltipContent>
       </Tooltip>
     </TooltipProvider>

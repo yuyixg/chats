@@ -1,8 +1,14 @@
 import React, { useEffect, useState } from 'react';
-import { getLoginServices } from '@/apis/adminService';
-import { GetLoginServicesResult } from '@/types/admin';
-import { serverSideTranslations } from 'next-i18next/serverSideTranslations';
+
 import { useTranslation } from 'next-i18next';
+import { serverSideTranslations } from 'next-i18next/serverSideTranslations';
+
+import { GetLoginServicesResult } from '@/types/admin';
+import { DEFAULT_LANGUAGE } from '@/types/settings';
+
+import { LoginServiceModal } from '@/components/Admin/LoginService/LoginServiceModal';
+import { Button } from '@/components/ui/button';
+import { Card } from '@/components/ui/card';
 import {
   Table,
   TableBody,
@@ -11,10 +17,8 @@ import {
   TableHeader,
   TableRow,
 } from '@/components/ui/table';
-import { Card } from '@/components/ui/card';
-import { Button } from '@/components/ui/button';
-import { DEFAULT_LANGUAGE } from '@/types/settings';
-import { LoginServiceModal } from '@/components/Admin/LoginService/LoginServiceModal';
+
+import { getLoginServices } from '@/apis/adminService';
 
 export default function LoginService() {
   const { t } = useTranslation('admin');
@@ -47,13 +51,13 @@ export default function LoginService() {
 
   return (
     <>
-      <div className='flex flex-col gap-4 mb-4'>
-        <div className='flex justify-end gap-3 items-center'>
+      <div className="flex flex-col gap-4 mb-4">
+        <div className="flex justify-end gap-3 items-center">
           <Button
             onClick={() => {
               setIsOpen(true);
             }}
-            color='primary'
+            color="primary"
           >
             {t('Add Login Service')}
           </Button>
@@ -67,16 +71,20 @@ export default function LoginService() {
               <TableHead>{t('Created Time')}</TableHead>
             </TableRow>
           </TableHeader>
-          <TableBody emptyText={t('No data')!} isLoading={loading} isEmpty={services.length === 0}>
+          <TableBody
+            emptyText={t('No data')!}
+            isLoading={loading}
+            isEmpty={services.length === 0}
+          >
             {services.map((item) => (
               <TableRow
-                className='cursor-pointer'
+                className="cursor-pointer"
                 key={item.id}
                 onClick={() => {
                   handleShow(item);
                 }}
               >
-                <TableCell className='flex items-center gap-1'>
+                <TableCell className="flex items-center gap-1">
                   <div
                     className={`w-2 h-2 rounded-full ${
                       item.enabled ? 'bg-green-400' : 'bg-gray-400'

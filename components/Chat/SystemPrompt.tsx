@@ -7,13 +7,16 @@ import {
   useRef,
   useState,
 } from 'react';
+import toast from 'react-hot-toast';
 
 import { useTranslation } from 'next-i18next';
+
 import { Prompt } from '@/types/prompt';
+
+import { HomeContext } from '@/pages/home/home';
+
 import { PromptList } from './PromptList';
 import { VariableModal } from './VariableModal';
-import toast from 'react-hot-toast';
-import { HomeContext } from '@/pages/home/home';
 
 interface Props {
   currentPrompt: string;
@@ -42,7 +45,7 @@ export const SystemPrompt: FC<Props> = ({
   const promptListRef = useRef<HTMLUListElement | null>(null);
 
   const filteredPrompts = prompts.filter((prompt) =>
-    prompt.name.toLowerCase().includes(promptInputValue.toLowerCase())
+    prompt.name.toLowerCase().includes(promptInputValue.toLowerCase()),
   );
 
   const handleChange = (e: React.ChangeEvent<HTMLTextAreaElement>) => {
@@ -135,17 +138,17 @@ export const SystemPrompt: FC<Props> = ({
       if (e.key === 'ArrowDown') {
         e.preventDefault();
         setActivePromptIndex((prevIndex) =>
-          prevIndex < prompts.length - 1 ? prevIndex + 1 : prevIndex
+          prevIndex < prompts.length - 1 ? prevIndex + 1 : prevIndex,
         );
       } else if (e.key === 'ArrowUp') {
         e.preventDefault();
         setActivePromptIndex((prevIndex) =>
-          prevIndex > 0 ? prevIndex - 1 : prevIndex
+          prevIndex > 0 ? prevIndex - 1 : prevIndex,
         );
       } else if (e.key === 'Tab') {
         e.preventDefault();
         setActivePromptIndex((prevIndex) =>
-          prevIndex < prompts.length - 1 ? prevIndex + 1 : 0
+          prevIndex < prompts.length - 1 ? prevIndex + 1 : 0,
         );
       } else if (e.key === 'Enter') {
         e.preventDefault();
@@ -188,13 +191,13 @@ export const SystemPrompt: FC<Props> = ({
   }, []);
 
   return (
-    <div className='flex flex-col'>
-      <label className='mb-2 text-left text-neutral-700 dark:text-neutral-400'>
+    <div className="flex flex-col">
+      <label className="mb-2 text-left text-neutral-700 dark:text-neutral-400">
         {t('System Prompt')}
       </label>
       <textarea
         ref={textareaRef}
-        className='w-full rounded-lg border border-neutral-200 bg-transparent px-4 py-3 text-neutral-900 dark:border-neutral-600 dark:text-neutral-100'
+        className="w-full rounded-lg border border-neutral-200 bg-transparent px-4 py-3 text-neutral-900 dark:border-neutral-600 dark:text-neutral-100"
         style={{
           resize: 'none',
           bottom: `${textareaRef?.current?.scrollHeight}px`,

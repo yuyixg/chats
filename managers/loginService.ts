@@ -1,6 +1,8 @@
-import prisma from '@/prisma/prisma';
-import { ProviderType } from '@/types/user';
 import { LoginTemplateAllProperty } from '@/utils/login';
+
+import { ProviderType } from '@/types/user';
+
+import prisma from '@/prisma/prisma';
 
 export interface CreateLoginService {
   type: string;

@@ -1,5 +1,6 @@
-import prisma from '@/prisma/prisma';
 import { OrderStatus } from '@/types/order';
+
+import prisma from '@/prisma/prisma';
 
 export interface CreateOrder {
   createUserId: string;

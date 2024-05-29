@@ -1,4 +1,5 @@
 import { ConversationComponent } from './Conversation';
+
 import { ChatResult } from '@/apis/userService';
 
 interface Props {
@@ -7,7 +8,7 @@ interface Props {
 
 export const Conversations = ({ chats }: Props) => {
   return (
-    <div className='flex w-full flex-col gap-1'>
+    <div className="flex w-full flex-col gap-1">
       {chats
         .slice()
         .reverse()

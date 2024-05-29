@@ -121,7 +121,7 @@ const useExternal = (path?: string, options?: Options) => {
       // do nothing
       console.error(
         "Cannot infer the type of external resource, and please provide a type ('js' | 'css'). " +
-          'Refer to the https://ahooks.js.org/hooks/dom/use-external/#options'
+          'Refer to the https://ahooks.js.org/hooks/dom/use-external/#options',
       );
     }
 

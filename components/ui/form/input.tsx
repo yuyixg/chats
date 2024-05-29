@@ -1,4 +1,5 @@
-import { Input } from '../input';
+import { HTMLInputTypeAttribute } from 'react';
+
 import {
   FormControl,
   FormDescription,
@@ -6,8 +7,8 @@ import {
   FormLabel,
   FormMessage,
 } from '../form';
+import { Input } from '../input';
 import { FormFieldType, IFormFieldOption } from './type';
-import { HTMLInputTypeAttribute } from 'react';
 
 const FormInput = ({
   label,
@@ -27,7 +28,7 @@ const FormInput = ({
   autocomplete?: string;
 }) => {
   return (
-    <FormItem className='py-2' hidden={hidden}>
+    <FormItem className="py-2" hidden={hidden}>
       <FormLabel>{options?.label || label}</FormLabel>
       <FormControl>
         <Input

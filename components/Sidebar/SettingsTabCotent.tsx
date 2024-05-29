@@ -1,15 +1,22 @@
 import { useContext, useEffect, useState } from 'react';
+import { useForm } from 'react-hook-form';
+
 import { useTranslation } from 'next-i18next';
-import { useCreateReducer } from '@/hooks/useCreateReducer';
-import { getSettings, saveSettings } from '@/utils/settings';
-import { Settings, Themes } from '@/types/settings';
-import { HomeContext } from '@/pages/home/home';
 import { useTheme } from 'next-themes';
-import { z } from 'zod';
+
+import { useCreateReducer } from '@/hooks/useCreateReducer';
+
+import { getSettings, saveSettings } from '@/utils/settings';
+
+import { Settings, Themes } from '@/types/settings';
+
+import { HomeContext } from '@/pages/home/home';
+
 import { Form, FormField } from '../ui/form';
 import FormSelect from '../ui/form/select';
-import { useForm } from 'react-hook-form';
+
 import { zodResolver } from '@hookform/resolvers/zod';
+import { z } from 'zod';
 
 const SettingsTabContent = () => {
   const { t } = useTranslation('settings');
@@ -50,16 +57,16 @@ const SettingsTabContent = () => {
   return (
     <Form {...form}>
       <form onSubmit={form.handleSubmit(onSubmit)}>
-        <div className='flex items-center justify-between gap-4'>
+        <div className="flex items-center justify-between gap-4">
           <span>{t('Theme')!}</span>
           <FormField
-            key='theme'
+            key="theme"
             control={form.control}
-            name='theme'
+            name="theme"
             render={({ field }) => {
               return (
                 <FormSelect
-                  className='space-y-0 p-0 m-0'
+                  className="space-y-0 p-0 m-0"
                   items={Themes.map((value) => ({
                     name: t(value),
                     value,

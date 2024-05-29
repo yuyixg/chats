@@ -1,7 +1,9 @@
-import useExternal from '@/hooks/useExternal';
 import { useEffect } from 'react';
-import { Dialog, DialogContent } from '../ui/dialog';
+
+import useExternal from '@/hooks/useExternal';
+
 import Spinner from '../Spinner';
+import { Dialog, DialogContent } from '../ui/dialog';
 
 const WeChatLoginModal = (props: {
   isOpen: boolean;
@@ -15,7 +17,7 @@ const WeChatLoginModal = (props: {
       js: {
         async: true,
       },
-    }
+    },
   );
   useEffect(() => {
     if (isOpen && status === 'ready') {
@@ -33,18 +35,18 @@ const WeChatLoginModal = (props: {
   }, [status]);
   return (
     <Dialog open={isOpen} onOpenChange={onClose}>
-      <DialogContent className='w-[340px] h-[320px]'>
+      <DialogContent className="w-[340px] h-[320px]">
         {status !== 'ready' && (
-          <div className='flex justify-center items-center h-[300px]'>
+          <div className="flex justify-center items-center h-[300px]">
             <Spinner
-              size='18'
-              className='mx-auto text-gray-500 dark:text-gray-50'
+              size="18"
+              className="mx-auto text-gray-500 dark:text-gray-50"
             />
           </div>
         )}
         <div
-          id='wxContainer'
-          className='flex justify-center items-center'
+          id="wxContainer"
+          className="flex justify-center items-center"
         ></div>
       </DialogContent>
     </Dialog>

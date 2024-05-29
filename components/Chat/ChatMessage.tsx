@@ -1,3 +1,11 @@
+import { FC, memo, useContext, useEffect, useRef, useState } from 'react';
+
+import { useTranslation } from 'next-i18next';
+
+import { Message } from '@/types/chat';
+
+import { HomeContext } from '@/pages/home/home';
+
 import {
   IconCheck,
   IconChevronLeft,
@@ -8,19 +16,17 @@ import {
   IconRobot,
   IconUser,
 } from '@/components/Icons/index';
-import { FC, memo, useContext, useEffect, useRef, useState } from 'react';
-import { useTranslation } from 'next-i18next';
-import { Message } from '@/types/chat';
+
 import { CodeBlock } from '../Markdown/CodeBlock';
 import { MemoizedReactMarkdown } from '../Markdown/MemoizedReactMarkdown';
+import { Button } from '../ui/button';
+import ChangeModel from './ChangeModel';
+import ChatButtonToolTip from './ChatButtonTooltip';
+import ChatError from './ChatError';
+
 import rehypeMathjax from 'rehype-mathjax';
 import remarkGfm from 'remark-gfm';
 import remarkMath from 'remark-math';
-import { HomeContext } from '@/pages/home/home';
-import ChangeModel from './ChangeModel';
-import { Button } from '../ui/button';
-import ChatError from './ChatError';
-import ChatButtonToolTip from './ChatButtonTooltip';
 
 export interface Props {
   readonly?: boolean;
@@ -77,7 +83,7 @@ export const ChatMessage: FC<Props> = memo(
     };
 
     const handleInputChange = (
-      event: React.ChangeEvent<HTMLTextAreaElement>
+      event: React.ChangeEvent<HTMLTextAreaElement>,
     ) => {
       setMessageContent({
         text: event.target.value,
@@ -136,8 +142,8 @@ export const ChatMessage: FC<Props> = memo(
         }`}
         style={{ overflowWrap: 'anywhere' }}
       >
-        <div className='relative m-auto flex px-4 py-[10px] text-base md:max-w-2xl lg:max-w-2xl lg:px-0 xl:max-w-5xl'>
-          <div className='min-w-[28px] text-right font-bold'>
+        <div className="relative m-auto flex px-4 py-[10px] text-base md:max-w-2xl lg:max-w-2xl lg:px-0 xl:max-w-5xl">
+          <div className="min-w-[28px] text-right font-bold">
             {message.role === 'assistant' ? (
               <IconRobot size={28} />
             ) : (
@@ -145,14 +151,14 @@ export const ChatMessage: FC<Props> = memo(
             )}
           </div>
 
-          <div className='prose mt-[2px] px-4 w-full dark:prose-invert'>
+          <div className="prose mt-[2px] px-4 w-full dark:prose-invert">
             {message.role === 'user' ? (
               <>
                 {isEditing ? (
-                  <div className='flex w-full flex-col'>
+                  <div className="flex w-full flex-col">
                     <textarea
                       ref={textareaRef}
-                      className='w-full outline-none resize-none whitespace-pre-wrap border-none rounded-md bg-[#ececec] dark:bg-[#262630]'
+                      className="w-full outline-none resize-none whitespace-pre-wrap border-none rounded-md bg-[#ececec] dark:bg-[#262630]"
                       value={messageContent.text}
                       onChange={handleInputChange}
                       onKeyDown={handlePressEnter}
@@ -168,10 +174,10 @@ export const ChatMessage: FC<Props> = memo(
                       }}
                     />
 
-                    <div className='mt-10 flex justify-center space-x-4'>
+                    <div className="mt-10 flex justify-center space-x-4">
                       <Button
-                        variant='default'
-                        className='h-[40px] rounded-md px-4 py-1 text-sm font-medium'
+                        variant="default"
+                        className="h-[40px] rounded-md px-4 py-1 text-sm font-medium"
                         onClick={handleEditMessage}
                         disabled={
                           (messageContent.text || '')?.trim().length <= 0
@@ -180,8 +186,8 @@ export const ChatMessage: FC<Props> = memo(
                         {t('Send')}
                       </Button>
                       <Button
-                        variant='outline'
-                        className='h-[40px] rounded-md border border-neutral-300 px-4 py-1 text-sm font-medium text-neutral-700 hover:bg-neutral-100 dark:border-neutral-700 dark:text-neutral-300 dark:hover:bg-neutral-800'
+                        variant="outline"
+                        className="h-[40px] rounded-md border border-neutral-300 px-4 py-1 text-sm font-medium text-neutral-700 hover:bg-neutral-100 dark:border-neutral-700 dark:text-neutral-300 dark:hover:bg-neutral-800"
                         onClick={() => {
                           setMessageContent(message.content);
                           setIsEditing(false);
@@ -193,15 +199,15 @@ export const ChatMessage: FC<Props> = memo(
                   </div>
                 ) : (
                   <div>
-                    <div className='flex flex-wrap gap-2'>
+                    <div className="flex flex-wrap gap-2">
                       {message.content?.image &&
                         message.content.image.map((img, index) => (
                           <img
-                            className='rounded-md mr-2'
+                            className="rounded-md mr-2"
                             key={index}
                             style={{ maxWidth: 268, maxHeight: 168 }}
                             src={img}
-                            alt=''
+                            alt=""
                           />
                         ))}
                     </div>
@@ -219,13 +225,13 @@ export const ChatMessage: FC<Props> = memo(
                 )}
 
                 {!isEditing && (
-                  <div className='flex'>
+                  <div className="flex">
                     <>
                       {parentChildrenIds.length > 1 && (
-                        <div className='flex text-sm items-center ml-[-8px]'>
+                        <div className="flex text-sm items-center ml-[-8px]">
                           <Button
-                            variant='ghost'
-                            className='p-1 m-0 h-auto disabled:opacity-50'
+                            variant="ghost"
+                            className="p-1 m-0 h-auto disabled:opacity-50"
                             disabled={
                               currentSelectIndex === 0 || messageIsStreaming
                             }
@@ -236,16 +242,16 @@ export const ChatMessage: FC<Props> = memo(
                               }
                             }}
                           >
-                            <IconChevronLeft stroke='#7d7d7d' />
+                            <IconChevronLeft stroke="#7d7d7d" />
                           </Button>
-                          <span className='font-bold text-[#7d7d7d]'>
+                          <span className="font-bold text-[#7d7d7d]">
                             {`${currentSelectIndex + 1}/${
                               parentChildrenIds.length
                             }`}
                           </span>
                           <Button
-                            variant='ghost'
-                            className='p-1 m-0 h-auto disabled:opacity-50'
+                            variant="ghost"
+                            className="p-1 m-0 h-auto disabled:opacity-50"
                             disabled={
                               currentSelectIndex ===
                                 parentChildrenIds.length - 1 ||
@@ -258,7 +264,7 @@ export const ChatMessage: FC<Props> = memo(
                               }
                             }}
                           >
-                            <IconChevronRight stroke='#7d7d7d' />
+                            <IconChevronRight stroke="#7d7d7d" />
                           </Button>
                         </div>
                       )}
@@ -266,12 +272,12 @@ export const ChatMessage: FC<Props> = memo(
                     <ChatButtonToolTip
                       trigger={
                         <Button
-                          variant='ghost'
+                          variant="ghost"
                           disabled={messageIsStreaming}
-                          className='p-1 m-0 h-auto invisible group-hover:visible focus:visible'
+                          className="p-1 m-0 h-auto invisible group-hover:visible focus:visible"
                           onClick={toggleEditing}
                         >
-                          <IconEdit stroke='#7d7d7d' />
+                          <IconEdit stroke="#7d7d7d" />
                         </Button>
                       }
                       content={t('Edit message')!}
@@ -281,9 +287,9 @@ export const ChatMessage: FC<Props> = memo(
               </>
             ) : (
               <>
-                <div className='pr-4 md:pr-0'>
+                <div className="pr-4 md:pr-0">
                   <MemoizedReactMarkdown
-                    className='prose dark:prose-invert flex-1'
+                    className="prose dark:prose-invert flex-1"
                     remarkPlugins={[remarkGfm, remarkMath]}
                     rehypePlugins={[rehypeMathjax]}
                     components={{
@@ -291,7 +297,7 @@ export const ChatMessage: FC<Props> = memo(
                         if (children.length) {
                           if (children[0] == '▍') {
                             return (
-                              <span className='animate-pulse cursor-default mt-1'>
+                              <span className="animate-pulse cursor-default mt-1">
                                 ▍
                               </span>
                             );
@@ -299,7 +305,7 @@ export const ChatMessage: FC<Props> = memo(
 
                           children[0] = (children[0] as string).replace(
                             '`▍`',
-                            '▍'
+                            '▍',
                           );
                         }
 
@@ -320,21 +326,21 @@ export const ChatMessage: FC<Props> = memo(
                       },
                       table({ children }) {
                         return (
-                          <table className='border-collapse border border-black px-3 py-1 dark:border-white'>
+                          <table className="border-collapse border border-black px-3 py-1 dark:border-white">
                             {children}
                           </table>
                         );
                       },
                       th({ children }) {
                         return (
-                          <th className='break-words border border-black bg-gray-500 px-3 py-1 text-white dark:border-white'>
+                          <th className="break-words border border-black bg-gray-500 px-3 py-1 text-white dark:border-white">
                             {children}
                           </th>
                         );
                       },
                       td({ children }) {
                         return (
-                          <td className='break-words border border-black px-3 py-1 dark:border-white'>
+                          <td className="break-words border border-black px-3 py-1 dark:border-white">
                             {children}
                           </td>
                         );
@@ -352,12 +358,12 @@ export const ChatMessage: FC<Props> = memo(
                 {chatError && isLastMessage && <ChatError />}
 
                 {!messageIsStreaming ? (
-                  <div className='flex gap-1 pt-2'>
+                  <div className="flex gap-1 pt-2">
                     {assistantChildrenIds.length > 1 && (
-                      <div className='flex text-sm items-center ml-[-8px]'>
+                      <div className="flex text-sm items-center ml-[-8px]">
                         <Button
-                          variant='ghost'
-                          className='p-1 m-0 h-auto disabled:opacity-50'
+                          variant="ghost"
+                          className="p-1 m-0 h-auto disabled:opacity-50"
                           disabled={
                             assistantCurrentSelectIndex === 0 ||
                             messageIsStreaming
@@ -369,16 +375,16 @@ export const ChatMessage: FC<Props> = memo(
                             }
                           }}
                         >
-                          <IconChevronLeft stroke='#7d7d7d' />
+                          <IconChevronLeft stroke="#7d7d7d" />
                         </Button>
-                        <span className='font-bold text-[#7d7d7d]'>
+                        <span className="font-bold text-[#7d7d7d]">
                           {`${assistantCurrentSelectIndex + 1}/${
                             assistantChildrenIds.length
                           }`}
                         </span>
                         <Button
-                          variant='ghost'
-                          className='p-1 m-0 h-auto'
+                          variant="ghost"
+                          className="p-1 m-0 h-auto"
                           disabled={
                             assistantCurrentSelectIndex ===
                               assistantChildrenIds.length - 1 ||
@@ -391,7 +397,7 @@ export const ChatMessage: FC<Props> = memo(
                             }
                           }}
                         >
-                          <IconChevronRight stroke='#7d7d7d' />
+                          <IconChevronRight stroke="#7d7d7d" />
                         </Button>
                       </div>
                     )}
@@ -401,21 +407,21 @@ export const ChatMessage: FC<Props> = memo(
                       } group-hover:visible focus:visible`}
                     >
                       {messagedCopied ? (
-                        <Button variant='ghost' className='p-1 m-0 h-auto'>
+                        <Button variant="ghost" className="p-1 m-0 h-auto">
                           <IconCheck
-                            stroke='#7d7d7d'
-                            className='text-green-500 dark:text-green-400'
+                            stroke="#7d7d7d"
+                            className="text-green-500 dark:text-green-400"
                           />
                         </Button>
                       ) : (
                         <ChatButtonToolTip
                           trigger={
                             <Button
-                              variant='ghost'
-                              className='p-1 m-0 h-auto'
+                              variant="ghost"
+                              className="p-1 m-0 h-auto"
                               onClick={copyOnClick}
                             >
-                              <IconCopy stroke='#7d7d7d' />
+                              <IconCopy stroke="#7d7d7d" />
                             </Button>
                           }
                           content={t('Copy')!}
@@ -425,13 +431,13 @@ export const ChatMessage: FC<Props> = memo(
                         <ChatButtonToolTip
                           trigger={
                             <Button
-                              variant='ghost'
-                              className='p-1 m-0 h-auto'
+                              variant="ghost"
+                              className="p-1 m-0 h-auto"
                               onClick={() => {
                                 onRegenerate && onRegenerate();
                               }}
                             >
-                              <IconRefresh stroke='#7d7d7d' />
+                              <IconRefresh stroke="#7d7d7d" />
                             </Button>
                           }
                           content={t('Regenerate')!}
@@ -452,7 +458,7 @@ export const ChatMessage: FC<Props> = memo(
                     </div>
                   </div>
                 ) : (
-                  <div className='min-h-[20px]'></div>
+                  <div className="min-h-[20px]"></div>
                 )}
               </>
             )}
@@ -460,6 +466,6 @@ export const ChatMessage: FC<Props> = memo(
         </div>
       </div>
     );
-  }
+  },
 );
 ChatMessage.displayName = 'ChatMessage';

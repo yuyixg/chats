@@ -1,8 +1,10 @@
-import { HomeContext } from '@/pages/home/home';
-import { Popover, PopoverContent, PopoverTrigger } from '../ui/popover';
 import { useContext } from 'react';
+
+import { HomeContext } from '@/pages/home/home';
+
 import { IconChevronDown } from '../Icons';
 import { Button } from '../ui/button';
+import { Popover, PopoverContent, PopoverTrigger } from '../ui/popover';
 
 const ChangeModel = ({
   readonly,
@@ -19,17 +21,17 @@ const ChangeModel = ({
 
   return (
     <Popover>
-      <PopoverTrigger className='flex' disabled={readonly}>
-        <Button variant='ghost' className='p-1 m-0 h-auto'>
-          <span className='text-[#7d7d7d] text-sm font-bold'>{modelName}</span>
-          {!readonly && <IconChevronDown stroke='#7d7d7d' />}
+      <PopoverTrigger className="flex" disabled={readonly}>
+        <Button variant="ghost" className="p-1 m-0 h-auto">
+          <span className="text-[#7d7d7d] text-sm font-bold">{modelName}</span>
+          {!readonly && <IconChevronDown stroke="#7d7d7d" />}
         </Button>
       </PopoverTrigger>
       <PopoverContent>
-        <div className='grid grid-1 items-start'>
+        <div className="grid grid-1 items-start">
           {models.map((x) => (
             <Button
-              variant='ghost'
+              variant="ghost"
               key={x.id}
               onClick={() => onChangeModel(x.id)}
             >

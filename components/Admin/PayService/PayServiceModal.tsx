@@ -1,6 +1,22 @@
-import { useTranslation } from 'next-i18next';
 import React, { useEffect } from 'react';
+import { useForm } from 'react-hook-form';
 import toast from 'react-hot-toast';
+
+import { useTranslation } from 'next-i18next';
+
+import { mergeConfigs } from '@/utils/model';
+import { getPayConfigs } from '@/utils/pay';
+
+import {
+  GetPayServicesResult,
+  PostPayServicesParams,
+  PutPayServicesParams,
+} from '@/types/admin';
+import { PayServiceType } from '@/types/pay';
+
+import FormSelect from '@/components/ui/form/select';
+
+import { Button } from '../../ui/button';
 import {
   Dialog,
   DialogContent,
@@ -8,24 +24,14 @@ import {
   DialogHeader,
   DialogTitle,
 } from '../../ui/dialog';
-import { useForm } from 'react-hook-form';
 import { Form, FormField } from '../../ui/form';
-import { zodResolver } from '@hookform/resolvers/zod';
-import { z } from 'zod';
-import { FormFieldType, IFormFieldOption } from '../../ui/form/type';
 import FormSwitch from '../../ui/form/switch';
 import FormTextarea from '../../ui/form/textarea';
-import { Button } from '../../ui/button';
-import FormSelect from '@/components/ui/form/select';
-import {
-  GetPayServicesResult,
-  PostPayServicesParams,
-  PutPayServicesParams,
-} from '@/types/admin';
-import { mergeConfigs } from '@/utils/model';
-import { PayServiceType } from '@/types/pay';
-import { getPayConfigs } from '@/utils/pay';
+import { FormFieldType, IFormFieldOption } from '../../ui/form/type';
+
 import { postPayService, putPayService } from '@/apis/adminService';
+import { zodResolver } from '@hookform/resolvers/zod';
+import { z } from 'zod';
 
 interface IProps {
   selected: GetPayServicesResult | null;
@@ -104,14 +110,14 @@ export const PayServiceModal = (props: IProps) => {
         ...values,
         id: selected.id,
         configs: JSON.stringify(
-          JSON.parse(values.configs?.replace(/\s*\n\s*/g, '')!)
+          JSON.parse(values.configs?.replace(/\s*\n\s*/g, '')!),
         ),
       } as PutPayServicesParams);
     } else {
       p = postPayService({
         ...values,
         configs: JSON.stringify(
-          JSON.parse(values.configs?.replace(/\s*\n\s*/g, '')!)
+          JSON.parse(values.configs?.replace(/\s*\n\s*/g, '')!),
         ),
       } as PostPayServicesParams);
     }
@@ -121,8 +127,8 @@ export const PayServiceModal = (props: IProps) => {
     }).catch(() => {
       toast.error(
         t(
-          'Operation failed! Please try again later, or contact technical personnel.'
-        )
+          'Operation failed! Please try again later, or contact technical personnel.',
+        ),
       );
     });
   }
@@ -136,7 +142,7 @@ export const PayServiceModal = (props: IProps) => {
         form.setValue('enabled', selected.enabled);
         form.setValue(
           'configs',
-          mergeConfigs(getPayConfigs(selected.type), selected.configs)
+          mergeConfigs(getPayConfigs(selected.type), selected.configs),
         );
       }
     }
@@ -148,7 +154,7 @@ export const PayServiceModal = (props: IProps) => {
         const type = value.type as PayServiceType;
         form.setValue(
           'configs',
-          JSON.stringify(getPayConfigs(type) || {}, null, 2)
+          JSON.stringify(getPayConfigs(type) || {}, null, 2),
         );
       }
     });
@@ -173,8 +179,8 @@ export const PayServiceModal = (props: IProps) => {
                 render={({ field }) => item.render(item, field)}
               />
             ))}
-            <DialogFooter className='pt-4'>
-              <Button type='submit'>{t('Save')}</Button>
+            <DialogFooter className="pt-4">
+              <Button type="submit">{t('Save')}</Button>
             </DialogFooter>
           </form>
         </Form>

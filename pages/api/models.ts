@@ -1,12 +1,14 @@
+import { ChatModelConfig } from '@/types/model';
+import { ChatsApiRequest } from '@/types/next-api';
+
 import {
   ChatModelManager,
   FileServiceManager,
   UserModelManager,
 } from '@/managers';
-import { ChatModels, FileServices } from '@prisma/client';
 import { apiHandler } from '@/middleware/api-handler';
-import { ChatsApiRequest } from '@/types/next-api';
-import { ChatModelConfig } from '@/types/model';
+import { ChatModels, FileServices } from '@prisma/client';
+
 export const config = {
   api: {
     bodyParser: {
@@ -25,7 +27,7 @@ const handler = async (req: ChatsApiRequest) => {
     .filter((m: ChatModels) => userModels.includes(m.id!))
     .map((x: ChatModels) => {
       const fileServer = fileServices.find(
-        (f: FileServices) => f.id === x.fileServiceId
+        (f: FileServices) => f.id === x.fileServiceId,
       );
       const modelConfig = JSON.parse(x.modelConfig) as ChatModelConfig;
       return {

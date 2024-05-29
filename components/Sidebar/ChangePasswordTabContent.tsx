@@ -1,17 +1,21 @@
-import { useTranslation } from 'next-i18next';
 import React, { useEffect, useState } from 'react';
-import { z } from 'zod';
-import { DialogFooter } from '../ui/dialog';
-import { Button } from '../ui/button';
-import { FormFieldType, IFormFieldOption } from '../ui/form/type';
-import FormInput from '../ui/form/input';
 import { useForm } from 'react-hook-form';
-import { zodResolver } from '@hookform/resolvers/zod';
-import { Form, FormField } from '../ui/form';
 import toast from 'react-hot-toast';
-import { changeUserPassword } from '@/apis/userService';
+
+import { useTranslation } from 'next-i18next';
 import { useRouter } from 'next/router';
+
 import { clearUserInfo, clearUserSessionId, getLoginUrl } from '@/utils/user';
+
+import { Button } from '../ui/button';
+import { DialogFooter } from '../ui/dialog';
+import { Form, FormField } from '../ui/form';
+import FormInput from '../ui/form/input';
+import { FormFieldType, IFormFieldOption } from '../ui/form/type';
+
+import { changeUserPassword } from '@/apis/userService';
+import { zodResolver } from '@hookform/resolvers/zod';
+import { z } from 'zod';
 
 export const ChangePasswordTabContent = () => {
   const { t } = useTranslation('sidebar');
@@ -24,7 +28,7 @@ export const ChangePasswordTabContent = () => {
       label: t('New Password'),
       defaultValue: '',
       render: (options: IFormFieldOption, field: FormFieldType) => (
-        <FormInput type='password' options={options} field={field} />
+        <FormInput type="password" options={options} field={field} />
       ),
     },
     {
@@ -32,7 +36,7 @@ export const ChangePasswordTabContent = () => {
       label: t('Confirm Password'),
       defaultValue: '',
       render: (options: IFormFieldOption, field: FormFieldType) => (
-        <FormInput type='password' options={options} field={field} />
+        <FormInput type="password" options={options} field={field} />
       ),
     },
   ];
@@ -44,7 +48,7 @@ export const ChangePasswordTabContent = () => {
         6,
         t('Must contain at least {{length}} character(s)', {
           length: 6,
-        })!
+        })!,
       )
       .max(18, t('Contain at most {{length}} character(s)', { length: 18 })!),
     confirmPassword: z
@@ -53,7 +57,7 @@ export const ChangePasswordTabContent = () => {
         6,
         t('Must contain at least {{length}} character(s)', {
           length: 6,
-        })!
+        })!,
       )
       .max(18, t('Contain at most {{length}} character(s)', { length: 18 })!),
   });
@@ -85,8 +89,8 @@ export const ChangePasswordTabContent = () => {
       .catch(() => {
         toast.error(
           t(
-            'Operation failed! Please try again later, or contact technical personnel.'
-          )
+            'Operation failed! Please try again later, or contact technical personnel.',
+          ),
         );
       })
       .finally(() => {
@@ -111,8 +115,8 @@ export const ChangePasswordTabContent = () => {
             render={({ field }) => item.render(item, field)}
           />
         ))}
-        <DialogFooter className='pt-4'>
-          <Button disabled={loading} type='submit'>
+        <DialogFooter className="pt-4">
+          <Button disabled={loading} type="submit">
             {t('Confirm')}
           </Button>
         </DialogFooter>

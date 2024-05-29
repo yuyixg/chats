@@ -1,12 +1,13 @@
-import prisma from '@/prisma/prisma';
 import { BalanceType } from '@/types/order';
+
+import prisma from '@/prisma/prisma';
 import Decimal from 'decimal.js';
 
 export class UserBalancesManager {
   static async chatUpdateBalance(
     userId: string,
     value: Decimal,
-    messageId: string
+    messageId: string,
   ) {
     const userBalance = await prisma.userBalances.findFirst({
       where: { userId },
@@ -23,21 +24,21 @@ export class UserBalancesManager {
   static async createBalance(
     userId: string,
     value: Decimal,
-    createUserId: string
+    createUserId: string,
   ) {
     await prisma.userBalances.create({ data: { userId, balance: value } });
     await this.createBalanceLog(
       userId,
       value,
       BalanceType.Initial,
-      createUserId
+      createUserId,
     );
   }
 
   static async updateBalance(
     userId: string,
     value: Decimal,
-    createUserId: string
+    createUserId: string,
   ) {
     const userBalance = await prisma.userBalances.findUnique({
       where: { userId },
@@ -50,7 +51,7 @@ export class UserBalancesManager {
       userId,
       value,
       BalanceType.Recharge,
-      createUserId
+      createUserId,
     );
   }
 
@@ -58,7 +59,7 @@ export class UserBalancesManager {
     userId: string,
     value: Decimal,
     createUserId: string,
-    messageId: string
+    messageId: string,
   ) {
     await prisma.balanceLogs.create({
       data: {
@@ -75,7 +76,7 @@ export class UserBalancesManager {
     userId: string,
     value: Decimal,
     type: BalanceType,
-    createUserId: string
+    createUserId: string,
   ) {
     await prisma.balanceLogs.create({
       data: { userId, value, type, createUserId },

@@ -1,7 +1,8 @@
-import { IconCheck, IconTrash, IconX } from '@/components/Icons/index';
 import { FC, useState } from 'react';
 
 import { useTranslation } from 'next-i18next';
+
+import { IconCheck, IconTrash, IconX } from '@/components/Icons/index';
 
 import { SidebarButton } from '../Sidebar/SidebarButton';
 
@@ -20,16 +21,16 @@ export const ClearConversations: FC<Props> = ({ onClearConversations }) => {
   };
 
   return isConfirming ? (
-    <div className='flex w-full cursor-pointer items-center rounded-lg py-3 px-3 hover:bg-gray-500/10'>
+    <div className="flex w-full cursor-pointer items-center rounded-lg py-3 px-3 hover:bg-gray-500/10">
       <IconTrash size={18} />
 
-      <div className='ml-3 flex-1 text-left leading-3 text-black dark:text-white'>
+      <div className="ml-3 flex-1 text-left leading-3 text-black dark:text-white">
         {t('Are you sure?')}
       </div>
 
-      <div className='flex w-[40px]'>
+      <div className="flex w-[40px]">
         <IconCheck
-          className='ml-auto mr-1 min-w-[20px] text-black dark:text-white hover:opacity-50'
+          className="ml-auto mr-1 min-w-[20px] text-black dark:text-white hover:opacity-50"
           size={18}
           onClick={(e) => {
             e.stopPropagation();
@@ -38,7 +39,7 @@ export const ClearConversations: FC<Props> = ({ onClearConversations }) => {
         />
 
         <IconX
-          className='ml-auto min-w-[20px] text-black dark:text-white hover:opacity-50'
+          className="ml-auto min-w-[20px] text-black dark:text-white hover:opacity-50"
           size={18}
           onClick={(e) => {
             e.stopPropagation();

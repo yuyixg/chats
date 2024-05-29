@@ -1,11 +1,14 @@
 import { FC, KeyboardEvent, useEffect, useRef, useState } from 'react';
-import { Prompt } from '@/types/prompt';
 import toast from 'react-hot-toast';
-import { Dialog, DialogContent, DialogHeader, DialogTitle } from '../ui/dialog';
-import { Button } from '../ui/button';
+
 import { useTranslation } from 'next-i18next';
-import { Textarea } from '../ui/textarea';
+
+import { Prompt } from '@/types/prompt';
+
+import { Button } from '../ui/button';
+import { Dialog, DialogContent, DialogHeader, DialogTitle } from '../ui/dialog';
 import { ScrollArea } from '../ui/scroll-area';
+import { Textarea } from '../ui/textarea';
 
 interface Props {
   prompt: Prompt;
@@ -28,8 +31,8 @@ export const VariableModal: FC<Props> = ({
       .map((variable) => ({ key: variable, value: '' }))
       .filter(
         (item, index, array) =>
-          array.findIndex((t) => t.key === item.key) === index
-      )
+          array.findIndex((t) => t.key === item.key) === index,
+      ),
   );
 
   const modalRef = useRef<HTMLDivElement>(null);
@@ -84,14 +87,14 @@ export const VariableModal: FC<Props> = ({
 
   return (
     <Dialog open={!!prompt} onOpenChange={onClose}>
-      <DialogContent className='w-2/5' onKeyDown={handleKeyDown}>
+      <DialogContent className="w-2/5" onKeyDown={handleKeyDown}>
         <DialogHeader>
           <DialogTitle>{prompt.name}</DialogTitle>
-          <div className='text-sm'>{prompt.description}</div>
+          <div className="text-sm">{prompt.description}</div>
         </DialogHeader>
         {updatedVariables.map((variable, index) => (
-          <div className='mb-4' key={index}>
-            <div className='mb-2 text-sm font-bold'>{variable.key}</div>
+          <div className="mb-4" key={index}>
+            <div className="mb-2 text-sm font-bold">{variable.key}</div>
             <Textarea
               ref={index === 0 ? nameInputRef : undefined}
               placeholder={`Enter a value for ${variable.key}...`}

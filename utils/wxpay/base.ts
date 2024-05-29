@@ -1,5 +1,6 @@
-import * as request from 'superagent';
 import { Output } from './type';
+
+import * as request from 'superagent';
 
 export class Base {
   protected userAgent = '127.0.0.1'; // User-Agent
@@ -11,7 +12,7 @@ export class Base {
   protected async postRequest(
     url: string,
     params: Record<string, any>,
-    authorization: string
+    authorization: string,
   ): Promise<Record<string, any>> {
     try {
       const result = await request.post(url).send(params).set({
@@ -41,7 +42,7 @@ export class Base {
   protected async postRequestV2(
     url: string,
     params: Record<string, any>,
-    authorization: string
+    authorization: string,
   ): Promise<Output> {
     try {
       const result = await request.post(url).send(params).set({
@@ -70,7 +71,7 @@ export class Base {
    */
   protected async getRequest(
     url: string,
-    authorization: string
+    authorization: string,
   ): Promise<Record<string, any>> {
     try {
       const result = await request.get(url).set({

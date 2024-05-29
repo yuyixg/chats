@@ -1,10 +1,12 @@
+import { BalanceType } from '@/types/order';
+
+import { CreateChatMessage } from './chatMessages';
+import { UpdateChat } from './chats';
+
 import prisma from '@/prisma/prisma';
 import { Prisma, PrismaClient } from '@prisma/client';
-import { CreateChatMessage } from './chatMessages';
-import Decimal from 'decimal.js';
-import { UpdateChat } from './chats';
 import { DefaultArgs } from '@prisma/client/runtime/library';
-import { BalanceType } from '@/types/order';
+import Decimal from 'decimal.js';
 
 type TX = Omit<
   PrismaClient<Prisma.PrismaClientOptions, never, DefaultArgs>,
@@ -45,7 +47,7 @@ export class ChatModelRecordManager {
       await this.updateChat(tx, updateChatParams);
       const chatMessage = await this.createChatMessage(
         tx,
-        createChatMessageParams
+        createChatMessageParams,
       );
       await this.updateUserModelTokenCount(tx, userId, chatModelId, tokenUsed);
       await this.chatUpdateBalance(tx, userId, calculatedPrice, chatMessage.id);
@@ -65,7 +67,7 @@ export class ChatModelRecordManager {
     tx: TX,
     userId: string,
     modelId: string,
-    token: number
+    token: number,
   ) {
     const userModel = await tx.userModels.findFirst({ where: { userId } });
     let models = JSON.parse(userModel?.models || '[]') as any[];
@@ -95,7 +97,7 @@ export class ChatModelRecordManager {
     tx: TX,
     userId: string,
     value: Decimal,
-    messageId: string
+    messageId: string,
   ) {
     const userBalance = await tx.userBalances.findFirst({
       where: { userId },

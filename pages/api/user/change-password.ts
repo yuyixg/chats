@@ -1,8 +1,10 @@
-import { UsersManager } from '@/managers';
 import { BadRequest } from '@/utils/error';
-import bcrypt from 'bcryptjs';
-import { apiHandler } from '@/middleware/api-handler';
+
 import { ChatsApiRequest, ChatsApiResponse } from '@/types/next-api';
+
+import { UsersManager } from '@/managers';
+import { apiHandler } from '@/middleware/api-handler';
+import bcrypt from 'bcryptjs';
 
 export const config = {
   api: {
@@ -24,7 +26,7 @@ async function handler(req: ChatsApiRequest, res: ChatsApiResponse) {
     const hashPassword = await bcrypt.hashSync(newPassword);
     const result = await UsersManager.updateUserPassword(
       user.id!,
-      hashPassword
+      hashPassword,
     );
     return result;
   }

@@ -1,20 +1,43 @@
-import { useCreateReducer } from '@/hooks/useCreateReducer';
 import { useEffect, useRef } from 'react';
-import Head from 'next/head';
-import { Chatbar } from '@/components/Chatbar/Chatbar';
-import { Chat } from '@/components/Chat/Chat';
-import { serverSideTranslations } from 'next-i18next/serverSideTranslations';
-import { useTranslation } from 'next-i18next';
-import { getSettingsLanguage, getSettings } from '@/utils/settings';
-import { getSession } from '@/utils/session';
-import { getLoginUrl, getUserInfo, getUserSessionId } from '@/utils/user';
-import { useRouter } from 'next/router';
 import { Dispatch, createContext } from 'react';
+
+import { useTranslation } from 'next-i18next';
+import { serverSideTranslations } from 'next-i18next/serverSideTranslations';
+import { useTheme } from 'next-themes';
+import Head from 'next/head';
+import { useRouter } from 'next/router';
+
+import { useCreateReducer } from '@/hooks/useCreateReducer';
 import { ActionType } from '@/hooks/useCreateReducer';
-import { v4 as uuidv4 } from 'uuid';
+
+import {
+  getPathChatId,
+  getSelectChatId,
+  saveSelectChatId,
+} from '@/utils/chats';
+import { getSelectMessages } from '@/utils/message';
+import { getStorageModelId, setStorageModelId } from '@/utils/model';
+import { getSession } from '@/utils/session';
+import { getSettings, getSettingsLanguage } from '@/utils/settings';
+import { getLoginUrl, getUserInfo, getUserSessionId } from '@/utils/user';
+import { UserSession } from '@/utils/user';
+
+import { Role } from '@/types/chat';
+import { ChatMessage } from '@/types/chatMessage';
 import { Model } from '@/types/model';
 import { Prompt } from '@/types/prompt';
-import { UserSession } from '@/utils/user';
+import {
+  DEFAULT_LANGUAGE,
+  DEFAULT_THEME,
+  Languages,
+  Themes,
+} from '@/types/settings';
+
+import { Chat } from '@/components/Chat/Chat';
+import { Chatbar } from '@/components/Chatbar/Chatbar';
+import PromptBar from '@/components/Promptbar';
+import Spinner from '@/components/Spinner';
+
 import {
   ChatResult,
   getChats,
@@ -23,24 +46,8 @@ import {
   getUserPrompts,
   postChats,
 } from '@/apis/userService';
-import {
-  DEFAULT_LANGUAGE,
-  DEFAULT_THEME,
-  Languages,
-  Themes,
-} from '@/types/settings';
-import { useTheme } from 'next-themes';
-import Spinner from '@/components/Spinner';
-import { ChatMessage } from '@/types/chatMessage';
-import { getSelectMessages } from '@/utils/message';
-import PromptBar from '@/components/Promptbar';
-import {
-  getPathChatId,
-  getSelectChatId,
-  saveSelectChatId,
-} from '@/utils/chats';
-import { Role } from '@/types/chat';
-import { getStorageModelId, setStorageModelId } from '@/utils/model';
+import { v4 as uuidv4 } from 'uuid';
+
 interface HandleUpdateChatParams {
   isShared?: boolean;
   title?: string;
@@ -101,7 +108,7 @@ interface HomeContextProps {
   handleUpdateChat: (
     chats: ChatResult[],
     id: string,
-    params: HandleUpdateChatParams
+    params: HandleUpdateChatParams,
   ) => void;
   handleUpdateSelectMessage: (lastLeafId: string) => void;
   handleUpdateCurrentMessage: (chatId: string) => void;
@@ -257,7 +264,7 @@ const Home = () => {
   function handleUpdateChat(
     chats: ChatResult[],
     id: string,
-    params: HandleUpdateChatParams
+    params: HandleUpdateChatParams,
   ) {
     const _chats = chats.map((x) => {
       if (x.id === id) return { ...x, ...params };
@@ -301,7 +308,7 @@ const Home = () => {
   const selectChat = (
     chatList: ChatResult[],
     chatId: string | null,
-    models: Model[]
+    models: Model[],
   ) => {
     const chat = chatList.find((x) => x.id === chatId);
     if (chat) {
@@ -448,32 +455,32 @@ const Home = () => {
     >
       <Head>
         <title>Chats</title>
-        <meta name='description' content='' />
+        <meta name="description" content="" />
         <meta
-          name='viewport'
-          content='height=device-height ,width=device-width, initial-scale=1, user-scalable=no'
+          name="viewport"
+          content="height=device-height ,width=device-width, initial-scale=1, user-scalable=no"
         />
-        <link rel='icon' href='/favicon.ico' />
+        <link rel="icon" href="/favicon.ico" />
       </Head>
       <main>
         {!user && (
           <div
             className={`fixed top-0 left-0 bottom-0 right-0 bg-white dark:bg-[#202123] text-black/80 dark:text-white/80 z-50 text-center text-[12.5px]`}
           >
-            <div className='fixed w-screen h-screen top-1/2'>
-              <div className='flex justify-center'>
+            <div className="fixed w-screen h-screen top-1/2">
+              <div className="flex justify-center">
                 <Spinner
-                  size='18'
-                  className='text-gray-500 dark:text-gray-50'
+                  size="18"
+                  className="text-gray-500 dark:text-gray-50"
                 />
               </div>
             </div>
           </div>
         )}
         <div className={`flex h-screen w-screen flex-col text-sm`}>
-          <div className='flex h-full w-full dark:bg-[#262630]'>
+          <div className="flex h-full w-full dark:bg-[#262630]">
             <Chatbar />
-            <div className='flex w-full'>
+            <div className="flex w-full">
               <Chat stopConversationRef={stopConversationRef} />
             </div>
             <PromptBar />

@@ -1,7 +1,10 @@
 import { NextApiRequest } from 'next';
-import { getSession } from './utils/session';
-import prisma from './prisma/prisma';
 import { NextResponse } from 'next/server';
+
+import { getSession } from './utils/session';
+
+import prisma from './prisma/prisma';
+
 export const middleware = async (req: NextApiRequest, res: NextResponse) => {
   if (req.url?.includes('/api/')) {
     // const session = await getSession(req.cookies);

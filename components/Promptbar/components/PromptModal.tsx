@@ -1,10 +1,13 @@
 import { FC, KeyboardEvent, useEffect, useRef, useState } from 'react';
+
 import { useTranslation } from 'next-i18next';
+
 import { Prompt } from '@/types/prompt';
+
+import { Button } from '@/components/ui/button';
 import { Dialog, DialogContent } from '@/components/ui/dialog';
 import { Input } from '@/components/ui/input';
 import { Textarea } from '@/components/ui/textarea';
-import { Button } from '@/components/ui/button';
 
 interface Props {
   prompt: Prompt;
@@ -53,8 +56,8 @@ export const PromptModal: FC<Props> = ({ prompt, onClose, onUpdatePrompt }) => {
 
   return (
     <Dialog open={!!prompt} onOpenChange={onClose}>
-      <DialogContent className='w-2/5' onKeyDown={handleEnter}>
-        <div className='text-sm font-bold text-black dark:text-neutral-200'>
+      <DialogContent className="w-2/5" onKeyDown={handleEnter}>
+        <div className="text-sm font-bold text-black dark:text-neutral-200">
           {t('Name')}
         </div>
         <Input
@@ -64,20 +67,20 @@ export const PromptModal: FC<Props> = ({ prompt, onClose, onUpdatePrompt }) => {
           onChange={(e) => setName(e.target.value)}
         ></Input>
 
-        <div className='mt-6 text-sm font-bold text-black dark:text-neutral-200'>
+        <div className="mt-6 text-sm font-bold text-black dark:text-neutral-200">
           {t('Prompt')}
         </div>
         <Textarea
           placeholder={
             t(
-              'Prompt content. Use {{}} to denote a variable. Ex: {{name}} is a {{adjective}} {{noun}}'
+              'Prompt content. Use {{}} to denote a variable. Ex: {{name}} is a {{adjective}} {{noun}}',
             ) || ''
           }
           value={content}
           onChange={(e) => setContent(e.target.value)}
           rows={8}
         ></Textarea>
-        <div className='mt-6 text-sm font-bold text-black dark:text-neutral-200'>
+        <div className="mt-6 text-sm font-bold text-black dark:text-neutral-200">
           {t('Description')}
         </div>
         <Textarea

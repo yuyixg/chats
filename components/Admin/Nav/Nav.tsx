@@ -1,14 +1,16 @@
 'use client';
 
 import Link from 'next/link';
-import { cn } from '@/lib/utils';
+import { useRouter } from 'next/router';
+
+import { buttonVariants } from '@/components/ui/button';
 import {
   Tooltip,
   TooltipContent,
   TooltipTrigger,
 } from '@/components/ui/tooltip';
-import { buttonVariants } from '@/components/ui/button';
-import { useRouter } from 'next/router';
+
+import { cn } from '@/lib/utils';
 
 interface IMenu {
   title: string;
@@ -31,9 +33,9 @@ export function Nav({ menus, isCollapsed }: NavProps) {
   return (
     <div
       data-collapsed={isCollapsed}
-      className='group flex flex-col gap-4 py-2 data-[collapsed=true]:py-2'
+      className="group flex flex-col gap-4 py-2 data-[collapsed=true]:py-2"
     >
-      <nav className='grid gap-1 px-2 group-[[data-collapsed=true]]:justify-center group-[[data-collapsed=true]]:px-2'>
+      <nav className="grid gap-1 px-2 group-[[data-collapsed=true]]:justify-center group-[[data-collapsed=true]]:px-2">
         {menus.map((menu, index) =>
           isCollapsed ? (
             <Tooltip key={index} delayDuration={0}>
@@ -48,14 +50,14 @@ export function Nav({ menus, isCollapsed }: NavProps) {
                     'h-9 w-9 flex',
                     active(menu)
                       ? 'dark:bg-muted dark:text-white dark:hover:bg-muted dark:hover:text-white'
-                      : ''
+                      : '',
                   )}
                 >
                   <span>{menu.icon()}</span>
-                  <span className='sr-only'>{menu.title}</span>
+                  <span className="sr-only">{menu.title}</span>
                 </Link>
               </TooltipTrigger>
-              <TooltipContent side='right' className='flex items-center gap-4'>
+              <TooltipContent side="right" className="flex items-center gap-4">
                 {menu.title}
               </TooltipContent>
             </Tooltip>
@@ -71,15 +73,15 @@ export function Nav({ menus, isCollapsed }: NavProps) {
                 active(menu)
                   ? 'dark:bg-muted dark:text-white dark:hover:bg-muted dark:hover:text-white'
                   : '',
-                'justify-start'
+                'justify-start',
               )}
             >
-              <span className='mr-2'>
+              <span className="mr-2">
                 {menu.icon(active(menu) ? 'white' : '')}
               </span>
               {menu.title}
             </Link>
-          )
+          ),
         )}
       </nav>
     </div>

@@ -1,29 +1,10 @@
-import { getFileServices, getModelKeys, postModels } from '@/apis/adminService';
-import { useTranslation } from 'next-i18next';
 import React, { useEffect, useState } from 'react';
-import toast from 'react-hot-toast';
-import {
-  Dialog,
-  DialogContent,
-  DialogFooter,
-  DialogHeader,
-  DialogTitle,
-} from '../../ui/dialog';
 import { useForm } from 'react-hook-form';
-import { Form, FormField } from '../../ui/form';
-import { zodResolver } from '@hookform/resolvers/zod';
-import { z } from 'zod';
-import FormInput from '../../ui/form/input';
-import FormSwitch from '../../ui/form/switch';
-import FormTextarea from '../../ui/form/textarea';
-import { Button } from '../../ui/button';
-import FormSelect from '@/components/ui/form/select';
-import { ModelProviders, ModelVersions } from '@/types/model';
-import {
-  GetFileServicesResult,
-  GetModelKeysResult,
-  PostModelParams,
-} from '@/types/admin';
+import toast from 'react-hot-toast';
+
+import { useTranslation } from 'next-i18next';
+
+import { formatNumberAsMoney } from '@/utils/common';
 import {
   ModelPriceUnit,
   conversionModelPriceToCreate,
@@ -34,13 +15,38 @@ import {
   getModelModelConfigJson,
   getModelPriceConfigJson,
 } from '@/utils/model';
-import { formatNumberAsMoney } from '@/utils/common';
+
+import {
+  GetFileServicesResult,
+  GetModelKeysResult,
+  PostModelParams,
+} from '@/types/admin';
+import { ModelProviders, ModelVersions } from '@/types/model';
+import { ModelProviderTemplates } from '@/types/template';
+
+import FormSelect from '@/components/ui/form/select';
 import {
   Popover,
   PopoverContent,
   PopoverTrigger,
 } from '@/components/ui/popover';
-import { ModelProviderTemplates } from '@/types/template';
+
+import { Button } from '../../ui/button';
+import {
+  Dialog,
+  DialogContent,
+  DialogFooter,
+  DialogHeader,
+  DialogTitle,
+} from '../../ui/dialog';
+import { Form, FormField } from '../../ui/form';
+import FormInput from '../../ui/form/input';
+import FormSwitch from '../../ui/form/switch';
+import FormTextarea from '../../ui/form/textarea';
+
+import { getFileServices, getModelKeys, postModels } from '@/apis/adminService';
+import { zodResolver } from '@hookform/resolvers/zod';
+import { z } from 'zod';
 
 interface IProps {
   isOpen: boolean;
@@ -101,7 +107,7 @@ export const AddModelModal = (props: IProps) => {
   function onSubmit(values: z.infer<typeof formSchema>) {
     if (!form.formState.isValid) return;
     const modelProvider = modelKeys.find(
-      (x) => x.id === form.getValues('modelKeysId')
+      (x) => x.id === form.getValues('modelKeysId'),
     )?.type;
     postModels({ ...values, modelProvider } as PostModelParams)
       .then(() => {
@@ -111,8 +117,8 @@ export const AddModelModal = (props: IProps) => {
       .catch(() => {
         toast.error(
           t(
-            'Operation failed! Please try again later, or contact technical personnel.'
-          )
+            'Operation failed! Please try again later, or contact technical personnel.',
+          ),
         );
       });
   }
@@ -140,7 +146,7 @@ export const AddModelModal = (props: IProps) => {
           form.setValue('modelVersion', '');
           const modelKeysId = value.modelKeysId as string;
           const modelProvider = modelKeys.find(
-            (x) => x.id === modelKeysId
+            (x) => x.id === modelKeysId,
           )?.type;
           setModelVersions(ModelProviderTemplates[modelProvider!].models);
         }
@@ -150,7 +156,7 @@ export const AddModelModal = (props: IProps) => {
           form.setValue('fileConfig', getModelFileConfigJson(modelVersion));
           form.setValue(
             'priceConfig',
-            conversionModelPriceToCreate(getModelPriceConfigJson(modelVersion))
+            conversionModelPriceToCreate(getModelPriceConfigJson(modelVersion)),
           );
         }
       });
@@ -160,32 +166,32 @@ export const AddModelModal = (props: IProps) => {
 
   return (
     <Dialog open={isOpen} onOpenChange={onClose}>
-      <DialogContent className='w-3/4'>
+      <DialogContent className="w-3/4">
         <DialogHeader>
           <DialogTitle>{t('Add Model')}</DialogTitle>
         </DialogHeader>
         <Form {...form}>
           <form onSubmit={form.handleSubmit(onSubmit)}>
-            <div className='grid grid-cols-2 gap-4'>
+            <div className="grid grid-cols-2 gap-4">
               <FormField
-                key='name'
+                key="name"
                 control={form.control}
-                name='name'
+                name="name"
                 render={({ field }) => {
                   return (
                     <FormInput field={field} label={t('Model Display Name')!} />
                   );
                 }}
               ></FormField>
-              <div className='flex justify-between'>
+              <div className="flex justify-between">
                 <FormField
-                  key='modelKeysId'
+                  key="modelKeysId"
                   control={form.control}
-                  name='modelKeysId'
+                  name="modelKeysId"
                   render={({ field }) => {
                     return (
                       <FormSelect
-                        className='w-full'
+                        className="w-full"
                         field={field}
                         label={t('Model Keys')!}
                         items={modelKeys.map((keys) => ({
@@ -201,32 +207,32 @@ export const AddModelModal = (props: IProps) => {
                 ></FormField>
                 <div
                   hidden={!form.getValues('modelKeysId')}
-                  className='text-sm w-36 mt-12 text-right'
+                  className="text-sm w-36 mt-12 text-right"
                 >
                   <Popover>
                     <PopoverTrigger>
-                      <span className='text-primary'>
+                      <span className="text-primary">
                         {t('Click View Configs')}
                       </span>
                     </PopoverTrigger>
-                    <PopoverContent className='w-full'>
+                    <PopoverContent className="w-full">
                       {JSON.stringify(
                         modelKeys.find(
-                          (x) => x.id === form.getValues('modelKeysId')
+                          (x) => x.id === form.getValues('modelKeysId'),
                         )?.configs,
                         null,
-                        2
+                        2,
                       )}
                     </PopoverContent>
                   </Popover>
                 </div>
               </div>
             </div>
-            <div className='grid grid-cols-2 gap-4'>
+            <div className="grid grid-cols-2 gap-4">
               <FormField
-                key='modelVersion'
+                key="modelVersion"
                 control={form.control}
-                name='modelVersion'
+                name="modelVersion"
                 render={({ field }) => {
                   return (
                     <FormSelect
@@ -241,26 +247,26 @@ export const AddModelModal = (props: IProps) => {
                 }}
               ></FormField>
               <FormField
-                key='remarks'
+                key="remarks"
                 control={form.control}
-                name='remarks'
+                name="remarks"
                 render={({ field }) => {
                   return <FormInput field={field} label={t('Remarks')!} />;
                 }}
               ></FormField>
             </div>
-            <div className='grid grid-cols-2 gap-4'>
+            <div className="grid grid-cols-2 gap-4">
               <FormField
-                key='modelConfig'
+                key="modelConfig"
                 control={form.control}
-                name='modelConfig'
+                name="modelConfig"
                 render={({ field }) => {
                   return (
                     <FormTextarea
                       rows={7}
                       hidden={
                         !getModelModelConfig(
-                          form.getValues('modelVersion') as ModelVersions
+                          form.getValues('modelVersion') as ModelVersions,
                         )
                       }
                       label={t('Model Configs')!}
@@ -270,20 +276,20 @@ export const AddModelModal = (props: IProps) => {
                 }}
               ></FormField>
               <FormField
-                key='priceConfig'
+                key="priceConfig"
                 control={form.control}
-                name='priceConfig'
+                name="priceConfig"
                 render={({ field }) => {
                   return (
                     <FormTextarea
                       rows={7}
                       hidden={
                         !getModelModelConfig(
-                          form.getValues('modelVersion') as ModelVersions
+                          form.getValues('modelVersion') as ModelVersions,
                         )
                       }
                       label={`${formatNumberAsMoney(ModelPriceUnit)} ${t(
-                        'Token Price'
+                        'Token Price',
                       )}(${t('Yuan')})`}
                       field={field}
                     />
@@ -293,9 +299,9 @@ export const AddModelModal = (props: IProps) => {
             </div>
             <div>
               <FormField
-                key='fileServiceId'
+                key="fileServiceId"
                 control={form.control}
-                name='fileServiceId'
+                name="fileServiceId"
                 render={({ field }) => {
                   return (
                     <FormSelect
@@ -303,7 +309,7 @@ export const AddModelModal = (props: IProps) => {
                       label={t('File Service Type')!}
                       hidden={
                         !getModelFileConfig(
-                          form.getValues('modelVersion') as ModelVersions
+                          form.getValues('modelVersion') as ModelVersions,
                         )
                       }
                       items={fileServices.map((item) => ({
@@ -315,16 +321,16 @@ export const AddModelModal = (props: IProps) => {
                 }}
               ></FormField>
               <FormField
-                key='fileConfig'
+                key="fileConfig"
                 control={form.control}
-                name='fileConfig'
+                name="fileConfig"
                 render={({ field }) => {
                   return (
                     <FormTextarea
                       rows={4}
                       hidden={
                         !getModelFileConfig(
-                          form.getValues('modelVersion') as ModelVersions
+                          form.getValues('modelVersion') as ModelVersions,
                         )
                       }
                       label={t('File Configs')!}
@@ -334,8 +340,8 @@ export const AddModelModal = (props: IProps) => {
                 }}
               ></FormField>
             </div>
-            <div className='grid grid-cols-2 gap-4'>
-              <div className='flex gap-4'>
+            <div className="grid grid-cols-2 gap-4">
+              <div className="flex gap-4">
                 <FormField
                   key={'isDefault'}
                   control={form.control}
@@ -361,8 +367,8 @@ export const AddModelModal = (props: IProps) => {
                 ></FormField>
               </div>
             </div>
-            <DialogFooter className='pt-4'>
-              <Button type='submit'>{t('Save')}</Button>
+            <DialogFooter className="pt-4">
+              <Button type="submit">{t('Save')}</Button>
             </DialogFooter>
           </form>
         </Form>

@@ -38,7 +38,7 @@ export class BadRequest extends BaseError {
 
 export class ModelUnauthorized extends BaseError {
   constructor(
-    message: string = 'The Model does not exist or access is denied'
+    message: string = 'The Model does not exist or access is denied',
   ) {
     super(message);
     this.statusCode = 401;

@@ -1,8 +1,11 @@
-import { ChatModelManager, UserModelManager } from '@/managers';
 import { ModelUnauthorized } from '@/utils/error';
-import { ChatModels, UserModels } from '@prisma/client';
-import { apiHandler } from '@/middleware/api-handler';
+
 import { ChatsApiRequest } from '@/types/next-api';
+
+import { ChatModelManager, UserModelManager } from '@/managers';
+import { apiHandler } from '@/middleware/api-handler';
+import { ChatModels, UserModels } from '@prisma/client';
+
 export const config = {
   api: {
     bodyParser: {
@@ -29,7 +32,7 @@ const handler = async (req: ChatsApiRequest) => {
           .filter((x) => x.enabled)
           .map((item) => {
             const model = chatModels.find(
-              (model: ChatModels) => model.id === item.modelId
+              (model: ChatModels) => model.id === item.modelId,
             )!;
             return {
               modelName: model.name,
@@ -52,7 +55,7 @@ const handler = async (req: ChatsApiRequest) => {
     });
     const data = await UserModelManager.updateUserModel(
       userModelId,
-      JSON.stringify(_models)
+      JSON.stringify(_models),
     );
     return data;
   } else if (req.method === 'POST') {

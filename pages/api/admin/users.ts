@@ -1,7 +1,10 @@
-import { UsersManager } from '@/managers';
 import { BadRequest } from '@/utils/error';
-import { apiHandler } from '@/middleware/api-handler';
+
 import { ChatsApiRequest } from '@/types/next-api';
+
+import { UsersManager } from '@/managers';
+import { apiHandler } from '@/middleware/api-handler';
+
 export const config = {
   api: {
     bodyParser: {

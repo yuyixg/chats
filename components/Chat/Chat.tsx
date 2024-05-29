@@ -8,22 +8,29 @@ import {
   useState,
 } from 'react';
 import toast from 'react-hot-toast';
+
 import { useTranslation } from 'next-i18next';
+
 import { throttle } from '@/utils/throttle';
+
 import { ChatBody, Message, Role } from '@/types/chat';
-import { ChatInput } from './ChatInput';
-import { MemoizedChatMessage } from './MemoizedChatMessage';
-import { ModelSelect } from './ModelSelect';
-import { HomeContext } from '@/pages/home/home';
-import { v4 as uuidv4 } from 'uuid';
-import { getChat, postChats } from '@/apis/userService';
-import { TemperatureSlider } from './Temperature';
 import { CurrentModel, ModelApiConfig } from '@/types/model';
 import { ModelTemplates } from '@/types/template';
-import { SystemPrompt } from './SystemPrompt';
-import EnableNetworkSearch from './EnableNetworkSearch';
-import { SharedMessageModal } from './SharedMessageModal';
+
+import { HomeContext } from '@/pages/home/home';
+
 import { IconShare } from '../Icons';
+import { ChatInput } from './ChatInput';
+import EnableNetworkSearch from './EnableNetworkSearch';
+import { MemoizedChatMessage } from './MemoizedChatMessage';
+import { ModelSelect } from './ModelSelect';
+import { SharedMessageModal } from './SharedMessageModal';
+import { SystemPrompt } from './SystemPrompt';
+import { TemperatureSlider } from './Temperature';
+
+import { getChat, postChats } from '@/apis/userService';
+import { v4 as uuidv4 } from 'uuid';
+
 interface Props {
   stopConversationRef: MutableRefObject<boolean>;
 }
@@ -57,10 +64,10 @@ export const Chat = memo(({ stopConversationRef }: Props) => {
     useState<boolean>(false);
   const [showShareModal, setShowShareModal] = useState(false);
   const [currentModel, setCurrentModel] = useState<CurrentModel>(
-    {} as CurrentModel
+    {} as CurrentModel,
   );
   const [modeApiConfig, setModelApiConfig] = useState<ModelApiConfig>(
-    {} as ModelApiConfig
+    {} as ModelApiConfig,
   );
   const [messageCanChat, setMessageCanChat] = useState(canChat);
   const currentSelectChat = chats.find((x) => x.id === selectChatId);
@@ -80,7 +87,7 @@ export const Chat = memo(({ stopConversationRef }: Props) => {
       message: Message,
       messageId: string,
       isRegenerate: boolean,
-      modelId: string = ''
+      modelId: string = '',
     ) => {
       homeDispatch({ field: 'chatError', value: false });
       let _selectChatId = selectChatId;
@@ -98,7 +105,7 @@ export const Chat = memo(({ stopConversationRef }: Props) => {
       }
       if (messageId && isRegenerate) {
         const messageIndex = _selectMessages.findIndex(
-          (x) => x.id === messageId
+          (x) => x.id === messageId,
         );
         homeDispatch({ field: 'selectMessageLastId', value: messageId });
         _selectMessages.splice(messageIndex + 1, _selectMessages.length);
@@ -109,7 +116,7 @@ export const Chat = memo(({ stopConversationRef }: Props) => {
         const parentMessage = _selectMessages.find((x) => x.id == messageId);
         parentMessage && parentMessage?.childrenIds.unshift(userTempId);
         const parentMessageIndex = _selectMessages.findIndex(
-          (x) => x.id == messageId
+          (x) => x.id == messageId,
         );
         const newUserMessage = {
           id: userTempId,
@@ -132,7 +139,7 @@ export const Chat = memo(({ stopConversationRef }: Props) => {
         _selectMessages.splice(
           parentMessageIndex + 1,
           removeCount,
-          newUserMessage
+          newUserMessage,
         );
       }
 
@@ -264,7 +271,7 @@ export const Chat = memo(({ stopConversationRef }: Props) => {
       selectMessages,
       selectModelId,
       stopConversationRef,
-    ]
+    ],
   );
 
   useCallback(() => {
@@ -327,7 +334,7 @@ export const Chat = memo(({ stopConversationRef }: Props) => {
       {
         root: null,
         threshold: 0.5,
-      }
+      },
     );
     const messagesEndElement = messagesEndRef.current;
     if (messagesEndElement) {
@@ -362,18 +369,18 @@ export const Chat = memo(({ stopConversationRef }: Props) => {
   }, [canChat]);
 
   return (
-    <div className='relative flex-1 overflow-hidden bg-white dark:bg-[#262630]'>
+    <div className="relative flex-1 overflow-hidden bg-white dark:bg-[#262630]">
       <>
         <div
-          className='max-h-full overflow-x-hidden'
+          className="max-h-full overflow-x-hidden"
           ref={chatContainerRef}
           onScroll={handleScroll}
         >
           {selectMessages?.length === 0 ? (
             <>
-              <div className='mx-auto flex flex-col space-y-5 md:space-y-10 px-3 pt-16 sm:max-w-[600px]'>
+              <div className="mx-auto flex flex-col space-y-5 md:space-y-10 px-3 pt-16 sm:max-w-[600px]">
                 {models.length !== 0 && (
-                  <div className='flex h-full flex-col space-y-4 rounded-lg border border-neutral-200 p-4 dark:border-neutral-600'>
+                  <div className="flex h-full flex-col space-y-4 rounded-lg border border-neutral-200 p-4 dark:border-neutral-600">
                     <ModelSelect />
                     {currentModel?.prompt && (
                       <SystemPrompt
@@ -415,15 +422,15 @@ export const Chat = memo(({ stopConversationRef }: Props) => {
           ) : (
             <>
               {currentSelectChat && (
-                <div className='sticky top-0 z-10 bg-white py-2 text-sm text-neutral-500 dark:border-none dark:bg-[#262630] dark:text-neutral-200'>
-                  <div className='mt-[6px] md:mt-3 flex justify-center items-center gap-1'>
+                <div className="sticky top-0 z-10 bg-white py-2 text-sm text-neutral-500 dark:border-none dark:bg-[#262630] dark:text-neutral-200">
+                  <div className="mt-[6px] md:mt-3 flex justify-center items-center gap-1">
                     <div>{currentModel.name}</div>
                     {currentModel?.temperature && (
-                      <div className='flex'>{currentModel.temperature}­°C</div>
+                      <div className="flex">{currentModel.temperature}­°C</div>
                     )}
                     {currentModel.name && (
                       <button
-                        className='ml-1 cursor-pointer hover:opacity-50'
+                        className="ml-1 cursor-pointer hover:opacity-50"
                         onClick={() => {
                           setShowShareModal(true);
                         }}
@@ -443,8 +450,8 @@ export const Chat = memo(({ stopConversationRef }: Props) => {
               )}
 
               {showSettings && (
-                <div className='flex flex-col space-y-10 md:mx-auto md:max-w-xl md:gap-6 md:py-3 md:pt-6 lg:max-w-2xl lg:px-0 xl:max-w-3xl'>
-                  <div className='flex h-full flex-col space-y-4 border-b border-neutral-200 p-4 dark:border-neutral-600 md:rounded-lg md:border'>
+                <div className="flex flex-col space-y-10 md:mx-auto md:max-w-xl md:gap-6 md:py-3 md:pt-6 lg:max-w-2xl lg:px-0 xl:max-w-3xl">
+                  <div className="flex h-full flex-col space-y-4 border-b border-neutral-200 p-4 dark:border-neutral-600 md:rounded-lg md:border">
                     <ModelSelect />
                   </div>
                 </div>
@@ -466,7 +473,7 @@ export const Chat = memo(({ stopConversationRef }: Props) => {
                   <MemoizedChatMessage
                     readonly={!canChat}
                     currentSelectIndex={parentChildrenIds.findIndex(
-                      (x) => x === current.id
+                      (x) => x === current.id,
                     )}
                     isLastMessage={selectMessages.length - 1 === index}
                     id={current.id!}
@@ -476,7 +483,7 @@ export const Chat = memo(({ stopConversationRef }: Props) => {
                     parentChildrenIds={parentChildrenIds}
                     assistantChildrenIds={current.assistantChildrenIds}
                     assistantCurrentSelectIndex={current.assistantChildrenIds.findIndex(
-                      (x) => x === current.id
+                      (x) => x === current.id,
                     )}
                     modelName={current.modelName}
                     message={{ role: current.role, content: current.content }}
@@ -485,14 +492,14 @@ export const Chat = memo(({ stopConversationRef }: Props) => {
                     }}
                     onRegenerate={(modelId?: string) => {
                       const message = currentMessages.find(
-                        (x) => x.id === current.parentId
+                        (x) => x.id === current.parentId,
                       );
                       if (!message) return;
                       handleSend(
                         { role: 'user', content: message.content },
                         current.parentId || '',
                         true,
-                        modelId
+                        modelId,
                       );
                     }}
                     onEdit={(editedMessage, parentId) => {
@@ -503,7 +510,7 @@ export const Chat = memo(({ stopConversationRef }: Props) => {
               })}
 
               <div
-                className='h-[162px] bg-white dark:bg-[#262630]'
+                className="h-[162px] bg-white dark:bg-[#262630]"
                 ref={messagesEndRef}
               />
             </>

@@ -1,7 +1,22 @@
-import { postLoginService, putLoginService } from '@/apis/adminService';
-import { useTranslation } from 'next-i18next';
 import React, { useEffect } from 'react';
+import { useForm } from 'react-hook-form';
 import toast from 'react-hot-toast';
+
+import { useTranslation } from 'next-i18next';
+
+import { getLoginConfigs } from '@/utils/login';
+import { mergeConfigs } from '@/utils/model';
+
+import {
+  GetLoginServicesResult,
+  PostLoginServicesParams,
+  PutLoginServicesParams,
+} from '@/types/admin';
+import { ProviderType } from '@/types/user';
+
+import FormSelect from '@/components/ui/form/select';
+
+import { Button } from '../../ui/button';
 import {
   Dialog,
   DialogContent,
@@ -9,23 +24,14 @@ import {
   DialogHeader,
   DialogTitle,
 } from '../../ui/dialog';
-import { useForm } from 'react-hook-form';
 import { Form, FormField } from '../../ui/form';
-import { zodResolver } from '@hookform/resolvers/zod';
-import { z } from 'zod';
-import { FormFieldType, IFormFieldOption } from '../../ui/form/type';
 import FormSwitch from '../../ui/form/switch';
 import FormTextarea from '../../ui/form/textarea';
-import { Button } from '../../ui/button';
-import FormSelect from '@/components/ui/form/select';
-import {
-  GetLoginServicesResult,
-  PostLoginServicesParams,
-  PutLoginServicesParams,
-} from '@/types/admin';
-import { mergeConfigs } from '@/utils/model';
-import { getLoginConfigs } from '@/utils/login';
-import { ProviderType } from '@/types/user';
+import { FormFieldType, IFormFieldOption } from '../../ui/form/type';
+
+import { postLoginService, putLoginService } from '@/apis/adminService';
+import { zodResolver } from '@hookform/resolvers/zod';
+import { z } from 'zod';
 
 interface IProps {
   selected: GetLoginServicesResult | null;
@@ -113,8 +119,8 @@ export const LoginServiceModal = (props: IProps) => {
     }).catch(() => {
       toast.error(
         t(
-          'Operation failed! Please try again later, or contact technical personnel.'
-        )
+          'Operation failed! Please try again later, or contact technical personnel.',
+        ),
       );
     });
   }
@@ -128,7 +134,7 @@ export const LoginServiceModal = (props: IProps) => {
         form.setValue('enabled', selected.enabled);
         form.setValue(
           'configs',
-          mergeConfigs(getLoginConfigs(selected.type), selected.configs)
+          mergeConfigs(getLoginConfigs(selected.type), selected.configs),
         );
       }
     }
@@ -140,7 +146,7 @@ export const LoginServiceModal = (props: IProps) => {
         const type = value.type as ProviderType;
         form.setValue(
           'configs',
-          JSON.stringify(getLoginConfigs(type) || {}, null, 2)
+          JSON.stringify(getLoginConfigs(type) || {}, null, 2),
         );
       }
     });
@@ -165,8 +171,8 @@ export const LoginServiceModal = (props: IProps) => {
                 render={({ field }) => item.render(item, field)}
               />
             ))}
-            <DialogFooter className='pt-4'>
-              <Button type='submit'>{t('Save')}</Button>
+            <DialogFooter className="pt-4">
+              <Button type="submit">{t('Save')}</Button>
             </DialogFooter>
           </form>
         </Form>

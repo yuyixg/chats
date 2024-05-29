@@ -1,4 +1,7 @@
 import { useEffect, useState } from 'react';
+
+import Image from 'next/image';
+
 import { Button } from '../ui/button';
 import {
   Tooltip,
@@ -6,7 +9,6 @@ import {
   TooltipProvider,
   TooltipTrigger,
 } from '../ui/tooltip';
-import Image from 'next/image';
 import WeChatLoginModal from './WeChatLoginModal';
 
 const WeChatLogin = (props: {
@@ -26,16 +28,16 @@ const WeChatLogin = (props: {
               onClick={() => {
                 setWeChatModal(true);
               }}
-              className='p-0 w-8 h-8'
+              className="p-0 w-8 h-8"
               disabled={loading}
-              variant='link'
+              variant="link"
             >
               <Image
-                src='/wechat.svg'
-                alt='WeChat'
+                src="/wechat.svg"
+                alt="WeChat"
                 width={0}
                 height={0}
-                className='h-8 w-8 dark:bg-transparent'
+                className="h-8 w-8 dark:bg-transparent"
               />
             </Button>
           </TooltipTrigger>

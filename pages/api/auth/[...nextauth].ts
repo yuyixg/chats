@@ -1,7 +1,9 @@
-import { SessionsManager, UsersManager } from '@/managers';
-import { KeyCloakProvider } from '@/utils/authProvider';
 import { NextApiRequest, NextApiResponse } from 'next';
 import NextAuth from 'next-auth';
+
+import { KeyCloakProvider } from '@/utils/authProvider';
+
+import { SessionsManager, UsersManager } from '@/managers';
 
 export default async function auth(req: NextApiRequest, res: NextApiResponse) {
   const keyCloak = await KeyCloakProvider();
@@ -29,7 +31,7 @@ export default async function auth(req: NextApiRequest, res: NextApiResponse) {
         if (trigger === 'signIn' || trigger === 'update') {
           let user = await UsersManager.findByUserByProvider(
             'keycloak',
-            profile?.sub!
+            profile?.sub!,
           );
           if (!user) {
             user = await UsersManager.createUser({

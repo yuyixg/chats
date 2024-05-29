@@ -1,13 +1,19 @@
-import { getMessageDetails } from '@/apis/adminService';
-import { ChatMessage as ChatMessageComponent } from '@/components/Admin/Messages/ChatMessage';
+import { useEffect, useState } from 'react';
+
+import { serverSideTranslations } from 'next-i18next/serverSideTranslations';
+import { useRouter } from 'next/router';
+
+import { getSelectMessages } from '@/utils/message';
+
 import { GetMessageDetailsResult } from '@/types/admin';
 import { ChatMessage } from '@/types/chatMessage';
 import { DEFAULT_LANGUAGE } from '@/types/settings';
-import { getSelectMessages } from '@/utils/message';
+
+import { ChatMessage as ChatMessageComponent } from '@/components/Admin/Messages/ChatMessage';
+
+import { getMessageDetails } from '@/apis/adminService';
 import Decimal from 'decimal.js';
-import { serverSideTranslations } from 'next-i18next/serverSideTranslations';
-import { useRouter } from 'next/router';
-import { useEffect, useState } from 'react';
+
 export default function MessageDetails() {
   const router = useRouter();
   const { id } = router.query as { id: string };
@@ -38,7 +44,7 @@ export default function MessageDetails() {
         const lastMessage = data.messages[data.messages.length - 1];
         const _selectMessages = getSelectMessages(
           data.messages,
-          lastMessage.id
+          lastMessage.id,
         );
         setSelectMessages(_selectMessages);
       }
@@ -53,7 +59,7 @@ export default function MessageDetails() {
   return (
     <>
       {selectMessages.length !== 0 && (
-        <div className='flex justify-center gap-2 my-2 font-semibold'>
+        <div className="flex justify-center gap-2 my-2 font-semibold">
           <div>{chat?.modelName}</div>
           <div>{chat?.modelTemperature}­°C</div>
           <div>
@@ -77,7 +83,7 @@ export default function MessageDetails() {
           return (
             <ChatMessageComponent
               currentSelectIndex={parentChildrenIds.findIndex(
-                (x) => x === current.id
+                (x) => x === current.id,
               )}
               isLastMessage={selectMessages.length - 1 === index}
               id={current.id!}
@@ -90,7 +96,7 @@ export default function MessageDetails() {
               parentChildrenIds={parentChildrenIds}
               assistantChildrenIds={current.assistantChildrenIds}
               assistantCurrentSelectIndex={current.assistantChildrenIds.findIndex(
-                (x) => x === current.id
+                (x) => x === current.id,
               )}
               modelName={current.modelName}
               message={{ role: current.role, content: current.content }}

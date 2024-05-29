@@ -1,6 +1,8 @@
 import { useEffect, useRef, useState } from 'react';
-import * as QRCode from 'qrcode';
+
 import Image from 'next/image';
+
+import * as QRCode from 'qrcode';
 
 const QRCodeImage = (props: {
   url: string;
@@ -30,7 +32,7 @@ const QRCodeImage = (props: {
           imageRef.current!.src = url;
           setTimeout(() => {
             var qcCanvas = document.getElementById(
-              'qrCodeCanvas'
+              'qrCodeCanvas',
             ) as HTMLCanvasElement;
             const dpr = window.devicePixelRatio;
             const { width, height } = qcCanvas;
@@ -51,7 +53,7 @@ const QRCodeImage = (props: {
             ctx.fillText(
               title || '',
               qcCanvas.width / (2 * dpr),
-              qcCanvas.height / dpr - 10
+              qcCanvas.height / dpr - 10,
             );
             setQRCodeUrl(qcCanvas.toDataURL());
             qcCanvas.width = qcCodeWidth;
@@ -59,24 +61,24 @@ const QRCodeImage = (props: {
             onSuccess && onSuccess();
           }, 100);
         }
-      }
+      },
     );
   });
 
   return (
     <>
-      <div className='flex justify-center items-center'>
-        <canvas hidden id='qrCode'></canvas>
+      <div className="flex justify-center items-center">
+        <canvas hidden id="qrCode"></canvas>
         <canvas
           hidden
           width={qcCodeWidth}
           height={qcCodeHeight}
-          id='qrCodeCanvas'
+          id="qrCodeCanvas"
         ></canvas>
         <img
           ref={imageRef}
           hidden
-          alt=''
+          alt=""
           style={{ width: qcCodeWidth, height: qcCodeHeight }}
         />
       </div>
@@ -84,7 +86,7 @@ const QRCodeImage = (props: {
         {qrCodeUrl && (
           <img
             src={qrCodeUrl}
-            alt=''
+            alt=""
             style={{ width: qcCodeWidth, height: qcCodeHeight }}
           ></img>
         )}

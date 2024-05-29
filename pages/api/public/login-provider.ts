@@ -1,6 +1,7 @@
+import { ChatsApiRequest } from '@/types/next-api';
+
 import { LoginServiceManager } from '@/managers/loginService';
 import { apiHandler } from '@/middleware/api-handler';
-import { ChatsApiRequest } from '@/types/next-api';
 
 export const config = {
   api: {

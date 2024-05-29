@@ -1,5 +1,6 @@
-import prisma from '@/prisma/prisma';
 import { PayServiceType } from '@/types/pay';
+
+import prisma from '@/prisma/prisma';
 
 export interface CreatePayService {
   type: string;

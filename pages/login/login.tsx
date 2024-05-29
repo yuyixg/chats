@@ -1,23 +1,28 @@
 import { useEffect, useState } from 'react';
-import { useRouter } from 'next/router';
-import { getUserInfo, saveUserInfo, setUserSessionId } from '@/utils/user';
-import toast from 'react-hot-toast';
-import { serverSideTranslations } from 'next-i18next/serverSideTranslations';
-import { useTranslation } from 'next-i18next';
-import { FormFieldType, IFormFieldOption } from '@/components/ui/form/type';
-import FormInput from '@/components/ui/form/input';
-import { z } from 'zod';
 import { useForm } from 'react-hook-form';
-import { zodResolver } from '@hookform/resolvers/zod';
-import { Form, FormField } from '@/components/ui/form';
-import { Button } from '@/components/ui/button';
-import FormCheckbox from '@/components/ui/form/checkbox';
-import { DEFAULT_LANGUAGE } from '@/types/settings';
+import toast from 'react-hot-toast';
+
+import { useTranslation } from 'next-i18next';
+import { serverSideTranslations } from 'next-i18next/serverSideTranslations';
 import Image from 'next/image';
-import { getLoginProvider, singIn } from '@/apis/userService';
+import { useRouter } from 'next/router';
+
+import { getUserInfo, saveUserInfo, setUserSessionId } from '@/utils/user';
+
+import { DEFAULT_LANGUAGE } from '@/types/settings';
 import { ProviderResult, ProviderType } from '@/types/user';
+
 import KeyCloakLogin from '@/components/Login/KeyCloakLogin';
 import WeChatLogin from '@/components/Login/WeChatLogin';
+import { Button } from '@/components/ui/button';
+import { Form, FormField } from '@/components/ui/form';
+import FormCheckbox from '@/components/ui/form/checkbox';
+import FormInput from '@/components/ui/form/input';
+import { FormFieldType, IFormFieldOption } from '@/components/ui/form/type';
+
+import { getLoginProvider, singIn } from '@/apis/userService';
+import { zodResolver } from '@hookform/resolvers/zod';
+import { z } from 'zod';
 
 export default function LoginPage() {
   const { t } = useTranslation('login');
@@ -33,7 +38,7 @@ export default function LoginPage() {
       label: t('Your username'),
       defaultValue: '',
       render: (options: IFormFieldOption, field: FormFieldType) => (
-        <FormInput autocomplete='on' options={options} field={field} />
+        <FormInput autocomplete="on" options={options} field={field} />
       ),
     },
     {
@@ -42,8 +47,8 @@ export default function LoginPage() {
       defaultValue: '',
       render: (options: IFormFieldOption, field: FormFieldType) => (
         <FormInput
-          autocomplete='on'
-          type='password'
+          autocomplete="on"
+          type="password"
           options={options}
           field={field}
         />
@@ -111,21 +116,21 @@ export default function LoginPage() {
   return (
     <>
       {isClient && (
-        <div className='container relative h-screen flex-col items-center justify-center md:grid lg:max-w-none lg:grid-cols-2 lg:px-0'>
-          <div className='relative hidden h-full flex-col bg-muted p-10 text-white lg:flex dark:border-r'>
-            <div className='absolute inset-0 bg-zinc-900' />
-            <div className='relative z-20 flex items-center text-lg font-medium'>
+        <div className="container relative h-screen flex-col items-center justify-center md:grid lg:max-w-none lg:grid-cols-2 lg:px-0">
+          <div className="relative hidden h-full flex-col bg-muted p-10 text-white lg:flex dark:border-r">
+            <div className="absolute inset-0 bg-zinc-900" />
+            <div className="relative z-20 flex items-center text-lg font-medium">
               <Image
-                src='/chats.png'
+                src="/chats.png"
                 width={32}
                 height={32}
-                className='mr-2 h-8 w-8'
-                alt='logo'
+                className="mr-2 h-8 w-8"
+                alt="logo"
               />
               Chats
             </div>
-            <div className='relative z-20 mt-auto'>
-              <blockquote className='space-y-2'>
+            <div className="relative z-20 mt-auto">
+              <blockquote className="space-y-2">
                 {/* <p className='text-lg'>
                   &ldquo;This library has saved me countless hours of work and
                   helped me deliver stunning designs to my clients faster than
@@ -135,22 +140,22 @@ export default function LoginPage() {
               </blockquote>
             </div>
           </div>
-          <div className='lg:p-8'>
-            <div className='mx-auto flex w-full flex-col justify-center space-y-6 sm:w-[350px]'>
-              <div className='flex flex-col space-y-2 text-center mt-12 md:mt-0 lg:mt-0'>
-                <h1 className='text-2xl font-semibold tracking-tight'>
+          <div className="lg:p-8">
+            <div className="mx-auto flex w-full flex-col justify-center space-y-6 sm:w-[350px]">
+              <div className="flex flex-col space-y-2 text-center mt-12 md:mt-0 lg:mt-0">
+                <h1 className="text-2xl font-semibold tracking-tight">
                   {t('Sign in to Chats')}
                 </h1>
-                <p className='text-sm text-muted-foreground'>
+                <p className="text-sm text-muted-foreground">
                   {t(
-                    'Enter your username and password below to complete the login'
+                    'Enter your username and password below to complete the login',
                   )}
                 </p>
               </div>
               <>
-                <div className='flex w-full justify-center'>
-                  <div className='relative w-full max-w-md max-h-full'>
-                    <div className='relative'>
+                <div className="flex w-full justify-center">
+                  <div className="relative w-full max-w-md max-h-full">
+                    <div className="relative">
                       <Form {...form}>
                         <form onSubmit={form.handleSubmit(onSubmit)}>
                           {formFields.map((item) => (
@@ -161,11 +166,11 @@ export default function LoginPage() {
                               render={({ field }) => item.render(item, field)}
                             />
                           ))}
-                          <div className='w-full flex justify-center'>
+                          <div className="w-full flex justify-center">
                             <Button
-                              className='w-full'
+                              className="w-full"
                               disabled={loginLoading}
-                              type='submit'
+                              type="submit"
                             >
                               {loginLoading
                                 ? t('Logging in...')
@@ -175,23 +180,23 @@ export default function LoginPage() {
                         </form>
                       </Form>
                       {providers.length > 0 && (
-                        <div className='relative'>
-                          <div className='absolute inset-0 flex items-center'>
-                            <span className='w-full border-t' />
+                        <div className="relative">
+                          <div className="absolute inset-0 flex items-center">
+                            <span className="w-full border-t" />
                           </div>
-                          <div className='relative flex justify-center text-xs uppercase'>
-                            <span className='bg-background p-4 text-muted-foreground'>
+                          <div className="relative flex justify-center text-xs uppercase">
+                            <span className="bg-background p-4 text-muted-foreground">
                               {t('Or continue with')}
                             </span>
                           </div>
                         </div>
                       )}
-                      <div className='flex justify-center gap-2'>
+                      <div className="flex justify-center gap-2">
                         {providerTypes.includes(ProviderType.WeChat) && (
                           <WeChatLogin
                             configs={
                               providers.find(
-                                (x) => x.type === ProviderType.WeChat
+                                (x) => x.type === ProviderType.WeChat,
                               )!.configs
                             }
                             loading={loginLoading}
@@ -205,7 +210,7 @@ export default function LoginPage() {
                   </div>
                 </div>
               </>
-              <p className='px-8 text-center text-sm text-muted-foreground'>
+              <p className="px-8 text-center text-sm text-muted-foreground">
                 © 2023 Chats™ . All Rights Reserved.
               </p>
             </div>

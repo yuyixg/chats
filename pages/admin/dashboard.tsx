@@ -1,8 +1,11 @@
-import { serverSideTranslations } from 'next-i18next/serverSideTranslations';
-import React from 'react';
 import ReactECharts from 'echarts-for-react';
-import { Card, CardContent, CardHeader } from '@/components/ui/card';
+import React from 'react';
+
+import { serverSideTranslations } from 'next-i18next/serverSideTranslations';
+
 import { DEFAULT_LANGUAGE } from '@/types/settings';
+
+import { Card, CardContent, CardHeader } from '@/components/ui/card';
 
 const Dashboard = (props: any) => {
   const option1 = {
@@ -89,17 +92,17 @@ const Dashboard = (props: any) => {
 
   return (
     <>
-      <div className='flex flex-wrap gap-4'>
-        <Card className='w-1/3'>
-          <CardHeader className='pb-0 pt-2 px-4 flex-col items-start font-semibold'>
+      <div className="flex flex-wrap gap-4">
+        <Card className="w-1/3">
+          <CardHeader className="pb-0 pt-2 px-4 flex-col items-start font-semibold">
             消耗Tokens
           </CardHeader>
           <CardContent>
             <ReactECharts option={option1} />
           </CardContent>
         </Card>
-        <Card className='w-1/3'>
-          <CardHeader className='pb-0 pt-2 px-4 flex-col items-start font-semibold'>
+        <Card className="w-1/3">
+          <CardHeader className="pb-0 pt-2 px-4 flex-col items-start font-semibold">
             使用次数
           </CardHeader>
           <CardContent>
@@ -116,7 +119,10 @@ export default Dashboard;
 export const getServerSideProps = async ({ locale }: any) => {
   return {
     props: {
-      ...(await serverSideTranslations(locale ?? DEFAULT_LANGUAGE, ['common', 'admin'])),
+      ...(await serverSideTranslations(locale ?? DEFAULT_LANGUAGE, [
+        'common',
+        'admin',
+      ])),
     },
   };
 };

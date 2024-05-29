@@ -1,13 +1,13 @@
+import { MouseEventHandler, useContext, useEffect, useState } from 'react';
+
+import { Prompt } from '@/types/prompt';
+
 import {
   IconBulbFilled,
   IconCheck,
   IconTrash,
   IconX,
 } from '@/components/Icons/index';
-import { MouseEventHandler, useContext, useEffect, useState } from 'react';
-
-import { Prompt } from '@/types/prompt';
-
 import SidebarActionButton from '@/components/SidebarActionButton';
 
 import PromptbarContext from '../PromptBar.context';
@@ -63,9 +63,9 @@ export const PromptComponent = ({ prompt }: Props) => {
   }, [isRenaming, isDeleting]);
 
   return (
-    <div className='relative flex items-center'>
+    <div className="relative flex items-center">
       <button
-        className='flex w-full cursor-pointer items-center gap-3 rounded-lg p-3 text-sm transition-colors duration-200 hover:bg-[#ececec] hover:dark:bg-[#262630]/90'
+        className="flex w-full cursor-pointer items-center gap-3 rounded-lg p-3 text-sm transition-colors duration-200 hover:bg-[#ececec] hover:dark:bg-[#262630]/90"
         onClick={(e) => {
           e.stopPropagation();
           setShowModal(true);
@@ -73,13 +73,13 @@ export const PromptComponent = ({ prompt }: Props) => {
       >
         <IconBulbFilled size={18} />
 
-        <div className='relative max-h-5 flex-1 overflow-hidden text-ellipsis whitespace-nowrap break-all pr-4 text-left text-[12.5px] leading-3'>
+        <div className="relative max-h-5 flex-1 overflow-hidden text-ellipsis whitespace-nowrap break-all pr-4 text-left text-[12.5px] leading-3">
           {prompt.name}
         </div>
       </button>
 
       {(isDeleting || isRenaming) && (
-        <div className='absolute right-1 z-10 flex text-gray-300'>
+        <div className="absolute right-1 z-10 flex text-gray-300">
           <SidebarActionButton handleClick={handleDelete}>
             <IconCheck size={18} />
           </SidebarActionButton>
@@ -91,7 +91,7 @@ export const PromptComponent = ({ prompt }: Props) => {
       )}
 
       {!isDeleting && !isRenaming && (
-        <div className='absolute right-1 z-10 flex text-gray-300'>
+        <div className="absolute right-1 z-10 flex text-gray-300">
           <SidebarActionButton handleClick={handleOpenDeleteModal}>
             <IconTrash size={18} />
           </SidebarActionButton>

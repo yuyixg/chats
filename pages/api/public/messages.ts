@@ -1,5 +1,7 @@
 import { NextApiRequest } from 'next';
+
 import { BadRequest } from '@/utils/error';
+
 import { ChatMessagesManager, ChatsManager } from '@/managers';
 import { apiHandler } from '@/middleware/api-handler';
 
@@ -16,7 +18,7 @@ const handler = async (req: NextApiRequest) => {
   const { chatId } = req.query as {
     chatId: string;
   };
-  
+
   if (!chatId) {
     throw new BadRequest();
   }

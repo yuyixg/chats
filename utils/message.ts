@@ -1,21 +1,22 @@
 import { ChatMessage, MessageNode } from '@/types/chatMessage';
 import { ChatModelPriceConfig } from '@/types/model';
+
 import Decimal from 'decimal.js';
 
 export const calcTokenPrice = (
   priceConfig: ChatModelPriceConfig,
   inputTokenCount: number,
-  outTokenCount: number
+  outTokenCount: number,
 ) => {
   return new Decimal(
     calcInputTokenPrice(inputTokenCount, priceConfig.input) +
-      calcOutTokenPrice(outTokenCount, priceConfig.out)
+      calcOutTokenPrice(outTokenCount, priceConfig.out),
   );
 };
 
 export const calcInputTokenPrice = (
   inputTokenCount: number,
-  inputPrice: number
+  inputPrice: number,
 ) => {
   return inputTokenCount * inputPrice;
 };
@@ -27,7 +28,7 @@ export const calcOutTokenPrice = (outTokenCount: number, outPrice: number) => {
 function findMessageChildren(
   conversations: ChatMessage[],
   nodeId: string,
-  messages: ChatMessage[]
+  messages: ChatMessage[],
 ) {
   const message = conversations.findLast((x) => x.parentId === nodeId);
   if (message) {
@@ -40,7 +41,7 @@ function findMessageChildren(
 function findMessageParent(
   conversations: ChatMessage[],
   nodeId: string | null,
-  messages: ChatMessage[]
+  messages: ChatMessage[],
 ) {
   if (!nodeId) return messages;
   const message = conversations.find((x) => x.id === nodeId);
@@ -53,7 +54,7 @@ function findMessageParent(
 
 export function getSelectMessages(
   conversations: ChatMessage[],
-  nodeId: string
+  nodeId: string,
 ): ChatMessage[] {
   let selectMessages: ChatMessage[] = [];
   const message = conversations.find((node) => node.id === nodeId);
@@ -67,7 +68,7 @@ export function getSelectMessages(
     const messageParent = findMessageParent(
       conversations,
       message.parentId,
-      []
+      [],
     );
     messageParent.reverse();
     selectMessages = selectMessages.concat([...messageParent, message]);
@@ -84,7 +85,7 @@ const findChildren = (nodes: MessageNode[], parentId: string): string[] => {
 
 const findResponseChildren = (
   nodes: MessageNode[],
-  parentId: string | null
+  parentId: string | null,
 ): string[] => {
   return nodes
     .filter((node) => node.parentId === parentId && node.role === 'assistant')

@@ -1,6 +1,8 @@
+import { ChatsApiRequest } from '@/types/next-api';
+
 import { ChatMessagesManager, ChatsManager } from '@/managers';
 import { apiHandler } from '@/middleware/api-handler';
-import { ChatsApiRequest } from '@/types/next-api';
+
 export const config = {
   api: {
     bodyParser: {

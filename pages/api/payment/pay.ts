@@ -1,8 +1,11 @@
-import requestIp from 'request-ip';
-import { OrdersManager, WxPayManager } from '@/managers';
 import { generateOrderTradeNo } from '@/utils/wxpay/utils';
-import { apiHandler } from '@/middleware/api-handler';
+
 import { ChatsApiRequest } from '@/types/next-api';
+
+import { OrdersManager, WxPayManager } from '@/managers';
+import { apiHandler } from '@/middleware/api-handler';
+import requestIp from 'request-ip';
+
 export const config = {
   api: {
     bodyParser: {

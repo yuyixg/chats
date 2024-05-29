@@ -1,8 +1,11 @@
-import { getModels, postUserModel, putUserModel } from '@/apis/adminService';
-import { GetModelResult, GetUserModelResult } from '@/types/admin';
-import { useTranslation } from 'next-i18next';
 import React, { useEffect, useState } from 'react';
 import toast from 'react-hot-toast';
+
+import { useTranslation } from 'next-i18next';
+
+import { GetModelResult, GetUserModelResult } from '@/types/admin';
+
+import { Button } from '../../ui/button';
 import {
   Dialog,
   DialogContent,
@@ -16,7 +19,8 @@ import {
   SelectTrigger,
   SelectValue,
 } from '../../ui/select';
-import { Button } from '../../ui/button';
+
+import { getModels, postUserModel, putUserModel } from '@/apis/adminService';
 
 interface IProps {
   isOpen: boolean;
@@ -41,7 +45,7 @@ export const AddUserModelModal = (props: IProps) => {
           (x) =>
             !selectedModel?.models
               .filter((m) => m.enabled)
-              ?.find((m) => m.modelId === x.modelId) && x.enabled
+              ?.find((m) => m.modelId === x.modelId) && x.enabled,
         );
         setModel(_models);
         setSubmit(false);
@@ -85,8 +89,8 @@ export const AddUserModelModal = (props: IProps) => {
       .catch(() => {
         toast.error(
           t(
-            'Operation failed! Please try again later, or contact technical personnel.'
-          )
+            'Operation failed! Please try again later, or contact technical personnel.',
+          ),
         );
       })
       .finally(() => {

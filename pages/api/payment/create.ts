@@ -1,10 +1,13 @@
 import { BadRequest } from '@/utils/error';
-import requestIp from 'request-ip';
-import { OrdersManager, PayServiceManager, WxPayManager } from '@/managers';
 import { weChatAuth } from '@/utils/weChat';
-import { apiHandler } from '@/middleware/api-handler';
+
 import { ChatsApiRequest } from '@/types/next-api';
 import { PayServiceType } from '@/types/pay';
+
+import { OrdersManager, PayServiceManager, WxPayManager } from '@/managers';
+import { apiHandler } from '@/middleware/api-handler';
+import requestIp from 'request-ip';
+
 export const config = {
   api: {
     bodyParser: {
@@ -26,7 +29,7 @@ const handler = async (req: ChatsApiRequest) => {
     }
 
     const payConfig = await PayServiceManager.findConfigsByType(
-      PayServiceType.WeChatPay
+      PayServiceType.WeChatPay,
     );
     const { appId, secret } = JSON.parse(payConfig);
 

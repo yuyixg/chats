@@ -12,7 +12,7 @@ export const QianWenStream = async (
   chatModel: ChatModels,
   temperature: number,
   messages: QianWenMessage[],
-  enableSearch: boolean = false
+  enableSearch: boolean = false,
 ) => {
   const {
     apiConfig: { host, apiKey },
@@ -79,7 +79,7 @@ export const QianWenStream = async (
                       +(output_tokens || 0) +
                       +(image_tokens || 0),
                   },
-                })
+                }),
               );
               if (json.output.finish_reason === 'stop') {
                 controller.close();
@@ -104,7 +104,7 @@ export const QianWenStream = async (
                         +(output_tokens || 0) +
                         +(image_tokens || 0),
                     },
-                  })
+                  }),
                 );
                 if (json.output.choices[0].finish_reason === 'stop') {
                   controller.close();

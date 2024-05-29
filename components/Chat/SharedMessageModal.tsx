@@ -1,10 +1,13 @@
-import { useTranslation } from 'next-i18next';
 import React, { useState } from 'react';
-import { Dialog, DialogContent, DialogHeader } from '../ui/dialog';
-import { Button } from '../ui/button';
-import { ChatResult, putChats } from '@/apis/userService';
 import toast from 'react-hot-toast';
+
+import { useTranslation } from 'next-i18next';
+
+import { Button } from '../ui/button';
+import { Dialog, DialogContent, DialogHeader } from '../ui/dialog';
 import { Input } from '../ui/input';
+
+import { ChatResult, putChats } from '@/apis/userService';
 
 interface IProps {
   chat: ChatResult;
@@ -52,15 +55,15 @@ export const SharedMessageModal = (props: IProps) => {
 
   return (
     <Dialog open={isOpen} onOpenChange={onClose}>
-      <DialogContent className='max-w-[320px]'>
+      <DialogContent className="max-w-[320px]">
         <DialogHeader>{t('Share Message')}</DialogHeader>
 
-        <div className='flex flex-col gap-2'>
+        <div className="flex flex-col gap-2">
           <Input value={shareUrl}></Input>
           {chat?.isShared ? (
             <>
               <Button
-                variant='link'
+                variant="link"
                 onClick={() => {
                   handleCloseShared();
                 }}

@@ -1,7 +1,10 @@
 import { generateOrderTradeNo } from '@/utils/wxpay/utils';
+
+import { ChatsApiRequest } from '@/types/next-api';
+
 import { OrdersManager } from '@/managers';
 import { apiHandler } from '@/middleware/api-handler';
-import { ChatsApiRequest } from '@/types/next-api';
+
 export const config = {
   api: {
     bodyParser: {

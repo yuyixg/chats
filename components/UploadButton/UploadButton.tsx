@@ -1,7 +1,10 @@
 import { useEffect, useRef } from 'react';
 import toast from 'react-hot-toast';
+
 import { useTranslation } from 'next-i18next';
+
 import { getFileEndpoint } from '@/utils/file';
+
 import { FileServicesType } from '@/types/file';
 import { ChatModelFileConfig } from '@/types/model';
 
@@ -35,7 +38,7 @@ const UploadButton: React.FunctionComponent<Props> = ({
       toast.error(
         t(`The file size limit is {{fileSize}}`, {
           fileSize: fileMaxSize / 1024 + 'MB',
-        })
+        }),
       );
       onFailed && onFailed();
       return;
@@ -62,7 +65,7 @@ const UploadButton: React.FunctionComponent<Props> = ({
         } else {
           const fileType = file.name.substring(
             file.name.lastIndexOf('.'),
-            file.name.length
+            file.name.length,
           );
           const res = await fetch(url, {
             method: 'POST',
@@ -114,7 +117,7 @@ const UploadButton: React.FunctionComponent<Props> = ({
         onClick={() => {
           uploadRef.current?.click();
         }}
-        className='absolute right-9 md:top-2 top-1.5 rounded-sm p-1 text-neutral-800 opacity-60 hover:bg-neutral-200 hover:text-neutral-900 dark:bg-opacity-50 dark:text-neutral-100 dark:hover:text-neutral-200'
+        className="absolute right-9 md:top-2 top-1.5 rounded-sm p-1 text-neutral-800 opacity-60 hover:bg-neutral-200 hover:text-neutral-900 dark:bg-opacity-50 dark:text-neutral-100 dark:hover:text-neutral-200"
       >
         {children}
       </div>
@@ -122,9 +125,9 @@ const UploadButton: React.FunctionComponent<Props> = ({
       <input
         ref={uploadRef}
         style={{ display: 'none' }}
-        id='upload'
-        type='file'
-        accept='image/*'
+        id="upload"
+        type="file"
+        accept="image/*"
       />
     </div>
   );

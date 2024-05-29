@@ -1,8 +1,10 @@
-import { putUserBalance } from '@/apis/adminService';
-import { z } from 'zod';
-import { useTranslation } from 'next-i18next';
 import React, { useEffect, useState } from 'react';
+import { useForm } from 'react-hook-form';
 import toast from 'react-hot-toast';
+
+import { useTranslation } from 'next-i18next';
+
+import { Button } from '../../ui/button';
 import {
   Dialog,
   DialogContent,
@@ -11,12 +13,13 @@ import {
   DialogTitle,
 } from '../../ui/dialog';
 import { Form, FormField } from '../../ui/form';
-import { FormFieldType, IFormFieldOption } from '../../ui/form/type';
 import FormInput from '../../ui/form/input';
-import { useForm } from 'react-hook-form';
+import { FormFieldType, IFormFieldOption } from '../../ui/form/type';
+
+import { putUserBalance } from '@/apis/adminService';
 import { zodResolver } from '@hookform/resolvers/zod';
-import { Button } from '../../ui/button';
 import Decimal from 'decimal.js';
+import { z } from 'zod';
 
 interface IProps {
   userId?: string;
@@ -36,7 +39,7 @@ export const EditUserBalanceModal = (props: IProps) => {
       label: `${t('Recharge Amount')}(${t('Yuan')})`,
       defaultValue: 0,
       render: (options: IFormFieldOption, field: FormFieldType) => (
-        <FormInput type='number' options={options} field={field} />
+        <FormInput type="number" options={options} field={field} />
       ),
     },
   ];
@@ -48,11 +51,11 @@ export const EditUserBalanceModal = (props: IProps) => {
         -9999,
         t('The recharge amount must be greater than {{count}}', {
           count: -9999,
-        })!
+        })!,
       )
       .max(
         9999,
-        t('The maximum recharge amount is {{count}}', { count: 9999 })!
+        t('The maximum recharge amount is {{count}}', { count: 9999 })!,
       ),
   });
 
@@ -80,8 +83,8 @@ export const EditUserBalanceModal = (props: IProps) => {
       .catch(() => {
         toast.error(
           t(
-            'Operation failed! Please try again later, or contact technical personnel.'
-          )
+            'Operation failed! Please try again later, or contact technical personnel.',
+          ),
         );
       })
       .finally(() => {
@@ -96,7 +99,7 @@ export const EditUserBalanceModal = (props: IProps) => {
           <DialogHeader>
             <DialogTitle>{t('User recharge')}</DialogTitle>
           </DialogHeader>
-          <p className='text-sm text-muted-foreground'>
+          <p className="text-sm text-muted-foreground">
             {t('Current Balance')}: {(+userBalance!).toFixed(2)} {t('Yuan')}
           </p>
           <Form {...form}>
@@ -109,8 +112,8 @@ export const EditUserBalanceModal = (props: IProps) => {
                   render={({ field }) => item.render(item, field)}
                 />
               ))}
-              <DialogFooter className='pt-4'>
-                <Button disabled={loading} type='submit'>
+              <DialogFooter className="pt-4">
+                <Button disabled={loading} type="submit">
                   {t('Confirm recharge')}
                 </Button>
               </DialogFooter>

@@ -1,6 +1,8 @@
 import { NextApiRequest } from 'next';
-import { PayServiceManager, SessionsManager, UsersManager } from '@/managers';
+
 import { BadRequest } from '@/utils/error';
+
+import { PayServiceManager, SessionsManager, UsersManager } from '@/managers';
 import { apiHandler } from '@/middleware/api-handler';
 
 export const config = {

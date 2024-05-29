@@ -1,7 +1,9 @@
+import { BadRequest } from '@/utils/error';
+
+import { ChatModelManager } from './models';
+
 import prisma from '@/prisma/prisma';
 import { Prisma } from '@prisma/client';
-import { ChatModelManager } from './models';
-import { BadRequest } from '@/utils/error';
 
 export class ModelKeysManager {
   static async findById(id: string) {

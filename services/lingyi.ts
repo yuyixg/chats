@@ -1,12 +1,12 @@
 import { GPT4Message, GPT4VisionMessage } from '@/types/chat';
+import { ChatModels } from '@/types/chatModel';
+import { ModelVersions } from '@/types/model';
 
 import {
   ParsedEvent,
   ReconnectInterval,
   createParser,
 } from 'eventsource-parser';
-import { ModelVersions } from '@/types/model';
-import { ChatModels } from '@/types/chatModel';
 
 export interface LingYiSteamResult {
   text: string;
@@ -20,7 +20,7 @@ export interface LingYiSteamResult {
 export const LingYiStream = async (
   chatModel: ChatModels,
   temperature: number,
-  messages: GPT4Message[] | GPT4VisionMessage[]
+  messages: GPT4Message[] | GPT4VisionMessage[],
 ) => {
   const {
     apiConfig: { host, apiKey },
@@ -80,7 +80,7 @@ export const LingYiStream = async (
                   completionTokens: completion_tokens,
                   totalTokens: total_tokens,
                 },
-              })
+              }),
             );
             if (json.choices[0]?.finish_reason === 'stop') {
               controller.close();

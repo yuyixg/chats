@@ -1,8 +1,11 @@
-import { IconMistOff } from '@/components/Icons/index';
 import { ReactNode } from 'react';
+
 import { useTranslation } from 'next-i18next';
-import { CloseSidebarButton, OpenSidebarButton } from './OpenCloseButton';
+
+import { IconMistOff } from '@/components/Icons/index';
+
 import Search from '../Search';
+import { CloseSidebarButton, OpenSidebarButton } from './OpenCloseButton';
 
 interface Props<T> {
   showOpenButton?: boolean;
@@ -45,7 +48,7 @@ const Sidebar = <T,>({
         } fixed top-0 ${side}-0 z-40 flex h-full flex-none flex-col space-y-2 text-black bg-[#f9f9f9] dark:bg-[#202123] dark:text-white p-2 text-[14px] sm:relative  sm:top-0`}
       >
         {hasModel() && (
-          <div className='flex items-center'>
+          <div className="flex items-center">
             <button
               className={`flex w-full flex-shrink-0 cursor-pointer select-none items-center gap-3 rounded-md p-3 text-black dark:text-white hover:bg-[#cdcdcd] hover:dark:bg-[#262630] bg-[#ececec] dark:bg-[#262630]/80 ${
                 messageIsStreaming ? 'disabled:cursor-not-allowed' : ''
@@ -66,13 +69,13 @@ const Sidebar = <T,>({
           onSearch={handleSearchTerm}
         />
 
-        <div className='flex-grow overflow-auto'>
+        <div className="flex-grow overflow-auto">
           {items?.length > 0 ? (
-            <div className='pt-2'>{itemComponent}</div>
+            <div className="pt-2">{itemComponent}</div>
           ) : (
-            <div className='mt-8 select-none text-center opacity-50'>
-              <IconMistOff className='mx-auto mb-3' />
-              <span className='text-[14px] leading-normal'>{t('No data')}</span>
+            <div className="mt-8 select-none text-center opacity-50">
+              <IconMistOff className="mx-auto mb-3" />
+              <span className="text-[14px] leading-normal">{t('No data')}</span>
             </div>
           )}
         </div>

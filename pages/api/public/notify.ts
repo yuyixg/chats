@@ -1,11 +1,14 @@
-import { IWxPayNotifyBody, PayEventType } from '@/utils/wxpay/type';
-import { OrdersManager, UserBalancesManager, WxPayManager } from '@/managers';
-import { OrderStatus } from '@/types/order';
-import Decimal from 'decimal.js';
-import { centsToYuan } from '@/utils/wxpay/utils';
-import { apiHandler } from '@/middleware/api-handler';
 import { BadRequest } from '@/utils/error';
+import { IWxPayNotifyBody, PayEventType } from '@/utils/wxpay/type';
+import { centsToYuan } from '@/utils/wxpay/utils';
+
 import { ChatsApiRequest } from '@/types/next-api';
+import { OrderStatus } from '@/types/order';
+
+import { OrdersManager, UserBalancesManager, WxPayManager } from '@/managers';
+import { apiHandler } from '@/middleware/api-handler';
+import Decimal from 'decimal.js';
+
 export const config = {
   api: {
     bodyParser: {
@@ -37,7 +40,7 @@ const handler = async (req: ChatsApiRequest) => {
         await UserBalancesManager.updateBalance(
           order.createUserId,
           new Decimal(centsToYuan(order.amount)),
-          order.createUserId
+          order.createUserId,
         );
       }
     } else {

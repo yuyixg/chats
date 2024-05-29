@@ -1,10 +1,11 @@
 import { useTranslation } from 'next-i18next';
+
 import {
+  Pagination,
   PaginationContent,
   PaginationItem,
   PaginationNext,
   PaginationPrevious,
-  Pagination,
 } from '../../ui/pagination';
 
 const PaginationContainer = ({
@@ -30,7 +31,7 @@ const PaginationContainer = ({
   }
 
   return (
-    <div className='flex w-full p-4 items-center justify-between text-gray-500 text-sm'>
+    <div className="flex w-full p-4 items-center justify-between text-gray-500 text-sm">
       <div>
         {t(
           'Showing {{currentCount}} - {{currentTotalCount}} total {{totalCount}}',
@@ -39,11 +40,11 @@ const PaginationContainer = ({
             currentTotalCount:
               currentCount < pageSize ? totalCount : page * pageSize,
             totalCount: totalCount,
-          }
+          },
         )}
       </div>
       <div>
-        <Pagination className='justify-normal'>
+        <Pagination className="justify-normal">
           <PaginationContent>
             <PaginationItem
               className={page === 1 ? 'pointer-events-none' : ''}

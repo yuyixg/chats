@@ -1,7 +1,9 @@
+import { BadRequest, InternalServerError } from '@/utils/error';
+
+import { ChatsApiRequest } from '@/types/next-api';
+
 import { FileServiceManager } from '@/managers';
 import { apiHandler } from '@/middleware/api-handler';
-import { ChatsApiRequest } from '@/types/next-api';
-import { BadRequest, InternalServerError } from '@/utils/error';
 import { IncomingForm } from 'formidable';
 import { promises as fs } from 'fs';
 
@@ -40,7 +42,7 @@ const handler = async (req: ChatsApiRequest) => {
     };
   } catch (error: any) {
     throw new InternalServerError(
-      JSON.stringify({ message: error?.message, stack: error?.stack })
+      JSON.stringify({ message: error?.message, stack: error?.stack }),
     );
   }
 };

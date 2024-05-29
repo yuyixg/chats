@@ -1,6 +1,13 @@
-import { useTranslation } from 'next-i18next';
 import React, { useEffect } from 'react';
+import { useForm } from 'react-hook-form';
 import toast from 'react-hot-toast';
+
+import { useTranslation } from 'next-i18next';
+
+import { PostPromptParams, PutPromptParams } from '@/types/admin';
+import { Prompt } from '@/types/prompt';
+
+import { Button } from '../ui/button';
 import {
   Dialog,
   DialogContent,
@@ -8,21 +15,18 @@ import {
   DialogHeader,
   DialogTitle,
 } from '../ui/dialog';
-import { useForm } from 'react-hook-form';
 import { Form, FormField } from '../ui/form';
-import { zodResolver } from '@hookform/resolvers/zod';
-import { z } from 'zod';
-import { FormFieldType, IFormFieldOption } from '../ui/form/type';
-import FormTextarea from '../ui/form/textarea';
-import { Button } from '../ui/button';
-import { PostPromptParams, PutPromptParams } from '@/types/admin';
 import FormInput from '../ui/form/input';
+import FormTextarea from '../ui/form/textarea';
+import { FormFieldType, IFormFieldOption } from '../ui/form/type';
+
 import {
   deleteUserPrompts,
   postUserPrompts,
   putUserPrompts,
 } from '@/apis/userService';
-import { Prompt } from '@/types/prompt';
+import { zodResolver } from '@hookform/resolvers/zod';
+import { z } from 'zod';
 
 interface IProps {
   selected: Prompt | null;
@@ -99,8 +103,8 @@ export const PromptsModal = (props: IProps) => {
     }).catch(() => {
       toast.error(
         t(
-          'Operation failed! Please try again later, or contact technical personnel.'
-        )
+          'Operation failed! Please try again later, or contact technical personnel.',
+        ),
       );
     });
   }
@@ -143,10 +147,10 @@ export const PromptsModal = (props: IProps) => {
                 render={({ field }) => item.render(item, field)}
               />
             ))}
-            <DialogFooter className='pt-4'>
+            <DialogFooter className="pt-4">
               {selected && (
                 <Button
-                  variant='destructive'
+                  variant="destructive"
                   onClick={(e) => {
                     onDelete();
                     e.preventDefault();
@@ -155,7 +159,7 @@ export const PromptsModal = (props: IProps) => {
                   {t('Delete')}
                 </Button>
               )}
-              <Button type='submit'>{t('Save')}</Button>
+              <Button type="submit">{t('Save')}</Button>
             </DialogFooter>
           </form>
         </Form>

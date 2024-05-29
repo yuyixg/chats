@@ -1,28 +1,10 @@
-import { getFileServices, getModelKeys, putModels } from '@/apis/adminService';
-import {
-  GetFileServicesResult,
-  GetModelKeysResult,
-  GetModelResult,
-  PutModelParams,
-} from '@/types/admin';
-import { useTranslation } from 'next-i18next';
 import React, { useEffect, useState } from 'react';
-import toast from 'react-hot-toast';
-import {
-  Dialog,
-  DialogContent,
-  DialogFooter,
-  DialogHeader,
-  DialogTitle,
-} from '../../ui/dialog';
 import { useForm } from 'react-hook-form';
-import { Form, FormField } from '../../ui/form';
-import { zodResolver } from '@hookform/resolvers/zod';
-import { z } from 'zod';
-import FormInput from '../../ui/form/input';
-import FormSwitch from '../../ui/form/switch';
-import FormTextarea from '../../ui/form/textarea';
-import { Button } from '../../ui/button';
+import toast from 'react-hot-toast';
+
+import { useTranslation } from 'next-i18next';
+
+import { formatNumberAsMoney } from '@/utils/common';
 import {
   ModelPriceUnit,
   conversionModelPriceToDisplay,
@@ -31,15 +13,39 @@ import {
   getModelPriceConfig,
   mergeConfigs,
 } from '@/utils/model';
-import FormSelect from '@/components/ui/form/select';
-import { formatNumberAsMoney } from '@/utils/common';
+
+import {
+  GetFileServicesResult,
+  GetModelKeysResult,
+  GetModelResult,
+  PutModelParams,
+} from '@/types/admin';
 import { ModelProviders } from '@/types/model';
+import { ModelProviderTemplates } from '@/types/template';
+
+import FormSelect from '@/components/ui/form/select';
 import {
   Popover,
   PopoverContent,
   PopoverTrigger,
 } from '@/components/ui/popover';
-import { ModelProviderTemplates } from '@/types/template';
+
+import { Button } from '../../ui/button';
+import {
+  Dialog,
+  DialogContent,
+  DialogFooter,
+  DialogHeader,
+  DialogTitle,
+} from '../../ui/dialog';
+import { Form, FormField } from '../../ui/form';
+import FormInput from '../../ui/form/input';
+import FormSwitch from '../../ui/form/switch';
+import FormTextarea from '../../ui/form/textarea';
+
+import { getFileServices, getModelKeys, putModels } from '@/apis/adminService';
+import { zodResolver } from '@hookform/resolvers/zod';
+import { z } from 'zod';
 
 interface IProps {
   isOpen: boolean;
@@ -105,8 +111,8 @@ export const EditModelModal = (props: IProps) => {
       .catch(() => {
         toast.error(
           t(
-            'Operation failed! Please try again later, or contact technical personnel.'
-          )
+            'Operation failed! Please try again later, or contact technical personnel.',
+          ),
         );
       });
   }
@@ -145,20 +151,26 @@ export const EditModelModal = (props: IProps) => {
       fileConfig &&
         form.setValue(
           'fileConfig',
-          mergeConfigs(getModelFileConfig(modelVersion), JSON.parse(fileConfig))
+          mergeConfigs(
+            getModelFileConfig(modelVersion),
+            JSON.parse(fileConfig),
+          ),
         );
       form.setValue(
         'modelConfig',
-        mergeConfigs(getModelModelConfig(modelVersion), JSON.parse(modelConfig))
+        mergeConfigs(
+          getModelModelConfig(modelVersion),
+          JSON.parse(modelConfig),
+        ),
       );
       form.setValue(
         'priceConfig',
         conversionModelPriceToDisplay(
           mergeConfigs(
             getModelPriceConfig(modelVersion),
-            JSON.parse(priceConfig)
-          )
-        )
+            JSON.parse(priceConfig),
+          ),
+        ),
       );
     }
   }, [isOpen]);
@@ -171,33 +183,33 @@ export const EditModelModal = (props: IProps) => {
         </DialogHeader>
         <Form {...form}>
           <form onSubmit={form.handleSubmit(onSubmit)}>
-            <div className='grid grid-cols-2 gap-4'>
+            <div className="grid grid-cols-2 gap-4">
               <FormField
-                key='name'
+                key="name"
                 control={form.control}
-                name='name'
+                name="name"
                 render={({ field }) => {
                   return (
                     <FormInput field={field} label={t('Model Display Name')!} />
                   );
                 }}
               ></FormField>
-              <div className='flex justify-between'>
+              <div className="flex justify-between">
                 <FormField
-                  key='modelKeysId'
+                  key="modelKeysId"
                   control={form.control}
-                  name='modelKeysId'
+                  name="modelKeysId"
                   render={({ field }) => {
                     return (
                       <FormSelect
-                        className='w-full'
+                        className="w-full"
                         field={field}
                         label={t('Model Keys')!}
                         items={modelKeys
                           .filter(
                             (x) =>
                               x.type ===
-                              (selected?.modelProvider as ModelProviders)
+                              (selected?.modelProvider as ModelProviders),
                           )
                           .map((keys) => ({
                             name: keys.name,
@@ -209,32 +221,32 @@ export const EditModelModal = (props: IProps) => {
                 ></FormField>
                 <div
                   hidden={!form.getValues('modelKeysId')}
-                  className='text-sm mt-12 w-36 text-right'
+                  className="text-sm mt-12 w-36 text-right"
                 >
                   <Popover>
                     <PopoverTrigger>
-                      <span className='text-primary'>
+                      <span className="text-primary">
                         {t('Click View Configs')}
                       </span>
                     </PopoverTrigger>
-                    <PopoverContent className='w-full'>
+                    <PopoverContent className="w-full">
                       {JSON.stringify(
                         modelKeys.find(
-                          (x) => x.id === form.getValues('modelKeysId')
+                          (x) => x.id === form.getValues('modelKeysId'),
                         )?.configs,
                         null,
-                        2
+                        2,
                       )}
                     </PopoverContent>
                   </Popover>
                 </div>
               </div>
             </div>
-            <div className='grid grid-cols-2 gap-4'>
+            <div className="grid grid-cols-2 gap-4">
               <FormField
-                key='modelVersion'
+                key="modelVersion"
                 control={form.control}
-                name='modelVersion'
+                name="modelVersion"
                 render={({ field }) => {
                   return (
                     <FormInput
@@ -246,19 +258,19 @@ export const EditModelModal = (props: IProps) => {
                 }}
               ></FormField>
               <FormField
-                key='remarks'
+                key="remarks"
                 control={form.control}
-                name='remarks'
+                name="remarks"
                 render={({ field }) => {
                   return <FormInput field={field} label={t('Remarks')!} />;
                 }}
               ></FormField>
             </div>
-            <div className='grid grid-cols-2 gap-4'>
+            <div className="grid grid-cols-2 gap-4">
               <FormField
-                key='modelConfig'
+                key="modelConfig"
                 control={form.control}
-                name='modelConfig'
+                name="modelConfig"
                 render={({ field }) => {
                   return (
                     <FormTextarea
@@ -271,16 +283,16 @@ export const EditModelModal = (props: IProps) => {
                 }}
               ></FormField>
               <FormField
-                key='priceConfig'
+                key="priceConfig"
                 control={form.control}
-                name='priceConfig'
+                name="priceConfig"
                 render={({ field }) => {
                   return (
                     <FormTextarea
                       rows={7}
                       hidden={!getModelModelConfig(selected?.modelVersion)}
                       label={`${formatNumberAsMoney(ModelPriceUnit)} ${t(
-                        'Token Price'
+                        'Token Price',
                       )}(${t('Yuan')})`}
                       field={field}
                     />
@@ -290,9 +302,9 @@ export const EditModelModal = (props: IProps) => {
             </div>
             <div>
               <FormField
-                key='fileServiceId'
+                key="fileServiceId"
                 control={form.control}
-                name='fileServiceId'
+                name="fileServiceId"
                 render={({ field }) => {
                   return (
                     <FormSelect
@@ -308,9 +320,9 @@ export const EditModelModal = (props: IProps) => {
                 }}
               ></FormField>
               <FormField
-                key='fileConfig'
+                key="fileConfig"
                 control={form.control}
-                name='fileConfig'
+                name="fileConfig"
                 render={({ field }) => {
                   return (
                     <FormTextarea
@@ -323,8 +335,8 @@ export const EditModelModal = (props: IProps) => {
                 }}
               ></FormField>
             </div>
-            <div className='grid grid-cols-2 gap-4'>
-              <div className='flex gap-4'>
+            <div className="grid grid-cols-2 gap-4">
+              <div className="flex gap-4">
                 <FormField
                   key={'isDefault'}
                   control={form.control}
@@ -350,8 +362,8 @@ export const EditModelModal = (props: IProps) => {
                 ></FormField>
               </div>
             </div>
-            <DialogFooter className='pt-4'>
-              <Button type='submit'>{t('Save')}</Button>
+            <DialogFooter className="pt-4">
+              <Button type="submit">{t('Save')}</Button>
             </DialogFooter>
           </form>
         </Form>

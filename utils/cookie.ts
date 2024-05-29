@@ -6,10 +6,10 @@ const Cookies = {
           new RegExp(
             '(?:(?:^|.*;)\\s*' +
               encodeURIComponent(sKey).replace(/[-.+*]/g, '\\$&') +
-              '\\s*\\=\\s*([^;]*).*$)|^.*$'
+              '\\s*\\=\\s*([^;]*).*$)|^.*$',
           ),
-          '$1'
-        )
+          '$1',
+        ),
       ) || null
     );
   },
@@ -19,7 +19,7 @@ const Cookies = {
     vEnd: number | string | Date,
     sPath?: string,
     sDomain?: string,
-    bSecure?: string
+    bSecure?: string,
   ) {
     if (!sKey || /^(?:expires|max\-age|path|domain|secure)$/i.test(sKey)) {
       return false;
@@ -66,7 +66,7 @@ const Cookies = {
     return new RegExp(
       '(?:^|;\\s*)' +
         encodeURIComponent(sKey).replace(/[-.+*]/g, '\\$&') +
-        '\\s*\\='
+        '\\s*\\=',
     ).test(document.cookie);
   },
   keys: /* optional method: you can safely remove it! */ function () {

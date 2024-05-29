@@ -1,7 +1,10 @@
-import { getUserBalance } from '@/apis/userService';
-import { GetUserBalanceLogsResult, GetUserBalanceResult } from '@/types/user';
-import { useTranslation } from 'next-i18next';
 import { useEffect, useState } from 'react';
+
+import { useTranslation } from 'next-i18next';
+
+import { GetUserBalanceLogsResult, GetUserBalanceResult } from '@/types/user';
+
+import { Separator } from '../ui/separator';
 import {
   Table,
   TableBody,
@@ -10,7 +13,8 @@ import {
   TableHeader,
   TableRow,
 } from '../ui/table';
-import { Separator } from '../ui/separator';
+
+import { getUserBalance } from '@/apis/userService';
 
 const UserBalanceTabContent = () => {
   const { t } = useTranslation('sidebar');
@@ -33,25 +37,25 @@ const UserBalanceTabContent = () => {
   }, []);
   return (
     <>
-      <div className='flex gap-2 items-center'>
+      <div className="flex gap-2 items-center">
         <span>{t('Balance')}</span>
         {(+(balanceData?.balance || 0)).toFixed(2)} {t('Yuan')}
       </div>
-      <Separator className='my-2' />
-      <div className='flex flex-col gap-2'>
-        <span className='text-sm'>{t('Recent 7 day consumption records')}</span>
+      <Separator className="my-2" />
+      <div className="flex flex-col gap-2">
+        <span className="text-sm">{t('Recent 7 day consumption records')}</span>
         <Table>
           <TableHeader>
             <TableRow>
-              <TableHead className='h-8 py-2'>{t('Date')}</TableHead>
-              <TableHead className='h-8 py-2'>{t('Amount')}</TableHead>
+              <TableHead className="h-8 py-2">{t('Date')}</TableHead>
+              <TableHead className="h-8 py-2">{t('Amount')}</TableHead>
             </TableRow>
           </TableHeader>
           <TableBody>
             {balanceData?.logs.map((log) => (
               <TableRow key={log.date}>
-                <TableCell className='h-8 py-2'>{log.date}</TableCell>
-                <TableCell className='h-8 py-2'>
+                <TableCell className="h-8 py-2">{log.date}</TableCell>
+                <TableCell className="h-8 py-2">
                   {(+(log?.value || 0)).toFixed(2)}
                 </TableCell>
               </TableRow>

@@ -1,11 +1,22 @@
-import {
-  deleteModelKeys,
-  postModelKeys,
-  putModelKeys,
-} from '@/apis/adminService';
-import { useTranslation } from 'next-i18next';
 import React, { useEffect } from 'react';
+import { useForm } from 'react-hook-form';
 import toast from 'react-hot-toast';
+
+import { useTranslation } from 'next-i18next';
+
+import { mergeConfigs } from '@/utils/model';
+
+import {
+  GetModelKeysResult,
+  PostModelKeysParams,
+  PutModelKeysParams,
+} from '@/types/admin';
+import { ModelProviders } from '@/types/model';
+import { ModelProviderTemplates } from '@/types/template';
+
+import FormSelect from '@/components/ui/form/select';
+
+import { Button } from '../../ui/button';
 import {
   Dialog,
   DialogContent,
@@ -13,23 +24,18 @@ import {
   DialogHeader,
   DialogTitle,
 } from '../../ui/dialog';
-import { useForm } from 'react-hook-form';
 import { Form, FormField } from '../../ui/form';
+import FormInput from '../../ui/form/input';
+import FormTextarea from '../../ui/form/textarea';
+import { FormFieldType, IFormFieldOption } from '../../ui/form/type';
+
+import {
+  deleteModelKeys,
+  postModelKeys,
+  putModelKeys,
+} from '@/apis/adminService';
 import { zodResolver } from '@hookform/resolvers/zod';
 import { z } from 'zod';
-import { FormFieldType, IFormFieldOption } from '../../ui/form/type';
-import FormTextarea from '../../ui/form/textarea';
-import { Button } from '../../ui/button';
-import {
-  GetModelKeysResult,
-  PostModelKeysParams,
-  PutModelKeysParams,
-} from '@/types/admin';
-import { mergeConfigs } from '@/utils/model';
-import FormInput from '../../ui/form/input';
-import FormSelect from '@/components/ui/form/select';
-import { ModelProviders } from '@/types/model';
-import { ModelProviderTemplates } from '@/types/template';
 
 interface IProps {
   selected: GetModelKeysResult | null;
@@ -117,8 +123,8 @@ export const ModelKeysModal = (props: IProps) => {
     }).catch(() => {
       toast.error(
         t(
-          'Operation failed! Please try again later, or contact technical personnel.'
-        )
+          'Operation failed! Please try again later, or contact technical personnel.',
+        ),
       );
     });
   }
@@ -139,8 +145,8 @@ export const ModelKeysModal = (props: IProps) => {
           JSON.stringify(
             ModelProviderTemplates[modelProvider].apiConfig,
             null,
-            2
-          )
+            2,
+          ),
         );
       }
     });
@@ -159,8 +165,8 @@ export const ModelKeysModal = (props: IProps) => {
           'configs',
           mergeConfigs(
             ModelProviderTemplates[type as ModelProviders].apiConfig,
-            configs
-          )
+            configs,
+          ),
         );
       }
     }
@@ -184,11 +190,11 @@ export const ModelKeysModal = (props: IProps) => {
                 render={({ field }) => item.render(item, field)}
               />
             ))}
-            <DialogFooter className='pt-4'>
+            <DialogFooter className="pt-4">
               {selected && (
                 <Button
-                  type='button'
-                  variant='destructive'
+                  type="button"
+                  variant="destructive"
                   onClick={(e) => {
                     onDelete();
                     e.preventDefault();
@@ -197,7 +203,7 @@ export const ModelKeysModal = (props: IProps) => {
                   {t('Delete')}
                 </Button>
               )}
-              <Button type='submit'>{t('Save')}</Button>
+              <Button type="submit">{t('Save')}</Button>
             </DialogFooter>
           </form>
         </Form>

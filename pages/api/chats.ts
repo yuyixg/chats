@@ -1,3 +1,18 @@
+import { KimiStream } from '@/services/kimi';
+import { LingYiStream } from '@/services/lingyi';
+import { OpenAIStream } from '@/services/openai';
+import { QianFanStream } from '@/services/qianfan';
+import { QianWenStream } from '@/services/qianwen';
+import ChatStreamResult from '@/services/type';
+
+import {
+  BadRequest,
+  InternalServerError,
+  ModelUnauthorized,
+} from '@/utils/error';
+import { calcTokenPrice } from '@/utils/message';
+import { verifyModel } from '@/utils/model';
+
 import {
   ChatBody,
   Content,
@@ -9,6 +24,9 @@ import {
   QianWenMessage,
   Role,
 } from '@/types/chat';
+import { ModelProviders, ModelVersions } from '@/types/model';
+import { ChatsApiRequest, ChatsApiResponse } from '@/types/next-api';
+
 import {
   ChatMessagesManager,
   ChatModelManager,
@@ -16,23 +34,8 @@ import {
   UserBalancesManager,
   UserModelManager,
 } from '@/managers';
-import {
-  BadRequest,
-  InternalServerError,
-  ModelUnauthorized,
-} from '@/utils/error';
-import { verifyModel } from '@/utils/model';
-import { calcTokenPrice } from '@/utils/message';
 import { apiHandler } from '@/middleware/api-handler';
-import { ChatsApiRequest, ChatsApiResponse } from '@/types/next-api';
 import { ChatMessages } from '@prisma/client';
-import ChatStreamResult from '@/services/type';
-import { KimiStream } from '@/services/kimi';
-import { ModelProviders, ModelVersions } from '@/types/model';
-import { OpenAIStream } from '@/services/openai';
-import { QianWenStream } from '@/services/qianwen';
-import { QianFanStream } from '@/services/qianfan';
-import { LingYiStream } from '@/services/lingyi';
 
 export const config = {
   api: {
@@ -89,14 +92,14 @@ const handler = async (req: ChatsApiRequest, res: ChatsApiResponse) => {
   }
   const chatMessages = await ChatMessagesManager.findUserMessageByChatId(
     chatId,
-    true
+    true,
   );
   let lastMessage = null;
   let resParentId = messageId;
   if (messageId) {
     lastMessage = await ChatMessagesManager.findByUserMessageId(
       messageId,
-      userId
+      userId,
     );
 
     if (lastMessage?.role === 'assistant') {
@@ -124,7 +127,7 @@ const handler = async (req: ChatsApiRequest, res: ChatsApiResponse) => {
   const findParents = (
     items: ChatMessages[],
     id: string | null,
-    foundItems: ChatMessages[]
+    foundItems: ChatMessages[],
   ): ChatMessages[] => {
     if (!id) return [];
     const currentItem = items.find((item) => item.id === id);
@@ -142,7 +145,7 @@ const handler = async (req: ChatsApiRequest, res: ChatsApiResponse) => {
   }
   function convertToGPTVisionMessage(
     messageContent: Content,
-    role: Role = 'user'
+    role: Role = 'user',
   ) {
     const message = { role, content: [] } as GPT4VisionMessage;
     message.content.push({ type: 'text', text: messageContent.text });
@@ -157,7 +160,7 @@ const handler = async (req: ChatsApiRequest, res: ChatsApiResponse) => {
 
   function convertToQianWenMessage(
     messageContent: Content,
-    role: Role = 'user'
+    role: Role = 'user',
   ) {
     const content = [] as QianWenContent[];
     if (messageContent?.image) {
@@ -247,7 +250,7 @@ const handler = async (req: ChatsApiRequest, res: ChatsApiResponse) => {
         chatModel,
         temperature,
         messagesToSend,
-        enableSearch
+        enableSearch,
       );
     } else if (chatModel.modelProvider === ModelProviders.QianFan) {
       allMessages.forEach((m) => {
@@ -296,7 +299,7 @@ const handler = async (req: ChatsApiRequest, res: ChatsApiResponse) => {
       stream = await LingYiStream(chatModel, temperature, messagesToSend);
     } else {
       throw new InternalServerError(
-        JSON.stringify({ message: 'Model Not Found' })
+        JSON.stringify({ message: 'Model Not Found' }),
       );
     }
     let assistantResponse = '';
@@ -318,7 +321,7 @@ const handler = async (req: ChatsApiRequest, res: ChatsApiResponse) => {
             const calculatedPrice = calcTokenPrice(
               priceConfig,
               inputTokens,
-              outputTokens
+              outputTokens,
             );
 
             await ChatModelRecordManager.recordTransfer({
@@ -353,7 +356,7 @@ const handler = async (req: ChatsApiRequest, res: ChatsApiResponse) => {
 
       streamResponse().catch((error) => {
         throw new InternalServerError(
-          JSON.stringify({ message: error?.message, stack: error?.stack })
+          JSON.stringify({ message: error?.message, stack: error?.stack }),
         );
       });
     }
@@ -362,7 +365,7 @@ const handler = async (req: ChatsApiRequest, res: ChatsApiResponse) => {
       await ChatMessagesManager.delete(lastMessage.id, userId);
     }
     throw new InternalServerError(
-      JSON.stringify({ message: error?.message, stack: error?.stack })
+      JSON.stringify({ message: error?.message, stack: error?.stack }),
     );
   }
 };

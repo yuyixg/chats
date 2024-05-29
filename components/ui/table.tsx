@@ -1,14 +1,15 @@
 import * as React from 'react';
+import { ReactElement } from 'react-markdown/lib/react-markdown';
+
+import { Skeleton } from './skeleton';
 
 import { cn } from '@/lib/utils';
-import { ReactElement } from 'react-markdown/lib/react-markdown';
-import { Skeleton } from './skeleton';
 
 const Table = React.forwardRef<
   HTMLTableElement,
   React.HTMLAttributes<HTMLTableElement>
 >(({ className, ...props }, ref) => (
-  <div className='relative w-full overflow-auto'>
+  <div className="relative w-full overflow-auto">
     <table
       ref={ref}
       className={cn('w-full caption-bottom text-sm', className)}
@@ -46,18 +47,18 @@ const TableBody = React.forwardRef<HTMLTableSectionElement, TableBodyProps>(
       emptyText,
       ...props
     },
-    ref
+    ref,
   ) =>
     isLoading ? (
       <tbody>
         <tr>
-          <td className='text-center align-middle p-4 h-32' colSpan={100}>
+          <td className="text-center align-middle p-4 h-32" colSpan={100}>
             {loadingContent || (
-              <div className='flex flex-col space-y-3'>
-                <Skeleton className='h-[125px] w-full rounded-xl' />
-                <div className='space-y-2'>
-                  <Skeleton className='h-4 w-full' />
-                  <Skeleton className='h-4 w-[90%]' />
+              <div className="flex flex-col space-y-3">
+                <Skeleton className="h-[125px] w-full rounded-xl" />
+                <div className="space-y-2">
+                  <Skeleton className="h-4 w-full" />
+                  <Skeleton className="h-4 w-[90%]" />
                 </div>
               </div>
             )}
@@ -67,9 +68,9 @@ const TableBody = React.forwardRef<HTMLTableSectionElement, TableBodyProps>(
     ) : isEmpty ? (
       <tbody>
         <tr>
-          <td className='text-center align-middle p-4 h-32' colSpan={100}>
+          <td className="text-center align-middle p-4 h-32" colSpan={100}>
             {emptyContent || (
-              <div className='flex flex-col space-y-3 text-muted-foreground'>
+              <div className="flex flex-col space-y-3 text-muted-foreground">
                 {emptyText || 'No data'}
               </div>
             )}
@@ -82,7 +83,7 @@ const TableBody = React.forwardRef<HTMLTableSectionElement, TableBodyProps>(
         className={cn('[&_tr:last-child]:border-0', className)}
         {...props}
       />
-    )
+    ),
 );
 TableBody.displayName = 'TableBody';
 
@@ -94,7 +95,7 @@ const TableFooter = React.forwardRef<
     ref={ref}
     className={cn(
       'border-t bg-muted/50 font-medium [&>tr]:last:border-b-0',
-      className
+      className,
     )}
     {...props}
   />
@@ -109,7 +110,7 @@ const TableRow = React.forwardRef<
     ref={ref}
     className={cn(
       'border-b transition-colors hover:bg-muted/50 data-[state=selected]:bg-muted',
-      className
+      className,
     )}
     {...props}
   />
@@ -124,7 +125,7 @@ const TableHead = React.forwardRef<
     ref={ref}
     className={cn(
       'h-12 px-4 text-left align-middle font-medium text-muted-foreground [&:has([role=checkbox])]:pr-0',
-      className
+      className,
     )}
     {...props}
   />

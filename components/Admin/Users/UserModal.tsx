@@ -1,9 +1,14 @@
-import { postUser, putUser } from '@/apis/adminService';
-import { GetUsersResult } from '@/types/admin';
-import { z } from 'zod';
-import { useTranslation } from 'next-i18next';
 import React, { useEffect, useState } from 'react';
+import { useForm } from 'react-hook-form';
 import toast from 'react-hot-toast';
+
+import { useTranslation } from 'next-i18next';
+
+import { GetUsersResult } from '@/types/admin';
+
+import FormSwitch from '@/components/ui/form/switch';
+
+import { Button } from '../../ui/button';
 import {
   Dialog,
   DialogContent,
@@ -12,13 +17,13 @@ import {
   DialogTitle,
 } from '../../ui/dialog';
 import { Form, FormField } from '../../ui/form';
-import { FormFieldType, IFormFieldOption } from '../../ui/form/type';
 import FormInput from '../../ui/form/input';
-import { useForm } from 'react-hook-form';
-import { zodResolver } from '@hookform/resolvers/zod';
-import { Button } from '../../ui/button';
 import FormSelect from '../../ui/form/select';
-import FormSwitch from '@/components/ui/form/switch';
+import { FormFieldType, IFormFieldOption } from '../../ui/form/type';
+
+import { postUser, putUser } from '@/apis/adminService';
+import { zodResolver } from '@hookform/resolvers/zod';
+import { z } from 'zod';
 
 interface IProps {
   user?: GetUsersResult | null;
@@ -64,7 +69,7 @@ export const UserModal = (props: IProps) => {
       defaultValue: '',
       render: (options: IFormFieldOption, field: FormFieldType) => (
         <FormInput
-          type='password'
+          type="password"
           hidden={!!user}
           options={options}
           field={field}
@@ -104,7 +109,7 @@ export const UserModal = (props: IProps) => {
         2,
         t('Must contain at least {{length}} character(s)', {
           length: 2,
-        })!
+        })!,
       )
       .max(10, t('Contain at most {{length}} character(s)', { length: 10 })!),
     enabled: z.boolean().optional(),
@@ -117,11 +122,11 @@ export const UserModal = (props: IProps) => {
             6,
             t('Must contain at least {{length}} character(s)', {
               length: 6,
-            })!
+            })!,
           )
           .max(
             18,
-            t('Contain at most {{length}} character(s)', { length: 18 })!
+            t('Contain at most {{length}} character(s)', { length: 18 })!,
           )
       : z.string(),
     role: z.string().optional(),
@@ -173,8 +178,8 @@ export const UserModal = (props: IProps) => {
       .catch(() => {
         toast.error(
           t(
-            'Operation failed! Please try again later, or contact technical personnel.'
-          )
+            'Operation failed! Please try again later, or contact technical personnel.',
+          ),
         );
       })
       .finally(() => {
@@ -198,8 +203,8 @@ export const UserModal = (props: IProps) => {
                 render={({ field }) => item.render(item, field)}
               />
             ))}
-            <DialogFooter className='pt-4'>
-              <Button disabled={submit} type='submit'>
+            <DialogFooter className="pt-4">
+              <Button disabled={submit} type="submit">
                 {t('Save')}
               </Button>
             </DialogFooter>

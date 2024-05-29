@@ -1,10 +1,13 @@
+import { weChatAuth } from '@/utils/weChat';
+
+import { ProviderType } from '@/types/user';
+
+import { ChatModelManager, UserBalancesManager, UserModelManager } from '.';
+import { LoginServiceManager } from './loginService';
+
 import prisma from '@/prisma/prisma';
 import bcrypt from 'bcryptjs';
-import { ChatModelManager, UserBalancesManager, UserModelManager } from '.';
 import Decimal from 'decimal.js';
-import { ProviderType } from '@/types/user';
-import { weChatAuth } from '@/utils/weChat';
-import { LoginServiceManager } from './loginService';
 
 export interface CreateUser {
   account?: string;
@@ -148,13 +151,13 @@ export class UsersManager {
     await UserBalancesManager.createBalance(
       userId,
       new Decimal(0),
-      createUserId || userId
+      createUserId || userId,
     );
   }
 
   static async weChatLogin(code: string) {
     const configs = await LoginServiceManager.findConfigsByType(
-      ProviderType.WeChat
+      ProviderType.WeChat,
     );
     const result = await weChatAuth(configs.appId, configs.secret, code);
     if (!result) {
@@ -162,7 +165,7 @@ export class UsersManager {
     }
     let user = await this.findByUserByProvider(
       ProviderType.WeChat,
-      result.openid
+      result.openid,
     );
     if (!user) {
       user = await this.createUser({

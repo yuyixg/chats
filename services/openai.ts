@@ -11,7 +11,7 @@ import {
 export const OpenAIStream = async (
   chatModel: ChatModels,
   temperature: number,
-  messages: GPT4Message[] | GPT4VisionMessage[]
+  messages: GPT4Message[] | GPT4VisionMessage[],
 ) => {
   const {
     apiConfig: { host, apiKey },
@@ -92,7 +92,7 @@ export const OpenAIStream = async (
                   outputTokens: 0,
                   totalTokens: 0,
                 },
-              })
+              }),
             );
           }
         }

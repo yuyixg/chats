@@ -1,9 +1,11 @@
 'use strict';
-import * as crypto from 'crypto';
-import * as x509_1 from '@fidm/x509';
 
-import { Ipay, Ih5, Ioptions, IJsApi } from './type';
 import { Base } from './base';
+import { IJsApi, Ih5, Ioptions, Ipay } from './type';
+
+import * as x509_1 from '@fidm/x509';
+import * as crypto from 'crypto';
+
 export class WxPay extends Base {
   private appid: string; //  直连商户申请的公众号或移动应用appid。
   private mchid: string; // 商户号
@@ -32,7 +34,7 @@ export class WxPay extends Base {
     mchid: string,
     publicKey: Buffer,
     privateKey: Buffer,
-    options?: Ioptions
+    options?: Ioptions,
   );
   /**
    * 构造器
@@ -53,7 +55,7 @@ export class WxPay extends Base {
     mchid?: string,
     publicKey?: Buffer,
     privateKey?: Buffer,
-    optipns?: Ioptions
+    optipns?: Ioptions,
   ) {
     super();
 
@@ -113,11 +115,11 @@ export class WxPay extends Base {
           item.encrypt_certificate.ciphertext,
           item.encrypt_certificate.associated_data,
           item.encrypt_certificate.nonce,
-          apiSecret
+          apiSecret,
         );
 
         newCertificates[item.serial_no] = x509_1.Certificate.fromPEM(
-          Buffer.from(decryptCertificate)
+          Buffer.from(decryptCertificate),
         ).publicKey.toPEM();
       });
 
@@ -180,7 +182,7 @@ export class WxPay extends Base {
     nonce_str: string,
     timestamp: string,
     url: string,
-    body?: string | Record<string, any>
+    body?: string | Record<string, any>,
   ): string {
     let str = method + '\n' + url + '\n' + timestamp + '\n' + nonce_str + '\n';
     if (body && body instanceof Object) body = JSON.stringify(body);
@@ -228,7 +230,7 @@ export class WxPay extends Base {
   public getAuthorization(
     nonce_str: string,
     timestamp: string,
-    signature: string
+    signature: string,
   ): string {
     const _authorization =
       'mchid="' +
@@ -259,7 +261,7 @@ export class WxPay extends Base {
     ciphertext: string,
     associated_data: string,
     nonce: string,
-    key?: string
+    key?: string,
   ): T {
     if (key) this.key = key;
     if (!this.key) throw new Error('缺少key');
@@ -293,12 +295,12 @@ export class WxPay extends Base {
       nonce_str,
       timestamp,
       url.replace('https://api.mch.weixin.qq.com', ''),
-      params
+      params,
     );
     const authorization = this.getAuthorization(
       nonce_str,
       timestamp,
-      signature
+      signature,
     );
     return authorization;
   }
@@ -326,7 +328,7 @@ export class WxPay extends Base {
    * @param params 请求参数 object 参数介绍 请看文档https://pay.weixin.qq.com/wiki/doc/apiv3/apis/chapter3_1_1.shtml
    */
   public async transactions_jsapi(
-    params: IJsApi
+    params: IJsApi,
   ): Promise<Record<string, any>> {
     // 请求参数
     const _params = {

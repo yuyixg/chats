@@ -1,4 +1,5 @@
 import { NextApiRequest, NextApiResponse } from 'next/types';
+
 import { Session } from './session';
 
 export interface ChatsApiRequest extends NextApiRequest {

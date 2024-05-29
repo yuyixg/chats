@@ -37,7 +37,7 @@ export function verifyModel(model: any, config: ChatModelConfig) {
 
 export function getModelConfigs(
   modelVersion: ModelVersions | undefined,
-  configType: ModelConfigType
+  configType: ModelConfigType,
 ) {
   if (!modelVersion) return null;
   const template = ModelTemplates[modelVersion] as any;
@@ -63,20 +63,20 @@ export function getModelApiConfigJson(modelVersion: ModelVersions | undefined) {
 }
 
 export function getModelModelConfigJson(
-  modelVersion: ModelVersions | undefined
+  modelVersion: ModelVersions | undefined,
 ) {
   return JSON.stringify(getModelConfigs(modelVersion, 'modelConfig'), null, 2);
 }
 
 export function getModelFileConfigJson(
-  modelVersion: ModelVersions | undefined
+  modelVersion: ModelVersions | undefined,
 ) {
   const config = getModelConfigs(modelVersion, 'fileConfig');
   return config ? JSON.stringify(config, null, 2) : null;
 }
 
 export function getModelPriceConfigJson(
-  modelVersion: ModelVersions | undefined
+  modelVersion: ModelVersions | undefined,
 ) {
   return JSON.stringify(getModelConfigs(modelVersion, 'priceConfig'), null, 2);
 }

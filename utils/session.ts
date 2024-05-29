@@ -1,10 +1,11 @@
 import { SessionsManager } from '@/managers';
+
 function getCookieSessionId(
   cookies:
     | Partial<{
         [key: string]: string;
       }>
-    | string
+    | string,
 ) {
   if (typeof cookies === 'object') {
     return cookies['sessionId'] || null;
@@ -28,7 +29,7 @@ export async function getSession(
     | Partial<{
         [key: string]: string;
       }>
-    | string
+    | string,
 ) {
   const sessionId = getCookieSessionId(cookies);
   if (!sessionId) {

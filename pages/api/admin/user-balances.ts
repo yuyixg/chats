@@ -1,6 +1,8 @@
+import { ChatsApiRequest } from '@/types/next-api';
+
 import { UserBalancesManager } from '@/managers';
 import { apiHandler } from '@/middleware/api-handler';
-import { ChatsApiRequest } from '@/types/next-api';
+
 export const config = {
   api: {
     bodyParser: {
@@ -16,7 +18,7 @@ const handler = async (req: ChatsApiRequest) => {
     const data = await UserBalancesManager.updateBalance(
       userId,
       value,
-      req.session.userId
+      req.session.userId,
     );
     return data;
   }

@@ -1,4 +1,18 @@
 import {
+  KeyboardEvent,
+  MouseEventHandler,
+  useContext,
+  useEffect,
+  useState,
+} from 'react';
+import toast from 'react-hot-toast';
+
+import { useTranslation } from 'next-i18next';
+
+import { HomeContext } from '@/pages/home/home';
+
+import ChatbarContext from '@/components/Chatbar/Chatbar.context';
+import {
   IconCheck,
   IconMessage,
   IconMessageShare,
@@ -6,20 +20,10 @@ import {
   IconTrash,
   IconX,
 } from '@/components/Icons/index';
-import {
-  KeyboardEvent,
-  MouseEventHandler,
-  useContext,
-  useEffect,
-  useState,
-} from 'react';
 
 import SidebarActionButton from '../SidebarActionButton';
-import ChatbarContext from '@/components/Chatbar/Chatbar.context';
-import { HomeContext } from '@/pages/home/home';
+
 import { ChatResult, deleteChats, putChats } from '@/apis/userService';
-import toast from 'react-hot-toast';
-import { useTranslation } from 'next-i18next';
 
 interface Props {
   chat: ChatResult;
@@ -78,7 +82,7 @@ export const ConversationComponent = ({ chat }: Props) => {
   };
 
   const handleOpenChangeTitleModal: MouseEventHandler<HTMLButtonElement> = (
-    e
+    e,
   ) => {
     e.stopPropagation();
     setTitleChanging(true);
@@ -98,13 +102,13 @@ export const ConversationComponent = ({ chat }: Props) => {
   }, [isChanging, isDeleting]);
 
   return (
-    <div className='relative flex items-center'>
+    <div className="relative flex items-center">
       {isChanging && selectChatId === chat.id ? (
-        <div className='flex w-full items-center gap-3 rounded-lg text-black dark:text-white dark:bg-[#262630]/90 p-3'>
+        <div className="flex w-full items-center gap-3 rounded-lg text-black dark:text-white dark:bg-[#262630]/90 p-3">
           <IconMessage size={18} />
           <input
-            className='mr-12 flex-1 overflow-hidden overflow-ellipsis border-neutral-400 bg-transparent text-left text-[12.5px] leading-3 outline-none text-black dark:text-white'
-            type='text'
+            className="mr-12 flex-1 overflow-hidden overflow-ellipsis border-neutral-400 bg-transparent text-left text-[12.5px] leading-3 outline-none text-black dark:text-white"
+            type="text"
             value={title}
             onChange={(e) => setTitle(e.target.value)}
             onKeyDown={handleEnterDown}
@@ -137,7 +141,7 @@ export const ConversationComponent = ({ chat }: Props) => {
       )}
 
       {(isDeleting || isChanging) && selectChatId === chat.id && (
-        <div className='absolute right-1 z-10 flex text-gray-300'>
+        <div className="absolute right-1 z-10 flex text-gray-300">
           <SidebarActionButton handleClick={handleConfirm}>
             <IconCheck size={18} />
           </SidebarActionButton>
@@ -148,7 +152,7 @@ export const ConversationComponent = ({ chat }: Props) => {
       )}
 
       {selectChatId === chat.id && !isDeleting && !isChanging && (
-        <div className='absolute right-1 z-10 flex text-gray-300'>
+        <div className="absolute right-1 z-10 flex text-gray-300">
           <SidebarActionButton handleClick={handleOpenChangeTitleModal}>
             <IconPencil size={18} />
           </SidebarActionButton>

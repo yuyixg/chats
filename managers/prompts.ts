@@ -1,5 +1,6 @@
-import prisma from '@/prisma/prisma';
 import { PromptType } from '@/types/prompt';
+
+import prisma from '@/prisma/prisma';
 
 interface CreatePrompt {
   name: string;

@@ -1,11 +1,4 @@
 import {
-  IconArrowDown,
-  IconCircleX,
-  IconSend,
-  IconStopFilled,
-  IconUpload,
-} from '@/components/Icons/index';
-import {
   KeyboardEvent,
   MutableRefObject,
   useCallback,
@@ -14,17 +7,29 @@ import {
   useRef,
   useState,
 } from 'react';
+import toast from 'react-hot-toast';
 
 import { useTranslation } from 'next-i18next';
-import { Content, Message } from '@/types/chat';
-import UploadButton from '../UploadButton';
-import { PromptList } from './PromptList';
-import { Prompt } from '@/types/prompt';
-import { VariableModal } from './VariableModal';
+
 import { isMobile } from '@/utils/common';
+
+import { Content, Message } from '@/types/chat';
+import { Prompt } from '@/types/prompt';
+
 import { HomeContext } from '@/pages/home/home';
-import toast from 'react-hot-toast';
+
+import {
+  IconArrowDown,
+  IconCircleX,
+  IconSend,
+  IconStopFilled,
+  IconUpload,
+} from '@/components/Icons/index';
+
+import UploadButton from '../UploadButton';
 import { Button } from '../ui/button';
+import { PromptList } from './PromptList';
+import { VariableModal } from './VariableModal';
 
 interface Props {
   onSend: (message: Message) => void;
@@ -71,7 +76,7 @@ export const ChatInput = ({
   const [isModalVisible, setIsModalVisible] = useState(false);
   const promptListRef = useRef<HTMLUListElement | null>(null);
   const filteredPrompts = prompts.filter((prompt) =>
-    prompt.name.toLowerCase().includes(promptInputValue.toLowerCase())
+    prompt.name.toLowerCase().includes(promptInputValue.toLowerCase()),
   );
   const updatePromptListVisibility = useCallback((text: string) => {
     const match = text.match(/\/\w*$/);
@@ -91,8 +96,8 @@ export const ChatInput = ({
       toast.error(
         t(
           `Message limit is {{maxLength}} characters. You have entered {{valueLength}} characters.`,
-          { maxLength: modelConfig.maxLength, valueLength: value.length }
-        )
+          { maxLength: modelConfig.maxLength, valueLength: value.length },
+        ),
       );
       return;
     }
@@ -130,17 +135,17 @@ export const ChatInput = ({
       if (e.key === 'ArrowDown') {
         e.preventDefault();
         setActivePromptIndex((prevIndex) =>
-          prevIndex < prompts.length - 1 ? prevIndex + 1 : prevIndex
+          prevIndex < prompts.length - 1 ? prevIndex + 1 : prevIndex,
         );
       } else if (e.key === 'ArrowUp') {
         e.preventDefault();
         setActivePromptIndex((prevIndex) =>
-          prevIndex > 0 ? prevIndex - 1 : prevIndex
+          prevIndex > 0 ? prevIndex - 1 : prevIndex,
         );
       } else if (e.key === 'Tab') {
         e.preventDefault();
         setActivePromptIndex((prevIndex) =>
-          prevIndex < prompts.length - 1 ? prevIndex + 1 : 0
+          prevIndex < prompts.length - 1 ? prevIndex + 1 : 0,
         );
       } else if (e.key === 'Enter') {
         e.preventDefault();
@@ -179,7 +184,7 @@ export const ChatInput = ({
       setContent((prevContent) => {
         const updatedContent = prevContent.text?.replace(
           /\/\w*$/,
-          prompt.content
+          prompt.content,
         );
         return { ...prevContent, text: updatedContent };
       });
@@ -193,7 +198,7 @@ export const ChatInput = ({
       setContent((prevContent) => {
         const newContent = prevContent.text?.replace(
           /\/\w*$/,
-          selectedPrompt.content
+          selectedPrompt.content,
         );
         return { ...prevContent, text: newContent };
       });
@@ -230,19 +235,19 @@ export const ChatInput = ({
   }, [selectModelId, selectChatId]);
 
   return (
-    <div className='absolute bottom-0 left-0 w-full border-transparent bg-gradient-to-b from-transparent via-white to-white pt-6 dark:border-white/20 dark:via-[#262630] dark:to-[#262630] md:pt-2'>
-      <div className='stretch mx-2 mt-4 flex flex-row gap-3 last:mb-2 md:mx-4 md:mt-[52px] md:last:mb-6 lg:mx-auto lg:max-w-5xl'>
+    <div className="absolute bottom-0 left-0 w-full border-transparent bg-gradient-to-b from-transparent via-white to-white pt-6 dark:border-white/20 dark:via-[#262630] dark:to-[#262630] md:pt-2">
+      <div className="stretch mx-2 mt-4 flex flex-row gap-3 last:mb-2 md:mx-4 md:mt-[52px] md:last:mb-6 lg:mx-auto lg:max-w-5xl">
         {!chatError ? (
-          <div className='relative flex w-full flex-grow flex-col rounded-md border border-black/10 bg-white shadow-[0_0_10px_rgba(0,0,0,0.10)] dark:border-gray-900/50 dark:bg-[#40414F] dark:text-white dark:shadow-[0_0_15px_rgba(0,0,0,0.10)]'>
-            <div className='absolute mb-1 bottom-full mx-auto flex w-full justify-start z-10'>
+          <div className="relative flex w-full flex-grow flex-col rounded-md border border-black/10 bg-white shadow-[0_0_10px_rgba(0,0,0,0.10)] dark:border-gray-900/50 dark:bg-[#40414F] dark:text-white dark:shadow-[0_0_15px_rgba(0,0,0,0.10)]">
+            <div className="absolute mb-1 bottom-full mx-auto flex w-full justify-start z-10">
               {content?.image &&
                 content.image.map((img, index) => (
-                  <div className='relative group' key={index}>
-                    <div className='mr-1 w-[32px] h-[32px] rounded overflow-hidden'>
+                  <div className="relative group" key={index}>
+                    <div className="mr-1 w-[32px] h-[32px] rounded overflow-hidden">
                       <img
                         src={img}
-                        alt=''
-                        className='w-full h-full object-cover shadow-lg'
+                        alt=""
+                        className="w-full h-full object-cover shadow-lg"
                       />
                       <button
                         onClick={() => {
@@ -254,10 +259,10 @@ export const ChatInput = ({
                             };
                           });
                         }}
-                        className='absolute top-[-5px] right-[-1px]'
+                        className="absolute top-[-5px] right-[-1px]"
                       >
                         <IconCircleX
-                          className='text-black/50 dark:text-white/50'
+                          className="text-black/50 dark:text-white/50"
                           size={12}
                         />
                       </button>
@@ -268,7 +273,7 @@ export const ChatInput = ({
 
             <textarea
               ref={textareaRef}
-              className='m-0 w-full resize-none border-0 bg-transparent rounded-md p-0 py-2 pr-16 pl-4 text-black dark:bg-transparent dark:text-white md:py-3 md:pl-4'
+              className="m-0 w-full resize-none border-0 bg-transparent rounded-md p-0 py-2 pr-16 pl-4 text-black dark:bg-transparent dark:text-white md:py-3 md:pl-4"
               style={{
                 resize: 'none',
                 bottom: `${textareaRef?.current?.scrollHeight}px`,
@@ -290,15 +295,15 @@ export const ChatInput = ({
               onKeyDown={handleKeyDown}
             />
 
-            <div className='flex'>
+            <div className="flex">
               <button
-                className='absolute right-2 md:top-2.5 top-1.5 rounded-sm p-1 text-neutral-800 opacity-60 hover:bg-neutral-200 hover:text-neutral-900 dark:bg-opacity-50 dark:text-neutral-100 dark:hover:text-neutral-200'
+                className="absolute right-2 md:top-2.5 top-1.5 rounded-sm p-1 text-neutral-800 opacity-60 hover:bg-neutral-200 hover:text-neutral-900 dark:bg-opacity-50 dark:text-neutral-100 dark:hover:text-neutral-200"
                 onClick={handleSend}
               >
                 {messageIsStreaming ? (
                   <IconStopFilled
                     onClick={handleStopConversation}
-                    className='h-4 w-4'
+                    className="h-4 w-4"
                   />
                 ) : (
                   <IconSend size={18} />
@@ -329,9 +334,9 @@ export const ChatInput = ({
             </div>
 
             {showScrollDownButton && (
-              <div className='absolute bottom-12 right-0 lg:bottom-0 lg:-right-10'>
+              <div className="absolute bottom-12 right-0 lg:bottom-0 lg:-right-10">
                 <button
-                  className='flex h-7 w-7 items-center justify-center rounded-full bg-neutral-300 text-gray-800 shadow-md hover:shadow-lg focus:outline-none focus:ring-2 focus:ring-blue-500 dark:bg-gray-700 dark:text-neutral-200'
+                  className="flex h-7 w-7 items-center justify-center rounded-full bg-neutral-300 text-gray-800 shadow-md hover:shadow-lg focus:outline-none focus:ring-2 focus:ring-blue-500 dark:bg-gray-700 dark:text-neutral-200"
                   onClick={onScrollDownClick}
                 >
                   <IconArrowDown size={18} />
@@ -340,7 +345,7 @@ export const ChatInput = ({
             )}
 
             {showPromptList && filteredPrompts.length > 0 && (
-              <div className='absolute bottom-12 w-full'>
+              <div className="absolute bottom-12 w-full">
                 <PromptList
                   activePromptIndex={activePromptIndex}
                   prompts={filteredPrompts}
@@ -372,7 +377,7 @@ export const ChatInput = ({
           // </div>
         )}
       </div>
-      <div className='px-3 pt-2 pb-3 text-center text-[12px] text-black/50 dark:text-white/50 md:px-4 md:pt-3 md:pb-6'>
+      <div className="px-3 pt-2 pb-3 text-center text-[12px] text-black/50 dark:text-white/50 md:px-4 md:pt-3 md:pb-6">
         {/* .
         {t(
           "Copyright."

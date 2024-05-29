@@ -1,7 +1,9 @@
-import { ChatMessagesManager, ChatModelManager } from '@/managers';
-import { apiHandler } from '@/middleware/api-handler';
 import { Content, Role } from '@/types/chat';
 import { ChatsApiRequest } from '@/types/next-api';
+
+import { ChatMessagesManager, ChatModelManager } from '@/managers';
+import { apiHandler } from '@/middleware/api-handler';
+
 export const config = {
   api: {
     bodyParser: {
@@ -29,7 +31,7 @@ const findChildren = (nodes: MessageNode[], parentId: string): string[] => {
 
 const findResponseChildren = (
   nodes: MessageNode[],
-  parentId: string
+  parentId: string,
 ): string[] => {
   return nodes
     .filter((node) => node.parentId === parentId && node.role === 'assistant')
@@ -48,7 +50,7 @@ const handler = async (req: ChatsApiRequest) => {
   if (req.method === 'GET') {
     const { chatId } = req.query as { chatId: string };
     const chatMessages = await ChatMessagesManager.findUserMessageByChatId(
-      chatId
+      chatId,
     );
     const chatModels = await ChatModelManager.findModels(true);
     const messages = chatMessages.map((x) => {

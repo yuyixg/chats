@@ -1,10 +1,11 @@
-import prisma from '@/prisma/prisma';
 import {
   FileServicesType,
   IFileConfig,
   PostFileServicesParams,
   PutFileServicesParams,
 } from '@/types/file';
+
+import prisma from '@/prisma/prisma';
 import AWS from 'aws-sdk';
 import fs from 'fs';
 
@@ -77,7 +78,7 @@ export class FileServiceManager {
           if (error) {
             console.error('Aws configuration error', JSON.stringify(error));
           }
-        }
+        },
       );
     }
   }

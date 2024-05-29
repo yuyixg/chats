@@ -13,7 +13,7 @@ export const createWeChatPayment = (code: string, orderId: string) => {
     '/api/payment/create',
     {
       body: { code, orderId },
-    }
+    },
   );
 };
 

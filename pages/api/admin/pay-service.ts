@@ -1,8 +1,11 @@
-import { apiHandler } from '@/middleware/api-handler';
-import { BadRequest } from '@/utils/error';
-import { ChatsApiRequest } from '@/types/next-api';
 import { addAsterisk, checkKey } from '@/utils/common';
+import { BadRequest } from '@/utils/error';
+
+import { ChatsApiRequest } from '@/types/next-api';
+
 import { PayServiceManager } from '@/managers';
+import { apiHandler } from '@/middleware/api-handler';
+
 export const config = {
   api: {
     bodyParser: {
@@ -43,11 +46,11 @@ const handler = async (req: ChatsApiRequest) => {
     configs.apiV3Key = checkKey(service.configs.apiV3Key, configs.apiV3Key);
     configs.apiClientCert = checkKey(
       service.configs.apiClientCert,
-      configs.apiClientCert
+      configs.apiClientCert,
     );
     configs.apiClientKey = checkKey(
       service.configs.apiClientKey,
-      configs.apiClientKey
+      configs.apiClientKey,
     );
 
     await PayServiceManager.update({

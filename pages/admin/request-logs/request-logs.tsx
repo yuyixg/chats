@@ -1,11 +1,17 @@
 import React, { useEffect, useState } from 'react';
-import { serverSideTranslations } from 'next-i18next/serverSideTranslations';
+
 import { useTranslation } from 'next-i18next';
-import { getRequestLogs } from '@/apis/adminService';
-import { PageResult, Paging } from '@/types/page';
+import { serverSideTranslations } from 'next-i18next/serverSideTranslations';
+
 import { GetRequestLogsListResult } from '@/types/admin';
-import { Input } from '@/components/ui/input';
+import { PageResult, Paging } from '@/types/page';
+import { DEFAULT_LANGUAGE } from '@/types/settings';
+import { StatusCodeColor } from '@/types/statusCode';
+
+import PaginationContainer from '@/components/Admin/Pagiation/Pagiation';
+import { RequestLogDetailsModal } from '@/components/Admin/RequestLogs/RequestLogDetailsModal';
 import { Card } from '@/components/ui/card';
+import { Input } from '@/components/ui/input';
 import {
   Table,
   TableBody,
@@ -14,16 +20,14 @@ import {
   TableHeader,
   TableRow,
 } from '@/components/ui/table';
-import PaginationContainer from '@/components/Admin/Pagiation/Pagiation';
-import { DEFAULT_LANGUAGE } from '@/types/settings';
-import { StatusCodeColor } from '@/types/statusCode';
-import { RequestLogDetailsModal } from '@/components/Admin/RequestLogs/RequestLogDetailsModal';
+
+import { getRequestLogs } from '@/apis/adminService';
 
 export default function RequestLogs() {
   const { t } = useTranslation('admin');
   const [loading, setLoading] = useState(true);
   const [logDetail, setLogDetail] = useState<GetRequestLogsListResult | null>(
-    null
+    null,
   );
   const [pagination, setPagination] = useState<Paging>({
     page: 1,
@@ -46,10 +50,10 @@ export default function RequestLogs() {
 
   return (
     <>
-      <div className='flex flex-col gap-4 mb-4'>
-        <div className='flex justify-between gap-3 items-center'>
+      <div className="flex flex-col gap-4 mb-4">
+        <div className="flex justify-between gap-3 items-center">
           <Input
-            className='w-full'
+            className="w-full"
             placeholder={t('Search...')!}
             value={query}
             onChange={(e) => {
@@ -85,7 +89,7 @@ export default function RequestLogs() {
                 <TableCell>{item.url}</TableCell>
                 <TableCell
                   onClick={() => {}}
-                  className='truncate cursor-pointer'
+                  className="truncate cursor-pointer"
                 >
                   {item.username}
                 </TableCell>
@@ -94,7 +98,7 @@ export default function RequestLogs() {
                 <TableCell>
                   <div
                     style={{ background: StatusCodeColor[item.statusCode] }}
-                    className='inline-flex items-center cursor-default rounded-md px-2.5 py-0.5 text-xs text-white'
+                    className="inline-flex items-center cursor-default rounded-md px-2.5 py-0.5 text-xs text-white"
                   >
                     {item.statusCode}
                   </div>

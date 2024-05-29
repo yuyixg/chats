@@ -1,12 +1,28 @@
 import React, { useEffect, useState } from 'react';
-import { getUsers } from '@/apis/adminService';
-import { GetUsersResult } from '@/types/admin';
-import { IconDots } from '@/components/Icons/index';
-import { serverSideTranslations } from 'next-i18next/serverSideTranslations';
+
 import { useTranslation } from 'next-i18next';
+import { serverSideTranslations } from 'next-i18next/serverSideTranslations';
+
 import { useThrottle } from '@/hooks/useThrottle';
+
+import { GetUsersResult } from '@/types/admin';
+import { DEFAULT_LANGUAGE } from '@/types/settings';
+
+import { EditUserBalanceModal } from '@/components/Admin/Users/EditUserBalanceModel';
 import { UserModal } from '@/components/Admin/Users/UserModal';
+import { IconDots } from '@/components/Icons/index';
+import { Avatar } from '@/components/ui/avatar';
+import { Badge } from '@/components/ui/badge';
+import { Button } from '@/components/ui/button';
 import { Card } from '@/components/ui/card';
+import {
+  DropdownMenu,
+  DropdownMenuContent,
+  DropdownMenuItem,
+  DropdownMenuSeparator,
+  DropdownMenuTrigger,
+} from '@/components/ui/dropdown-menu';
+import { Input } from '@/components/ui/input';
 import {
   Table,
   TableBody,
@@ -15,19 +31,8 @@ import {
   TableHeader,
   TableRow,
 } from '@/components/ui/table';
-import { Button } from '@/components/ui/button';
-import { Input } from '@/components/ui/input';
-import { DEFAULT_LANGUAGE } from '@/types/settings';
-import {
-  DropdownMenu,
-  DropdownMenuContent,
-  DropdownMenuItem,
-  DropdownMenuSeparator,
-  DropdownMenuTrigger,
-} from '@/components/ui/dropdown-menu';
-import { EditUserBalanceModal } from '@/components/Admin/Users/EditUserBalanceModel';
-import { Badge } from '@/components/ui/badge';
-import { Avatar } from '@/components/ui/avatar';
+
+import { getUsers } from '@/apis/adminService';
 
 export default function Users() {
   const { t } = useTranslation('admin');
@@ -75,17 +80,17 @@ export default function Users() {
 
   return (
     <>
-      <div className='flex flex-col gap-4 mb-4'>
-        <div className='flex justify-between gap-3 items-center'>
+      <div className="flex flex-col gap-4 mb-4">
+        <div className="flex justify-between gap-3 items-center">
           <Input
-            className='w-full'
+            className="w-full"
             placeholder={t('Search...')!}
             value={query}
             onChange={(e) => {
               setQuery(e.target.value);
             }}
           />
-          <Button onClick={() => handleShowAddModal()} color='primary'>
+          <Button onClick={() => handleShowAddModal()} color="primary">
             {t('Add User')}
           </Button>
         </div>
@@ -102,7 +107,7 @@ export default function Users() {
               <TableHead>{t('Phone')}</TableHead>
               <TableHead>{t('E-Mail')}</TableHead>
               <TableHead>{t('Created Time')}</TableHead>
-              <TableHead className='w-16'></TableHead>
+              <TableHead className="w-16"></TableHead>
             </TableRow>
           </TableHeader>
           <TableBody
@@ -111,9 +116,9 @@ export default function Users() {
             isEmpty={users.length === 0}
           >
             {users.map((item) => (
-              <TableRow className='cursor-pointer' key={item.id}>
+              <TableRow className="cursor-pointer" key={item.id}>
                 <TableCell>
-                  <div className='flex gap-1 items-center'>
+                  <div className="flex gap-1 items-center">
                     <div
                       className={`w-2 h-2 rounded-full ${
                         item.enabled ? 'bg-green-400' : 'bg-gray-400'
@@ -121,7 +126,7 @@ export default function Users() {
                     ></div>
                     {item.username}
                     {item.provider && (
-                      <Badge className='capitalize'>{item.provider}</Badge>
+                      <Badge className="capitalize">{item.provider}</Badge>
                     )}
                   </div>
                 </TableCell>
@@ -135,7 +140,7 @@ export default function Users() {
                 <TableCell>
                   <DropdownMenu>
                     <DropdownMenuTrigger>
-                      <Button variant='ghost'>
+                      <Button variant="ghost">
                         <IconDots size={16} />
                       </Button>
                     </DropdownMenuTrigger>

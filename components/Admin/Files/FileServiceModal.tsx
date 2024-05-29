@@ -1,7 +1,22 @@
-import { postFileService, putFileService } from '@/apis/adminService';
-import { useTranslation } from 'next-i18next';
 import React, { useEffect } from 'react';
+import { useForm } from 'react-hook-form';
 import toast from 'react-hot-toast';
+
+import { useTranslation } from 'next-i18next';
+
+import { getFileConfigs } from '@/utils/file';
+import { mergeConfigs } from '@/utils/model';
+
+import { GetFileServicesResult } from '@/types/admin';
+import {
+  FileServicesType,
+  PostFileServicesParams,
+  PutFileServicesParams,
+} from '@/types/file';
+
+import FormSelect from '@/components/ui/form/select';
+
+import { Button } from '../../ui/button';
 import {
   Dialog,
   DialogContent,
@@ -9,24 +24,15 @@ import {
   DialogHeader,
   DialogTitle,
 } from '../../ui/dialog';
-import { useForm } from 'react-hook-form';
 import { Form, FormField } from '../../ui/form';
-import { zodResolver } from '@hookform/resolvers/zod';
-import { z } from 'zod';
-import { FormFieldType, IFormFieldOption } from '../../ui/form/type';
 import FormInput from '../../ui/form/input';
 import FormSwitch from '../../ui/form/switch';
 import FormTextarea from '../../ui/form/textarea';
-import { Button } from '../../ui/button';
-import FormSelect from '@/components/ui/form/select';
-import {
-  FileServicesType,
-  PostFileServicesParams,
-  PutFileServicesParams,
-} from '@/types/file';
-import { getFileConfigs } from '@/utils/file';
-import { GetFileServicesResult } from '@/types/admin';
-import { mergeConfigs } from '@/utils/model';
+import { FormFieldType, IFormFieldOption } from '../../ui/form/type';
+
+import { postFileService, putFileService } from '@/apis/adminService';
+import { zodResolver } from '@hookform/resolvers/zod';
+import { z } from 'zod';
 
 interface IProps {
   selected: GetFileServicesResult | null;
@@ -122,8 +128,8 @@ export const FileServiceModal = (props: IProps) => {
     }).catch(() => {
       toast.error(
         t(
-          'Operation failed! Please try again later, or contact technical personnel.'
-        )
+          'Operation failed! Please try again later, or contact technical personnel.',
+        ),
       );
     });
   }
@@ -138,7 +144,7 @@ export const FileServiceModal = (props: IProps) => {
         form.setValue('enabled', selected.enabled);
         form.setValue(
           'configs',
-          mergeConfigs(getFileConfigs(selected.type), selected.configs)
+          mergeConfigs(getFileConfigs(selected.type), selected.configs),
         );
       }
     }
@@ -150,7 +156,7 @@ export const FileServiceModal = (props: IProps) => {
         const type = value.type as FileServicesType;
         form.setValue(
           'configs',
-          JSON.stringify(getFileConfigs(type) || {}, null, 2)
+          JSON.stringify(getFileConfigs(type) || {}, null, 2),
         );
       }
     });
@@ -175,8 +181,8 @@ export const FileServiceModal = (props: IProps) => {
                 render={({ field }) => item.render(item, field)}
               />
             ))}
-            <DialogFooter className='pt-4'>
-              <Button type='submit'>{t('Save')}</Button>
+            <DialogFooter className="pt-4">
+              <Button type="submit">{t('Save')}</Button>
             </DialogFooter>
           </form>
         </Form>

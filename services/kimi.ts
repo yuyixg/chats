@@ -10,7 +10,7 @@ import {
 export const KimiStream = async (
   chatModel: ChatModels,
   temperature: number,
-  messages: GPT4Message[] | GPT4VisionMessage[]
+  messages: GPT4Message[] | GPT4VisionMessage[],
 ) => {
   const {
     apiConfig: { host, apiKey },
@@ -67,7 +67,7 @@ export const KimiStream = async (
                   outputTokens: completion_tokens,
                   totalTokens: total_tokens,
                 },
-              })
+              }),
             );
           }
         }

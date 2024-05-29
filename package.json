@@ -7,6 +7,7 @@
     "build": "npx prisma generate && next build",
     "start": "npx prisma generate && next start",
     "lint": "next lint",
+    "format": "prettier --write .",
     "db:init": "ts-node -O \"{\\\"module\\\":\\\"commonjs\\\"}\" prisma/init.ts",
     "db:pg": "export $(cat .env.local | xargs) && env && npm run init",
     "db-win:pg": "set DB_DIALECT=postgres && (for /F \"tokens=*\" %i in (.env.local) do set %i) && npm run init"
@@ -56,7 +57,6 @@
     "next-i18next": "^13.2.2",
     "next-themes": "^0.3.0",
     "pg": "^8.11.3",
-    "postcss": "8.4.29",
     "qrcode": "^1.5.3",
     "react": "18.2.0",
     "react-day-picker": "^8.10.0",
@@ -82,7 +82,9 @@
     "zod": "^3.22.4"
   },
   "devDependencies": {
+    "postcss": "8.4.29",
     "@tailwindcss/typography": "^0.5.13",
+    "@trivago/prettier-plugin-sort-imports": "^4.1.1",
     "@types/aws-sdk": "^2.7.0",
     "@types/bcryptjs": "^2.4.6",
     "@types/decimal.js": "^7.4.0",
@@ -94,6 +96,8 @@
     "@types/uuid": "^9.0.4",
     "cross-env": "^7.0.3",
     "prisma": "^5.13.0",
-    "ts-node-dev": "^2.0.0"
+    "ts-node-dev": "^2.0.0",
+    "prettier": "^2.8.7",
+    "prettier-plugin-tailwindcss": "^0.2.5"
   }
 }

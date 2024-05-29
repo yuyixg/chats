@@ -1,10 +1,12 @@
-import { Dialog, DialogContent, DialogHeader, DialogTitle } from '../ui/dialog';
+import { useState } from 'react';
+
 import { useTranslation } from 'next-i18next';
-import { Tabs, TabsContent, TabsList, TabsTrigger } from '../ui/tabs';
+
 import { IconMoneybag, IconPasswordUser, IconSettings } from '../Icons';
+import { Dialog, DialogContent, DialogHeader, DialogTitle } from '../ui/dialog';
+import { Tabs, TabsContent, TabsList, TabsTrigger } from '../ui/tabs';
 import { ChangePasswordTabContent } from './ChangePasswordTabContent';
 import SettingsTabContent from './SettingsTabCotent';
-import { useState } from 'react';
 import UserBalanceTabContent from './UserBalanceTabContent';
 
 interface IProps {
@@ -25,52 +27,52 @@ const SettingsModal = (props: IProps) => {
 
   return (
     <Dialog open={isOpen} onOpenChange={onClose}>
-      <DialogContent className='w-full w- max-w-2xl'>
-        <DialogHeader className='mb-[16px]'>
+      <DialogContent className="w-full w- max-w-2xl">
+        <DialogHeader className="mb-[16px]">
           <DialogTitle>{t('Account Settings')}</DialogTitle>
         </DialogHeader>
         <Tabs
           defaultValue={TabKey.Settings}
-          orientation='horizontal'
-          className='w-1/2 p-0 m-0 min-h-[320px]'
+          orientation="horizontal"
+          className="w-1/2 p-0 m-0 min-h-[320px]"
         >
-          <TabsList className='bg-transparent min-w-[160px] gap-2 p-0 m-0'>
+          <TabsList className="bg-transparent min-w-[160px] gap-2 p-0 m-0">
             <TabsTrigger
               value={TabKey.Settings}
               onClick={() => setCurrentTab(TabKey.Settings)}
-              className='flex w-full data-[state=active]:bg-[#ececec] data-[state=active]:dark:bg-[#262630]/90 data-[state=active]:shadow-none'
+              className="flex w-full data-[state=active]:bg-[#ececec] data-[state=active]:dark:bg-[#262630]/90 data-[state=active]:shadow-none"
             >
-              <div className='flex gap-1'>
+              <div className="flex gap-1">
                 <IconSettings /> {t('General')}
               </div>
             </TabsTrigger>
             <TabsTrigger
               value={TabKey.Balance}
               onClick={() => setCurrentTab(TabKey.Balance)}
-              className='flex w-full data-[state=active]:bg-[#ececec] data-[state=active]:dark:bg-[#262630]/90 data-[state=active]:shadow-none'
+              className="flex w-full data-[state=active]:bg-[#ececec] data-[state=active]:dark:bg-[#262630]/90 data-[state=active]:shadow-none"
             >
-              <div className='flex gap-1'>
+              <div className="flex gap-1">
                 <IconMoneybag /> {t('Account balance')}
               </div>
             </TabsTrigger>
             <TabsTrigger
               value={TabKey.ChangePassword}
               onClick={() => setCurrentTab(TabKey.ChangePassword)}
-              className='flex w-full data-[state=active]:bg-[#ececec] data-[state=active]:dark:bg-[#262630]/90 data-[state=active]:shadow-none'
+              className="flex w-full data-[state=active]:bg-[#ececec] data-[state=active]:dark:bg-[#262630]/90 data-[state=active]:shadow-none"
             >
-              <div className='flex gap-1'>
+              <div className="flex gap-1">
                 <IconPasswordUser /> {t('Change Password')}
               </div>
             </TabsTrigger>
           </TabsList>
-          <TabsContent className='min-w-full mt-[-4px]' value={TabKey.Settings}>
+          <TabsContent className="min-w-full mt-[-4px]" value={TabKey.Settings}>
             <SettingsTabContent />
           </TabsContent>
-          <TabsContent className='min-w-full mt-[4px]' value={TabKey.Balance}>
+          <TabsContent className="min-w-full mt-[4px]" value={TabKey.Balance}>
             <UserBalanceTabContent />
           </TabsContent>
           <TabsContent
-            className='min-w-full mt-[-4px]'
+            className="min-w-full mt-[-4px]"
             value={TabKey.ChangePassword}
           >
             <ChangePasswordTabContent />

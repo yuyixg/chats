@@ -1,37 +1,38 @@
 import { useFetch } from '@/hooks/useFetch';
+
 import {
-  PostUserParams,
   GetFileServicesResult,
+  GetLoginServicesResult,
   GetMessageDetailsResult,
+  GetModelKeysResult,
   GetModelResult,
+  GetPayServicesResult,
+  GetRequestLogsDetailsResult,
+  GetRequestLogsListResult,
+  GetRequestLogsParams,
   GetUserMessageParams,
   GetUserMessageResult,
   GetUserModelResult,
   GetUsersResult,
+  PostLoginServicesParams,
+  PostModelKeysParams,
   PostModelParams,
+  PostPayServicesParams,
   PostUserModelParams,
+  PostUserParams,
+  PutLoginServicesParams,
+  PutModelKeysParams,
   PutModelParams,
+  PutPayServicesParams,
+  PutUserBalanceParams,
   PutUserModelParams,
   PutUserParams,
-  PutUserBalanceParams,
-  GetRequestLogsParams,
-  GetRequestLogsListResult,
-  GetRequestLogsDetailsResult,
-  GetLoginServicesResult,
-  PostLoginServicesParams,
-  PutLoginServicesParams,
-  GetPayServicesResult,
-  PostPayServicesParams,
-  PutPayServicesParams,
-  GetModelKeysResult,
-  PutModelKeysParams,
-  PostModelKeysParams,
 } from '@/types/admin';
 import { PostFileServicesParams, PutFileServicesParams } from '@/types/file';
 import { PageResult } from '@/types/page';
 
 export const getUserModels = (
-  query?: string
+  query?: string,
 ): Promise<GetUserModelResult[]> => {
   const fetchService = useFetch();
   return fetchService.get('/api/admin/user-models?query=' + query);
@@ -102,28 +103,28 @@ export const putUserBalance = (params: PutUserBalanceParams) => {
 };
 
 export const getMessages = (
-  params: GetUserMessageParams
+  params: GetUserMessageParams,
 ): Promise<PageResult<GetUserMessageResult[]>> => {
   const { query = null, page = 1, pageSize = 12 } = params;
   const fetchService = useFetch();
   return fetchService.get(
-    `/api/admin/messages?page=${page}&pageSize=${pageSize}&query=${query}`
+    `/api/admin/messages?page=${page}&pageSize=${pageSize}&query=${query}`,
   );
 };
 
 export const getMessageDetails = (
-  chatId: string
+  chatId: string,
 ): Promise<GetMessageDetailsResult> => {
   const fetchService = useFetch();
   return fetchService.get(`/api/admin/message-details?chatId=${chatId}`);
 };
 
 export const getFileServices = (
-  select: boolean = false
+  select: boolean = false,
 ): Promise<GetFileServicesResult[]> => {
   const fetchService = useFetch();
   return fetchService.get(
-    '/api/admin/file-service?select=' + (!select ? '' : true)
+    '/api/admin/file-service?select=' + (!select ? '' : true),
   );
 };
 
@@ -142,21 +143,21 @@ export const putFileService = (params: PutFileServicesParams) => {
 };
 
 export const getShareMessage = (
-  chatId: string
+  chatId: string,
 ): Promise<GetMessageDetailsResult> => {
   const fetchService = useFetch();
   return fetchService.get(`/api/public/messages?chatId=${chatId}`);
 };
 
 export const getRequestLogs = (
-  params: GetRequestLogsParams
+  params: GetRequestLogsParams,
 ): Promise<PageResult<GetRequestLogsListResult[]>> => {
   const fetchService = useFetch();
   return fetchService.post(`/api/admin/request-logs`, { body: { ...params } });
 };
 
 export const getRequestLogDetails = (
-  id: string
+  id: string,
 ): Promise<GetRequestLogsDetailsResult> => {
   const fetchService = useFetch();
   return fetchService.get(`/api/admin/request-logs?id=` + id);

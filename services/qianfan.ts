@@ -1,12 +1,12 @@
 import { QianFanMessage } from '@/types/chat';
+import { ChatModels } from '@/types/chatModel';
+import { ModelVersions } from '@/types/model';
 
 import {
   ParsedEvent,
   ReconnectInterval,
   createParser,
 } from 'eventsource-parser';
-import { ModelVersions } from '@/types/model';
-import { ChatModels } from '@/types/chatModel';
 
 export const ModelEndpoint: { [key in ModelVersions]?: string } = {
   [ModelVersions.ERNIE_Bot_4]: 'completions_pro',
@@ -16,7 +16,7 @@ export const ModelEndpoint: { [key in ModelVersions]?: string } = {
 async function getAccessTokenAsync(
   apiHost: string,
   apiKey: string,
-  apiSecret: string
+  apiSecret: string,
 ) {
   let url = `${apiHost}/oauth/2.0/token?grant_type=client_credentials&client_id=${apiKey}&client_secret=${apiSecret}`;
   const resp = await fetch(url, {
@@ -36,7 +36,7 @@ async function getAccessTokenAsync(
 export const QianFanStream = async (
   chatModel: ChatModels,
   messages: QianFanMessage[],
-  parameters: any
+  parameters: any,
 ) => {
   const {
     modelVersion,
@@ -85,7 +85,7 @@ export const QianFanStream = async (
                   outputTokens: completion_tokens,
                   totalTokens: total_tokens,
                 },
-              })
+              }),
             );
             if (json.is_end) {
               controller.close();

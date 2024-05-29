@@ -1,12 +1,13 @@
-import { ModelVersions, ModelType, ModelProviders, ModelConfig } from './model';
-import { Paging } from './page';
 import { Message } from './chat';
+import { ChatMessage } from './chatMessage';
 import { PutFileServicesParams } from './file';
-import Decimal from 'decimal.js';
+import { ModelConfig, ModelProviders, ModelType, ModelVersions } from './model';
+import { Paging } from './page';
+import { PayServiceType } from './pay';
 import { StatusCode } from './statusCode';
 import { ProviderType } from './user';
-import { PayServiceType } from './pay';
-import { ChatMessage } from './chatMessage';
+
+import Decimal from 'decimal.js';
 
 export const enum UserRole {
   'admin' = 'admin',

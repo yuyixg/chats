@@ -1,8 +1,10 @@
-import * as AWS from 'aws-sdk';
 import { BadRequest } from '@/utils/error';
+
+import { ChatsApiRequest } from '@/types/next-api';
+
 import { FileServiceManager } from '@/managers';
 import { apiHandler } from '@/middleware/api-handler';
-import { ChatsApiRequest } from '@/types/next-api';
+import * as AWS from 'aws-sdk';
 
 const handler = async (req: ChatsApiRequest) => {
   const { id } = req.query as { id: string };

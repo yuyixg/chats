@@ -24,7 +24,7 @@ export const addAsterisk = (value?: string, separator = '*') => {
 
 export const checkKey = (
   originValue: string | undefined,
-  currentValue: string | undefined
+  currentValue: string | undefined,
 ) => {
   if (originValue && addAsterisk(originValue) === currentValue) {
     return originValue;

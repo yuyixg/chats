@@ -1,5 +1,6 @@
-import Decimal from 'decimal.js';
 import { Content, Message, Role } from './chat';
+
+import Decimal from 'decimal.js';
 
 export interface ChatMessage {
   id: string;

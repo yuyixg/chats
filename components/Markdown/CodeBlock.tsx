@@ -1,8 +1,10 @@
-import { IconCheck, IconClipboard } from '@/components/Icons/index';
 import { FC, memo, useState } from 'react';
 import { Prism as SyntaxHighlighter } from 'react-syntax-highlighter';
 import { oneDark } from 'react-syntax-highlighter/dist/cjs/styles/prism';
+
 import { useTranslation } from 'next-i18next';
+
+import { IconCheck, IconClipboard } from '@/components/Icons/index';
 
 interface Props {
   language: string;
@@ -28,13 +30,13 @@ export const CodeBlock: FC<Props> = memo(({ language, value }) => {
   };
 
   return (
-    <div className='codeblock relative font-sans text-[16px]'>
-      <div className='flex items-center justify-between w-full py-[6px] px-3 bg-black'>
-        <span className='text-xs lowercase text-white'>{language}</span>
+    <div className="codeblock relative font-sans text-[16px]">
+      <div className="flex items-center justify-between w-full py-[6px] px-3 bg-black">
+        <span className="text-xs lowercase text-white">{language}</span>
 
-        <div className='flex items-center'>
+        <div className="flex items-center">
           <button
-            className='flex gap-1.5 items-center rounded bg-none p-1 text-xs text-white'
+            className="flex gap-1.5 items-center rounded bg-none p-1 text-xs text-white"
             onClick={copyToClipboard}
           >
             {isCopied ? (
