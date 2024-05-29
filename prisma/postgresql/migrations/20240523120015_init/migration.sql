@@ -73,25 +73,6 @@ CREATE TABLE "UserModels" (
 );
 
 -- CreateTable
-CREATE TABLE "Messages" (
-    "id" UUID NOT NULL,
-    "userId" UUID NOT NULL,
-    "chatModelId" UUID NOT NULL,
-    "name" TEXT NOT NULL,
-    "prompt" TEXT,
-    "messages" TEXT NOT NULL,
-    "tokenCount" INTEGER NOT NULL DEFAULT 0,
-    "chatCount" INTEGER NOT NULL DEFAULT 0,
-    "totalPrice" DECIMAL(65,30) NOT NULL DEFAULT 0,
-    "isDeleted" BOOLEAN DEFAULT false,
-    "isShared" BOOLEAN NOT NULL DEFAULT false,
-    "createdAt" TIMESTAMP(3) NOT NULL DEFAULT CURRENT_TIMESTAMP,
-    "updatedAt" TIMESTAMP(3) NOT NULL,
-
-    CONSTRAINT "Messages_pkey" PRIMARY KEY ("id")
-);
-
--- CreateTable
 CREATE TABLE "Chats" (
     "id" UUID NOT NULL,
     "title" VARCHAR(50) NOT NULL,
@@ -111,10 +92,11 @@ CREATE TABLE "ChatMessages" (
     "userId" UUID NOT NULL,
     "chatId" UUID NOT NULL,
     "parentId" UUID,
+    "chatModelId" TEXT,
+    "role" TEXT NOT NULL,
     "messages" TEXT NOT NULL,
-    "calculatedPrice" DECIMAL(65,30) NOT NULL,
-    "tokenUsed" INTEGER NOT NULL,
-    "isDeleted" BOOLEAN NOT NULL DEFAULT false,
+    "calculatedPrice" DECIMAL(65,30) NOT NULL DEFAULT 0,
+    "tokenUsed" INTEGER NOT NULL DEFAULT 0,
     "createdAt" TIMESTAMP(3) NOT NULL DEFAULT CURRENT_TIMESTAMP,
 
     CONSTRAINT "ChatMessages_pkey" PRIMARY KEY ("id")
@@ -243,7 +225,6 @@ CREATE TABLE "Prompts" (
     "content" VARCHAR(2048),
     "description" VARCHAR(100),
     "createUserId" UUID NOT NULL,
-    "isDeleted" BOOLEAN NOT NULL DEFAULT false,
     "createdAt" TIMESTAMP(3) NOT NULL DEFAULT CURRENT_TIMESTAMP,
     "updatedAt" TIMESTAMP(3) NOT NULL,
 
@@ -261,12 +242,6 @@ ALTER TABLE "Sessions" ADD CONSTRAINT "Sessions_userId_fkey" FOREIGN KEY ("userI
 
 -- AddForeignKey
 ALTER TABLE "UserModels" ADD CONSTRAINT "UserModels_userId_fkey" FOREIGN KEY ("userId") REFERENCES "Users"("id") ON DELETE RESTRICT ON UPDATE CASCADE;
-
--- AddForeignKey
-ALTER TABLE "Messages" ADD CONSTRAINT "Messages_userId_fkey" FOREIGN KEY ("userId") REFERENCES "Users"("id") ON DELETE RESTRICT ON UPDATE CASCADE;
-
--- AddForeignKey
-ALTER TABLE "Messages" ADD CONSTRAINT "Messages_chatModelId_fkey" FOREIGN KEY ("chatModelId") REFERENCES "ChatModels"("id") ON DELETE RESTRICT ON UPDATE CASCADE;
 
 -- AddForeignKey
 ALTER TABLE "Chats" ADD CONSTRAINT "Chats_userId_fkey" FOREIGN KEY ("userId") REFERENCES "Users"("id") ON DELETE RESTRICT ON UPDATE CASCADE;

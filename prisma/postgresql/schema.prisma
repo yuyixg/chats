@@ -25,7 +25,6 @@ model Users {
   createdAt    DateTime      @default(now())
   updatedAt    DateTime      @updatedAt
   sessions     Sessions[]
-  messages     Messages[]
   userBalances UserBalances?
   UserModels   UserModels[]
   AuditLogs    RequestLogs[]
@@ -60,7 +59,6 @@ model ChatModels {
   enabled       Boolean    @default(true)
   createdAt     DateTime   @default(now())
   updatedAt     DateTime   @updatedAt
-  messages      Messages[]
   ModelKeys     ModelKeys? @relation(fields: [modelKeysId], references: [id])
   Chats         Chats[]
 }
@@ -82,24 +80,6 @@ model UserModels {
   user      Users    @relation(fields: [userId], references: [id])
 }
 
-model Messages {
-  id          String     @id @default(uuid()) @db.Uuid()
-  userId      String     @db.Uuid()
-  chatModelId String     @db.Uuid()
-  name        String
-  prompt      String?
-  messages    String     @db.Text()
-  tokenCount  Int        @default(0)
-  chatCount   Int        @default(0)
-  totalPrice  Decimal    @default(0)
-  isDeleted   Boolean?   @default(false)
-  isShared    Boolean    @default(false)
-  createdAt   DateTime   @default(now())
-  updatedAt   DateTime   @updatedAt
-  user        Users      @relation(fields: [userId], references: [id])
-  chatModel   ChatModels @relation(fields: [chatModelId], references: [id])
-}
-
 model Chats {
   id              String         @id @default(uuid()) @db.Uuid()
   title           String         @db.VarChar(50)
@@ -119,10 +99,11 @@ model ChatMessages {
   userId          String   @db.Uuid()
   chatId          String   @db.Uuid()
   parentId        String?  @db.Uuid()
+  chatModelId     String?
+  role            String
   messages        String   @db.Text()
-  calculatedPrice Decimal
-  tokenUsed       Int
-  isDeleted       Boolean  @default(false)
+  calculatedPrice Decimal  @default(0)
+  tokenUsed       Int      @default(0)
   createdAt       DateTime @default(now())
   chats           Chats    @relation(fields: [chatId], references: [id])
 }
