@@ -116,256 +116,233 @@ export const ModelProviderTemplates = {
   },
 };
 
-export const ModelTemplates = {
-  [ModelVersions.GPT_3_5]: {
-    type: ModelType.GPT,
-    config: {
-      temperature: {
-        min: 0,
-        max: 2,
-      },
-    },
-    modelConfig: {
-      prompt:
-        "You are ChatGPT, a large language model trained by OpenAI. Follow the user's instructions carefully. Respond using markdown.",
-      temperature: 0.5,
-      version: '2024-02-01',
-      organization: '',
-      deploymentName: '',
-    },
-    apiConfig: gptApiConfig,
-    fileConfig: null,
-    priceConfig: {
-      input: 0.00001085,
-      out: 0.00001446,
-    },
-  },
-  [ModelVersions.GPT_4]: {
-    type: ModelType.GPT,
-    config: {
-      temperature: {
-        min: 0,
-        max: 2,
-      },
-    },
-    modelConfig: {
-      prompt:
-        "You are ChatGPT, a large language model trained by OpenAI. Follow the user's instructions carefully. Respond using markdown.",
-      temperature: 0.5,
-      version: '2024-02-01',
-      organization: '',
-      deploymentName: '',
-    },
-    apiConfig: gptApiConfig,
-    priceConfig: {
-      input: 0.00021691,
-      out: 0.00043381,
-    },
-  },
-  [ModelVersions.GPT_4_Vision]: {
-    type: ModelType.GPT,
-    config: {
-      temperature: {
-        min: 0,
-        max: 2,
-      },
-    },
-    modelConfig: {
-      prompt:
-        "You are ChatGPT, a large language model trained by OpenAI. Follow the user's instructions carefully. Respond using markdown.",
-      temperature: 0.5,
-      version: '2024-02-01',
-      organization: '',
-      deploymentName: '',
-    },
-    apiConfig: gptApiConfig,
-    fileConfig: { count: 5, maxSize: 10240 },
-    priceConfig: {
-      input: 0.0000723,
-      out: 0.00021691,
-    },
-  },
-  [ModelVersions.QWen]: {
-    type: ModelType.QianWen,
-    config: {
-      temperature: {
-        min: 0,
-        max: 1.99,
-      },
-    },
-    modelConfig: {
-      prompt:
-        "You are an AI assistant, Follow the user's instructions carefully. Respond using markdown.",
-      temperature: 0.85,
-      version: 'qwen-max-longcontext',
-      enableSearch: false,
-    },
-    apiConfig: qianWenApiConfig,
-    priceConfig: {
-      input: 0,
-      out: 0,
-    },
-  },
-  [ModelVersions.QWen_Vl]: {
-    type: ModelType.QianWen,
-    config: {},
-    modelConfig: {
-      prompt:
-        "You are an AI assistant with image understanding capabilities, Follow the user's instructions carefully. Respond using markdown.",
-      version: 'qwen-vl-max',
-    },
-    apiConfig: qianWenApiConfig,
-    fileConfig: { count: 5, maxSize: 10240 },
-    priceConfig: {
-      input: 0,
-      out: 0,
-    },
-  },
-  [ModelVersions.ERNIE_Bot_4]: {
-    type: ModelType.QianFan,
-    config: {
-      temperature: {
-        min: 0,
-        max: 2,
-      },
-    },
-    modelConfig: {
-      prompt:
-        "You are an AI assistant, Follow the user's instructions carefully. Respond using markdown.",
-      temperature: 0.8,
-    },
-    apiConfig: qianFanApiConfig,
-    priceConfig: {
-      input: 0.000024,
-      out: 0.000048,
-    },
-  },
-  [ModelVersions.ERNIE_Bot_8K]: {
-    type: ModelType.QianFan,
-    config: {
-      temperature: {
-        min: 0,
-        max: 2,
-      },
-    },
-    modelConfig: {
-      prompt:
-        "You are an AI assistant, Follow the user's instructions carefully. Respond using markdown.",
-      temperature: 0.8,
-    },
-    apiConfig: qianFanApiConfig,
-    priceConfig: {
-      input: 0.000024,
-      out: 0.000048,
-    },
-  },
-  [ModelVersions.yi_34b_chat_0205]: {
-    type: ModelType.LingYi,
-    config: {
-      temperature: {
-        min: 0,
-        max: 2,
-      },
-    },
-    modelConfig: {
-      prompt:
-        "You are an AI assistant, Follow the user's instructions carefully. Respond using markdown.",
-      temperature: 0.8,
-    },
-    apiConfig: lingYiApiConfig,
-    priceConfig: {
-      input: 0.0000025,
-      out: 0.0000025,
-    },
-  },
-  [ModelVersions.yi_34b_chat_200k]: {
-    type: ModelType.LingYi,
-    config: {
-      temperature: {
-        min: 0,
-        max: 2,
-      },
-    },
-    modelConfig: {
-      prompt:
-        "You are an AI assistant, Follow the user's instructions carefully. Respond using markdown.",
-      temperature: 0.8,
-    },
-    apiConfig: lingYiApiConfig,
-    priceConfig: {
-      input: 0.000012,
-      out: 0.000012,
-    },
-  },
-  [ModelVersions.yi_vl_plus]: {
-    type: ModelType.LingYi,
-    config: {},
-    modelConfig: {
-      prompt:
-        "You are an AI assistant with image understanding capabilities, Follow the user's instructions carefully. Respond using markdown.",
-    },
-    apiConfig: lingYiApiConfig,
-    fileConfig: {},
-    priceConfig: {
-      input: 0.000006,
-      out: 0.000006,
-    },
-  },
-  [ModelVersions.moonshot_v1_8k]: {
-    type: ModelType.Moonshot,
-    config: {
-      temperature: {
-        min: 0,
-        max: 1,
-      },
-    },
-    modelConfig: {
-      prompt:
-        "You are an AI assistant, Follow the user's instructions carefully. Respond using markdown.",
-      temperature: 0.3,
-    },
-    apiConfig: moonshotApiConfig,
-    priceConfig: {
-      input: 0.000012,
-      out: 0.000012,
-    },
-  },
-  [ModelVersions.moonshot_v1_32k]: {
-    type: ModelType.Moonshot,
-    config: {
-      temperature: {
-        min: 0,
-        max: 1,
-      },
-    },
-    modelConfig: {
-      prompt:
-        "You are an AI assistant, Follow the user's instructions carefully. Respond using markdown.",
-      temperature: 0.3,
-    },
-    apiConfig: moonshotApiConfig,
-    priceConfig: {
-      input: 0.000024,
-      out: 0.000024,
-    },
-  },
-  [ModelVersions.moonshot_v1_128k]: {
-    type: ModelType.Moonshot,
-    config: {
-      temperature: {
-        min: 0,
-        max: 1,
-      },
-    },
-    modelConfig: {
-      prompt:
-        "You are an AI assistant, Follow the user's instructions carefully. Respond using markdown.",
-      temperature: 0.3,
-    },
-    apiConfig: moonshotApiConfig,
-    priceConfig: {
-      input: 0.00006,
-      out: 0.00006,
-    },
-  },
-};
+export function getModelDefaultTemplate(
+  version: ModelVersions,
+  provider: ModelProviders,
+) {
+  if (provider === ModelProviders.OpenAI) {
+    switch (version) {
+      case ModelVersions.GPT_3_5:
+      case ModelVersions.GPT_4: {
+        return {
+          type: ModelType.OpenAI,
+          config: {
+            temperature: {
+              min: 0,
+              max: 2,
+            },
+          },
+          modelConfig: {
+            prompt:
+              "You are ChatGPT, a large language model trained by OpenAI. Follow the user's instructions carefully. Respond using markdown.",
+            temperature: 0.5,
+            organization: '',
+            model: '',
+          },
+          apiConfig: gptApiConfig,
+          fileConfig: null,
+          priceConfig: {
+            input: 0.00001085,
+            out: 0.00001446,
+          },
+        };
+      }
+      case ModelVersions.GPT_4_Vision: {
+        return {
+          type: ModelType.OpenAI,
+          config: {
+            temperature: {
+              min: 0,
+              max: 2,
+            },
+          },
+          modelConfig: {
+            prompt:
+              "You are ChatGPT, a large language model trained by OpenAI. Follow the user's instructions carefully. Respond using markdown.",
+            temperature: 0.5,
+            organization: '',
+            model: '',
+          },
+          apiConfig: gptApiConfig,
+          fileConfig: { count: 5, maxSize: 10240 },
+          priceConfig: {
+            input: 0.0000723,
+            out: 0.00021691,
+          },
+        };
+      }
+    }
+  } else if (provider === ModelProviders.Azure) {
+    switch (version) {
+      case ModelVersions.GPT_3_5:
+      case ModelVersions.GPT_4: {
+        return {
+          type: ModelType.Azure,
+          config: {
+            temperature: {
+              min: 0,
+              max: 2,
+            },
+          },
+          modelConfig: {
+            prompt:
+              "You are ChatGPT, a large language model trained by OpenAI. Follow the user's instructions carefully. Respond using markdown.",
+            temperature: 0.5,
+            version: '2024-02-01',
+            deploymentName: '',
+          },
+          apiConfig: gptApiConfig,
+          fileConfig: null,
+          priceConfig: {
+            input: 0.00001085,
+            out: 0.00001446,
+          },
+        };
+      }
+      case ModelVersions.GPT_4_Vision: {
+        return {
+          type: ModelType.Azure,
+          config: {
+            temperature: {
+              min: 0,
+              max: 2,
+            },
+          },
+          modelConfig: {
+            prompt:
+              "You are ChatGPT, a large language model trained by OpenAI. Follow the user's instructions carefully. Respond using markdown.",
+            temperature: 0.5,
+            version: '2024-02-01',
+            deploymentName: '',
+          },
+          apiConfig: gptApiConfig,
+          fileConfig: { count: 5, maxSize: 10240 },
+          priceConfig: {
+            input: 0.0000723,
+            out: 0.00021691,
+          },
+        };
+      }
+    }
+  } else if (provider === ModelProviders.Moonshot) {
+    switch (version) {
+      case ModelVersions.moonshot_v1_8k:
+      case ModelVersions.moonshot_v1_32k:
+      case ModelVersions.moonshot_v1_128k: {
+        return {
+          type: ModelType.Moonshot,
+          config: {
+            temperature: {
+              min: 0,
+              max: 1,
+            },
+          },
+          modelConfig: {
+            prompt:
+              "You are an AI assistant, Follow the user's instructions carefully. Respond using markdown.",
+            temperature: 0.3,
+          },
+          apiConfig: moonshotApiConfig,
+          priceConfig: {
+            input: 0.000012,
+            out: 0.000012,
+          },
+        };
+      }
+    }
+  } else if (provider === ModelProviders.QianWen) {
+    switch (version) {
+      case ModelVersions.QWen: {
+        return {
+          type: ModelType.QianWen,
+          config: {
+            temperature: {
+              min: 0,
+              max: 1.99,
+            },
+          },
+          modelConfig: {
+            prompt:
+              "You are an AI assistant, Follow the user's instructions carefully. Respond using markdown.",
+            temperature: 0.85,
+            version: 'qwen-max-longcontext',
+            enableSearch: false,
+          },
+          apiConfig: qianWenApiConfig,
+          priceConfig: {
+            input: 0,
+            out: 0,
+          },
+        };
+      }
+      case ModelVersions.QWen_Vl: {
+        return {
+          type: ModelType.QianWen,
+          config: {},
+          modelConfig: {
+            prompt:
+              "You are an AI assistant with image understanding capabilities, Follow the user's instructions carefully. Respond using markdown.",
+            version: 'qwen-vl-max',
+          },
+          apiConfig: qianWenApiConfig,
+          fileConfig: { count: 5, maxSize: 10240 },
+          priceConfig: {
+            input: 0,
+            out: 0,
+          },
+        };
+      }
+    }
+  } else if (provider === ModelProviders.QianFan) {
+    switch (version) {
+      case ModelVersions.ERNIE_Bot_4:
+      case ModelVersions.ERNIE_Bot_8K: {
+        return {
+          type: ModelType.QianFan,
+          config: {
+            temperature: {
+              min: 0,
+              max: 2,
+            },
+          },
+          modelConfig: {
+            prompt:
+              "You are an AI assistant, Follow the user's instructions carefully. Respond using markdown.",
+            temperature: 0.8,
+          },
+          apiConfig: qianFanApiConfig,
+          priceConfig: {
+            input: 0.000024,
+            out: 0.000048,
+          },
+        };
+      }
+    }
+  } else if (provider === ModelProviders.LingYi) {
+    switch (version) {
+      case ModelVersions.yi_34b_chat_0205:
+      case ModelVersions.yi_34b_chat_200k:
+      case ModelVersions.yi_vl_plus: {
+        return {
+          type: ModelType.LingYi,
+          config: {
+            temperature: {
+              min: 0,
+              max: 2,
+            },
+          },
+          modelConfig: {
+            prompt:
+              "You are an AI assistant, Follow the user's instructions carefully. Respond using markdown.",
+            temperature: 0.8,
+          },
+          apiConfig: lingYiApiConfig,
+          priceConfig: {
+            input: 0.0000025,
+            out: 0.0000025,
+          },
+        };
+      }
+    }
+  }
+}

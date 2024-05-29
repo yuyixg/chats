@@ -8,7 +8,6 @@ import { formatNumberAsMoney } from '@/utils/common';
 import {
   ModelPriceUnit,
   conversionModelPriceToCreate,
-  conversionModelPriceToDisplay,
   getModelFileConfig,
   getModelFileConfigJson,
   getModelModelConfig,
@@ -60,6 +59,7 @@ export const AddModelModal = (props: IProps) => {
   const [fileServices, setFileServices] = useState<GetFileServicesResult[]>([]);
   const [modelKeys, setModelKeys] = useState<GetModelKeysResult[]>([]);
   const [modelVersions, setModelVersions] = useState<ModelVersions[]>([]);
+  const [modelProvider, setModelProvider] = useState<ModelProviders>();
   const { isOpen, onClose, onSuccessful } = props;
   const [loading, setLoading] = useState(true);
 
@@ -143,20 +143,32 @@ export const AddModelModal = (props: IProps) => {
     if (!loading) {
       subscription = form.watch((value, { name, type }) => {
         if (name === 'modelKeysId' && type === 'change') {
-          form.setValue('modelVersion', '');
           const modelKeysId = value.modelKeysId as string;
-          const modelProvider = modelKeys.find(
+          const _modelProvider = modelKeys.find(
             (x) => x.id === modelKeysId,
           )?.type;
-          setModelVersions(ModelProviderTemplates[modelProvider!].models);
+          setModelProvider(_modelProvider);
+          setModelVersions(ModelProviderTemplates[_modelProvider!].models);
+          form.setValue('modelVersion', '');
         }
         if (name === 'modelVersion' && type === 'change') {
           const modelVersion = value.modelVersion as ModelVersions;
-          form.setValue('modelConfig', getModelModelConfigJson(modelVersion));
-          form.setValue('fileConfig', getModelFileConfigJson(modelVersion));
+          const modelKeysId = value.modelKeysId as string;
+          const _modelProvider = modelKeys.find((x) => x.id === modelKeysId)
+            ?.type!;
+          form.setValue(
+            'modelConfig',
+            getModelModelConfigJson(modelVersion, _modelProvider),
+          );
+          form.setValue(
+            'fileConfig',
+            getModelFileConfigJson(modelVersion, _modelProvider),
+          );
           form.setValue(
             'priceConfig',
-            conversionModelPriceToCreate(getModelPriceConfigJson(modelVersion)),
+            conversionModelPriceToCreate(
+              getModelPriceConfigJson(modelVersion, _modelProvider),
+            ),
           );
         }
       });
@@ -228,7 +240,10 @@ export const AddModelModal = (props: IProps) => {
                 </div>
               </div>
             </div>
-            <div className="grid grid-cols-2 gap-4">
+            <div
+              className="grid grid-cols-2 gap-4"
+              key={form.getValues('modelKeysId')! || 'modelVersionKey'}
+            >
               <FormField
                 key="modelVersion"
                 control={form.control}
@@ -267,6 +282,7 @@ export const AddModelModal = (props: IProps) => {
                       hidden={
                         !getModelModelConfig(
                           form.getValues('modelVersion') as ModelVersions,
+                          modelProvider!,
                         )
                       }
                       label={t('Model Configs')!}
@@ -286,6 +302,7 @@ export const AddModelModal = (props: IProps) => {
                       hidden={
                         !getModelModelConfig(
                           form.getValues('modelVersion') as ModelVersions,
+                          modelProvider!,
                         )
                       }
                       label={`${formatNumberAsMoney(ModelPriceUnit)} ${t(
@@ -310,6 +327,7 @@ export const AddModelModal = (props: IProps) => {
                       hidden={
                         !getModelFileConfig(
                           form.getValues('modelVersion') as ModelVersions,
+                          modelProvider!,
                         )
                       }
                       items={fileServices.map((item) => ({
@@ -331,6 +349,7 @@ export const AddModelModal = (props: IProps) => {
                       hidden={
                         !getModelFileConfig(
                           form.getValues('modelVersion') as ModelVersions,
+                          modelProvider!,
                         )
                       }
                       label={t('File Configs')!}

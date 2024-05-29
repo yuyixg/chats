@@ -18,7 +18,7 @@ export const OpenAIStream = async (
     apiConfig: { host, apiKey },
     modelVersion,
     modelProvider,
-    modelConfig: { version, organization, deploymentName },
+    modelConfig: { version, organization, deploymentName, model },
   } = chatModel;
   let url = `${host}/v1/chat/completions`;
   if (modelProvider === ModelProviders.Azure) {
@@ -44,7 +44,7 @@ export const OpenAIStream = async (
     method: 'POST',
     body: JSON.stringify({
       ...(modelProvider === ModelProviders.OpenAI && {
-        model: deploymentName || modelVersion,
+        model: model || modelVersion,
       }),
       messages: messages,
       ...(modelVersion === ModelVersions.GPT_4_Vision && { max_tokens: 4096 }),

@@ -134,17 +134,21 @@ export default function Models() {
           </TableBody>
         </Table>
       </Card>
-      <EditModelModal
-        selected={selectedModel}
-        isOpen={isOpen.edit}
-        onClose={handleClose}
-        onSuccessful={init}
-      />
-      <AddModelModal
-        isOpen={isOpen.add}
-        onClose={handleClose}
-        onSuccessful={init}
-      />
+      {isOpen.edit && (
+        <EditModelModal
+          selected={selectedModel!}
+          isOpen={isOpen.edit}
+          onClose={handleClose}
+          onSuccessful={init}
+        />
+      )}
+      {isOpen.add && (
+        <AddModelModal
+          isOpen={isOpen.add}
+          onClose={handleClose}
+          onSuccessful={init}
+        />
+      )}
     </>
   );
 }

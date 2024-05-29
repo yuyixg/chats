@@ -15,7 +15,7 @@ import { throttle } from '@/utils/throttle';
 
 import { ChatBody, Message, Role } from '@/types/chat';
 import { CurrentModel, ModelApiConfig } from '@/types/model';
-import { ModelTemplates } from '@/types/template';
+import { getModelDefaultTemplate } from '@/types/template';
 
 import { HomeContext } from '@/pages/home/home';
 
@@ -348,7 +348,7 @@ export const Chat = memo(({ stopConversationRef }: Props) => {
   }, [messagesEndRef]);
 
   useEffect(() => {
-    const { name, modelConfig, modelVersion } =
+    const { name, modelConfig, modelVersion, modelProvider } =
       getModel(models, selectModelId!) || {};
     setCurrentModel({
       name,
@@ -361,7 +361,9 @@ export const Chat = memo(({ stopConversationRef }: Props) => {
         currentSelectChat?.userModelConfig?.enableSearch ||
         modelConfig?.enableSearch,
     });
-    setModelApiConfig(ModelTemplates[modelVersion]?.config as any);
+    setModelApiConfig(
+      getModelDefaultTemplate(modelVersion, modelProvider)?.config as any,
+    );
   }, [selectModelId]);
 
   useEffect(() => {

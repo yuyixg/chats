@@ -2,9 +2,10 @@ import {
   ChatModelConfig,
   ChatModelPriceConfig,
   ModelConfigType,
+  ModelProviders,
   ModelVersions,
 } from '@/types/model';
-import { ModelTemplates } from '@/types/template';
+import { getModelDefaultTemplate } from '@/types/template';
 
 export function verifyModel(model: any, config: ChatModelConfig) {
   const { tokens, counts, expires } = model;
@@ -37,48 +38,73 @@ export function verifyModel(model: any, config: ChatModelConfig) {
 
 export function getModelConfigs(
   modelVersion: ModelVersions | undefined,
+  modelProvider: ModelProviders,
   configType: ModelConfigType,
 ) {
   if (!modelVersion) return null;
-  const template = ModelTemplates[modelVersion] as any;
+  const template = getModelDefaultTemplate(modelVersion, modelProvider) as any;
   return template[configType] || null;
 }
 
-export function getModelApiConfig(modelVersion: ModelVersions | undefined) {
-  return getModelConfigs(modelVersion, 'apiConfig');
+export function getModelModelConfig(
+  modelVersion: ModelVersions | undefined,
+  modelProvider: ModelProviders,
+) {
+  return getModelConfigs(modelVersion, modelProvider, 'modelConfig');
 }
-export function getModelModelConfig(modelVersion: ModelVersions | undefined) {
-  return getModelConfigs(modelVersion, 'modelConfig');
-}
-export function getModelFileConfig(modelVersion: ModelVersions | undefined) {
-  return getModelConfigs(modelVersion, 'fileConfig');
+export function getModelFileConfig(
+  modelVersion: ModelVersions | undefined,
+  modelProvider: ModelProviders,
+) {
+  return getModelConfigs(modelVersion, modelProvider, 'fileConfig');
 }
 
-export function getModelPriceConfig(modelVersion: ModelVersions | undefined) {
-  return getModelConfigs(modelVersion, 'priceConfig');
+export function getModelPriceConfig(
+  modelVersion: ModelVersions | undefined,
+  modelProvider: ModelProviders,
+) {
+  return getModelConfigs(modelVersion, modelProvider, 'priceConfig');
 }
 
-export function getModelApiConfigJson(modelVersion: ModelVersions | undefined) {
-  return JSON.stringify(getModelConfigs(modelVersion, 'apiConfig'), null, 2);
+export function getModelApiConfigJson(
+  modelVersion: ModelVersions | undefined,
+  modelProvider: ModelProviders,
+) {
+  return JSON.stringify(
+    getModelConfigs(modelVersion, modelProvider, 'apiConfig'),
+    null,
+    2,
+  );
 }
 
 export function getModelModelConfigJson(
   modelVersion: ModelVersions | undefined,
+  modelProvider: ModelProviders,
 ) {
-  return JSON.stringify(getModelConfigs(modelVersion, 'modelConfig'), null, 2);
+  return JSON.stringify(
+    getModelConfigs(modelVersion, modelProvider, 'modelConfig'),
+    null,
+    2,
+  );
 }
 
 export function getModelFileConfigJson(
   modelVersion: ModelVersions | undefined,
+  modelProvider: ModelProviders,
 ) {
-  const config = getModelConfigs(modelVersion, 'fileConfig');
+  const config = getModelConfigs(modelVersion, modelProvider, 'fileConfig');
   return config ? JSON.stringify(config, null, 2) : null;
 }
 
 export function getModelPriceConfigJson(
   modelVersion: ModelVersions | undefined,
+  modelProvider: ModelProviders,
 ) {
-  return JSON.stringify(getModelConfigs(modelVersion, 'priceConfig'), null, 2);
+  return JSON.stringify(
+    getModelConfigs(modelVersion, modelProvider, 'priceConfig'),
+    null,
+    2,
+  );
 }
 
 export function mergeConfigs(obj1: any, obj2: any) {

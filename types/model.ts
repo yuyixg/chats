@@ -38,7 +38,8 @@ export enum ModelVersions {
 }
 
 export enum ModelType {
-  GPT = 'GPT',
+  OpenAI = 'OpenAI',
+  Azure = 'Azure',
   QianWen = 'QianWen',
   QianFan = 'QianFan',
   Spark = 'Spark',
@@ -77,6 +78,7 @@ export interface ChatModelConfig {
   organization?: string;
   deploymentName?: string;
   enableSearch?: boolean;
+  model?: string;
 }
 
 export interface ChatModelPriceConfig {

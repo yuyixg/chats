@@ -21,7 +21,6 @@ import {
   PutModelParams,
 } from '@/types/admin';
 import { ModelProviders } from '@/types/model';
-import { ModelProviderTemplates } from '@/types/template';
 
 import FormSelect from '@/components/ui/form/select';
 import {
@@ -29,6 +28,7 @@ import {
   PopoverContent,
   PopoverTrigger,
 } from '@/components/ui/popover';
+import { Skeleton } from '@/components/ui/skeleton';
 
 import { Button } from '../../ui/button';
 import {
@@ -49,7 +49,7 @@ import { z } from 'zod';
 
 interface IProps {
   isOpen: boolean;
-  selected: GetModelResult | null;
+  selected: GetModelResult;
   onClose: () => void;
   onSuccessful: () => void;
   saveLoading?: boolean;
@@ -60,6 +60,7 @@ export const EditModelModal = (props: IProps) => {
   const { isOpen, onClose, selected, onSuccessful } = props;
   const [fileServices, setFileServices] = useState<GetFileServicesResult[]>([]);
   const [modelKeys, setModelKeys] = useState<GetModelKeysResult[]>([]);
+  const [loading, setLoading] = useState(true);
 
   const formSchema = z.object({
     modelVersion: z.string(),
@@ -124,6 +125,7 @@ export const EditModelModal = (props: IProps) => {
       });
       getModelKeys().then((data) => {
         setModelKeys(data);
+        setLoading(false);
       });
       form.reset();
       form.formState.isValid;
@@ -139,7 +141,8 @@ export const EditModelModal = (props: IProps) => {
         fileConfig,
         modelConfig,
         priceConfig,
-      } = selected!;
+        modelProvider,
+      } = selected;
       form.setValue('modelVersion', modelVersion);
       form.setValue('name', name);
       form.setValue('isDefault', isDefault);
@@ -152,14 +155,14 @@ export const EditModelModal = (props: IProps) => {
         form.setValue(
           'fileConfig',
           mergeConfigs(
-            getModelFileConfig(modelVersion),
+            getModelFileConfig(modelVersion, modelProvider),
             JSON.parse(fileConfig),
           ),
         );
       form.setValue(
         'modelConfig',
         mergeConfigs(
-          getModelModelConfig(modelVersion),
+          getModelModelConfig(modelVersion, modelProvider),
           JSON.parse(modelConfig),
         ),
       );
@@ -167,7 +170,7 @@ export const EditModelModal = (props: IProps) => {
         'priceConfig',
         conversionModelPriceToDisplay(
           mergeConfigs(
-            getModelPriceConfig(modelVersion),
+            getModelPriceConfig(modelVersion, modelProvider),
             JSON.parse(priceConfig),
           ),
         ),
@@ -181,192 +184,225 @@ export const EditModelModal = (props: IProps) => {
         <DialogHeader>
           <DialogTitle>{t('Edit Model')}</DialogTitle>
         </DialogHeader>
-        <Form {...form}>
-          <form onSubmit={form.handleSubmit(onSubmit)}>
-            <div className="grid grid-cols-2 gap-4">
-              <FormField
-                key="name"
-                control={form.control}
-                name="name"
-                render={({ field }) => {
-                  return (
-                    <FormInput field={field} label={t('Model Display Name')!} />
-                  );
-                }}
-              ></FormField>
-              <div className="flex justify-between">
+        {loading ? (
+          <div className="flex flex-col space-y-3">
+            <Skeleton className="h-[125px] w-full rounded-xl" />
+            <div className="space-y-2">
+              <Skeleton className="h-4 w-full" />
+              <Skeleton className="h-4 w-[90%]" />
+            </div>
+          </div>
+        ) : (
+          <Form {...form}>
+            <form onSubmit={form.handleSubmit(onSubmit)}>
+              <div className="grid grid-cols-2 gap-4">
                 <FormField
-                  key="modelKeysId"
+                  key="name"
                   control={form.control}
-                  name="modelKeysId"
+                  name="name"
+                  render={({ field }) => {
+                    return (
+                      <FormInput
+                        field={field}
+                        label={t('Model Display Name')!}
+                      />
+                    );
+                  }}
+                ></FormField>
+                <div className="flex justify-between">
+                  <FormField
+                    key="modelKeysId"
+                    control={form.control}
+                    name="modelKeysId"
+                    render={({ field }) => {
+                      return (
+                        <FormSelect
+                          className="w-full"
+                          field={field}
+                          label={t('Model Keys')!}
+                          items={modelKeys
+                            .filter(
+                              (x) =>
+                                x.type ===
+                                (selected.modelProvider as ModelProviders),
+                            )
+                            .map((keys) => ({
+                              name: keys.name,
+                              value: keys.id,
+                            }))}
+                        />
+                      );
+                    }}
+                  ></FormField>
+                  <div
+                    hidden={!form.getValues('modelKeysId')}
+                    className="text-sm mt-12 w-36 text-right"
+                  >
+                    <Popover>
+                      <PopoverTrigger>
+                        <span className="text-primary">
+                          {t('Click View Configs')}
+                        </span>
+                      </PopoverTrigger>
+                      <PopoverContent className="w-full">
+                        {JSON.stringify(
+                          modelKeys.find(
+                            (x) => x.id === form.getValues('modelKeysId'),
+                          )?.configs,
+                          null,
+                          2,
+                        )}
+                      </PopoverContent>
+                    </Popover>
+                  </div>
+                </div>
+              </div>
+              <div className="grid grid-cols-2 gap-4">
+                <FormField
+                  key="modelVersion"
+                  control={form.control}
+                  name="modelVersion"
+                  render={({ field }) => {
+                    return (
+                      <FormInput
+                        disabled
+                        field={field}
+                        label={t('Model Version')!}
+                      />
+                    );
+                  }}
+                ></FormField>
+                <FormField
+                  key="remarks"
+                  control={form.control}
+                  name="remarks"
+                  render={({ field }) => {
+                    return <FormInput field={field} label={t('Remarks')!} />;
+                  }}
+                ></FormField>
+              </div>
+              <div className="grid grid-cols-2 gap-4">
+                <FormField
+                  key="modelConfig"
+                  control={form.control}
+                  name="modelConfig"
+                  render={({ field }) => {
+                    return (
+                      <FormTextarea
+                        rows={7}
+                        hidden={
+                          !getModelModelConfig(
+                            selected.modelVersion,
+                            selected.modelProvider,
+                          )
+                        }
+                        label={t('Model Configs')!}
+                        field={field}
+                      />
+                    );
+                  }}
+                ></FormField>
+                <FormField
+                  key="priceConfig"
+                  control={form.control}
+                  name="priceConfig"
+                  render={({ field }) => {
+                    return (
+                      <FormTextarea
+                        rows={7}
+                        hidden={
+                          !getModelModelConfig(
+                            selected.modelVersion,
+                            selected.modelProvider,
+                          )
+                        }
+                        label={`${formatNumberAsMoney(ModelPriceUnit)} ${t(
+                          'Token Price',
+                        )}(${t('Yuan')})`}
+                        field={field}
+                      />
+                    );
+                  }}
+                ></FormField>
+              </div>
+              <div>
+                <FormField
+                  key="fileServiceId"
+                  control={form.control}
+                  name="fileServiceId"
                   render={({ field }) => {
                     return (
                       <FormSelect
-                        className="w-full"
                         field={field}
-                        label={t('Model Keys')!}
-                        items={modelKeys
-                          .filter(
-                            (x) =>
-                              x.type ===
-                              (selected?.modelProvider as ModelProviders),
+                        label={t('File Service Type')!}
+                        hidden={
+                          !getModelFileConfig(
+                            selected.modelVersion,
+                            selected.modelProvider,
                           )
-                          .map((keys) => ({
-                            name: keys.name,
-                            value: keys.id,
-                          }))}
+                        }
+                        items={fileServices.map((item) => ({
+                          name: item.name,
+                          value: item.id,
+                        }))}
                       />
                     );
                   }}
                 ></FormField>
-                <div
-                  hidden={!form.getValues('modelKeysId')}
-                  className="text-sm mt-12 w-36 text-right"
-                >
-                  <Popover>
-                    <PopoverTrigger>
-                      <span className="text-primary">
-                        {t('Click View Configs')}
-                      </span>
-                    </PopoverTrigger>
-                    <PopoverContent className="w-full">
-                      {JSON.stringify(
-                        modelKeys.find(
-                          (x) => x.id === form.getValues('modelKeysId'),
-                        )?.configs,
-                        null,
-                        2,
-                      )}
-                    </PopoverContent>
-                  </Popover>
+                <FormField
+                  key="fileConfig"
+                  control={form.control}
+                  name="fileConfig"
+                  render={({ field }) => {
+                    return (
+                      <FormTextarea
+                        rows={4}
+                        hidden={
+                          !getModelFileConfig(
+                            selected.modelVersion,
+                            selected.modelProvider,
+                          )
+                        }
+                        label={t('File Configs')!}
+                        field={field}
+                      />
+                    );
+                  }}
+                ></FormField>
+              </div>
+              <div className="grid grid-cols-2 gap-4">
+                <div className="flex gap-4">
+                  <FormField
+                    key={'isDefault'}
+                    control={form.control}
+                    name={'isDefault'}
+                    render={({ field }) => {
+                      return (
+                        <FormSwitch
+                          label={t('Provide new User')!}
+                          field={field}
+                        />
+                      );
+                    }}
+                  ></FormField>
+                  <FormField
+                    key={'enabled'}
+                    control={form.control}
+                    name={'enabled'}
+                    render={({ field }) => {
+                      return (
+                        <FormSwitch label={t('Is it enabled')!} field={field} />
+                      );
+                    }}
+                  ></FormField>
                 </div>
               </div>
-            </div>
-            <div className="grid grid-cols-2 gap-4">
-              <FormField
-                key="modelVersion"
-                control={form.control}
-                name="modelVersion"
-                render={({ field }) => {
-                  return (
-                    <FormInput
-                      disabled
-                      field={field}
-                      label={t('Model Version')!}
-                    />
-                  );
-                }}
-              ></FormField>
-              <FormField
-                key="remarks"
-                control={form.control}
-                name="remarks"
-                render={({ field }) => {
-                  return <FormInput field={field} label={t('Remarks')!} />;
-                }}
-              ></FormField>
-            </div>
-            <div className="grid grid-cols-2 gap-4">
-              <FormField
-                key="modelConfig"
-                control={form.control}
-                name="modelConfig"
-                render={({ field }) => {
-                  return (
-                    <FormTextarea
-                      rows={7}
-                      hidden={!getModelModelConfig(selected?.modelVersion)}
-                      label={t('Model Configs')!}
-                      field={field}
-                    />
-                  );
-                }}
-              ></FormField>
-              <FormField
-                key="priceConfig"
-                control={form.control}
-                name="priceConfig"
-                render={({ field }) => {
-                  return (
-                    <FormTextarea
-                      rows={7}
-                      hidden={!getModelModelConfig(selected?.modelVersion)}
-                      label={`${formatNumberAsMoney(ModelPriceUnit)} ${t(
-                        'Token Price',
-                      )}(${t('Yuan')})`}
-                      field={field}
-                    />
-                  );
-                }}
-              ></FormField>
-            </div>
-            <div>
-              <FormField
-                key="fileServiceId"
-                control={form.control}
-                name="fileServiceId"
-                render={({ field }) => {
-                  return (
-                    <FormSelect
-                      field={field}
-                      label={t('File Service Type')!}
-                      hidden={!getModelFileConfig(selected?.modelVersion)}
-                      items={fileServices.map((item) => ({
-                        name: item.name,
-                        value: item.id,
-                      }))}
-                    />
-                  );
-                }}
-              ></FormField>
-              <FormField
-                key="fileConfig"
-                control={form.control}
-                name="fileConfig"
-                render={({ field }) => {
-                  return (
-                    <FormTextarea
-                      rows={4}
-                      hidden={!getModelFileConfig(selected?.modelVersion)}
-                      label={t('File Configs')!}
-                      field={field}
-                    />
-                  );
-                }}
-              ></FormField>
-            </div>
-            <div className="grid grid-cols-2 gap-4">
-              <div className="flex gap-4">
-                <FormField
-                  key={'isDefault'}
-                  control={form.control}
-                  name={'isDefault'}
-                  render={({ field }) => {
-                    return (
-                      <FormSwitch
-                        label={t('Provide new User')!}
-                        field={field}
-                      />
-                    );
-                  }}
-                ></FormField>
-                <FormField
-                  key={'enabled'}
-                  control={form.control}
-                  name={'enabled'}
-                  render={({ field }) => {
-                    return (
-                      <FormSwitch label={t('Is it enabled')!} field={field} />
-                    );
-                  }}
-                ></FormField>
-              </div>
-            </div>
-            <DialogFooter className="pt-4">
-              <Button type="submit">{t('Save')}</Button>
-            </DialogFooter>
-          </form>
-        </Form>
+              <DialogFooter className="pt-4">
+                <Button type="submit">{t('Save')}</Button>
+              </DialogFooter>
+            </form>
+          </Form>
+        )}
       </DialogContent>
     </Dialog>
   );
