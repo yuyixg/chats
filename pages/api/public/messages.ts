@@ -13,22 +13,29 @@ export const config = {
 };
 
 const handler = async (req: NextApiRequest) => {
-  const { messageId } = req.query as { messageId: string };
-  if (!messageId) {
+  const { chatId } = req.query as {
+    chatId: string;
+  };
+  
+  if (!chatId) {
     throw new BadRequest();
   }
-  const chat = await ChatsManager.findChatById(messageId);
+
+  const chat = await ChatsManager.findChatById(chatId);
   if (!chat || !chat.isShared) {
     throw new BadRequest();
   }
 
-  const messages = await ChatMessagesManager.findUserMessageByChatId(chat.id);
-
-  return {
-    name: chat.title,
-    prompt: chat.userModelConfig,
-    messages: messages,
-  };
+  if (chatId) {
+    const chat = await ChatsManager.findChatIncludeAllById(chatId);
+    const chatMessages =
+      await ChatMessagesManager.findUserMessageDetailByChatId(chatId);
+    return {
+      name: chat?.title,
+      modelName: chat?.chatModel?.name,
+      messages: chatMessages,
+    };
+  }
 };
 
 export default apiHandler(handler);

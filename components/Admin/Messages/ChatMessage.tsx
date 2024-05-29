@@ -3,8 +3,6 @@ import {
   IconChevronLeft,
   IconChevronRight,
   IconCopy,
-  IconEdit,
-  IconRefresh,
   IconRobot,
   IconUser,
 } from '@/components/Icons/index';
@@ -16,7 +14,6 @@ import { MemoizedReactMarkdown } from '../../Markdown/MemoizedReactMarkdown';
 import rehypeMathjax from 'rehype-mathjax';
 import remarkGfm from 'remark-gfm';
 import remarkMath from 'remark-math';
-import { HomeContext } from '@/pages/home/home';
 import { Button } from '../../ui/button';
 
 export interface Props {
@@ -43,38 +40,12 @@ export const ChatMessage: FC<Props> = memo(
     assistantChildrenIds,
     currentSelectIndex,
     assistantCurrentSelectIndex,
-    parentId,
     modelName,
     message,
-    onEdit,
     onChangeMessage,
-    onRegenerate,
   }) => {
-    const { t } = useTranslation('chat');
-
-    const [isEditing, setIsEditing] = useState<boolean>(false);
-    const [isTyping, setIsTyping] = useState<boolean>(false);
-    const [messageContent, setMessageContent] = useState(message.content);
     const [messagedCopied, setMessageCopied] = useState(false);
-    const textareaRef = useRef<HTMLTextAreaElement>(null);
-
-    const toggleEditing = () => {
-      setIsEditing(!isEditing);
-    };
-
-    const handleInputChange = (
-      event: React.ChangeEvent<HTMLTextAreaElement>
-    ) => {
-      setMessageContent({
-        text: event.target.value,
-        image: message.content.image,
-      });
-      if (textareaRef.current) {
-        textareaRef.current.style.height = 'inherit';
-        textareaRef.current.style.height = `${textareaRef.current.scrollHeight}px`;
-      }
-    };
-
+    
     const copyOnClick = () => {
       if (!navigator.clipboard) return;
 
@@ -85,17 +56,6 @@ export const ChatMessage: FC<Props> = memo(
         }, 2000);
       });
     };
-
-    useEffect(() => {
-      setMessageContent(message.content);
-    }, [message.content]);
-
-    useEffect(() => {
-      if (textareaRef.current) {
-        textareaRef.current.style.height = 'inherit';
-        textareaRef.current.style.height = `${textareaRef.current.scrollHeight}px`;
-      }
-    }, [isEditing]);
 
     return (
       <div

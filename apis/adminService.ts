@@ -142,10 +142,10 @@ export const putFileService = (params: PutFileServicesParams) => {
 };
 
 export const getShareMessage = (
-  messageId: string
+  chatId: string
 ): Promise<GetMessageDetailsResult> => {
   const fetchService = useFetch();
-  return fetchService.get(`/api/public/messages?messageId=${messageId}`);
+  return fetchService.get(`/api/public/messages?chatId=${chatId}`);
 };
 
 export const getRequestLogs = (

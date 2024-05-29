@@ -42,6 +42,7 @@ import {
 import { Role } from '@/types/chat';
 import { getStorageModelId, setStorageModelId } from '@/utils/model';
 interface HandleUpdateChatParams {
+  isShared?: boolean;
   title?: string;
   chatModelId?: string;
 }

@@ -3,7 +3,12 @@ import { PostPromptParams, PutPromptParams } from '@/types/admin';
 import { ChatMessage } from '@/types/chatMessage';
 import { Model } from '@/types/model';
 import { Prompt } from '@/types/prompt';
-import { GetUserBalanceResult, ProviderResult, SingInParams, SingInResult } from '@/types/user';
+import {
+  GetUserBalanceResult,
+  ProviderResult,
+  SingInParams,
+  SingInResult,
+} from '@/types/user';
 
 export interface ChatResult {
   id: string;
@@ -61,26 +66,6 @@ export const putChats = (params: PutChatParams) => {
 export const deleteChats = (id: string) => {
   const fetchService = useFetch();
   return fetchService.delete('/api/user/chats?id=' + id);
-};
-
-export const putUserMessages = (
-  id: string,
-  name: string,
-  isShared?: boolean
-) => {
-  const fetchService = useFetch();
-  return fetchService.put('/api/messages', {
-    body: {
-      id,
-      name,
-      isShared,
-    },
-  });
-};
-
-export const deleteUserMessages = (id: string) => {
-  const fetchService = useFetch();
-  return fetchService.delete('/api/messages?id=' + id);
 };
 
 export const getCsrfToken = (): Promise<{ csrfToken: string }> => {

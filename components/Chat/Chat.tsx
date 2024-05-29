@@ -22,6 +22,8 @@ import { CurrentModel, ModelApiConfig } from '@/types/model';
 import { ModelTemplates } from '@/types/template';
 import { SystemPrompt } from './SystemPrompt';
 import EnableNetworkSearch from './EnableNetworkSearch';
+import { SharedMessageModal } from './SharedMessageModal';
+import { IconShare } from '../Icons';
 interface Props {
   stopConversationRef: MutableRefObject<boolean>;
 }
@@ -299,12 +301,9 @@ export const Chat = memo(({ stopConversationRef }: Props) => {
     setShowSettings(!showSettings);
   };
 
-  // const handleSharedMessage = (isShare: boolean) => {
-  //   handleUpdateConversation(selectedConversation!, {
-  //     key: 'isShared',
-  //     value: isShare,
-  //   });
-  // };
+  const handleSharedMessage = (isShared: boolean) => {
+    handleUpdateChat(chats, selectChatId!, { isShared });
+  };
 
   const scrollDown = () => {
     if (autoScrollEnabled) {
@@ -417,20 +416,20 @@ export const Chat = memo(({ stopConversationRef }: Props) => {
             <>
               {currentSelectChat && (
                 <div className='sticky top-0 z-10 bg-white py-2 text-sm text-neutral-500 dark:border-none dark:bg-[#262630] dark:text-neutral-200'>
-                  <div className='mt-[6px] md:mt-3 flex justify-center gap-1'>
+                  <div className='mt-[6px] md:mt-3 flex justify-center items-center gap-1'>
                     <div>{currentModel.name}</div>
                     {currentModel?.temperature && (
                       <div className='flex'>{currentModel.temperature}­°C</div>
                     )}
-                    {/* <div>
+                    {currentModel.name && (
                       <button
-                        className='ml-2 cursor-pointer hover:opacity-50'
+                        className='ml-1 cursor-pointer hover:opacity-50'
                         onClick={() => {
                           setShowShareModal(true);
                         }}
                       >
                         <IconShare
-                          size={18}
+                          size={16}
                           stroke={
                             currentSelectChat?.isShared
                               ? 'hsl(var(--primary))'
@@ -438,7 +437,7 @@ export const Chat = memo(({ stopConversationRef }: Props) => {
                           }
                         />
                       </button>
-                    </div> */}
+                    )}
                   </div>
                 </div>
               )}
@@ -521,14 +520,16 @@ export const Chat = memo(({ stopConversationRef }: Props) => {
             showScrollDownButton={showScrollDownButton}
           />
         )}
-        {/* <SharedMessageModal
-          isOpen={showShareModal}
-          onClose={() => {
-            setShowShareModal(false);
-          }}
-          conversation={selectedConversation}
-          onShareChange={handleSharedMessage}
-        /> */}
+        {showShareModal && (
+          <SharedMessageModal
+            isOpen={showShareModal}
+            onClose={() => {
+              setShowShareModal(false);
+            }}
+            chat={currentSelectChat!}
+            onShareChange={handleSharedMessage}
+          />
+        )}
       </>
     </div>
   );
