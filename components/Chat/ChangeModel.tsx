@@ -5,9 +5,11 @@ import { IconChevronDown } from '../Icons';
 import { Button } from '../ui/button';
 
 const ChangeModel = ({
-  onChangeModel,
+  readonly,
   modelName,
+  onChangeModel,
 }: {
+  readonly: boolean;
   modelName: string;
   onChangeModel: (modelId: string) => void;
 }) => {
@@ -17,10 +19,10 @@ const ChangeModel = ({
 
   return (
     <Popover>
-      <PopoverTrigger className='flex'>
+      <PopoverTrigger className='flex' disabled={readonly}>
         <Button variant='ghost' className='p-1 m-0 h-auto'>
           <span className='text-[#7d7d7d] text-sm font-bold'>{modelName}</span>
-          <IconChevronDown stroke='#7d7d7d' />
+          {!readonly && <IconChevronDown stroke='#7d7d7d' />}
         </Button>
       </PopoverTrigger>
       <PopoverContent>

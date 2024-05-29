@@ -464,6 +464,7 @@ export const Chat = memo(({ stopConversationRef }: Props) => {
                 }
                 return (
                   <MemoizedChatMessage
+                    readonly={!canChat}
                     currentSelectIndex={parentChildrenIds.findIndex(
                       (x) => x === current.id
                     )}

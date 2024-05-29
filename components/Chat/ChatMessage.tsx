@@ -23,6 +23,7 @@ import ChatError from './ChatError';
 import ChatButtonToolTip from './ChatButtonTooltip';
 
 export interface Props {
+  readonly?: boolean;
   id: string;
   isLastMessage: boolean;
   parentId: string | null;
@@ -40,6 +41,7 @@ export interface Props {
 
 export const ChatMessage: FC<Props> = memo(
   ({
+    readonly = false,
     id,
     isLastMessage,
     parentChildrenIds,
@@ -419,23 +421,26 @@ export const ChatMessage: FC<Props> = memo(
                           content={t('Copy')!}
                         />
                       )}
-                      <ChatButtonToolTip
-                        trigger={
-                          <Button
-                            variant='ghost'
-                            className='p-1 m-0 h-auto'
-                            onClick={() => {
-                              onRegenerate && onRegenerate();
-                            }}
-                          >
-                            <IconRefresh stroke='#7d7d7d' />
-                          </Button>
-                        }
-                        content={t('Regenerate')!}
-                      />
+                      {!readonly && (
+                        <ChatButtonToolTip
+                          trigger={
+                            <Button
+                              variant='ghost'
+                              className='p-1 m-0 h-auto'
+                              onClick={() => {
+                                onRegenerate && onRegenerate();
+                              }}
+                            >
+                              <IconRefresh stroke='#7d7d7d' />
+                            </Button>
+                          }
+                          content={t('Regenerate')!}
+                        />
+                      )}
                       <ChatButtonToolTip
                         trigger={
                           <ChangeModel
+                            readonly={readonly}
                             onChangeModel={(modelId) => {
                               onRegenerate && onRegenerate(modelId);
                             }}
