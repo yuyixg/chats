@@ -27,9 +27,10 @@ import {
 } from '@/components/Icons/index';
 
 import UploadButton from '../UploadButton';
-import { Button } from '../ui/button';
 import { PromptList } from './PromptList';
 import { VariableModal } from './VariableModal';
+
+import { stopChat } from '@/apis/userService';
 
 interface Props {
   onSend: (message: Message) => void;
@@ -58,6 +59,7 @@ export const ChatInput = ({
       chatError,
     },
     getModel,
+    handleUpdateCurrentMessage,
   } = useContext(HomeContext);
 
   const { fileConfig, fileServerConfig, modelConfig } =
@@ -123,11 +125,9 @@ export const ChatInput = ({
     }
   };
 
-  const handleStopConversation = () => {
+  const handleStopChat = () => {
     stopConversationRef.current = true;
-    setTimeout(() => {
-      stopConversationRef.current = false;
-    }, 1000);
+    stopChat(selectChatId!);
   };
 
   const handleKeyDown = (e: KeyboardEvent<HTMLTextAreaElement>) => {
@@ -302,7 +302,7 @@ export const ChatInput = ({
               >
                 {messageIsStreaming ? (
                   <IconStopFilled
-                    onClick={handleStopConversation}
+                    onClick={handleStopChat}
                     className="h-4 w-4"
                   />
                 ) : (

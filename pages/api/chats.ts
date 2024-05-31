@@ -5,6 +5,7 @@ import { QianFanStream } from '@/services/qianfan';
 import { QianWenStream } from '@/services/qianwen';
 import ChatStreamResult from '@/services/type';
 
+import { addChat, checkChatIsStopped, stopChat } from '@/utils/chats';
 import {
   BadRequest,
   InternalServerError,
@@ -51,6 +52,7 @@ const handler = async (req: ChatsApiRequest, res: ChatsApiResponse) => {
   const { chatId, modelId, userMessage, messageId, userModelConfig } =
     req.body as ChatBody;
   const userMessageText = userMessage.text!;
+  addChat(chatId);
 
   const chatModel = await ChatModelManager.findModelById(modelId);
   if (!chatModel?.enabled) {
@@ -309,13 +311,12 @@ const handler = async (req: ChatsApiRequest, res: ChatsApiResponse) => {
       const streamResponse = async () => {
         while (true) {
           const { done, value } = await reader.read();
-
           if (value) {
             result = JSON.parse(value) as ChatStreamResult;
             assistantResponse += result.text;
           }
-
-          if (done) {
+          if (done || checkChatIsStopped(chatId)) {
+            stopChat(chatId);
             const { totalTokens, inputTokens, outputTokens } = result.usage;
             const tokenUsed = totalTokens;
             const calculatedPrice = calcTokenPrice(

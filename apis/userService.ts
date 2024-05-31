@@ -64,6 +64,11 @@ export const putChats = (params: PutChatParams) => {
   return fetchService.put('/api/user/chats', { body: params });
 };
 
+export const stopChat = (chatId: string) => {
+  const fetchService = useFetch();
+  return fetchService.post('/api/user/chat-stop', { body: { chatId } });
+};
+
 export const deleteChats = (id: string) => {
   const fetchService = useFetch();
   return fetchService.delete('/api/user/chats?id=' + id);

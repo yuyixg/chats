@@ -109,8 +109,6 @@ export class UserBalancesManager {
         type: BalanceType.Consume,
         userId,
       },
-      skip: 0,
-      take: 7,
       orderBy: { createdAt: 'desc' },
     });
     return {

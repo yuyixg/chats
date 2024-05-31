@@ -54,12 +54,10 @@ export const Chat = memo(({ stopConversationRef }: Props) => {
     handleUpdateCurrentMessage,
     handleUpdateChat,
     handleUpdateUserModelConfig,
-    hasModel,
     getModel,
     dispatch: homeDispatch,
   } = useContext(HomeContext);
   const [autoScrollEnabled, setAutoScrollEnabled] = useState<boolean>(true);
-  const [showSettings, setShowSettings] = useState<boolean>(false);
   const [showScrollDownButton, setShowScrollDownButton] =
     useState<boolean>(false);
   const [showShareModal, setShowShareModal] = useState(false);
@@ -260,8 +258,10 @@ export const Chat = memo(({ stopConversationRef }: Props) => {
         });
       homeDispatch({ field: 'loading', value: false });
       homeDispatch({ field: 'messageIsStreaming', value: false });
-      !stopConversationRef.current &&
+      setTimeout(() => {
         handleUpdateCurrentMessage(_selectChatId!);
+      }, 100);
+      stopConversationRef.current = false;
     },
     [
       userModelConfig,
@@ -302,10 +302,6 @@ export const Chat = memo(({ stopConversationRef }: Props) => {
       top: chatContainerRef.current.scrollHeight,
       behavior: 'smooth',
     });
-  };
-
-  const handleSettings = () => {
-    setShowSettings(!showSettings);
   };
 
   const handleSharedMessage = (isShared: boolean) => {
@@ -393,7 +389,7 @@ export const Chat = memo(({ stopConversationRef }: Props) => {
                         }}
                       />
                     )}
-                    {currentModel.temperature && (
+                    {currentModel?.temperature && (
                       <TemperatureSlider
                         label={t('Temperature')}
                         min={modeApiConfig.temperature.min}
@@ -447,14 +443,6 @@ export const Chat = memo(({ stopConversationRef }: Props) => {
                         />
                       </button>
                     )}
-                  </div>
-                </div>
-              )}
-
-              {showSettings && (
-                <div className="flex flex-col space-y-10 md:mx-auto md:max-w-xl md:gap-6 md:py-3 md:pt-6 lg:max-w-2xl lg:px-0 xl:max-w-3xl">
-                  <div className="flex h-full flex-col space-y-4 border-b border-neutral-200 p-4 dark:border-neutral-600 md:rounded-lg md:border">
-                    <ModelSelect />
                   </div>
                 </div>
               )}

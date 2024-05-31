@@ -10,6 +10,9 @@ const nextConfig = {
 
     return config;
   },
+  publicRuntimeConfig: {
+    chattingIds: {}
+  }
 };
 
 module.exports = nextConfig;

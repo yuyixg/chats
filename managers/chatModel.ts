@@ -43,6 +43,8 @@ export class ChatModelRecordManager {
           userMessageText.length > 30
             ? userMessageText.substring(0, 30) + '...'
             : userMessageText;
+      } else {
+        delete updateChatParams.chatModelId;
       }
       await this.updateChat(tx, updateChatParams);
       const chatMessage = await this.createChatMessage(
