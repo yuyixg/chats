@@ -122,7 +122,30 @@ export function getModelDefaultTemplate(
 ) {
   if (provider === ModelProviders.OpenAI) {
     switch (version) {
-      case ModelVersions.GPT_3_5:
+      case ModelVersions.GPT_3_5: {
+        return {
+          type: ModelType.OpenAI,
+          config: {
+            temperature: {
+              min: 0,
+              max: 2,
+            },
+          },
+          modelConfig: {
+            prompt:
+              "You are ChatGPT, a large language model trained by OpenAI. Follow the user's instructions carefully. Respond using markdown.",
+            temperature: 0.5,
+            organization: '',
+            model: 'gpt-3.5',
+          },
+          apiConfig: gptApiConfig,
+          fileConfig: null,
+          priceConfig: {
+            input: 0.00001085,
+            out: 0.00001446,
+          },
+        };
+      }
       case ModelVersions.GPT_4: {
         return {
           type: ModelType.OpenAI,
@@ -137,7 +160,7 @@ export function getModelDefaultTemplate(
               "You are ChatGPT, a large language model trained by OpenAI. Follow the user's instructions carefully. Respond using markdown.",
             temperature: 0.5,
             organization: '',
-            model: '',
+            model: 'gpt-4',
           },
           apiConfig: gptApiConfig,
           fileConfig: null,
@@ -161,7 +184,7 @@ export function getModelDefaultTemplate(
               "You are ChatGPT, a large language model trained by OpenAI. Follow the user's instructions carefully. Respond using markdown.",
             temperature: 0.5,
             organization: '',
-            model: '',
+            model: 'gpt-4-vision',
           },
           apiConfig: gptApiConfig,
           fileConfig: { count: 5, maxSize: 10240 },

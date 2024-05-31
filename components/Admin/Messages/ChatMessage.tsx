@@ -215,7 +215,7 @@ export const ChatMessage: FC<Props> = memo(
                   </MemoizedReactMarkdown>
                 </div>
 
-                <div className="flex gap-1 pt-2">
+                <div className="flex gap-1 pt-2 flex-wrap">
                   {assistantChildrenIds.length > 1 && (
                     <div className="flex text-sm items-center ml-[-8px]">
                       <Button

@@ -74,7 +74,6 @@ interface HomeInitialState {
   showChatbar: boolean;
   showPromptbar: boolean;
   searchTerm: string;
-  canChat: boolean;
 }
 
 const initialState: HomeInitialState = {
@@ -97,7 +96,6 @@ const initialState: HomeInitialState = {
   showPromptbar: false,
   showChatbar: true,
   searchTerm: '',
-  canChat: false,
 };
 
 interface HomeContextProps {
@@ -140,12 +138,14 @@ const Home = () => {
   const calcSelectModelId = (chats: ChatResult[], models: Model[]) => {
     const lastChat = chats.findLast((x) => x.chatModelId);
     const model = models.find((x) => x.id === lastChat?.chatModelId);
-    if (lastChat && lastChat.chatModelId && model) return lastChat.chatModelId;
+    if (model) return lastChat!.chatModelId;
     else return models.length > 0 ? models[0].id : undefined;
   };
 
-  const getChatModelId = (chatId: string) => {
-    return chats.find((x) => x.id === chatId)?.chatModelId;
+  const getChatModelId = (chatId: string, models: Model[]) => {
+    const chatModelId = chats.find((x) => x.id === chatId)?.chatModelId;
+    const model = models.find((x) => x.id === chatModelId);
+    return model?.id;
   };
 
   const chatErrorMessage = (message: ChatMessage) => {
@@ -230,14 +230,8 @@ const Home = () => {
           value: [],
         });
       }
-      dispatch({
-        field: 'canChat',
-        value:
-          (hasModel() && data.length === 0) ||
-          models.find((x) => x.id === chat?.chatModelId),
-      });
       const selectModelId =
-        getChatModelId(chatId) || calcSelectModelId(chats, models);
+        getChatModelId(chatId, models) || calcSelectModelId(chats, models);
       selectModelId && setStorageModelId(selectModelId);
       dispatch({
         field: 'selectModelId',
@@ -341,15 +335,9 @@ const Home = () => {
             value: [],
           });
         }
-        const hasModel = models.length > 0;
-        dispatch({
-          field: 'canChat',
-          value:
-            (hasModel && data.length === 0) ||
-            models.find((x) => x.id === chat?.chatModelId),
-        });
         const modelId =
-          chat?.chatModelId || calcSelectModelId(chatList, models);
+          getChatModelId(chat?.id, models) ||
+          calcSelectModelId(chatList, models);
         dispatch({
           field: 'selectModelId',
           value: modelId,

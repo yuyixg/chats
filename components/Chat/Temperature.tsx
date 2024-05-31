@@ -4,6 +4,8 @@ import { useTranslation } from 'next-i18next';
 
 import { HomeContext } from '@/pages/home/home';
 
+import { Slider } from '../ui/slider';
+
 interface Props {
   label: string;
   defaultTemperature: number;
@@ -24,8 +26,8 @@ export const TemperatureSlider: FC<Props> = ({
   } = useContext(HomeContext);
   const [temperature, setTemperature] = useState(defaultTemperature);
   const { t } = useTranslation('chat');
-  const handleChange = (event: React.ChangeEvent<HTMLInputElement>) => {
-    const newValue = parseFloat(event.target.value);
+  const handleChange = (value: number[]) => {
+    const newValue = value[0];
     setTemperature(newValue);
     onChangeTemperature(newValue);
   };
@@ -47,14 +49,13 @@ export const TemperatureSlider: FC<Props> = ({
       <span className="mt-2 mb-1 text-center text-neutral-900 dark:text-neutral-100">
         {temperature.toFixed(2)}
       </span>
-      <input
+      <Slider
         className="cursor-pointer"
-        type="range"
         min={min}
         max={max}
         step={0.01}
-        value={temperature}
-        onChange={handleChange}
+        value={[temperature]}
+        onValueChange={handleChange}
       />
       <ul className="w mt-2 pb-8 flex justify-between px-[24px] text-neutral-900 dark:text-neutral-100">
         <li className="flex justify-center">

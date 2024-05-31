@@ -298,7 +298,7 @@ const IconSend = (props: IconProps) => {
   );
 };
 
-const IconUpload = (props: IconProps) => {
+const IconPaperclip = (props: IconProps) => {
   const { className, size = 20, strokeWidth = 2, stroke, onClick } = props;
 
   return (
@@ -316,9 +316,7 @@ const IconUpload = (props: IconProps) => {
       strokeLinejoin="round"
     >
       <path stroke="none" d="M0 0h24v24H0z" fill="none" />
-      <path d="M4 17v2a2 2 0 0 0 2 2h12a2 2 0 0 0 2 -2v-2" />
-      <path d="M7 9l5 -5l5 5" />
-      <path d="M12 4l0 12" />
+      <path d="M15 7l-6.5 6.5a1.5 1.5 0 0 0 3 3l6.5 -6.5a3 3 0 0 0 -6 -6l-6.5 6.5a4.5 4.5 0 0 0 9 9l6.5 -6.5" />
     </svg>
   );
 };
@@ -628,29 +626,7 @@ const IconBulbFilled = (props: IconProps) => {
     </svg>
   );
 };
-const IconMenu = (props: IconProps) => {
-  const { className, size = 20, strokeWidth = 2, stroke, onClick } = props;
 
-  return (
-    <svg
-      xmlns="http://www.w3.org/2000/svg"
-      onClick={onClick}
-      className={className}
-      width={size}
-      height={size}
-      strokeWidth={strokeWidth}
-      stroke={stroke || 'hsl(var(--foreground))'}
-      viewBox="0 0 24 24"
-      fill="none"
-      strokeLinecap="round"
-      strokeLinejoin="round"
-    >
-      <path stroke="none" d="M0 0h24v24H0z" fill="none" />
-      <path d="M4 8l16 0" />
-      <path d="M4 16l16 0" />
-    </svg>
-  );
-};
 const IconMistOff = (props: IconProps) => {
   const { className, size = 20, strokeWidth = 2, stroke, onClick } = props;
 
@@ -1093,6 +1069,204 @@ var IconError = (props: IconProps) => {
   );
 };
 
+var IconSquarePlus = (props: IconProps) => {
+  const { className, size = 20, strokeWidth = 2, stroke, onClick } = props;
+
+  return (
+    <svg
+      xmlns="http://www.w3.org/2000/svg"
+      onClick={onClick}
+      className={className}
+      width={size}
+      height={size}
+      strokeWidth={strokeWidth}
+      stroke={stroke || 'hsl(var(--foreground))'}
+      viewBox="0 0 24 24"
+      fill="none"
+      strokeLinecap="round"
+      strokeLinejoin="round"
+    >
+      <path stroke="none" d="M0 0h24v24H0z" fill="none" />
+      <path d="M12 3c7.2 0 9 1.8 9 9s-1.8 9 -9 9s-9 -1.8 -9 -9s1.8 -9 9 -9z" />
+      <path d="M15 12h-6" />
+      <path d="M12 9v6" />
+    </svg>
+  );
+};
+
+var IconMessageCirclePlus = (props: IconProps) => {
+  const { className, size = 20, strokeWidth = 2, stroke, onClick } = props;
+
+  return (
+    <svg
+      xmlns="http://www.w3.org/2000/svg"
+      onClick={onClick}
+      className={className}
+      width={size}
+      height={size}
+      strokeWidth={strokeWidth}
+      stroke={stroke || 'hsl(var(--foreground))'}
+      viewBox="0 0 24 24"
+      fill="none"
+      strokeLinecap="round"
+      strokeLinejoin="round"
+    >
+      <path stroke="none" d="M0 0h24v24H0z" fill="none" />
+      <path d="M12.007 19.98a9.869 9.869 0 0 1 -4.307 -.98l-4.7 1l1.3 -3.9c-2.324 -3.437 -1.426 -7.872 2.1 -10.374c3.526 -2.501 8.59 -2.296 11.845 .48c1.992 1.7 2.93 4.04 2.747 6.34" />
+      <path d="M16 19h6" />
+      <path d="M19 16v6" />
+    </svg>
+  );
+};
+
+var IconLayoutSidebarRightExpand = (props: IconProps) => {
+  const { className, size = 20, strokeWidth = 2, stroke, onClick } = props;
+
+  return (
+    <svg
+      xmlns="http://www.w3.org/2000/svg"
+      onClick={onClick}
+      className={className}
+      width={size}
+      height={size}
+      strokeWidth={strokeWidth}
+      stroke={stroke || 'hsl(var(--foreground))'}
+      viewBox="0 0 24 24"
+      fill="none"
+      strokeLinecap="round"
+      strokeLinejoin="round"
+    >
+      <path stroke="none" d="M0 0h24v24H0z" fill="none" />
+      <path d="M4 4m0 2a2 2 0 0 1 2 -2h12a2 2 0 0 1 2 2v12a2 2 0 0 1 -2 2h-12a2 2 0 0 1 -2 -2z" />
+      <path d="M15 4v16" />
+      <path d="M10 10l-2 2l2 2" />
+    </svg>
+  );
+};
+
+var IconLayoutSidebarLeftExpand = (props: IconProps) => {
+  const { className, size = 20, strokeWidth = 2, stroke, onClick } = props;
+
+  return (
+    <svg
+      xmlns="http://www.w3.org/2000/svg"
+      onClick={onClick}
+      className={className}
+      width={size}
+      height={size}
+      strokeWidth={strokeWidth}
+      stroke={stroke || 'hsl(var(--foreground))'}
+      viewBox="0 0 24 24"
+      fill="none"
+      strokeLinecap="round"
+      strokeLinejoin="round"
+    >
+      <path stroke="none" d="M0 0h24v24H0z" fill="none" />
+      <path d="M4 4m0 2a2 2 0 0 1 2 -2h12a2 2 0 0 1 2 2v12a2 2 0 0 1 -2 2h-12a2 2 0 0 1 -2 -2z" />
+      <path d="M9 4v16" />
+      <path d="M14 10l2 2l-2 2" />
+    </svg>
+  );
+};
+
+var IconLayoutSidebarRightCollapse = (props: IconProps) => {
+  const { className, size = 20, strokeWidth = 2, stroke, onClick } = props;
+
+  return (
+    <svg
+      xmlns="http://www.w3.org/2000/svg"
+      onClick={onClick}
+      className={className}
+      width={size}
+      height={size}
+      strokeWidth={strokeWidth}
+      stroke={stroke || 'hsl(var(--foreground))'}
+      viewBox="0 0 24 24"
+      fill="none"
+      strokeLinecap="round"
+      strokeLinejoin="round"
+    >
+      <path stroke="none" d="M0 0h24v24H0z" fill="none" />
+      <path d="M4 4m0 2a2 2 0 0 1 2 -2h12a2 2 0 0 1 2 2v12a2 2 0 0 1 -2 2h-12a2 2 0 0 1 -2 -2z" />
+      <path d="M15 4v16" />
+      <path d="M9 10l2 2l-2 2" />
+    </svg>
+  );
+};
+
+var IconLayoutSidebarLeftCollapse = (props: IconProps) => {
+  const { className, size = 20, strokeWidth = 2, stroke, onClick } = props;
+
+  return (
+    <svg
+      xmlns="http://www.w3.org/2000/svg"
+      onClick={onClick}
+      className={className}
+      width={size}
+      height={size}
+      strokeWidth={strokeWidth}
+      stroke={stroke || 'hsl(var(--foreground))'}
+      viewBox="0 0 24 24"
+      fill="none"
+      strokeLinecap="round"
+      strokeLinejoin="round"
+    >
+      <path stroke="none" d="M0 0h24v24H0z" fill="none" />
+      <path d="M4 4m0 2a2 2 0 0 1 2 -2h12a2 2 0 0 1 2 2v12a2 2 0 0 1 -2 2h-12a2 2 0 0 1 -2 -2z" />
+      <path d="M9 4v16" />
+      <path d="M15 10l-2 2l2 2" />
+    </svg>
+  );
+};
+
+var IconLayoutSidebar = (props: IconProps) => {
+  const { className, size = 20, strokeWidth = 2, stroke, onClick } = props;
+
+  return (
+    <svg
+      xmlns="http://www.w3.org/2000/svg"
+      onClick={onClick}
+      className={className}
+      width={size}
+      height={size}
+      strokeWidth={strokeWidth}
+      stroke={stroke || 'hsl(var(--foreground))'}
+      viewBox="0 0 24 24"
+      fill="none"
+      strokeLinecap="round"
+      strokeLinejoin="round"
+    >
+      <path stroke="none" d="M0 0h24v24H0z" fill="none" />
+      <path d="M4 4m0 2a2 2 0 0 1 2 -2h12a2 2 0 0 1 2 2v12a2 2 0 0 1 -2 2h-12a2 2 0 0 1 -2 -2z" />
+      <path d="M9 4l0 16" />
+    </svg>
+  );
+};
+
+var IconLayoutSidebarRight = (props: IconProps) => {
+  const { className, size = 20, strokeWidth = 2, stroke, onClick } = props;
+
+  return (
+    <svg
+      xmlns="http://www.w3.org/2000/svg"
+      onClick={onClick}
+      className={className}
+      width={size}
+      height={size}
+      strokeWidth={strokeWidth}
+      stroke={stroke || 'hsl(var(--foreground))'}
+      viewBox="0 0 24 24"
+      fill="none"
+      strokeLinecap="round"
+      strokeLinejoin="round"
+    >
+      <path stroke="none" d="M0 0h24v24H0z" fill="none" />
+      <path d="M4 4m0 2a2 2 0 0 1 2 -2h12a2 2 0 0 1 2 2v12a2 2 0 0 1 -2 2h-12a2 2 0 0 1 -2 -2z" />
+      <path d="M15 4l0 16" />
+    </svg>
+  );
+};
+
 var Base = (props: IconProps) => {
   const { className, size = 20, strokeWidth = 2, stroke, onClick } = props;
 
@@ -1122,7 +1296,7 @@ export {
   IconArrowDown,
   IconCircleX,
   IconSend,
-  IconUpload,
+  IconPaperclip,
   IconEdit,
   IconTrash,
   IconLogout,
@@ -1136,7 +1310,6 @@ export {
   IconX,
   IconClipboard,
   IconBulbFilled,
-  IconMenu,
   IconMistOff,
   IconPlus,
   IconSquareRoundedX,
@@ -1156,4 +1329,8 @@ export {
   IconChevronRight,
   IconChevronDown,
   IconError,
+  IconSquarePlus,
+  IconMessageCirclePlus,
+  IconLayoutSidebar,
+  IconLayoutSidebarRight,
 };

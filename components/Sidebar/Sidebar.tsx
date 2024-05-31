@@ -1,11 +1,22 @@
-import { ReactNode } from 'react';
+import { ReactNode, useContext } from 'react';
 
 import { useTranslation } from 'next-i18next';
 
-import { IconMistOff } from '@/components/Icons/index';
+import { HomeContext } from '@/pages/home/home';
 
+import {
+  IconLayoutSidebar,
+  IconLayoutSidebarRight,
+  IconMistOff,
+  IconSquarePlus,
+} from '@/components/Icons/index';
+
+import ButtonToolTip from '../ButtonToolTip/ButtonToolTip';
 import Search from '../Search';
-import { CloseSidebarButton, OpenSidebarButton } from './OpenCloseButton';
+import { Button } from '../ui/button';
+import { OpenSidebarButton } from './OpenCloseButton';
+
+import { cn } from '@/lib/utils';
 
 interface Props<T> {
   showOpenButton?: boolean;
@@ -39,28 +50,57 @@ const Sidebar = <T,>({
   hasModel,
 }: Props<T>) => {
   const { t } = useTranslation('prompt');
-
+  const { dispatch: homeDispatch } = useContext(HomeContext);
   return (
     <>
       <div
         className={`${
           isOpen ? 'w-[260px]' : 'w-0 hidden'
-        } fixed top-0 ${side}-0 z-40 flex h-full flex-none flex-col space-y-2 text-black bg-[#f9f9f9] dark:bg-[#202123] dark:text-white p-2 text-[14px] sm:relative  sm:top-0`}
+        } fixed top-0 ${side}-0 z-40 flex h-full flex-none flex-col text-black bg-[#f9f9f9] dark:bg-[#202123] dark:text-white p-2 text-[14px] sm:relative  sm:top-0`}
       >
         {hasModel() && (
-          <div className="flex items-center">
-            <button
-              className={`flex w-full flex-shrink-0 cursor-pointer select-none items-center gap-3 rounded-md p-3 text-black dark:text-white hover:bg-[#cdcdcd] hover:dark:bg-[#262630] bg-[#ececec] dark:bg-[#262630]/80 ${
-                messageIsStreaming ? 'disabled:cursor-not-allowed' : ''
-              }`}
-              onClick={() => {
-                handleCreateItem();
-                handleSearchTerm('');
-              }}
-              disabled={messageIsStreaming}
-            >
-              {addItemButtonTitle}
-            </button>
+          <div
+            className={cn(
+              'flex items-center px-[6px] justify-between',
+              side === 'right' && 'flex-row-reverse',
+            )}
+          >
+            <ButtonToolTip
+              trigger={
+                <Button
+                  variant="ghost"
+                  className="p-1 m-0 h-auto"
+                  onClick={() => {
+                    homeDispatch({
+                      field: side === 'right' ? 'showPromptbar' : 'showChatbar',
+                      value: false,
+                    });
+                  }}
+                >
+                  {side === 'right' ? (
+                    <IconLayoutSidebarRight stroke="#7d7d7d" size={26} />
+                  ) : (
+                    <IconLayoutSidebar stroke="#7d7d7d" size={26} />
+                  )}
+                </Button>
+              }
+            />
+            <ButtonToolTip
+              trigger={
+                <Button
+                  onClick={() => {
+                    handleCreateItem();
+                    handleSearchTerm('');
+                  }}
+                  disabled={messageIsStreaming}
+                  variant="ghost"
+                  className="p-1 m-0 h-auto"
+                >
+                  <IconSquarePlus stroke="#7d7d7d" size={26} />
+                </Button>
+              }
+              content={addItemButtonTitle}
+            />
           </div>
         )}
         <Search
@@ -80,11 +120,52 @@ const Sidebar = <T,>({
           )}
         </div>
         {footerComponent}
-        <CloseSidebarButton onClick={toggleOpen} side={side} />
       </div>
 
       {!isOpen && showOpenButton && (
-        <OpenSidebarButton onClick={toggleOpen} side={side} />
+        <div
+          className={`group fixed z-20 ${
+            side === 'right' ? 'right-2' : 'left-[14px]'
+          }`}
+          style={{ top: '4px' }}
+        >
+          <button className="pt-1" onClick={toggleOpen}>
+            <span data-state="closed">
+              <div className="flex items-center justify-center">
+                {side === 'right' ? (
+                  <div className="flex flex-col items-center">
+                    <Button variant="ghost">
+                      <IconLayoutSidebarRight stroke="#7d7d7d" size={26} />
+                    </Button>
+                  </div>
+                ) : (
+                  <div className="flex flex-col items-center">
+                    <Button variant="ghost" className="p-1 m-0 h-auto">
+                      <IconLayoutSidebar stroke="#7d7d7d" size={26} />
+                    </Button>
+                  </div>
+                )}
+              </div>
+            </span>
+          </button>
+
+          <ButtonToolTip
+            trigger={
+              <Button
+                onClick={() => {
+                  handleCreateItem();
+                  handleSearchTerm('');
+                }}
+                disabled={messageIsStreaming}
+                variant="ghost"
+                className="p-1 m-0 h-auto"
+              >
+                <IconSquarePlus stroke="#7d7d7d" size={26} />
+              </Button>
+            }
+            content={addItemButtonTitle}
+          />
+        </div>
       )}
     </>
   );

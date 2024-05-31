@@ -99,7 +99,7 @@ export class UserBalancesManager {
 
     const now = new Date();
     const SevenDaysAgo = new Date(now);
-    SevenDaysAgo.setDate(now.getDate() - 7);
+    SevenDaysAgo.setDate(now.getDate() - 6);
     const balanceLogs = await prisma.balanceLogs.findMany({
       where: {
         createdAt: {

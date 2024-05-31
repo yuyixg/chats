@@ -17,11 +17,11 @@ import {
   IconUser,
 } from '@/components/Icons/index';
 
+import ButtonToolTip from '../ButtonToolTip/ButtonToolTip';
 import { CodeBlock } from '../Markdown/CodeBlock';
 import { MemoizedReactMarkdown } from '../Markdown/MemoizedReactMarkdown';
 import { Button } from '../ui/button';
 import ChangeModel from './ChangeModel';
-import ChatButtonToolTip from './ChatButtonTooltip';
 import ChatError from './ChatError';
 
 import rehypeMathjax from 'rehype-mathjax';
@@ -268,7 +268,8 @@ export const ChatMessage: FC<Props> = memo(
                         </div>
                       )}
                     </>
-                    <ChatButtonToolTip
+                    <ButtonToolTip
+                      className="h-[28px]"
                       trigger={
                         <Button
                           variant="ghost"
@@ -280,7 +281,7 @@ export const ChatMessage: FC<Props> = memo(
                         </Button>
                       }
                       content={t('Edit message')!}
-                    ></ChatButtonToolTip>
+                    />
                   </div>
                 )}
               </>
@@ -357,7 +358,7 @@ export const ChatMessage: FC<Props> = memo(
                 {chatError && isLastMessage && <ChatError />}
 
                 {!messageIsStreaming ? (
-                  <div className="flex gap-1 pt-2">
+                  <div className="flex gap-1 pt-2 flex-wrap">
                     {assistantChildrenIds.length > 1 && (
                       <div className="flex text-sm items-center ml-[-8px]">
                         <Button
@@ -413,7 +414,8 @@ export const ChatMessage: FC<Props> = memo(
                           />
                         </Button>
                       ) : (
-                        <ChatButtonToolTip
+                        <ButtonToolTip
+                          className="h-[28px]"
                           trigger={
                             <Button
                               variant="ghost"
@@ -427,7 +429,8 @@ export const ChatMessage: FC<Props> = memo(
                         />
                       )}
                       {!readonly && (
-                        <ChatButtonToolTip
+                        <ButtonToolTip
+                          className="h-[28px]"
                           trigger={
                             <Button
                               variant="ghost"
@@ -442,7 +445,8 @@ export const ChatMessage: FC<Props> = memo(
                           content={t('Regenerate')!}
                         />
                       )}
-                      <ChatButtonToolTip
+                      <ButtonToolTip
+                        className="h-[28px]"
                         trigger={
                           <ChangeModel
                             readonly={readonly}

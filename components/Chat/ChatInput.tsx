@@ -21,9 +21,9 @@ import { HomeContext } from '@/pages/home/home';
 import {
   IconArrowDown,
   IconCircleX,
+  IconPaperclip,
   IconSend,
   IconStopFilled,
-  IconUpload,
 } from '@/components/Icons/index';
 
 import UploadButton from '../UploadButton';
@@ -59,7 +59,6 @@ export const ChatInput = ({
       chatError,
     },
     getModel,
-    handleUpdateCurrentMessage,
   } = useContext(HomeContext);
 
   const { fileConfig, fileServerConfig, modelConfig } =
@@ -273,7 +272,7 @@ export const ChatInput = ({
 
             <textarea
               ref={textareaRef}
-              className="m-0 w-full resize-none border-0 bg-transparent rounded-md p-0 py-2 pr-16 pl-4 text-black dark:bg-transparent dark:text-white md:py-3 md:pl-4"
+              className="m-0 w-full resize-none border-none outline-none bg-transparent rounded-md p-0 py-2 pr-16 pl-4 text-black dark:bg-black dark:text-white md:py-3 md:pl-4"
               style={{
                 resize: 'none',
                 bottom: `${textareaRef?.current?.scrollHeight}px`,
@@ -328,7 +327,7 @@ export const ChatInput = ({
                       setUploading(false);
                     }}
                   >
-                    <IconUpload size={18} />
+                    <IconPaperclip size={18} />
                   </UploadButton>
                 )}
             </div>

@@ -19,7 +19,7 @@ import { getModelDefaultTemplate } from '@/types/template';
 
 import { HomeContext } from '@/pages/home/home';
 
-import { IconShare } from '../Icons';
+import ChangeModel from './ChangeModel';
 import { ChatInput } from './ChatInput';
 import EnableNetworkSearch from './EnableNetworkSearch';
 import { MemoizedChatMessage } from './MemoizedChatMessage';
@@ -29,6 +29,7 @@ import { SystemPrompt } from './SystemPrompt';
 import { TemperatureSlider } from './Temperature';
 
 import { getChat, postChats } from '@/apis/userService';
+import { cn } from '@/lib/utils';
 import { v4 as uuidv4 } from 'uuid';
 
 interface Props {
@@ -48,13 +49,14 @@ export const Chat = memo(({ stopConversationRef }: Props) => {
       models,
       prompts,
       userModelConfig,
-      canChat,
+      showChatbar,
     },
     handleUpdateSelectMessage,
     handleUpdateCurrentMessage,
     handleUpdateChat,
     handleUpdateUserModelConfig,
     getModel,
+    hasModel,
     dispatch: homeDispatch,
   } = useContext(HomeContext);
   const [autoScrollEnabled, setAutoScrollEnabled] = useState<boolean>(true);
@@ -67,7 +69,6 @@ export const Chat = memo(({ stopConversationRef }: Props) => {
   const [modeApiConfig, setModelApiConfig] = useState<ModelApiConfig>(
     {} as ModelApiConfig,
   );
-  const [messageCanChat, setMessageCanChat] = useState(canChat);
   const currentSelectChat = chats.find((x) => x.id === selectChatId);
 
   const messagesEndRef = useRef<HTMLDivElement>(null);
@@ -362,10 +363,6 @@ export const Chat = memo(({ stopConversationRef }: Props) => {
     );
   }, [selectModelId]);
 
-  useEffect(() => {
-    setMessageCanChat(canChat);
-  }, [canChat]);
-
   return (
     <div className="relative flex-1 overflow-hidden bg-white dark:bg-[#262630]">
       <>
@@ -420,28 +417,24 @@ export const Chat = memo(({ stopConversationRef }: Props) => {
           ) : (
             <>
               {currentSelectChat && (
-                <div className="sticky top-0 z-10 bg-white py-2 text-sm text-neutral-500 dark:border-none dark:bg-[#262630] dark:text-neutral-200">
-                  <div className="mt-[6px] md:mt-3 flex justify-center items-center gap-1">
-                    <div>{currentModel.name}</div>
-                    {currentModel?.temperature && (
-                      <div className="flex">{currentModel.temperature}­°C</div>
+                <div className="sticky top-0 z-10 text-sm pt-[9px] bg-white dark:bg-[#262630] dark:text-neutral-200">
+                  <div
+                    className={cn(
+                      'ml-[84px] flex justify-start items-center',
+                      showChatbar && 'ml-6',
                     )}
-                    {currentModel.name && (
-                      <button
-                        className="ml-1 cursor-pointer hover:opacity-50"
-                        onClick={() => {
-                          setShowShareModal(true);
+                  >
+                    {hasModel() && (
+                      <ChangeModel
+                        className=" font-semibold text-base"
+                        modelName={currentModel.name}
+                        onChangeModel={(modelId) => {
+                          homeDispatch({
+                            field: 'selectModelId',
+                            value: modelId,
+                          });
                         }}
-                      >
-                        <IconShare
-                          size={16}
-                          stroke={
-                            currentSelectChat?.isShared
-                              ? 'hsl(var(--primary))'
-                              : '#737373'
-                          }
-                        />
-                      </button>
+                      />
                     )}
                   </div>
                 </div>
@@ -461,7 +454,6 @@ export const Chat = memo(({ stopConversationRef }: Props) => {
                 }
                 return (
                   <MemoizedChatMessage
-                    readonly={!canChat}
                     currentSelectIndex={parentChildrenIds.findIndex(
                       (x) => x === current.id,
                     )}
@@ -506,7 +498,7 @@ export const Chat = memo(({ stopConversationRef }: Props) => {
             </>
           )}
         </div>
-        {messageCanChat && (
+        {hasModel() && (
           <ChatInput
             stopConversationRef={stopConversationRef}
             textareaRef={textareaRef}

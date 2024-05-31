@@ -31,6 +31,7 @@
     "@radix-ui/react-scroll-area": "^1.0.5",
     "@radix-ui/react-select": "^2.0.0",
     "@radix-ui/react-separator": "^1.0.3",
+    "@radix-ui/react-slider": "^1.1.2",
     "@radix-ui/react-slot": "^1.0.2",
     "@radix-ui/react-switch": "^1.0.3",
     "@radix-ui/react-tabs": "^1.0.4",
@@ -82,7 +83,6 @@
     "zod": "^3.22.4"
   },
   "devDependencies": {
-    "postcss": "8.4.29",
     "@tailwindcss/typography": "^0.5.13",
     "@trivago/prettier-plugin-sort-imports": "^4.1.1",
     "@types/aws-sdk": "^2.7.0",
@@ -95,9 +95,10 @@
     "@types/superagent": "^8.1.6",
     "@types/uuid": "^9.0.4",
     "cross-env": "^7.0.3",
-    "prisma": "^5.13.0",
-    "ts-node-dev": "^2.0.0",
+    "postcss": "8.4.29",
     "prettier": "^2.8.7",
-    "prettier-plugin-tailwindcss": "^0.2.5"
+    "prettier-plugin-tailwindcss": "^0.2.5",
+    "prisma": "^5.13.0",
+    "ts-node-dev": "^2.0.0"
   }
 }
