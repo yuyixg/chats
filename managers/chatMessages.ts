@@ -77,7 +77,9 @@ export class ChatMessagesManager {
   }
 
   static async checkIsFirstChat(chatId: string) {
-    const count = await prisma.chatMessages.count({ where: { chatId } });
+    const count = await prisma.chatMessages.count({
+      where: { chatId, role: { notIn: ['system'] } },
+    });
     return count === 0;
   }
 

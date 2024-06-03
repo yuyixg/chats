@@ -32,8 +32,19 @@ export class ChatsManager {
   }
 
   static async findUserChats(userId: string) {
+    const now = new Date();
+    const SevenDaysAgo = new Date(now);
+    SevenDaysAgo.setDate(now.getDate() - 6);
+
     return await prisma.chats.findMany({
-      where: { userId, isDeleted: false },
+      where: {
+        userId,
+        isDeleted: false,
+        createdAt: {
+          gte: SevenDaysAgo,
+          lt: now,
+        },
+      },
       include: { chatModel: true },
       orderBy: { createdAt: 'asc' },
     });

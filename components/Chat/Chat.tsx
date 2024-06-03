@@ -20,6 +20,7 @@ import { getModelDefaultTemplate } from '@/types/template';
 import { HomeContext } from '@/pages/home/home';
 
 import ChangeModel from './ChangeModel';
+import ChatError from './ChatError';
 import { ChatInput } from './ChatInput';
 import EnableNetworkSearch from './EnableNetworkSearch';
 import { MemoizedChatMessage } from './MemoizedChatMessage';
@@ -50,6 +51,7 @@ export const Chat = memo(({ stopConversationRef }: Props) => {
       prompts,
       userModelConfig,
       showChatbar,
+      chatError,
     },
     handleUpdateSelectMessage,
     handleUpdateCurrentMessage,
@@ -441,6 +443,8 @@ export const Chat = memo(({ stopConversationRef }: Props) => {
               )}
 
               {selectMessages.map((current, index) => {
+                let lastMessageId =
+                  selectMessages[selectMessages.length - 1].id;
                 let parentChildrenIds: string[] = [];
                 if (!current.parentId) {
                   parentChildrenIds = currentMessages
@@ -457,7 +461,6 @@ export const Chat = memo(({ stopConversationRef }: Props) => {
                     currentSelectIndex={parentChildrenIds.findIndex(
                       (x) => x === current.id,
                     )}
-                    isLastMessage={selectMessages.length - 1 === index}
                     id={current.id!}
                     key={current.id + index}
                     parentId={current.parentId}
@@ -490,6 +493,9 @@ export const Chat = memo(({ stopConversationRef }: Props) => {
                   />
                 );
               })}
+              <div className="flex relative m-auto justify-center md:max-w-2xl lg:max-w-2xl lg:px-0 xl:max-w-5xl">
+                {chatError && <ChatError />}
+              </div>
 
               <div
                 className="h-[162px] bg-white dark:bg-[#262630]"

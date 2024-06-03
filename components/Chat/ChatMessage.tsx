@@ -31,7 +31,6 @@ import remarkMath from 'remark-math';
 export interface Props {
   readonly?: boolean;
   id: string;
-  isLastMessage: boolean;
   parentId: string | null;
   childrenIds: string[];
   assistantChildrenIds: string[];
@@ -49,7 +48,6 @@ export const ChatMessage: FC<Props> = memo(
   ({
     readonly = false,
     id,
-    isLastMessage,
     parentChildrenIds,
     assistantChildrenIds,
     currentSelectIndex,
@@ -355,8 +353,6 @@ export const ChatMessage: FC<Props> = memo(
                   </MemoizedReactMarkdown>
                 </div>
 
-                {chatError && isLastMessage && <ChatError />}
-
                 {!messageIsStreaming ? (
                   <div className="flex gap-1 pt-2 flex-wrap">
                     {assistantChildrenIds.length > 1 && (
@@ -402,9 +398,7 @@ export const ChatMessage: FC<Props> = memo(
                       </div>
                     )}
                     <div
-                      className={`flex gap-0 items-center ${
-                        isLastMessage ? 'visible' : 'invisible'
-                      } group-hover:visible focus:visible`}
+                      className={`flex gap-0 items-center visible group-hover:visible focus:visible`}
                     >
                       {messagedCopied ? (
                         <Button variant="ghost" className="p-1 m-0 h-auto">
