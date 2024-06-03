@@ -375,7 +375,7 @@ export const Chat = memo(({ stopConversationRef }: Props) => {
         >
           {selectMessages?.length === 0 ? (
             <>
-              <div className="mx-auto flex flex-col space-y-5 md:space-y-10 px-3 pt-16 sm:max-w-[600px]">
+              <div className="mx-auto flex flex-col space-y-5 md:space-y-10 px-3 pt-[52px] sm:max-w-[600px]">
                 {models.length !== 0 && (
                   <div className="flex h-full flex-col space-y-4 rounded-lg border border-neutral-200 p-4 dark:border-neutral-600">
                     <ModelSelect />
