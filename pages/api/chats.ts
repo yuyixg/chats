@@ -4,6 +4,7 @@ import { OpenAIStream } from '@/services/openai';
 import { QianFanStream } from '@/services/qianfan';
 import { QianWenStream } from '@/services/qianwen';
 import ChatStreamResult from '@/services/type';
+import { ZhiPuAIStream } from '@/services/zhipuai';
 
 import { addChat, checkChatIsStopped, stopChat } from '@/utils/chats';
 import {
@@ -299,6 +300,28 @@ const handler = async (req: ChatsApiRequest, res: ChatsApiResponse) => {
       }
 
       stream = await LingYiStream(chatModel, temperature, messagesToSend);
+    } else if (chatModel.modelProvider === ModelProviders.ZhiPuAI) {
+      allMessages.forEach((m) => {
+        const chatMessages = JSON.parse(m.messages) as Content;
+        let content = {} as GPT4Message | GPT4VisionMessage;
+        if (chatModel.modelVersion === ModelVersions.GLM_4V) {
+          content = convertToGPTVisionMessage(chatMessages, m.role as Role);
+        } else {
+          content = convertMessageToSend(chatMessages, m.role as Role);
+        }
+        messagesToSend.push(content);
+      });
+
+      const userMessageToSend =
+        chatModel.modelVersion === ModelVersions.GLM_4V
+          ? convertToGPTVisionMessage(userMessage)
+          : convertMessageToSend(userMessage);
+
+      messagesToSend.push(userMessageToSend);
+      if (lastMessage?.role === 'user') {
+        messagesToSend.pop();
+      }
+      stream = await ZhiPuAIStream(chatModel, temperature, messagesToSend);
     } else {
       throw new InternalServerError(
         JSON.stringify({ message: 'Model Not Found' }),
@@ -318,13 +341,13 @@ const handler = async (req: ChatsApiRequest, res: ChatsApiResponse) => {
           if (done || checkChatIsStopped(chatId)) {
             stopChat(chatId);
             const { totalTokens, inputTokens, outputTokens } = result.usage;
+  
             const tokenUsed = totalTokens;
             const calculatedPrice = calcTokenPrice(
               priceConfig,
               inputTokens,
               outputTokens,
             );
-
             await ChatModelRecordManager.recordTransfer({
               isFirstChat,
               userId,

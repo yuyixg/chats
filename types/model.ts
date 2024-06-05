@@ -35,6 +35,9 @@ export enum ModelVersions {
   moonshot_v1_8k = 'moonshot-v1-8k',
   moonshot_v1_32k = 'moonshot-v1-32k',
   moonshot_v1_128k = 'moonshot-v1-128k',
+  GLM_4 = 'glm-4',
+  GLM_4V = 'glm-4v',
+  GLM_3_turbo = 'glm-3-turbo',
 }
 
 export enum ModelType {
@@ -45,6 +48,7 @@ export enum ModelType {
   Spark = 'Spark',
   LingYi = 'LingYi',
   Moonshot = 'Moonshot',
+  ZhiPuAI = 'ZhiPuAI',
 }
 
 export enum ModelProviders {
@@ -55,6 +59,7 @@ export enum ModelProviders {
   Spark = 'Spark',
   LingYi = 'LingYi',
   Moonshot = 'Moonshot',
+  ZhiPuAI = 'ZhiPuAI',
 }
 
 export interface ChatModelFileConfig {

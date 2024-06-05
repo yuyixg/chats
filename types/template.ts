@@ -62,6 +62,11 @@ const sparkApiConfig: SparkApiConfig = {
   apiKey: '',
 };
 
+const zhiPuAIApiConfig: LingYiApiConfig = {
+  host: 'https://open.bigmodel.cn',
+  apiKey: '',
+};
+
 export const ModelProviderTemplates = {
   [ModelProviders.OpenAI]: {
     models: [
@@ -113,6 +118,15 @@ export const ModelProviderTemplates = {
     models: [],
     apiConfig: sparkApiConfig,
     displayName: '讯飞星火',
+  },
+  [ModelProviders.ZhiPuAI]: {
+    models: [
+      ModelVersions.GLM_4,
+      ModelVersions.GLM_4V,
+      ModelVersions.GLM_3_turbo,
+    ],
+    apiConfig: zhiPuAIApiConfig,
+    displayName: '智谱AI',
   },
 };
 
@@ -360,6 +374,53 @@ export function getModelDefaultTemplate(
             temperature: 0.8,
           },
           apiConfig: lingYiApiConfig,
+          priceConfig: {
+            input: 0.0000025,
+            out: 0.0000025,
+          },
+        };
+      }
+    }
+  } else if (provider === ModelProviders.ZhiPuAI) {
+    switch (version) {
+      case ModelVersions.GLM_4:
+      case ModelVersions.GLM_3_turbo: {
+        return {
+          type: ModelType.ZhiPuAI,
+          config: {
+            temperature: {
+              min: 0,
+              max: 1,
+            },
+          },
+          modelConfig: {
+            prompt:
+              "You are an AI assistant, Follow the user's instructions carefully. Respond using markdown.",
+            temperature: 0.8,
+          },
+          apiConfig: zhiPuAIApiConfig,
+          priceConfig: {
+            input: 0.0000025,
+            out: 0.0000025,
+          },
+        };
+      }
+      case ModelVersions.GLM_4V: {
+        return {
+          type: ModelType.ZhiPuAI,
+          config: {
+            temperature: {
+              min: 0,
+              max: 1,
+            },
+          },
+          modelConfig: {
+            prompt:
+              "You are an AI assistant, Follow the user's instructions carefully. Respond using markdown.",
+            temperature: 0.8,
+          },
+          apiConfig: zhiPuAIApiConfig,
+          fileConfig: { count: 5, maxSize: 10240 },
           priceConfig: {
             input: 0.0000025,
             out: 0.0000025,

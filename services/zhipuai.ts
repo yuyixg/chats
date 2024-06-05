@@ -8,40 +8,29 @@ import {
   createParser,
 } from 'eventsource-parser';
 
-export interface LingYiSteamResult {
-  text: string;
-  usage: {
-    prompt_tokens: number;
-    completion_tokens: number;
-    total_tokens: number;
-  };
-}
-
-export const LingYiStream = async (
+export const ZhiPuAIStream = async (
   chatModel: ChatModels,
   temperature: number,
-  messages: GPT4Message[] | GPT4VisionMessage[],
+  messages: GPT4Message[] | GPT4VisionMessage,
 ) => {
   const {
     apiConfig: { host, apiKey },
     modelVersion,
   } = chatModel;
-  let url = `${host}/v1/chat/completions`;
+  let url = `${host}/api/paas/v4/chat/completions`;
 
   const body = {
     headers: {
       'Content-Type': 'application/json',
-      Authorization: `Bearer ${apiKey}`,
+      Authorization: 'Bearer ' + apiKey,
     },
     method: 'POST',
     body: JSON.stringify({
       model: modelVersion,
       messages: messages,
-      ...(modelVersion === ModelVersions.yi_vl_plus
-        ? { max_tokens: 4096 }
-        : {}),
-      stream: true,
+      max_tokens: modelVersion === ModelVersions.GLM_4V ? 1024 : 8192,
       temperature,
+      stream: true,
     }),
   };
 
@@ -58,7 +47,6 @@ export const LingYiStream = async (
     }
     throw new Error(JSON.stringify(errors));
   }
-
   const stream = new ReadableStream({
     async start(controller) {
       const onParse = (event: ParsedEvent | ReconnectInterval) => {
