@@ -99,7 +99,7 @@ model ChatMessages {
   userId          String   @db.Uuid()
   chatId          String   @db.Uuid()
   parentId        String?  @db.Uuid()
-  chatModelId     String?
+  chatModelId     String?  @db.Uuid()
   role            String
   messages        String   @db.Text()
   calculatedPrice Decimal  @default(0)
@@ -210,4 +210,13 @@ model Prompts {
   createdAt    DateTime @default(now())
   updatedAt    DateTime @updatedAt
   user         Users?   @relation(fields: [createUserId], references: [id])
+}
+
+model UserInitialConfig {
+  id        String   @id @default(uuid()) @db.Uuid()
+  models    String   @default("[]")
+  price     Decimal  @default(0)
+  enabled   Boolean  @default(true)
+  createdAt DateTime @default(now())
+  updatedAt DateTime @updatedAt
 }

@@ -41,6 +41,13 @@ export interface IWeChatAuthResult {
   errmsg: string;
 }
 
+export interface UpdateUserInitialConfig {
+  id: string;
+  models: string;
+  price: Decimal;
+  enabled?: boolean;
+}
+
 export class UsersManager {
   static async findByUserId(id: string) {
     return await prisma.users.findUnique({ where: { id } });
@@ -179,5 +186,19 @@ export class UsersManager {
       await this.initialUser(user.id);
     }
     return user;
+  }
+
+  static async updateUserInitialConfig(params: UpdateUserInitialConfig) {
+    await prisma.userInitialConfig.update({
+      where: { id: params.id },
+      data: {
+        models: params.models,
+        price: params.price,
+      },
+    });
+  }
+
+  static async getUserInitialConfig() {
+    return await prisma.userInitialConfig.findFirst();
   }
 }

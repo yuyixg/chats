@@ -13,7 +13,7 @@
     "db-win:pg": "set DB_DIALECT=postgres && (for /F \"tokens=*\" %i in (.env.local) do set %i) && npm run init"
   },
   "prisma": {
-    "schema": "./prisma/sqlserver/schema.prisma"
+    "schema": "./prisma/postgresql/schema.prisma"
   },
   "dependencies": {
     "@dqbd/tiktoken": "^1.0.7",

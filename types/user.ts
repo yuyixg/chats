@@ -34,3 +34,23 @@ export interface GetUserBalanceResult {
   balance: number;
   logs: GetUserBalanceLogsResult[];
 }
+
+export interface GetUserInitialConfigResult {
+  id: string;
+  price: Decimal;
+  models: UserInitialModel[];
+}
+
+export interface PutUserInitialConfigParams {
+  id: string;
+  price: Decimal;
+  models: UserInitialModel[];
+}
+
+export interface UserInitialModel {
+  modelId: string;
+  enabled: boolean;
+  tokens: string;
+  counts: string;
+  expires: string;
+}

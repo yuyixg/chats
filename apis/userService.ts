@@ -6,7 +6,9 @@ import { Model } from '@/types/model';
 import { Prompt } from '@/types/prompt';
 import {
   GetUserBalanceResult,
+  GetUserInitialConfigResult,
   ProviderResult,
+  PutUserInitialConfigParams,
   SingInParams,
   SingInResult,
 } from '@/types/user';
@@ -117,4 +119,14 @@ export const putUserPrompts = (params: PutPromptParams) => {
 export const deleteUserPrompts = (id: string) => {
   const fetchServer = useFetch();
   return fetchServer.delete('/api/prompts?id=' + id);
+};
+
+export const getUserInitialConfig = () => {
+  const fetchServer = useFetch();
+  return fetchServer.get<GetUserInitialConfigResult>('/api/user-config');
+};
+
+export const putUserInitialConfig = (params: PutUserInitialConfigParams) => {
+  const fetchServer = useFetch();
+  return fetchServer.put('/api/user-config', { body: params });
 };

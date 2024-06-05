@@ -92,7 +92,7 @@ CREATE TABLE "ChatMessages" (
     "userId" UUID NOT NULL,
     "chatId" UUID NOT NULL,
     "parentId" UUID,
-    "chatModelId" TEXT,
+    "chatModelId" UUID,
     "role" TEXT NOT NULL,
     "messages" TEXT NOT NULL,
     "calculatedPrice" DECIMAL(65,30) NOT NULL DEFAULT 0,
@@ -229,6 +229,17 @@ CREATE TABLE "Prompts" (
     "updatedAt" TIMESTAMP(3) NOT NULL,
 
     CONSTRAINT "Prompts_pkey" PRIMARY KEY ("id")
+);
+
+-- CreateTable
+CREATE TABLE "UserInitialConfig" (
+    "id" UUID NOT NULL,
+    "models" TEXT NOT NULL DEFAULT '[]',
+    "price" DECIMAL(65,30) NOT NULL DEFAULT 0,
+    "createdAt" TIMESTAMP(3) NOT NULL DEFAULT CURRENT_TIMESTAMP,
+    "updatedAt" TIMESTAMP(3) NOT NULL,
+
+    CONSTRAINT "UserInitialConfig_pkey" PRIMARY KEY ("id")
 );
 
 -- CreateIndex

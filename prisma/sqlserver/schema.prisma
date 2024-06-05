@@ -124,7 +124,7 @@ model BalanceLogs {
   id           String   @id @default(uuid()) @db.UniqueIdentifier
   userId       String   @db.UniqueIdentifier
   messageId    String?  @db.UniqueIdentifier
-  createUserId String
+  createUserId String   @db.UniqueIdentifier
   value        Decimal  @default(0)
   type         Int
   createdAt    DateTime @default(now())
@@ -138,7 +138,7 @@ model Orders {
   outTradeNo   String
   status       String
   payH5Url     String?
-  prepayId     String?
+  prepayId     String?  @db.UniqueIdentifier
   createdAt    DateTime @default(now())
   updatedAt    DateTime @updatedAt
   user         Users    @relation(fields: [createUserId], references: [id])
@@ -213,4 +213,12 @@ model Prompts {
   createdAt    DateTime @default(now())
   updatedAt    DateTime @updatedAt
   user         Users?   @relation(fields: [createUserId], references: [id])
+}
+
+model UserInitialConfig {
+  id        String   @id @default(uuid()) @db.UniqueIdentifier
+  models    String   @default("[]")
+  price     Decimal  @default(0)
+  createdAt DateTime @default(now())
+  updatedAt DateTime @updatedAt
 }
