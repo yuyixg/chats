@@ -16,6 +16,7 @@ export const ZhiPuAIStream = async (
   const {
     apiConfig: { host, apiKey },
     modelVersion,
+    modelConfig: { model },
   } = chatModel;
   let url = `${host}/api/paas/v4/chat/completions`;
 
@@ -26,7 +27,7 @@ export const ZhiPuAIStream = async (
     },
     method: 'POST',
     body: JSON.stringify({
-      model: modelVersion,
+      model,
       messages: messages,
       max_tokens: modelVersion === ModelVersions.GLM_4V ? 1024 : 8192,
       temperature,
