@@ -1,6 +1,7 @@
 import { BadRequest } from '@/utils/error';
 
 import { ChatsApiRequest } from '@/types/next-api';
+import { LoginType } from '@/types/user';
 
 import { UsersManager } from '@/managers';
 import { apiHandler } from '@/middleware/api-handler';
@@ -50,7 +51,7 @@ const handler = async (req: ChatsApiRequest) => {
       email,
     });
     return data;
-  } else {
+  } else if (req.method === 'POST') {
     const { account, password, role } = req.body;
     let isFound = await UsersManager.findByAccount(account);
     if (isFound) {
@@ -62,7 +63,7 @@ const handler = async (req: ChatsApiRequest) => {
       password,
       role,
     });
-    await UsersManager.initialUser(user.id!, req.session.userId);
+    await UsersManager.initialUser(user.id!, '-', req.session.userId);
     return user;
   }
 };

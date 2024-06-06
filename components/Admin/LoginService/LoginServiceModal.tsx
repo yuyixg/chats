@@ -12,7 +12,7 @@ import {
   PostLoginServicesParams,
   PutLoginServicesParams,
 } from '@/types/admin';
-import { ProviderType } from '@/types/user';
+import { LoginType } from '@/types/user';
 
 import FormSelect from '@/components/ui/form/select';
 
@@ -35,7 +35,7 @@ import { z } from 'zod';
 
 interface IProps {
   selected: GetLoginServicesResult | null;
-  types: ProviderType[];
+  types: LoginType[];
   isOpen: boolean;
   onClose: () => void;
   onSuccessful: () => void;
@@ -53,11 +53,11 @@ export const LoginServiceModal = (props: IProps) => {
       render: (options: IFormFieldOption, field: FormFieldType) => (
         <FormSelect
           disabled={!!selected}
-          items={Object.keys(ProviderType)
+          items={Object.keys(LoginType)
             .filter((x) => selected || !types.find((t) => t.toString() === x))
             .map((key) => ({
-              name: ProviderType[key as keyof typeof ProviderType],
-              value: ProviderType[key as keyof typeof ProviderType],
+              name: LoginType[key as keyof typeof LoginType],
+              value: LoginType[key as keyof typeof LoginType],
             }))}
           options={options}
           field={field}
@@ -143,7 +143,7 @@ export const LoginServiceModal = (props: IProps) => {
   useEffect(() => {
     const subscription = form.watch((value, { name, type }) => {
       if (name === 'type' && type === 'change') {
-        const type = value.type as ProviderType;
+        const type = value.type as LoginType;
         form.setValue(
           'configs',
           JSON.stringify(getLoginConfigs(type) || {}, null, 2),

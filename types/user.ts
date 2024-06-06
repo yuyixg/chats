@@ -1,6 +1,6 @@
 import Decimal from 'decimal.js';
 
-export enum ProviderType {
+export enum LoginType {
   'KeyCloak' = 'KeyCloak',
   'WeChat' = 'WeChat',
   'Phone' = 'Phone',
@@ -20,7 +20,7 @@ export interface SingInResult {
 }
 
 export interface ProviderResult {
-  type: ProviderType;
+  type: LoginType;
   configs: {
     appId: string;
   };
@@ -39,7 +39,7 @@ export interface GetUserBalanceResult {
 export interface GetUserInitialConfigResult {
   id: string;
   name: string;
-  provider: string;
+  loginType: string;
   price: Decimal;
   models: UserInitialModel[];
 }
@@ -47,7 +47,7 @@ export interface GetUserInitialConfigResult {
 export interface PostUserInitialConfigParams {
   name: string;
   price: Decimal;
-  provider: string;
+  loginType: string;
   models: UserInitialModel[];
 }
 
@@ -55,7 +55,7 @@ export interface PutUserInitialConfigParams {
   id: string;
   name: string;
   price: Decimal;
-  provider: string;
+  loginType: string;
   models: UserInitialModel[];
 }
 

@@ -4,9 +4,10 @@ import toast from 'react-hot-toast';
 
 import { useTranslation } from 'next-i18next';
 
+import { GetModelResult } from '@/types/admin';
 import {
   GetUserInitialConfigResult,
-  ProviderType,
+  LoginType,
   UserInitialModel,
 } from '@/types/user';
 
@@ -39,13 +40,17 @@ import { Form, FormControl, FormField } from '../../ui/form';
 import FormInput from '../../ui/form/input';
 import FormSelect from '../../ui/form/select';
 
-import { getModels, postUserInitialConfig } from '@/apis/adminService';
+import {
+  postUserInitialConfig,
+  putUserInitialConfig,
+} from '@/apis/adminService';
 import { cn } from '@/lib/utils';
 import { zodResolver } from '@hookform/resolvers/zod';
 import Decimal from 'decimal.js';
 import { z } from 'zod';
 
 interface IProps {
+  models: GetModelResult[];
   select?: GetUserInitialConfigResult;
   isOpen: boolean;
   onClose: () => void;
@@ -54,7 +59,7 @@ interface IProps {
 let ModelKeyMap = {} as any;
 export const AddUserInitialConfigModal = (props: IProps) => {
   const { t } = useTranslation('admin');
-  const { isOpen, select, onClose, onSuccessful } = props;
+  const { models, isOpen, select, onClose, onSuccessful } = props;
   const [submit, setSubmit] = useState(false);
   const [editModels, setEditModels] = useState<UserInitialModel[]>([]);
 
@@ -69,7 +74,7 @@ export const AddUserInitialConfigModal = (props: IProps) => {
       )
       .max(50, t('Contain at most {{length}} character(s)', { length: 50 })!),
     price: z.union([z.string(), z.number()]).optional(),
-    provider: z.string().optional(),
+    loginType: z.string().optional(),
   });
 
   const form = useForm<z.infer<typeof formSchema>>({
@@ -77,7 +82,7 @@ export const AddUserInitialConfigModal = (props: IProps) => {
     defaultValues: {
       name: '',
       price: 0,
-      provider: '-',
+      loginType: '-',
     },
   });
 
@@ -88,38 +93,52 @@ export const AddUserInitialConfigModal = (props: IProps) => {
       if (select) {
         form.setValue('name', select.name);
         form.setValue('price', `${select.price}` || 0);
-        form.setValue('provider', select.provider);
+        form.setValue('loginType', select.loginType);
       }
       setEditModels([]);
-      getModels().then((data) => {
-        const model = data.map((x) => {
-          ModelKeyMap[x.modelId] = x.name;
-          return {
-            modelId: x.modelId,
-            tokens: '-',
-            counts: '-',
-            expires: '-',
-            enabled: false,
-          };
-        });
-        setEditModels(model);
+
+      const model = models.map((x) => {
+        ModelKeyMap[x.modelId] = x.name;
+        const model = select?.models.find(
+          (model) => model.modelId === x.modelId,
+        );
+        if (model) return model;
+        return {
+          modelId: x.modelId,
+          tokens: '-',
+          counts: '-',
+          expires: '-',
+          enabled: false,
+        };
       });
+      setEditModels(model);
     }
   }, [isOpen]);
 
   const onSubmit = (values: z.infer<typeof formSchema>) => {
     setSubmit(true);
-    const { name, provider, price } = values;
-    postUserInitialConfig({
-      name: name!,
-      provider: provider!,
-      price: new Decimal(price || 0),
-      models: editModels.filter((x) => x.enabled),
+    const { name, loginType, price } = values;
+    let p;
+    if (select) {
+      p = putUserInitialConfig({
+        id: select.id,
+        name: name!,
+        loginType: loginType!,
+        price: new Decimal(price || 0),
+        models: editModels.filter((x) => x.enabled),
+      });
+    } else {
+      p = postUserInitialConfig({
+        name: name!,
+        loginType: loginType!,
+        price: new Decimal(price || 0),
+        models: editModels.filter((x) => x.enabled),
+      });
+    }
+    p.then(() => {
+      toast.success(t('Save successful!'));
+      onSuccessful();
     })
-      .then(() => {
-        toast.success(t('Save successful!'));
-        onSuccessful();
-      })
       .catch(() => {
         toast.error(
           t(
@@ -139,14 +158,13 @@ export const AddUserInitialConfigModal = (props: IProps) => {
   ) => {
     const _models = editModels as any;
     _models[index][type] = value;
-    console.log(_models);
     setEditModels([..._models]);
   };
 
   return (
     <Dialog open={isOpen} onOpenChange={onClose}>
       <DialogContent>
-        <DialogHeader>{t('User Initial Config')}</DialogHeader>
+        <DialogHeader>{t('Account Initial Config')}</DialogHeader>
         <Form {...form}>
           <form onSubmit={form.handleSubmit(onSubmit)}>
             <div className="grid grid-cols-2 gap-4">
@@ -170,18 +188,18 @@ export const AddUserInitialConfigModal = (props: IProps) => {
                   }}
                 ></FormField>
                 <FormField
-                  key="provider"
+                  key="loginType"
                   control={form.control}
-                  name="provider"
+                  name="loginType"
                   render={({ field }) => {
                     return (
                       <FormSelect
                         className="w-full"
                         field={field}
-                        label={t('Provider')!}
+                        label={t('Login Type')!}
                         items={[
                           { name: '-', value: '-' },
-                          ...Object.keys(ProviderType).map((key) => ({
+                          ...Object.keys(LoginType).map((key) => ({
                             name: key,
                             value: key,
                           })),
@@ -199,7 +217,7 @@ export const AddUserInitialConfigModal = (props: IProps) => {
                       <TableRow className="pointer-events-none">
                         <TableHead>{t('Model Display Name')}</TableHead>
                         <TableHead>{t('Tokens')}</TableHead>
-                        <TableHead>{t('Counts')}</TableHead>
+                        <TableHead>{t('Chat Counts')}</TableHead>
                         <TableHead>{t('Expiration Time')}</TableHead>
                         <TableHead>{t('Is Enabled')}</TableHead>
                       </TableRow>

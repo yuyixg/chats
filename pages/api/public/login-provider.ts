@@ -14,8 +14,8 @@ export const config = {
 
 async function handler(req: ChatsApiRequest) {
   if (req.method === 'GET') {
-    const providers = await LoginServiceManager.findAllEnabled();
-    return providers.map((x) => {
+    const loginTypes = await LoginServiceManager.findAllEnabled();
+    return loginTypes.map((x) => {
       const configs = JSON.parse(x?.configs || '{}');
       return {
         type: x.type,

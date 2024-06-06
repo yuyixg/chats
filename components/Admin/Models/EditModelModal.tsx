@@ -373,19 +373,6 @@ export const EditModelModal = (props: IProps) => {
               <div className="grid grid-cols-2 gap-4">
                 <div className="flex gap-4">
                   <FormField
-                    key={'isDefault'}
-                    control={form.control}
-                    name={'isDefault'}
-                    render={({ field }) => {
-                      return (
-                        <FormSwitch
-                          label={t('Provide new User')!}
-                          field={field}
-                        />
-                      );
-                    }}
-                  ></FormField>
-                  <FormField
                     key={'enabled'}
                     control={form.control}
                     name={'enabled'}

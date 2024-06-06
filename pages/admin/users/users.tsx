@@ -91,7 +91,7 @@ export default function Users() {
             }}
           />
           <Button onClick={() => handleShowAddModal()} color="primary">
-            {t('User Initial Config')}
+            {t('Account Initial Config')}
           </Button>
           <Button onClick={() => handleShowAddModal()} color="primary">
             {t('Add User')}

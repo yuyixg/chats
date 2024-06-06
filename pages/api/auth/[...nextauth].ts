@@ -3,6 +3,8 @@ import NextAuth from 'next-auth';
 
 import { KeyCloakProvider } from '@/utils/authProvider';
 
+import { LoginType } from '@/types/user';
+
 import { SessionsManager, UsersManager } from '@/managers';
 
 export default async function auth(req: NextApiRequest, res: NextApiResponse) {
@@ -43,7 +45,7 @@ export default async function auth(req: NextApiRequest, res: NextApiResponse) {
               role: '-',
               email: profile?.email,
             });
-            await UsersManager.initialUser(user.id!);
+            await UsersManager.initialUser(user.id!, LoginType.KeyCloak);
           }
 
           const session = await SessionsManager.generateSession(user.id!);

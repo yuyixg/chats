@@ -1,6 +1,6 @@
 import { weChatAuth } from '@/utils/weChat';
 
-import { ProviderType } from '@/types/user';
+import { LoginType, UserInitialModel } from '@/types/user';
 
 import { ChatModelManager, UserBalancesManager, UserModelManager } from '.';
 import { LoginServiceManager } from './loginService';
@@ -45,7 +45,7 @@ export interface CreateUserInitialConfig {
   name: string;
   price: Decimal;
   models: string;
-  provider: string;
+  loginType: string;
 }
 export interface UpdateUserInitialConfig extends CreateUserInitialConfig {
   id: string;
@@ -145,48 +145,63 @@ export class UsersManager {
     });
   }
 
-  static async initialUser(userId: string, createUserId?: string) {
-    const chatModels = await ChatModelManager.findDefaultModels();
-    const userModels = chatModels.map((x) => ({
-      modelId: x.id,
+  static async initialUser(
+    userId: string,
+    LoginType?: LoginType | string,
+    createUserId?: string,
+  ) {
+    const configs = await prisma.userInitialConfig.findMany({
+      where: {
+        loginType: { in: ['-', ...(LoginType ? [LoginType] : [])] },
+      },
+    });
+
+    let config = configs.find((x) => x.loginType === LoginType);
+    if (!config) {
+      config = configs.find((x) => x.loginType === '-');
+    }
+
+    let models = [] as UserInitialModel[];
+    let initialPrice = new Decimal(0);
+    if (config) {
+      initialPrice = config.price;
+      models = JSON.parse(config.models) || [];
+    }
+    const userModels = models.map((x) => ({
+      ...x,
       enabled: true,
-      tokens: '-',
-      counts: '-',
-      expires: '-',
     }));
+
     await UserModelManager.createUserModel({
       userId: userId,
       models: JSON.stringify(userModels),
     });
     await UserBalancesManager.createBalance(
       userId,
-      new Decimal(0),
+      initialPrice,
       createUserId || userId,
     );
   }
 
   static async weChatLogin(code: string) {
     const configs = await LoginServiceManager.findConfigsByType(
-      ProviderType.WeChat,
+      LoginType.WeChat,
     );
     const result = await weChatAuth(configs.appId, configs.secret, code);
     if (!result) {
       return null;
     }
-    let user = await this.findByUserByProvider(
-      ProviderType.WeChat,
-      result.openid,
-    );
+    let user = await this.findByUserByProvider(LoginType.WeChat, result.openid);
     if (!user) {
       user = await this.createUser({
         account: result.openid,
         username: '微信用户',
         password: '-',
         role: '-',
-        provider: ProviderType.WeChat,
+        provider: LoginType.WeChat,
         sub: result.openid,
       });
-      await this.initialUser(user.id);
+      await this.initialUser(user.id, LoginType.WeChat);
     }
     return user;
   }
@@ -213,7 +228,7 @@ export class UsersManager {
     return configs.map((x) => ({
       id: x.id,
       name: x.name,
-      provider: x.provider,
+      loginType: x.loginType,
       models: JSON.parse(x.models),
       price: x.price,
     }));

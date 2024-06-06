@@ -5,7 +5,7 @@ import { ModelConfig, ModelProviders, ModelType, ModelVersions } from './model';
 import { Paging } from './page';
 import { PayServiceType } from './pay';
 import { StatusCode } from './statusCode';
-import { ProviderType } from './user';
+import { LoginType } from './user';
 
 import Decimal from 'decimal.js';
 
@@ -161,14 +161,14 @@ export interface GetRequestLogsDetailsResult extends GetRequestLogsListResult {
 
 export interface GetLoginServicesResult {
   id: string;
-  type: ProviderType;
+  type: LoginType;
   enabled: boolean;
   configs: string;
   createdAt: string;
 }
 
 export interface PostLoginServicesParams {
-  type: ProviderType;
+  type: LoginType;
   enabled: boolean;
   configs: string;
 }

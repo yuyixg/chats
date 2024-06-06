@@ -1,10 +1,10 @@
-import { ProviderType } from '@/types/user';
+import { LoginType } from '@/types/user';
 
 import { LoginServiceManager } from '@/managers/loginService';
 
 export async function KeyCloakProvider(): Promise<any> {
   const configs = await LoginServiceManager.findConfigsByType(
-    ProviderType.KeyCloak,
+    LoginType.KeyCloak,
   );
   return {
     id: 'keycloak',

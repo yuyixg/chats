@@ -1,19 +1,20 @@
-import { ProviderType } from '@/types/user';
+import { LoginType } from '@/types/user';
 
-export function getLoginConfigs(type: ProviderType) {
+export function getLoginConfigs(type: LoginType) {
   return LoginDefaultTemplates[type] as any;
 }
 
 export const LoginDefaultTemplates = {
-  [ProviderType.KeyCloak]: {
+  [LoginType.KeyCloak]: {
     wellKnown: '',
     clientId: '',
     secret: '',
   },
-  [ProviderType.WeChat]: {
+  [LoginType.WeChat]: {
     appId: '',
     secret: '',
   },
+  [LoginType.Phone]: {},
 };
 
 export interface LoginTemplateAllProperty {

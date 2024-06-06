@@ -10,7 +10,7 @@ import { useRouter } from 'next/router';
 import { getUserInfo, saveUserInfo, setUserSessionId } from '@/utils/user';
 
 import { DEFAULT_LANGUAGE } from '@/types/settings';
-import { ProviderResult, ProviderType } from '@/types/user';
+import { ProviderResult, LoginType } from '@/types/user';
 
 import KeyCloakLogin from '@/components/Login/KeyCloakLogin';
 import WeChatLogin from '@/components/Login/WeChatLogin';
@@ -30,7 +30,7 @@ export default function LoginPage() {
   const [loginLoading, setLoginLoading] = useState(false);
   const [isClient, setIsClient] = useState(false);
   const [providers, setProviders] = useState<ProviderResult[]>([]);
-  const [providerTypes, setProviderTypes] = useState<ProviderType[]>([]);
+  const [providerTypes, setProviderTypes] = useState<LoginType[]>([]);
 
   const formFields: IFormFieldOption[] = [
     {
@@ -192,17 +192,17 @@ export default function LoginPage() {
                         </div>
                       )}
                       <div className="flex justify-center gap-2">
-                        {providerTypes.includes(ProviderType.WeChat) && (
+                        {providerTypes.includes(LoginType.WeChat) && (
                           <WeChatLogin
                             configs={
                               providers.find(
-                                (x) => x.type === ProviderType.WeChat,
+                                (x) => x.type === LoginType.WeChat,
                               )!.configs
                             }
                             loading={loginLoading}
                           />
                         )}
-                        {providerTypes.includes(ProviderType.KeyCloak) && (
+                        {providerTypes.includes(LoginType.KeyCloak) && (
                           <KeyCloakLogin loading={loginLoading} />
                         )}
                       </div>

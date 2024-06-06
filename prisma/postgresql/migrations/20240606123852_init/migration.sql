@@ -65,7 +65,7 @@ CREATE TABLE "Sessions" (
 CREATE TABLE "UserModels" (
     "id" UUID NOT NULL,
     "userId" UUID NOT NULL,
-    "models" TEXT NOT NULL DEFAULT '[]',
+    "models" VARCHAR(4000) NOT NULL DEFAULT '[]',
     "createdAt" TIMESTAMP(3) NOT NULL DEFAULT CURRENT_TIMESTAMP,
     "updatedAt" TIMESTAMP(3) NOT NULL,
 
@@ -234,8 +234,10 @@ CREATE TABLE "Prompts" (
 -- CreateTable
 CREATE TABLE "UserInitialConfig" (
     "id" UUID NOT NULL,
-    "models" TEXT NOT NULL DEFAULT '[]',
+    "name" VARCHAR(50) NOT NULL,
+    "loginType" VARCHAR(50),
     "price" DECIMAL(65,30) NOT NULL DEFAULT 0,
+    "models" VARCHAR(4000) NOT NULL DEFAULT '[]',
     "createdAt" TIMESTAMP(3) NOT NULL DEFAULT CURRENT_TIMESTAMP,
     "updatedAt" TIMESTAMP(3) NOT NULL,
 

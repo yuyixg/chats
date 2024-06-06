@@ -1,4 +1,5 @@
 import React, { useEffect, useState } from 'react';
+import toast from 'react-hot-toast';
 
 import { useTranslation } from 'next-i18next';
 import { serverSideTranslations } from 'next-i18next/serverSideTranslations';
@@ -11,6 +12,11 @@ import { AddUserInitialConfigModal } from '@/components/Admin/Users/AddUserIniti
 import { Button } from '@/components/ui/button';
 import { Card } from '@/components/ui/card';
 import {
+  Popover,
+  PopoverContent,
+  PopoverTrigger,
+} from '@/components/ui/popover';
+import {
   Table,
   TableBody,
   TableCell,
@@ -19,7 +25,11 @@ import {
   TableRow,
 } from '@/components/ui/table';
 
-import { getModels, getUserInitialConfig } from '@/apis/adminService';
+import {
+  deleteUserInitialConfig,
+  getModels,
+  getUserInitialConfig,
+} from '@/apis/adminService';
 
 export default function UserInitialConfig() {
   const { t } = useTranslation('admin');
@@ -27,20 +37,45 @@ export default function UserInitialConfig() {
   const [configList, setConfigList] = useState<GetUserInitialConfigResult[]>(
     [],
   );
-
   const [models, setModels] = useState<GetModelResult[]>([]);
   const [selectConfig, setSelectConfig] =
     useState<GetUserInitialConfigResult>();
+
+  const [deleting, setDeleting] = useState(false);
+
   const handleShowAddModal = () => {
     setIsOpenModal(true);
+  };
+
+  const getConfigs = () => {
+    getUserInitialConfig().then((data) => {
+      setConfigList(data);
+    });
+  };
+
+  const onDeleteConfig = (config: GetUserInitialConfigResult) => {
+    setDeleting(true);
+    deleteUserInitialConfig(config.id)
+      .then(() => {
+        toast.success(t('Delete successful!'));
+        getConfigs();
+      })
+      .catch(() => {
+        toast.error(
+          t(
+            'Operation failed! Please try again later, or contact technical personnel.',
+          ),
+        );
+      })
+      .finally(() => {
+        setDeleting(false);
+      });
   };
 
   useEffect(() => {
     getModels().then((data) => {
       setModels(data.filter((x) => x.enabled === true));
-      getUserInitialConfig().then((data) => {
-        setConfigList(data);
-      });
+      getConfigs();
     });
   }, []);
 
@@ -70,14 +105,14 @@ export default function UserInitialConfig() {
     );
   };
 
-  const ProviderCell = (
+  const LoginTypeCell = (
     config: GetUserInitialConfigResult,
     rowSpan: number = 1,
   ) => {
     return (
       <TableCell rowSpan={rowSpan}>
         <div className="flex items-center gap-2">
-          <div>{config.provider}</div>
+          <div>{config.loginType}</div>
         </div>
       </TableCell>
     );
@@ -92,18 +127,41 @@ export default function UserInitialConfig() {
     setIsOpenModal(true);
   };
 
-  const ActionCell = (
-    config: GetUserInitialConfigResult,
-    rowSpan: number = 1,
-  ) => {
+  const ActionCell = (config: GetUserInitialConfigResult, rowSpan: number) => {
     return (
       <TableCell rowSpan={rowSpan}>
-        <Button variant="link" onClick={() => handleEditModal(config)}>
-          {t('Edit')}
-        </Button>
-        <Button variant="link" className="text-red-500" onClick={() => {}}>
-          {t('Delete')}
-        </Button>
+        <div className="flex justify-center">
+          <Popover>
+            <PopoverTrigger asChild>
+              <Button variant="link" className="text-red-500">
+                {t('Delete')}
+              </Button>
+            </PopoverTrigger>
+            <PopoverContent className="w-[165px]">
+              <div className="flex gap-4">
+                <div>
+                  <h4 className="pb-2">
+                    {t('Are you sure you want to delete it?')}
+                  </h4>
+                  <div className='flex justify-end'>
+                    <Button
+                      disabled={deleting}
+                      size="sm"
+                      onClick={() => {
+                        onDeleteConfig(config);
+                      }}
+                    >
+                      {t('Confirm')}
+                    </Button>
+                  </div>
+                </div>
+              </div>
+            </PopoverContent>
+          </Popover>
+          <Button variant="link" onClick={() => handleEditModal(config)}>
+            {t('Edit')}
+          </Button>
+        </div>
       </TableCell>
     );
   };
@@ -111,9 +169,9 @@ export default function UserInitialConfig() {
   return (
     <>
       <div className="flex flex-col gap-4 mb-4">
-        <div className="flex justify-between gap-3 items-center">
+        <div className="flex justify-end gap-3 items-center">
           <Button onClick={() => handleShowAddModal()} color="primary">
-            {t('Add User Initial Config')}
+            {t('Add Account Initial Config')}
           </Button>
         </div>
       </div>
@@ -132,7 +190,7 @@ export default function UserInitialConfig() {
                 rowSpan={2}
                 style={{ borderRight: '1px solid hsl(var(--muted))' }}
               >
-                {t('Provider')}
+                {t('Login Type')}
               </TableHead>
               <TableHead colSpan={4} className="text-center">
                 {t('Models')}
@@ -148,7 +206,7 @@ export default function UserInitialConfig() {
             <TableRow className="pointer-events-none">
               <TableHead>{t('Model Display Name')}</TableHead>
               <TableHead>{t('Tokens')}</TableHead>
-              <TableHead>{t('Counts')}</TableHead>
+              <TableHead>{t('Chat Counts')}</TableHead>
               <TableHead>{t('Expiration Time')}</TableHead>
             </TableRow>
           </TableHeader>
@@ -160,38 +218,51 @@ export default function UserInitialConfig() {
               className="tbody-hover"
               style={{ borderTop: '1px solid hsl(var(--muted))' }}
             >
-              {config.models.map((model, index) => {
-                return (
-                  <TableRow
-                    key={model.modelId}
-                    className={`${
-                      index !== config.models.length - 1 && 'border-none'
-                    }`}
-                  >
-                    {index === 0 && NameCell(config, config.models.length)}
-                    {index === 0 &&
-                      InitialPriceCell(config, config.models.length)}
-                    {index === 0 && ProviderCell(config, config.models.length)}
-                    {ModelCell(
-                      models.find((x) => x.modelId === model.modelId)?.name,
-                    )}
-                    {ModelCell(model.tokens)}
-                    {ModelCell(model.counts)}
-                    {ModelCell(model.expires)}
-                    {index === 0 && ActionCell(config, config.models.length)}
-                  </TableRow>
-                );
-              })}
+              {config.models.length > 0 ? (
+                config.models.map((model, index) => {
+                  return (
+                    <TableRow
+                      key={model.modelId}
+                      className={`${
+                        index !== config.models.length - 1 && 'border-none'
+                      }`}
+                    >
+                      {index === 0 && NameCell(config, config.models.length)}
+                      {index === 0 &&
+                        InitialPriceCell(config, config.models.length)}
+                      {index === 0 &&
+                        LoginTypeCell(config, config.models.length)}
+                      {ModelCell(
+                        models.find((x) => x.modelId === model.modelId)?.name,
+                      )}
+                      {ModelCell(model.tokens)}
+                      {ModelCell(model.counts)}
+                      {ModelCell(model.expires)}
+                      {index === 0 && ActionCell(config, config.models.length)}
+                    </TableRow>
+                  );
+                })
+              ) : (
+                <TableRow key={config.id}>
+                  {NameCell(config, config.models.length)}
+                  {InitialPriceCell(config, config.models.length)}
+                  {ModelCell(config.loginType)}
+                  <TableCell colSpan={4}></TableCell>
+                  {ActionCell(config, config.models.length)}
+                </TableRow>
+              )}
             </TableBody>
           ))}
         </Table>
       </Card>
       <AddUserInitialConfigModal
+        models={models}
         select={selectConfig}
         onClose={() => {
           setIsOpenModal(false);
         }}
         onSuccessful={() => {
+          getConfigs();
           setIsOpenModal(false);
         }}
         isOpen={isOpenModal}

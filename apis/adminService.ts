@@ -246,3 +246,8 @@ export const putUserInitialConfig = (params: PutUserInitialConfigParams) => {
   const fetchServer = useFetch();
   return fetchServer.put('/api/admin/user-config', { body: params });
 };
+
+export const deleteUserInitialConfig = (id: string) => {
+  const fetchServer = useFetch();
+  return fetchServer.delete('/api/admin/user-config?id=' + id);
+};

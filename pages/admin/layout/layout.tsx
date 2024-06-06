@@ -112,7 +112,7 @@ const AdminLayout = ({
       icon: (stroke?: string) => {
         return <IconNotes stroke={stroke} />;
       },
-      title: t('User Config'),
+      title: t('Account Initial Config'),
     },
   ];
 

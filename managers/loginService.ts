@@ -1,6 +1,6 @@
 import { LoginTemplateAllProperty } from '@/utils/login';
 
-import { ProviderType } from '@/types/user';
+import { LoginType } from '@/types/user';
 
 import prisma from '@/prisma/prisma';
 
@@ -23,7 +23,7 @@ export class LoginServiceManager {
     };
   }
 
-  static async findConfigsByType(type: ProviderType) {
+  static async findConfigsByType(type: LoginType) {
     const service = await prisma.loginServices.findFirst({ where: { type } });
     return JSON.parse(service?.configs || '{}') as LoginTemplateAllProperty;
   }

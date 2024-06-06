@@ -419,7 +419,7 @@ export function getModelDefaultTemplate(
             prompt:
               "You are an AI assistant, Follow the user's instructions carefully. Respond using markdown.",
             temperature: 0.8,
-            model: 'glm-4-0520',
+            model: 'glm-4v',
           },
           apiConfig: zhiPuAIApiConfig,
           fileConfig: { count: 5, maxSize: 10240 },

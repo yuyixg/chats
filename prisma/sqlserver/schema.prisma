@@ -218,7 +218,7 @@ model Prompts {
 model UserInitialConfig {
   id        String   @id @default(uuid()) @db.UniqueIdentifier
   name      String   @db.NVarChar(50)
-  provider  String?  @db.NVarChar(50)
+  loginType String?  @db.NVarChar(50)
   price     Decimal  @default(0)
   models    String   @default("[]") @db.NVarChar(4000)
   createdAt DateTime @default(now())
