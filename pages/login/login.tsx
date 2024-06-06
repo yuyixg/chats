@@ -10,9 +10,10 @@ import { useRouter } from 'next/router';
 import { getUserInfo, saveUserInfo, setUserSessionId } from '@/utils/user';
 
 import { DEFAULT_LANGUAGE } from '@/types/settings';
-import { ProviderResult, LoginType } from '@/types/user';
+import { LoginType, ProviderResult } from '@/types/user';
 
 import KeyCloakLogin from '@/components/Login/KeyCloakLogin';
+import PhoneLogin from '@/components/Login/PhoneLogin';
 import WeChatLogin from '@/components/Login/WeChatLogin';
 import { Button } from '@/components/ui/button';
 import { Form, FormField } from '@/components/ui/form';
@@ -204,6 +205,9 @@ export default function LoginPage() {
                         )}
                         {providerTypes.includes(LoginType.KeyCloak) && (
                           <KeyCloakLogin loading={loginLoading} />
+                        )}
+                        {providerTypes.includes(LoginType.Phone) && (
+                          <PhoneLogin loading={loginLoading} />
                         )}
                       </div>
                     </div>
