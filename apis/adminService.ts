@@ -30,6 +30,11 @@ import {
 } from '@/types/admin';
 import { PostFileServicesParams, PutFileServicesParams } from '@/types/file';
 import { PageResult } from '@/types/page';
+import {
+  GetUserInitialConfigResult,
+  PostUserInitialConfigParams,
+  PutUserInitialConfigParams,
+} from '@/types/user';
 
 export const getUserModels = (
   query?: string,
@@ -223,4 +228,21 @@ export const putModelKeys = (params: PutModelKeysParams) => {
 export const deleteModelKeys = (id: string) => {
   const fetchService = useFetch();
   return fetchService.delete('/api/admin/model-keys?id=' + id);
+};
+
+export const getUserInitialConfig = () => {
+  const fetchServer = useFetch();
+  return fetchServer.get<GetUserInitialConfigResult[]>(
+    '/api/admin/user-config',
+  );
+};
+
+export const postUserInitialConfig = (params: PostUserInitialConfigParams) => {
+  const fetchServer = useFetch();
+  return fetchServer.post('/api/admin/user-config', { body: params });
+};
+
+export const putUserInitialConfig = (params: PutUserInitialConfigParams) => {
+  const fetchServer = useFetch();
+  return fetchServer.put('/api/admin/user-config', { body: params });
 };

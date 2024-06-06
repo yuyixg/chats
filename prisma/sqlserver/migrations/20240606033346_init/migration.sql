@@ -65,7 +65,7 @@ CREATE TABLE [dbo].[Sessions] (
 CREATE TABLE [dbo].[UserModels] (
     [id] UNIQUEIDENTIFIER NOT NULL,
     [userId] UNIQUEIDENTIFIER NOT NULL,
-    [models] NVARCHAR(1000) NOT NULL CONSTRAINT [UserModels_models_df] DEFAULT '[]',
+    [models] NVARCHAR(4000) NOT NULL CONSTRAINT [UserModels_models_df] DEFAULT '[]',
     [createdAt] DATETIME2 NOT NULL CONSTRAINT [UserModels_createdAt_df] DEFAULT CURRENT_TIMESTAMP,
     [updatedAt] DATETIME2 NOT NULL,
     CONSTRAINT [UserModels_pkey] PRIMARY KEY CLUSTERED ([id])
@@ -89,8 +89,8 @@ CREATE TABLE [dbo].[ChatMessages] (
     [id] UNIQUEIDENTIFIER NOT NULL,
     [userId] UNIQUEIDENTIFIER NOT NULL,
     [chatId] UNIQUEIDENTIFIER NOT NULL,
-    [parentId] NVARCHAR(1000),
-    [chatModelId] NVARCHAR(1000),
+    [parentId] UNIQUEIDENTIFIER,
+    [chatModelId] UNIQUEIDENTIFIER,
     [role] NVARCHAR(1000) NOT NULL,
     [messages] NTEXT NOT NULL,
     [calculatedPrice] DECIMAL(32,16) NOT NULL CONSTRAINT [ChatMessages_calculatedPrice_df] DEFAULT 0,
@@ -115,7 +115,7 @@ CREATE TABLE [dbo].[BalanceLogs] (
     [id] UNIQUEIDENTIFIER NOT NULL,
     [userId] UNIQUEIDENTIFIER NOT NULL,
     [messageId] UNIQUEIDENTIFIER,
-    [createUserId] NVARCHAR(1000) NOT NULL,
+    [createUserId] UNIQUEIDENTIFIER NOT NULL,
     [value] DECIMAL(32,16) NOT NULL CONSTRAINT [BalanceLogs_value_df] DEFAULT 0,
     [type] INT NOT NULL,
     [createdAt] DATETIME2 NOT NULL CONSTRAINT [BalanceLogs_createdAt_df] DEFAULT CURRENT_TIMESTAMP,
@@ -131,7 +131,7 @@ CREATE TABLE [dbo].[Orders] (
     [outTradeNo] NVARCHAR(1000) NOT NULL,
     [status] NVARCHAR(1000) NOT NULL,
     [payH5Url] NVARCHAR(1000),
-    [prepayId] NVARCHAR(1000),
+    [prepayId] UNIQUEIDENTIFIER,
     [createdAt] DATETIME2 NOT NULL CONSTRAINT [Orders_createdAt_df] DEFAULT CURRENT_TIMESTAMP,
     [updatedAt] DATETIME2 NOT NULL,
     CONSTRAINT [Orders_pkey] PRIMARY KEY CLUSTERED ([id])
@@ -217,6 +217,18 @@ CREATE TABLE [dbo].[Prompts] (
     [createdAt] DATETIME2 NOT NULL CONSTRAINT [Prompts_createdAt_df] DEFAULT CURRENT_TIMESTAMP,
     [updatedAt] DATETIME2 NOT NULL,
     CONSTRAINT [Prompts_pkey] PRIMARY KEY CLUSTERED ([id])
+);
+
+-- CreateTable
+CREATE TABLE [dbo].[UserInitialConfig] (
+    [id] UNIQUEIDENTIFIER NOT NULL,
+    [name] NVARCHAR(50) NOT NULL,
+    [provider] NVARCHAR(50),
+    [price] DECIMAL(32,16) NOT NULL CONSTRAINT [UserInitialConfig_price_df] DEFAULT 0,
+    [models] NVARCHAR(4000) NOT NULL CONSTRAINT [UserInitialConfig_models_df] DEFAULT '[]',
+    [createdAt] DATETIME2 NOT NULL CONSTRAINT [UserInitialConfig_createdAt_df] DEFAULT CURRENT_TIMESTAMP,
+    [updatedAt] DATETIME2 NOT NULL,
+    CONSTRAINT [UserInitialConfig_pkey] PRIMARY KEY CLUSTERED ([id])
 );
 
 -- AddForeignKey

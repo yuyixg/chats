@@ -74,7 +74,7 @@ model Sessions {
 model UserModels {
   id        String   @id @default(uuid()) @db.UniqueIdentifier
   userId    String   @db.UniqueIdentifier
-  models    String   @default("[]")
+  models    String   @default("[]") @db.NVarChar(4000)
   createdAt DateTime @default(now())
   updatedAt DateTime @updatedAt
   user      Users    @relation(fields: [userId], references: [id])
@@ -217,8 +217,10 @@ model Prompts {
 
 model UserInitialConfig {
   id        String   @id @default(uuid()) @db.UniqueIdentifier
-  models    String   @default("[]")
+  name      String   @db.NVarChar(50)
+  provider  String?  @db.NVarChar(50)
   price     Decimal  @default(0)
+  models    String   @default("[]") @db.NVarChar(4000)
   createdAt DateTime @default(now())
   updatedAt DateTime @updatedAt
 }

@@ -107,6 +107,13 @@ const AdminLayout = ({
       },
       title: t('Request Logs'),
     },
+    {
+      url: '/admin/user-config',
+      icon: (stroke?: string) => {
+        return <IconNotes stroke={stroke} />;
+      },
+      title: t('User Config'),
+    },
   ];
 
   useEffect(() => {

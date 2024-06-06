@@ -41,11 +41,14 @@ export interface IWeChatAuthResult {
   errmsg: string;
 }
 
-export interface UpdateUserInitialConfig {
-  id: string;
-  models: string;
+export interface CreateUserInitialConfig {
+  name: string;
   price: Decimal;
-  enabled?: boolean;
+  models: string;
+  provider: string;
+}
+export interface UpdateUserInitialConfig extends CreateUserInitialConfig {
+  id: string;
 }
 
 export class UsersManager {
@@ -188,17 +191,35 @@ export class UsersManager {
     return user;
   }
 
+  static async createUserInitialConfig(params: CreateUserInitialConfig) {
+    await prisma.userInitialConfig.create({
+      data: {
+        ...params,
+      },
+    });
+  }
+
   static async updateUserInitialConfig(params: UpdateUserInitialConfig) {
     await prisma.userInitialConfig.update({
       where: { id: params.id },
       data: {
-        models: params.models,
-        price: params.price,
+        ...params,
       },
     });
   }
 
   static async getUserInitialConfig() {
-    return await prisma.userInitialConfig.findFirst();
+    const configs = await prisma.userInitialConfig.findMany();
+    return configs.map((x) => ({
+      id: x.id,
+      name: x.name,
+      provider: x.provider,
+      models: JSON.parse(x.models),
+      price: x.price,
+    }));
+  }
+
+  static async deleteUserInitialConfig(id: string) {
+    await prisma.userInitialConfig.delete({ where: { id } });
   }
 }

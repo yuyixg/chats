@@ -16,23 +16,27 @@ const handler = async (req: ChatsApiRequest) => {
   if (req.method === 'GET') {
     return await UsersManager.getUserInitialConfig();
   } else if (req.method === 'PUT') {
-    const { id, models, price, enabled } = req.body;
-    const _models = models.map((x: any) => {
-      return {
-        modelId: x.modelId,
-        enabled: x.enabled,
-        tokens: x.tokens,
-        counts: x.counts,
-        expires: x.expires,
-      };
-    });
+    const { id, name, models, price, provider } = req.body;
     const data = await UsersManager.updateUserInitialConfig({
       id,
-      models: _models,
+      name,
+      models: JSON.stringify(models),
       price,
-      enabled,
+      provider,
     });
     return data;
+  } else if (req.method === 'POST') {
+    const { name, models, price, provider } = req.body;
+    const data = await UsersManager.createUserInitialConfig({
+      name,
+      models: JSON.stringify(models),
+      price,
+      provider,
+    });
+    return data;
+  } else if (req.method === 'DELETE') {
+    const { id } = req.body;
+    return await UsersManager.deleteUserInitialConfig(id);
   }
 };
 

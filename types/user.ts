@@ -3,6 +3,7 @@ import Decimal from 'decimal.js';
 export enum ProviderType {
   'KeyCloak' = 'KeyCloak',
   'WeChat' = 'WeChat',
+  'Phone' = 'Phone',
 }
 
 export interface SingInParams {
@@ -37,20 +38,31 @@ export interface GetUserBalanceResult {
 
 export interface GetUserInitialConfigResult {
   id: string;
+  name: string;
+  provider: string;
   price: Decimal;
+  models: UserInitialModel[];
+}
+
+export interface PostUserInitialConfigParams {
+  name: string;
+  price: Decimal;
+  provider: string;
   models: UserInitialModel[];
 }
 
 export interface PutUserInitialConfigParams {
   id: string;
+  name: string;
   price: Decimal;
+  provider: string;
   models: UserInitialModel[];
 }
 
 export interface UserInitialModel {
   modelId: string;
-  enabled: boolean;
   tokens: string;
   counts: string;
   expires: string;
+  enabled?: boolean;
 }
