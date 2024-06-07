@@ -30,7 +30,7 @@ export const stopChat = (chatId: string) => {
   const currentTimeStamp = new Date().getTime() - 1000 * 60 * 5;
   Object.keys(publicRuntimeConfig.chattingIds).forEach((key) => {
     if (
-      new Date(publicRuntimeConfig.chattingIds[key]).getTime() >
+      new Date(publicRuntimeConfig.chattingIds[key]).getTime() <
       currentTimeStamp
     ) {
       delete publicRuntimeConfig.chattingIds[key];
