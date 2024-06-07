@@ -43,3 +43,17 @@ export function formatRMB(number: number) {
 export function formatNumberAsMoney(amount: number) {
   return new Intl.NumberFormat('zh-CN').format(amount);
 }
+
+export function generateUniqueCode() {
+  let code = '';
+  while (code.length < 6) {
+    const digit = Math.floor(Math.random() * 10);
+    if (!code.includes(digit.toString())) {
+      code += digit;
+    }
+  }
+  return code;
+}
+
+export const PhoneRegExp = /^[1][3,4,5,6,7,8,9][0-9]{9}$/;
+export const SmsExpirationSeconds = 120;

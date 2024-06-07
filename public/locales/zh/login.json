@@ -9,6 +9,14 @@
   "Login to your account": "登录",
   "Logging in...": "登录中...",
   "Old password incorrect": "旧密码不正确",
-  "Enter your username and password below to complete the login": "在下面输入您的用户名和密码以完成登录",
-  "Or continue with": "或者其他"
+  "Please enter your phone number and verification code below to complete the login.": "在下面输入您的手机号码和验证码以完成登录",
+  "Or continue with": "或者其他",
+  "Account password login": "账号密码登录",
+  "Verification code error": "验证码错误",
+  "SMS sent successfully": "短信发送成功",
+  "SMS send failed, please try again later": "短信发送失败，请稍后再试",
+  "Code": "验证码",
+  "Phone Number": "手机号码",
+  "Send code": "发送验证码",
+  "Mobile number format error": "手机号码格式错误"
 }

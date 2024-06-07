@@ -118,3 +118,16 @@ export const deleteUserPrompts = (id: string) => {
   const fetchServer = useFetch();
   return fetchServer.delete('/api/prompts?id=' + id);
 };
+
+export const postSignCode = (phone: string) => {
+  const fetchServer = useFetch();
+  return fetchServer.post('/api/public/send-code', { body: { phone } });
+};
+
+export const signByPhone = (
+  phone: string,
+  code: string,
+): Promise<SingInResult> => {
+  const fetchServer = useFetch();
+  return fetchServer.post('/api/public/login-phone', { body: { phone, code } });
+};

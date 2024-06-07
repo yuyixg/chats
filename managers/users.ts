@@ -2,7 +2,7 @@ import { weChatAuth } from '@/utils/weChat';
 
 import { LoginType, UserInitialModel } from '@/types/user';
 
-import { ChatModelManager, UserBalancesManager, UserModelManager } from '.';
+import { UserBalancesManager, UserModelManager } from '.';
 import { LoginServiceManager } from './loginService';
 
 import prisma from '@/prisma/prisma';
@@ -12,7 +12,7 @@ import Decimal from 'decimal.js';
 export interface CreateUser {
   account?: string;
   username?: string;
-  password: string;
+  password?: string;
   role: string;
   email?: string;
   phone?: string;
@@ -90,9 +90,9 @@ export class UsersManager {
     });
   }
 
-  static async singIn(username: string, password: string) {
-    const user = await this.findByUnique(username);
-    if (user) {
+  static async singIn(account: string, password: string) {
+    const user = await this.findByUnique(account);
+    if (user && user.password) {
       const match = await bcrypt.compareSync(password, user.password);
       if (match) {
         return user;
@@ -103,7 +103,8 @@ export class UsersManager {
 
   static async createUser(params: CreateUser) {
     const { password } = params;
-    let hashPassword = await bcrypt.hashSync(password);
+    let hashPassword = null;
+    if (password) hashPassword = await bcrypt.hashSync(password);
     return prisma.users.create({
       data: {
         ...params,
