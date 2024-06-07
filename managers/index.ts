@@ -9,6 +9,7 @@ import { PayServiceManager } from './payService';
 import { PromptsManager } from './prompts';
 import { RequestLogsManager } from './requestLogs';
 import { SessionsManager } from './sessions';
+import { SmsManager } from './sms';
 import { UserBalancesManager } from './userBalances';
 import { UserModelManager } from './userModels';
 import { UsersManager } from './users';
@@ -30,4 +31,5 @@ export {
   ChatsManager,
   PromptsManager,
   ChatModelRecordManager,
+  SmsManager
 };

@@ -17,6 +17,8 @@ const publicApis = [
   '/api/public/messages',
   '/api/public/notify',
   '/api/public/login-provider',
+  '/api/public/send-code',
+  '/api/public/login-phone',
 ];
 const adminApis = '/api/admin/';
 

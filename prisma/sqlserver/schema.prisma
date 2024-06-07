@@ -15,7 +15,7 @@ model Users {
   avatar       String?
   account      String?
   username     String?
-  password     String
+  password     String?
   email        String?
   phone        String?
   role         String        @default("-")
@@ -160,11 +160,12 @@ model LoginServices {
   updatedAt DateTime @updatedAt
 }
 
-model UserSms {
+model Sms {
   id        String   @id @default(uuid()) @db.UniqueIdentifier
-  type      String
-  status    String
-  code      String
+  signName  String   @db.NVarChar(50)
+  type      Int      @db.SmallInt()
+  status    Int      @db.SmallInt()
+  code      String   @db.NVarChar(10)
   createdAt DateTime @default(now())
 }
 

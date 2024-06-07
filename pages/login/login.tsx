@@ -7,76 +7,56 @@ import { serverSideTranslations } from 'next-i18next/serverSideTranslations';
 import Image from 'next/image';
 import { useRouter } from 'next/router';
 
-import { getUserInfo, saveUserInfo, setUserSessionId } from '@/utils/user';
+import { PhoneRegExp, SmsExpirationSeconds } from '@/utils/common';
+import { saveUserInfo, setUserSessionId } from '@/utils/user';
 
 import { DEFAULT_LANGUAGE } from '@/types/settings';
 import { LoginType, ProviderResult } from '@/types/user';
 
+import AccountLogin from '@/components/Login/AccountLogin';
 import KeyCloakLogin from '@/components/Login/KeyCloakLogin';
-import PhoneLogin from '@/components/Login/PhoneLogin';
 import WeChatLogin from '@/components/Login/WeChatLogin';
 import { Button } from '@/components/ui/button';
-import { Form, FormField } from '@/components/ui/form';
-import FormCheckbox from '@/components/ui/form/checkbox';
-import FormInput from '@/components/ui/form/input';
-import { FormFieldType, IFormFieldOption } from '@/components/ui/form/type';
+import {
+  Form,
+  FormControl,
+  FormField,
+  FormItem,
+  FormMessage,
+} from '@/components/ui/form';
+import { Input } from '@/components/ui/input';
 
-import { getLoginProvider, singIn } from '@/apis/userService';
+import {
+  getLoginProvider,
+  postSignCode,
+  signByPhone,
+} from '@/apis/userService';
 import { zodResolver } from '@hookform/resolvers/zod';
 import { z } from 'zod';
 
 export default function LoginPage() {
   const { t } = useTranslation('login');
   const router = useRouter();
+  const [seconds, setSeconds] = useState(SmsExpirationSeconds - 1);
+  const [isSendCode, setIsSendCode] = useState(false);
+  const [smsCode, setSmsCode] = useState('');
   const [loginLoading, setLoginLoading] = useState(false);
   const [isClient, setIsClient] = useState(false);
   const [providers, setProviders] = useState<ProviderResult[]>([]);
   const [providerTypes, setProviderTypes] = useState<LoginType[]>([]);
 
-  const formFields: IFormFieldOption[] = [
-    {
-      name: 'username',
-      label: t('Your username'),
-      defaultValue: '',
-      render: (options: IFormFieldOption, field: FormFieldType) => (
-        <FormInput autocomplete="on" options={options} field={field} />
-      ),
-    },
-    {
-      name: 'password',
-      label: t('Your password'),
-      defaultValue: '',
-      render: (options: IFormFieldOption, field: FormFieldType) => (
-        <FormInput
-          autocomplete="on"
-          type="password"
-          options={options}
-          field={field}
-        />
-      ),
-    },
-    {
-      name: 'remember',
-      label: t('Remember me'),
-      defaultValue: true,
-      render: (options: IFormFieldOption, field: FormFieldType) => (
-        <FormCheckbox options={options} field={field} />
-      ),
-    },
-  ];
-
   const formSchema = z.object({
-    username: z.string().min(1, `${t('Please enter you user name')}`),
-    password: z.string().min(1, `${t('Please enter you password')}`),
-    remember: z.boolean(),
+    phone: z
+      .string()
+      .regex(PhoneRegExp, { message: t('Mobile number format error')! }),
   });
 
   const form = useForm<z.infer<typeof formSchema>>({
     resolver: zodResolver(formSchema),
-    defaultValues: formFields.reduce((obj: any, field) => {
-      obj[field.name] = field.defaultValue;
-      return obj;
-    }, {}),
+    mode: 'all',
+    defaultValues: {
+      phone: '',
+    },
   });
 
   useEffect(() => {
@@ -86,33 +66,59 @@ export default function LoginPage() {
     });
 
     form.formState.isValid;
-    const userInfo = getUserInfo();
-    if (userInfo) {
-      const { username } = userInfo;
-      form.setValue('username', username);
-    }
     setIsClient(true);
   }, []);
 
-  async function onSubmit(values: z.infer<typeof formSchema>) {
-    if (!form.formState.isValid) return;
-    setLoginLoading(true);
-    const { username, password, remember } = values;
-    singIn({ username, password })
-      .then((response) => {
-        setUserSessionId(response.sessionId);
-        saveUserInfo({
-          canRecharge: response.canRecharge,
-          role: response.role,
-          username: response.username,
+  useEffect(() => {
+    let timer: any;
+    if (isSendCode && seconds > 0) {
+      timer = setInterval(() => {
+        setSeconds((prevSeconds) => prevSeconds - 1);
+      }, 1000);
+    }
+
+    if (seconds === 0) {
+      setIsSendCode(false);
+      setSeconds(SmsExpirationSeconds);
+    }
+
+    return () => clearInterval(timer);
+  }, [isSendCode, seconds]);
+
+  const sendCode = () => {
+    if (form.formState.isValid) {
+      const phone = form.getValues('phone');
+      postSignCode(phone)
+        .then(() => {
+          toast.success(t('SMS sent successfully'));
+          setIsSendCode(true);
+        })
+        .catch(() => {
+          toast.error(t('SMS send failed, please try again later'));
         });
-        router.push('/');
-      })
-      .catch(() => {
-        setLoginLoading(false);
-        toast.error(t('Username or password incorrect'));
-      });
-  }
+    }
+  };
+
+  const sign = () => {
+    if (form.formState.isValid && smsCode.length === 6) {
+      const phone = form.getValues('phone');
+      setLoginLoading(true);
+      signByPhone(phone, smsCode)
+        .then((response) => {
+          setUserSessionId(response.sessionId);
+          saveUserInfo({
+            canRecharge: response.canRecharge,
+            role: response.role,
+            username: response.username,
+          });
+          router.push('/');
+        })
+        .catch(() => {
+          setLoginLoading(false);
+          toast.error(t('Verification code error'));
+        });
+    }
+  };
 
   return (
     <>
@@ -149,7 +155,7 @@ export default function LoginPage() {
                 </h1>
                 <p className="text-sm text-muted-foreground">
                   {t(
-                    'Enter your username and password below to complete the login',
+                    'Please enter your phone number and verification code below to complete the login.',
                   )}
                 </p>
               </div>
@@ -158,40 +164,83 @@ export default function LoginPage() {
                   <div className="relative w-full max-w-md max-h-full">
                     <div className="relative">
                       <Form {...form}>
-                        <form onSubmit={form.handleSubmit(onSubmit)}>
-                          {formFields.map((item) => (
-                            <FormField
-                              key={item.name}
-                              control={form.control}
-                              name={item.name as never}
-                              render={({ field }) => item.render(item, field)}
-                            />
-                          ))}
-                          <div className="w-full flex justify-center">
-                            <Button
-                              className="w-full"
-                              disabled={loginLoading}
-                              type="submit"
-                            >
-                              {loginLoading
-                                ? t('Logging in...')
-                                : t('Login to your account')}
-                            </Button>
-                          </div>
+                        <form>
+                          <FormField
+                            control={form.control}
+                            name="phone"
+                            render={({ field }) => (
+                              <FormItem className="flex flex-col items-start">
+                                <FormControl className="w-full">
+                                  <div>
+                                    <div className="py-2.5 text-sm font-medium leading-none">
+                                      {t('Phone Number')}
+                                    </div>
+                                    <div className="flex border rounded-md">
+                                      <Button
+                                        type="button"
+                                        variant="ghost"
+                                        className="absolute font-semibold"
+                                      >
+                                        +86
+                                      </Button>
+                                      <Input
+                                        className="w-full m-0 border-none outline-none bg-transparent rounded-md p-0 pl-14"
+                                        {...field}
+                                      />
+                                    </div>
+                                  </div>
+                                </FormControl>
+                                <FormMessage />
+                              </FormItem>
+                            )}
+                          />
                         </form>
                       </Form>
-                      {providers.length > 0 && (
-                        <div className="relative">
-                          <div className="absolute inset-0 flex items-center">
-                            <span className="w-full border-t" />
-                          </div>
-                          <div className="relative flex justify-center text-xs uppercase">
-                            <span className="bg-background p-4 text-muted-foreground">
-                              {t('Or continue with')}
-                            </span>
-                          </div>
+                      <div className="pt-2">
+                        <div className="py-2.5 text-sm font-medium leading-none">
+                          {t('Code')}
                         </div>
-                      )}
+                        <div className="flex border rounded-md">
+                          <Input
+                            value={smsCode}
+                            onChange={(e) => {
+                              setSmsCode(e.target.value);
+                            }}
+                            className="m-0 border-none outline-none bg-transparent rounded-md p-0 pr-[102px] pl-4"
+                          />
+                          <Button
+                            className="absolute right-[5px] text-center"
+                            disabled={!form.formState.isValid}
+                            variant="link"
+                            onClick={sendCode}
+                          >
+                            {isSendCode ? seconds : t('Send code')}
+                          </Button>
+                        </div>
+                      </div>
+                      <div className="pt-4">
+                        <Button
+                          className="w-full"
+                          onClick={sign}
+                          disabled={loginLoading}
+                        >
+                          {loginLoading
+                            ? t('Logging in...')
+                            : t('Login to your account')}
+                        </Button>
+                      </div>
+
+                      <div className="relative mt-2">
+                        <div className="absolute inset-0 flex items-center">
+                          <span className="w-full border-t" />
+                        </div>
+                        <div className="relative flex justify-center text-xs uppercase">
+                          <span className="bg-background p-4 text-muted-foreground">
+                            {t('Or continue with')}
+                          </span>
+                        </div>
+                      </div>
+
                       <div className="flex justify-center gap-2">
                         {providerTypes.includes(LoginType.WeChat) && (
                           <WeChatLogin
@@ -206,9 +255,8 @@ export default function LoginPage() {
                         {providerTypes.includes(LoginType.KeyCloak) && (
                           <KeyCloakLogin loading={loginLoading} />
                         )}
-                        {providerTypes.includes(LoginType.Phone) && (
-                          <PhoneLogin loading={loginLoading} />
-                        )}
+
+                        <AccountLogin loading={loginLoading} />
                       </div>
                     </div>
                   </div>

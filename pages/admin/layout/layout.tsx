@@ -17,12 +17,6 @@ import {
   IconUserCog,
   IconUsers,
 } from '@/components/Icons/index';
-import {
-  ResizableHandle,
-  ResizablePanel,
-  ResizablePanelGroup,
-} from '@/components/ui/resizable';
-import { TooltipProvider } from '@/components/ui/tooltip';
 
 import { cn } from '@/lib/utils';
 
@@ -121,64 +115,39 @@ const AdminLayout = ({
   }, []);
 
   return (
-    <TooltipProvider delayDuration={0}>
-      <ResizablePanelGroup
-        direction="horizontal"
-        className="h-full w-full items-stretch"
-      >
-        <ResizablePanel
-          defaultSize={160}
-          collapsedSize={4}
-          collapsible={true}
-          minSize={8}
-          maxSize={14}
-          onCollapse={() => {
-            setIsCollapsed(true);
-          }}
-          onExpand={() => {
-            setIsCollapsed(false);
-          }}
-          className={cn(
-            isCollapsed &&
-              'min-w-[50px] transition-all duration-300 ease-in-out',
-            'h-full',
-          )}
-        >
-          <div
-            className={cn('px-4 py-4 overflow-y-auto', isCollapsed && 'px-2')}
+    <div className="h-full w-full flex">
+      <div className="min-w-[180px] h-screen" style={{ borderRightWidth: 1 }}>
+        <div className={cn('px-4 py-4 overflow-y-auto', isCollapsed && 'px-2')}>
+          <a
+            onClick={() => {
+              router.push('/');
+            }}
+            className={cn(
+              'flex items-center cursor-pointer',
+              isCollapsed && 'justify-center',
+            )}
           >
-            <a
-              onClick={() => {
-                router.push('/');
-              }}
-              className={cn(
-                'flex items-center cursor-pointer',
-                isCollapsed && 'justify-center',
-              )}
+            <Image
+              className="h-8 w-8 rounded-sm"
+              alt="Chats Logo"
+              src="/chats.png"
+              width={32}
+              height={32}
+            />
+            <span
+              hidden={isCollapsed}
+              className="self-center text-lg font-medium whitespace-nowrap"
             >
-              <Image
-                className="h-8 w-8 rounded-sm"
-                alt="Chats Logo"
-                src="/chats.png"
-                width={32}
-                height={32}
-              />
-              <span
-                hidden={isCollapsed}
-                className="self-center text-lg font-medium whitespace-nowrap"
-              >
-                Chats
-              </span>
-            </a>
-          </div>
-          <Nav isCollapsed={isCollapsed} menus={menus} />
-        </ResizablePanel>
-        <ResizableHandle className="h-screen" withHandle />
-        <ResizablePanel defaultSize={1000}>
-          <div className="p-4">{children}</div>
-        </ResizablePanel>
-      </ResizablePanelGroup>
-    </TooltipProvider>
+              Chats
+            </span>
+          </a>
+        </div>
+        <Nav isCollapsed={isCollapsed} menus={menus} />
+      </div>
+      <div className="w-full">
+        <div className="p-4">{children}</div>
+      </div>
+    </div>
   );
 };
 

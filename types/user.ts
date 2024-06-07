@@ -6,6 +6,16 @@ export enum LoginType {
   'Phone' = 'Phone',
 }
 
+export enum SmsType {
+  SignIn = 1,
+  Register = 2,
+}
+
+export enum SmsStatus {
+  WaitingForVerification = 1,
+  Verified = 2,
+}
+
 export interface SingInParams {
   username?: string;
   password?: string;

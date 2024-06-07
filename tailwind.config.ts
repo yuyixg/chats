@@ -59,43 +59,9 @@ const config = {
         md: 'calc(var(--radius) - 2px)',
         sm: 'calc(var(--radius) - 4px)',
       },
-      keyframes: {
-        'accordion-down': {
-          from: { height: '0' },
-          to: { height: 'var(--radix-accordion-content-height)' },
-        },
-        'accordion-up': {
-          from: { height: 'var(--radix-accordion-content-height)' },
-          to: { height: '0' },
-        },
-        'slide-in': {
-          from: {
-            transform: 'translate3d(-100%, 0, 0)',
-            visibility: 'visible',
-          },
-          to: {
-            transform: 'translate3d(0, 0, 0)',
-          },
-        },
-        'slide-out': {
-          from: {
-            transform: 'translate3d(0, 0, 0)',
-          },
-          to: {
-            visibility: 'hidden',
-            transform: 'translate3d(-100%, 0, 0)',
-          },
-        },
-      },
-      animation: {
-        'accordion-down': 'accordion-down 0.2s ease-out',
-        'accordion-up': 'accordion-up 0.2s ease-out',
-        'slide-in': 'slide-in 300ms ease-in-out',
-        'slide-out': 'slide-out 300ms ease-in-out forwards',
-      },
     },
   },
-  plugins: [require('tailwindcss-animate'), require('@tailwindcss/typography')],
+  plugins: [require('@tailwindcss/typography')],
 } satisfies Config;
 
 export default config;

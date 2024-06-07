@@ -1,5 +1,6 @@
-import { useEffect, useState } from 'react';
+import { useState } from 'react';
 
+import { useTranslation } from 'next-i18next';
 import Image from 'next/image';
 
 import { Button } from '../ui/button';
@@ -9,13 +10,13 @@ import {
   TooltipProvider,
   TooltipTrigger,
 } from '../ui/tooltip';
-import PhoneLoginModal from './PhoneLoginModal';
+import AccountLoginModal from './AccountLoginModal';
 
-const PhoneLogin = (props: { loading?: boolean }) => {
+const AccountLogin = (props: { loading?: boolean }) => {
+  const { t } = useTranslation('login');
   const { loading } = props;
 
   const [isOpen, setIsOpen] = useState(false);
-  useEffect(() => {}, []);
 
   return (
     <div>
@@ -31,19 +32,19 @@ const PhoneLogin = (props: { loading?: boolean }) => {
               }}
             >
               <Image
-                src="/phone.svg"
+                src="/account.svg"
                 alt="Phone"
                 width={0}
                 height={0}
-                className="h-6 w-6 dark:bg-transparent"
+                className="h-7 w-7 dark:bg-transparent"
               />
             </Button>
           </TooltipTrigger>
-          <TooltipContent>验证码登录</TooltipContent>
+          <TooltipContent>{t('Account password login')}</TooltipContent>
         </Tooltip>
       </TooltipProvider>
-      <PhoneLoginModal onClose={() => setIsOpen(false)} isOpen={isOpen} />
+      <AccountLoginModal onClose={() => setIsOpen(false)} isOpen={isOpen} />
     </div>
   );
 };
-export default PhoneLogin;
+export default AccountLogin;
