@@ -9,9 +9,11 @@ import {
   IconChartPie,
   IconCreditCard,
   IconFiles,
+  IconIdBadge,
   IconKey,
   IconMessages,
   IconNotes,
+  IconSettings,
   IconSettingsCog,
   IconShieldLock,
   IconUserCog,
@@ -104,9 +106,23 @@ const AdminLayout = ({
     {
       url: '/admin/user-config',
       icon: (stroke?: string) => {
-        return <IconNotes stroke={stroke} />;
+        return <IconUserCog stroke={stroke} />;
       },
       title: t('Account Initial Config'),
+    },
+    {
+      url: '/admin/global-configs',
+      icon: (stroke?: string) => {
+        return <IconSettings stroke={stroke} />;
+      },
+      title: t('Global Configs'),
+    },
+    {
+      url: '/admin/invitation-code',
+      icon: (stroke?: string) => {
+        return <IconIdBadge stroke={stroke} />;
+      },
+      title: t('Invitation Code Management'),
     },
   ];
 

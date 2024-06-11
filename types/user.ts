@@ -76,3 +76,32 @@ export interface UserInitialModel {
   expires: string;
   enabled?: boolean;
 }
+
+export interface GetConfigsResult {
+  key: string;
+  value: string;
+  description: string;
+}
+
+export interface PostAndPutConfigParams {
+  key: string;
+  value: string;
+  description: string;
+}
+
+export interface GetInvitationCodeResult {
+  id: string;
+  value: string;
+  count: number;
+  username: string;
+}
+
+export interface PostInvitationCodeParams {
+  value: string;
+  count: number;
+}
+
+export interface PutInvitationCodeParams {
+  id: string;
+  count: number;
+}

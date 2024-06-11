@@ -18,6 +18,14 @@ import KeyCloakLogin from '@/components/Login/KeyCloakLogin';
 import WeChatLogin from '@/components/Login/WeChatLogin';
 import { Button } from '@/components/ui/button';
 import {
+  Card,
+  CardContent,
+  CardDescription,
+  CardFooter,
+  CardHeader,
+  CardTitle,
+} from '@/components/ui/card';
+import {
   Form,
   FormControl,
   FormField,
@@ -25,6 +33,10 @@ import {
   FormMessage,
 } from '@/components/ui/form';
 import { Input } from '@/components/ui/input';
+import { Label } from '@/components/ui/label';
+import { Tabs, TabsContent, TabsList, TabsTrigger } from '@/components/ui/tabs';
+
+import message from '../message';
 
 import {
   getLoginProvider,
@@ -46,6 +58,7 @@ export default function LoginPage() {
   const [providerTypes, setProviderTypes] = useState<LoginType[]>([]);
 
   const formSchema = z.object({
+    invitationCode: z.string().min(1, t('请输入正确的邀请码')!).optional(),
     phone: z
       .string()
       .regex(PhoneRegExp, { message: t('Mobile number format error')! }),
@@ -55,6 +68,7 @@ export default function LoginPage() {
     resolver: zodResolver(formSchema),
     mode: 'all',
     defaultValues: {
+      invitationCode: '',
       phone: '',
     },
   });
@@ -100,10 +114,12 @@ export default function LoginPage() {
   };
 
   const sign = () => {
+    form.trigger();
     if (form.formState.isValid && smsCode.length === 6) {
       const phone = form.getValues('phone');
+      const invitationCode = form.getValues('invitationCode')!;
       setLoginLoading(true);
-      signByPhone(phone, smsCode)
+      signByPhone(phone, smsCode, invitationCode)
         .then((response) => {
           setUserSessionId(response.sessionId);
           saveUserInfo({
@@ -113,9 +129,10 @@ export default function LoginPage() {
           });
           router.push('/');
         })
-        .catch(() => {
+        .catch(async (response) => {
           setLoginLoading(false);
-          toast.error(t('Verification code error'));
+          const json = await response.json();
+          toast.error(json.message || t('Verification code error'));
         });
     }
   };
@@ -163,72 +180,163 @@ export default function LoginPage() {
                 <div className="flex w-full justify-center">
                   <div className="relative w-full max-w-md max-h-full">
                     <div className="relative">
-                      <Form {...form}>
-                        <form>
-                          <FormField
-                            control={form.control}
-                            name="phone"
-                            render={({ field }) => (
-                              <FormItem className="flex flex-col items-start">
-                                <FormControl className="w-full">
-                                  <div>
-                                    <div className="py-2.5 text-sm font-medium leading-none">
-                                      {t('Phone Number')}
-                                    </div>
-                                    <div className="flex border rounded-md">
-                                      <Button
-                                        type="button"
-                                        variant="ghost"
-                                        className="absolute font-semibold"
-                                      >
-                                        +86
-                                      </Button>
-                                      <Input
-                                        className="w-full m-0 border-none outline-none bg-transparent rounded-md p-0 pl-14"
-                                        {...field}
-                                      />
-                                    </div>
-                                  </div>
-                                </FormControl>
-                                <FormMessage />
-                              </FormItem>
-                            )}
-                          />
-                        </form>
-                      </Form>
-                      <div className="pt-2">
-                        <div className="py-2.5 text-sm font-medium leading-none">
-                          {t('Code')}
-                        </div>
-                        <div className="flex border rounded-md">
-                          <Input
-                            value={smsCode}
-                            onChange={(e) => {
-                              setSmsCode(e.target.value);
-                            }}
-                            className="m-0 border-none outline-none bg-transparent rounded-md p-0 pr-[102px] pl-4"
-                          />
-                          <Button
-                            className="absolute right-[5px] text-center"
-                            disabled={!form.formState.isValid}
-                            variant="link"
-                            onClick={sendCode}
+                      <Tabs defaultValue="phone" className="w-[400px] flex-col">
+                        <TabsList className="flex w-full flex-row justify-around">
+                          <TabsTrigger
+                            value="phone"
+                            className="flex justify-center w-full"
                           >
-                            {isSendCode ? seconds : t('Send code')}
-                          </Button>
-                        </div>
-                      </div>
-                      <div className="pt-4">
-                        <Button
-                          className="w-full"
-                          onClick={sign}
-                          disabled={loginLoading}
-                        >
-                          {loginLoading
-                            ? t('Logging in...')
-                            : t('Login to your account')}
-                        </Button>
-                      </div>
+                            手机登录
+                          </TabsTrigger>
+                          <TabsTrigger
+                            value="register"
+                            className="flex justify-center w-full"
+                          >
+                            注册
+                          </TabsTrigger>
+                          <TabsTrigger
+                            value="account"
+                            className="flex justify-center w-full"
+                          >
+                            账号登录
+                          </TabsTrigger>
+                        </TabsList>
+                        <TabsContent className="m-0 mt-2" value="phone">
+                          <Card>
+                            <CardContent className="space-y-2">
+                              <Form {...form}>
+                                <form>
+                                  <FormField
+                                    control={form.control}
+                                    name="invitationCode"
+                                    render={({ field }) => (
+                                      <FormItem className="flex flex-col items-start">
+                                        <FormControl className="w-full">
+                                          <div>
+                                            <div className="py-2.5 text-sm font-medium leading-none">
+                                              {t('Invitation Code')}
+                                            </div>
+                                            <div className="flex border rounded-md">
+                                              <Input
+                                                className="w-full m-0 border-none outline-none bg-transparent rounded-md"
+                                                {...field}
+                                              />
+                                            </div>
+                                          </div>
+                                        </FormControl>
+                                        <FormMessage />
+                                      </FormItem>
+                                    )}
+                                  />
+                                  <FormField
+                                    control={form.control}
+                                    name="phone"
+                                    render={({ field }) => (
+                                      <FormItem className="flex flex-col items-start">
+                                        <FormControl className="w-full">
+                                          <div>
+                                            <div className="py-2.5 text-sm font-medium leading-none">
+                                              {t('Phone Number')}
+                                            </div>
+                                            <div className="flex border rounded-md">
+                                              <Button
+                                                type="button"
+                                                variant="ghost"
+                                                className="absolute font-semibold"
+                                              >
+                                                +86
+                                              </Button>
+                                              <Input
+                                                className="w-full m-0 border-none outline-none bg-transparent rounded-md p-0 pl-14"
+                                                {...field}
+                                              />
+                                            </div>
+                                          </div>
+                                        </FormControl>
+                                        <FormMessage />
+                                      </FormItem>
+                                    )}
+                                  />
+                                </form>
+                              </Form>
+                              <div className="pt-2">
+                                <div className="py-2.5 text-sm font-medium leading-none">
+                                  {t('Code')}
+                                </div>
+                                <div className="flex border rounded-md">
+                                  <Input
+                                    value={smsCode}
+                                    onChange={(e) => {
+                                      setSmsCode(e.target.value);
+                                    }}
+                                    className="m-0 border-none outline-none bg-transparent rounded-md p-0 pr-[102px] pl-4"
+                                  />
+                                  <Button
+                                    className="absolute right-[5px] text-center"
+                                    disabled={!form.formState.isValid}
+                                    variant="link"
+                                    onClick={sendCode}
+                                  >
+                                    {isSendCode
+                                      ? seconds + 's'
+                                      : t('Send code')}
+                                  </Button>
+                                </div>
+                              </div>
+                              <div className="pt-4">
+                                <Button
+                                  className="w-full"
+                                  type="submit"
+                                  onClick={sign}
+                                  disabled={loginLoading}
+                                >
+                                  {loginLoading
+                                    ? t('Logging in...')
+                                    : t('Login to your account')}
+                                </Button>
+                              </div>
+                            </CardContent>
+                          </Card>
+                        </TabsContent>
+                        <TabsContent className="m-0 mt-2" value="register">
+                          <Card>
+                            <CardContent className="space-y-2">
+                              <div className="space-y-1">
+                                <Label htmlFor="current">
+                                  Current password
+                                </Label>
+                                <Input id="current" type="password" />
+                              </div>
+                              <div className="space-y-1">
+                                <Label htmlFor="new">New password</Label>
+                                <Input id="new" type="password" />
+                              </div>
+                            </CardContent>
+                            <CardFooter>
+                              <Button>Save password</Button>
+                            </CardFooter>
+                          </Card>
+                        </TabsContent>
+                        <TabsContent className="m-0 mt-2" value="account">
+                          <Card>
+                            <CardContent className="space-y-2">
+                              <div className="space-y-1">
+                                <Label htmlFor="current">
+                                  Current password
+                                </Label>
+                                <Input id="current" type="password" />
+                              </div>
+                              <div className="space-y-1">
+                                <Label htmlFor="new">New password</Label>
+                                <Input id="new" type="password" />
+                              </div>
+                            </CardContent>
+                            <CardFooter>
+                              <Button>Save password</Button>
+                            </CardFooter>
+                          </Card>
+                        </TabsContent>
+                      </Tabs>
 
                       <div className="relative mt-2">
                         <div className="absolute inset-0 flex items-center">

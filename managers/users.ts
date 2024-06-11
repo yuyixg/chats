@@ -64,6 +64,13 @@ export class UsersManager {
     return await prisma.users.findFirst({
       where: {
         account: account?.toLowerCase(),
+      },
+    });
+  }
+
+  static async findByPhone(account: string) {
+    return await prisma.users.findFirst({
+      where: {
         phone: account,
       },
     });

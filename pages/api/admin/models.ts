@@ -103,8 +103,7 @@ const handler = async (req: ChatsApiRequest) => {
     const model = await ChatModelManager.findModelById(id);
     if (model) {
       await ChatModelManager.deleteModelById(id);
-    }
-    throw new BadRequest('Model is not Found!');
+    } else throw new BadRequest('Model is not Found!');
   }
 };
 

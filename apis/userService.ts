@@ -127,7 +127,10 @@ export const postSignCode = (phone: string) => {
 export const signByPhone = (
   phone: string,
   code: string,
+  invitationCode: string,
 ): Promise<SingInResult> => {
   const fetchServer = useFetch();
-  return fetchServer.post('/api/public/login-phone', { body: { phone, code } });
+  return fetchServer.post('/api/public/login-phone', {
+    body: { phone, code, invitationCode },
+  });
 };

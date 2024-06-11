@@ -31,8 +31,13 @@ import {
 import { PostFileServicesParams, PutFileServicesParams } from '@/types/file';
 import { PageResult } from '@/types/page';
 import {
+  GetConfigsResult,
+  GetInvitationCodeResult,
   GetUserInitialConfigResult,
+  PostAndPutConfigParams,
+  PostInvitationCodeParams,
   PostUserInitialConfigParams,
+  PutInvitationCodeParams,
   PutUserInitialConfigParams,
 } from '@/types/user';
 
@@ -250,4 +255,46 @@ export const putUserInitialConfig = (params: PutUserInitialConfigParams) => {
 export const deleteUserInitialConfig = (id: string) => {
   const fetchServer = useFetch();
   return fetchServer.delete('/api/admin/user-config?id=' + id);
+};
+
+export const getConfigs = () => {
+  const fetchServer = useFetch();
+  return fetchServer.get<GetConfigsResult[]>('/api/admin/global-configs');
+};
+
+export const postConfigs = (params: PostAndPutConfigParams) => {
+  const fetchServer = useFetch();
+  return fetchServer.post('/api/admin/global-configs', { body: params });
+};
+
+export const putConfigs = (params: PostAndPutConfigParams) => {
+  const fetchServer = useFetch();
+  return fetchServer.put('/api/admin/global-configs', { body: params });
+};
+
+export const deleteConfigs = (id: string) => {
+  const fetchServer = useFetch();
+  return fetchServer.delete('/api/admin/global-configs?id=' + id);
+};
+
+export const getInvitationCode = () => {
+  const fetchServer = useFetch();
+  return fetchServer.get<GetInvitationCodeResult[]>(
+    '/api/admin/invitation-code',
+  );
+};
+
+export const putInvitationCode = (params: PutInvitationCodeParams) => {
+  const fetchServer = useFetch();
+  return fetchServer.put('/api/admin/invitation-code', { body: params });
+};
+
+export const postInvitationCode = (params: PostInvitationCodeParams) => {
+  const fetchServer = useFetch();
+  return fetchServer.post('/api/admin/invitation-code', { body: params });
+};
+
+export const deleteInvitationCode = (id: string) => {
+  const fetchServer = useFetch();
+  return fetchServer.delete('/api/admin/invitation-code?id=' + id);
 };

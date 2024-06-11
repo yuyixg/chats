@@ -1,7 +1,9 @@
 import { ChatMessagesManager } from './chatMessages';
 import { ChatModelRecordManager } from './chatModel';
 import { ChatsManager } from './chats';
+import { ConfigsManager } from './configs';
 import { FileServiceManager } from './fileService';
+import { InvitationCodeManager } from './invitationCode';
 import { ModelKeysManager } from './modelKeys';
 import { ChatModelManager } from './models';
 import { OrdersManager } from './order';
@@ -31,5 +33,7 @@ export {
   ChatsManager,
   PromptsManager,
   ChatModelRecordManager,
-  SmsManager
+  SmsManager,
+  ConfigsManager,
+  InvitationCodeManager
 };

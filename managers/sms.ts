@@ -16,9 +16,9 @@ export class SmsManager {
       },
     });
     if (!sms) return null;
-    const createAt = new Date(sms.createdAt);
-    createAt.setMinutes(createAt.getMinutes() + SmsExpirationSeconds / 60);
-    return sms.createdAt > new Date() ? sms : null;
+    const createdAt = new Date(sms.createdAt);
+    createdAt.setMinutes(createdAt.getMinutes() + SmsExpirationSeconds / 60);
+    return createdAt.getTime() > new Date().getTime() ? sms : null;
   };
 
   static sendSignInCode = async (phone: string) => {

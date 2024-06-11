@@ -9,6 +9,8 @@
   "Login Service": "登录服务",
   "Pay Service": "支付服务",
   "Request Logs": "请求日志",
+  "Global Configs": "全局设置",
+  "Invitation Code Management": "激活码管理",
   "Request Logs Details": "请求日志详情",
   "User Name": "用户昵称",
   "Balance": "余额",
@@ -113,5 +115,13 @@
   "Name": "名称",
   "Account Initial Config": "账号配置",
   "Add Account Initial Config": "添加账号配置",
-  "Is Enabled": "是否启用"
+  "Is Enabled": "是否启用",
+  "Value": "值",
+  "Description": "描述",
+  "Add Configs": "添加配置",
+  "Edit Configs": "编辑配置",
+  "Invitation Code": "激活码",
+  "Use count": "可激活次数",
+  "Add Invitation Code": "新增激活码",
+  "Created User": "创建者"
 }

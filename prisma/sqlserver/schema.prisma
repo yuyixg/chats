@@ -11,26 +11,27 @@ datasource db {
 }
 
 model Users {
-  id           String        @id @default(uuid()) @db.UniqueIdentifier
-  avatar       String?
-  account      String?
-  username     String?
-  password     String?
-  email        String?
-  phone        String?
-  role         String        @default("-")
-  enabled      Boolean       @default(true)
-  provider     String?
-  sub          String?
-  createdAt    DateTime      @default(now())
-  updatedAt    DateTime      @updatedAt
-  sessions     Sessions[]
-  userBalances UserBalances?
-  UserModels   UserModels[]
-  AuditLogs    RequestLogs[]
-  Orders       Orders[]
-  Chats        Chats[]
-  Prompts      Prompts[]
+  id             String           @id @default(uuid()) @db.UniqueIdentifier
+  avatar         String?
+  account        String?
+  username       String?
+  password       String?
+  email          String?
+  phone          String?
+  role           String           @default("-")
+  enabled        Boolean          @default(true)
+  provider       String?
+  sub            String?
+  createdAt      DateTime         @default(now())
+  updatedAt      DateTime         @updatedAt
+  sessions       Sessions[]
+  userBalances   UserBalances?
+  UserModels     UserModels[]
+  AuditLogs      RequestLogs[]
+  Orders         Orders[]
+  Chats          Chats[]
+  Prompts        Prompts[]
+  InvitationCode InvitationCode[]
 }
 
 model FileServices {
@@ -224,4 +225,28 @@ model UserInitialConfig {
   models    String   @default("[]") @db.NVarChar(4000)
   createdAt DateTime @default(now())
   updatedAt DateTime @updatedAt
+}
+
+model Configs {
+  key         String  @unique
+  value       String  @db.NVarChar(1000)
+  description String? @db.NVarChar(50)
+}
+
+model InvitationCode {
+  id             String           @id @default(uuid()) @db.UniqueIdentifier
+  value          String           @unique
+  count          Int              @db.SmallInt
+  createUserId   String           @db.UniqueIdentifier
+  createdAt      DateTime         @default(now())
+  isDeleted      Boolean          @default(false)
+  user           Users?           @relation(fields: [createUserId], references: [id])
+  UserInvitation UserInvitation[]
+}
+
+model UserInvitation {
+  id               String         @id @default(uuid()) @db.UniqueIdentifier
+  userId           String         @db.UniqueIdentifier
+  invitationCodeId String         @db.UniqueIdentifier
+  InvitationCode   InvitationCode @relation(fields: [invitationCodeId], references: [id])
 }

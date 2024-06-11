@@ -232,6 +232,34 @@ CREATE TABLE [dbo].[UserInitialConfig] (
     CONSTRAINT [UserInitialConfig_pkey] PRIMARY KEY CLUSTERED ([id])
 );
 
+-- CreateTable
+CREATE TABLE [dbo].[Configs] (
+    [key] NVARCHAR(1000) NOT NULL,
+    [value] NVARCHAR(1000) NOT NULL,
+    [description] NVARCHAR(50),
+    CONSTRAINT [Configs_key_key] UNIQUE NONCLUSTERED ([key])
+);
+
+-- CreateTable
+CREATE TABLE [dbo].[InvitationCode] (
+    [id] UNIQUEIDENTIFIER NOT NULL,
+    [value] NVARCHAR(1000) NOT NULL,
+    [count] SMALLINT NOT NULL,
+    [createUserId] UNIQUEIDENTIFIER NOT NULL,
+    [createdAt] DATETIME2 NOT NULL CONSTRAINT [InvitationCode_createdAt_df] DEFAULT CURRENT_TIMESTAMP,
+    [isDeleted] BIT NOT NULL CONSTRAINT [InvitationCode_isDeleted_df] DEFAULT 0,
+    CONSTRAINT [InvitationCode_pkey] PRIMARY KEY CLUSTERED ([id]),
+    CONSTRAINT [InvitationCode_value_key] UNIQUE NONCLUSTERED ([value])
+);
+
+-- CreateTable
+CREATE TABLE [dbo].[UserInvitation] (
+    [id] UNIQUEIDENTIFIER NOT NULL,
+    [userId] UNIQUEIDENTIFIER NOT NULL,
+    [invitationCodeId] UNIQUEIDENTIFIER NOT NULL,
+    CONSTRAINT [UserInvitation_pkey] PRIMARY KEY CLUSTERED ([id])
+);
+
 -- AddForeignKey
 ALTER TABLE [dbo].[ChatModels] ADD CONSTRAINT [ChatModels_modelKeysId_fkey] FOREIGN KEY ([modelKeysId]) REFERENCES [dbo].[ModelKeys]([id]) ON DELETE SET NULL ON UPDATE CASCADE;
 
@@ -261,6 +289,12 @@ ALTER TABLE [dbo].[RequestLogs] ADD CONSTRAINT [RequestLogs_userId_fkey] FOREIGN
 
 -- AddForeignKey
 ALTER TABLE [dbo].[Prompts] ADD CONSTRAINT [Prompts_createUserId_fkey] FOREIGN KEY ([createUserId]) REFERENCES [dbo].[Users]([id]) ON DELETE NO ACTION ON UPDATE CASCADE;
+
+-- AddForeignKey
+ALTER TABLE [dbo].[InvitationCode] ADD CONSTRAINT [InvitationCode_createUserId_fkey] FOREIGN KEY ([createUserId]) REFERENCES [dbo].[Users]([id]) ON DELETE NO ACTION ON UPDATE CASCADE;
+
+-- AddForeignKey
+ALTER TABLE [dbo].[UserInvitation] ADD CONSTRAINT [UserInvitation_invitationCodeId_fkey] FOREIGN KEY ([invitationCodeId]) REFERENCES [dbo].[InvitationCode]([id]) ON DELETE NO ACTION ON UPDATE CASCADE;
 
 COMMIT TRAN;
 
