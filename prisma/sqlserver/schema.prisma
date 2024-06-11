@@ -107,9 +107,6 @@ model ChatMessages {
   tokenUsed       Int      @default(0)
   createdAt       DateTime @default(now())
   chats           Chats    @relation(fields: [chatId], references: [id])
-  // chatModel       ChatModels @relation(fields: [chatModelId], references: [id])
-  // parent          ChatMessages?  @relation(fields: [parentId], references: [id])
-  // ChatMessages    ChatMessages[]
 }
 
 model UserBalances {

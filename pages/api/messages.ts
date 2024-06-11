@@ -1,12 +1,9 @@
-import getConfig from 'next/config';
-
 import { Content, Role } from '@/types/chat';
 import { ChatsApiRequest } from '@/types/next-api';
 
 import { ChatMessagesManager, ChatModelManager } from '@/managers';
 import { apiHandler } from '@/middleware/api-handler';
 
-const { publicRuntimeConfig } = getConfig();
 export const config = {
   api: {
     bodyParser: {

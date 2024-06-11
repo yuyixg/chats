@@ -1,4 +1,4 @@
-import { useEffect, useState } from 'react';
+import { useEffect } from 'react';
 import { useForm } from 'react-hook-form';
 import toast from 'react-hot-toast';
 
@@ -10,7 +10,7 @@ import { saveUserInfo, setUserSessionId } from '@/utils/user';
 import { Button } from '@/components/ui/button';
 import { Form, FormField } from '@/components/ui/form';
 
-import { Dialog, DialogContent, DialogHeader, DialogTitle } from '../ui/dialog';
+import { Card, CardContent } from '../ui/card';
 import FormInput from '../ui/form/input';
 import { FormFieldType, IFormFieldOption } from '../ui/form/type';
 
@@ -18,11 +18,14 @@ import { singIn } from '@/apis/userService';
 import { zodResolver } from '@hookform/resolvers/zod';
 import { z } from 'zod';
 
-const AccountLoginModal = (props: { isOpen: boolean; onClose: () => void }) => {
+const AccountLoginCard = (props: {
+  loginLoading: boolean;
+  openLoading: Function;
+  closeLoading: Function;
+}) => {
+  const { loginLoading, openLoading, closeLoading } = props;
   const { t } = useTranslation('login');
-  const { isOpen, onClose } = props;
   const router = useRouter();
-  const [loginLoading, setLoginLoading] = useState(false);
 
   useEffect(() => {
     form.formState.isValid;
@@ -67,7 +70,7 @@ const AccountLoginModal = (props: { isOpen: boolean; onClose: () => void }) => {
 
   async function onSubmit(values: z.infer<typeof formSchema>) {
     if (!form.formState.isValid) return;
-    setLoginLoading(true);
+    openLoading();
     const { username, password } = values;
     singIn({ username, password })
       .then((response) => {
@@ -80,17 +83,14 @@ const AccountLoginModal = (props: { isOpen: boolean; onClose: () => void }) => {
         router.push('/');
       })
       .catch(() => {
-        setLoginLoading(false);
+        closeLoading();
         toast.error(t('Username or password incorrect'));
       });
   }
 
   return (
-    <Dialog open={isOpen} onOpenChange={onClose}>
-      <DialogContent className="w-[340px] h-[340px] flex flex-col">
-        <DialogHeader className="h-[32px]">
-          <DialogTitle>账号密码登录</DialogTitle>
-        </DialogHeader>
+    <Card>
+      <CardContent className="space-y-2">
         <Form {...form}>
           <form onSubmit={form.handleSubmit(onSubmit)}>
             {formFields.map((item) => (
@@ -108,9 +108,9 @@ const AccountLoginModal = (props: { isOpen: boolean; onClose: () => void }) => {
             </div>
           </form>
         </Form>
-      </DialogContent>
-    </Dialog>
+      </CardContent>
+    </Card>
   );
 };
 
-export default AccountLoginModal;
+export default AccountLoginCard;

@@ -90,7 +90,6 @@ export default function InvitationCode() {
               <TableHead>{t('Invitation Code')}</TableHead>
               <TableHead>{t('Use count')}</TableHead>
               <TableHead>{t('Created User')}</TableHead>
-              <TableHead>{t('Actions')}</TableHead>
             </TableRow>
           </TableHeader>
           <TableBody

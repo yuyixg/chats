@@ -1,77 +1,27 @@
 import { useEffect, useState } from 'react';
-import { useForm } from 'react-hook-form';
-import toast from 'react-hot-toast';
 
 import { useTranslation } from 'next-i18next';
 import { serverSideTranslations } from 'next-i18next/serverSideTranslations';
 import Image from 'next/image';
-import { useRouter } from 'next/router';
-
-import { PhoneRegExp, SmsExpirationSeconds } from '@/utils/common';
-import { saveUserInfo, setUserSessionId } from '@/utils/user';
 
 import { DEFAULT_LANGUAGE } from '@/types/settings';
 import { LoginType, ProviderResult } from '@/types/user';
 
-import AccountLogin from '@/components/Login/AccountLogin';
+import AccountLoginCard from '@/components/Login/AccountLoginCard';
 import KeyCloakLogin from '@/components/Login/KeyCloakLogin';
+import PhoneLoginCard from '@/components/Login/PhoneLoginCard';
+import PhoneRegisterCard from '@/components/Login/PhoneRegisterCard';
 import WeChatLogin from '@/components/Login/WeChatLogin';
-import { Button } from '@/components/ui/button';
-import {
-  Card,
-  CardContent,
-  CardDescription,
-  CardFooter,
-  CardHeader,
-  CardTitle,
-} from '@/components/ui/card';
-import {
-  Form,
-  FormControl,
-  FormField,
-  FormItem,
-  FormMessage,
-} from '@/components/ui/form';
-import { Input } from '@/components/ui/input';
-import { Label } from '@/components/ui/label';
 import { Tabs, TabsContent, TabsList, TabsTrigger } from '@/components/ui/tabs';
 
-import message from '../message';
-
-import {
-  getLoginProvider,
-  postSignCode,
-  signByPhone,
-} from '@/apis/userService';
-import { zodResolver } from '@hookform/resolvers/zod';
-import { z } from 'zod';
+import { getLoginProvider } from '@/apis/userService';
 
 export default function LoginPage() {
   const { t } = useTranslation('login');
-  const router = useRouter();
-  const [seconds, setSeconds] = useState(SmsExpirationSeconds - 1);
-  const [isSendCode, setIsSendCode] = useState(false);
-  const [smsCode, setSmsCode] = useState('');
-  const [loginLoading, setLoginLoading] = useState(false);
   const [isClient, setIsClient] = useState(false);
   const [providers, setProviders] = useState<ProviderResult[]>([]);
   const [providerTypes, setProviderTypes] = useState<LoginType[]>([]);
-
-  const formSchema = z.object({
-    invitationCode: z.string().min(1, t('请输入正确的邀请码')!).optional(),
-    phone: z
-      .string()
-      .regex(PhoneRegExp, { message: t('Mobile number format error')! }),
-  });
-
-  const form = useForm<z.infer<typeof formSchema>>({
-    resolver: zodResolver(formSchema),
-    mode: 'all',
-    defaultValues: {
-      invitationCode: '',
-      phone: '',
-    },
-  });
+  const [loginLoading, setLoginLoading] = useState(false);
 
   useEffect(() => {
     getLoginProvider().then((data) => {
@@ -79,63 +29,12 @@ export default function LoginPage() {
       setProviderTypes(data.map((x) => x.type));
     });
 
-    form.formState.isValid;
     setIsClient(true);
   }, []);
 
-  useEffect(() => {
-    let timer: any;
-    if (isSendCode && seconds > 0) {
-      timer = setInterval(() => {
-        setSeconds((prevSeconds) => prevSeconds - 1);
-      }, 1000);
-    }
+  const openLoading = () => setLoginLoading(true);
 
-    if (seconds === 0) {
-      setIsSendCode(false);
-      setSeconds(SmsExpirationSeconds);
-    }
-
-    return () => clearInterval(timer);
-  }, [isSendCode, seconds]);
-
-  const sendCode = () => {
-    if (form.formState.isValid) {
-      const phone = form.getValues('phone');
-      postSignCode(phone)
-        .then(() => {
-          toast.success(t('SMS sent successfully'));
-          setIsSendCode(true);
-        })
-        .catch(() => {
-          toast.error(t('SMS send failed, please try again later'));
-        });
-    }
-  };
-
-  const sign = () => {
-    form.trigger();
-    if (form.formState.isValid && smsCode.length === 6) {
-      const phone = form.getValues('phone');
-      const invitationCode = form.getValues('invitationCode')!;
-      setLoginLoading(true);
-      signByPhone(phone, smsCode, invitationCode)
-        .then((response) => {
-          setUserSessionId(response.sessionId);
-          saveUserInfo({
-            canRecharge: response.canRecharge,
-            role: response.role,
-            username: response.username,
-          });
-          router.push('/');
-        })
-        .catch(async (response) => {
-          setLoginLoading(false);
-          const json = await response.json();
-          toast.error(json.message || t('Verification code error'));
-        });
-    }
-  };
+  const closeLoading = () => setLoginLoading(false);
 
   return (
     <>
@@ -186,168 +85,56 @@ export default function LoginPage() {
                             value="phone"
                             className="flex justify-center w-full"
                           >
-                            手机登录
+                            {t('Mobile Login')}
                           </TabsTrigger>
                           <TabsTrigger
                             value="register"
                             className="flex justify-center w-full"
                           >
-                            注册
+                            {t('Register')}
                           </TabsTrigger>
                           <TabsTrigger
                             value="account"
                             className="flex justify-center w-full"
                           >
-                            账号登录
+                            {t('Account Login')}
                           </TabsTrigger>
                         </TabsList>
                         <TabsContent className="m-0 mt-2" value="phone">
-                          <Card>
-                            <CardContent className="space-y-2">
-                              <Form {...form}>
-                                <form>
-                                  <FormField
-                                    control={form.control}
-                                    name="invitationCode"
-                                    render={({ field }) => (
-                                      <FormItem className="flex flex-col items-start">
-                                        <FormControl className="w-full">
-                                          <div>
-                                            <div className="py-2.5 text-sm font-medium leading-none">
-                                              {t('Invitation Code')}
-                                            </div>
-                                            <div className="flex border rounded-md">
-                                              <Input
-                                                className="w-full m-0 border-none outline-none bg-transparent rounded-md"
-                                                {...field}
-                                              />
-                                            </div>
-                                          </div>
-                                        </FormControl>
-                                        <FormMessage />
-                                      </FormItem>
-                                    )}
-                                  />
-                                  <FormField
-                                    control={form.control}
-                                    name="phone"
-                                    render={({ field }) => (
-                                      <FormItem className="flex flex-col items-start">
-                                        <FormControl className="w-full">
-                                          <div>
-                                            <div className="py-2.5 text-sm font-medium leading-none">
-                                              {t('Phone Number')}
-                                            </div>
-                                            <div className="flex border rounded-md">
-                                              <Button
-                                                type="button"
-                                                variant="ghost"
-                                                className="absolute font-semibold"
-                                              >
-                                                +86
-                                              </Button>
-                                              <Input
-                                                className="w-full m-0 border-none outline-none bg-transparent rounded-md p-0 pl-14"
-                                                {...field}
-                                              />
-                                            </div>
-                                          </div>
-                                        </FormControl>
-                                        <FormMessage />
-                                      </FormItem>
-                                    )}
-                                  />
-                                </form>
-                              </Form>
-                              <div className="pt-2">
-                                <div className="py-2.5 text-sm font-medium leading-none">
-                                  {t('Code')}
-                                </div>
-                                <div className="flex border rounded-md">
-                                  <Input
-                                    value={smsCode}
-                                    onChange={(e) => {
-                                      setSmsCode(e.target.value);
-                                    }}
-                                    className="m-0 border-none outline-none bg-transparent rounded-md p-0 pr-[102px] pl-4"
-                                  />
-                                  <Button
-                                    className="absolute right-[5px] text-center"
-                                    disabled={!form.formState.isValid}
-                                    variant="link"
-                                    onClick={sendCode}
-                                  >
-                                    {isSendCode
-                                      ? seconds + 's'
-                                      : t('Send code')}
-                                  </Button>
-                                </div>
-                              </div>
-                              <div className="pt-4">
-                                <Button
-                                  className="w-full"
-                                  type="submit"
-                                  onClick={sign}
-                                  disabled={loginLoading}
-                                >
-                                  {loginLoading
-                                    ? t('Logging in...')
-                                    : t('Login to your account')}
-                                </Button>
-                              </div>
-                            </CardContent>
-                          </Card>
+                          <PhoneLoginCard
+                            openLoading={openLoading}
+                            closeLoading={closeLoading}
+                            loginLoading={loginLoading}
+                          />
                         </TabsContent>
                         <TabsContent className="m-0 mt-2" value="register">
-                          <Card>
-                            <CardContent className="space-y-2">
-                              <div className="space-y-1">
-                                <Label htmlFor="current">
-                                  Current password
-                                </Label>
-                                <Input id="current" type="password" />
-                              </div>
-                              <div className="space-y-1">
-                                <Label htmlFor="new">New password</Label>
-                                <Input id="new" type="password" />
-                              </div>
-                            </CardContent>
-                            <CardFooter>
-                              <Button>Save password</Button>
-                            </CardFooter>
-                          </Card>
+                          <PhoneRegisterCard
+                            openLoading={openLoading}
+                            closeLoading={closeLoading}
+                            loginLoading={loginLoading}
+                          />
                         </TabsContent>
                         <TabsContent className="m-0 mt-2" value="account">
-                          <Card>
-                            <CardContent className="space-y-2">
-                              <div className="space-y-1">
-                                <Label htmlFor="current">
-                                  Current password
-                                </Label>
-                                <Input id="current" type="password" />
-                              </div>
-                              <div className="space-y-1">
-                                <Label htmlFor="new">New password</Label>
-                                <Input id="new" type="password" />
-                              </div>
-                            </CardContent>
-                            <CardFooter>
-                              <Button>Save password</Button>
-                            </CardFooter>
-                          </Card>
+                          <AccountLoginCard
+                            openLoading={openLoading}
+                            closeLoading={closeLoading}
+                            loginLoading={loginLoading}
+                          />
                         </TabsContent>
                       </Tabs>
 
-                      <div className="relative mt-2">
-                        <div className="absolute inset-0 flex items-center">
-                          <span className="w-full border-t" />
+                      {providerTypes.length > 0 && (
+                        <div className="relative mt-2">
+                          <div className="absolute inset-0 flex items-center">
+                            <span className="w-full border-t" />
+                          </div>
+                          <div className="relative flex justify-center text-xs uppercase">
+                            <span className="bg-background p-4 text-muted-foreground">
+                              {t('Or continue with')}
+                            </span>
+                          </div>
                         </div>
-                        <div className="relative flex justify-center text-xs uppercase">
-                          <span className="bg-background p-4 text-muted-foreground">
-                            {t('Or continue with')}
-                          </span>
-                        </div>
-                      </div>
+                      )}
 
                       <div className="flex justify-center gap-2">
                         {providerTypes.includes(LoginType.WeChat) && (
@@ -363,8 +150,6 @@ export default function LoginPage() {
                         {providerTypes.includes(LoginType.KeyCloak) && (
                           <KeyCloakLogin loading={loginLoading} />
                         )}
-
-                        <AccountLogin loading={loginLoading} />
                       </div>
                     </div>
                   </div>

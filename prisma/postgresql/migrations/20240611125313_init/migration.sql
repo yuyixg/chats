@@ -4,7 +4,7 @@ CREATE TABLE "Users" (
     "avatar" TEXT,
     "account" TEXT,
     "username" TEXT,
-    "password" TEXT NOT NULL,
+    "password" TEXT,
     "email" TEXT,
     "phone" TEXT,
     "role" TEXT NOT NULL DEFAULT '-',
@@ -165,14 +165,15 @@ CREATE TABLE "LoginServices" (
 );
 
 -- CreateTable
-CREATE TABLE "UserSms" (
+CREATE TABLE "Sms" (
     "id" UUID NOT NULL,
-    "type" TEXT NOT NULL,
-    "status" TEXT NOT NULL,
-    "code" TEXT NOT NULL,
+    "signName" VARCHAR(50) NOT NULL,
+    "type" SMALLINT NOT NULL,
+    "status" SMALLINT NOT NULL,
+    "code" VARCHAR(10) NOT NULL,
     "createdAt" TIMESTAMP(3) NOT NULL DEFAULT CURRENT_TIMESTAMP,
 
-    CONSTRAINT "UserSms_pkey" PRIMARY KEY ("id")
+    CONSTRAINT "Sms_pkey" PRIMARY KEY ("id")
 );
 
 -- CreateTable
@@ -244,8 +245,42 @@ CREATE TABLE "UserInitialConfig" (
     CONSTRAINT "UserInitialConfig_pkey" PRIMARY KEY ("id")
 );
 
+-- CreateTable
+CREATE TABLE "Configs" (
+    "key" TEXT NOT NULL,
+    "value" VARCHAR(1000) NOT NULL,
+    "description" VARCHAR(50)
+);
+
+-- CreateTable
+CREATE TABLE "InvitationCode" (
+    "id" UUID NOT NULL,
+    "value" TEXT NOT NULL,
+    "count" SMALLINT NOT NULL,
+    "createUserId" UUID NOT NULL,
+    "createdAt" TIMESTAMP(3) NOT NULL DEFAULT CURRENT_TIMESTAMP,
+    "isDeleted" BOOLEAN NOT NULL DEFAULT false,
+
+    CONSTRAINT "InvitationCode_pkey" PRIMARY KEY ("id")
+);
+
+-- CreateTable
+CREATE TABLE "UserInvitation" (
+    "id" UUID NOT NULL,
+    "userId" UUID NOT NULL,
+    "invitationCodeId" UUID NOT NULL,
+
+    CONSTRAINT "UserInvitation_pkey" PRIMARY KEY ("id")
+);
+
 -- CreateIndex
 CREATE UNIQUE INDEX "UserBalances_userId_key" ON "UserBalances"("userId");
+
+-- CreateIndex
+CREATE UNIQUE INDEX "Configs_key_key" ON "Configs"("key");
+
+-- CreateIndex
+CREATE UNIQUE INDEX "InvitationCode_value_key" ON "InvitationCode"("value");
 
 -- AddForeignKey
 ALTER TABLE "ChatModels" ADD CONSTRAINT "ChatModels_modelKeysId_fkey" FOREIGN KEY ("modelKeysId") REFERENCES "ModelKeys"("id") ON DELETE SET NULL ON UPDATE CASCADE;
@@ -276,3 +311,9 @@ ALTER TABLE "RequestLogs" ADD CONSTRAINT "RequestLogs_userId_fkey" FOREIGN KEY (
 
 -- AddForeignKey
 ALTER TABLE "Prompts" ADD CONSTRAINT "Prompts_createUserId_fkey" FOREIGN KEY ("createUserId") REFERENCES "Users"("id") ON DELETE RESTRICT ON UPDATE CASCADE;
+
+-- AddForeignKey
+ALTER TABLE "InvitationCode" ADD CONSTRAINT "InvitationCode_createUserId_fkey" FOREIGN KEY ("createUserId") REFERENCES "Users"("id") ON DELETE RESTRICT ON UPDATE CASCADE;
+
+-- AddForeignKey
+ALTER TABLE "UserInvitation" ADD CONSTRAINT "UserInvitation_invitationCodeId_fkey" FOREIGN KEY ("invitationCodeId") REFERENCES "InvitationCode"("id") ON DELETE RESTRICT ON UPDATE CASCADE;

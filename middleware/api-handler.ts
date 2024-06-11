@@ -13,12 +13,13 @@ import requestIp from 'request-ip';
 const modelApis = ['/api/chats'];
 
 const publicApis = [
-  '/api/public/login',
   '/api/public/messages',
   '/api/public/notify',
   '/api/public/login-provider',
   '/api/public/send-code',
-  '/api/public/login-phone',
+  '/api/public/account-login',
+  '/api/public/phone-login',
+  '/api/public/phone-register',
 ];
 const adminApis = '/api/admin/';
 

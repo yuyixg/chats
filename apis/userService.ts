@@ -81,7 +81,7 @@ export const getCsrfToken = (): Promise<{ csrfToken: string }> => {
 
 export const singIn = (params: SingInParams): Promise<SingInResult> => {
   const fetchServer = useFetch();
-  return fetchServer.post('/api/public/login', { body: params });
+  return fetchServer.post('/api/public/account-login', { body: params });
 };
 
 export const getUserModels = () => {
@@ -124,13 +124,23 @@ export const postSignCode = (phone: string) => {
   return fetchServer.post('/api/public/send-code', { body: { phone } });
 };
 
-export const signByPhone = (
+export const registerByPhone = (
   phone: string,
   code: string,
   invitationCode: string,
 ): Promise<SingInResult> => {
   const fetchServer = useFetch();
-  return fetchServer.post('/api/public/login-phone', {
+  return fetchServer.post('/api/public/phone-register', {
     body: { phone, code, invitationCode },
+  });
+};
+
+export const signByPhone = (
+  phone: string,
+  code: string,
+): Promise<SingInResult> => {
+  const fetchServer = useFetch();
+  return fetchServer.post('/api/public/phone-login', {
+    body: { phone, code },
   });
 };

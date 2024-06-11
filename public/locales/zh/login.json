@@ -18,6 +18,10 @@
   "Code": "验证码",
   "Phone Number": "手机号码",
   "Send code": "发送验证码",
-  "Mobile number format error": "手机号码格式错误",
-  "Invitation Code": "邀请码"
+  "Please enter the correct invitation code": "请输入正确的邀请码",
+  "Please enter the correct phone number": "请输入正确的手机号码",
+  "Invitation Code": "邀请码",
+  "Mobile Login": "手机登录",
+  "Register": "注册",
+  "Account Login": "账号登录"
 }

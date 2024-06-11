@@ -11,26 +11,27 @@ datasource db {
 }
 
 model Users {
-  id           String        @id @default(uuid()) @db.Uuid()
-  avatar       String?
-  account      String?
-  username     String?
-  password     String
-  email        String?
-  phone        String?
-  role         String        @default("-")
-  enabled      Boolean       @default(true)
-  provider     String?
-  sub          String?
-  createdAt    DateTime      @default(now())
-  updatedAt    DateTime      @updatedAt
-  sessions     Sessions[]
-  userBalances UserBalances?
-  UserModels   UserModels[]
-  AuditLogs    RequestLogs[]
-  Orders       Orders[]
-  Chats        Chats[]
-  Prompts      Prompts[]
+  id             String           @id @default(uuid()) @db.Uuid()
+  avatar         String?
+  account        String?
+  username       String?
+  password       String?
+  email          String?
+  phone          String?
+  role           String           @default("-")
+  enabled        Boolean          @default(true)
+  provider       String?
+  sub            String?
+  createdAt      DateTime         @default(now())
+  updatedAt      DateTime         @updatedAt
+  sessions       Sessions[]
+  userBalances   UserBalances?
+  UserModels     UserModels[]
+  AuditLogs      RequestLogs[]
+  Orders         Orders[]
+  Chats          Chats[]
+  Prompts        Prompts[]
+  InvitationCode InvitationCode[]
 }
 
 model FileServices {
@@ -157,11 +158,12 @@ model LoginServices {
   updatedAt DateTime @updatedAt
 }
 
-model UserSms {
+model Sms {
   id        String   @id @default(uuid()) @db.Uuid()
-  type      String
-  status    String
-  code      String
+  signName  String   @db.VarChar(50)
+  type      Int      @db.SmallInt()
+  status    Int      @db.SmallInt()
+  code      String   @db.VarChar(10)
   createdAt DateTime @default(now())
 }
 
@@ -213,11 +215,35 @@ model Prompts {
 }
 
 model UserInitialConfig {
-  id        String   @id @default(uuid()) @db.Uuid
+  id        String   @id @default(uuid()) @db.Uuid()
   name      String   @db.VarChar(50)
   loginType String?  @db.VarChar(50)
   price     Decimal  @default(0)
   models    String   @default("[]") @db.VarChar(4000)
   createdAt DateTime @default(now())
   updatedAt DateTime @updatedAt
+}
+
+model Configs {
+  key         String  @unique
+  value       String  @db.VarChar(1000)
+  description String? @db.VarChar(50)
+}
+
+model InvitationCode {
+  id             String           @id @default(uuid()) @db.Uuid()
+  value          String           @unique
+  count          Int              @db.SmallInt
+  createUserId   String           @db.Uuid()
+  createdAt      DateTime         @default(now())
+  isDeleted      Boolean          @default(false)
+  user           Users?           @relation(fields: [createUserId], references: [id])
+  UserInvitation UserInvitation[]
+}
+
+model UserInvitation {
+  id               String         @id @default(uuid()) @db.Uuid()
+  userId           String         @db.Uuid()
+  invitationCodeId String         @db.Uuid()
+  InvitationCode   InvitationCode @relation(fields: [invitationCodeId], references: [id])
 }
