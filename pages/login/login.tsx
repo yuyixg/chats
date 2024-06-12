@@ -16,12 +16,43 @@ import { Tabs, TabsContent, TabsList, TabsTrigger } from '@/components/ui/tabs';
 
 import { getLoginProvider } from '@/apis/userService';
 
+enum TabKeys {
+  PHONE = 'phone',
+  REGISTER = 'register',
+  ACCOUNT = 'account',
+}
+
+type LoginHeader = {
+  [key in TabKeys]: { title: string; description: string };
+};
+
 export default function LoginPage() {
   const { t } = useTranslation('login');
+  const LoginHeaders: LoginHeader = {
+    phone: {
+      title: t('Sign in to Chats'),
+      description: t(
+        'Please enter your phone number and verification code below to complete the login',
+      ),
+    },
+    register: {
+      title: t('Welcome to register'),
+      description: t(
+        'Please enter your phone number and invitation code below to complete the register',
+      ),
+    },
+    account: {
+      title: t('Sign in to Chats'),
+      description: t(
+        'Please enter your account name and password below to complete the login',
+      ),
+    },
+  };
   const [isClient, setIsClient] = useState(false);
   const [providers, setProviders] = useState<ProviderResult[]>([]);
   const [providerTypes, setProviderTypes] = useState<LoginType[]>([]);
   const [loginLoading, setLoginLoading] = useState(false);
+  const [currentTab, setCurrentTab] = useState<TabKeys>(TabKeys.PHONE);
 
   useEffect(() => {
     getLoginProvider().then((data) => {
@@ -33,7 +64,6 @@ export default function LoginPage() {
   }, []);
 
   const openLoading = () => setLoginLoading(true);
-
   const closeLoading = () => setLoginLoading(false);
 
   return (
@@ -65,36 +95,43 @@ export default function LoginPage() {
           </div>
           <div className="lg:p-8">
             <div className="mx-auto flex w-full flex-col justify-center space-y-6 sm:w-[350px]">
-              <div className="flex flex-col space-y-2 text-center mt-12 md:mt-0 lg:mt-0">
+              <div
+                className="flex flex-col space-y-2 text-center mt-12 md:mt-0 lg:mt-0"
+                key={currentTab}
+              >
                 <h1 className="text-2xl font-semibold tracking-tight">
-                  {t('Sign in to Chats')}
+                  {LoginHeaders[currentTab].title}
                 </h1>
                 <p className="text-sm text-muted-foreground">
-                  {t(
-                    'Please enter your phone number and verification code below to complete the login.',
-                  )}
+                  {LoginHeaders[currentTab].description}
                 </p>
               </div>
               <>
                 <div className="flex w-full justify-center">
                   <div className="relative w-full max-w-md max-h-full">
                     <div className="relative">
-                      <Tabs defaultValue="phone" className="w-[400px] flex-col">
+                      <Tabs
+                        defaultValue={currentTab}
+                        onValueChange={(value) => {
+                          setCurrentTab(value as TabKeys);
+                        }}
+                        className="w-[400px] flex-col"
+                      >
                         <TabsList className="flex w-full flex-row justify-around">
                           <TabsTrigger
-                            value="phone"
+                            value={TabKeys.PHONE}
                             className="flex justify-center w-full"
                           >
                             {t('Mobile Login')}
                           </TabsTrigger>
                           <TabsTrigger
-                            value="register"
+                            value={TabKeys.REGISTER}
                             className="flex justify-center w-full"
                           >
                             {t('Register')}
                           </TabsTrigger>
                           <TabsTrigger
-                            value="account"
+                            value={TabKeys.ACCOUNT}
                             className="flex justify-center w-full"
                           >
                             {t('Account Login')}

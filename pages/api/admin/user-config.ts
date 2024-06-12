@@ -16,22 +16,24 @@ const handler = async (req: ChatsApiRequest) => {
   if (req.method === 'GET') {
     return await UsersManager.getUserInitialConfig();
   } else if (req.method === 'PUT') {
-    const { id, name, models, price, loginType } = req.body;
+    const { id, name, models, price, loginType, invitationCodeId } = req.body;
     const data = await UsersManager.updateUserInitialConfig({
       id,
       name,
       models: JSON.stringify(models),
       price,
       loginType,
+      invitationCodeId,
     });
     return data;
   } else if (req.method === 'POST') {
-    const { name, models, price, loginType } = req.body;
+    const { name, models, price, loginType, invitationCodeId } = req.body;
     const data = await UsersManager.createUserInitialConfig({
       name,
       models: JSON.stringify(models),
       price,
       loginType,
+      invitationCodeId,
     });
     return data;
   } else if (req.method === 'DELETE') {

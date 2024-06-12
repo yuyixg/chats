@@ -111,7 +111,7 @@ export const UserModal = (props: IProps) => {
           length: 2,
         })!,
       )
-      .max(10, t('Contain at most {{length}} character(s)', { length: 10 })!),
+      .max(20, t('Contain at most {{length}} character(s)', { length: 20 })!),
     enabled: z.boolean().optional(),
     phone: z.string().nullable().default(null),
     email: z.string().nullable().default(null),

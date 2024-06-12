@@ -105,14 +105,11 @@ export default function UserInitialConfig() {
     );
   };
 
-  const LoginTypeCell = (
-    config: GetUserInitialConfigResult,
-    rowSpan: number = 1,
-  ) => {
+  const Cell = (value: string, rowSpan: number = 1) => {
     return (
       <TableCell rowSpan={rowSpan}>
         <div className="flex items-center gap-2">
-          <div>{config.loginType}</div>
+          <div>{value}</div>
         </div>
       </TableCell>
     );
@@ -143,7 +140,7 @@ export default function UserInitialConfig() {
                   <h4 className="pb-2">
                     {t('Are you sure you want to delete it?')}
                   </h4>
-                  <div className='flex justify-end'>
+                  <div className="flex justify-end">
                     <Button
                       disabled={deleting}
                       size="sm"
@@ -192,6 +189,12 @@ export default function UserInitialConfig() {
               >
                 {t('Login Type')}
               </TableHead>
+              <TableHead
+                rowSpan={2}
+                style={{ borderRight: '1px solid hsl(var(--muted))' }}
+              >
+                {t('Invitation Code')}
+              </TableHead>
               <TableHead colSpan={4} className="text-center">
                 {t('Models')}
               </TableHead>
@@ -231,7 +234,9 @@ export default function UserInitialConfig() {
                       {index === 0 &&
                         InitialPriceCell(config, config.models.length)}
                       {index === 0 &&
-                        LoginTypeCell(config, config.models.length)}
+                        Cell(config.loginType, config.models.length)}
+                      {index === 0 &&
+                        Cell(config.invitationCode, config.models.length)}
                       {ModelCell(
                         models.find((x) => x.modelId === model.modelId)?.name,
                       )}
@@ -247,6 +252,7 @@ export default function UserInitialConfig() {
                   {NameCell(config, config.models.length)}
                   {InitialPriceCell(config, config.models.length)}
                   {ModelCell(config.loginType)}
+                  {ModelCell(config.invitationCode)}
                   <TableCell colSpan={4}></TableCell>
                   {ActionCell(config, config.models.length)}
                 </TableRow>

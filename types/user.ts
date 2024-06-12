@@ -51,6 +51,8 @@ export interface GetUserInitialConfigResult {
   name: string;
   loginType: string;
   price: Decimal;
+  invitationCodeId: string;
+  invitationCode: string;
   models: UserInitialModel[];
 }
 
@@ -58,6 +60,7 @@ export interface PostUserInitialConfigParams {
   name: string;
   price: Decimal;
   loginType: string;
+  invitationCodeId: string | null;
   models: UserInitialModel[];
 }
 
@@ -66,6 +69,7 @@ export interface PutUserInitialConfigParams {
   name: string;
   price: Decimal;
   loginType: string;
+  invitationCodeId: string | null;
   models: UserInitialModel[];
 }
 

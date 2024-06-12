@@ -23,6 +23,18 @@ export class SessionsManager {
     });
   }
 
+  static async checkSession(userId: string) {
+    const sessions = await prisma.sessions.findMany({
+      where: { userId },
+      orderBy: { createdAt: 'desc' },
+    });
+
+    sessions.filter((x) => {
+      if(x.createdAt)
+      return x;
+    });
+  }
+
   static async findSession(id: string) {
     const session = await prisma.sessions.findFirst({
       where: { id: id },

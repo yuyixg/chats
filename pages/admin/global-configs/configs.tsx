@@ -86,14 +86,17 @@ export default function Configs() {
                 }}
               >
                 <TableCell>{item.key}</TableCell>
-                <TableCell>{item.value}</TableCell>
-                <TableCell>{item.description}</TableCell>
+                <TableCell className="max-w-[200px]">{item.value}</TableCell>
+                <TableCell className="max-w-[200px]">
+                  {item.description}
+                </TableCell>
               </TableRow>
             ))}
           </TableBody>
         </Table>
       </Card>
       <GlobalConfigsModal
+        configKeys={selected ? [] : configs.map((x) => x.key)}
         selected={selected}
         isOpen={isOpen}
         onClose={handleClose}

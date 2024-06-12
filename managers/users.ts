@@ -46,6 +46,7 @@ export interface CreateUserInitialConfig {
   price: Decimal;
   models: string;
   loginType: string;
+  invitationCodeId: string;
 }
 export interface UpdateUserInitialConfig extends CreateUserInitialConfig {
   id: string;
@@ -68,10 +69,10 @@ export class UsersManager {
     });
   }
 
-  static async findByPhone(account: string) {
+  static async findByPhone(phone: string) {
     return await prisma.users.findFirst({
       where: {
-        phone: account,
+        phone,
       },
     });
   }
@@ -158,18 +159,39 @@ export class UsersManager {
 
   static async initialUser(
     userId: string,
+    invitationCodeId?: string,
     LoginType?: LoginType | string,
     createUserId?: string,
   ) {
+    console.log('invitationCodeId\n', invitationCodeId);
     const configs = await prisma.userInitialConfig.findMany({
       where: {
-        loginType: { in: ['-', ...(LoginType ? [LoginType] : [])] },
+        OR: [
+          {
+            loginType: { in: ['-', ...(LoginType ? [LoginType] : [])] },
+          },
+          {
+            invitationCodeId: {
+              equals: invitationCodeId,
+            },
+          },
+        ],
       },
+      orderBy: { createdAt: 'desc' },
     });
 
-    let config = configs.find((x) => x.loginType === LoginType);
+    console.log('configs \n', configs);
+
+    let config = configs.find(
+      (x) => x.loginType === LoginType && invitationCodeId === invitationCodeId,
+    );
+
+    console.log('config \n', config);
+
     if (!config) {
-      config = configs.find((x) => x.loginType === '-');
+      config = configs.find(
+        (x) => x.loginType === '-' && x.invitationCodeId == null,
+      );
     }
 
     let models = [] as UserInitialModel[];
@@ -235,13 +257,19 @@ export class UsersManager {
   }
 
   static async getUserInitialConfig() {
-    const configs = await prisma.userInitialConfig.findMany();
+    const configs = await prisma.userInitialConfig.findMany({
+      include: {
+        InvitationCode: { select: { value: true, id: true } },
+      },
+    });
     return configs.map((x) => ({
       id: x.id,
       name: x.name,
       loginType: x.loginType,
       models: JSON.parse(x.models),
       price: x.price,
+      invitationCodeId: x.InvitationCode?.id || '-',
+      invitationCode: x.InvitationCode?.value || '-',
     }));
   }
 

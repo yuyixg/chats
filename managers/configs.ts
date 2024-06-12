@@ -1,4 +1,8 @@
+import getConfig from 'next/config';
+
 import prisma from '@/prisma/prisma';
+
+const { publicRuntimeConfig } = getConfig();
 
 export interface Configs {
   key: string;
@@ -30,5 +34,19 @@ export class ConfigsManager {
 
   static async findByKey(key: string) {
     return await prisma.configs.findFirst({ where: { key } });
+  }
+
+  static async get(key: string) {
+    if (publicRuntimeConfig.globalConfigs[key]) {
+      return publicRuntimeConfig.globalConfigs[key];
+    } else {
+      const config = await prisma.configs.findFirst({ where: { key } });
+      if (config) {
+        const value = JSON.parse(config.value);
+        publicRuntimeConfig.globalConfigs = value;
+        return value;
+      }
+      return null;
+    }
   }
 }

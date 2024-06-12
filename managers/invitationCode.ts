@@ -52,4 +52,10 @@ export class InvitationCodeManager {
       where: { value: code },
     });
   }
+
+  static async createUserInvitation(userId: string, invitationCodeId: string) {
+    return await prisma.userInvitation.create({
+      data: { userId, invitationCodeId },
+    });
+  }
 }

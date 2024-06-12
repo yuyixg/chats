@@ -341,7 +341,7 @@ const handler = async (req: ChatsApiRequest, res: ChatsApiResponse) => {
           if (done || checkChatIsStopped(chatId)) {
             stopChat(chatId);
             const { totalTokens, inputTokens, outputTokens } = result.usage;
-  
+
             const tokenUsed = totalTokens;
             const calculatedPrice = calcTokenPrice(
               priceConfig,
@@ -380,7 +380,10 @@ const handler = async (req: ChatsApiRequest, res: ChatsApiResponse) => {
 
       streamResponse().catch((error) => {
         throw new InternalServerError(
-          JSON.stringify({ message: error?.message, stack: error?.stack }),
+          JSON.stringify({
+            message: error?.message || JSON.stringify(error),
+            stack: error?.stack,
+          }),
         );
       });
     }
@@ -389,7 +392,10 @@ const handler = async (req: ChatsApiRequest, res: ChatsApiResponse) => {
       await ChatMessagesManager.delete(lastMessage.id, userId);
     }
     throw new InternalServerError(
-      JSON.stringify({ message: error?.message, stack: error?.stack }),
+      JSON.stringify({
+        message: error?.message || JSON.stringify(error),
+        stack: error?.stack,
+      }),
     );
   }
 };

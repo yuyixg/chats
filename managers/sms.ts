@@ -1,17 +1,24 @@
 import { SmsExpirationSeconds, generateUniqueCode } from '@/utils/common';
-import { sendSmsAsync } from '@/utils/tencentSmsClient';
+import tencentSms from '@/utils/tencentSmsClient';
 
+import { GlobalConfigKeys, TencentSmsConfig } from '@/types/config';
 import { SmsStatus, SmsType } from '@/types/user';
+
+import { ConfigsManager } from './configs';
 
 import prisma from '@/prisma/prisma';
 
 export class SmsManager {
-  static verifyUserSignInCode = async (phone: string, code: string) => {
+  static verifyUserSignInCode = async (
+    phone: string,
+    code: string,
+    type: SmsType,
+  ) => {
     const sms = await prisma.sms.findFirst({
       where: {
         code,
         signName: phone,
-        type: SmsType.SignIn,
+        type,
         status: SmsStatus.WaitingForVerification,
       },
     });
@@ -21,22 +28,26 @@ export class SmsManager {
     return createdAt.getTime() > new Date().getTime() ? sms : null;
   };
 
-  static sendSignInCode = async (phone: string) => {
+  static sendSignInCode = async (phone: string, type: SmsType) => {
     const code = generateUniqueCode();
     await prisma.sms.create({
       data: {
         code,
         signName: phone,
         status: SmsStatus.WaitingForVerification,
-        type: SmsType.SignIn,
+        type,
       },
     });
-    const { SMS_SDK_APP_ID, SMS_SIGN_NAME, SMS_TEMPLATE_ID } = process.env;
-    await sendSmsAsync({
+    const tencentSmsConfig: TencentSmsConfig = await ConfigsManager.get(
+      GlobalConfigKeys.tencentSms,
+    );
+    const { secretId, secretKey, sdkAppId, signName, templateId } =
+      tencentSmsConfig;
+    await new tencentSms(secretId, secretKey).sendSmsAsync({
       phoneNumberSet: [phone],
-      signName: SMS_SIGN_NAME!,
-      smsSdkAppId: SMS_SDK_APP_ID!,
-      templateId: SMS_TEMPLATE_ID!,
+      smsSdkAppId: sdkAppId!,
+      signName: signName!,
+      templateId: templateId!,
       templateParamSet: [code],
     });
   };

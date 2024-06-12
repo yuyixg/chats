@@ -37,7 +37,7 @@ export const getLoginUrl = (locale?: string) => {
 
 export const setUserSessionId = (sessionId: string) => {
   let expires = new Date();
-  expires.setHours(expires.getHours() + 12);
+  expires.setMinutes(expires.getMinutes() + 10080);
   Cookies.setItem('sessionId', sessionId, expires, '/');
 };
 

@@ -9,7 +9,7 @@
   "Login to your account": "登录",
   "Logging in...": "登录中...",
   "Old password incorrect": "旧密码不正确",
-  "Please enter your phone number and verification code below to complete the login.": "在下面输入您的手机号码和验证码以完成登录",
+  "Please enter your phone number and verification code below to complete the login": "在下面输入您的手机号码和验证码以完成登录",
   "Or continue with": "或者其他",
   "Account password login": "账号密码登录",
   "Verification code error": "验证码错误",
@@ -23,5 +23,8 @@
   "Invitation Code": "邀请码",
   "Mobile Login": "手机登录",
   "Register": "注册",
-  "Account Login": "账号登录"
+  "Account Login": "账号登录",
+  "Welcome to register": "欢迎注册",
+  "Please enter your phone number and invitation code below to complete the register": "在下面输入您的手机号码和邀请码以完成注册",
+  "Please enter your account name and password below to complete the login": "在下面输入您的账号和密码已完成登录"
 }

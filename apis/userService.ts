@@ -9,6 +9,7 @@ import {
   ProviderResult,
   SingInParams,
   SingInResult,
+  SmsType,
 } from '@/types/user';
 
 export interface ChatResult {
@@ -119,9 +120,9 @@ export const deleteUserPrompts = (id: string) => {
   return fetchServer.delete('/api/prompts?id=' + id);
 };
 
-export const postSignCode = (phone: string) => {
+export const postSignCode = (phone: string, type: SmsType) => {
   const fetchServer = useFetch();
-  return fetchServer.post('/api/public/send-code', { body: { phone } });
+  return fetchServer.post('/api/public/send-code', { body: { phone, type } });
 };
 
 export const registerByPhone = (

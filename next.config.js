@@ -11,7 +11,8 @@ const nextConfig = {
     return config;
   },
   publicRuntimeConfig: {
-    chattingIds: {}
+    chattingIds: {},
+    globalConfigs: {}
   }
 };
 

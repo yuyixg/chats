@@ -25,6 +25,9 @@ async function handler(req: NextApiRequest) {
     }
 
     if (user) {
+      if (!user?.enabled) {
+        throw new BadRequest('用户已被禁用，请联系管理人员');
+      }
       const pays = await PayServiceManager.findAllEnabled();
       const session = await SessionsManager.generateSession(user.id!);
       return {

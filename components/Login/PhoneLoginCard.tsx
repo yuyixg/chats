@@ -1,4 +1,4 @@
-import { useContext, useEffect, useState } from 'react';
+import { useEffect, useState } from 'react';
 import { useForm } from 'react-hook-form';
 import toast from 'react-hot-toast';
 
@@ -7,6 +7,8 @@ import { useRouter } from 'next/router';
 
 import { PhoneRegExp, SmsExpirationSeconds } from '@/utils/common';
 import { saveUserInfo, setUserSessionId } from '@/utils/user';
+
+import { SmsType } from '@/types/user';
 
 import { Button } from '@/components/ui/button';
 import { Card, CardContent } from '@/components/ui/card';
@@ -72,7 +74,7 @@ const PhoneLoginCard = (props: {
   const sendCode = () => {
     if (form.formState.isValid) {
       const phone = form.getValues('phone');
-      postSignCode(phone)
+      postSignCode(phone, SmsType.SignIn)
         .then(() => {
           toast.success(t('SMS sent successfully'));
           setIsSendCode(true);
@@ -159,7 +161,7 @@ const PhoneLoginCard = (props: {
               variant="link"
               onClick={sendCode}
             >
-              {isSendCode ? seconds + 's' : t('Send code')}
+              {isSendCode ? seconds + ' s' : t('Send code')}
             </Button>
           </div>
         </div>

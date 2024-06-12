@@ -32,7 +32,7 @@ const handler = async (req: ChatsApiRequest) => {
     const { value, count } = req.body;
     const code = await InvitationCodeManager.findByCode(value);
     if (code) {
-      throw new BadRequest('激活码已存在');
+      throw new BadRequest('邀请码已存在');
     }
     const data = await InvitationCodeManager.create({
       value,

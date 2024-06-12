@@ -4,7 +4,10 @@ import toast from 'react-hot-toast';
 
 import { useTranslation } from 'next-i18next';
 
+import { GlobalConfigKeys, GlobalConfigs } from '@/types/config';
 import { GetConfigsResult, PostAndPutConfigParams } from '@/types/user';
+
+import FormSelect from '@/components/ui/form/select';
 
 import { Button } from '../../ui/button';
 import {
@@ -15,7 +18,6 @@ import {
   DialogTitle,
 } from '../../ui/dialog';
 import { Form, FormField } from '../../ui/form';
-import FormInput from '../../ui/form/input';
 import FormTextarea from '../../ui/form/textarea';
 import { FormFieldType, IFormFieldOption } from '../../ui/form/type';
 
@@ -25,6 +27,7 @@ import { z } from 'zod';
 
 interface IProps {
   selected: GetConfigsResult | null;
+  configKeys?: string[];
   isOpen: boolean;
   onClose: () => void;
   onSuccessful: () => void;
@@ -33,14 +36,24 @@ interface IProps {
 
 export const GlobalConfigsModal = (props: IProps) => {
   const { t } = useTranslation('admin');
-  const { selected, isOpen, onClose, onSuccessful } = props;
+  const { configKeys = [], selected, isOpen, onClose, onSuccessful } = props;
   const formFields: IFormFieldOption[] = [
     {
       name: 'key',
       label: t('Key'),
       defaultValue: '',
       render: (options: IFormFieldOption, field: FormFieldType) => (
-        <FormInput options={options} field={field} />
+        <FormSelect
+          disabled={!!selected}
+          field={field}
+          options={options}
+          items={Object.keys(GlobalConfigKeys)
+            .filter((y) => !configKeys.includes(y))
+            .map((key) => ({
+              name: key,
+              value: key,
+            }))}
+        />
       ),
     },
     {
@@ -111,6 +124,16 @@ export const GlobalConfigsModal = (props: IProps) => {
       }
     }
   }, [isOpen]);
+
+  useEffect(() => {
+    const subscription = form.watch((value, { name, type }) => {
+      if (name === 'key' && type === 'change') {
+        const key = value.key as GlobalConfigKeys;
+        form.setValue('value', JSON.stringify(GlobalConfigs[key], null, 2));
+      }
+    });
+    return () => subscription.unsubscribe();
+  }, [form.watch]);
 
   return (
     <Dialog open={isOpen} onOpenChange={onClose}>

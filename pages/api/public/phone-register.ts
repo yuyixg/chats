@@ -2,7 +2,7 @@ import { NextApiRequest } from 'next';
 
 import { BadRequest } from '@/utils/error';
 
-import { LoginType } from '@/types/user';
+import { LoginType, SmsType } from '@/types/user';
 
 import {
   InvitationCodeManager,
@@ -25,7 +25,11 @@ export const config = {
 async function handler(req: NextApiRequest) {
   if (req.method === 'POST') {
     const { phone, smsCode, invitationCode } = req.body;
-    const smsVerify = await SmsManager.verifyUserSignInCode(phone, smsCode);
+    const smsVerify = await SmsManager.verifyUserSignInCode(
+      phone,
+      smsCode,
+      SmsType.Register,
+    );
     const code = await InvitationCodeManager.verifyCode(invitationCode);
     if (!code || code.count == 0) {
       throw new BadRequest('邀请码错误或过期');
@@ -34,6 +38,9 @@ async function handler(req: NextApiRequest) {
       throw new BadRequest('验证码错误');
     } else {
       let user = await UsersManager.findByPhone(phone);
+      if (user) {
+        throw new BadRequest('用户已存在');
+      }
       if (!user) {
         user = await UsersManager.createUser({
           account: phone,
@@ -41,7 +48,12 @@ async function handler(req: NextApiRequest) {
           phone: phone,
           role: '-',
         });
-        await UsersManager.initialUser(user.id, LoginType.Phone);
+        await UsersManager.initialUser(
+          user.id,
+          LoginType.Phone,
+          code.id,
+        );
+        await InvitationCodeManager.createUserInvitation(user.id, code.id);
       }
       const pays = await PayServiceManager.findAllEnabled();
       const session = await SessionsManager.generateSession(user.id!);

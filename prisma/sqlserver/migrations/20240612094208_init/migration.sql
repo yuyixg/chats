@@ -229,6 +229,7 @@ CREATE TABLE [dbo].[UserInitialConfig] (
     [models] NVARCHAR(4000) NOT NULL CONSTRAINT [UserInitialConfig_models_df] DEFAULT '[]',
     [createdAt] DATETIME2 NOT NULL CONSTRAINT [UserInitialConfig_createdAt_df] DEFAULT CURRENT_TIMESTAMP,
     [updatedAt] DATETIME2 NOT NULL,
+    [invitationCodeId] UNIQUEIDENTIFIER,
     CONSTRAINT [UserInitialConfig_pkey] PRIMARY KEY CLUSTERED ([id])
 );
 
@@ -289,6 +290,9 @@ ALTER TABLE [dbo].[RequestLogs] ADD CONSTRAINT [RequestLogs_userId_fkey] FOREIGN
 
 -- AddForeignKey
 ALTER TABLE [dbo].[Prompts] ADD CONSTRAINT [Prompts_createUserId_fkey] FOREIGN KEY ([createUserId]) REFERENCES [dbo].[Users]([id]) ON DELETE NO ACTION ON UPDATE CASCADE;
+
+-- AddForeignKey
+ALTER TABLE [dbo].[UserInitialConfig] ADD CONSTRAINT [UserInitialConfig_invitationCodeId_fkey] FOREIGN KEY ([invitationCodeId]) REFERENCES [dbo].[InvitationCode]([id]) ON DELETE SET NULL ON UPDATE CASCADE;
 
 -- AddForeignKey
 ALTER TABLE [dbo].[InvitationCode] ADD CONSTRAINT [InvitationCode_createUserId_fkey] FOREIGN KEY ([createUserId]) REFERENCES [dbo].[Users]([id]) ON DELETE NO ACTION ON UPDATE CASCADE;

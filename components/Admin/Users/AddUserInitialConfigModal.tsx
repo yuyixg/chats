@@ -6,6 +6,7 @@ import { useTranslation } from 'next-i18next';
 
 import { GetModelResult } from '@/types/admin';
 import {
+  GetInvitationCodeResult,
   GetUserInitialConfigResult,
   LoginType,
   UserInitialModel,
@@ -41,6 +42,7 @@ import FormInput from '../../ui/form/input';
 import FormSelect from '../../ui/form/select';
 
 import {
+  getInvitationCode,
   postUserInitialConfig,
   putUserInitialConfig,
 } from '@/apis/adminService';
@@ -62,6 +64,9 @@ export const AddUserInitialConfigModal = (props: IProps) => {
   const { models, isOpen, select, onClose, onSuccessful } = props;
   const [submit, setSubmit] = useState(false);
   const [editModels, setEditModels] = useState<UserInitialModel[]>([]);
+  const [invitationCodes, setInvitationCodes] = useState<
+    GetInvitationCodeResult[]
+  >([]);
 
   const formSchema = z.object({
     name: z
@@ -75,6 +80,7 @@ export const AddUserInitialConfigModal = (props: IProps) => {
       .max(50, t('Contain at most {{length}} character(s)', { length: 50 })!),
     price: z.union([z.string(), z.number()]).optional(),
     loginType: z.string().optional(),
+    invitationCodeId: z.string().optional(),
   });
 
   const form = useForm<z.infer<typeof formSchema>>({
@@ -88,12 +94,16 @@ export const AddUserInitialConfigModal = (props: IProps) => {
 
   useEffect(() => {
     if (isOpen) {
+      getInvitationCode().then((data) => {
+        setInvitationCodes(data);
+      });
       form.reset();
       form.formState.isValid;
       if (select) {
         form.setValue('name', select.name);
         form.setValue('price', `${select.price}` || 0);
         form.setValue('loginType', select.loginType);
+        form.setValue('invitationCodeId', select.invitationCodeId);
       }
       setEditModels([]);
 
@@ -117,7 +127,7 @@ export const AddUserInitialConfigModal = (props: IProps) => {
 
   const onSubmit = (values: z.infer<typeof formSchema>) => {
     setSubmit(true);
-    const { name, loginType, price } = values;
+    const { name, loginType, price, invitationCodeId } = values;
     let p;
     if (select) {
       p = putUserInitialConfig({
@@ -126,6 +136,7 @@ export const AddUserInitialConfigModal = (props: IProps) => {
         loginType: loginType!,
         price: new Decimal(price || 0),
         models: editModels.filter((x) => x.enabled),
+        invitationCodeId: invitationCodeId === '-' ? null : invitationCodeId!,
       });
     } else {
       p = postUserInitialConfig({
@@ -133,6 +144,7 @@ export const AddUserInitialConfigModal = (props: IProps) => {
         loginType: loginType!,
         price: new Decimal(price || 0),
         models: editModels.filter((x) => x.enabled),
+        invitationCodeId: invitationCodeId === '-' ? null : invitationCodeId!,
       });
     }
     p.then(() => {
@@ -202,6 +214,27 @@ export const AddUserInitialConfigModal = (props: IProps) => {
                           ...Object.keys(LoginType).map((key) => ({
                             name: key,
                             value: key,
+                          })),
+                        ]}
+                      />
+                    );
+                  }}
+                ></FormField>
+                <FormField
+                  key="invitationCodeId"
+                  control={form.control}
+                  name="invitationCodeId"
+                  render={({ field }) => {
+                    return (
+                      <FormSelect
+                        className="w-full"
+                        field={field}
+                        label={t('Invitation Code')!}
+                        items={[
+                          { name: '-', value: '-' },
+                          ...invitationCodes.map((x) => ({
+                            name: x.value,
+                            value: x.id,
                           })),
                         ]}
                       />
