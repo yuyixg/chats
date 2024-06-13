@@ -34,7 +34,7 @@ async function handler(req: NextApiRequest) {
     if (!code || code.count == 0) {
       throw new BadRequest('邀请码错误或过期');
     }
-    if (!smsVerify) {
+    if (!smsVerify || smsVerify.code !== smsCode) {
       throw new BadRequest('验证码错误');
     } else {
       let user = await UsersManager.findByPhone(phone);
@@ -46,6 +46,7 @@ async function handler(req: NextApiRequest) {
           account: phone,
           username: phone,
           phone: phone,
+          provider: LoginType.Phone,
           role: '-',
         });
         await UsersManager.initialUser(user.id, LoginType.Phone, code.id);

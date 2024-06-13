@@ -16,8 +16,8 @@ export class SmsManager {
   ) => {
     const sms = await prisma.sms.findFirst({
       where: {
-        code,
         signName: phone,
+        code,
         type,
         status: SmsStatus.WaitingForVerification,
       },
