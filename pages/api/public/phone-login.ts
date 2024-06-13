@@ -29,7 +29,7 @@ async function handler(req: NextApiRequest) {
       smsCode,
       SmsType.SignIn,
     );
-    if (!smsVerify || smsVerify.code != smsCode) {
+    if (!smsVerify || smsVerify.code !== smsCode) {
       throw new BadRequest('验证码错误');
     } else {
       let user = await UsersManager.findByPhone(phone);
