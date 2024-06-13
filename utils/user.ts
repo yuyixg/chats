@@ -1,4 +1,7 @@
+import { Session } from '@/types/session';
+
 import Cookies from './cookie';
+import { UserRole } from '@/types/admin';
 
 export interface UserSession {
   sessionId: string;

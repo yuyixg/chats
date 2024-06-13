@@ -19,7 +19,7 @@ const ButtonToolTip = ({
   return (
     <TooltipProvider>
       <Tooltip>
-        <TooltipTrigger className={className}>{trigger}</TooltipTrigger>
+        <TooltipTrigger asChild={true} className={className}>{trigger}</TooltipTrigger>
         {content && <TooltipContent>{content}</TooltipContent>}
       </Tooltip>
     </TooltipProvider>

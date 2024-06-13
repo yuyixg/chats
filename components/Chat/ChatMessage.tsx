@@ -440,7 +440,6 @@ export const ChatMessage: FC<Props> = memo(
                         />
                       )}
                       <ButtonToolTip
-                        className="h-[28px]"
                         trigger={
                           <ChangeModel
                             readonly={readonly}
