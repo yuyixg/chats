@@ -137,21 +137,21 @@ export default function LoginPage() {
                             {t('Account Login')}
                           </TabsTrigger>
                         </TabsList>
-                        <TabsContent className="m-0 mt-2" value="phone">
+                        <TabsContent className="m-0 mt-2" value={TabKeys.PHONE}>
                           <PhoneLoginCard
                             openLoading={openLoading}
                             closeLoading={closeLoading}
                             loginLoading={loginLoading}
                           />
                         </TabsContent>
-                        <TabsContent className="m-0 mt-2" value="register">
+                        <TabsContent className="m-0 mt-2" value={TabKeys.REGISTER}>
                           <PhoneRegisterCard
                             openLoading={openLoading}
                             closeLoading={closeLoading}
                             loginLoading={loginLoading}
                           />
                         </TabsContent>
-                        <TabsContent className="m-0 mt-2" value="account">
+                        <TabsContent className="m-0 mt-2" value={TabKeys.ACCOUNT}>
                           <AccountLoginCard
                             openLoading={openLoading}
                             closeLoading={closeLoading}

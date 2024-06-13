@@ -1,4 +1,4 @@
-import { PhoneRegExp } from '@/utils/common';
+import { PhoneRegExp, SmsExpirationSeconds } from '@/utils/common';
 import { BadRequest } from '@/utils/error';
 
 import { ChatsApiRequest } from '@/types/next-api';
@@ -24,6 +24,14 @@ export interface IDecipherAttach {
 const handler = async (req: ChatsApiRequest) => {
   if (req.method === 'POST') {
     const { phone, type } = req.body;
+    const sms = await SmsManager.findBySignName(type, phone);
+    if (sms) {
+      const createdAt = new Date(sms.createdAt);
+      createdAt.setSeconds(createdAt.getSeconds() + SmsExpirationSeconds);
+      if (createdAt > new Date()) {
+        throw new BadRequest('验证码已发送，请查收');
+      }
+    }
     let smsType = SmsType.SignIn;
     if (type === SmsType.SignIn) {
       const user = await UsersManager.findByPhone(phone);

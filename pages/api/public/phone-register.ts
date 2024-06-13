@@ -48,11 +48,7 @@ async function handler(req: NextApiRequest) {
           phone: phone,
           role: '-',
         });
-        await UsersManager.initialUser(
-          user.id,
-          LoginType.Phone,
-          code.id,
-        );
+        await UsersManager.initialUser(user.id, LoginType.Phone, code.id);
         await InvitationCodeManager.createUserInvitation(user.id, code.id);
       }
       const pays = await PayServiceManager.findAllEnabled();

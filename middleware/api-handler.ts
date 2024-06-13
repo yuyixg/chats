@@ -16,7 +16,7 @@ const publicApis = [
   '/api/public/messages',
   '/api/public/notify',
   '/api/public/login-provider',
-  '/api/public/send-code',
+  '/api/public/sms',
   '/api/public/account-login',
   '/api/public/phone-login',
   '/api/public/phone-register',

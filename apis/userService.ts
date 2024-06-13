@@ -122,7 +122,7 @@ export const deleteUserPrompts = (id: string) => {
 
 export const postSignCode = (phone: string, type: SmsType) => {
   const fetchServer = useFetch();
-  return fetchServer.post('/api/public/send-code', { body: { phone, type } });
+  return fetchServer.post('/api/public/sms', { body: { phone, type } });
 };
 
 export const registerByPhone = (

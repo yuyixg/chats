@@ -58,33 +58,33 @@ const Sidebar = <T,>({
           isOpen ? 'w-[260px]' : 'w-0 hidden'
         } fixed top-0 ${side}-0 z-40 flex h-full flex-none flex-col text-black bg-[#f9f9f9] dark:bg-[#202123] dark:text-white p-2 text-[14px] sm:relative  sm:top-0`}
       >
-        {hasModel() && (
-          <div
-            className={cn(
-              'flex items-center px-[6px] justify-between',
-              side === 'right' && 'flex-row-reverse',
-            )}
-          >
-            <ButtonToolTip
-              trigger={
-                <Button
-                  variant="ghost"
-                  className="p-1 m-0 h-auto"
-                  onClick={() => {
-                    homeDispatch({
-                      field: side === 'right' ? 'showPromptbar' : 'showChatbar',
-                      value: false,
-                    });
-                  }}
-                >
-                  {side === 'right' ? (
-                    <IconLayoutSidebarRight stroke="#7d7d7d" size={26} />
-                  ) : (
-                    <IconLayoutSidebar stroke="#7d7d7d" size={26} />
-                  )}
-                </Button>
-              }
-            />
+        <div
+          className={cn(
+            'flex items-center px-[6px] justify-between',
+            side === 'right' && 'flex-row-reverse',
+          )}
+        >
+          <ButtonToolTip
+            trigger={
+              <Button
+                variant="ghost"
+                className="p-1 m-0 h-auto"
+                onClick={() => {
+                  homeDispatch({
+                    field: side === 'right' ? 'showPromptbar' : 'showChatbar',
+                    value: false,
+                  });
+                }}
+              >
+                {side === 'right' ? (
+                  <IconLayoutSidebarRight stroke="#7d7d7d" size={26} />
+                ) : (
+                  <IconLayoutSidebar stroke="#7d7d7d" size={26} />
+                )}
+              </Button>
+            }
+          />
+          {hasModel() && (
             <ButtonToolTip
               trigger={
                 <Button
@@ -101,14 +101,14 @@ const Sidebar = <T,>({
               }
               content={addItemButtonTitle}
             />
-          </div>
-        )}
+          )}
+        </div>
+
         <Search
           placeholder={t('Search...') || ''}
           searchTerm={searchTerm}
           onSearch={handleSearchTerm}
         />
-
         <div className="flex-grow overflow-auto">
           {items?.length > 0 ? (
             <div className="pt-2">{itemComponent}</div>
@@ -148,23 +148,24 @@ const Sidebar = <T,>({
               </div>
             </span>
           </button>
-
-          <ButtonToolTip
-            trigger={
-              <Button
-                onClick={() => {
-                  handleCreateItem();
-                  handleSearchTerm('');
-                }}
-                disabled={messageIsStreaming}
-                variant="ghost"
-                className="p-1 m-0 h-auto"
-              >
-                <IconSquarePlus stroke="#7d7d7d" size={26} />
-              </Button>
-            }
-            content={addItemButtonTitle}
-          />
+          {hasModel() && (
+            <ButtonToolTip
+              trigger={
+                <Button
+                  onClick={() => {
+                    handleCreateItem();
+                    handleSearchTerm('');
+                  }}
+                  disabled={messageIsStreaming}
+                  variant="ghost"
+                  className="p-1 m-0 h-auto"
+                >
+                  <IconSquarePlus stroke="#7d7d7d" size={26} />
+                </Button>
+              }
+              content={addItemButtonTitle}
+            />
+          )}
         </div>
       )}
     </>

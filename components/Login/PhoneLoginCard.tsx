@@ -36,6 +36,7 @@ const PhoneLoginCard = (props: {
   const [seconds, setSeconds] = useState(SmsExpirationSeconds - 1);
   const [isSendCode, setIsSendCode] = useState(false);
   const [smsCode, setSmsCode] = useState('');
+  const [sending, setSending] = useState(false);
 
   const formSchema = z.object({
     phone: z.string().regex(PhoneRegExp, {
@@ -72,6 +73,7 @@ const PhoneLoginCard = (props: {
   }, [isSendCode, seconds]);
 
   const sendCode = () => {
+    setSending(true);
     if (form.formState.isValid) {
       const phone = form.getValues('phone');
       postSignCode(phone, SmsType.SignIn)
@@ -79,8 +81,14 @@ const PhoneLoginCard = (props: {
           toast.success(t('SMS sent successfully'));
           setIsSendCode(true);
         })
-        .catch(() => {
-          toast.error(t('SMS send failed, please try again later'));
+        .catch(async (response) => {
+          const body = await response.json();
+          toast.error(
+            body.message || t('SMS send failed, please try again later'),
+          );
+        })
+        .finally(() => {
+          setSending(false);
         });
     }
   };
@@ -156,8 +164,8 @@ const PhoneLoginCard = (props: {
               className="m-0 border-none outline-none bg-transparent rounded-md p-0 pr-[102px] pl-4"
             />
             <Button
-              className="absolute right-0 text-center"
-              disabled={!form.formState.isValid}
+              className="absolute right-0 text-center px-0"
+              disabled={!form.formState.isValid || isSendCode || sending}
               variant="link"
               onClick={sendCode}
             >

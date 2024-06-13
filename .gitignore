@@ -41,3 +41,6 @@ public/files
 
 # wx
 cert
+
+#log
+logs.txt

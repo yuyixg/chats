@@ -159,11 +159,10 @@ export class UsersManager {
 
   static async initialUser(
     userId: string,
-    invitationCodeId?: string,
-    LoginType?: LoginType | string,
+    LoginType: LoginType | string,
+    invitationCodeId?: string | null,
     createUserId?: string,
   ) {
-    console.log('invitationCodeId\n', invitationCodeId);
     const configs = await prisma.userInitialConfig.findMany({
       where: {
         OR: [
@@ -180,13 +179,9 @@ export class UsersManager {
       orderBy: { createdAt: 'desc' },
     });
 
-    console.log('configs \n', configs);
-
     let config = configs.find(
       (x) => x.loginType === LoginType && invitationCodeId === invitationCodeId,
     );
-
-    console.log('config \n', config);
 
     if (!config) {
       config = configs.find(

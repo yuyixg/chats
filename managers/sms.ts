@@ -21,6 +21,7 @@ export class SmsManager {
         type,
         status: SmsStatus.WaitingForVerification,
       },
+      orderBy: { createdAt: 'desc' },
     });
     if (!sms) return null;
     const createdAt = new Date(sms.createdAt);
@@ -56,6 +57,13 @@ export class SmsManager {
     await prisma.sms.update({
       where: { id },
       data: { status: SmsStatus.Verified },
+    });
+  };
+
+  static findBySignName = async (type: SmsType, signName: string) => {
+    return await prisma.sms.findFirst({
+      where: { signName, type, status: SmsStatus.WaitingForVerification },
+      orderBy: { createdAt: 'desc' },
     });
   };
 }
