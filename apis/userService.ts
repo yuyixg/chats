@@ -127,21 +127,21 @@ export const postSignCode = (phone: string, type: SmsType) => {
 
 export const registerByPhone = (
   phone: string,
-  code: string,
+  smsCode: string,
   invitationCode: string,
 ): Promise<SingInResult> => {
   const fetchServer = useFetch();
   return fetchServer.post('/api/public/phone-register', {
-    body: { phone, code, invitationCode },
+    body: { phone, smsCode, invitationCode },
   });
 };
 
 export const signByPhone = (
   phone: string,
-  code: string,
+  smsCode: string,
 ): Promise<SingInResult> => {
   const fetchServer = useFetch();
   return fetchServer.post('/api/public/phone-login', {
-    body: { phone, code },
+    body: { phone, smsCode },
   });
 };

@@ -179,14 +179,40 @@ export class UsersManager {
       orderBy: { createdAt: 'desc' },
     });
 
-    let config = configs.find(
-      (x) => x.loginType === LoginType && invitationCodeId === invitationCodeId,
-    );
+    const configScores = configs
+      .map((config, index) => {
+        let score = 0;
+        if (
+          config.loginType === LoginType &&
+          config.invitationCodeId === invitationCodeId
+        ) {
+          score = 30;
+        } else if (
+          config.loginType === '-' &&
+          config.invitationCodeId === invitationCodeId
+        ) {
+          score = 20;
+        } else if (
+          config.loginType === LoginType &&
+          config.invitationCodeId === null
+        ) {
+          score = 10;
+        } else if (
+          config.loginType === '-' &&
+          config.invitationCodeId === null
+        ) {
+          score = 5;
+        } else {
+          score = 0;
+        }
+        return { index, score };
+      })
+      .sort((a, b) => b.score - a.score);
 
-    if (!config) {
-      config = configs.find(
-        (x) => x.loginType === '-' && x.invitationCodeId == null,
-      );
+    let config = null;
+
+    if (configScores.length > 0) {
+      config = configs[configScores[0].index];
     }
 
     let models = [] as UserInitialModel[];

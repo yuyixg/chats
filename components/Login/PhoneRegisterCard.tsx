@@ -118,6 +118,9 @@ const PhoneRegisterCard = (props: {
           closeLoading();
           const json = await response.json();
           toast.error(json.message || t('Verification code error'));
+        })
+        .finally(() => {
+          closeLoading();
         });
     }
   };
