@@ -1,4 +1,4 @@
-import { ChatsApiRequest, ChatsApiResponse } from '@/types/next-api';
+import { ChatsApiRequest } from '@/types/next-api';
 
 import { RequestLogsManager } from '@/managers';
 import { apiHandler } from '@/middleware/api-handler';
@@ -12,7 +12,7 @@ export const config = {
   maxDuration: 5,
 };
 
-const handler = async (req: ChatsApiRequest, res: ChatsApiResponse) => {
+const handler = async (req: ChatsApiRequest) => {
   if (req.method === 'GET') {
     const { id } = req.query as {
       id: string;

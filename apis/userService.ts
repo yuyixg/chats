@@ -3,6 +3,7 @@ import { useFetch } from '@/hooks/useFetch';
 import { PostPromptParams, PutPromptParams } from '@/types/admin';
 import { ChatMessage } from '@/types/chatMessage';
 import { Model } from '@/types/model';
+import { PageResult, Paging } from '@/types/page';
 import { Prompt } from '@/types/prompt';
 import {
   GetUserBalanceResult,
@@ -11,6 +12,10 @@ import {
   SingInResult,
   SmsType,
 } from '@/types/user';
+
+export interface GetChatsParams extends Paging {
+  query?: string;
+}
 
 export interface ChatResult {
   id: string;
@@ -45,9 +50,14 @@ export const getUserMessages = (chatId: string): Promise<ChatMessage[]> => {
   return fetchService.get('/api/messages?chatId=' + chatId);
 };
 
-export const getChats = (): Promise<ChatResult[]> => {
+export const getChatsByPaging = (
+  params: GetChatsParams,
+): Promise<PageResult<ChatResult[]>> => {
+  const { query, page, pageSize } = params;
   const fetchService = useFetch();
-  return fetchService.get('/api/user/chats');
+  return fetchService.get(
+    `/api/user/chats?page=${page}&pageSize=${pageSize}&query=${query || ''}`,
+  );
 };
 
 export const getChat = (id: string): Promise<ChatResult> => {

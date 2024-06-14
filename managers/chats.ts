@@ -16,10 +16,18 @@ export interface UpdateChat {
   isShared?: boolean;
 }
 
+export interface FindChatsByPaging {
+  query?: string;
+  userId: string;
+  page: number;
+  pageSize: number;
+}
+
 export class ChatsManager {
   static async findByUserChatId(id: string, userId: string) {
     return await prisma.chats.findUnique({ where: { id, AND: { userId } } });
   }
+
   static async create(params: CreateChat) {
     return await prisma.chats.create({ data: { ...params } });
   }
@@ -48,6 +56,32 @@ export class ChatsManager {
       include: { chatModel: true },
       orderBy: { createdAt: 'asc' },
     });
+  }
+
+  static async findChatsByPaging(params: FindChatsByPaging) {
+    const { userId, query, page, pageSize } = params;
+    const where: Prisma.ChatsWhereInput = {
+      userId,
+      isDeleted: false,
+    };
+
+    if (query) {
+      where.title = { contains: query };
+    }
+
+    const rows = await prisma.chats.findMany({
+      where,
+      skip: (page - 1) * pageSize,
+      take: pageSize,
+      include: { chatModel: true },
+      // orderBy: { createdAt: 'asc' },
+    });
+
+    const count = await prisma.chats.count({
+      where,
+    });
+
+    return { rows, count };
   }
 
   static async delete(id: string) {

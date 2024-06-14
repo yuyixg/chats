@@ -17,7 +17,12 @@ export const config = {
 const handler = async (req: ChatsApiRequest) => {
   const { userId } = req.session;
   if (req.method === 'GET') {
-    const { id } = req.query as { id: string };
+    const { id, page, pageSize, query } = req.query as {
+      id: string;
+      page: string;
+      pageSize: string;
+      query: string;
+    };
     const chatModels = await ChatModelManager.findModels(true);
     if (id) {
       const chat = await ChatsManager.findByUserChatId(id, userId);
@@ -33,8 +38,17 @@ const handler = async (req: ChatsApiRequest) => {
         isShared: chat.isShared,
       };
     }
-    const chats = await ChatsManager.findUserChats(userId);
-    return chats.map((c) => {
+    const _page = Number(page) || 1,
+      _pageSize = Number(pageSize) || 50;
+
+    const chats = await ChatsManager.findChatsByPaging({
+      userId,
+      page: _page,
+      pageSize: _pageSize,
+      query,
+    });
+
+    const rows = chats.rows.map((c) => {
       const chatModel = chatModels.find((x) => x.id === c.chatModelId);
       return {
         id: c.id,
@@ -46,6 +60,7 @@ const handler = async (req: ChatsApiRequest) => {
         isShared: c.isShared,
       };
     });
+    return { rows, count: chats.count };
   } else if (req.method === 'POST') {
     const { title } = req.body;
     return await ChatsManager.create({ title, userId });

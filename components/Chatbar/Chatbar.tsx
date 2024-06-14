@@ -30,6 +30,7 @@ export const Chatbar = () => {
     handleSelectChat,
     handleNewChat,
     hasModel,
+    getChats,
   } = useContext(HomeContext);
 
   const {
@@ -88,9 +89,10 @@ export const Chatbar = () => {
         itemComponent={<Conversations chats={filteredChats} />}
         items={filteredChats}
         searchTerm={searchTerm}
-        handleSearchTerm={(searchTerm: string) =>
-          chatDispatch({ field: 'searchTerm', value: searchTerm })
-        }
+        handleSearchTerm={(searchTerm: string) => {
+          chatDispatch({ field: 'searchTerm', value: searchTerm });
+          getChats({ query: searchTerm, page: 1, pageSize: 20 }, []);
+        }}
         toggleOpen={handleToggleChatbar}
         handleCreateItem={handleNewChat}
         footerComponent={<ChatBarSettings />}

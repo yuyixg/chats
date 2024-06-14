@@ -14,7 +14,6 @@ import {
 import ButtonToolTip from '../ButtonToolTip/ButtonToolTip';
 import Search from '../Search';
 import { Button } from '../ui/button';
-import { OpenSidebarButton } from './OpenCloseButton';
 
 import { cn } from '@/lib/utils';
 
@@ -90,7 +89,7 @@ const Sidebar = <T,>({
                 <Button
                   onClick={() => {
                     handleCreateItem();
-                    handleSearchTerm('');
+                    // handleSearchTerm('');
                   }}
                   disabled={messageIsStreaming}
                   variant="ghost"

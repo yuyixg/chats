@@ -40,7 +40,8 @@ import Spinner from '@/components/Spinner';
 
 import {
   ChatResult,
-  getChats,
+  GetChatsParams,
+  getChatsByPaging,
   getUserMessages,
   getUserModels,
   getUserPrompts,
@@ -62,6 +63,7 @@ interface HomeInitialState {
   messageIsStreaming: boolean;
   models: Model[];
   chats: ChatResult[];
+  chatsPaging: { count: number; page: number; pageSize: number };
   selectChatId: string | undefined;
   selectModelId: string | undefined;
   currentMessages: ChatMessage[];
@@ -89,6 +91,7 @@ const initialState: HomeInitialState = {
   currentChatMessageId: '',
   models: [],
   chats: [],
+  chatsPaging: { count: 0, page: 1, pageSize: 20 },
   selectModelId: undefined,
   selectChatId: undefined,
   chatError: false,
@@ -115,6 +118,7 @@ interface HomeContextProps {
   handleUpdateUserModelConfig: (value: any) => void;
   hasModel: () => boolean;
   getModel: (models: Model[], selectModelId: string) => Model;
+  getChats: (params: GetChatsParams, models?: Model[]) => void;
 }
 
 const HomeContext = createContext<HomeContextProps>(undefined!);
@@ -346,6 +350,26 @@ const Home = () => {
     }
   };
 
+  const getChats = (params: GetChatsParams, modelList?: Model[]) => {
+    const { page, pageSize } = params;
+    getChatsByPaging(params).then((data) => {
+      const { rows, count } = data;
+      dispatch({
+        field: 'chatsPaging',
+        value: { count, page, pageSize },
+      });
+      let _chats = rows;
+      if (!modelList) {
+        _chats = rows.concat(chats);
+      }
+      dispatch({ field: 'chats', value: _chats });
+      if (modelList) {
+        const selectChatId = getPathChatId(router.asPath) || getSelectChatId();
+        selectChat(rows, selectChatId, modelList || models);
+      }
+    });
+  };
+
   useEffect(() => {
     const settings = getSettings();
     if (settings.theme) {
@@ -398,12 +422,7 @@ const Home = () => {
           });
         }
 
-        getChats().then((data) => {
-          dispatch({ field: 'chats', value: data });
-          const selectChatId =
-            getPathChatId(router.asPath) || getSelectChatId();
-          selectChat(data, selectChatId, modelData);
-        });
+        getChats({ page: 1, pageSize: 20 }, modelData);
       });
 
       getUserPrompts().then((data) => {
@@ -439,6 +458,7 @@ const Home = () => {
         handleUpdateUserModelConfig,
         hasModel,
         getModel,
+        getChats,
       }}
     >
       <Head>
