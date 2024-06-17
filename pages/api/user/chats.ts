@@ -48,7 +48,7 @@ const handler = async (req: ChatsApiRequest) => {
       query,
     });
 
-    const rows = chats.rows.map((c) => {
+    const rows = chats.rows.reverse().map((c) => {
       const chatModel = chatModels.find((x) => x.id === c.chatModelId);
       return {
         id: c.id,

@@ -74,7 +74,7 @@ export class ChatsManager {
       skip: (page - 1) * pageSize,
       take: pageSize,
       include: { chatModel: true },
-      // orderBy: { createdAt: 'asc' },
+      orderBy: { createdAt: 'desc' },
     });
 
     const count = await prisma.chats.count({
