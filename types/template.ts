@@ -315,10 +315,16 @@ export function getModelDefaultTemplate(
       case ModelVersions.QWen_Vl: {
         return {
           type: ModelType.QianWen,
-          config: {},
+          config: {
+            temperature: {
+              min: 0,
+              max: 1.99,
+            },
+          },
           modelConfig: {
             prompt:
               "You are an AI assistant with image understanding capabilities, Follow the user's instructions carefully. Respond using markdown.",
+            temperature: 0.85,
             version: 'qwen-vl-max',
           },
           apiConfig: qianWenApiConfig,

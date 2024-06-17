@@ -241,6 +241,7 @@ CREATE TABLE "UserInitialConfig" (
     "models" VARCHAR(4000) NOT NULL DEFAULT '[]',
     "createdAt" TIMESTAMP(3) NOT NULL DEFAULT CURRENT_TIMESTAMP,
     "updatedAt" TIMESTAMP(3) NOT NULL,
+    "invitationCodeId" UUID,
 
     CONSTRAINT "UserInitialConfig_pkey" PRIMARY KEY ("id")
 );
@@ -311,6 +312,9 @@ ALTER TABLE "RequestLogs" ADD CONSTRAINT "RequestLogs_userId_fkey" FOREIGN KEY (
 
 -- AddForeignKey
 ALTER TABLE "Prompts" ADD CONSTRAINT "Prompts_createUserId_fkey" FOREIGN KEY ("createUserId") REFERENCES "Users"("id") ON DELETE RESTRICT ON UPDATE CASCADE;
+
+-- AddForeignKey
+ALTER TABLE "UserInitialConfig" ADD CONSTRAINT "UserInitialConfig_invitationCodeId_fkey" FOREIGN KEY ("invitationCodeId") REFERENCES "InvitationCode"("id") ON DELETE SET NULL ON UPDATE CASCADE;
 
 -- AddForeignKey
 ALTER TABLE "InvitationCode" ADD CONSTRAINT "InvitationCode_createUserId_fkey" FOREIGN KEY ("createUserId") REFERENCES "Users"("id") ON DELETE RESTRICT ON UPDATE CASCADE;

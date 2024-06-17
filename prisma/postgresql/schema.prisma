@@ -215,13 +215,15 @@ model Prompts {
 }
 
 model UserInitialConfig {
-  id        String   @id @default(uuid()) @db.Uuid()
-  name      String   @db.VarChar(50)
-  loginType String?  @db.VarChar(50)
-  price     Decimal  @default(0)
-  models    String   @default("[]") @db.VarChar(4000)
-  createdAt DateTime @default(now())
-  updatedAt DateTime @updatedAt
+  id               String          @id @default(uuid()) @db.Uuid
+  name             String          @db.VarChar(50)
+  loginType        String?         @db.VarChar(50)
+  price            Decimal         @default(0)
+  models           String          @default("[]") @db.VarChar(4000)
+  createdAt        DateTime        @default(now())
+  updatedAt        DateTime        @updatedAt
+  InvitationCode   InvitationCode? @relation(fields: [invitationCodeId], references: [id])
+  invitationCodeId String?         @db.Uuid
 }
 
 model Configs {
@@ -231,19 +233,20 @@ model Configs {
 }
 
 model InvitationCode {
-  id             String           @id @default(uuid()) @db.Uuid()
-  value          String           @unique
-  count          Int              @db.SmallInt
-  createUserId   String           @db.Uuid()
-  createdAt      DateTime         @default(now())
-  isDeleted      Boolean          @default(false)
-  user           Users?           @relation(fields: [createUserId], references: [id])
-  UserInvitation UserInvitation[]
+  id                String              @id @default(uuid()) @db.Uuid
+  value             String              @unique
+  count             Int                 @db.SmallInt
+  createUserId      String              @db.Uuid
+  createdAt         DateTime            @default(now())
+  isDeleted         Boolean             @default(false)
+  user              Users?              @relation(fields: [createUserId], references: [id])
+  UserInvitation    UserInvitation[]
+  UserInitialConfig UserInitialConfig[]
 }
 
 model UserInvitation {
-  id               String         @id @default(uuid()) @db.Uuid()
-  userId           String         @db.Uuid()
-  invitationCodeId String         @db.Uuid()
+  id               String         @id @default(uuid()) @db.Uuid
+  userId           String         @db.Uuid
+  invitationCodeId String         @db.Uuid
   InvitationCode   InvitationCode @relation(fields: [invitationCodeId], references: [id])
 }

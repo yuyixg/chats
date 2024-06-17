@@ -246,11 +246,9 @@ const handler = async (req: ChatsApiRequest, res: ChatsApiResponse) => {
       });
 
       const userMessageToSend =
-        chatModel.modelVersion === ModelVersions.QWen
+        chatModel.modelVersion === ModelVersions.QWen_Vl
           ? convertToQianWenMessage(userMessage)
           : convertMessageToSend(userMessage);
-
-      console.log(userMessageToSend);
 
       messagesToSend.push(userMessageToSend);
 
