@@ -21,7 +21,11 @@ import {
 } from '@/components/ui/form';
 import { Input } from '@/components/ui/input';
 
-import { postSignCode, registerByPhone } from '@/apis/userService';
+import {
+  postSignCode,
+  registerByPhone,
+  verifyInvitationCode,
+} from '@/apis/userService';
 import { zodResolver } from '@hookform/resolvers/zod';
 import { z } from 'zod';
 
@@ -80,11 +84,24 @@ const PhoneRegisterCard = (props: {
   const sendCode = () => {
     setSending(true);
     if (form.formState.isValid) {
-      const phone = form.getValues('phone');
-      postSignCode(phone, SmsType.Register)
+      const invitationCode = form.getValues('invitationCode');
+      verifyInvitationCode(invitationCode!)
         .then(() => {
-          toast.success(t('SMS sent successfully'));
-          setIsSendCode(true);
+          const phone = form.getValues('phone');
+          postSignCode(phone, SmsType.Register)
+            .then(() => {
+              toast.success(t('SMS sent successfully'));
+              setIsSendCode(true);
+            })
+            .catch(async (response) => {
+              const body = await response.json();
+              toast.error(
+                body.message || t('SMS send failed, please try again later'),
+              );
+            })
+            .finally(() => {
+              setSending(false);
+            });
         })
         .catch(async (response) => {
           const body = await response.json();

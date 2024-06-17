@@ -20,6 +20,7 @@ const publicApis = [
   '/api/public/account-login',
   '/api/public/phone-login',
   '/api/public/phone-register',
+  '/api/public/invitation-code',
 ];
 const adminApis = '/api/admin/';
 

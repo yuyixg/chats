@@ -135,6 +135,12 @@ export const postSignCode = (phone: string, type: SmsType) => {
   return fetchServer.post('/api/public/sms', { body: { phone, type } });
 };
 
+export const verifyInvitationCode = (invitationCode: string) => {
+  const fetchServer = useFetch();
+  return fetchServer.post('/api/public/invitation-code', { body: { invitationCode } });
+};
+
+
 export const registerByPhone = (
   phone: string,
   smsCode: string,
