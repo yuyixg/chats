@@ -113,8 +113,8 @@
   "Counts": "次数",
   "Initial Price": "初始金额",
   "Name": "名称",
-  "Account Initial Config": "账号配置",
-  "Add Account Initial Config": "添加账号配置",
+  "Account Initial Config": "账号初始配置",
+  "Add Account Initial Config": "添加初始账号配置",
   "Is Enabled": "是否启用",
   "Value": "值",
   "Description": "描述",
@@ -122,6 +122,7 @@
   "Edit Configs": "编辑配置",
   "Invitation Code": "邀请码",
   "Use count": "可邀请次数",
+  "Edit Invitation Code": "编辑邀请码",
   "Add Invitation Code": "新增邀请码",
   "Created User": "创建者"
 }
