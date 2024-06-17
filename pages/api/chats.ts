@@ -237,7 +237,7 @@ const handler = async (req: ChatsApiRequest, res: ChatsApiResponse) => {
       allMessages.forEach((m) => {
         const chatMessages = JSON.parse(m.messages) as Content;
         let content = {} as QianWenMessage | QianWenMaxMessage;
-        if (chatModel.modelVersion === ModelVersions.QWen) {
+        if (chatModel.modelVersion === ModelVersions.QWen_Vl) {
           content = convertToQianWenMessage(chatMessages, m.role as Role);
         } else {
           content = convertMessageToSend(chatMessages, m.role as Role);
@@ -249,6 +249,8 @@ const handler = async (req: ChatsApiRequest, res: ChatsApiResponse) => {
         chatModel.modelVersion === ModelVersions.QWen
           ? convertToQianWenMessage(userMessage)
           : convertMessageToSend(userMessage);
+
+      console.log(userMessageToSend);
 
       messagesToSend.push(userMessageToSend);
 
