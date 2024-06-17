@@ -296,7 +296,7 @@ export const ChatInput = ({
 
             <div className="flex">
               <button
-                className="absolute right-2 md:top-2.5 top-1.5 rounded-sm p-1 text-neutral-800 opacity-60 hover:bg-neutral-200 hover:text-neutral-900 dark:bg-opacity-50 dark:text-neutral-100 dark:hover:text-neutral-200"
+                className="absolute right-2 md:top-2.5 top-1.5 rounded-sm p-1 text-neutral-800 opacity-60 hover:bg-accent hover:text-neutral-900 dark:bg-opacity-50 dark:text-neutral-100 dark:hover:text-neutral-200"
                 onClick={handleSend}
               >
                 {messageIsStreaming ? (

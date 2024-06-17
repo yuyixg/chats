@@ -14,14 +14,25 @@ import { HomeContext } from '@/pages/home/home';
 import ChatbarContext from '@/components/Chatbar/Chatbar.context';
 import {
   IconCheck,
+  IconDots,
   IconMessage,
   IconMessageShare,
   IconPencil,
+  IconShare,
   IconTrash,
   IconX,
 } from '@/components/Icons/index';
 
+import { SharedMessageModal } from '../Chat/SharedMessageModal';
 import SidebarActionButton from '../SidebarActionButton';
+import { Button } from '../ui/button';
+import {
+  DropdownMenu,
+  DropdownMenuContent,
+  DropdownMenuItem,
+  DropdownMenuSeparator,
+  DropdownMenuTrigger,
+} from '../ui/dropdown-menu';
 
 import { ChatResult, deleteChats, putChats } from '@/apis/userService';
 
@@ -42,6 +53,7 @@ export const ConversationComponent = ({ chat }: Props) => {
   const [isDeleting, setIsDeleting] = useState(false);
   const [isChanging, setTitleChanging] = useState(false);
   const [title, setTitle] = useState('');
+  const [isShare, setIsShare] = useState(false);
 
   const handleEnterDown = (e: KeyboardEvent<HTMLDivElement>) => {
     if (e.key === 'Enter') {
@@ -81,16 +93,22 @@ export const ConversationComponent = ({ chat }: Props) => {
     setTitleChanging(false);
   };
 
-  const handleOpenChangeTitleModal: MouseEventHandler<HTMLButtonElement> = (
-    e,
-  ) => {
+  const handleOpenChangeTitleModal: MouseEventHandler<HTMLDivElement> = (e) => {
     e.stopPropagation();
     setTitleChanging(true);
     selectChatId && setTitle(chat.title);
   };
-  const handleOpenDeleteModal: MouseEventHandler<HTMLButtonElement> = (e) => {
+  const handleOpenDeleteModal: MouseEventHandler<HTMLDivElement> = (e) => {
     e.stopPropagation();
     setIsDeleting(true);
+  };
+  const handleOpenShareModal: MouseEventHandler<HTMLDivElement> = (e) => {
+    e.stopPropagation();
+    setIsShare(true);
+  };
+
+  const handleSharedMessage = (isShared: boolean) => {
+    handleUpdateChat(chats, selectChatId!, { isShared });
   };
 
   useEffect(() => {
@@ -152,14 +170,50 @@ export const ConversationComponent = ({ chat }: Props) => {
       )}
 
       {selectChatId === chat.id && !isDeleting && !isChanging && (
-        <div className="absolute right-1 z-10 flex text-gray-300">
-          <SidebarActionButton handleClick={handleOpenChangeTitleModal}>
-            <IconPencil size={18} />
-          </SidebarActionButton>
-          <SidebarActionButton handleClick={handleOpenDeleteModal}>
-            <IconTrash size={18} />
-          </SidebarActionButton>
+        <div className="absolute right-2 z-10 flex text-gray-300">
+          <DropdownMenu>
+            <DropdownMenuTrigger disabled={messageIsStreaming}>
+              <Button variant="ghost" className="p-[6px] m-0 h-auto">
+                <IconDots size={16} />
+              </Button>
+            </DropdownMenuTrigger>
+            <DropdownMenuContent>
+              <DropdownMenuItem
+                className="flex justify-start gap-2"
+                onClick={handleOpenChangeTitleModal}
+              >
+                <IconPencil size={18} />
+                {t('Edit')}
+              </DropdownMenuItem>
+              <DropdownMenuItem
+                className="flex justify-start gap-2"
+                onClick={handleOpenShareModal}
+              >
+                <IconShare size={18} />
+                {t('Share')}
+              </DropdownMenuItem>
+              <DropdownMenuSeparator />
+              <DropdownMenuItem
+                className="flex justify-start gap-2"
+                onClick={handleOpenDeleteModal}
+              >
+                <IconTrash size={18} />
+                {t('Delete')}
+              </DropdownMenuItem>
+            </DropdownMenuContent>
+          </DropdownMenu>
         </div>
+      )}
+
+      {isShare && (
+        <SharedMessageModal
+          isOpen={isShare}
+          onClose={() => {
+            setIsShare(false);
+          }}
+          chat={chats.find((x) => x.id === selectChatId)!}
+          onShareChange={handleSharedMessage}
+        />
       )}
     </div>
   );

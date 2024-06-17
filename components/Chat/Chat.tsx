@@ -25,7 +25,6 @@ import { ChatInput } from './ChatInput';
 import EnableNetworkSearch from './EnableNetworkSearch';
 import { MemoizedChatMessage } from './MemoizedChatMessage';
 import { ModelSelect } from './ModelSelect';
-import { SharedMessageModal } from './SharedMessageModal';
 import { SystemPrompt } from './SystemPrompt';
 import { TemperatureSlider } from './Temperature';
 
@@ -64,7 +63,6 @@ export const Chat = memo(({ stopConversationRef }: Props) => {
   const [autoScrollEnabled, setAutoScrollEnabled] = useState<boolean>(true);
   const [showScrollDownButton, setShowScrollDownButton] =
     useState<boolean>(false);
-  const [showShareModal, setShowShareModal] = useState(false);
   const [currentModel, setCurrentModel] = useState<CurrentModel>(
     {} as CurrentModel,
   );
@@ -517,16 +515,6 @@ export const Chat = memo(({ stopConversationRef }: Props) => {
             }}
             onScrollDownClick={handleScrollDown}
             showScrollDownButton={showScrollDownButton}
-          />
-        )}
-        {showShareModal && (
-          <SharedMessageModal
-            isOpen={showShareModal}
-            onClose={() => {
-              setShowShareModal(false);
-            }}
-            chat={currentSelectChat!}
-            onShareChange={handleSharedMessage}
           />
         )}
       </>

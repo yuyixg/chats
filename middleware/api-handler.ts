@@ -25,8 +25,9 @@ const adminApis = '/api/admin/';
 
 async function authMiddleware(request: ChatsApiRequest) {
   const requestUrl = request.url!;
+  console.log(requestUrl);
   let session: Session | null = null;
-  if (!publicApis.includes(requestUrl)) {
+  if (publicApis.filter((url) => requestUrl.includes(url)).length === 0) {
     session = await getSession(request.cookies);
     if (!session) {
       throw new Unauthorized();
