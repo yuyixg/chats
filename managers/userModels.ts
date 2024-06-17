@@ -1,3 +1,5 @@
+import { ModelUsage } from '@/types/model';
+
 import prisma from '@/prisma/prisma';
 
 export interface CreateUserModel {
@@ -6,12 +8,12 @@ export interface CreateUserModel {
 }
 
 export class UserModelManager {
-  static async findUserEnableModels(userId: string) {
+  static async findUserEnableModels(userId: string): Promise<ModelUsage[]> {
     const userModel = await prisma.userModels.findFirst({
       where: { userId },
     });
     const models = JSON.parse(userModel?.models || '[]') as any[];
-    return models.filter((x) => x.enabled).map((x) => x.modelId) || [];
+    return models.filter((x) => x.enabled);
   }
 
   static async createUserModel(params: CreateUserModel) {

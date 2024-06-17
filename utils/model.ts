@@ -7,33 +7,60 @@ import {
 } from '@/types/model';
 import { getModelDefaultTemplate } from '@/types/template';
 
-export function verifyModel(model: any, config: ChatModelConfig) {
+import Decimal from 'decimal.js';
+
+export function verifyChat(model: any, userBalance: Decimal) {
   const { tokens, counts, expires } = model;
-  const result = {
+  const errorMessages = {
     tokens: 'Not enough tokens available to send the message',
     counts: 'Not enough counts available to send the message',
     expires: 'Subscription has expired',
   };
 
-  if (tokens !== '-') {
-    if (+tokens <= 0) {
-      return result.tokens;
+  let usages = {
+    balance: false,
+    tokens: false,
+    counts: false,
+    expires: true,
+  };
+
+  if (expires !== '-') {
+    if (new Date(expires + ' 23:59:59') < new Date()) {
+      usages.expires = false;
+      return usages;
     }
+  }
+
+  if (counts === '-') {
+    usages.counts = true;
+    return usages;
   }
 
   if (counts !== '-') {
-    if (+counts <= 0) {
-      return result.counts;
+    if (+counts > 0) {
+      usages.counts = true;
+      return usages;
     }
   }
 
-  if (expires !== '-') {
-    if (new Date(expires) < new Date()) {
-      return result.expires;
+  if (tokens === '-') {
+    usages.tokens = true;
+    return usages;
+  }
+  
+  if (tokens !== '-') {
+    if (+tokens >= 4096) {
+      usages.tokens = true;
+      return usages;
     }
   }
 
-  return null;
+  if (userBalance.gte(0)) {
+    usages.balance = true;
+    return usages;
+  }
+
+  return usages;
 }
 
 export function getModelConfigs(

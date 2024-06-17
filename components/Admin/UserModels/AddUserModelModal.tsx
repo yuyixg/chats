@@ -63,8 +63,8 @@ export const AddUserModelModal = (props: IProps) => {
         models.push({
           modelId: select?.modelId!,
           enabled: true,
-          tokens: '-',
-          counts: '-',
+          tokens: '0',
+          counts: '0',
           expires: '-',
         });
       } else {

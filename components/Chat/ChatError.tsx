@@ -8,7 +8,7 @@ const ChatError = () => {
   return (
     <Alert variant="destructive" className="bg-[#f93a370d]">
       <AlertDescription className="flex items-center gap-1">
-        <IconError stroke="#7f1d1d" />
+        <IconError stroke="#ef4444" />
         {t(
           'There were some errors during the chat. You can switch models or try again later.',
         )}

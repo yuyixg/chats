@@ -1,3 +1,4 @@
+import { Usages } from '@/types/model';
 import { BalanceType } from '@/types/order';
 
 import { CreateChatMessage } from './chatMessages';
@@ -23,11 +24,13 @@ export interface ChatRecord {
   chatModelId: string;
   updateChatParams: UpdateChat;
   createChatMessageParams: CreateChatMessage;
+  usages: Usages;
 }
 
 export class ChatModelRecordManager {
   static async recordTransfer(params: ChatRecord) {
     const {
+      usages,
       userId,
       isFirstChat,
       chatModelId,
@@ -51,8 +54,20 @@ export class ChatModelRecordManager {
         tx,
         createChatMessageParams,
       );
-      await this.updateUserModelTokenCount(tx, userId, chatModelId, tokenUsed);
-      await this.chatUpdateBalance(tx, userId, calculatedPrice, chatMessage.id);
+      await this.updateUserModelTokenCount(
+        tx,
+        userId,
+        chatModelId,
+        tokenUsed,
+        usages,
+      );
+      usages.balance &&
+        (await this.chatUpdateBalance(
+          tx,
+          userId,
+          calculatedPrice,
+          chatMessage.id,
+        ));
     });
   }
 
@@ -70,16 +85,17 @@ export class ChatModelRecordManager {
     userId: string,
     modelId: string,
     token: number,
+    usages: Usages,
   ) {
     const userModel = await tx.userModels.findFirst({ where: { userId } });
     let models = JSON.parse(userModel?.models || '[]') as any[];
     models = models.map((m) => {
       if (m.modelId === modelId) {
-        if (m.tokens && m.tokens !== '-') {
-          m.tokens -= token;
-        }
-        if (m.counts && m.counts !== '-') {
+        if (m.counts && m.counts !== '-' && usages.counts) {
           m.counts -= 1;
+        }
+        if (m.tokens && m.tokens !== '-' && usages.tokens) {
+          m.tokens -= token;
         }
       }
       return m;

@@ -24,17 +24,23 @@ const handler = async (req: ChatsApiRequest) => {
   const models = await ChatModelManager.findModels();
   const fileServices = await FileServiceManager.findFileServices(false);
   const _models = models
-    .filter((m: ChatModels) => userModels.includes(m.id!))
+    .filter((m: ChatModels) => userModels.find((um) => um.modelId === m.id))
     .map((x: ChatModels) => {
       const fileServer = fileServices.find(
         (f: FileServices) => f.id === x.fileServiceId,
       );
       const modelConfig = JSON.parse(x.modelConfig) as ChatModelConfig;
+      const modelUsage = userModels.find((um) => um.modelId === x.id);
       return {
         id: x.id,
         modelVersion: x.modelVersion,
         name: x.name,
         modelProvider: x.modelProvider,
+        modelUsage: {
+          counts: modelUsage?.counts,
+          expires: modelUsage?.expires,
+          tokens: modelUsage?.tokens,
+        },
         modelConfig: {
           prompt: modelConfig?.prompt,
           temperature: modelConfig?.temperature,

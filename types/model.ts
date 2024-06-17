@@ -19,6 +19,7 @@ export interface Model {
   };
   fileConfig?: ChatModelFileConfig;
   enabled?: boolean;
+  modelUsage: ModelUsage;
 }
 
 export enum ModelVersions {
@@ -106,4 +107,18 @@ export interface ModelApiConfig {
 
 export interface CurrentModel extends ModelConfig {
   name: string;
+}
+
+export interface Usages {
+  balance: boolean;
+  tokens: boolean;
+  counts: boolean;
+  expires: boolean;
+}
+
+export interface ModelUsage {
+  modelId: string;
+  tokens: string;
+  counts: string;
+  expires: string;
 }

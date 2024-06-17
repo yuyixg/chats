@@ -456,6 +456,9 @@ export const Chat = memo(({ stopConversationRef }: Props) => {
                       ?.childrenIds || [];
                   parentChildrenIds = [...parentChildrenIds].reverse();
                 }
+                if(lastMessageId === current.id && chatError) {
+                  return <></>
+                }
                 return (
                   <MemoizedChatMessage
                     currentSelectIndex={parentChildrenIds.findIndex(

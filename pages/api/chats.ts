@@ -13,7 +13,7 @@ import {
   ModelUnauthorized,
 } from '@/utils/error';
 import { calcTokenPrice } from '@/utils/message';
-import { verifyModel } from '@/utils/model';
+import { verifyChat } from '@/utils/model';
 
 import {
   ChatBody,
@@ -67,13 +67,21 @@ const handler = async (req: ChatsApiRequest, res: ChatsApiResponse) => {
     throw new ModelUnauthorized();
   }
 
-  const verifyMessage = verifyModel(userModel, modelConfig);
-  if (verifyMessage) {
-    throw new BadRequest(verifyMessage);
-  }
+  let usages = {
+    balance: false,
+    tokens: false,
+    counts: false,
+    expires: false,
+  };
 
   const userBalance = await UserBalancesManager.findUserBalance(userId);
-  if (userBalance.lte(0)) {
+
+  const verified = verifyChat(userModel, userBalance);
+  if (!verified.expires) {
+    throw new BadRequest('Subscription has expired');
+  }
+  usages = { ...verified };
+  if (!usages.balance && !verified.counts && !verified.tokens) {
     throw new BadRequest('Insufficient balance');
   }
 
@@ -349,6 +357,7 @@ const handler = async (req: ChatsApiRequest, res: ChatsApiResponse) => {
               outputTokens,
             );
             await ChatModelRecordManager.recordTransfer({
+              usages,
               isFirstChat,
               userId,
               chatId,
