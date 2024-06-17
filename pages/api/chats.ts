@@ -89,6 +89,10 @@ const handler = async (req: ChatsApiRequest, res: ChatsApiResponse) => {
   const temperature = +(
     userModelConfig?.temperature || modelConfig.temperature
   );
+  const enableSearch =
+    userModelConfig?.enableSearch != undefined
+      ? userModelConfig?.enableSearch
+      : modelConfig?.enableSearch;
 
   let messagesToSend = [] as any[];
 
@@ -230,11 +234,6 @@ const handler = async (req: ChatsApiRequest, res: ChatsApiResponse) => {
       }
       stream = await KimiStream(chatModel, temperature, messagesToSend);
     } else if (chatModel.modelProvider === ModelProviders.QianWen) {
-      const enableSearch =
-        userModelConfig?.enableSearch != undefined
-          ? userModelConfig?.enableSearch
-          : modelConfig?.enableSearch;
-
       allMessages.forEach((m) => {
         const chatMessages = JSON.parse(m.messages) as Content;
         let content = {} as QianWenMessage | QianWenMaxMessage;
@@ -378,7 +377,14 @@ const handler = async (req: ChatsApiRequest, res: ChatsApiResponse) => {
               updateChatParams: {
                 id: chatId,
                 chatModelId: chatModel.id,
-                userModelConfig: JSON.stringify(userModelConfig),
+                userModelConfig: JSON.stringify({
+                  ...(userModelConfig?.enableSearch && {
+                    enableSearch,
+                  }),
+                  ...(userModelConfig?.temperature && {
+                    temperature,
+                  }),
+                }),
               },
             });
             return res.end();
