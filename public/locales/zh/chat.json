@@ -62,5 +62,8 @@
   "Internet Search": "互联网搜索",
   "There were some errors during the chat. You can switch models or try again later.": "聊天中出现了一些错误，你可以切换模型或者稍后再试。",
   "Error generating response, click to regenerate response.": "生成响应时出错，点击以重新生成响应。",
-  "Show more": "加载更多"
+  "Show more": "加载更多",
+  "Remaining Tokens": "剩余Tokens",
+  "Remaining Chat Counts": "剩余聊天次数",
+  "become due": "到期"
 }

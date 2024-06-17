@@ -85,4 +85,9 @@ export class UserModelManager {
       },
     });
   }
+
+  static async findUserModelUsage(userId: string, modelId: string) {
+    const userModels = await this.findUserEnableModels(userId);
+    return userModels.find((x) => x.modelId === modelId);
+  }
 }

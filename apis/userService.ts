@@ -2,7 +2,7 @@ import { useFetch } from '@/hooks/useFetch';
 
 import { PostPromptParams, PutPromptParams } from '@/types/admin';
 import { ChatMessage } from '@/types/chatMessage';
-import { Model } from '@/types/model';
+import { Model, ModelUsage } from '@/types/model';
 import { PageResult, Paging } from '@/types/page';
 import { Prompt } from '@/types/prompt';
 import {
@@ -154,4 +154,10 @@ export const signByPhone = (
   return fetchServer.post('/api/public/phone-login', {
     body: { phone, smsCode },
   });
+};
+export const getUserModelUsage = (modelId: string) => {
+  const fetchServer = useFetch();
+  return fetchServer.get<ModelUsage>(
+    '/api/user/model-usage?modelId=' + modelId,
+  );
 };

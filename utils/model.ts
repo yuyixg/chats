@@ -47,7 +47,7 @@ export function verifyChat(model: any, userBalance: Decimal) {
     usages.tokens = true;
     return usages;
   }
-  
+
   if (tokens !== '-') {
     if (+tokens >= 4096) {
       usages.tokens = true;

@@ -1,10 +1,14 @@
-import { useContext, useState } from 'react';
+import { useContext, useEffect, useState } from 'react';
 
 import { useTranslation } from 'next-i18next';
 
-import { Model } from '@/types/model';
+import { formatNumberAsMoney } from '@/utils/common';
+
+import { ModelUsage } from '@/types/model';
 
 import { HomeContext } from '@/pages/home/home';
+
+import { getUserModelUsage } from '@/apis/userService';
 
 export const ModelSelect = () => {
   const { t } = useTranslation('chat');
@@ -14,13 +18,18 @@ export const ModelSelect = () => {
     handleSelectModel,
   } = useContext(HomeContext);
 
-  const [selectedModel, setSelectedModel] = useState<Model>(
-    models.find((x) => x.id === selectModelId)!,
+  const [modelUsage, setModelUsage] = useState<ModelUsage | undefined>(
+    models.find((x) => x.id === selectModelId)?.modelUsage,
   );
+
+  useEffect(() => {
+    getUserModelUsage(selectModelId!).then((data) => {
+      setModelUsage(data);
+    });
+  }, [selectModelId]);
 
   const handleChange = (e: React.ChangeEvent<HTMLSelectElement>) => {
     const model = models.find((m) => m.id == e.target.value)!;
-    setSelectedModel(model);
     handleSelectModel(model.id);
   };
 
@@ -47,19 +56,39 @@ export const ModelSelect = () => {
           ))}
         </select>
       </div>
-      <div className="flex gap-4 text-xs pt-1 text-muted-foreground">
-        <span>
-          {t('剩余Tokens')}: {selectedModel.modelUsage.tokens}
-        </span>
-        <span>
-          {t('剩余聊天次数')}: {selectedModel.modelUsage.counts}
-        </span>
-        <span>
-          {selectedModel.modelUsage.expires === '-'
-            ? t('不限制使用')
-            : selectedModel.modelUsage.expires + '到期'}
-        </span>
-      </div>
+      {modelUsage &&
+      (modelUsage.tokens === '-' || modelUsage.counts === '-') ? (
+        <></>
+      ) : (
+        <>
+          {modelUsage && (
+            <div className="flex justify-between text-xs pt-1 text-muted-foreground">
+              <div className="flex gap-4">
+                {+modelUsage.counts > 0 && (
+                  <span>
+                    {t('Remaining Chat Counts')}:&nbsp;{modelUsage.counts}
+                  </span>
+                )}
+                {+modelUsage.tokens > 0 && (
+                  <span>
+                    {t('Remaining Tokens')}:&nbsp;
+                    {formatNumberAsMoney(+modelUsage.tokens)}
+                  </span>
+                )}
+              </div>
+              <div className="flex justify-end">
+                {modelUsage.expires === '-' ? (
+                  <></>
+                ) : (
+                  <>
+                    {modelUsage.expires} {` ${t('become due')}`}
+                  </>
+                )}
+              </div>
+            </div>
+          )}
+        </>
+      )}
     </div>
   );
 };
