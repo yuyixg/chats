@@ -91,7 +91,7 @@ const initialState: HomeInitialState = {
   currentChatMessageId: '',
   models: [],
   chats: [],
-  chatsPaging: { count: 0, page: 1, pageSize: 20 },
+  chatsPaging: { count: 0, page: 1, pageSize: 50 },
   selectModelId: undefined,
   selectChatId: undefined,
   chatError: false,
@@ -422,7 +422,7 @@ const Home = () => {
           });
         }
 
-        getChats({ page: 1, pageSize: 20 }, modelData);
+        getChats({ page: 1, pageSize: 50 }, modelData);
       });
 
       getUserPrompts().then((data) => {

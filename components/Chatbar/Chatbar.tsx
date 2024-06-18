@@ -91,7 +91,7 @@ export const Chatbar = () => {
         searchTerm={searchTerm}
         handleSearchTerm={(searchTerm: string) => {
           chatDispatch({ field: 'searchTerm', value: searchTerm });
-          getChats({ query: searchTerm, page: 1, pageSize: 20 }, []);
+          getChats({ query: searchTerm, page: 1, pageSize: 50 }, []);
         }}
         toggleOpen={handleToggleChatbar}
         handleCreateItem={handleNewChat}

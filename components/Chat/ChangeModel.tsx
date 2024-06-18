@@ -1,10 +1,25 @@
 import { useContext } from 'react';
 
+import Image from 'next/image';
+
+import { Model, ModelProviders } from '@/types/model';
+import { ModelProviderTemplates } from '@/types/template';
+
 import { HomeContext } from '@/pages/home/home';
 
 import { IconChevronDown } from '../Icons';
 import { Button } from '../ui/button';
-import { Popover, PopoverContent, PopoverTrigger } from '../ui/popover';
+import {
+  DropdownMenu,
+  DropdownMenuContent,
+  DropdownMenuGroup,
+  DropdownMenuItem,
+  DropdownMenuPortal,
+  DropdownMenuSub,
+  DropdownMenuSubContent,
+  DropdownMenuSubTrigger,
+  DropdownMenuTrigger,
+} from '../ui/dropdown-menu';
 
 import { cn } from '@/lib/utils';
 
@@ -23,30 +38,63 @@ const ChangeModel = ({
     state: { models },
   } = useContext(HomeContext);
 
+  let modelGroup = [] as { provider: ModelProviders; child: Model[] }[];
+  const groupModel = () => {
+    models.forEach((m) => {
+      const model = modelGroup.find((x) => x.provider === m.modelProvider);
+      if (model) {
+        model.child.push(m);
+      } else {
+        modelGroup.push({
+          provider: m.modelProvider,
+          child: [m],
+        });
+      }
+    });
+    console.log(modelGroup);
+  };
+  groupModel();
+
   return (
-    <Popover>
-      <PopoverTrigger className="flex" disabled={readonly}>
-        <Button variant="ghost" className="p-1 m-0 h-auto">
+    <DropdownMenu>
+      <DropdownMenuTrigger asChild>
+        <Button variant="ghost" className="p-1 m-0 h-auto" disabled={readonly}>
           <span className={cn('text-[#7d7d7d] font-medium', className)}>
             {modelName}
           </span>
           {!readonly && <IconChevronDown stroke="#7d7d7d" />}
         </Button>
-      </PopoverTrigger>
-      <PopoverContent>
-        <div className="grid grid-1 items-start">
-          {models.map((x) => (
-            <Button
-              variant="ghost"
-              key={x.id}
-              onClick={() => onChangeModel(x.id)}
-            >
-              {x.name}
-            </Button>
-          ))}
-        </div>
-      </PopoverContent>
-    </Popover>
+      </DropdownMenuTrigger>
+      <DropdownMenuContent className=" w-48">
+        <DropdownMenuGroup>
+          {modelGroup.map((m) => {
+            return (
+              <DropdownMenuSub key={m.provider}>
+                <DropdownMenuSubTrigger className="p-2 flex gap-2">
+                  <Image
+                    src={`/${ModelProviderTemplates[m.provider].icon}`}
+                    alt="KeyCloak"
+                    width={18}
+                    height={18}
+                    className="h-4 w-4 rounded-md dark:bg-white"
+                  />
+                  {ModelProviderTemplates[m.provider].displayName}
+                </DropdownMenuSubTrigger>
+                <DropdownMenuPortal>
+                  <DropdownMenuSubContent>
+                    {m.child.map((x) => (
+                      <DropdownMenuItem onClick={() => onChangeModel(x.id)}>
+                        {x.name}
+                      </DropdownMenuItem>
+                    ))}
+                  </DropdownMenuSubContent>
+                </DropdownMenuPortal>
+              </DropdownMenuSub>
+            );
+          })}
+        </DropdownMenuGroup>
+      </DropdownMenuContent>
+    </DropdownMenu>
   );
 };
 

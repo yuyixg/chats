@@ -76,6 +76,7 @@ export const ModelProviderTemplates = {
     ],
     apiConfig: gptApiConfig,
     displayName: 'OpenAI',
+    icon: 'openai.svg',
   },
   [ModelProviders.Azure]: {
     models: [
@@ -85,16 +86,19 @@ export const ModelProviderTemplates = {
     ],
     apiConfig: gptApiConfig,
     displayName: 'Azure',
+    icon: 'azure.svg',
   },
   [ModelProviders.QianWen]: {
     models: [ModelVersions.QWen, ModelVersions.QWen_Vl],
     apiConfig: qianWenApiConfig,
     displayName: '通义千问',
+    icon: 'qianwen.svg',
   },
   [ModelProviders.QianFan]: {
     models: [ModelVersions.ERNIE_Bot_4, ModelVersions.ERNIE_Bot_8K],
     apiConfig: qianFanApiConfig,
     displayName: '文心一言',
+    icon: 'qianfan.svg',
   },
   [ModelProviders.LingYi]: {
     models: [
@@ -104,6 +108,7 @@ export const ModelProviderTemplates = {
     ],
     apiConfig: lingYiApiConfig,
     displayName: '零一万物',
+    icon: 'model.svg',
   },
   [ModelProviders.Moonshot]: {
     models: [
@@ -113,11 +118,13 @@ export const ModelProviderTemplates = {
     ],
     apiConfig: moonshotApiConfig,
     displayName: '月之暗面',
+    icon: 'moonshot.svg',
   },
   [ModelProviders.Spark]: {
     models: [],
     apiConfig: sparkApiConfig,
     displayName: '讯飞星火',
+    icon: 'spark.svg',
   },
   [ModelProviders.ZhiPuAI]: {
     models: [
@@ -127,6 +134,7 @@ export const ModelProviderTemplates = {
     ],
     apiConfig: zhiPuAIApiConfig,
     displayName: '智谱AI',
+    icon: 'zhipuai.svg',
   },
 };
 
