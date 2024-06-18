@@ -4,7 +4,7 @@ import { useTranslation } from 'next-i18next';
 
 import { formatNumberAsMoney } from '@/utils/common';
 
-import { ModelUsage } from '@/types/model';
+import { GetModelUsageResult } from '@/types/user';
 
 import { HomeContext } from '@/pages/home/home';
 
@@ -18,7 +18,7 @@ export const ModelSelect = () => {
     handleSelectModel,
   } = useContext(HomeContext);
 
-  const [modelUsage, setModelUsage] = useState<ModelUsage | undefined>(
+  const [modelUsage, setModelUsage] = useState<GetModelUsageResult | undefined>(
     models.find((x) => x.id === selectModelId)?.modelUsage,
   );
 
@@ -58,22 +58,23 @@ export const ModelSelect = () => {
       </div>
       {modelUsage &&
       (modelUsage.tokens === '-' || modelUsage.counts === '-') ? (
-        <></>
+        <span className='text-xs pt-1'>{t('unit-price')}: ￥{modelUsage.prices} (1M tokens)</span>
       ) : (
         <>
           {modelUsage && (
             <div className="flex justify-between text-xs pt-1 text-muted-foreground">
               <div className="flex gap-4">
-                {+modelUsage.counts > 0 && (
+                {+modelUsage.counts > 0 ? (
                   <span>
                     {t('Remaining Chat Counts')}:&nbsp;{modelUsage.counts}
                   </span>
-                )}
-                {+modelUsage.tokens > 0 && (
+                ) : +modelUsage.tokens > 0 ? (
                   <span>
                     {t('Remaining Tokens')}:&nbsp;
                     {formatNumberAsMoney(+modelUsage.tokens)}
                   </span>
+                ) : (
+                  <span>{t('unit-price')}: ￥{modelUsage.prices} (1M tokens)</span>
                 )}
               </div>
               <div className="flex justify-end">

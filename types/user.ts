@@ -109,3 +109,11 @@ export interface PutInvitationCodeParams {
   id: string;
   count: number;
 }
+
+export interface GetModelUsageResult {
+  modelId: string;
+  tokens: string;
+  counts: string;
+  expires: string;
+  prices?: string;
+}

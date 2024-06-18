@@ -6,6 +6,7 @@ import { Model, ModelUsage } from '@/types/model';
 import { PageResult, Paging } from '@/types/page';
 import { Prompt } from '@/types/prompt';
 import {
+  GetModelUsageResult,
   GetUserBalanceResult,
   ProviderResult,
   SingInParams,
@@ -163,7 +164,7 @@ export const signByPhone = (
 };
 export const getUserModelUsage = (modelId: string) => {
   const fetchServer = useFetch();
-  return fetchServer.get<ModelUsage>(
+  return fetchServer.get<GetModelUsageResult>(
     '/api/user/model-usage?modelId=' + modelId,
   );
 };

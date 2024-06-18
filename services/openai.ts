@@ -85,6 +85,9 @@ export const OpenAIStream = async (
             return;
           } else {
             const json = JSON.parse(data);
+            if (json?.error) {
+              throw new Error(data);
+            }
             if (
               json.choices[0]?.finish_details != null ||
               json.choices[0]?.finish_reason != null
