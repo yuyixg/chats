@@ -70,8 +70,9 @@ const ChangeModel = ({
           {modelGroup.map((m) => {
             return (
               <DropdownMenuSub key={m.provider}>
-                <DropdownMenuSubTrigger className="p-2 flex gap-2">
+                <DropdownMenuSubTrigger key={`trigger-${m.provider}`} className="p-2 flex gap-2">
                   <Image
+                    key={`img-${m.provider}`}
                     src={`/${ModelProviderTemplates[m.provider].icon}`}
                     alt="KeyCloak"
                     width={18}
@@ -83,7 +84,7 @@ const ChangeModel = ({
                 <DropdownMenuPortal>
                   <DropdownMenuSubContent>
                     {m.child.map((x) => (
-                      <DropdownMenuItem onClick={() => onChangeModel(x.id)}>
+                      <DropdownMenuItem key={x.id} onClick={() => onChangeModel(x.id)}>
                         {x.name}
                       </DropdownMenuItem>
                     ))}
