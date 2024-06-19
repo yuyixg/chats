@@ -167,7 +167,7 @@ const PhoneLoginCard = (props: {
               className="m-0 border-none outline-none bg-transparent rounded-md p-0 pr-[102px] pl-4"
             />
             <Button
-              className="absolute right-0 text-center px-0"
+              className="absolute right-10 text-center px-0"
               disabled={!form.formState.isValid || isSendCode || sending}
               variant="link"
               onClick={sendCode}

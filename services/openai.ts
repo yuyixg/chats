@@ -86,7 +86,9 @@ export const OpenAIStream = async (
           } else {
             const json = JSON.parse(data);
             if (json?.error) {
-              throw new Error(data);
+              controller.error(data);
+              encoding.free();
+              controller.close();
             }
             if (
               json.choices[0]?.finish_details != null ||
@@ -113,10 +115,14 @@ export const OpenAIStream = async (
         }
       };
 
-      const parser = createParser(onParse);
+      try {
+        const parser = createParser(onParse);
 
-      for await (const chunk of res.body as any) {
-        parser.feed(decoder.decode(chunk));
+        for await (const chunk of res.body as any) {
+          parser.feed(decoder.decode(chunk));
+        }
+      } catch (error) {
+        throw error;
       }
     },
   });

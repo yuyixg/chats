@@ -62,7 +62,7 @@ export const QianWenStream = async (
           try {
             const json = JSON.parse(data);
             if (json?.code) {
-              throw new Error(JSON.stringify(json));
+              throw data;
             }
             if (modelVersion === ModelVersions.QWen) {
               const text = json.output.text;

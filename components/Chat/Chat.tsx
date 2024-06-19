@@ -203,21 +203,51 @@ export const Chat = memo(({ stopConversationRef }: Props) => {
         return;
       }
 
-      let done = false;
       let text = '';
       const reader = data.getReader();
       const decoder = new TextDecoder();
+      let buffer = '';
+      async function* processBuffer() {
+        while (true) {
+          const { done, value } = await reader.read();
+          if (done) {
+            break;
+          }
 
-      while (!done) {
-        if (stopConversationRef.current === true) {
+          buffer += decoder.decode(value, { stream: true });
+
+          let newlineIndex;
+          while ((newlineIndex = buffer.indexOf('\n')) >= 0) {
+            const line = buffer.slice(0, newlineIndex + 1).trim();
+            buffer = buffer.slice(newlineIndex + 1);
+
+            if (line.startsWith('data:')) {
+              yield line.slice(5).trim();
+            }
+
+            if (line === '') {
+              continue;
+            }
+          }
+        }
+      }
+
+      for await (const message of processBuffer()) {
+        console.log('Received message:', message);
+        let value = JSON.parse(message);
+        if (!value.success) {
+          homeDispatch({
+            field: 'chatError',
+            value: true,
+          });
           controller.abort();
-          done = true;
           break;
         }
-        const { value, done: doneReading } = await reader.read();
-        done = doneReading;
-        const chunkValue = decoder.decode(value);
-        text += chunkValue;
+        if (stopConversationRef.current === true) {
+          controller.abort();
+          break;
+        }
+        text += value.result;
 
         let lastMessages = _selectMessages[_selectMessages.length - 1];
         lastMessages = {
@@ -232,6 +262,7 @@ export const Chat = memo(({ stopConversationRef }: Props) => {
           value: [..._selectMessages],
         });
       }
+
       if (_selectMessages.length === 1) {
         const userMessageText = message.content.text!;
         const title =
@@ -454,8 +485,8 @@ export const Chat = memo(({ stopConversationRef }: Props) => {
                       ?.childrenIds || [];
                   parentChildrenIds = [...parentChildrenIds].reverse();
                 }
-                if(lastMessageId === current.id && chatError) {
-                  return <></>
+                if (lastMessageId === current.id && chatError) {
+                  return <></>;
                 }
                 return (
                   <MemoizedChatMessage

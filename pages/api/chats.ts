@@ -389,26 +389,48 @@ const handler = async (req: ChatsApiRequest, res: ChatsApiResponse) => {
             });
             return res.end();
           }
-          res.write(Buffer.from(result.text));
+          res.write(
+            Buffer.from(
+              `data:${JSON.stringify({
+                result: result.text,
+                success: true,
+              })}\n`,
+            ),
+          );
         }
       };
-
-      streamResponse().catch((error) => {
+      try {
+        await streamResponse();
+      } catch (error: any) {
+        res.write(
+          Buffer.from(
+            `data:${JSON.stringify({
+              success: false,
+            })}\n`,
+          ),
+        );
         throw new InternalServerError(
           JSON.stringify({
-            message: error?.message || JSON.stringify(error),
+            message: typeof error === 'string' ? error : JSON.stringify(error),
             stack: error?.stack,
           }),
         );
-      });
+      }
     }
   } catch (error: any) {
     if (lastMessage && lastMessage.id !== messageId) {
       await ChatMessagesManager.delete(lastMessage.id, userId);
     }
+    res.write(
+      Buffer.from(
+        `data:${JSON.stringify({
+          success: false,
+        })}\n`,
+      ),
+    );
     throw new InternalServerError(
       JSON.stringify({
-        message: error?.message || JSON.stringify(error),
+        message: typeof error === 'string' ? error : JSON.stringify(error),
         stack: error?.stack,
       }),
     );

@@ -56,7 +56,7 @@ export function apiHandler(handler: any) {
     let logs = {
       ip: requestIp.getClientIp(request),
       url: requestUrl,
-      userId: request?.session?.userId,
+
       method: request.method!,
       statusCode: 200,
       headers: getHeadersLog(request.headers),
@@ -66,6 +66,7 @@ export function apiHandler(handler: any) {
 
     try {
       await authMiddleware(request);
+      logs.userId = request?.session?.userId;
       const data = await handler(request, response);
       if (modelApis.includes(request.url!)) {
         return response.write(Buffer.from(data || ''));

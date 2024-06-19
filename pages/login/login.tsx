@@ -94,7 +94,7 @@ export default function LoginPage() {
             </div>
           </div>
           <div className="lg:p-8">
-            <div className="mx-auto flex w-full flex-col justify-center space-y-6 sm:w-[350px]">
+            <div className="mx-auto flex w-full flex-col justify-center space-y-6">
               <div
                 className="flex flex-col space-y-2 text-center mt-12 md:mt-0 lg:mt-0"
                 key={currentTab}
@@ -115,7 +115,7 @@ export default function LoginPage() {
                         onValueChange={(value) => {
                           setCurrentTab(value as TabKeys);
                         }}
-                        className="w-[400px] flex-col"
+                        className="flex-col"
                       >
                         <TabsList className="flex w-full flex-row justify-around">
                           <TabsTrigger
