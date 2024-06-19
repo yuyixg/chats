@@ -26,14 +26,17 @@ export class RequestLogsManager {
     return await prisma.requestLogs.create({ data: { ...params } });
   }
   static async findRequestLogs(params: FindRequestLogs) {
-    const { query, statusCode, page, pageSize } = params;
+    const { query, page, pageSize } = params;
 
     const where: Prisma.RequestLogsWhereInput = {};
     if (query) {
-      where.user = { username: { contains: query } };
-    }
-    if (statusCode) {
-      where.statusCode = { equals: statusCode };
+      where.OR = [
+        {
+          user: { username: { equals: query } },
+        },
+        { url: { equals: query } },
+        !isNaN(+query) ? { statusCode: { equals: +query } } : {},
+      ];
     }
 
     const requestLogs = await prisma.requestLogs.findMany({

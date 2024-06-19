@@ -1,3 +1,5 @@
+import { UserRole } from '@/types/admin';
+
 import prisma from '@/prisma/prisma';
 import { Prisma } from '@prisma/client';
 
@@ -105,10 +107,15 @@ export class ChatsManager {
   static async findChatsByPage(query: string, page: number, pageSize: number) {
     const where: Prisma.ChatsWhereInput = {};
     if (query) {
-      where.title = { contains: query };
+      where.user = {
+        username: { equals: query },
+      };
     }
     const chats = await prisma.chats.findMany({
-      where,
+      where: {
+        ...where,
+        user: { role: { notIn: [UserRole.admin] } },
+      },
       include: {
         user: { select: { username: true } },
         chatModel: { select: { name: true } },
