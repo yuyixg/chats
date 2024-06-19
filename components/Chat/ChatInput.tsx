@@ -12,6 +12,7 @@ import toast from 'react-hot-toast';
 import { useTranslation } from 'next-i18next';
 
 import { isMobile } from '@/utils/common';
+import { getSiteInfo } from '@/utils/website';
 
 import { Content, Message } from '@/types/chat';
 import { Prompt } from '@/types/prompt';
@@ -377,10 +378,7 @@ export const ChatInput = ({
         )}
       </div>
       <div className="px-3 pt-2 pb-3 text-center text-[12px] text-black/50 dark:text-white/50 md:px-4 md:pt-3 md:pb-6">
-        {/* .
-        {t(
-          "Copyright."
-        )} */}
+        {getSiteInfo()?.filingNumber}
       </div>
     </div>
   );

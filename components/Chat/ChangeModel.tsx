@@ -51,7 +51,6 @@ const ChangeModel = ({
         });
       }
     });
-    console.log(modelGroup);
   };
   groupModel();
 

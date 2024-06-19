@@ -1,6 +1,7 @@
 export enum GlobalConfigKeys {
   tencentSms = 'tencentSms',
   session = 'session',
+  siteInfo = 'siteInfo',
 }
 
 export interface TencentSmsConfig {
@@ -13,6 +14,13 @@ export interface TencentSmsConfig {
 
 export interface SessionConfig {}
 
+export interface SiteInfo {
+  filingNumber: string;
+  contact: {
+    qqGroupNumber: string;
+  };
+}
+
 export const GlobalConfigs = {
   tencentSms: {
     secretId: '',
@@ -20,6 +28,12 @@ export const GlobalConfigs = {
     sdkAppId: '',
     signName: '',
     templateId: '',
+  },
+  siteInfo: {
+    filingNumber: '',
+    contact: {
+      qqGroup: '',
+    },
   },
   session: {
     expire: '',

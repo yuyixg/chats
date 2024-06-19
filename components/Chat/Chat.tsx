@@ -233,7 +233,6 @@ export const Chat = memo(({ stopConversationRef }: Props) => {
       }
 
       for await (const message of processBuffer()) {
-        console.log('Received message:', message);
         let value = JSON.parse(message);
         if (!value.success) {
           homeDispatch({

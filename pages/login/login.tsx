@@ -4,6 +4,9 @@ import { useTranslation } from 'next-i18next';
 import { serverSideTranslations } from 'next-i18next/serverSideTranslations';
 import Image from 'next/image';
 
+import { setSiteInfo } from '@/utils/website';
+
+import { GlobalConfigKeys, SiteInfo } from '@/types/config';
 import { DEFAULT_LANGUAGE } from '@/types/settings';
 import { LoginType, ProviderResult } from '@/types/user';
 
@@ -15,6 +18,7 @@ import WeChatLogin from '@/components/Login/WeChatLogin';
 import { Tabs, TabsContent, TabsList, TabsTrigger } from '@/components/ui/tabs';
 
 import { getLoginProvider } from '@/apis/userService';
+import { ConfigsManager } from '@/managers';
 
 enum TabKeys {
   PHONE = 'phone',
@@ -26,7 +30,7 @@ type LoginHeader = {
   [key in TabKeys]: { title: string; description: string };
 };
 
-export default function LoginPage() {
+export default function LoginPage({ siteInfo }: { siteInfo: SiteInfo }) {
   const { t } = useTranslation('login');
   const LoginHeaders: LoginHeader = {
     phone: {
@@ -59,6 +63,7 @@ export default function LoginPage() {
       setProviders(data);
       setProviderTypes(data.map((x) => x.type));
     });
+
 
     setIsClient(true);
   }, []);
@@ -144,14 +149,20 @@ export default function LoginPage() {
                             loginLoading={loginLoading}
                           />
                         </TabsContent>
-                        <TabsContent className="m-0 mt-2" value={TabKeys.REGISTER}>
+                        <TabsContent
+                          className="m-0 mt-2"
+                          value={TabKeys.REGISTER}
+                        >
                           <PhoneRegisterCard
                             openLoading={openLoading}
                             closeLoading={closeLoading}
                             loginLoading={loginLoading}
                           />
                         </TabsContent>
-                        <TabsContent className="m-0 mt-2" value={TabKeys.ACCOUNT}>
+                        <TabsContent
+                          className="m-0 mt-2"
+                          value={TabKeys.ACCOUNT}
+                        >
                           <AccountLoginCard
                             openLoading={openLoading}
                             closeLoading={closeLoading}
@@ -193,6 +204,9 @@ export default function LoginPage() {
                 </div>
               </>
               <p className="px-8 text-center text-sm text-muted-foreground">
+                <div className="flex text-sm justify-center py-1">
+                  {siteInfo?.filingNumber}
+                </div>
                 © 2024 Chats™ . All Rights Reserved.
               </p>
             </div>
@@ -204,9 +218,13 @@ export default function LoginPage() {
 }
 
 export const getServerSideProps = async ({ locale }: { locale: string }) => {
+  const siteInfo: SiteInfo = await ConfigsManager.get(
+    GlobalConfigKeys.siteInfo,
+  );
   return {
     props: {
       ...(await serverSideTranslations(locale ?? DEFAULT_LANGUAGE, ['login'])),
+      siteInfo: siteInfo || {},
     },
   };
 };

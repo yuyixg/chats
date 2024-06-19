@@ -24,6 +24,7 @@ import { UserSession } from '@/utils/user';
 
 import { Role } from '@/types/chat';
 import { ChatMessage } from '@/types/chatMessage';
+import { GlobalConfigKeys, SiteInfo } from '@/types/config';
 import { Model } from '@/types/model';
 import { Prompt } from '@/types/prompt';
 import {
@@ -47,7 +48,9 @@ import {
   getUserPrompts,
   postChats,
 } from '@/apis/userService';
+import { ConfigsManager } from '@/managers';
 import { v4 as uuidv4 } from 'uuid';
+import { setSiteInfo } from '@/utils/website';
 
 interface HandleUpdateChatParams {
   isShared?: boolean;
@@ -125,7 +128,7 @@ const HomeContext = createContext<HomeContextProps>(undefined!);
 
 export { initialState, HomeContext };
 
-const Home = () => {
+const Home = ({ siteInfo }: { siteInfo: SiteInfo }) => {
   const router = useRouter();
   const { t } = useTranslation('chat');
   const contextValue = useCreateReducer<HomeInitialState>({
@@ -371,6 +374,7 @@ const Home = () => {
   };
 
   useEffect(() => {
+    setSiteInfo(siteInfo);
     const settings = getSettings();
     if (settings.theme) {
       dispatch({
@@ -508,9 +512,13 @@ export const getServerSideProps = async ({
   locale: string;
   req: any;
 }) => {
+  const siteInfo: SiteInfo = await ConfigsManager.get(
+    GlobalConfigKeys.siteInfo,
+  );
   const session = await getSession(req.headers.cookie);
   return {
     props: {
+      siteInfo: siteInfo || {},
       locale,
       session,
       ...(await serverSideTranslations(locale ?? DEFAULT_LANGUAGE, [

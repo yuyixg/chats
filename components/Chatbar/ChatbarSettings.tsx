@@ -4,12 +4,14 @@ import { useTranslation } from 'next-i18next';
 import { useRouter } from 'next/router';
 
 import { clearUserInfo, clearUserSessionId, getLoginUrl } from '@/utils/user';
+import { hasContact } from '@/utils/website';
 
 import { UserRole } from '@/types/admin';
 
 import { HomeContext } from '@/pages/home/home';
 
 import {
+  IconAddress,
   IconBulbFilled,
   IconLogout,
   IconMoneybag,
@@ -18,6 +20,7 @@ import {
   IconUserCog,
 } from '@/components/Icons/index';
 
+import ContactModal from '../Sidebar/ContactModal';
 import SettingsModal from '../Sidebar/SettingsModal';
 import { SidebarButton } from '../Sidebar/SidebarButton';
 import { RechargeModal } from '../UserRecharge/RechargeModal';
@@ -29,6 +32,7 @@ export const ChatBarSettings = () => {
   const { t } = useTranslation('sidebar');
   const [isSettingModalOpen, setIsSettingModal] = useState<boolean>(false);
   const [isRechargeModalOpen, setIsRechargeModal] = useState<boolean>(false);
+  const [isContactModalOpen, setIsContactModal] = useState<boolean>(false);
 
   const {
     state: { user },
@@ -93,6 +97,13 @@ export const ChatBarSettings = () => {
               icon={<IconSettings size={18} />}
               onClick={() => setIsSettingModal(true)}
             />
+            {hasContact() && (
+              <SidebarButton
+                text={t('Contact')}
+                icon={<IconAddress size={18} />}
+                onClick={() => setIsContactModal(true)}
+              />
+            )}
             <Separator className="my-2" />
             <SidebarButton
               text={t('Log out')}
@@ -117,6 +128,15 @@ export const ChatBarSettings = () => {
           isOpen={isRechargeModalOpen}
           onClose={() => {
             setIsRechargeModal(false);
+          }}
+        />
+      )}
+
+      {isContactModalOpen && (
+        <ContactModal
+          isOpen={isContactModalOpen}
+          onClose={() => {
+            setIsContactModal(false);
           }}
         />
       )}
