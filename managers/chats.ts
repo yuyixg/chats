@@ -106,15 +106,13 @@ export class ChatsManager {
 
   static async findChatsByPage(query: string, page: number, pageSize: number) {
     const where: Prisma.ChatsWhereInput = {};
-    if (query) {
-      where.user = {
-        username: { equals: query },
-      };
-    }
+
     const chats = await prisma.chats.findMany({
       where: {
-        ...where,
-        user: { role: { notIn: [UserRole.admin] } },
+        user: {
+          role: { notIn: [UserRole.admin] },
+          username: query ? { equals: query } : {},
+        },
       },
       include: {
         user: { select: { username: true } },
@@ -125,7 +123,12 @@ export class ChatsManager {
       orderBy: { createdAt: 'desc' },
     });
     const count = await prisma.chats.count({
-      where,
+      where: {
+        user: {
+          role: { notIn: [UserRole.admin] },
+          username: query ? { equals: query } : {},
+        },
+      },
     });
     return { rows: chats, count };
   }
