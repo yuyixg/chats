@@ -193,7 +193,7 @@ export default function LoginPage() {
                 </div>
               </>
               <p className="px-8 text-center text-sm text-muted-foreground">
-                © 2023 Chats™ . All Rights Reserved.
+                © 2024 Chats™ . All Rights Reserved.
               </p>
             </div>
           </div>
