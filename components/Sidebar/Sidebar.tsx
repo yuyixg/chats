@@ -153,7 +153,7 @@ const Sidebar = <T,>({
                 <Button
                   onClick={() => {
                     handleCreateItem();
-                    handleSearchTerm('');
+                    // handleSearchTerm('');
                   }}
                   disabled={messageIsStreaming}
                   variant="ghost"
