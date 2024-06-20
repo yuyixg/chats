@@ -9,7 +9,11 @@ export const getSiteInfo = (): SiteInfo => {
   return JSON.parse(siteInfo);
 };
 
-export const hasContact = () => {
-  const contact = getSiteInfo().contact;
+export const hasContact = (siteInfo?: SiteInfo) => {
+  let contact = {} as any;
+  if (siteInfo) {
+    contact = siteInfo.contact;
+  }
+  contact = getSiteInfo().contact;
   return !!contact?.qqGroupNumber;
 };

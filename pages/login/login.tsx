@@ -4,7 +4,7 @@ import { useTranslation } from 'next-i18next';
 import { serverSideTranslations } from 'next-i18next/serverSideTranslations';
 import Image from 'next/image';
 
-import { setSiteInfo } from '@/utils/website';
+import { hasContact } from '@/utils/website';
 
 import { GlobalConfigKeys, SiteInfo } from '@/types/config';
 import { DEFAULT_LANGUAGE } from '@/types/settings';
@@ -63,7 +63,6 @@ export default function LoginPage({ siteInfo }: { siteInfo: SiteInfo }) {
       setProviders(data);
       setProviderTypes(data.map((x) => x.type));
     });
-
 
     setIsClient(true);
   }, []);
@@ -157,6 +156,7 @@ export default function LoginPage({ siteInfo }: { siteInfo: SiteInfo }) {
                             openLoading={openLoading}
                             closeLoading={closeLoading}
                             loginLoading={loginLoading}
+                            showContact={hasContact(siteInfo)}
                           />
                         </TabsContent>
                         <TabsContent
@@ -223,7 +223,10 @@ export const getServerSideProps = async ({ locale }: { locale: string }) => {
   );
   return {
     props: {
-      ...(await serverSideTranslations(locale ?? DEFAULT_LANGUAGE, ['login'])),
+      ...(await serverSideTranslations(locale ?? DEFAULT_LANGUAGE, [
+        'login',
+        'sidebar',
+      ])),
       siteInfo: siteInfo || {},
     },
   };
