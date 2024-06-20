@@ -36,12 +36,14 @@ import {
   DialogContent,
   DialogFooter,
   DialogHeader,
+  DialogTitle,
 } from '../../ui/dialog';
 import { Form, FormControl, FormField } from '../../ui/form';
 import FormInput from '../../ui/form/input';
 import FormSelect from '../../ui/form/select';
 
 import {
+  deleteUserInitialConfig,
   getInvitationCode,
   postUserInitialConfig,
   putUserInitialConfig,
@@ -59,7 +61,7 @@ interface IProps {
   onSuccessful: () => void;
 }
 let ModelKeyMap = {} as any;
-export const AddUserInitialConfigModal = (props: IProps) => {
+export const UserInitialConfigModal = (props: IProps) => {
   const { t } = useTranslation('admin');
   const { models, isOpen, select, onClose, onSuccessful } = props;
   const [submit, setSubmit] = useState(false);
@@ -115,8 +117,8 @@ export const AddUserInitialConfigModal = (props: IProps) => {
         if (model) return model;
         return {
           modelId: x.modelId,
-          tokens: '-',
-          counts: '-',
+          tokens: '0',
+          counts: '0',
           expires: '-',
           enabled: false,
         };
@@ -173,10 +175,31 @@ export const AddUserInitialConfigModal = (props: IProps) => {
     setEditModels([..._models]);
   };
 
+  const onDeleteConfig = () => {
+    setSubmit(true);
+    deleteUserInitialConfig(select!.id)
+      .then(() => {
+        toast.success(t('Delete successful!'));
+        onSuccessful();
+      })
+      .catch(() => {
+        toast.error(
+          t(
+            'Operation failed! Please try again later, or contact technical personnel.',
+          ),
+        );
+      })
+      .finally(() => {
+        setSubmit(false);
+      });
+  };
+
   return (
     <Dialog open={isOpen} onOpenChange={onClose}>
       <DialogContent>
-        <DialogHeader>{t('Account Initial Config')}</DialogHeader>
+        <DialogHeader>
+          <DialogTitle>{t('Account Initial Config')}</DialogTitle>
+        </DialogHeader>
         <Form {...form}>
           <form onSubmit={form.handleSubmit(onSubmit)}>
             <div className="grid grid-cols-2 gap-4">
@@ -341,6 +364,16 @@ export const AddUserInitialConfigModal = (props: IProps) => {
               </div>
             </div>
             <DialogFooter className="pt-4">
+              {select && (
+                <Button
+                  type="button"
+                  disabled={submit}
+                  variant="destructive"
+                  onClick={onDeleteConfig}
+                >
+                  {t('Delete')}
+                </Button>
+              )}
               <Button disabled={submit} type="submit">
                 {t('Save')}
               </Button>

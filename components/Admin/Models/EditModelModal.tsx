@@ -171,7 +171,7 @@ export const EditModelModal = (props: IProps) => {
         conversionModelPriceToDisplay(
           mergeConfigs(
             getModelPriceConfig(modelVersion, modelProvider),
-            JSON.parse(priceConfig),
+            priceConfig,
           ),
         ),
       );

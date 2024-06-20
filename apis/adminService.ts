@@ -13,6 +13,7 @@ import {
   GetUserMessageParams,
   GetUserMessageResult,
   GetUserModelResult,
+  GetUsersParams,
   GetUsersResult,
   PostLoginServicesParams,
   PostModelKeysParams,
@@ -86,9 +87,15 @@ export const postModels = (params: PostModelParams): Promise<any> => {
   });
 };
 
-export const getUsers = (query?: string): Promise<GetUsersResult[]> => {
+export const getUsers = (
+  params: GetUsersParams,
+): Promise<PageResult<GetUsersResult[]>> => {
   const fetchService = useFetch();
-  return fetchService.get('/api/admin/users?query=' + query);
+  return fetchService.get(
+    `/api/admin/users?page=${params.page}&pageSize=${params.pageSize}&query=${
+      params?.query || ''
+    }`,
+  );
 };
 
 export const postUser = (params: PostUserParams) => {

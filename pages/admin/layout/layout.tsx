@@ -49,13 +49,13 @@ const AdminLayout = ({
       },
       title: t('User Management'),
     },
-    {
-      url: '/admin/user-models',
-      icon: (stroke?: string) => {
-        return <IconUserCog stroke={stroke} />;
-      },
-      title: t('User Models'),
-    },
+    // {
+    //   url: '/admin/user-models',
+    //   icon: (stroke?: string) => {
+    //     return <IconUserCog stroke={stroke} />;
+    //   },
+    //   title: t('User Models'),
+    // },
     {
       url: '/admin/model-keys',
       icon: (stroke?: string) => {

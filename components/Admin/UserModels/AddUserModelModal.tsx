@@ -11,6 +11,7 @@ import {
   DialogContent,
   DialogFooter,
   DialogHeader,
+  DialogTitle
 } from '../../ui/dialog';
 import {
   Select,
@@ -101,7 +102,9 @@ export const AddUserModelModal = (props: IProps) => {
   return (
     <Dialog open={isOpen} onOpenChange={onClose}>
       <DialogContent>
-        <DialogHeader>{t('Add User Model')}</DialogHeader>
+        <DialogHeader>
+          <DialogTitle>{t('Add User Model')}</DialogTitle>
+        </DialogHeader>
         <Select
           value={select?.modelId}
           onValueChange={(value) => {

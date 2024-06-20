@@ -34,7 +34,7 @@ const handler = async (req: ChatsApiRequest) => {
         fileServiceId: x.fileServiceId,
         fileConfig: x.fileConfig,
         modelConfig: x.modelConfig,
-        priceConfig: x.priceConfig,
+        priceConfig: JSON.parse(x.priceConfig || '{}'),
       };
     });
     return data;

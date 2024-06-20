@@ -6,6 +6,7 @@ import { UserBalancesManager, UserModelManager } from '.';
 import { LoginServiceManager } from './loginService';
 
 import prisma from '@/prisma/prisma';
+import { Prisma } from '@prisma/client';
 import bcrypt from 'bcryptjs';
 import Decimal from 'decimal.js';
 
@@ -124,26 +125,41 @@ export class UsersManager {
     });
   }
 
-  static async findUsers(query: string) {
-    return await prisma.users.findMany({
-      include: { userBalances: { select: { balance: true } } },
-      where: {
-        OR: [
-          {
-            username: { contains: query },
-          },
-          {
-            phone: { contains: query },
-          },
-          {
-            email: { contains: query },
-          },
-        ],
+  static async findUsers(query: string, page: number, pageSize: number) {
+    const where: Prisma.UsersWhereInput = query
+      ? {
+          OR: [
+            {
+              username: { equals: query },
+            },
+            {
+              account: { equals: query },
+            },
+            {
+              phone: { equals: query },
+            },
+            {
+              email: { equals: query },
+            },
+          ],
+        }
+      : {};
+    const users = await prisma.users.findMany({
+      include: {
+        userBalances: { select: { balance: true } },
+        UserModels: { select: { models: true, id: true } },
       },
+      where,
+      skip: (page - 1) * pageSize,
+      take: pageSize,
       orderBy: {
         createdAt: 'desc',
       },
     });
+    const count = await prisma.users.count({
+      where,
+    });
+    return { rows: users, count };
   }
 
   static async updateUserPassword(id: string, password: string) {
@@ -192,7 +208,7 @@ export class UsersManager {
         } else if (config.loginType === '-') {
           score += 1;
         }
-        
+
         return { index, score };
       })
       .sort((a, b) => b.score - a.score);

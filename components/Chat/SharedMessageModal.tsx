@@ -4,7 +4,7 @@ import toast from 'react-hot-toast';
 import { useTranslation } from 'next-i18next';
 
 import { Button } from '../ui/button';
-import { Dialog, DialogContent, DialogHeader } from '../ui/dialog';
+import { Dialog, DialogContent, DialogHeader, DialogTitle } from '../ui/dialog';
 import { Input } from '../ui/input';
 
 import { ChatResult, putChats } from '@/apis/userService';
@@ -56,7 +56,9 @@ export const SharedMessageModal = (props: IProps) => {
   return (
     <Dialog open={isOpen} onOpenChange={onClose}>
       <DialogContent className="max-w-[320px]">
-        <DialogHeader>{t('Share Message')}</DialogHeader>
+        <DialogHeader>
+          <DialogTitle>{t('Share Message')}</DialogTitle>
+        </DialogHeader>
 
         <div className="flex flex-col gap-2">
           <Input value={shareUrl}></Input>

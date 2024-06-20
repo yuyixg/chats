@@ -1,6 +1,7 @@
 import { BadRequest } from '@/utils/error';
 
 import { ChatsApiRequest } from '@/types/next-api';
+import { CommonQueryParams } from '@/types/query';
 
 import { UsersManager } from '@/managers';
 import { apiHandler } from '@/middleware/api-handler';
@@ -16,9 +17,9 @@ export const config = {
 
 const handler = async (req: ChatsApiRequest) => {
   if (req.method === 'GET') {
-    const { query } = req.query;
-    const users = await UsersManager.findUsers(query as string);
-    const data = users.map((x) => {
+    const { query, page, pageSize } = req.query as CommonQueryParams;
+    const data = await UsersManager.findUsers(query, +page, +pageSize);
+    const rows = data.rows.map((x) => {
       return {
         id: x.id,
         username: x.username,
@@ -31,9 +32,11 @@ const handler = async (req: ChatsApiRequest) => {
         provider: x.provider,
         enabled: x.enabled,
         createdAt: x.createdAt,
+        userModelId: x.UserModels[0].id,
+        models: JSON.parse(x.UserModels[0].models || '[]'),
       };
     });
-    return data;
+    return { rows, count: data.count };
   } else if (req.method === 'PUT') {
     const { id, username, password, role, enabled, phone, email } = req.body;
     let user = await UsersManager.findByUserId(id);

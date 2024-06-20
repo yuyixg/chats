@@ -3,21 +3,17 @@ import React, { useEffect, useState } from 'react';
 import { useTranslation } from 'next-i18next';
 import { serverSideTranslations } from 'next-i18next/serverSideTranslations';
 
+import { formatNumberAsMoney } from '@/utils/common';
+import { ModelPriceUnit } from '@/utils/model';
+
 import { GetModelResult } from '@/types/admin';
 import { DEFAULT_LANGUAGE } from '@/types/settings';
 import { ModelProviderTemplates } from '@/types/template';
 
 import { AddModelModal } from '@/components/Admin/Models/AddModelModal';
 import { EditModelModal } from '@/components/Admin/Models/EditModelModal';
-import { IconDots } from '@/components/Icons/index';
 import { Button } from '@/components/ui/button';
 import { Card } from '@/components/ui/card';
-import {
-  DropdownMenu,
-  DropdownMenuContent,
-  DropdownMenuItem,
-  DropdownMenuTrigger,
-} from '@/components/ui/dropdown-menu';
 import {
   Table,
   TableBody,
@@ -82,6 +78,7 @@ export default function Models() {
               <TableHead>{t('Model Display Name')}</TableHead>
               <TableHead>{t('Model Provider')}</TableHead>
               <TableHead>{t('Model Version')}</TableHead>
+              <TableHead>{t('Token Price')}</TableHead>
               <TableHead>{t('Remarks')}</TableHead>
               <TableHead className="w-16"></TableHead>
             </TableRow>
@@ -112,21 +109,15 @@ export default function Models() {
                   {ModelProviderTemplates[item.modelProvider].displayName}
                 </TableCell>
                 <TableCell>{item.modelVersion}</TableCell>
-                <TableCell>{item.remarks}</TableCell>
                 <TableCell>
-                  <DropdownMenu>
-                    <DropdownMenuTrigger>
-                      <Button variant="ghost">
-                        <IconDots size={16} />
-                      </Button>
-                    </DropdownMenuTrigger>
-                    <DropdownMenuContent>
-                      <DropdownMenuItem onClick={() => handleShow(item)}>
-                        {t('Edit')}
-                      </DropdownMenuItem>
-                    </DropdownMenuContent>
-                  </DropdownMenu>
+                  {'￥' +
+                    formatNumberAsMoney(
+                      item.priceConfig.input * ModelPriceUnit,
+                    ) +
+                    '/' +
+                    formatNumberAsMoney(item.priceConfig.out * ModelPriceUnit)}
                 </TableCell>
+                <TableCell>{item.remarks}</TableCell>
               </TableRow>
             ))}
           </TableBody>

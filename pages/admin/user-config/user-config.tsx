@@ -1,5 +1,4 @@
 import React, { useEffect, useState } from 'react';
-import toast from 'react-hot-toast';
 
 import { useTranslation } from 'next-i18next';
 import { serverSideTranslations } from 'next-i18next/serverSideTranslations';
@@ -8,14 +7,9 @@ import { GetModelResult } from '@/types/admin';
 import { DEFAULT_LANGUAGE } from '@/types/settings';
 import { GetUserInitialConfigResult } from '@/types/user';
 
-import { AddUserInitialConfigModal } from '@/components/Admin/Users/AddUserInitialConfigModal';
+import { UserInitialConfigModal } from '@/components/Admin/Users/UserInitialConfigModal';
 import { Button } from '@/components/ui/button';
 import { Card } from '@/components/ui/card';
-import {
-  Popover,
-  PopoverContent,
-  PopoverTrigger,
-} from '@/components/ui/popover';
 import {
   Table,
   TableBody,
@@ -25,11 +19,7 @@ import {
   TableRow,
 } from '@/components/ui/table';
 
-import {
-  deleteUserInitialConfig,
-  getModels,
-  getUserInitialConfig,
-} from '@/apis/adminService';
+import { getModels, getUserInitialConfig } from '@/apis/adminService';
 
 export default function UserInitialConfig() {
   const { t } = useTranslation('admin');
@@ -39,11 +29,10 @@ export default function UserInitialConfig() {
   );
   const [models, setModels] = useState<GetModelResult[]>([]);
   const [selectConfig, setSelectConfig] =
-    useState<GetUserInitialConfigResult>();
-
-  const [deleting, setDeleting] = useState(false);
+    useState<GetUserInitialConfigResult | null>(null);
 
   const handleShowAddModal = () => {
+    setSelectConfig(null);
     setIsOpenModal(true);
   };
 
@@ -51,25 +40,6 @@ export default function UserInitialConfig() {
     getUserInitialConfig().then((data) => {
       setConfigList(data);
     });
-  };
-
-  const onDeleteConfig = (config: GetUserInitialConfigResult) => {
-    setDeleting(true);
-    deleteUserInitialConfig(config.id)
-      .then(() => {
-        toast.success(t('Delete successful!'));
-        getConfigs();
-      })
-      .catch(() => {
-        toast.error(
-          t(
-            'Operation failed! Please try again later, or contact technical personnel.',
-          ),
-        );
-      })
-      .finally(() => {
-        setDeleting(false);
-      });
   };
 
   useEffect(() => {
@@ -124,50 +94,16 @@ export default function UserInitialConfig() {
     setIsOpenModal(true);
   };
 
-  const ActionCell = (config: GetUserInitialConfigResult, rowSpan: number) => {
-    return (
-      <TableCell rowSpan={rowSpan}>
-        <div className="flex justify-center">
-          <Popover>
-            <PopoverTrigger asChild>
-              <Button variant="link" className="text-red-500">
-                {t('Delete')}
-              </Button>
-            </PopoverTrigger>
-            <PopoverContent className="w-[165px]">
-              <div className="flex gap-4">
-                <div>
-                  <h4 className="pb-2">
-                    {t('Are you sure you want to delete it?')}
-                  </h4>
-                  <div className="flex justify-end">
-                    <Button
-                      disabled={deleting}
-                      size="sm"
-                      onClick={() => {
-                        onDeleteConfig(config);
-                      }}
-                    >
-                      {t('Confirm')}
-                    </Button>
-                  </div>
-                </div>
-              </div>
-            </PopoverContent>
-          </Popover>
-          <Button variant="link" onClick={() => handleEditModal(config)}>
-            {t('Edit')}
-          </Button>
-        </div>
-      </TableCell>
-    );
-  };
-
   return (
     <>
       <div className="flex flex-col gap-4 mb-4">
         <div className="flex justify-end gap-3 items-center">
-          <Button onClick={() => handleShowAddModal()} color="primary">
+          <Button
+            onClick={() => {
+              handleShowAddModal();
+            }}
+            color="primary"
+          >
             {t('Add Account Initial Config')}
           </Button>
         </div>
@@ -198,13 +134,6 @@ export default function UserInitialConfig() {
               <TableHead colSpan={4} className="text-center">
                 {t('Models')}
               </TableHead>
-              <TableHead
-                rowSpan={2}
-                style={{ borderLeft: '1px solid hsl(var(--muted))' }}
-                className="w-16 text-center"
-              >
-                {t('Actions')}
-              </TableHead>
             </TableRow>
             <TableRow className="pointer-events-none">
               <TableHead>{t('Model Display Name')}</TableHead>
@@ -222,48 +151,51 @@ export default function UserInitialConfig() {
               style={{ borderTop: '1px solid hsl(var(--muted))' }}
             >
               {config.models.length > 0 ? (
-                config.models.map((model, index) => {
-                  return (
-                    <TableRow
-                      key={model.modelId}
-                      className={`${
-                        index !== config.models.length - 1 && 'border-none'
-                      }`}
-                    >
-                      {index === 0 && NameCell(config, config.models.length)}
-                      {index === 0 &&
-                        InitialPriceCell(config, config.models.length)}
-                      {index === 0 &&
-                        Cell(config.loginType, config.models.length)}
-                      {index === 0 &&
-                        Cell(config.invitationCode, config.models.length)}
-                      {ModelCell(
-                        models.find((x) => x.modelId === model.modelId)?.name,
-                      )}
-                      {ModelCell(model.tokens)}
-                      {ModelCell(model.counts)}
-                      {ModelCell(model.expires)}
-                      {index === 0 && ActionCell(config, config.models.length)}
-                    </TableRow>
-                  );
-                })
+                config.models
+                  .map((model, index) => {
+                    return (
+                      <TableRow
+                        onClick={() => handleEditModal(config)}
+                        key={model.modelId}
+                        className={`${
+                          index !== config.models.length - 1 && 'border-none'
+                        }`}
+                      >
+                        {index === 0 && NameCell(config, config.models.length)}
+                        {index === 0 &&
+                          InitialPriceCell(config, config.models.length)}
+                        {index === 0 &&
+                          Cell(config.loginType, config.models.length)}
+                        {index === 0 &&
+                          Cell(config.invitationCode, config.models.length)}
+                        {ModelCell(
+                          models.find((x) => x.modelId === model.modelId)?.name,
+                        )}
+                        {ModelCell(model.tokens)}
+                        {ModelCell(model.counts)}
+                        {ModelCell(model.expires)}
+                      </TableRow>
+                    );
+                  })
               ) : (
-                <TableRow key={config.id}>
+                <TableRow
+                  key={config.id}
+                  onClick={() => handleEditModal(config)}
+                >
                   {NameCell(config, config.models.length)}
                   {InitialPriceCell(config, config.models.length)}
                   {ModelCell(config.loginType)}
                   {ModelCell(config.invitationCode)}
                   <TableCell colSpan={4}></TableCell>
-                  {ActionCell(config, config.models.length)}
                 </TableRow>
               )}
             </TableBody>
           ))}
         </Table>
       </Card>
-      <AddUserInitialConfigModal
+      <UserInitialConfigModal
         models={models}
-        select={selectConfig}
+        select={selectConfig || undefined}
         onClose={() => {
           setIsOpenModal(false);
         }}

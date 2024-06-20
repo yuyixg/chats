@@ -1,6 +1,7 @@
 import { ModelUsage } from '@/types/model';
 
 import prisma from '@/prisma/prisma';
+import { Prisma } from '@prisma/client';
 
 export interface CreateUserModel {
   userId: string;
@@ -32,20 +33,22 @@ export class UserModelManager {
   }
 
   static async findUsersModel(query: string) {
+    const where: Prisma.UserModelsWhereInput = query
+      ? {
+          OR: [
+            {
+              user: { username: { equals: query } },
+            },
+          ],
+        }
+      : {};
     return await prisma.userModels.findMany({
       include: {
         user: {
           include: { userBalances: { select: { balance: true } } },
         },
       },
-      where: {
-        OR: [
-          {
-            user: { username: { contains: query } },
-          },
-          { user: { role: { contains: query } } },
-        ],
-      },
+      where,
       orderBy: { createdAt: 'desc' },
     });
   }

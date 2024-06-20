@@ -5,23 +5,17 @@ import { serverSideTranslations } from 'next-i18next/serverSideTranslations';
 
 import { useThrottle } from '@/hooks/useThrottle';
 
-import { GetUsersResult } from '@/types/admin';
+import { GetModelResult, GetUsersResult } from '@/types/admin';
+import { PageResult, Paging } from '@/types/page';
 import { DEFAULT_LANGUAGE } from '@/types/settings';
 
+import PaginationContainer from '@/components/Admin/Pagiation/Pagiation';
 import { EditUserBalanceModal } from '@/components/Admin/Users/EditUserBalanceModel';
+import { EditUserModelModal } from '@/components/Admin/Users/EditUserModelModal';
 import { UserModal } from '@/components/Admin/Users/UserModal';
-import { IconDots } from '@/components/Icons/index';
-import { Avatar } from '@/components/ui/avatar';
 import { Badge } from '@/components/ui/badge';
 import { Button } from '@/components/ui/button';
 import { Card } from '@/components/ui/card';
-import {
-  DropdownMenu,
-  DropdownMenuContent,
-  DropdownMenuItem,
-  DropdownMenuSeparator,
-  DropdownMenuTrigger,
-} from '@/components/ui/dropdown-menu';
 import { Input } from '@/components/ui/input';
 import {
   Table,
@@ -32,27 +26,43 @@ import {
   TableRow,
 } from '@/components/ui/table';
 
-import { getUsers } from '@/apis/adminService';
+import { getModels, getUsers } from '@/apis/adminService';
 
 export default function Users() {
   const { t } = useTranslation('admin');
+  const [models, setModels] = useState<GetModelResult[]>([]);
   const [isOpenModal, setIsOpenModal] = useState({
     edit: false,
     create: false,
     recharge: false,
+    changeModel: false,
+  });
+  const [pagination, setPagination] = useState<Paging>({
+    page: 1,
+    pageSize: 50,
   });
   const [selectedUser, setSelectedUser] = useState<GetUsersResult | null>(null);
-  const [users, setUsers] = useState<GetUsersResult[]>([]);
+  const [users, setUsers] = useState<PageResult<GetUsersResult[]>>({
+    count: 0,
+    rows: [],
+  });
+
   const [loading, setLoading] = useState(true);
   const [query, setQuery] = useState<string>('');
   const throttledValue = useThrottle(query, 1000);
 
   useEffect(() => {
+    getModels().then((data) => {
+      setModels(data.filter((x) => x.enabled === true));
+    });
+  }, []);
+
+  useEffect(() => {
     init();
-  }, [throttledValue]);
+  }, [pagination, throttledValue]);
 
   const init = () => {
-    getUsers(query).then((data) => {
+    getUsers({ query, ...pagination }).then((data) => {
       setUsers(data);
       handleClose();
       setLoading(false);
@@ -60,21 +70,51 @@ export default function Users() {
   };
 
   const handleShowAddModal = () => {
-    setIsOpenModal({ edit: false, create: true, recharge: false });
+    setIsOpenModal({
+      edit: false,
+      create: true,
+      recharge: false,
+      changeModel: false,
+    });
   };
 
   const handleShowEditModal = (user: GetUsersResult) => {
     setSelectedUser(user);
-    setIsOpenModal({ edit: true, create: false, recharge: false });
+    setIsOpenModal({
+      edit: true,
+      create: false,
+      recharge: false,
+      changeModel: false,
+    });
   };
 
   const handleShowReChargeModal = (user: GetUsersResult) => {
     setSelectedUser(user);
-    setIsOpenModal({ edit: false, create: false, recharge: true });
+    setIsOpenModal({
+      edit: false,
+      create: false,
+      recharge: true,
+      changeModel: false,
+    });
+  };
+
+  const handleShowChangeModal = (user: GetUsersResult) => {
+    setSelectedUser(user);
+    setIsOpenModal({
+      edit: false,
+      create: false,
+      recharge: false,
+      changeModel: true,
+    });
   };
 
   const handleClose = () => {
-    setIsOpenModal({ edit: false, create: false, recharge: false });
+    setIsOpenModal({
+      edit: false,
+      create: false,
+      recharge: false,
+      changeModel: false,
+    });
     setSelectedUser(null);
   };
 
@@ -91,9 +131,6 @@ export default function Users() {
             }}
           />
           <Button onClick={() => handleShowAddModal()} color="primary">
-            {t('Account Initial Config')}
-          </Button>
-          <Button onClick={() => handleShowAddModal()} color="primary">
             {t('Add User')}
           </Button>
         </div>
@@ -103,12 +140,14 @@ export default function Users() {
           <TableHeader>
             <TableRow>
               <TableHead>{t('User Name')}</TableHead>
+              <TableHead>{t('Account')}</TableHead>
               <TableHead>{t('Role')}</TableHead>
+              <TableHead>{t('Phone')}</TableHead>
+              <TableHead>{t('E-Mail')}</TableHead>
               <TableHead>
                 {t('Balance')}({t('Yuan')})
               </TableHead>
-              <TableHead>{t('Phone')}</TableHead>
-              <TableHead>{t('E-Mail')}</TableHead>
+              <TableHead>{t('Model Count')}</TableHead>
               <TableHead>{t('Created Time')}</TableHead>
               <TableHead className="w-16"></TableHead>
             </TableRow>
@@ -116,10 +155,16 @@ export default function Users() {
           <TableBody
             emptyText={t('No data')!}
             isLoading={loading}
-            isEmpty={users.length === 0}
+            isEmpty={users.rows.length === 0}
           >
-            {users.map((item) => (
-              <TableRow className="cursor-pointer" key={item.id}>
+            {users.rows.map((item) => (
+              <TableRow
+                className="cursor-pointer"
+                key={item.id}
+                onClick={() => {
+                  handleShowEditModal(item);
+                }}
+              >
                 <TableCell>
                   <div className="flex gap-1 items-center">
                     <div
@@ -133,43 +178,49 @@ export default function Users() {
                     )}
                   </div>
                 </TableCell>
+                <TableCell>{item.account}</TableCell>
                 <TableCell>{item.role}</TableCell>
-                <TableCell>{(+item.balance).toFixed(2)}</TableCell>
                 <TableCell>{item.phone}</TableCell>
                 <TableCell>{item.email}</TableCell>
-                <TableCell>
-                  {new Date(item.createdAt).toLocaleString()}
+                <TableCell
+                  className="hover:underline"
+                  onClick={(e) => {
+                    handleShowReChargeModal(item);
+                    e.stopPropagation();
+                  }}
+                >
+                  {(+item.balance).toFixed(2)}
                 </TableCell>
                 <TableCell>
-                  <DropdownMenu>
-                    <DropdownMenuTrigger>
-                      <Button variant="ghost">
-                        <IconDots size={16} />
-                      </Button>
-                    </DropdownMenuTrigger>
-                    <DropdownMenuContent>
-                      <DropdownMenuItem
-                        onClick={() => {
-                          handleShowEditModal(item);
-                        }}
-                      >
-                        {t('Edit')}
-                      </DropdownMenuItem>
-                      <DropdownMenuSeparator />
-                      <DropdownMenuItem
-                        onClick={() => {
-                          handleShowReChargeModal(item);
-                        }}
-                      >
-                        {t('User recharge')}
-                      </DropdownMenuItem>
-                    </DropdownMenuContent>
-                  </DropdownMenu>
+                  <Button
+                    type="button"
+                    variant="link"
+                    onClick={(e) => {
+                      handleShowChangeModal(item);
+                      e.stopPropagation();
+                    }}
+                  >
+                    {item.models.filter((x) => x.enabled).length}
+                  </Button>
+                </TableCell>
+                <TableCell>
+                  {new Date(item.createdAt).toLocaleString()}
                 </TableCell>
               </TableRow>
             ))}
           </TableBody>
         </Table>
+        {users.count !== 0 && (
+          <PaginationContainer
+            page={pagination.page}
+            pageSize={pagination.pageSize}
+            currentCount={users.rows.length}
+            totalCount={users.count}
+            onPagingChange={(page, pageSize) => {
+              setPagination({ page, pageSize });
+            }}
+          />
+        )}
       </Card>
       <UserModal
         user={selectedUser}
@@ -184,6 +235,14 @@ export default function Users() {
         userBalance={selectedUser?.balance}
         isOpen={isOpenModal.recharge}
       />
+      <EditUserModelModal
+        onSuccessful={init}
+        onClose={handleClose}
+        isOpen={isOpenModal.changeModel}
+        models={models}
+        userModelId={selectedUser?.userModelId || ''}
+        select={selectedUser?.models || []}
+      />
     </>
   );
 }
@@ -194,6 +253,7 @@ export const getServerSideProps = async ({ locale }: { locale: string }) => {
       ...(await serverSideTranslations(locale ?? DEFAULT_LANGUAGE, [
         'common',
         'admin',
+        'pagination',
       ])),
     },
   };

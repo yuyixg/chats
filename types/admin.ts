@@ -1,11 +1,17 @@
 import { Message } from './chat';
 import { ChatMessage } from './chatMessage';
 import { PutFileServicesParams } from './file';
-import { ModelConfig, ModelProviders, ModelType, ModelVersions } from './model';
+import {
+  ChatModelPriceConfig,
+  ModelConfig,
+  ModelProviders,
+  ModelType,
+  ModelVersions,
+} from './model';
 import { Paging } from './page';
 import { PayServiceType } from './pay';
 import { StatusCode } from './statusCode';
-import { LoginType } from './user';
+import { LoginType, UserInitialModel } from './user';
 
 import Decimal from 'decimal.js';
 
@@ -55,7 +61,7 @@ export interface GetModelResult {
   fileServiceId: string;
   modelKeysId: string;
   fileConfig: string;
-  priceConfig: string;
+  priceConfig: ChatModelPriceConfig;
 }
 
 export interface PutModelParams {
@@ -81,7 +87,7 @@ export interface PostModelParams {
 }
 
 export interface PostUserParams {
-  account: string;
+  username: string;
   password: string;
   role: string;
 }
@@ -95,8 +101,14 @@ export interface PutUserBalanceParams {
   value: number;
 }
 
+export interface GetUsersParams {
+  query?: string;
+  page: number;
+  pageSize: number;
+}
 export interface GetUsersResult {
   id: string;
+  account: string;
   username: string;
   role: string;
   email: string;
@@ -106,6 +118,8 @@ export interface GetUsersResult {
   createdAt: string;
   updatedAt: string;
   enabled: boolean;
+  userModelId: string;
+  models: UserInitialModel[];
 }
 
 export interface GetUserMessageParams extends Paging {
