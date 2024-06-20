@@ -13,7 +13,8 @@ export const hasContact = (siteInfo?: SiteInfo) => {
   let contact = {} as any;
   if (siteInfo) {
     contact = siteInfo.contact;
+  } else {
+    contact = getSiteInfo().contact;
   }
-  contact = getSiteInfo().contact;
   return !!contact?.qqGroupNumber;
 };
