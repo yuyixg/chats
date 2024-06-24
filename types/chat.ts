@@ -51,6 +51,11 @@ export interface GPT4Message {
   content: string;
 }
 
+export interface HunYuanMessage {
+  Role: Role;
+  Content: string;
+}
+
 export interface ChatBody {
   modelId: string;
   userMessage: Content;

@@ -39,6 +39,7 @@ export enum ModelVersions {
   GLM_4 = 'glm-4',
   GLM_4V = 'glm-4v',
   GLM_3_turbo = 'glm-3-turbo',
+  HunYuan = 'hunyuan',
 }
 
 export enum ModelType {
@@ -50,6 +51,7 @@ export enum ModelType {
   LingYi = 'LingYi',
   Moonshot = 'Moonshot',
   ZhiPuAI = 'ZhiPuAI',
+  HunYuan = 'HunYuan',
 }
 
 export enum ModelProviders {
@@ -61,6 +63,7 @@ export enum ModelProviders {
   LingYi = 'LingYi',
   Moonshot = 'Moonshot',
   ZhiPuAI = 'ZhiPuAI',
+  HunYuan = 'HunYuan',
 }
 
 export interface ChatModelFileConfig {

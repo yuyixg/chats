@@ -34,11 +34,11 @@ export const QianFanStream = async (
 ) => {
   const {
     apiConfig: { host, apiKey, secret },
-    modelConfig: { version },
+    modelConfig: { model },
   } = chatModel;
   const systemMessage = messages.shift();
   const accessToken = await getAccessTokenAsync(host!, apiKey!, secret!);
-  const url = `${host}/rpc/2.0/ai_custom/v1/wenxinworkshop/chat/${version}?access_token=${accessToken}`;
+  const url = `${host}/rpc/2.0/ai_custom/v1/wenxinworkshop/chat/${model}?access_token=${accessToken}`;
   const body = {
     headers: {
       'Content-Type': 'application/json',

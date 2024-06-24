@@ -1,3 +1,4 @@
+import { HunYuanStream } from '@/services/hunyuan';
 import { KimiStream } from '@/services/kimi';
 import { LingYiStream } from '@/services/lingyi';
 import { OpenAIStream } from '@/services/openai';
@@ -20,6 +21,7 @@ import {
   Content,
   GPT4Message,
   GPT4VisionMessage,
+  HunYuanMessage,
   QianFanMessage,
   QianWenContent,
   QianWenMaxMessage,
@@ -172,6 +174,12 @@ const handler = async (req: ChatsApiRequest, res: ChatsApiResponse) => {
     });
     return message;
   }
+  function convertHunYuanMessageToSend(
+    messageContent: Content,
+    Role: Role = 'user',
+  ) {
+    return { Role, Content: messageContent.text } as HunYuanMessage;
+  }
 
   function convertToQianWenMessage(
     messageContent: Content,
@@ -264,11 +272,11 @@ const handler = async (req: ChatsApiRequest, res: ChatsApiResponse) => {
       );
     } else if (chatModel.modelProvider === ModelProviders.QianFan) {
       allMessages.forEach((m) => {
-          const chatMessages = JSON.parse(m.messages) as Content;
-          let content = {} as QianFanMessage;
-          content = convertMessageToSend(chatMessages, m.role as Role);
-          messagesToSend.push(content);
-        });
+        const chatMessages = JSON.parse(m.messages) as Content;
+        let content = {} as QianFanMessage;
+        content = convertMessageToSend(chatMessages, m.role as Role);
+        messagesToSend.push(content);
+      });
       const userMessageToSend = convertMessageToSend(userMessage);
 
       messagesToSend.push(userMessageToSend);
@@ -328,6 +336,21 @@ const handler = async (req: ChatsApiRequest, res: ChatsApiResponse) => {
         messagesToSend.pop();
       }
       stream = await ZhiPuAIStream(chatModel, temperature, messagesToSend);
+    } else if (chatModel.modelProvider === ModelProviders.HunYuan) {
+      allMessages.forEach((m) => {
+        const chatMessages = JSON.parse(m.messages) as Content;
+        let content = {} as HunYuanMessage;
+        content = convertHunYuanMessageToSend(chatMessages, m.role as Role);
+        messagesToSend.push(content);
+      });
+
+      const userMessageToSend = convertHunYuanMessageToSend(userMessage);
+
+      messagesToSend.push(userMessageToSend);
+      if (lastMessage?.role === 'user') {
+        messagesToSend.pop();
+      }
+      stream = await HunYuanStream(chatModel, temperature, messagesToSend);
     } else {
       throw new InternalServerError(
         JSON.stringify({ message: 'Model Not Found' }),

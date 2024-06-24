@@ -31,6 +31,12 @@ type SparkApiConfig = {
   apiKey: string;
 };
 
+type HunYuanApiConfig = {
+  host: string;
+  apiKey: string;
+  secret: string;
+};
+
 const gptApiConfig: ChatGPTApiConfig = {
   host: '',
   apiKey: '',
@@ -64,6 +70,12 @@ const sparkApiConfig: SparkApiConfig = {
 
 const zhiPuAIApiConfig: LingYiApiConfig = {
   host: 'https://open.bigmodel.cn',
+  apiKey: '',
+};
+
+const hunYuanApiConfig: HunYuanApiConfig = {
+  host: 'hunyuan.tencentcloudapi.com',
+  secret: '',
   apiKey: '',
 };
 
@@ -135,6 +147,12 @@ export const ModelProviderTemplates = {
     apiConfig: zhiPuAIApiConfig,
     displayName: '智谱AI',
     icon: 'zhipuai.svg',
+  },
+  [ModelProviders.HunYuan]: {
+    models: [ModelVersions.HunYuan],
+    apiConfig: hunYuanApiConfig,
+    displayName: '腾讯混元',
+    icon: 'model.svg',
   },
 };
 
@@ -346,7 +364,7 @@ export function getModelDefaultTemplate(
     }
   } else if (provider === ModelProviders.QianFan) {
     switch (version) {
-      case ModelVersions.ERNIE_4:{
+      case ModelVersions.ERNIE_4: {
         return {
           type: ModelType.QianFan,
           config: {
@@ -359,7 +377,7 @@ export function getModelDefaultTemplate(
             prompt:
               "You are an AI assistant, Follow the user's instructions carefully. Respond using markdown.",
             temperature: 0.95,
-            version: 'completions_pro',
+            model: 'completions_pro',
           },
           apiConfig: qianFanApiConfig,
           priceConfig: {
@@ -381,7 +399,7 @@ export function getModelDefaultTemplate(
             prompt:
               "You are an AI assistant, Follow the user's instructions carefully. Respond using markdown.",
             temperature: 0.95,
-            version: 'eb-instant',
+            model: 'eb-instant',
           },
           apiConfig: qianFanApiConfig,
           priceConfig: {
@@ -462,6 +480,31 @@ export function getModelDefaultTemplate(
           priceConfig: {
             input: 0.0000025,
             out: 0.0000025,
+          },
+        };
+      }
+    }
+  } else if (provider === ModelProviders.HunYuan) {
+    switch (version) {
+      case ModelVersions.HunYuan: {
+        return {
+          type: ModelType.HunYuan,
+          config: {
+            temperature: {
+              min: 0,
+              max: 2,
+            },
+          },
+          modelConfig: {
+            prompt:
+              "You are an AI assistant, Follow the user's instructions carefully. Respond using markdown.",
+            temperature: 0.8,
+            model: 'hunyuan-lite',
+          },
+          apiConfig: hunYuanApiConfig,
+          priceConfig: {
+            input: 0,
+            out: 0,
           },
         };
       }
