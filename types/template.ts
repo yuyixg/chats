@@ -346,26 +346,47 @@ export function getModelDefaultTemplate(
     }
   } else if (provider === ModelProviders.QianFan) {
     switch (version) {
-      case ModelVersions.ERNIE_4:
-      case ModelVersions.ERNIE_Lite: {
+      case ModelVersions.ERNIE_4:{
         return {
           type: ModelType.QianFan,
           config: {
             temperature: {
-              min: 0,
-              max: 2,
+              min: 0.1,
+              max: 1,
             },
           },
           modelConfig: {
             prompt:
               "You are an AI assistant, Follow the user's instructions carefully. Respond using markdown.",
-            temperature: 0.8,
-            version: 'ernie-4.0-8k',
+            temperature: 0.95,
+            version: 'completions_pro',
           },
           apiConfig: qianFanApiConfig,
           priceConfig: {
             input: 0.000024,
             out: 0.000048,
+          },
+        };
+      }
+      case ModelVersions.ERNIE_Lite: {
+        return {
+          type: ModelType.QianFan,
+          config: {
+            temperature: {
+              min: 0.1,
+              max: 1,
+            },
+          },
+          modelConfig: {
+            prompt:
+              "You are an AI assistant, Follow the user's instructions carefully. Respond using markdown.",
+            temperature: 0.95,
+            version: 'eb-instant',
+          },
+          apiConfig: qianFanApiConfig,
+          priceConfig: {
+            input: 0,
+            out: 0,
           },
         };
       }

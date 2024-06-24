@@ -264,11 +264,11 @@ const handler = async (req: ChatsApiRequest, res: ChatsApiResponse) => {
       );
     } else if (chatModel.modelProvider === ModelProviders.QianFan) {
       allMessages.forEach((m) => {
-        const chatMessages = JSON.parse(m.messages) as Content;
-        let content = {} as QianFanMessage;
-        content = convertMessageToSend(chatMessages, m.role as Role);
-        messagesToSend.push(content);
-      });
+          const chatMessages = JSON.parse(m.messages) as Content;
+          let content = {} as QianFanMessage;
+          content = convertMessageToSend(chatMessages, m.role as Role);
+          messagesToSend.push(content);
+        });
       const userMessageToSend = convertMessageToSend(userMessage);
 
       messagesToSend.push(userMessageToSend);

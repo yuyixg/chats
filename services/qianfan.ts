@@ -1,13 +1,11 @@
 import { QianFanMessage } from '@/types/chat';
 import { ChatModels } from '@/types/chatModel';
-import { ModelVersions } from '@/types/model';
 
 import {
   ParsedEvent,
   ReconnectInterval,
   createParser,
 } from 'eventsource-parser';
-
 
 async function getAccessTokenAsync(
   apiHost: string,
@@ -35,10 +33,10 @@ export const QianFanStream = async (
   parameters: any,
 ) => {
   const {
-    modelVersion,
     apiConfig: { host, apiKey, secret },
     modelConfig: { version },
   } = chatModel;
+  const systemMessage = messages.shift();
   const accessToken = await getAccessTokenAsync(host!, apiKey!, secret!);
   const url = `${host}/rpc/2.0/ai_custom/v1/wenxinworkshop/chat/${version}?access_token=${accessToken}`;
   const body = {
@@ -48,7 +46,7 @@ export const QianFanStream = async (
     },
     method: 'POST',
     body: JSON.stringify({
-      model: modelVersion,
+      system: systemMessage!.content,
       messages: [...messages],
       stream: true,
       ...parameters,
