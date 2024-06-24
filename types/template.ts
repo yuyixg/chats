@@ -107,7 +107,7 @@ export const ModelProviderTemplates = {
     icon: 'qianwen.svg',
   },
   [ModelProviders.QianFan]: {
-    models: [ModelVersions.ERNIE_4, ModelVersions.ERNIE_Lite],
+    models: [ModelVersions.ERNIE],
     apiConfig: qianFanApiConfig,
     displayName: '文心一言',
     icon: 'qianfan.svg',
@@ -120,7 +120,7 @@ export const ModelProviderTemplates = {
     ],
     apiConfig: lingYiApiConfig,
     displayName: '零一万物',
-    icon: 'model.svg',
+    icon: 'lingyi.svg',
   },
   [ModelProviders.Moonshot]: {
     models: [
@@ -152,7 +152,7 @@ export const ModelProviderTemplates = {
     models: [ModelVersions.HunYuan],
     apiConfig: hunYuanApiConfig,
     displayName: '腾讯混元',
-    icon: 'model.svg',
+    icon: 'hunyuan.svg',
   },
 };
 
@@ -364,7 +364,7 @@ export function getModelDefaultTemplate(
     }
   } else if (provider === ModelProviders.QianFan) {
     switch (version) {
-      case ModelVersions.ERNIE_4: {
+      case ModelVersions.ERNIE: {
         return {
           type: ModelType.QianFan,
           config: {
@@ -383,28 +383,6 @@ export function getModelDefaultTemplate(
           priceConfig: {
             input: 0.000024,
             out: 0.000048,
-          },
-        };
-      }
-      case ModelVersions.ERNIE_Lite: {
-        return {
-          type: ModelType.QianFan,
-          config: {
-            temperature: {
-              min: 0.1,
-              max: 1,
-            },
-          },
-          modelConfig: {
-            prompt:
-              "You are an AI assistant, Follow the user's instructions carefully. Respond using markdown.",
-            temperature: 0.95,
-            model: 'eb-instant',
-          },
-          apiConfig: qianFanApiConfig,
-          priceConfig: {
-            input: 0,
-            out: 0,
           },
         };
       }
