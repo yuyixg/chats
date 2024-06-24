@@ -8,10 +8,6 @@ import {
   createParser,
 } from 'eventsource-parser';
 
-export const ModelEndpoint: { [key in ModelVersions]?: string } = {
-  [ModelVersions.ERNIE_Bot_4]: 'completions_pro',
-  [ModelVersions.ERNIE_Bot_8K]: 'ernie_bot_8k',
-};
 
 async function getAccessTokenAsync(
   apiHost: string,
@@ -41,9 +37,9 @@ export const QianFanStream = async (
   const {
     modelVersion,
     apiConfig: { host, apiKey, secret },
+    modelConfig: { version },
   } = chatModel;
   const accessToken = await getAccessTokenAsync(host!, apiKey!, secret!);
-  const version = (ModelEndpoint as any)[modelVersion];
   const url = `${host}/rpc/2.0/ai_custom/v1/wenxinworkshop/chat/${version}?access_token=${accessToken}`;
   const body = {
     headers: {

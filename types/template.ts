@@ -95,7 +95,7 @@ export const ModelProviderTemplates = {
     icon: 'qianwen.svg',
   },
   [ModelProviders.QianFan]: {
-    models: [ModelVersions.ERNIE_Bot_4, ModelVersions.ERNIE_Bot_8K],
+    models: [ModelVersions.ERNIE_4, ModelVersions.ERNIE_Lite],
     apiConfig: qianFanApiConfig,
     displayName: '文心一言',
     icon: 'qianfan.svg',
@@ -346,8 +346,8 @@ export function getModelDefaultTemplate(
     }
   } else if (provider === ModelProviders.QianFan) {
     switch (version) {
-      case ModelVersions.ERNIE_Bot_4:
-      case ModelVersions.ERNIE_Bot_8K: {
+      case ModelVersions.ERNIE_4:
+      case ModelVersions.ERNIE_Lite: {
         return {
           type: ModelType.QianFan,
           config: {
@@ -360,6 +360,7 @@ export function getModelDefaultTemplate(
             prompt:
               "You are an AI assistant, Follow the user's instructions carefully. Respond using markdown.",
             temperature: 0.8,
+            version: 'ernie-4.0-8k',
           },
           apiConfig: qianFanApiConfig,
           priceConfig: {

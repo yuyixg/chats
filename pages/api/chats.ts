@@ -279,7 +279,6 @@ const handler = async (req: ChatsApiRequest, res: ChatsApiResponse) => {
         temperature,
         top_p: 0.7,
         penalty_socre: 1,
-        user_id: undefined,
         request_timeout: 60000,
       });
     } else if (chatModel.modelProvider === ModelProviders.LingYi) {

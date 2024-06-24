@@ -41,7 +41,7 @@ export default async function auth(req: NextApiRequest, res: NextApiResponse) {
               sub: profile?.sub,
               account: profile?.name,
               username: profile?.name,
-              password: '-',
+              password: undefined,
               role: '-',
               email: profile?.email,
             });
