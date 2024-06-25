@@ -2,16 +2,12 @@ import {
   FC,
   KeyboardEvent,
   useCallback,
-  useContext,
   useEffect,
   useRef,
   useState,
 } from 'react';
-import toast from 'react-hot-toast';
 
 import { useTranslation } from 'next-i18next';
-
-import { formatPrompt } from '@/utils/promptVariable';
 
 import { Prompt } from '@/types/prompt';
 
@@ -32,9 +28,6 @@ export const SystemPrompt: FC<Props> = ({
   onChangePrompt,
 }) => {
   const { t } = useTranslation('chat');
-  const {
-    state: { selectModelId },
-  } = useContext(HomeContext);
 
   const [value, setValue] = useState<string>('');
   const [activePromptIndex, setActivePromptIndex] = useState(0);
@@ -51,7 +44,7 @@ export const SystemPrompt: FC<Props> = ({
   );
 
   const handleChange = (e: React.ChangeEvent<HTMLTextAreaElement>) => {
-    const value = formatPrompt(e.target.value);
+    const value = e.target.value;
     /// const maxLength = conversation.model.maxLength!;
 
     // if (value.length > maxLength) {
@@ -112,9 +105,7 @@ export const SystemPrompt: FC<Props> = ({
     if (parsedVariables.length > 0) {
       setIsModalVisible(true);
     } else {
-      const updatedContent = formatPrompt(
-        value?.replace(/\/\w*$/, prompt.content),
-      );
+      const updatedContent = value?.replace(/\/\w*$/, prompt.content);
 
       setValue(updatedContent);
       onChangePrompt(updatedContent);

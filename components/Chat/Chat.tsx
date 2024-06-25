@@ -11,6 +11,7 @@ import toast from 'react-hot-toast';
 
 import { useTranslation } from 'next-i18next';
 
+import { formatPrompt } from '@/utils/promptVariable';
 import { throttle } from '@/utils/throttle';
 
 import { ChatBody, Message, Role } from '@/types/chat';
@@ -173,7 +174,11 @@ export const Chat = memo(({ stopConversationRef }: Props) => {
         chatId: _selectChatId!,
         messageId,
         userMessage: messageContent,
-        userModelConfig,
+        userModelConfig: {
+          prompt: currentModel?.prompt,
+          enableSearch: currentModel?.enableSearch,
+          temperature: currentModel?.temperature,
+        },
       };
       let body = JSON.stringify(chatBody);
 
@@ -335,10 +340,6 @@ export const Chat = memo(({ stopConversationRef }: Props) => {
     });
   };
 
-  const handleSharedMessage = (isShared: boolean) => {
-    handleUpdateChat(chats, selectChatId!, { isShared });
-  };
-
   const scrollDown = () => {
     if (autoScrollEnabled) {
       messagesEndRef.current?.scrollIntoView(true);
@@ -377,13 +378,16 @@ export const Chat = memo(({ stopConversationRef }: Props) => {
   useEffect(() => {
     const { name, modelConfig, modelVersion, modelProvider } =
       getModel(models, selectModelId!) || {};
+    const prompt = formatPrompt(
+      currentSelectChat?.userModelConfig?.prompt || modelConfig?.prompt,
+    );
     setCurrentModel({
       name,
       ...modelConfig,
       temperature:
         currentSelectChat?.userModelConfig?.temperature ||
         modelConfig?.temperature,
-      prompt: currentSelectChat?.userModelConfig?.prompt || modelConfig?.prompt,
+      prompt,
       enableSearch:
         currentSelectChat?.userModelConfig?.enableSearch ||
         modelConfig?.enableSearch,
