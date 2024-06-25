@@ -2,8 +2,12 @@ import { FC, KeyboardEvent, useEffect, useRef, useState } from 'react';
 
 import { useTranslation } from 'next-i18next';
 
+import { PromptVariables } from '@/utils/promptVariable';
+
 import { Prompt } from '@/types/prompt';
 
+import { IconInfo } from '@/components/Icons';
+import Tips from '@/components/Tips/Tips';
 import { Button } from '@/components/ui/button';
 import { Dialog, DialogContent } from '@/components/ui/dialog';
 import { Input } from '@/components/ui/input';
@@ -67,8 +71,28 @@ export const PromptModal: FC<Props> = ({ prompt, onClose, onUpdatePrompt }) => {
           onChange={(e) => setName(e.target.value)}
         ></Input>
 
-        <div className="mt-6 text-sm font-bold text-black dark:text-neutral-200">
+        <div className="mt-4 gap-1 text-sm flex align-middle items-center font-bold text-black dark:text-neutral-200">
           {t('Prompt')}
+          <Tips
+            trigger={
+              <Button className="w-auto h-auto" size="icon" variant="link">
+                <IconInfo size={18} />
+              </Button>
+            }
+            content={
+              <div className="text-xs font-normal">
+                <span className="font-semibold">{t('System Variables')}</span>
+                <div className="mt-2 flex-col">
+                  {Object.keys(PromptVariables).map((key) => (
+                    <p key={key}>
+                      {key}：
+                      {PromptVariables[key as keyof typeof PromptVariables]()}
+                    </p>
+                  ))}
+                </div>
+              </div>
+            }
+          />
         </div>
         <Textarea
           placeholder={

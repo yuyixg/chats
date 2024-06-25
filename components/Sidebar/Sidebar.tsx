@@ -11,7 +11,7 @@ import {
   IconSquarePlus,
 } from '@/components/Icons/index';
 
-import ButtonToolTip from '../ButtonToolTip/ButtonToolTip';
+import Tips from '../Tips/Tips';
 import Search from '../Search';
 import { Button } from '../ui/button';
 
@@ -63,7 +63,7 @@ const Sidebar = <T,>({
             side === 'right' && 'flex-row-reverse',
           )}
         >
-          <ButtonToolTip
+          <Tips
             trigger={
               <Button
                 variant="ghost"
@@ -84,7 +84,7 @@ const Sidebar = <T,>({
             }
           />
           {hasModel() && (
-            <ButtonToolTip
+            <Tips
               trigger={
                 <Button
                   onClick={() => {
@@ -148,7 +148,7 @@ const Sidebar = <T,>({
             </span>
           </button>
           {hasModel() && (
-            <ButtonToolTip
+            <Tips
               trigger={
                 <Button
                   onClick={() => {

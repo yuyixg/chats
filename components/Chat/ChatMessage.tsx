@@ -17,7 +17,7 @@ import {
   IconUser,
 } from '@/components/Icons/index';
 
-import ButtonToolTip from '../ButtonToolTip/ButtonToolTip';
+import Tips from '../Tips/Tips';
 import { CodeBlock } from '../Markdown/CodeBlock';
 import { MemoizedReactMarkdown } from '../Markdown/MemoizedReactMarkdown';
 import { Button } from '../ui/button';
@@ -266,7 +266,7 @@ export const ChatMessage: FC<Props> = memo(
                         </div>
                       )}
                     </>
-                    <ButtonToolTip
+                    <Tips
                       className="h-[28px]"
                       trigger={
                         <Button
@@ -408,7 +408,7 @@ export const ChatMessage: FC<Props> = memo(
                           />
                         </Button>
                       ) : (
-                        <ButtonToolTip
+                        <Tips
                           className="h-[28px]"
                           trigger={
                             <Button
@@ -423,7 +423,7 @@ export const ChatMessage: FC<Props> = memo(
                         />
                       )}
                       {!readonly && (
-                        <ButtonToolTip
+                        <Tips
                           className="h-[28px]"
                           trigger={
                             <Button
@@ -439,7 +439,7 @@ export const ChatMessage: FC<Props> = memo(
                           content={t('Regenerate')!}
                         />
                       )}
-                      <ButtonToolTip
+                      <Tips
                         trigger={
                           <ChangeModel
                             readonly={readonly}

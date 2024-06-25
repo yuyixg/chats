@@ -7,7 +7,7 @@ import {
   TooltipTrigger,
 } from '../ui/tooltip';
 
-const ButtonToolTip = ({
+const Tips = ({
   trigger,
   content,
   className,
@@ -19,11 +19,13 @@ const ButtonToolTip = ({
   return (
     <TooltipProvider>
       <Tooltip>
-        <TooltipTrigger asChild={true} className={className}>{trigger}</TooltipTrigger>
+        <TooltipTrigger asChild={true} className={className}>
+          {trigger}
+        </TooltipTrigger>
         {content && <TooltipContent>{content}</TooltipContent>}
       </Tooltip>
     </TooltipProvider>
   );
 };
 
-export default ButtonToolTip;
+export default Tips;

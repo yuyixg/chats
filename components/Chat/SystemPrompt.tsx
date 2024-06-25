@@ -11,6 +11,8 @@ import toast from 'react-hot-toast';
 
 import { useTranslation } from 'next-i18next';
 
+import { formatPrompt } from '@/utils/promptVariable';
+
 import { Prompt } from '@/types/prompt';
 
 import { HomeContext } from '@/pages/home/home';
@@ -49,7 +51,7 @@ export const SystemPrompt: FC<Props> = ({
   );
 
   const handleChange = (e: React.ChangeEvent<HTMLTextAreaElement>) => {
-    const value = e.target.value;
+    const value = formatPrompt(e.target.value);
     /// const maxLength = conversation.model.maxLength!;
 
     // if (value.length > maxLength) {
@@ -110,7 +112,9 @@ export const SystemPrompt: FC<Props> = ({
     if (parsedVariables.length > 0) {
       setIsModalVisible(true);
     } else {
-      const updatedContent = value?.replace(/\/\w*$/, prompt.content);
+      const updatedContent = formatPrompt(
+        value?.replace(/\/\w*$/, prompt.content),
+      );
 
       setValue(updatedContent);
       onChangePrompt(updatedContent);
@@ -120,7 +124,7 @@ export const SystemPrompt: FC<Props> = ({
   };
 
   const handleSubmit = (updatedVariables: string[]) => {
-    const newContent = value?.replace(/{{(.*?)}}/g, (match, variable) => {
+    const newContent = value?.replace(/{{(.*?)}}/g, (_, variable) => {
       const index = variables.indexOf(variable);
       return updatedVariables[index];
     });
