@@ -54,13 +54,17 @@ const handler = async (req: ChatsApiRequest) => {
     );
     const chatModels = await ChatModelManager.findModels(true);
     const messages = chatMessages.map((x) => {
+      const chatModel = chatModels.find((m) => m.id === x.chatModelId);
       return {
         id: x.id,
         parentId: x.parentId?.toLocaleLowerCase(),
         role: x.role,
         content: JSON.parse(x.messages),
+        inputTokens: x.inputTokens,
+        outputTokens: x.outputTokens,
         createdAt: x.createdAt,
-        modelName: chatModels.find((m) => m.id === x.chatModelId)?.name,
+        duration: x.duration,
+        modelName: chatModel?.name,
       } as MessageNode;
     });
     return calculateMessages(messages);

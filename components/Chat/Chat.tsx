@@ -125,6 +125,8 @@ export const Chat = memo(({ stopConversationRef }: Props) => {
           childrenIds: [],
           assistantChildrenIds: [],
           content: message.content,
+          inputTokens: 0,
+          outputTokens: 0,
         };
         let removeCount = -1;
         if (parentMessageIndex !== -1) removeCount = _selectMessages.length - 1;
@@ -154,6 +156,8 @@ export const Chat = memo(({ stopConversationRef }: Props) => {
           image: [],
           text: '',
         },
+        inputTokens: 0,
+        outputTokens: 0,
       };
 
       homeDispatch({
@@ -475,8 +479,7 @@ export const Chat = memo(({ stopConversationRef }: Props) => {
               )}
 
               {selectMessages.map((current, index) => {
-                let lastMessageId =
-                  selectMessages[selectMessages.length - 1].id;
+                let lastMessage = selectMessages[selectMessages.length - 1];
                 let parentChildrenIds: string[] = [];
                 if (!current.parentId) {
                   parentChildrenIds = currentMessages
@@ -488,16 +491,16 @@ export const Chat = memo(({ stopConversationRef }: Props) => {
                       ?.childrenIds || [];
                   parentChildrenIds = [...parentChildrenIds].reverse();
                 }
-                if (lastMessageId === current.id && chatError) {
+                if (lastMessage.id === current.id && chatError) {
                   return <></>;
                 }
                 return (
                   <MemoizedChatMessage
+                    key={current.id + index}
+                    modelName={current.modelName}
                     currentSelectIndex={parentChildrenIds.findIndex(
                       (x) => x === current.id,
                     )}
-                    id={current.id!}
-                    key={current.id + index}
                     parentId={current.parentId}
                     childrenIds={current.childrenIds}
                     parentChildrenIds={parentChildrenIds}
@@ -505,8 +508,15 @@ export const Chat = memo(({ stopConversationRef }: Props) => {
                     assistantCurrentSelectIndex={current.assistantChildrenIds.findIndex(
                       (x) => x === current.id,
                     )}
-                    modelName={current.modelName}
-                    message={{ role: current.role, content: current.content }}
+                    lastMessageId={lastMessage.id}
+                    message={{
+                      id: current.id!,
+                      role: current.role,
+                      content: current.content,
+                      duration: current.duration,
+                      inputTokens: current.inputTokens,
+                      outputTokens: current.outputTokens,
+                    }}
                     onChangeMessage={(messageId) => {
                       handleUpdateSelectMessage(messageId);
                     }}

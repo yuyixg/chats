@@ -12,6 +12,9 @@ export interface ChatMessage {
   modelName?: string;
   tokenUsed?: number;
   calculatedPrice?: Decimal;
+  inputTokens: number;
+  outputTokens: number;
+  duration?: number;
 }
 
 export interface MessageNode {

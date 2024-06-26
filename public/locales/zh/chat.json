@@ -68,5 +68,8 @@
   "Remaining Tokens": "剩余Tokens",
   "Remaining Chat Counts": "剩余聊天次数",
   "become due": "到期",
-  "unit-price": "单价"
+  "unit-price": "单价",
+  "Generate information": "生成信息",
+  "prompt_tokens": "prompt_tokens",
+  "response_tokens": "response_tokens"
 }

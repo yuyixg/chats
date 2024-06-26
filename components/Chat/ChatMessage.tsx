@@ -2,7 +2,7 @@ import { FC, memo, useContext, useEffect, useRef, useState } from 'react';
 
 import { useTranslation } from 'next-i18next';
 
-import { Message } from '@/types/chat';
+import { Content, Message, Role } from '@/types/chat';
 
 import { HomeContext } from '@/pages/home/home';
 
@@ -12,25 +12,35 @@ import {
   IconChevronRight,
   IconCopy,
   IconEdit,
+  IconInfo,
   IconRefresh,
   IconRobot,
   IconUser,
 } from '@/components/Icons/index';
 
-import Tips from '../Tips/Tips';
 import { CodeBlock } from '../Markdown/CodeBlock';
 import { MemoizedReactMarkdown } from '../Markdown/MemoizedReactMarkdown';
+import Tips from '../Tips/Tips';
 import { Button } from '../ui/button';
+import { Label } from '../ui/label';
 import ChangeModel from './ChangeModel';
-import ChatError from './ChatError';
 
+import { cn } from '@/lib/utils';
 import rehypeMathjax from 'rehype-mathjax';
 import remarkGfm from 'remark-gfm';
 import remarkMath from 'remark-math';
 
+interface PropsMessage {
+  id: string;
+  role: Role;
+  content: Content;
+  inputTokens: number;
+  outputTokens: number;
+  duration?: number;
+}
+
 export interface Props {
   readonly?: boolean;
-  id: string;
   parentId: string | null;
   childrenIds: string[];
   assistantChildrenIds: string[];
@@ -38,7 +48,8 @@ export interface Props {
   assistantCurrentSelectIndex: number;
   parentChildrenIds: string[];
   modelName?: string;
-  message: Message;
+  lastMessageId: string;
+  message: PropsMessage;
   onChangeMessage?: (messageId: string) => void;
   onEdit?: (editedMessage: Message, parentId: string | null) => void;
   onRegenerate?: (modelId?: string) => void;
@@ -47,13 +58,13 @@ export interface Props {
 export const ChatMessage: FC<Props> = memo(
   ({
     readonly = false,
-    id,
     parentChildrenIds,
     assistantChildrenIds,
     currentSelectIndex,
     assistantCurrentSelectIndex,
     parentId,
     modelName,
+    lastMessageId,
     message,
     onEdit,
     onChangeMessage,
@@ -346,7 +357,7 @@ export const ChatMessage: FC<Props> = memo(
                     }}
                   >
                     {`${message.content.text}${
-                      messageIsStreaming && id == currentChatMessageId
+                      messageIsStreaming && message.id == currentChatMessageId
                         ? '`▍`'
                         : ''
                     }`}
@@ -398,7 +409,10 @@ export const ChatMessage: FC<Props> = memo(
                       </div>
                     )}
                     <div
-                      className={`flex gap-0 items-center visible group-hover:visible focus:visible`}
+                      className={cn(
+                        lastMessageId === message.id ? 'visible' : 'invisible',
+                        'flex gap-0 items-center  group-hover:visible focus:visible',
+                      )}
                     >
                       {messagedCopied ? (
                         <Button variant="ghost" className="p-1 m-0 h-auto">
@@ -420,6 +434,52 @@ export const ChatMessage: FC<Props> = memo(
                             </Button>
                           }
                           content={t('Copy')!}
+                        />
+                      )}
+                      {!readonly && (
+                        <Tips
+                          className="h-[28px]"
+                          trigger={
+                            <Button variant="ghost" className="p-1 m-0 h-auto">
+                              <IconInfo stroke="#7d7d7d" />
+                            </Button>
+                          }
+                          content={
+                            <div className="w-50">
+                              <div className="grid gap-4">
+                                <div className="pt-1 pb-2">
+                                  <Label className="font-medium">
+                                    {t('Generate information')}
+                                  </Label>
+                                </div>
+                              </div>
+                              <div className="grid">
+                                <div className="grid grid-cols-1 items-center">
+                                  <Label className="text-xs" htmlFor="duration">
+                                    {t('duration')}:{message?.duration}ms
+                                  </Label>
+                                </div>
+                                <div className="grid grid-cols-1 items-center">
+                                  <Label
+                                    className="text-xs"
+                                    htmlFor="InputTokens"
+                                  >
+                                    {t('prompt_tokens')}:{message.inputTokens}{' '}
+                                    tokens
+                                  </Label>
+                                </div>
+                                <div className="grid grid-cols-1 items-center">
+                                  <Label
+                                    className="text-xs"
+                                    htmlFor="OutputTokens"
+                                  >
+                                    {t('response_tokens')}:
+                                    {message.outputTokens} tokens
+                                  </Label>
+                                </div>
+                              </div>
+                            </div>
+                          }
                         />
                       )}
                       {!readonly && (

@@ -8,6 +8,7 @@ import ChatStreamResult from '@/services/type';
 import { ZhiPuAIStream } from '@/services/zhipuai';
 
 import { addChat, checkChatIsStopped, stopChat } from '@/utils/chats';
+import { calcHrtime } from '@/utils/common';
 import {
   BadRequest,
   InternalServerError,
@@ -358,6 +359,7 @@ const handler = async (req: ChatsApiRequest, res: ChatsApiResponse) => {
     }
     let assistantResponse = '';
     if (stream.getReader) {
+      const start = process.hrtime();
       const reader = stream.getReader();
       let result = {} as ChatStreamResult;
       const streamResponse = async () => {
@@ -369,6 +371,8 @@ const handler = async (req: ChatsApiRequest, res: ChatsApiResponse) => {
           }
           if (done || checkChatIsStopped(chatId)) {
             stopChat(chatId);
+            const end = process.hrtime(start);
+            const duration = calcHrtime(end);
             const { totalTokens, inputTokens, outputTokens } = result.usage;
 
             const tokenUsed = totalTokens;
@@ -379,10 +383,10 @@ const handler = async (req: ChatsApiRequest, res: ChatsApiResponse) => {
             );
             await ChatModelRecordManager.recordTransfer({
               usages,
+              tokenUsed,
               isFirstChat,
               userId,
               chatId,
-              tokenUsed,
               userMessageText,
               calculatedPrice,
               chatModelId: chatModel.id,
@@ -394,7 +398,10 @@ const handler = async (req: ChatsApiRequest, res: ChatsApiResponse) => {
                 parentId: resParentId,
                 messages: JSON.stringify({ text: assistantResponse }),
                 tokenUsed,
+                inputTokens,
+                outputTokens,
                 calculatedPrice,
+                duration,
               },
               updateChatParams: {
                 id: chatId,

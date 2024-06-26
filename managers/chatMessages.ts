@@ -17,7 +17,10 @@ export interface CreateChatMessage {
   parentId?: string | null;
   calculatedPrice?: Decimal;
   tokenUsed?: number;
+  inputTokens?: number;
+  outputTokens?: number;
   chatModelId?: string;
+  duration?: number;
 }
 
 export class ChatMessagesManager {

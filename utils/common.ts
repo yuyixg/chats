@@ -55,5 +55,10 @@ export function generateUniqueCode() {
   return code;
 }
 
+export function calcHrtime(hrtime: [number, number]) {
+  // 将秒和纳秒转换为毫秒
+  return hrtime[0] * 1000 + hrtime[1] / 1000000;
+}
+
 export const PhoneRegExp = /^[1][3,4,5,6,7,8,9][0-9]{9}$/;
 export const SmsExpirationSeconds = 300;
