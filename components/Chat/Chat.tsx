@@ -31,8 +31,8 @@ import { TemperatureSlider } from './Temperature';
 
 import { getChat, postChats } from '@/apis/userService';
 import { cn } from '@/lib/utils';
-import { v4 as uuidv4 } from 'uuid';
 import Decimal from 'decimal.js';
+import { v4 as uuidv4 } from 'uuid';
 
 interface Props {
   stopConversationRef: MutableRefObject<boolean>;
@@ -183,11 +183,7 @@ export const Chat = memo(({ stopConversationRef }: Props) => {
         chatId: _selectChatId!,
         messageId,
         userMessage: messageContent,
-        userModelConfig: {
-          prompt: currentModel?.prompt,
-          enableSearch: currentModel?.enableSearch,
-          temperature: currentModel?.temperature,
-        },
+        userModelConfig,
       };
       let body = JSON.stringify(chatBody);
 
@@ -387,16 +383,13 @@ export const Chat = memo(({ stopConversationRef }: Props) => {
   useEffect(() => {
     const { name, modelConfig, modelVersion, modelProvider } =
       getModel(models, selectModelId!) || {};
-    const prompt = formatPrompt(
-      currentSelectChat?.userModelConfig?.prompt || modelConfig?.prompt,
-    );
     setCurrentModel({
       name,
       ...modelConfig,
       temperature:
         currentSelectChat?.userModelConfig?.temperature ||
         modelConfig?.temperature,
-      prompt,
+      prompt: currentSelectChat?.userModelConfig?.prompt || modelConfig?.prompt,
       enableSearch:
         currentSelectChat?.userModelConfig?.enableSearch ||
         modelConfig?.enableSearch,

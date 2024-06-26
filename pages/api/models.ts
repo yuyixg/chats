@@ -8,6 +8,7 @@ import {
 } from '@/managers';
 import { apiHandler } from '@/middleware/api-handler';
 import { ChatModels, FileServices } from '@prisma/client';
+import { formatPrompt } from '@/utils/promptVariable';
 
 export const config = {
   api: {
@@ -42,7 +43,7 @@ const handler = async (req: ChatsApiRequest) => {
           tokens: modelUsage?.tokens,
         },
         modelConfig: {
-          prompt: modelConfig?.prompt,
+          prompt: formatPrompt(modelConfig?.prompt),
           temperature: modelConfig?.temperature,
           maxLength: modelConfig?.maxLength,
           enableSearch: modelConfig?.enableSearch,
