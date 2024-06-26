@@ -62,6 +62,8 @@ const handler = async (req: ChatsApiRequest) => {
         content: JSON.parse(x.messages),
         inputTokens: x.inputTokens,
         outputTokens: x.outputTokens,
+        inputPrice: x.inputPrice,
+        outputPrice: x.outputPrice,
         createdAt: x.createdAt,
         duration: x.duration,
         modelName: chatModel?.name,

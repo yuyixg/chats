@@ -13,7 +13,6 @@ import prisma from '@/prisma/prisma';
 
 interface CreateModel {
   name: string;
-  isDefault: boolean;
   modelProvider: ModelProviders;
   modelVersion: ModelVersions;
   enabled?: boolean;
@@ -27,7 +26,6 @@ interface CreateModel {
 interface UpdateModel {
   id: string;
   name: string;
-  isDefault: boolean;
   enabled?: boolean;
   modelKeysId?: string;
   fileServiceId?: string;
@@ -71,12 +69,6 @@ export class ChatModelManager {
   static async findModelByModelKeyId(modelKeysId: string) {
     return await prisma.chatModels.findFirst({
       where: { modelKeysId },
-    });
-  }
-
-  static async findDefaultModels() {
-    return await prisma.chatModels.findMany({
-      where: { isDefault: true },
     });
   }
 

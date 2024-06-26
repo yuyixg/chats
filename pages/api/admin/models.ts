@@ -27,7 +27,6 @@ const handler = async (req: ChatsApiRequest) => {
         modelProvider: x.modelProvider,
         modelVersion: x.modelVersion,
         name: x.name,
-        isDefault: x.isDefault,
         enabled: x.enabled,
         remarks: x.remarks,
         modelKeysId: x.modelKeysId,
@@ -42,7 +41,6 @@ const handler = async (req: ChatsApiRequest) => {
     const {
       modelId,
       name,
-      isDefault,
       enabled,
       modelKeysId,
       fileServiceId,
@@ -58,7 +56,6 @@ const handler = async (req: ChatsApiRequest) => {
 
     const data = await ChatModelManager.updateModel({
       id: modelId,
-      isDefault,
       name,
       enabled,
       modelKeysId,
@@ -74,7 +71,6 @@ const handler = async (req: ChatsApiRequest) => {
       modelProvider,
       modelVersion,
       name,
-      isDefault,
       enabled,
       modelKeysId,
       fileServiceId,
@@ -88,7 +84,6 @@ const handler = async (req: ChatsApiRequest) => {
       modelProvider,
       modelVersion,
       name,
-      isDefault,
       enabled,
       modelKeysId,
       fileServiceId,

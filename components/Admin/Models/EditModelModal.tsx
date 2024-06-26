@@ -69,7 +69,6 @@ export const EditModelModal = (props: IProps) => {
       .min(1, `${t('This field is require')}`)
       .optional(),
     modelId: z.string().optional(),
-    isDefault: z.boolean().optional(),
     enabled: z.boolean().optional(),
     modelConfig: z
       .string()
@@ -90,7 +89,6 @@ export const EditModelModal = (props: IProps) => {
     defaultValues: {
       modelVersion: '',
       name: '',
-      isDefault: false,
       modelId: '',
       enabled: true,
       modelConfig: '',
@@ -131,7 +129,6 @@ export const EditModelModal = (props: IProps) => {
       form.formState.isValid;
       const {
         name,
-        isDefault,
         modelId,
         modelVersion,
         enabled,
@@ -145,7 +142,6 @@ export const EditModelModal = (props: IProps) => {
       } = selected;
       form.setValue('modelVersion', modelVersion);
       form.setValue('name', name);
-      form.setValue('isDefault', isDefault);
       form.setValue('modelId', modelId);
       form.setValue('enabled', enabled);
       form.setValue('remarks', remarks);

@@ -53,7 +53,6 @@ export interface GetModelResult {
   modelProvider: ModelProviders;
   modelVersion: ModelVersions;
   name: string;
-  isDefault: boolean;
   rank: number;
   enabled: boolean;
   remarks: string;

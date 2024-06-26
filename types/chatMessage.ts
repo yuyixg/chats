@@ -10,8 +10,8 @@ export interface ChatMessage {
   role: Role;
   content: Content;
   modelName?: string;
-  tokenUsed?: number;
-  calculatedPrice?: Decimal;
+  inputPrice: Decimal;
+  outputPrice: Decimal;
   inputTokens: number;
   outputTokens: number;
   duration?: number;
@@ -25,6 +25,17 @@ export interface MessageNode {
   assistantChildrenIds?: string[];
   modelName?: string;
   role: Role;
-  tokenUsed: number;
-  calculatedPrice: Decimal;
+  inputTokens: number;
+  outputTokens: number;
+  inputPrice: Decimal;
+  outputPrice: Decimal;
+}
+
+export interface ChatErrorMessage {
+  id: string;
+  parentId: string | null;
+  childrenIds: string[];
+  assistantChildrenIds: string[];
+  role: Role;
+  content: Content;
 }

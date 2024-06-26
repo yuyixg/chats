@@ -72,7 +72,6 @@ export const AddModelModal = (props: IProps) => {
       .string()
       .min(1, `${t('This field is require')}`)
       .optional(),
-    isDefault: z.boolean().optional(),
     enabled: z.boolean().optional(),
     modelConfig: z
       .string()
@@ -93,7 +92,6 @@ export const AddModelModal = (props: IProps) => {
     defaultValues: {
       modelVersion: '',
       name: '',
-      isDefault: false,
       enabled: true,
       modelConfig: '',
       modelKeysId: '',

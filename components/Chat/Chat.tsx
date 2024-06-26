@@ -32,6 +32,7 @@ import { TemperatureSlider } from './Temperature';
 import { getChat, postChats } from '@/apis/userService';
 import { cn } from '@/lib/utils';
 import { v4 as uuidv4 } from 'uuid';
+import Decimal from 'decimal.js';
 
 interface Props {
   stopConversationRef: MutableRefObject<boolean>;
@@ -127,6 +128,8 @@ export const Chat = memo(({ stopConversationRef }: Props) => {
           content: message.content,
           inputTokens: 0,
           outputTokens: 0,
+          inputPrice: new Decimal(0),
+          outputPrice: new Decimal(0),
         };
         let removeCount = -1;
         if (parentMessageIndex !== -1) removeCount = _selectMessages.length - 1;
@@ -158,6 +161,8 @@ export const Chat = memo(({ stopConversationRef }: Props) => {
         },
         inputTokens: 0,
         outputTokens: 0,
+        inputPrice: new Decimal(0),
+        outputPrice: new Decimal(0),
       };
 
       homeDispatch({
@@ -516,6 +521,8 @@ export const Chat = memo(({ stopConversationRef }: Props) => {
                       duration: current.duration,
                       inputTokens: current.inputTokens,
                       outputTokens: current.outputTokens,
+                      inputPrice: current.inputPrice,
+                      outputPrice: current.outputPrice,
                     }}
                     onChangeMessage={(messageId) => {
                       handleUpdateSelectMessage(messageId);

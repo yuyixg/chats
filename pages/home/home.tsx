@@ -21,6 +21,7 @@ import { getSession } from '@/utils/session';
 import { getSettings, getSettingsLanguage } from '@/utils/settings';
 import { getLoginUrl, getUserInfo, getUserSessionId } from '@/utils/user';
 import { UserSession } from '@/utils/user';
+import { setSiteInfo } from '@/utils/website';
 
 import { Role } from '@/types/chat';
 import { ChatMessage } from '@/types/chatMessage';
@@ -50,7 +51,7 @@ import {
 } from '@/apis/userService';
 import { ConfigsManager } from '@/managers';
 import { v4 as uuidv4 } from 'uuid';
-import { setSiteInfo } from '@/utils/website';
+import Decimal from 'decimal.js';
 
 interface HandleUpdateChatParams {
   isShared?: boolean;
@@ -155,14 +156,18 @@ const Home = ({ siteInfo }: { siteInfo: SiteInfo }) => {
     return model?.id;
   };
 
-  const chatErrorMessage = (message: ChatMessage) => {
+  const chatErrorMessage = (messageId: string) => {
     return {
       id: uuidv4(),
-      parentId: message.id,
+      parentId: messageId,
       childrenIds: [],
       assistantChildrenIds: [],
       role: 'assistant' as Role,
       content: { text: '', image: [] },
+      inputTokens: 0,
+      outputTokens: 0,
+      inputPrice: new Decimal(0),
+      outputPrice: new Decimal(0),
     };
   };
 
@@ -222,7 +227,7 @@ const Home = ({ siteInfo }: { siteInfo: SiteInfo }) => {
             field: 'chatError',
             value: true,
           });
-          _selectMessages.push(chatErrorMessage(lastMessage));
+          _selectMessages.push(chatErrorMessage(lastMessage.id));
         }
 
         dispatch({
@@ -328,7 +333,7 @@ const Home = ({ siteInfo }: { siteInfo: SiteInfo }) => {
               field: 'chatError',
               value: true,
             });
-            _selectMessages.push(chatErrorMessage(lastMessage));
+            _selectMessages.push(chatErrorMessage(lastMessage.id));
           }
           dispatch({
             field: 'selectMessages',

@@ -49,7 +49,6 @@ model ChatModels {
   modelProvider String
   modelVersion  String
   name          String
-  isDefault     Boolean    @default(false)
   rank          Int?
   remarks       String?
   modelKeysId   String?    @db.Uuid()

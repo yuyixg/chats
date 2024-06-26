@@ -16,8 +16,10 @@ type TX = Omit<
 
 export interface ChatRecord {
   userId: string;
-  tokenUsed: number;
-  calculatedPrice: Decimal;
+  inputPrice: Decimal;
+  outputPrice: Decimal;
+  inputTokens: number;
+  outputTokens: number;
   userMessageText: string;
   chatId: string;
   isFirstChat: boolean;
@@ -34,8 +36,10 @@ export class ChatModelRecordManager {
       userId,
       isFirstChat,
       chatModelId,
-      tokenUsed,
-      calculatedPrice,
+      inputPrice,
+      outputPrice,
+      inputTokens,
+      outputTokens,
       userMessageText,
       createChatMessageParams,
       updateChatParams,
@@ -58,16 +62,12 @@ export class ChatModelRecordManager {
         tx,
         userId,
         chatModelId,
-        tokenUsed,
+        inputTokens + outputTokens,
         usages,
       );
+      const totalPrice = inputPrice.plus(outputPrice);
       usages.balance &&
-        (await this.chatUpdateBalance(
-          tx,
-          userId,
-          calculatedPrice,
-          chatMessage.id,
-        ));
+        (await this.chatUpdateBalance(tx, userId, totalPrice, chatMessage.id));
     });
   }
 

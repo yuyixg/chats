@@ -15,8 +15,8 @@ export interface CreateChatMessage {
   chatId: string;
   messages: string;
   parentId?: string | null;
-  calculatedPrice?: Decimal;
-  tokenUsed?: number;
+  inputPrice?: Decimal;
+  outputPrice?: Decimal;
   inputTokens?: number;
   outputTokens?: number;
   chatModelId?: string;
@@ -57,8 +57,10 @@ export class ChatMessagesManager {
         id: x.id,
         parentId: x.parentId,
         createdAt: x.createdAt,
-        tokenUsed: x.tokenUsed,
-        calculatedPrice: x.calculatedPrice,
+        inputTokens: x.inputTokens,
+        outputTokens: x.outputTokens,
+        inputPrice: x.inputPrice,
+        outputPrice: x.outputPrice,
         role: x.role,
         content: JSON.parse(x.messages),
         modelName: chatModels.find((m) => m.id === x.chatModelId)?.name,

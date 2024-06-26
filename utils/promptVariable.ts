@@ -1,6 +1,6 @@
 export const PromptVariables = {
-  '{{currentDate}}': () => new Date().toLocaleDateString(),
-  '{{currentTime}}': () => new Date().toLocaleString(),
+  '{{CURRENT_DATE}}': () => new Date().toLocaleDateString(),
+  '{{CURRENT_TIME}}': () => new Date().toLocaleString(),
 };
 
 export function formatPrompt(prompt: string) {

@@ -40,8 +40,10 @@ export function formatRMB(number: number) {
   return formatted.replace(/￥(\d)/, '￥ $1');
 }
 
-export function formatNumberAsMoney(amount: number) {
-  return new Intl.NumberFormat('zh-CN').format(amount);
+export function formatNumberAsMoney(amount: number, maximumFractionDigits = 4) {
+  return new Intl.NumberFormat('zh-CN', { maximumFractionDigits }).format(
+    amount,
+  );
 }
 
 export function generateUniqueCode() {

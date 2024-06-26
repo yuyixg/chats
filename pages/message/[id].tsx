@@ -37,8 +37,8 @@ export default function MessageDetails() {
         let tokenUsed = 0;
         let calculatedPrice = new Decimal(0);
         data.messages.forEach((x) => {
-          tokenUsed += x.tokenUsed!;
-          calculatedPrice = calculatedPrice.plus(x.calculatedPrice!);
+          tokenUsed += (x.inputTokens + x.outputTokens)!;
+          calculatedPrice.plus(x.inputPrice.plus(x.outputPrice!));
         });
         setChatSummary({ tokenUsed, calculatedPrice });
         const lastMessage = data.messages[data.messages.length - 1];

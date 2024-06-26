@@ -2,6 +2,8 @@ import { FC, memo, useContext, useEffect, useRef, useState } from 'react';
 
 import { useTranslation } from 'next-i18next';
 
+import { formatNumberAsMoney } from '@/utils/common';
+
 import { Content, Message, Role } from '@/types/chat';
 
 import { HomeContext } from '@/pages/home/home';
@@ -26,6 +28,7 @@ import { Label } from '../ui/label';
 import ChangeModel from './ChangeModel';
 
 import { cn } from '@/lib/utils';
+import Decimal from 'decimal.js';
 import rehypeMathjax from 'rehype-mathjax';
 import remarkGfm from 'remark-gfm';
 import remarkMath from 'remark-math';
@@ -36,6 +39,8 @@ interface PropsMessage {
   content: Content;
   inputTokens: number;
   outputTokens: number;
+  inputPrice: Decimal;
+  outputPrice: Decimal;
   duration?: number;
 }
 
@@ -140,6 +145,17 @@ export const ChatMessage: FC<Props> = memo(
         textareaRef.current.style.height = `${textareaRef.current.scrollHeight}px`;
       }
     }, [isEditing]);
+
+    const GenerateInformation = (props: { name: string; value: string }) => {
+      const { name, value } = props;
+      return (
+        <Label key={name} className="text-xs">
+          {t(name)}
+          {': '}
+          {value}
+        </Label>
+      );
+    };
 
     return (
       <div
@@ -455,27 +471,52 @@ export const ChatMessage: FC<Props> = memo(
                               </div>
                               <div className="grid">
                                 <div className="grid grid-cols-1 items-center">
-                                  <Label className="text-xs" htmlFor="duration">
-                                    {t('duration')}:{message?.duration}ms
-                                  </Label>
-                                </div>
-                                <div className="grid grid-cols-1 items-center">
-                                  <Label
-                                    className="text-xs"
-                                    htmlFor="InputTokens"
-                                  >
-                                    {t('prompt_tokens')}:{message.inputTokens}{' '}
-                                    tokens
-                                  </Label>
-                                </div>
-                                <div className="grid grid-cols-1 items-center">
-                                  <Label
-                                    className="text-xs"
-                                    htmlFor="OutputTokens"
-                                  >
-                                    {t('response_tokens')}:
-                                    {message.outputTokens} tokens
-                                  </Label>
+                                  <GenerateInformation
+                                    name={'duration'}
+                                    value={message?.duration + 'ms'}
+                                  />
+                                  <GenerateInformation
+                                    name={'speed'}
+                                    value={
+                                      message?.duration
+                                        ? (
+                                            (message.outputTokens /
+                                              (message?.duration || 0)) *
+                                            1000
+                                          ).toFixed(2) + ' tokens/s'
+                                        : '-'
+                                    }
+                                  />
+                                  <GenerateInformation
+                                    name={'total_price'}
+                                    value={formatNumberAsMoney(
+                                      +message.inputPrice +
+                                        +message.outputPrice,
+                                      6,
+                                    )}
+                                  />
+                                  <GenerateInformation
+                                    name={'prompt_price'}
+                                    value={formatNumberAsMoney(
+                                      +message.inputPrice,
+                                      6,
+                                    )}
+                                  />
+                                  <GenerateInformation
+                                    name={'response_price'}
+                                    value={formatNumberAsMoney(
+                                      +message.outputPrice,
+                                      6,
+                                    )}
+                                  />
+                                  <GenerateInformation
+                                    name={'prompt_tokens'}
+                                    value={`${message.inputTokens}`}
+                                  />
+                                  <GenerateInformation
+                                    name={'response_tokens'}
+                                    value={`${message.outputTokens}`}
+                                  />
                                 </div>
                               </div>
                             </div>

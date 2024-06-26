@@ -14,7 +14,7 @@ import {
   InternalServerError,
   ModelUnauthorized,
 } from '@/utils/error';
-import { calcTokenPrice } from '@/utils/message';
+import { calcInputTokenPrice, calcOutputTokenPrice } from '@/utils/message';
 import { verifyChat } from '@/utils/model';
 
 import {
@@ -373,22 +373,28 @@ const handler = async (req: ChatsApiRequest, res: ChatsApiResponse) => {
             stopChat(chatId);
             const end = process.hrtime(start);
             const duration = calcHrtime(end);
-            const { totalTokens, inputTokens, outputTokens } = result.usage;
+            const { inputTokens, outputTokens } = result.usage;
 
-            const tokenUsed = totalTokens;
-            const calculatedPrice = calcTokenPrice(
-              priceConfig,
+            const inputPrice = calcInputTokenPrice(
               inputTokens,
-              outputTokens,
+              priceConfig.input,
             );
+
+            const outputPrice = calcOutputTokenPrice(
+              outputTokens,
+              priceConfig.out,
+            );
+
             await ChatModelRecordManager.recordTransfer({
               usages,
-              tokenUsed,
+              inputTokens,
+              outputTokens,
               isFirstChat,
               userId,
               chatId,
               userMessageText,
-              calculatedPrice,
+              inputPrice,
+              outputPrice,
               chatModelId: chatModel.id,
               createChatMessageParams: {
                 role: 'assistant',
@@ -397,10 +403,10 @@ const handler = async (req: ChatsApiRequest, res: ChatsApiResponse) => {
                 chatModelId: modelId,
                 parentId: resParentId,
                 messages: JSON.stringify({ text: assistantResponse }),
-                tokenUsed,
+                inputPrice,
+                outputPrice,
                 inputTokens,
                 outputTokens,
-                calculatedPrice,
                 duration,
               },
               updateChatParams: {

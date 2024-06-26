@@ -93,8 +93,11 @@ CREATE TABLE [dbo].[ChatMessages] (
     [chatModelId] UNIQUEIDENTIFIER,
     [role] NVARCHAR(1000) NOT NULL,
     [messages] NTEXT NOT NULL,
-    [calculatedPrice] DECIMAL(32,16) NOT NULL CONSTRAINT [ChatMessages_calculatedPrice_df] DEFAULT 0,
-    [tokenUsed] INT NOT NULL CONSTRAINT [ChatMessages_tokenUsed_df] DEFAULT 0,
+    [inputTokens] INT NOT NULL CONSTRAINT [ChatMessages_inputTokens_df] DEFAULT 0,
+    [outputTokens] INT NOT NULL CONSTRAINT [ChatMessages_outputTokens_df] DEFAULT 0,
+    [inputPrice] DECIMAL(32,16) NOT NULL CONSTRAINT [ChatMessages_inputPrice_df] DEFAULT 0,
+    [outputPrice] DECIMAL(32,16) NOT NULL CONSTRAINT [ChatMessages_outputPrice_df] DEFAULT 0,
+    [duration] INT NOT NULL CONSTRAINT [ChatMessages_duration_df] DEFAULT 0,
     [createdAt] DATETIME2 NOT NULL CONSTRAINT [ChatMessages_createdAt_df] DEFAULT CURRENT_TIMESTAMP,
     CONSTRAINT [ChatMessages_pkey] PRIMARY KEY CLUSTERED ([id])
 );
