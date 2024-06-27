@@ -1,5 +1,6 @@
-import { ChatModelConfig } from '@/types/model';
+import { ChatModelConfig, ModelProviders, ModelVersions } from '@/types/model';
 import { ChatsApiRequest } from '@/types/next-api';
+import { getModelDefaultTemplate } from '@/types/template';
 
 import {
   ChatModelManager,
@@ -8,7 +9,6 @@ import {
 } from '@/managers';
 import { apiHandler } from '@/middleware/api-handler';
 import { ChatModels, FileServices } from '@prisma/client';
-import { formatPrompt } from '@/utils/promptVariable';
 
 export const config = {
   api: {
@@ -42,8 +42,14 @@ const handler = async (req: ChatsApiRequest) => {
           expires: modelUsage?.expires,
           tokens: modelUsage?.tokens,
         },
+        modelConfigOptions: {
+          ...(getModelDefaultTemplate(
+            x.modelVersion as ModelVersions,
+            x.modelProvider as ModelProviders,
+          )?.config || {}),
+        },
         modelConfig: {
-          prompt: formatPrompt(modelConfig?.prompt),
+          prompt: modelConfig?.prompt,
           temperature: modelConfig?.temperature,
           maxLength: modelConfig?.maxLength,
           enableSearch: modelConfig?.enableSearch,

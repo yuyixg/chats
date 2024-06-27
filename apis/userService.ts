@@ -2,7 +2,7 @@ import { useFetch } from '@/hooks/useFetch';
 
 import { PostPromptParams, PutPromptParams } from '@/types/admin';
 import { ChatMessage } from '@/types/chatMessage';
-import { Model, ModelUsage } from '@/types/model';
+import { Model } from '@/types/model';
 import { PageResult, Paging } from '@/types/page';
 import { Prompt } from '@/types/prompt';
 import {
@@ -138,9 +138,10 @@ export const postSignCode = (phone: string, type: SmsType) => {
 
 export const verifyInvitationCode = (invitationCode: string) => {
   const fetchServer = useFetch();
-  return fetchServer.post('/api/public/invitation-code', { body: { invitationCode } });
+  return fetchServer.post('/api/public/invitation-code', {
+    body: { invitationCode },
+  });
 };
-
 
 export const registerByPhone = (
   phone: string,

@@ -11,12 +11,10 @@ import toast from 'react-hot-toast';
 
 import { useTranslation } from 'next-i18next';
 
-import { formatPrompt } from '@/utils/promptVariable';
 import { throttle } from '@/utils/throttle';
 
 import { ChatBody, Message, Role } from '@/types/chat';
-import { CurrentModel, ModelApiConfig } from '@/types/model';
-import { getModelDefaultTemplate } from '@/types/template';
+import { ModelApiConfig, UserModelConfig } from '@/types/model';
 
 import { HomeContext } from '@/pages/home/home';
 
@@ -44,7 +42,7 @@ export const Chat = memo(({ stopConversationRef }: Props) => {
   const {
     state: {
       selectChatId,
-      selectModelId,
+      selectModel,
       selectMessages,
       currentMessages,
       chats,
@@ -58,19 +56,12 @@ export const Chat = memo(({ stopConversationRef }: Props) => {
     handleUpdateCurrentMessage,
     handleUpdateChat,
     handleUpdateUserModelConfig,
-    getModel,
     hasModel,
     dispatch: homeDispatch,
   } = useContext(HomeContext);
   const [autoScrollEnabled, setAutoScrollEnabled] = useState<boolean>(true);
   const [showScrollDownButton, setShowScrollDownButton] =
     useState<boolean>(false);
-  const [currentModel, setCurrentModel] = useState<CurrentModel>(
-    {} as CurrentModel,
-  );
-  const [modeApiConfig, setModelApiConfig] = useState<ModelApiConfig>(
-    {} as ModelApiConfig,
-  );
   const currentSelectChat = chats.find((x) => x.id === selectChatId);
 
   const messagesEndRef = useRef<HTMLDivElement>(null);
@@ -179,7 +170,7 @@ export const Chat = memo(({ stopConversationRef }: Props) => {
       homeDispatch({ field: 'messageIsStreaming', value: true });
       const messageContent = message.content;
       const chatBody: ChatBody = {
-        modelId: modelId || selectModelId!,
+        modelId: modelId || selectModel?.id!,
         chatId: _selectChatId!,
         messageId,
         userMessage: messageContent,
@@ -280,7 +271,7 @@ export const Chat = memo(({ stopConversationRef }: Props) => {
             : userMessageText;
         handleUpdateChat(_chats, _selectChatId!, {
           title,
-          chatModelId: selectModelId,
+          chatModelId: selectModel?.id,
         });
       }
       !chats.find((x) => x.id === _selectChatId)?.chatModelId &&
@@ -310,7 +301,7 @@ export const Chat = memo(({ stopConversationRef }: Props) => {
       selectChatId,
       currentMessages,
       selectMessages,
-      selectModelId,
+      selectModel,
       stopConversationRef,
     ],
   );
@@ -357,47 +348,8 @@ export const Chat = memo(({ stopConversationRef }: Props) => {
   }, [selectMessages, throttledScrollDown]);
 
   useEffect(() => {
-    const observer = new IntersectionObserver(
-      ([entry]) => {
-        setAutoScrollEnabled(entry.isIntersecting);
-        if (entry.isIntersecting) {
-          textareaRef.current?.focus();
-        }
-      },
-      {
-        root: null,
-        threshold: 0.5,
-      },
-    );
-    const messagesEndElement = messagesEndRef.current;
-    if (messagesEndElement) {
-      observer.observe(messagesEndElement);
-    }
-    return () => {
-      if (messagesEndElement) {
-        observer.unobserve(messagesEndElement);
-      }
-    };
-  }, [messagesEndRef]);
-
-  useEffect(() => {
-    const { name, modelConfig, modelVersion, modelProvider } =
-      getModel(models, selectModelId!) || {};
-    setCurrentModel({
-      name,
-      ...modelConfig,
-      temperature:
-        currentSelectChat?.userModelConfig?.temperature ||
-        modelConfig?.temperature,
-      prompt: currentSelectChat?.userModelConfig?.prompt || modelConfig?.prompt,
-      enableSearch:
-        currentSelectChat?.userModelConfig?.enableSearch ||
-        modelConfig?.enableSearch,
-    });
-    setModelApiConfig(
-      getModelDefaultTemplate(modelVersion, modelProvider)?.config as any,
-    );
-  }, [selectModelId]);
+    console.log('userModelConfig \n', userModelConfig);
+  }, [userModelConfig]);
 
   return (
     <div className="relative flex-1 overflow-hidden bg-white dark:bg-[#262630]">
@@ -413,21 +365,21 @@ export const Chat = memo(({ stopConversationRef }: Props) => {
                 {models.length !== 0 && (
                   <div className="flex h-full flex-col space-y-4 rounded-lg border border-neutral-200 p-4 dark:border-neutral-600">
                     <ModelSelect />
-                    {currentModel?.prompt && (
+                    {userModelConfig?.prompt && (
                       <SystemPrompt
-                        currentPrompt={currentModel?.prompt}
+                        currentPrompt={userModelConfig?.prompt}
                         prompts={prompts}
                         onChangePrompt={(prompt) => {
                           handleUpdateUserModelConfig({ prompt });
                         }}
                       />
                     )}
-                    {currentModel?.temperature && (
+                    {userModelConfig?.temperature !== undefined && (
                       <TemperatureSlider
                         label={t('Temperature')}
-                        min={modeApiConfig.temperature.min}
-                        max={modeApiConfig.temperature.max}
-                        defaultTemperature={currentModel.temperature}
+                        min={selectModel?.modelConfigOptions.temperature.min!}
+                        max={selectModel?.modelConfigOptions.temperature.max!}
+                        defaultTemperature={userModelConfig.temperature}
                         onChangeTemperature={(temperature) =>
                           handleUpdateUserModelConfig({
                             temperature,
@@ -435,10 +387,10 @@ export const Chat = memo(({ stopConversationRef }: Props) => {
                         }
                       />
                     )}
-                    {currentModel?.enableSearch != undefined && (
+                    {userModelConfig?.enableSearch != undefined && (
                       <EnableNetworkSearch
                         label={t('Internet Search')}
-                        enable={currentModel.enableSearch}
+                        enable={userModelConfig.enableSearch}
                         onChange={(enableSearch) => {
                           handleUpdateUserModelConfig({
                             enableSearch,
@@ -463,11 +415,11 @@ export const Chat = memo(({ stopConversationRef }: Props) => {
                     {hasModel() && (
                       <ChangeModel
                         className=" font-semibold text-base"
-                        modelName={currentModel.name}
-                        onChangeModel={(modelId) => {
+                        modelName={selectModel?.name}
+                        onChangeModel={(model) => {
                           homeDispatch({
-                            field: 'selectModelId',
-                            value: modelId,
+                            field: 'selectModel',
+                            value: model,
                           });
                         }}
                       />

@@ -14,23 +14,23 @@ export const ModelSelect = () => {
   const { t } = useTranslation('chat');
 
   const {
-    state: { selectModelId, models },
+    state: { selectModel, models },
     handleSelectModel,
   } = useContext(HomeContext);
 
   const [modelUsage, setModelUsage] = useState<GetModelUsageResult | undefined>(
-    models.find((x) => x.id === selectModelId)?.modelUsage,
+    selectModel?.modelUsage,
   );
 
   useEffect(() => {
-    getUserModelUsage(selectModelId!).then((data) => {
+    getUserModelUsage(selectModel?.id!).then((data) => {
       setModelUsage(data);
     });
-  }, [selectModelId]);
+  }, [selectModel]);
 
   const handleChange = (e: React.ChangeEvent<HTMLSelectElement>) => {
     const model = models.find((m) => m.id == e.target.value)!;
-    handleSelectModel(model.id);
+    handleSelectModel(model);
   };
 
   return (
@@ -42,7 +42,7 @@ export const ModelSelect = () => {
         <select
           className="w-full bg-transparent p-2"
           placeholder={t('Select a model') || ''}
-          value={selectModelId}
+          value={selectModel?.id}
           onChange={handleChange}
         >
           {models.map((model) => (

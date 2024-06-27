@@ -12,6 +12,12 @@ export interface Model {
   modelVersion: ModelVersions;
   name: string;
   modelProvider: ModelProviders;
+  modelConfigOptions: {
+    temperature: {
+      min: number;
+      max: number;
+    };
+  };
   modelConfig: ModelConfig;
   fileServerConfig: {
     id: string;
@@ -107,9 +113,7 @@ export interface ModelApiConfig {
   };
 }
 
-export interface CurrentModel extends ModelConfig {
-  name: string;
-}
+export interface UserModelConfig extends ModelConfig {}
 
 export interface Usages {
   balance: boolean;

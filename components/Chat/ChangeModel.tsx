@@ -32,7 +32,7 @@ const ChangeModel = ({
   readonly?: boolean;
   modelName?: string;
   className?: string;
-  onChangeModel: (modelId: string) => void;
+  onChangeModel: (model: Model) => void;
 }) => {
   const {
     state: { models },
@@ -69,7 +69,10 @@ const ChangeModel = ({
           {modelGroup.map((m) => {
             return (
               <DropdownMenuSub key={m.provider}>
-                <DropdownMenuSubTrigger key={`trigger-${m.provider}`} className="p-2 flex gap-2">
+                <DropdownMenuSubTrigger
+                  key={`trigger-${m.provider}`}
+                  className="p-2 flex gap-2"
+                >
                   <Image
                     key={`img-${m.provider}`}
                     src={`/${ModelProviderTemplates[m.provider].icon}`}
@@ -83,7 +86,10 @@ const ChangeModel = ({
                 <DropdownMenuPortal>
                   <DropdownMenuSubContent>
                     {m.child.map((x) => (
-                      <DropdownMenuItem key={x.id} onClick={() => onChangeModel(x.id)}>
+                      <DropdownMenuItem
+                        key={x.id}
+                        onClick={() => onChangeModel(x)}
+                      >
                         {x.name}
                       </DropdownMenuItem>
                     ))}
