@@ -29,7 +29,7 @@ export interface SingInResult {
   canRecharge: boolean;
 }
 
-export interface ProviderResult {
+export interface LoginConfigsResult {
   type: LoginType;
   configs: {
     appId: string;

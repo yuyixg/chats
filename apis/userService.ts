@@ -8,7 +8,7 @@ import { Prompt } from '@/types/prompt';
 import {
   GetModelUsageResult,
   GetUserBalanceResult,
-  ProviderResult,
+  LoginConfigsResult,
   SingInParams,
   SingInResult,
   SmsType,
@@ -108,7 +108,7 @@ export const getUserBalance = () => {
 
 export const getLoginProvider = () => {
   const fetchServer = useFetch();
-  return fetchServer.get<ProviderResult[]>('/api/public/login-provider');
+  return fetchServer.get<LoginConfigsResult[]>('/api/public/login-provider');
 };
 
 export const getUserPrompts = () => {

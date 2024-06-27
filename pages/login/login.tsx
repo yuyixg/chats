@@ -8,7 +8,7 @@ import { hasContact } from '@/utils/website';
 
 import { GlobalConfigKeys, SiteInfo } from '@/types/config';
 import { DEFAULT_LANGUAGE } from '@/types/settings';
-import { LoginType, ProviderResult } from '@/types/user';
+import { LoginConfigsResult, LoginType } from '@/types/user';
 
 import AccountLoginCard from '@/components/Login/AccountLoginCard';
 import KeyCloakLogin from '@/components/Login/KeyCloakLogin';
@@ -17,8 +17,8 @@ import PhoneRegisterCard from '@/components/Login/PhoneRegisterCard';
 import WeChatLogin from '@/components/Login/WeChatLogin';
 import { Tabs, TabsContent, TabsList, TabsTrigger } from '@/components/ui/tabs';
 
-import { getLoginProvider } from '@/apis/userService';
 import { ConfigsManager } from '@/managers';
+import { LoginServiceManager } from '@/managers/loginService';
 
 enum TabKeys {
   PHONE = 'phone',
@@ -30,8 +30,15 @@ type LoginHeader = {
   [key in TabKeys]: { title: string; description: string };
 };
 
-export default function LoginPage({ siteInfo }: { siteInfo: SiteInfo }) {
+export default function LoginPage({
+  siteInfo,
+  loginConfigs,
+}: {
+  siteInfo: SiteInfo;
+  loginConfigs: LoginConfigsResult[];
+}) {
   const { t } = useTranslation('login');
+  const [isClient, setIsClient] = useState(false);
   const LoginHeaders: LoginHeader = {
     phone: {
       title: t('Sign in to Chats'),
@@ -52,23 +59,49 @@ export default function LoginPage({ siteInfo }: { siteInfo: SiteInfo }) {
       ),
     },
   };
-  const [isClient, setIsClient] = useState(false);
-  const [providers, setProviders] = useState<ProviderResult[]>([]);
-  const [providerTypes, setProviderTypes] = useState<LoginType[]>([]);
+  const [loginTypes] = useState<LoginType[]>(loginConfigs.map((x) => x.type));
   const [loginLoading, setLoginLoading] = useState(false);
-  const [currentTab, setCurrentTab] = useState<TabKeys>(TabKeys.PHONE);
+  const [currentTab, setCurrentTab] = useState<TabKeys>(
+    loginTypes.includes(LoginType.Phone) ? TabKeys.PHONE : TabKeys.ACCOUNT,
+  );
 
   useEffect(() => {
-    getLoginProvider().then((data) => {
-      setProviders(data);
-      setProviderTypes(data.map((x) => x.type));
-    });
-
     setIsClient(true);
   }, []);
 
   const openLoading = () => setLoginLoading(true);
   const closeLoading = () => setLoginLoading(false);
+
+  const TabsListRender = () => {
+    return loginTypes.includes(LoginType.Phone) ? (
+      <TabsList className="flex w-full flex-row justify-around">
+        {loginTypes.includes(LoginType.Phone) && (
+          <TabsTrigger
+            value={TabKeys.PHONE}
+            className="flex justify-center w-full"
+          >
+            {t('Mobile Login')}
+          </TabsTrigger>
+        )}
+        {loginTypes.includes(LoginType.Phone) && (
+          <TabsTrigger
+            value={TabKeys.REGISTER}
+            className="flex justify-center w-full"
+          >
+            {t('Register')}
+          </TabsTrigger>
+        )}
+        <TabsTrigger
+          value={TabKeys.ACCOUNT}
+          className="flex justify-center w-full"
+        >
+          {t('Account Login')}
+        </TabsTrigger>
+      </TabsList>
+    ) : (
+      <></>
+    );
+  };
 
   return (
     <>
@@ -121,26 +154,7 @@ export default function LoginPage({ siteInfo }: { siteInfo: SiteInfo }) {
                         }}
                         className="flex-col"
                       >
-                        <TabsList className="flex w-full flex-row justify-around">
-                          <TabsTrigger
-                            value={TabKeys.PHONE}
-                            className="flex justify-center w-full"
-                          >
-                            {t('Mobile Login')}
-                          </TabsTrigger>
-                          <TabsTrigger
-                            value={TabKeys.REGISTER}
-                            className="flex justify-center w-full"
-                          >
-                            {t('Register')}
-                          </TabsTrigger>
-                          <TabsTrigger
-                            value={TabKeys.ACCOUNT}
-                            className="flex justify-center w-full"
-                          >
-                            {t('Account Login')}
-                          </TabsTrigger>
-                        </TabsList>
+                        <TabsListRender />
                         <TabsContent className="m-0 mt-2" value={TabKeys.PHONE}>
                           <PhoneLoginCard
                             openLoading={openLoading}
@@ -171,7 +185,7 @@ export default function LoginPage({ siteInfo }: { siteInfo: SiteInfo }) {
                         </TabsContent>
                       </Tabs>
 
-                      {providerTypes.length > 0 && (
+                      {loginTypes.length > 0 && (
                         <div className="relative mt-2">
                           <div className="absolute inset-0 flex items-center">
                             <span className="w-full border-t" />
@@ -185,17 +199,17 @@ export default function LoginPage({ siteInfo }: { siteInfo: SiteInfo }) {
                       )}
 
                       <div className="flex justify-center gap-2">
-                        {providerTypes.includes(LoginType.WeChat) && (
+                        {loginTypes.includes(LoginType.WeChat) && (
                           <WeChatLogin
                             configs={
-                              providers.find(
+                              loginConfigs.find(
                                 (x) => x.type === LoginType.WeChat,
                               )!.configs
                             }
                             loading={loginLoading}
                           />
                         )}
-                        {providerTypes.includes(LoginType.KeyCloak) && (
+                        {loginTypes.includes(LoginType.KeyCloak) && (
                           <KeyCloakLogin loading={loginLoading} />
                         )}
                       </div>
@@ -204,9 +218,9 @@ export default function LoginPage({ siteInfo }: { siteInfo: SiteInfo }) {
                 </div>
               </>
               <p className="px-8 text-center text-sm text-muted-foreground">
-                <div className="flex text-sm justify-center py-1">
+                <span className="flex text-sm justify-center py-1">
                   {siteInfo?.filingNumber}
-                </div>
+                </span>
                 © 2024 Chats™ . All Rights Reserved.
               </p>
             </div>
@@ -218,16 +232,28 @@ export default function LoginPage({ siteInfo }: { siteInfo: SiteInfo }) {
 }
 
 export const getServerSideProps = async ({ locale }: { locale: string }) => {
-  const siteInfo: SiteInfo = await ConfigsManager.get(
-    GlobalConfigKeys.siteInfo,
-  );
+  const siteInfo: SiteInfo =
+    (await ConfigsManager.get(GlobalConfigKeys.siteInfo)) || {};
+
+  const loginConfigList = await LoginServiceManager.findAllEnabled();
+  const loginConfigs = loginConfigList.map((x) => {
+    const configs = JSON.parse(x?.configs || '{}');
+    return {
+      type: x.type,
+      configs: {
+        appId: configs?.appId || null,
+      },
+    };
+  });
+
   return {
     props: {
       ...(await serverSideTranslations(locale ?? DEFAULT_LANGUAGE, [
         'login',
         'sidebar',
       ])),
-      siteInfo: siteInfo || {},
+      siteInfo,
+      loginConfigs,
     },
   };
 };
