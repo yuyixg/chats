@@ -36,7 +36,6 @@ CREATE TABLE "ChatModels" (
     "modelProvider" TEXT NOT NULL,
     "modelVersion" TEXT NOT NULL,
     "name" TEXT NOT NULL,
-    "isDefault" BOOLEAN NOT NULL DEFAULT false,
     "rank" INTEGER,
     "remarks" TEXT,
     "modelKeysId" UUID,
@@ -95,8 +94,11 @@ CREATE TABLE "ChatMessages" (
     "chatModelId" UUID,
     "role" TEXT NOT NULL,
     "messages" TEXT NOT NULL,
-    "calculatedPrice" DECIMAL(65,30) NOT NULL DEFAULT 0,
-    "tokenUsed" INTEGER NOT NULL DEFAULT 0,
+    "inputTokens" INTEGER NOT NULL DEFAULT 0,
+    "outputTokens" INTEGER NOT NULL DEFAULT 0,
+    "inputPrice" DECIMAL(65,30) NOT NULL DEFAULT 0,
+    "outputPrice" DECIMAL(65,30) NOT NULL DEFAULT 0,
+    "duration" INTEGER NOT NULL DEFAULT 0,
     "createdAt" TIMESTAMP(3) NOT NULL DEFAULT CURRENT_TIMESTAMP,
 
     CONSTRAINT "ChatMessages_pkey" PRIMARY KEY ("id")

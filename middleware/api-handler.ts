@@ -71,6 +71,10 @@ export function apiHandler(handler: any) {
       if (modelApis.includes(request.url!)) {
         return response.write(Buffer.from(data || ''));
       }
+      // logs.response = JSON.stringify(data);
+      // logs.responseTime = new Date().getTime().toString();
+
+      // await RequestLogsManager.create(logs);
       return data
         ? response.status(200).json(data)
         : response.status(200).end();

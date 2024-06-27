@@ -22,7 +22,6 @@ interface IProps {
 export const RequestLogDetailsModal = (props: IProps) => {
   const { t } = useTranslation('admin');
   const { isOpen, onClose } = props;
-  const [loading, setLoading] = useState(false);
   const [log, setLog] = useState<GetRequestLogsDetailsResult>();
 
   useEffect(() => {
@@ -39,7 +38,7 @@ export const RequestLogDetailsModal = (props: IProps) => {
         <DialogContent>
           <DialogHeader>
             <DialogTitle>{t('Request Logs Details')}</DialogTitle>
-            <div className="pt-6">
+            <div className="pt-6 max-h-[60vh] overflow-scroll">
               <dl className="grid gap-3">
                 <div className="flex items-center">
                   <dt className="text-muted-foreground min-w-[80px]">
@@ -102,7 +101,7 @@ export const RequestLogDetailsModal = (props: IProps) => {
                   <dt className="text-muted-foreground min-w-[80px]">
                     {t('Response')}：
                   </dt>
-                  <dd className="max-h-96 overflow-auto">{log?.response}</dd>
+                  <dd>{log?.response}</dd>
                 </div>
               </dl>
             </div>

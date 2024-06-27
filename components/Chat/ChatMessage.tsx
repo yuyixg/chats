@@ -544,8 +544,8 @@ export const ChatMessage: FC<Props> = memo(
                         trigger={
                           <ChangeModel
                             readonly={readonly}
-                            onChangeModel={(modelId) => {
-                              onRegenerate && onRegenerate(modelId);
+                            onChangeModel={(model) => {
+                              onRegenerate && onRegenerate(model.id);
                             }}
                             modelName={modelName!}
                           />
