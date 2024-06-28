@@ -1,4 +1,4 @@
-import { ReactElement } from 'react';
+import { ReactElement, useState } from 'react';
 
 import {
   Tooltip,
@@ -16,10 +16,17 @@ const Tips = ({
   trigger: ReactElement | string;
   content?: ReactElement | string;
 }) => {
+  const [isOpen, setIsOpen] = useState(false);
   return (
     <TooltipProvider>
-      <Tooltip>
-        <TooltipTrigger asChild={true} className={className}>
+      <Tooltip open={isOpen}>
+        <TooltipTrigger
+          asChild={true}
+          className={className}
+          onMouseEnter={() => setIsOpen(true)}
+          onMouseLeave={() => setIsOpen(false)}
+          onClick={() => setIsOpen(true)}
+        >
           {trigger}
         </TooltipTrigger>
         {content && <TooltipContent>{content}</TooltipContent>}
