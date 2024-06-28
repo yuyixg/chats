@@ -1,12 +1,19 @@
-import { DocumentProps, Head, Html, Main, NextScript } from 'next/document';
+import Document, {
+  DocumentContext,
+  DocumentProps,
+  Head,
+  Html,
+  Main,
+  NextScript,
+} from 'next/document';
 
-import i18nextConfig from '../next-i18next.config';
+type Props = DocumentProps & {
+  apiUrl: string;
+};
 
-type Props = DocumentProps & {};
-
-export default function Document(props: Props) {
-  const currentLocale =
-    props.__NEXT_DATA__.locale ?? i18nextConfig.i18n.defaultLocale;
+function ChatsDocument(props: Props) {
+  props.__NEXT_DATA__.props['API_URL'] = 'nice';
+  console.log(props.__NEXT_DATA__.props);
   return (
     <Html lang="zh">
       <Head>
@@ -16,7 +23,20 @@ export default function Document(props: Props) {
       <body>
         <Main />
         <NextScript />
+        <script
+          dangerouslySetInnerHTML={{
+            __html: `window.API_URL = "${props.apiUrl}";`,
+          }}
+        />
       </body>
     </Html>
   );
 }
+
+(ChatsDocument as any).getInitialProps = async (ctx: DocumentContext) => {
+  const initialProps = await Document.getInitialProps(ctx);
+  const apiUrl = process.env.API_URL || '';
+  return { ...initialProps, apiUrl };
+};
+
+export default ChatsDocument;
