@@ -1,5 +1,7 @@
 import getConfig from 'next/config';
 
+import { GlobalConfigKeys, GlobalDefaultConfigs } from '@/types/config';
+
 import prisma from '@/prisma/prisma';
 
 const { publicRuntimeConfig } = getConfig();
@@ -13,6 +15,7 @@ export interface Configs {
 export class ConfigsManager {
   static async update(params: Configs) {
     const { key, value, description } = params;
+    publicRuntimeConfig.globalConfigs[key] = value;
     await prisma.configs.update({
       where: { key },
       data: { value, description },
@@ -21,10 +24,16 @@ export class ConfigsManager {
 
   static async create(params: Configs) {
     const { key, value, description } = params;
+    if (publicRuntimeConfig.globalConfigs[key]) {
+      publicRuntimeConfig.globalConfigs = value;
+    }
     return await prisma.configs.create({ data: { key, value, description } });
   }
 
   static async delete(key: string) {
+    if (publicRuntimeConfig.globalConfigs[key]) {
+      delete publicRuntimeConfig.globalConfigs[key];
+    }
     await prisma.configs.delete({ where: { key } });
   }
 
@@ -36,7 +45,7 @@ export class ConfigsManager {
     return await prisma.configs.findFirst({ where: { key } });
   }
 
-  static async get(key: string) {
+  static async get<T>(key: GlobalConfigKeys): Promise<T> {
     if (publicRuntimeConfig.globalConfigs[key]) {
       return publicRuntimeConfig.globalConfigs[key];
     } else {
@@ -46,7 +55,7 @@ export class ConfigsManager {
         publicRuntimeConfig.globalConfigs = value;
         return value;
       }
-      return null;
+      return GlobalDefaultConfigs[key] as T;
     }
   }
 }

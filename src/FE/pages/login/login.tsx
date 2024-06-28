@@ -6,7 +6,7 @@ import Image from 'next/image';
 
 import { hasContact } from '@/utils/website';
 
-import { GlobalConfigKeys, SiteInfo } from '@/types/config';
+import { GlobalConfigKeys, SiteInfoConfig } from '@/types/config';
 import { DEFAULT_LANGUAGE } from '@/types/settings';
 import { LoginConfigsResult, LoginType } from '@/types/user';
 
@@ -34,7 +34,7 @@ export default function LoginPage({
   siteInfo,
   loginConfigs,
 }: {
-  siteInfo: SiteInfo;
+  siteInfo: SiteInfoConfig;
   loginConfigs: LoginConfigsResult[];
 }) {
   const { t } = useTranslation('login');
@@ -232,8 +232,9 @@ export default function LoginPage({
 }
 
 export const getServerSideProps = async ({ locale }: { locale: string }) => {
-  const siteInfo: SiteInfo =
-    (await ConfigsManager.get(GlobalConfigKeys.siteInfo)) || {};
+  const siteInfo = await ConfigsManager.get<SiteInfoConfig>(
+    GlobalConfigKeys.siteInfo,
+  );
 
   const loginConfigList = await LoginServiceManager.findAllEnabled();
   const loginConfigs = loginConfigList.map((x) => {

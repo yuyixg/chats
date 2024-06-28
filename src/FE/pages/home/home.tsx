@@ -26,7 +26,7 @@ import { setSiteInfo } from '@/utils/website';
 
 import { Role } from '@/types/chat';
 import { ChatMessage } from '@/types/chatMessage';
-import { GlobalConfigKeys, SiteInfo } from '@/types/config';
+import { GlobalConfigKeys, SiteInfoConfig } from '@/types/config';
 import { Model, UserModelConfig } from '@/types/model';
 import { Prompt } from '@/types/prompt';
 import {
@@ -129,7 +129,7 @@ const HomeContext = createContext<HomeContextProps>(undefined!);
 
 export { initialState, HomeContext };
 
-const Home = ({ siteInfo }: { siteInfo: SiteInfo }) => {
+const Home = ({ siteInfo }: { siteInfo: SiteInfoConfig }) => {
   const router = useRouter();
   const { t } = useTranslation('chat');
   const contextValue = useCreateReducer<HomeInitialState>({
@@ -507,7 +507,7 @@ export const getServerSideProps = async ({
   locale: string;
   req: any;
 }) => {
-  const siteInfo: SiteInfo = await ConfigsManager.get(
+  const siteInfo = await ConfigsManager.get<SiteInfoConfig>(
     GlobalConfigKeys.siteInfo,
   );
   const session = await getSession(req.headers.cookie);

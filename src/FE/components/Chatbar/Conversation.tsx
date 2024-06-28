@@ -30,7 +30,6 @@ import {
   DropdownMenu,
   DropdownMenuContent,
   DropdownMenuItem,
-  DropdownMenuSeparator,
   DropdownMenuTrigger,
 } from '../ui/dropdown-menu';
 
@@ -192,7 +191,6 @@ export const ConversationComponent = ({ chat }: Props) => {
                 <IconShare size={18} />
                 {t('Share')}
               </DropdownMenuItem>
-              <DropdownMenuSeparator />
               <DropdownMenuItem
                 className="flex justify-start gap-2"
                 onClick={handleOpenDeleteModal}

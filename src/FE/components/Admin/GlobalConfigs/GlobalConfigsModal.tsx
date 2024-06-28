@@ -4,7 +4,7 @@ import toast from 'react-hot-toast';
 
 import { useTranslation } from 'next-i18next';
 
-import { GlobalConfigKeys, GlobalConfigs } from '@/types/config';
+import { GlobalConfigKeys, GlobalDefaultConfigs } from '@/types/config';
 import { GetConfigsResult, PostAndPutConfigParams } from '@/types/user';
 
 import FormSelect from '@/components/ui/form/select';
@@ -129,7 +129,7 @@ export const GlobalConfigsModal = (props: IProps) => {
     const subscription = form.watch((value, { name, type }) => {
       if (name === 'key' && type === 'change') {
         const key = value.key as GlobalConfigKeys;
-        form.setValue('value', JSON.stringify(GlobalConfigs[key], null, 2));
+        form.setValue('value', JSON.stringify(GlobalDefaultConfigs[key], null, 2));
       }
     });
     return () => subscription.unsubscribe();

@@ -14,7 +14,6 @@ import { useTranslation } from 'next-i18next';
 import { throttle } from '@/utils/throttle';
 
 import { ChatBody, Message, Role } from '@/types/chat';
-import { ModelApiConfig, UserModelConfig } from '@/types/model';
 
 import { HomeContext } from '@/pages/home/home';
 

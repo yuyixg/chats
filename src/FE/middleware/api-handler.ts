@@ -3,9 +3,11 @@ import { getSession } from '@/utils/session';
 import { replacePassword } from '@/utils/user';
 
 import { UserRole } from '@/types/admin';
+import { GlobalConfigKeys, LogsConfig } from '@/types/config';
 import { ChatsApiRequest, ChatsApiResponse } from '@/types/next-api';
 import { Session } from '@/types/session';
 
+import { ConfigsManager } from '@/managers';
 import { CreateRequestLogs, RequestLogsManager } from '@/managers/requestLogs';
 import { IncomingHttpHeaders } from 'http';
 import requestIp from 'request-ip';
@@ -63,7 +65,9 @@ export function apiHandler(handler: any) {
       request: replacePassword(JSON.stringify(request.body)),
       requestTime: new Date().getTime().toString(),
     } as CreateRequestLogs;
-
+    const logConfig = await ConfigsManager.get<LogsConfig>(
+      GlobalConfigKeys.logs,
+    );
     try {
       await authMiddleware(request);
       logs.userId = request?.session?.userId;
@@ -71,10 +75,11 @@ export function apiHandler(handler: any) {
       if (modelApis.includes(request.url!)) {
         return response.write(Buffer.from(data || ''));
       }
-      // logs.response = JSON.stringify(data);
-      // logs.responseTime = new Date().getTime().toString();
-
-      // await RequestLogsManager.create(logs);
+      if (logConfig.success) {
+        logs.response = JSON.stringify(data);
+        logs.responseTime = new Date().getTime().toString();
+        await RequestLogsManager.create(logs);
+      }
       return data
         ? response.status(200).json(data)
         : response.status(200).end();
@@ -83,14 +88,14 @@ export function apiHandler(handler: any) {
       logs.responseTime = new Date().getTime().toString();
       if (error instanceof BaseError && error.statusCode !== 500) {
         logs.statusCode = error.statusCode;
-        await RequestLogsManager.create(logs);
+        logConfig.error && (await RequestLogsManager.create(logs));
         return response
           .status(error.statusCode)
           .json({ message: error.message });
       } else {
         console.log('ERROR: \n', error);
         logs.statusCode = 500;
-        await RequestLogsManager.create(logs);
+        logConfig.error && (await RequestLogsManager.create(logs));
         return response
           .status(500)
           .json({ message: 'An unexpected error occurred' });

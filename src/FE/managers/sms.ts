@@ -39,7 +39,7 @@ export class SmsManager {
         type,
       },
     });
-    const tencentSmsConfig: TencentSmsConfig = await ConfigsManager.get(
+    const tencentSmsConfig = await ConfigsManager.get<TencentSmsConfig>(
       GlobalConfigKeys.tencentSms,
     );
     const { secretId, secretKey, sdkAppId, signName, templateId } =
