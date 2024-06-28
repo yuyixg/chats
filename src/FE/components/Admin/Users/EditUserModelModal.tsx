@@ -72,16 +72,6 @@ export const EditUserModelModal = (props: IProps) => {
 
   const onSubmit = () => {
     setSubmit(true);
-    console.log({
-      userModelId,
-      models: editModels.filter(
-        (x) =>
-          x.enabled ||
-          x.counts !== '0' ||
-          x.tokens !== '0' ||
-          x.expires !== '-',
-      ),
-    });
     putUserModel({ userModelId, models: editModels })
       .then(() => {
         toast.success(t('Save successful!'));

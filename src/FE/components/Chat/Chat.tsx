@@ -346,9 +346,7 @@ export const Chat = memo(({ stopConversationRef }: Props) => {
     throttledScrollDown();
   }, [selectMessages, throttledScrollDown]);
 
-  useEffect(() => {
-    console.log('userModelConfig \n', userModelConfig);
-  }, [userModelConfig]);
+  useEffect(() => {}, [userModelConfig]);
 
   return (
     <div className="relative flex-1 overflow-hidden bg-white dark:bg-[#262630]">

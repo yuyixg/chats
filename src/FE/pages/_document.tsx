@@ -12,8 +12,6 @@ type Props = DocumentProps & {
 };
 
 function ChatsDocument(props: Props) {
-  props.__NEXT_DATA__.props['API_URL'] = 'nice';
-  console.log(props.__NEXT_DATA__.props);
   return (
     <Html lang="zh">
       <Head>
