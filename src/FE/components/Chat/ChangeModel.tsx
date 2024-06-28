@@ -64,7 +64,7 @@ const ChangeModel = ({
           {!readonly && <IconChevronDown stroke="#7d7d7d" />}
         </Button>
       </DropdownMenuTrigger>
-      <DropdownMenuContent className=" w-48">
+      <DropdownMenuContent className="w-42">
         <DropdownMenuGroup>
           {modelGroup.map((m) => {
             return (

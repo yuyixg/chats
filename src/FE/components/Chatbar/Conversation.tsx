@@ -177,7 +177,7 @@ export const ConversationComponent = ({ chat }: Props) => {
                 <IconDots size={16} />
               </Button>
             </DropdownMenuTrigger>
-            <DropdownMenuContent>
+            <DropdownMenuContent className='w-42'>
               <DropdownMenuItem
                 className="flex justify-start gap-2"
                 onClick={handleOpenChangeTitleModal}
