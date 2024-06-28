@@ -6,6 +6,5 @@ export const DEFAULT_LANGUAGE = 'zh';
 export const DEFAULT_THEME = 'light';
 
 export interface Settings {
-  theme: (typeof Themes)[number];
   language: (typeof Languages)[number];
 }

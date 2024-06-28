@@ -1,4 +1,4 @@
-import { useContext, useEffect, useState } from 'react';
+import { useContext, useEffect } from 'react';
 import { useForm } from 'react-hook-form';
 
 import { useTranslation } from 'next-i18next';
@@ -26,18 +26,25 @@ const SettingsTabContent = () => {
   });
 
   const { dispatch: homeDispatch } = useContext(HomeContext);
+  const getStorageTheme = () => {
+    return localStorage.getItem('theme') || 'light';
+  };
+  
   const formSchema = z.object({
     theme: z.string(),
     language: z.string(),
   });
   const { setTheme } = useTheme();
+
   const form = useForm<z.infer<typeof formSchema>>({
     resolver: zodResolver(formSchema),
-    defaultValues: { theme: state.theme, language: '' },
+    defaultValues: {
+      theme: getStorageTheme(),
+      language: '',
+    },
   });
 
   const onSubmit = (values: z.infer<typeof formSchema>) => {
-    homeDispatch({ field: 'theme', value: values.theme });
     homeDispatch({ field: 'language', value: values.language });
     saveSettings(values);
     setTheme(values.theme);
@@ -46,7 +53,7 @@ const SettingsTabContent = () => {
   useEffect(() => {
     form.formState.isValid;
     form.reset();
-    form.setValue('theme', state.theme);
+    form.setValue('theme', getStorageTheme());
 
     const subscription = form.watch((value, { name, type }) => {
       form.handleSubmit(onSubmit)();

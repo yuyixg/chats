@@ -11,8 +11,8 @@ import {
   IconSquarePlus,
 } from '@/components/Icons/index';
 
-import Tips from '../Tips/Tips';
 import Search from '../Search';
+import Tips from '../Tips/Tips';
 import { Button } from '../ui/button';
 
 import { cn } from '@/lib/utils';
@@ -68,12 +68,7 @@ const Sidebar = <T,>({
               <Button
                 variant="ghost"
                 className="p-1 m-0 h-auto"
-                onClick={() => {
-                  homeDispatch({
-                    field: side === 'right' ? 'showPromptbar' : 'showChatbar',
-                    value: false,
-                  });
-                }}
+                onClick={toggleOpen}
               >
                 {side === 'right' ? (
                   <IconLayoutSidebarRight stroke="#7d7d7d" size={26} />

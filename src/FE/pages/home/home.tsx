@@ -63,7 +63,6 @@ interface HandleUpdateChatParams {
 interface HomeInitialState {
   user: UserSession | null;
   loading: boolean;
-  theme: (typeof Themes)[number];
   language: (typeof Languages)[number];
   messageIsStreaming: boolean;
   models: Model[];
@@ -86,7 +85,6 @@ interface HomeInitialState {
 const initialState: HomeInitialState = {
   user: null,
   loading: false,
-  theme: DEFAULT_THEME,
   language: DEFAULT_LANGUAGE,
   messageIsStreaming: false,
   currentMessages: [],
@@ -372,15 +370,7 @@ const Home = ({ siteInfo }: { siteInfo: SiteInfoConfig }) => {
 
   useEffect(() => {
     setSiteInfo(siteInfo);
-    const settings = getSettings();
-    if (settings.theme) {
-      dispatch({
-        field: 'theme',
-        value: settings.theme,
-      });
-      setTheme(settings.theme);
-    }
-
+    const settings = getSettings()
     if (settings.language) {
       dispatch({
         field: 'language',
