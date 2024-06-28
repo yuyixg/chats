@@ -149,7 +149,6 @@ export default function Users() {
               </TableHead>
               <TableHead>{t('Model Count')}</TableHead>
               <TableHead>{t('Created Time')}</TableHead>
-              <TableHead className="w-16"></TableHead>
             </TableRow>
           </TableHeader>
           <TableBody

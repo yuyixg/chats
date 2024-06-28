@@ -124,10 +124,10 @@ export const ChatMessage: FC<Props> = memo(
       }
     };
 
-    const copyOnClick = () => {
+    const copyOnClick = (content?: string) => {
       if (!navigator.clipboard) return;
 
-      navigator.clipboard.writeText(message.content.text || '').then(() => {
+      navigator.clipboard.writeText(content || '').then(() => {
         setMessageCopied(true);
         setTimeout(() => {
           setMessageCopied(false);
@@ -168,88 +168,87 @@ export const ChatMessage: FC<Props> = memo(
       >
         <div className="relative m-auto flex px-4 py-[10px] text-base md:max-w-2xl lg:max-w-2xl lg:px-0 xl:max-w-5xl">
           <div className="min-w-[28px] text-right font-bold">
-            {message.role === 'assistant' ? (
-              <IconRobot size={28} />
-            ) : (
-              <IconUser size={28} />
-            )}
+            {message.role === 'assistant' && <IconRobot size={28} />}
           </div>
 
-          <div className="prose mt-[2px] px-4 w-full dark:prose-invert">
+          <div className="prose mt-[2px] w-full px-4 dark:prose-invert">
             {message.role === 'user' ? (
               <>
-                {isEditing ? (
-                  <div className="flex w-full flex-col">
-                    <textarea
-                      ref={textareaRef}
-                      className="w-full outline-none resize-none whitespace-pre-wrap border-none rounded-md bg-[#ececec] dark:bg-[#262630]"
-                      value={messageContent.text}
-                      onChange={handleInputChange}
-                      onKeyDown={handlePressEnter}
-                      onCompositionStart={() => setIsTyping(true)}
-                      onCompositionEnd={() => setIsTyping(false)}
-                      style={{
-                        fontFamily: 'inherit',
-                        fontSize: 'inherit',
-                        lineHeight: 'inherit',
-                        padding: '8px',
-                        margin: '0',
-                        overflow: 'hidden',
-                      }}
-                    />
-
-                    <div className="mt-10 flex justify-center space-x-4">
-                      <Button
-                        variant="default"
-                        className="h-[40px] rounded-md px-4 py-1 text-sm font-medium"
-                        onClick={handleEditMessage}
-                        disabled={
-                          (messageContent.text || '')?.trim().length <= 0
-                        }
-                      >
-                        {t('Send')}
-                      </Button>
-                      <Button
-                        variant="outline"
-                        className="h-[40px] rounded-md border border-neutral-300 px-4 py-1 text-sm font-medium text-neutral-700 hover:bg-neutral-100 dark:border-neutral-700 dark:text-neutral-300 dark:hover:bg-neutral-800"
-                        onClick={() => {
-                          setMessageContent(message.content);
-                          setIsEditing(false);
+                <div className="flex flex-row-reverse">
+                  {isEditing ? (
+                    <div className="flex w-full flex-col">
+                      <textarea
+                        ref={textareaRef}
+                        className="w-full outline-none resize-none whitespace-pre-wrap border-none rounded-md bg-[#ececec] dark:bg-[#2f2f2f]"
+                        value={messageContent.text}
+                        onChange={handleInputChange}
+                        onKeyDown={handlePressEnter}
+                        onCompositionStart={() => setIsTyping(true)}
+                        onCompositionEnd={() => setIsTyping(false)}
+                        style={{
+                          fontFamily: 'inherit',
+                          fontSize: 'inherit',
+                          lineHeight: 'inherit',
+                          padding: '8px',
+                          paddingBottom: '60px',
+                          margin: '0',
+                          overflow: 'hidden',
                         }}
-                      >
-                        {t('Cancel')}
-                      </Button>
-                    </div>
-                  </div>
-                ) : (
-                  <div>
-                    <div className="flex flex-wrap gap-2">
-                      {message.content?.image &&
-                        message.content.image.map((img, index) => (
-                          <img
-                            className="rounded-md mr-2"
-                            key={index}
-                            style={{ maxWidth: 268, maxHeight: 168 }}
-                            src={img}
-                            alt=""
-                          />
-                        ))}
-                    </div>
-                    <div
-                      className={`prose whitespace-pre-wrap dark:prose-invert ${
-                        message.content?.image &&
-                        message.content.image.length > 0
-                          ? 'mt-2'
-                          : ''
-                      }`}
-                    >
-                      {message.content.text}
-                    </div>
-                  </div>
-                )}
+                      />
 
-                {!isEditing && (
-                  <div className="flex">
+                      <div className="absolute right-10 bottom-6  md:right-20 md:bottom-7 flex justify-end space-x-4">
+                        <Button
+                          variant="default"
+                          className="rounded-md px-4 py-1 text-sm font-medium"
+                          onClick={handleEditMessage}
+                          disabled={
+                            (messageContent.text || '')?.trim().length <= 0
+                          }
+                        >
+                          {t('Send')}
+                        </Button>
+                        <Button
+                          variant="outline"
+                          className="rounded-md border border-neutral-300 px-4 py-1 text-sm font-medium text-neutral-700 hover:bg-neutral-100 dark:border-neutral-700 dark:text-neutral-300 dark:hover:bg-neutral-800"
+                          onClick={() => {
+                            setMessageContent(message.content);
+                            setIsEditing(false);
+                          }}
+                        >
+                          {t('Cancel')}
+                        </Button>
+                      </div>
+                    </div>
+                  ) : (
+                    <div className="bg-[#ececec]/40 dark:bg-[#2f2f2f] py-2 px-3 rounded-md">
+                      <div className="flex flex-wrap justify-end text-right gap-2">
+                        {message.content?.image &&
+                          message.content.image.map((img, index) => (
+                            <img
+                              className="rounded-md mr-2"
+                              key={index}
+                              style={{ maxWidth: 268, maxHeight: 168 }}
+                              src={img}
+                              alt=""
+                            />
+                          ))}
+                      </div>
+                      <div
+                        className={`prose whitespace-pre-wrap dark:prose-invert ${
+                          message.content?.image &&
+                          message.content.image.length > 0
+                            ? 'mt-2'
+                            : ''
+                        }`}
+                      >
+                        {message.content.text}
+                      </div>
+                    </div>
+                  )}
+                </div>
+
+                <div className="flex justify-end pt-1">
+                  {!isEditing && (
                     <>
                       {parentChildrenIds.length > 1 && (
                         <div className="flex text-sm items-center ml-[-8px]">
@@ -292,23 +291,45 @@ export const ChatMessage: FC<Props> = memo(
                           </Button>
                         </div>
                       )}
-                    </>
-                    <Tips
-                      className="h-[28px]"
-                      trigger={
-                        <Button
-                          variant="ghost"
-                          disabled={messageIsStreaming}
-                          className="p-1 m-0 h-auto invisible group-hover:visible focus:visible"
-                          onClick={toggleEditing}
-                        >
-                          <IconEdit stroke="#7d7d7d" />
+                      <Tips
+                        className="h-[28px]"
+                        trigger={
+                          <Button
+                            variant="ghost"
+                            disabled={messageIsStreaming}
+                            className="p-1 m-0 h-auto invisible group-hover:visible focus:visible"
+                            onClick={toggleEditing}
+                          >
+                            <IconEdit stroke="#7d7d7d" />
+                          </Button>
+                        }
+                        content={t('Edit message')!}
+                      />
+                      {messagedCopied ? (
+                        <Button variant="ghost" className="p-1 m-0 h-auto">
+                          <IconCheck
+                            stroke="#7d7d7d"
+                            className="text-green-500 dark:text-green-400"
+                          />
                         </Button>
-                      }
-                      content={t('Edit message')!}
-                    />
-                  </div>
-                )}
+                      ) : (
+                        <Tips
+                          className="h-[28px]"
+                          trigger={
+                            <Button
+                              variant="ghost"
+                              className="p-1 m-0 h-auto invisible group-hover:visible focus:visible"
+                              onClick={() => copyOnClick(message.content.text)}
+                            >
+                              <IconCopy stroke="#7d7d7d" />
+                            </Button>
+                          }
+                          content={t('Copy')!}
+                        />
+                      )}
+                    </>
+                  )}
+                </div>
               </>
             ) : (
               <>
@@ -381,7 +402,7 @@ export const ChatMessage: FC<Props> = memo(
                 </div>
 
                 {!messageIsStreaming ? (
-                  <div className="flex gap-1 pt-2 flex-wrap">
+                  <div className="flex gap-1 flex-wrap">
                     {assistantChildrenIds.length > 1 && (
                       <div className="flex text-sm items-center ml-[-8px]">
                         <Button
@@ -444,7 +465,7 @@ export const ChatMessage: FC<Props> = memo(
                             <Button
                               variant="ghost"
                               className="p-1 m-0 h-auto"
-                              onClick={copyOnClick}
+                              onClick={() => copyOnClick(message.content.text)}
                             >
                               <IconCopy stroke="#7d7d7d" />
                             </Button>
@@ -555,7 +576,7 @@ export const ChatMessage: FC<Props> = memo(
                     </div>
                   </div>
                 ) : (
-                  <div className="min-h-[20px]"></div>
+                  <div className="h-9"></div>
                 )}
               </>
             )}

@@ -161,6 +161,7 @@ const handler = async (req: ChatsApiRequest, res: ChatsApiResponse) => {
   function convertMessageToSend(messageContent: Content, role: Role = 'user') {
     return { role, content: messageContent.text } as GPT4Message;
   }
+
   function convertToGPTVisionMessage(
     messageContent: Content,
     role: Role = 'user',
@@ -175,6 +176,7 @@ const handler = async (req: ChatsApiRequest, res: ChatsApiResponse) => {
     });
     return message;
   }
+
   function convertHunYuanMessageToSend(
     messageContent: Content,
     Role: Role = 'user',
@@ -198,6 +200,21 @@ const handler = async (req: ChatsApiRequest, res: ChatsApiResponse) => {
       content.push({ text: messageContent.text });
     }
     return { role, content: content } as QianWenMessage;
+  }
+
+  function transformToSSE({
+    result,
+    success = true,
+  }: {
+    result?: string;
+    success?: boolean;
+  }) {
+    return Buffer.from(
+      `data:${JSON.stringify({
+        result: result || '',
+        success,
+      })}\n`,
+    );
   }
 
   const allMessages = [...messages, ...systemMessages].reverse();
@@ -424,26 +441,13 @@ const handler = async (req: ChatsApiRequest, res: ChatsApiResponse) => {
             });
             return res.end();
           }
-          res.write(
-            Buffer.from(
-              `data:${JSON.stringify({
-                result: result.text,
-                success: true,
-              })}\n`,
-            ),
-          );
+          res.write(Buffer.from(transformToSSE({ result: result.text })));
         }
       };
       try {
         await streamResponse();
       } catch (error: any) {
-        res.write(
-          Buffer.from(
-            `data:${JSON.stringify({
-              success: false,
-            })}\n`,
-          ),
-        );
+        res.write(transformToSSE({ success: false }));
         throw new InternalServerError(
           JSON.stringify({
             message: typeof error === 'string' ? error : JSON.stringify(error),
@@ -456,13 +460,7 @@ const handler = async (req: ChatsApiRequest, res: ChatsApiResponse) => {
     if (lastMessage && lastMessage.id !== messageId) {
       await ChatMessagesManager.delete(lastMessage.id, userId);
     }
-    res.write(
-      Buffer.from(
-        `data:${JSON.stringify({
-          success: false,
-        })}\n`,
-      ),
-    );
+    res.write(Buffer.from(transformToSSE({ success: false })));
     throw new InternalServerError(
       JSON.stringify({
         message: typeof error === 'string' ? error : JSON.stringify(error),
