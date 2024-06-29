@@ -16,7 +16,8 @@ export const useFetch = () => {
     request: any,
     signal?: AbortSignal,
   ) => {
-    const apiUrl = `${(window as any)['API_URL'] || ''}${url}`;
+    const apiPrefix = (window as any)['API_URL'] || '';
+    const apiUrl = `${apiPrefix}${url}`;
     const requestUrl = request?.params ? `${apiUrl}${request.params}` : apiUrl;
 
     const requestBody = request?.body
@@ -29,9 +30,10 @@ export const useFetch = () => {
       ...(request?.headers
         ? request.headers
         : request?.body && request.body instanceof FormData
-        ? {}
-        : { 'Content-type': 'application/json' }),
+          ? {}
+          : { 'Content-type': 'application/json' }),
     };
+    if (apiPrefix) { headers.credentials = 'include'; }
 
     return fetch(requestUrl, { ...requestBody, headers, signal })
       .then((response) => {
@@ -49,12 +51,12 @@ export const useFetch = () => {
 
         const result =
           contentType &&
-          (contentType?.indexOf('application/json') !== -1 ||
-            contentType?.indexOf('text/plain') !== -1)
+            (contentType?.indexOf('application/json') !== -1 ||
+              contentType?.indexOf('text/plain') !== -1)
             ? response.json()
             : contentDisposition?.indexOf('attachment') !== -1
-            ? response.blob()
-            : response;
+              ? response.blob()
+              : response;
 
         return result;
       })
