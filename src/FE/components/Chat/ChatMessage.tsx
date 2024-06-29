@@ -159,11 +159,10 @@ export const ChatMessage: FC<Props> = memo(
 
     return (
       <div
-        className={`group md:px-4 ${
-          message.role === 'assistant'
-            ? 'text-gray-800 dark:text-gray-100'
-            : 'text-gray-800 dark:text-gray-100'
-        }`}
+        className={`group md:px-4 ${message.role === 'assistant'
+          ? 'text-gray-800 dark:text-gray-100'
+          : 'text-gray-800 dark:text-gray-100'
+          }`}
         style={{ overflowWrap: 'anywhere' }}
       >
         <div className="relative m-auto flex px-4 py-[10px] text-base md:max-w-2xl lg:max-w-2xl lg:px-0 xl:max-w-5xl">
@@ -234,12 +233,11 @@ export const ChatMessage: FC<Props> = memo(
                           ))}
                       </div>
                       <div
-                        className={`prose whitespace-pre-wrap dark:prose-invert ${
-                          message.content?.image &&
+                        className={`prose whitespace-pre-wrap dark:prose-invert ${message.content?.image &&
                           message.content.image.length > 0
-                            ? 'mt-2'
-                            : ''
-                        }`}
+                          ? 'mt-2'
+                          : ''
+                          }`}
                       >
                         {message.content.text}
                       </div>
@@ -268,16 +266,15 @@ export const ChatMessage: FC<Props> = memo(
                             <IconChevronLeft stroke="#7d7d7d" />
                           </Button>
                           <span className="font-bold text-[#7d7d7d]">
-                            {`${currentSelectIndex + 1}/${
-                              parentChildrenIds.length
-                            }`}
+                            {`${currentSelectIndex + 1}/${parentChildrenIds.length
+                              }`}
                           </span>
                           <Button
                             variant="ghost"
                             className="p-1 m-0 h-auto disabled:opacity-50"
                             disabled={
                               currentSelectIndex ===
-                                parentChildrenIds.length - 1 ||
+                              parentChildrenIds.length - 1 ||
                               messageIsStreaming
                             }
                             onClick={() => {
@@ -393,11 +390,10 @@ export const ChatMessage: FC<Props> = memo(
                       },
                     }}
                   >
-                    {`${message.content.text}${
-                      messageIsStreaming && message.id == currentChatMessageId
-                        ? '`▍`'
-                        : ''
-                    }`}
+                    {`${message.content.text}${messageIsStreaming && message.id == currentChatMessageId
+                      ? '`▍`'
+                      : ''
+                      }`}
                   </MemoizedReactMarkdown>
                 </div>
 
@@ -422,16 +418,15 @@ export const ChatMessage: FC<Props> = memo(
                           <IconChevronLeft stroke="#7d7d7d" />
                         </Button>
                         <span className="font-bold text-[#7d7d7d]">
-                          {`${assistantCurrentSelectIndex + 1}/${
-                            assistantChildrenIds.length
-                          }`}
+                          {`${assistantCurrentSelectIndex + 1}/${assistantChildrenIds.length
+                            }`}
                         </span>
                         <Button
                           variant="ghost"
                           className="p-1 m-0 h-auto"
                           disabled={
                             assistantCurrentSelectIndex ===
-                              assistantChildrenIds.length - 1 ||
+                            assistantChildrenIds.length - 1 ||
                             messageIsStreaming
                           }
                           onClick={() => {
@@ -494,41 +489,7 @@ export const ChatMessage: FC<Props> = memo(
                                 <div className="grid grid-cols-1 items-center">
                                   <GenerateInformation
                                     name={'duration'}
-                                    value={message?.duration + 'ms'}
-                                  />
-                                  <GenerateInformation
-                                    name={'speed'}
-                                    value={
-                                      message?.duration
-                                        ? (
-                                            (message.outputTokens /
-                                              (message?.duration || 0)) *
-                                            1000
-                                          ).toFixed(2) + ' tokens/s'
-                                        : '-'
-                                    }
-                                  />
-                                  <GenerateInformation
-                                    name={'total_price'}
-                                    value={formatNumberAsMoney(
-                                      +message.inputPrice +
-                                        +message.outputPrice,
-                                      6,
-                                    )}
-                                  />
-                                  <GenerateInformation
-                                    name={'prompt_price'}
-                                    value={formatNumberAsMoney(
-                                      +message.inputPrice,
-                                      6,
-                                    )}
-                                  />
-                                  <GenerateInformation
-                                    name={'response_price'}
-                                    value={formatNumberAsMoney(
-                                      +message.outputPrice,
-                                      6,
-                                    )}
+                                    value={message?.duration?.toLocaleString() + 'ms'}
                                   />
                                   <GenerateInformation
                                     name={'prompt_tokens'}
@@ -537,6 +498,44 @@ export const ChatMessage: FC<Props> = memo(
                                   <GenerateInformation
                                     name={'response_tokens'}
                                     value={`${message.outputTokens}`}
+                                  />
+                                  <GenerateInformation
+                                    name={'total_tokens'}
+                                    value={`${message.inputTokens + message.outputTokens}`}
+                                  />
+                                  <GenerateInformation
+                                    name={'speed'}
+                                    value={
+                                      message?.duration
+                                        ? (
+                                          (message.outputTokens /
+                                            (message?.duration || 0)) *
+                                          1000
+                                        ).toFixed(2) + ' tokens/s'
+                                        : '-'
+                                    }
+                                  />
+                                  <GenerateInformation
+                                    name={'prompt_price'}
+                                    value={'￥' + formatNumberAsMoney(
+                                      +message.inputPrice,
+                                      6,
+                                    )}
+                                  />
+                                  <GenerateInformation
+                                    name={'response_price'}
+                                    value={'￥' + formatNumberAsMoney(
+                                      +message.outputPrice,
+                                      6,
+                                    )}
+                                  />
+                                  <GenerateInformation
+                                    name={'total_price'}
+                                    value={'￥' + formatNumberAsMoney(
+                                      +message.inputPrice +
+                                      +message.outputPrice,
+                                      6,
+                                    )}
                                   />
                                 </div>
                               </div>

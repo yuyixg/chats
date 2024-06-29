@@ -64,6 +64,7 @@ export class ChatMessagesManager {
         role: x.role,
         content: JSON.parse(x.messages),
         modelName: chatModels.find((m) => m.id === x.chatModelId)?.name,
+        duration: x.duration,
       } as MessageNode;
     });
     return calculateMessages(messages);

@@ -2,13 +2,14 @@ import { FC, memo, useEffect, useRef, useState } from 'react';
 
 import { useTranslation } from 'next-i18next';
 
-import { Message } from '@/types/chat';
+import { Content, Message, Role } from '@/types/chat';
 
 import {
   IconCheck,
   IconChevronLeft,
   IconChevronRight,
   IconCopy,
+  IconInfo,
   IconRobot,
   IconUser,
 } from '@/components/Icons/index';
@@ -20,6 +21,21 @@ import { Button } from '../../ui/button';
 import rehypeMathjax from 'rehype-mathjax';
 import remarkGfm from 'remark-gfm';
 import remarkMath from 'remark-math';
+import Tips from '@/components/Tips/Tips';
+import { Label } from '@/components/ui/label';
+import { formatNumberAsMoney } from '@/utils/common';
+import Decimal from 'decimal.js';
+
+interface PropsMessage {
+  id: string;
+  role: Role;
+  content: Content;
+  inputTokens: number;
+  outputTokens: number;
+  inputPrice: Decimal;
+  outputPrice: Decimal;
+  duration?: number;
+}
 
 export interface Props {
   id: string;
@@ -31,7 +47,7 @@ export interface Props {
   assistantCurrentSelectIndex: number;
   parentChildrenIds: string[];
   modelName?: string;
-  message: Message;
+  message: PropsMessage;
   onChangeMessage?: (messageId: string) => void;
   onEdit?: (editedMessage: Message, parentId: string | null) => void;
   onRegenerate?: (modelId?: string) => void;
@@ -50,6 +66,7 @@ export const ChatMessage: FC<Props> = memo(
     onChangeMessage,
   }) => {
     const [messagedCopied, setMessageCopied] = useState(false);
+    const { t } = useTranslation('chat');
 
     const copyOnClick = () => {
       if (!navigator.clipboard) return;
@@ -62,13 +79,23 @@ export const ChatMessage: FC<Props> = memo(
       });
     };
 
+    const GenerateInformation = (props: { name: string; value: string }) => {
+      const { name, value } = props;
+      return (
+        <Label key={name} className="text-xs">
+          {t(name)}
+          {': '}
+          {value}
+        </Label>
+      );
+    };
+
     return (
       <div
-        className={`group md:px-4 ${
-          message.role === 'assistant'
-            ? 'text-gray-800 dark:text-gray-100'
-            : 'text-gray-800 dark:text-gray-100'
-        }`}
+        className={`group md:px-4 ${message.role === 'assistant'
+          ? 'text-gray-800 dark:text-gray-100'
+          : 'text-gray-800 dark:text-gray-100'
+          }`}
         style={{ overflowWrap: 'anywhere' }}
       >
         <div className="relative m-auto flex px-4 py-[10px] text-base md:max-w-2xl lg:max-w-2xl lg:px-0 xl:max-w-5xl">
@@ -97,11 +124,10 @@ export const ChatMessage: FC<Props> = memo(
                       ))}
                   </div>
                   <div
-                    className={`prose whitespace-pre-wrap dark:prose-invert ${
-                      message.content?.image && message.content.image.length > 0
-                        ? 'mt-2'
-                        : ''
-                    }`}
+                    className={`prose whitespace-pre-wrap dark:prose-invert ${message.content?.image && message.content.image.length > 0
+                      ? 'mt-2'
+                      : ''
+                      }`}
                   >
                     {message.content.text}
                   </div>
@@ -125,9 +151,8 @@ export const ChatMessage: FC<Props> = memo(
                           <IconChevronLeft stroke="#7d7d7d" />
                         </Button>
                         <span className="font-bold text-[#7d7d7d]">
-                          {`${currentSelectIndex + 1}/${
-                            parentChildrenIds.length
-                          }`}
+                          {`${currentSelectIndex + 1}/${parentChildrenIds.length
+                            }`}
                         </span>
                         <Button
                           variant="ghost"
@@ -232,9 +257,8 @@ export const ChatMessage: FC<Props> = memo(
                         <IconChevronLeft stroke="#7d7d7d" />
                       </Button>
                       <span className="font-bold text-[#7d7d7d]">
-                        {`${assistantCurrentSelectIndex + 1}/${
-                          assistantChildrenIds.length
-                        }`}
+                        {`${assistantCurrentSelectIndex + 1}/${assistantChildrenIds.length
+                          }`}
                       </span>
                       <Button
                         variant="ghost"
@@ -255,9 +279,8 @@ export const ChatMessage: FC<Props> = memo(
                     </div>
                   )}
                   <div
-                    className={`flex gap-1 ${
-                      isLastMessage ? 'visible' : 'invisible'
-                    } group-hover:visible focus:visible`}
+                    className={`flex gap-1 ${isLastMessage ? 'visible' : 'invisible'
+                      } group-hover:visible focus:visible`}
                   >
                     {messagedCopied ? (
                       <Button variant="ghost" className="p-1 m-0 h-auto">
@@ -275,6 +298,81 @@ export const ChatMessage: FC<Props> = memo(
                         <IconCopy stroke="#7d7d7d" />
                       </Button>
                     )}
+
+                    <Tips
+                      className="h-[28px]"
+                      trigger={
+                        <Button variant="ghost" className="p-1 m-0 h-auto">
+                          <IconInfo stroke="#7d7d7d" />
+                        </Button>
+                      }
+                      content={
+                        <div className="w-50">
+                          <div className="grid gap-4">
+                            <div className="pt-1 pb-2">
+                              <Label className="font-medium">
+                                {t('Generate information')}
+                              </Label>
+                            </div>
+                          </div>
+                          <div className="grid">
+                            <div className="grid grid-cols-1 items-center">
+                              <GenerateInformation
+                                name={'duration'}
+                                value={message?.duration?.toLocaleString() + 'ms'}
+                              />
+                              <GenerateInformation
+                                name={'prompt_tokens'}
+                                value={`${message.inputTokens}`}
+                              />
+                              <GenerateInformation
+                                name={'response_tokens'}
+                                value={`${message.outputTokens}`}
+                              />
+                              <GenerateInformation
+                                name={'total_tokens'}
+                                value={`${message.inputTokens + message.outputTokens}`}
+                              />
+                              <GenerateInformation
+                                name={'speed'}
+                                value={
+                                  message?.duration
+                                    ? (
+                                      (message.outputTokens /
+                                        (message?.duration || 0)) *
+                                      1000
+                                    ).toFixed(2) + ' tokens/s'
+                                    : '-'
+                                }
+                              />
+                              <GenerateInformation
+                                name={'prompt_price'}
+                                value={'￥' + formatNumberAsMoney(
+                                  +message.inputPrice,
+                                  6,
+                                )}
+                              />
+                              <GenerateInformation
+                                name={'response_price'}
+                                value={'￥' + formatNumberAsMoney(
+                                  +message.outputPrice,
+                                  6,
+                                )}
+                              />
+                              <GenerateInformation
+                                name={'total_price'}
+                                value={'￥' + formatNumberAsMoney(
+                                  +message.inputPrice +
+                                  +message.outputPrice,
+                                  6,
+                                )}
+                              />
+                            </div>
+                          </div>
+                        </div>
+                      }
+                    />
+
                     <Button variant="ghost" className="p-1 m-0 h-auto">
                       {modelName}
                     </Button>
