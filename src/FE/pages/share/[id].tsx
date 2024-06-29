@@ -78,7 +78,16 @@ export default function ShareMessage() {
                   (x) => x === current.id,
                 )}
                 modelName={current.modelName}
-                message={{ role: current.role, content: current.content }}
+                message={{
+                  id: current.id!,
+                  role: current.role,
+                  content: current.content,
+                  duration: current.duration,
+                  inputTokens: current.inputTokens,
+                  outputTokens: current.outputTokens,
+                  inputPrice: current.inputPrice,
+                  outputPrice: current.outputPrice,
+                }}
               />
             );
           })}
