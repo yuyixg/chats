@@ -1,7 +1,7 @@
+import { UserRole } from '@/types/admin';
 import { Session } from '@/types/session';
 
 import Cookies from './cookie';
-import { UserRole } from '@/types/admin';
 
 export interface UserSession {
   sessionId: string;
@@ -15,6 +15,11 @@ export interface UserInfo {
   username: string;
   role: string;
   canRecharge: boolean;
+}
+
+export interface StorageSession {
+  sessionId: string;
+  expires: number;
 }
 
 export const saveUserInfo = (user: UserInfo) => {
@@ -38,19 +43,27 @@ export const getLoginUrl = (locale?: string) => {
   return '/login';
 };
 
-export const setUserSessionId = (sessionId: string) => {
+export const setUserSession = (sessionId: string) => {
   let expires = new Date();
   expires.setMinutes(expires.getMinutes() + 10080);
-  Cookies.setItem('sessionId', sessionId, expires, '/');
+  localStorage.setItem(
+    'session',
+    JSON.stringify({
+      sessionId,
+      expires: expires.getTime(),
+    }),
+  );
 };
 
-export const getUserSessionId = () => {
-  return Cookies.getItem('sessionId');
+export const getUserSession = () => {
+  const session = JSON.parse(localStorage.getItem('session') || '{}');
+  if (session?.expires && session?.expires > new Date().getTime())
+    return session.sessionId;
+  return '';
 };
 
-export const clearUserSessionId = () => {
-  const user = getUserInfo();
-  user && Cookies.removeItem('sessionId', '/');
+export const clearUserSession = () => {
+  localStorage.removeItem('session');
 };
 
 export function replacePassword(value: string): string {

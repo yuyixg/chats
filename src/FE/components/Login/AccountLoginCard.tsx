@@ -5,7 +5,7 @@ import toast from 'react-hot-toast';
 import { useTranslation } from 'next-i18next';
 import { useRouter } from 'next/router';
 
-import { saveUserInfo, setUserSessionId } from '@/utils/user';
+import { saveUserInfo, setUserSession } from '@/utils/user';
 
 import { Button } from '@/components/ui/button';
 import { Form, FormField } from '@/components/ui/form';
@@ -74,7 +74,7 @@ const AccountLoginCard = (props: {
     const { username, password } = values;
     singIn({ username, password })
       .then((response) => {
-        setUserSessionId(response.sessionId);
+        setUserSession(response.sessionId);
         saveUserInfo({
           canRecharge: response.canRecharge,
           role: response.role,

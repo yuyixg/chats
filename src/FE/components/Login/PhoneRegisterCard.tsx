@@ -6,7 +6,7 @@ import { useTranslation } from 'next-i18next';
 import { useRouter } from 'next/router';
 
 import { PhoneRegExp, SmsExpirationSeconds } from '@/utils/common';
-import { saveUserInfo, setUserSessionId } from '@/utils/user';
+import { saveUserInfo, setUserSession } from '@/utils/user';
 
 import { SmsType } from '@/types/user';
 
@@ -127,7 +127,7 @@ const PhoneRegisterCard = (props: {
       openLoading();
       registerByPhone(phone, smsCode, invitationCode)
         .then((response) => {
-          setUserSessionId(response.sessionId);
+          setUserSession(response.sessionId);
           saveUserInfo({
             canRecharge: response.canRecharge,
             role: response.role,

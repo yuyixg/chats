@@ -5,7 +5,7 @@ import toast from 'react-hot-toast';
 import { useTranslation } from 'next-i18next';
 import { useRouter } from 'next/router';
 
-import { clearUserInfo, clearUserSessionId, getLoginUrl } from '@/utils/user';
+import { clearUserInfo, clearUserSession, getLoginUrl } from '@/utils/user';
 
 import { Button } from '../ui/button';
 import { DialogFooter } from '../ui/dialog';
@@ -81,7 +81,7 @@ export const ChangePasswordTabContent = () => {
     changeUserPassword(password)
       .then(() => {
         toast.success(t('Modified successfully!'));
-        clearUserSessionId();
+        clearUserSession();
         clearUserInfo();
         router.push(getLoginUrl());
         setLoading(false);

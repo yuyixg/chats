@@ -1,4 +1,4 @@
-import { getLoginUrl } from '@/utils/user';
+import { getLoginUrl, getUserSession } from '@/utils/user';
 
 export type RequestModel = {
   params?: object;
@@ -33,7 +33,11 @@ export const useFetch = () => {
         : { 'Content-type': 'application/json' }),
     };
 
-    return fetch(requestUrl, { ...requestBody, headers, signal })
+    return fetch(requestUrl, {
+      ...requestBody,
+      headers: { ...headers, Authorization: `Bearer ${getUserSession()}` },
+      signal,
+    })
       .then((response) => {
         if (!response.ok) {
           if (response.status === 401) {

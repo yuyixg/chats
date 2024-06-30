@@ -1,37 +1,12 @@
 import { SessionsManager } from '@/managers';
+import { IncomingHttpHeaders } from 'http';
 
-function getCookieSessionId(
-  cookies:
-    | Partial<{
-        [key: string]: string;
-      }>
-    | string,
-) {
-  if (typeof cookies === 'object') {
-    return cookies['sessionId'] || null;
-  }
-  var name = 'sessionId' + '=';
-  var decodedCookie = decodeURIComponent(cookies);
-  var ca = decodedCookie.split(';');
-  for (var i = 0; i < ca.length; i++) {
-    var c = ca[i];
-    while (c.charAt(0) == ' ') {
-      c = c.substring(1);
-    }
-    if (c.indexOf(name) == 0) {
-      return c.substring(name.length, c.length);
-    }
-  }
-  return null;
+function getHeaderSessionId(headers: IncomingHttpHeaders) {
+  return headers.authorization?.substring(7);
 }
-export async function getSession(
-  cookies:
-    | Partial<{
-        [key: string]: string;
-      }>
-    | string,
-) {
-  const sessionId = getCookieSessionId(cookies);
+
+export async function getSession(headers: IncomingHttpHeaders) {
+  const sessionId = getHeaderSessionId(headers);
   if (!sessionId) {
     return null;
   }

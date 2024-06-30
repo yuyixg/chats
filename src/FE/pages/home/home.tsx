@@ -20,7 +20,7 @@ import { getStorageModelId, setStorageModelId } from '@/utils/model';
 import { formatPrompt } from '@/utils/promptVariable';
 import { getSession } from '@/utils/session';
 import { getSettings, getSettingsLanguage } from '@/utils/settings';
-import { getLoginUrl, getUserInfo, getUserSessionId } from '@/utils/user';
+import { getLoginUrl, getUserInfo, getUserSession } from '@/utils/user';
 import { UserSession } from '@/utils/user';
 import { setSiteInfo } from '@/utils/website';
 
@@ -391,7 +391,7 @@ const Home = ({ siteInfo }: { siteInfo: SiteInfoConfig }) => {
 
   useEffect(() => {
     const session = getUserInfo();
-    const sessionId = getUserSessionId();
+    const sessionId = getUserSession();
     if (session && sessionId) {
       setTimeout(() => {
         dispatch({ field: 'user', value: session });

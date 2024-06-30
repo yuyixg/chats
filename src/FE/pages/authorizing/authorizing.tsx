@@ -7,7 +7,7 @@ import { useTranslation } from 'next-i18next';
 import { serverSideTranslations } from 'next-i18next/serverSideTranslations';
 import { useRouter } from 'next/router';
 
-import { saveUserInfo, setUserSessionId } from '@/utils/user';
+import { saveUserInfo, setUserSession } from '@/utils/user';
 
 import { DEFAULT_LANGUAGE } from '@/types/settings';
 
@@ -28,7 +28,7 @@ export default function Authorizing(props: { session: any }) {
     if (code) {
       singIn({ code })
         .then((response) => {
-          setUserSessionId(response.sessionId);
+          setUserSession(response.sessionId);
           saveUserInfo({
             ...response,
           });
@@ -38,7 +38,7 @@ export default function Authorizing(props: { session: any }) {
           toast.error(t('授权失败,请稍后再试'));
         });
     } else if (session) {
-      setUserSessionId(session.sessionId);
+      setUserSession(session.sessionId);
       saveUserInfo({
         ...session,
       });

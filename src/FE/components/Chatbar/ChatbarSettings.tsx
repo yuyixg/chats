@@ -3,7 +3,7 @@ import { useContext, useState } from 'react';
 import { useTranslation } from 'next-i18next';
 import { useRouter } from 'next/router';
 
-import { clearUserInfo, clearUserSessionId, getLoginUrl } from '@/utils/user';
+import { clearUserInfo, clearUserSession, getLoginUrl } from '@/utils/user';
 import { hasContact } from '@/utils/website';
 
 import { UserRole } from '@/types/admin';
@@ -40,7 +40,7 @@ export const ChatBarSettings = () => {
   } = useContext(HomeContext);
 
   const logout = () => {
-    clearUserSessionId();
+    clearUserSession();
     clearUserInfo();
     router.push(getLoginUrl());
   };
