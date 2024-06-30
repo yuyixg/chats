@@ -2,7 +2,7 @@ import { SessionsManager } from '@/managers';
 import { IncomingHttpHeaders } from 'http';
 
 function getHeaderSessionId(headers: IncomingHttpHeaders) {
-  return headers.authorization?.substring(7);
+  return headers?.authorization?.substring(7) || '';
 }
 
 export async function getSession(headers: IncomingHttpHeaders) {
