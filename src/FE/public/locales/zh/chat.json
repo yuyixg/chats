@@ -73,6 +73,7 @@
   "duration": "耗时",
   "prompt_tokens": "请求tokens",
   "response_tokens": "响应tokens",
+  "total_tokens": "总tokens",
   "speed": "速度",
   "total_price": "总成本",
   "prompt_price": "请求成本",

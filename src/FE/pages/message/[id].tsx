@@ -37,6 +37,7 @@ export default function MessageDetails() {
         let tokenUsed = 0;
         let calculatedPrice = new Decimal(0);
         data.messages.forEach((x) => {
+          x.inputPrice = new Decimal(x.inputPrice);
           tokenUsed += (x.inputTokens + x.outputTokens)!;
           calculatedPrice.plus(x.inputPrice.plus(x.outputPrice!));
         });
@@ -99,7 +100,16 @@ export default function MessageDetails() {
                 (x) => x === current.id,
               )}
               modelName={current.modelName}
-              message={{ role: current.role, content: current.content }}
+              message={{
+                id: current.id!,
+                role: current.role,
+                content: current.content,
+                duration: current.duration,
+                inputTokens: current.inputTokens,
+                outputTokens: current.outputTokens,
+                inputPrice: current.inputPrice,
+                outputPrice: current.outputPrice,
+              }}
             />
           );
         })}
