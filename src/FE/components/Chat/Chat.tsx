@@ -30,6 +30,7 @@ import { getChat, postChats } from '@/apis/userService';
 import { cn } from '@/lib/utils';
 import Decimal from 'decimal.js';
 import { v4 as uuidv4 } from 'uuid';
+import { getUserSession } from '@/utils/user';
 
 interface Props {
   stopConversationRef: MutableRefObject<boolean>;
@@ -182,6 +183,7 @@ export const Chat = memo(({ stopConversationRef }: Props) => {
         method: 'POST',
         headers: {
           'Content-Type': 'application/json',
+          Authorization: `Bearer ${getUserSession()}`,
         },
         signal: controller.signal,
         body,
