@@ -20,6 +20,8 @@ public class Program
 
         builder.AddReverseProxy();
 
+        builder.AddCORSPolicies();
+
         var app = builder.Build();
 
         // Configure the HTTP request pipeline.
@@ -28,6 +30,8 @@ public class Program
             app.UseSwagger();
             app.UseSwaggerUI();
         }
+
+        app.UseCORSMiddleware();
 
         app.UseAuthorization();
 
