@@ -9,10 +9,10 @@ EXPOSE 8081
 FROM mcr.microsoft.com/dotnet/sdk:8.0 AS build
 ARG BUILD_CONFIGURATION=Release
 WORKDIR /src
-COPY ["src/BE/Chats.BE/Chats.BE.csproj", "src/BE/Chats.BE/"]
-RUN dotnet restore "./src/BE/Chats.BE/Chats.BE.csproj"
+COPY ["src/BE/Chats.BE.csproj", "src/BE/"]
+RUN dotnet restore "./src/BE/Chats.BE.csproj"
 COPY . .
-WORKDIR "/src/src/BE/Chats.BE"
+WORKDIR "/src/src/BE"
 RUN dotnet build "./Chats.BE.csproj" -c $BUILD_CONFIGURATION -o /app/build
 
 FROM build AS publish
