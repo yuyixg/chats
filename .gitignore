@@ -51,3 +51,4 @@ logs.txt
 /Release
 /src/BE/Chats.BE.csproj.user
 /src/BE/obj
+/src/BE/bin

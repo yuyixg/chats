@@ -5,7 +5,8 @@
       "launchBrowser": true,
       "launchUrl": "swagger",
       "environmentVariables": {
-        "ASPNETCORE_ENVIRONMENT": "Development"
+        "ASPNETCORE_ENVIRONMENT": "Development",
+        "OLD_BE_URL": "https://chats2.starworks.cc:88"
       },
       "dotnetRunMessages": true,
       "applicationUrl": "http://localhost:5146"
@@ -15,7 +16,8 @@
       "launchBrowser": true,
       "launchUrl": "swagger",
       "environmentVariables": {
-        "ASPNETCORE_ENVIRONMENT": "Development"
+        "ASPNETCORE_ENVIRONMENT": "Development",
+        "OLD_BE_URL": "https://chats2.starworks.cc:88"
       },
       "dotnetRunMessages": true,
       "applicationUrl": "https://localhost:7063;http://localhost:5146"
@@ -25,7 +27,8 @@
       "launchBrowser": true,
       "launchUrl": "swagger",
       "environmentVariables": {
-        "ASPNETCORE_ENVIRONMENT": "Development"
+        "ASPNETCORE_ENVIRONMENT": "Development",
+        "OLD_BE_URL": "https://chats2.starworks.cc:88"
       }
     },
     "Container (Dockerfile)": {
@@ -34,7 +37,8 @@
       "launchUrl": "{Scheme}://{ServiceHost}:{ServicePort}/swagger",
       "environmentVariables": {
         "ASPNETCORE_HTTPS_PORTS": "8081",
-        "ASPNETCORE_HTTP_PORTS": "8080"
+        "ASPNETCORE_HTTP_PORTS": "8080",
+        "OLD_BE_URL": "https://chats2.starworks.cc:88"
       },
       "publishAllPorts": true,
       "useSSL": true
