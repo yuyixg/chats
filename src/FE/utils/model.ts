@@ -1,5 +1,4 @@
 import {
-  ChatModelConfig,
   ChatModelPriceConfig,
   ModelConfigType,
   ModelProviders,
@@ -11,12 +10,6 @@ import Decimal from 'decimal.js';
 
 export function verifyChat(model: any, userBalance: Decimal) {
   const { tokens, counts, expires } = model;
-  const errorMessages = {
-    tokens: 'Not enough tokens available to send the message',
-    counts: 'Not enough counts available to send the message',
-    expires: 'Subscription has expired',
-  };
-
   let usages = {
     balance: false,
     tokens: false,

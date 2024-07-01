@@ -2,11 +2,8 @@ import React, { useEffect, useState } from 'react';
 
 import { serverSideTranslations } from 'next-i18next/serverSideTranslations';
 
-import { getSession } from '@/utils/session';
-import { getUserInfo } from '@/utils/user';
-
-import { UserRole } from '@/types/admin';
 import { DEFAULT_LANGUAGE } from '@/utils/settings';
+import { getUserInfo } from '@/utils/user';
 
 const Dashboard = () => {
   const [name, setName] = useState('');
@@ -19,16 +16,7 @@ const Dashboard = () => {
 
 export default Dashboard;
 
-export const getServerSideProps = async ({ locale, req }: any) => {
-  let session = await getSession(req.cookies);
-  if (!session || session.role != UserRole.admin) {
-    return {
-      redirect: {
-        destination: '/',
-        permanent: false,
-      },
-    };
-  }
+export const getServerSideProps = async ({ locale }: any) => {
   return {
     props: {
       ...(await serverSideTranslations(locale ?? DEFAULT_LANGUAGE, [

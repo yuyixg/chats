@@ -1,8 +1,3 @@
-import { UserRole } from '@/types/admin';
-import { Session } from '@/types/session';
-
-import Cookies from './cookie';
-
 export interface UserSession {
   sessionId: string;
   username: string;
