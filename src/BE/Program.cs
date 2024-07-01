@@ -1,4 +1,5 @@
 
+using Chats.BE.DB;
 using Chats.BE.Infrastructure;
 
 namespace Chats.BE;
@@ -15,6 +16,7 @@ public class Program
         // Learn more about configuring Swagger/OpenAPI at https://aka.ms/aspnetcore/swashbuckle
         builder.Services.AddEndpointsApiExplorer();
         builder.Services.AddSwaggerGen();
+        builder.Services.AddDbContext<ChatsDB>();
 
         builder.AddReverseProxy();
 
