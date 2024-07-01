@@ -49,5 +49,5 @@ logs.txt
 /.vs
 /Debug
 /Release
-/src/BE/Chats.BE/obj
-/src/BE/Chats.BE/Chats.BE.csproj.user
+/src/BE/Chats.BE.csproj.user
+/src/BE/obj
