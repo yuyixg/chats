@@ -8,7 +8,7 @@ import { getSelectMessages } from '@/utils/message';
 
 import { GetMessageDetailsResult } from '@/types/admin';
 import { ChatMessage } from '@/types/chatMessage';
-import { DEFAULT_LANGUAGE } from '@/types/settings';
+import { DEFAULT_LANGUAGE } from '@/utils/settings';
 
 import { ChatMessage as ChatMessageComponent } from '@/components/Admin/Messages/ChatMessage';
 import { Button } from '@/components/ui/button';

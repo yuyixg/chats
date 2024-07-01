@@ -4,7 +4,7 @@ import { useTranslation } from 'next-i18next';
 import { serverSideTranslations } from 'next-i18next/serverSideTranslations';
 
 import { GetModelKeysResult } from '@/types/admin';
-import { DEFAULT_LANGUAGE } from '@/types/settings';
+import { DEFAULT_LANGUAGE } from '@/utils/settings';
 import { ModelProviderTemplates } from '@/types/template';
 
 import { ModelKeysModal } from '@/components/Admin/ModelKeys/ModelKeysModal';

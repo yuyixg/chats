@@ -7,7 +7,7 @@ import { useThrottle } from '@/hooks/useThrottle';
 
 import { GetModelResult, GetUsersResult } from '@/types/admin';
 import { PageResult, Paging } from '@/types/page';
-import { DEFAULT_LANGUAGE } from '@/types/settings';
+import { DEFAULT_LANGUAGE } from '@/utils/settings';
 
 import PaginationContainer from '@/components/Admin/Pagiation/Pagiation';
 import { EditUserBalanceModal } from '@/components/Admin/Users/EditUserBalanceModel';

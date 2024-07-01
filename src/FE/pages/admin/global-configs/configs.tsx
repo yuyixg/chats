@@ -3,7 +3,7 @@ import React, { useEffect, useState } from 'react';
 import { useTranslation } from 'next-i18next';
 import { serverSideTranslations } from 'next-i18next/serverSideTranslations';
 
-import { DEFAULT_LANGUAGE } from '@/types/settings';
+import { DEFAULT_LANGUAGE } from '@/utils/settings';
 import { GetConfigsResult } from '@/types/user';
 
 import { GlobalConfigsModal } from '@/components/Admin/GlobalConfigs/GlobalConfigsModal';

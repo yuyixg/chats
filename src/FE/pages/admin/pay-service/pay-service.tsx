@@ -4,7 +4,7 @@ import { useTranslation } from 'next-i18next';
 import { serverSideTranslations } from 'next-i18next/serverSideTranslations';
 
 import { GetPayServicesResult } from '@/types/admin';
-import { DEFAULT_LANGUAGE } from '@/types/settings';
+import { DEFAULT_LANGUAGE } from '@/utils/settings';
 
 import { PayServiceModal } from '@/components/Admin/PayService/PayServiceModal';
 import { Button } from '@/components/ui/button';

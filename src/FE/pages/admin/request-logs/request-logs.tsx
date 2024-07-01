@@ -5,7 +5,7 @@ import { serverSideTranslations } from 'next-i18next/serverSideTranslations';
 
 import { GetRequestLogsListResult } from '@/types/admin';
 import { PageResult, Paging } from '@/types/page';
-import { DEFAULT_LANGUAGE } from '@/types/settings';
+import { DEFAULT_LANGUAGE } from '@/utils/settings';
 import { StatusCodeColor } from '@/types/statusCode';
 
 import PaginationContainer from '@/components/Admin/Pagiation/Pagiation';

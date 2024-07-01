@@ -4,7 +4,7 @@ import toast from 'react-hot-toast';
 import { useTranslation } from 'next-i18next';
 import { serverSideTranslations } from 'next-i18next/serverSideTranslations';
 
-import { DEFAULT_LANGUAGE } from '@/types/settings';
+import { DEFAULT_LANGUAGE } from '@/utils/settings';
 import { GetInvitationCodeResult } from '@/types/user';
 
 import { InvitationCodeModal } from '@/components/Admin/InvitationCode/InvitationCodeModal';

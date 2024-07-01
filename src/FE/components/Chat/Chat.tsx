@@ -49,7 +49,7 @@ export const Chat = memo(({ stopConversationRef }: Props) => {
       models,
       prompts,
       userModelConfig,
-      showChatbar,
+      settings,
       chatError,
     },
     handleUpdateSelectMessage,
@@ -408,7 +408,7 @@ export const Chat = memo(({ stopConversationRef }: Props) => {
                   <div
                     className={cn(
                       'ml-[84px] flex justify-start items-center',
-                      showChatbar && 'ml-6',
+                      settings.showChatBar && 'ml-6',
                     )}
                   >
                     {hasModel() && (

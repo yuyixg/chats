@@ -3,7 +3,6 @@ import { Dispatch, createContext } from 'react';
 
 import { useTranslation } from 'next-i18next';
 import { serverSideTranslations } from 'next-i18next/serverSideTranslations';
-import { useTheme } from 'next-themes';
 import Head from 'next/head';
 import { useRouter } from 'next/router';
 
@@ -19,7 +18,12 @@ import { getSelectMessages } from '@/utils/message';
 import { getStorageModelId, setStorageModelId } from '@/utils/model';
 import { formatPrompt } from '@/utils/promptVariable';
 import { getSession } from '@/utils/session';
-import { getSettings, getSettingsLanguage } from '@/utils/settings';
+import {
+  DEFAULT_SETTINGS,
+  getSettings,
+  getSettingsLanguage,
+  saveSettings,
+} from '@/utils/settings';
 import { getLoginUrl, getUserInfo, getUserSession } from '@/utils/user';
 import { UserSession } from '@/utils/user';
 import { setSiteInfo } from '@/utils/website';
@@ -29,12 +33,7 @@ import { ChatMessage } from '@/types/chatMessage';
 import { GlobalConfigKeys, SiteInfoConfig } from '@/types/config';
 import { Model, UserModelConfig } from '@/types/model';
 import { Prompt } from '@/types/prompt';
-import {
-  DEFAULT_LANGUAGE,
-  DEFAULT_THEME,
-  Languages,
-  Themes,
-} from '@/types/settings';
+import { DEFAULT_LANGUAGE, Settings } from '@/utils/settings';
 
 import { Chat } from '@/components/Chat/Chat';
 import { Chatbar } from '@/components/Chatbar/Chatbar';
@@ -63,7 +62,6 @@ interface HandleUpdateChatParams {
 interface HomeInitialState {
   user: UserSession | null;
   loading: boolean;
-  language: (typeof Languages)[number];
   messageIsStreaming: boolean;
   models: Model[];
   chats: ChatResult[];
@@ -77,15 +75,13 @@ interface HomeInitialState {
   userModelConfig: UserModelConfig | undefined;
   chatError: boolean;
   prompts: Prompt[];
-  showChatbar: boolean;
-  showPromptbar: boolean;
+  settings: Settings;
   searchTerm: string;
 }
 
 const initialState: HomeInitialState = {
   user: null,
   loading: false,
-  language: DEFAULT_LANGUAGE,
   messageIsStreaming: false,
   currentMessages: [],
   userModelConfig: undefined,
@@ -99,8 +95,7 @@ const initialState: HomeInitialState = {
   selectChatId: undefined,
   chatError: false,
   prompts: [],
-  showPromptbar: false,
-  showChatbar: true,
+  settings: DEFAULT_SETTINGS,
   searchTerm: '',
 };
 
@@ -119,6 +114,10 @@ interface HomeContextProps {
   handleDeleteChat: (id: string) => void;
   handleSelectModel: (model: Model) => void;
   handleUpdateUserModelConfig: (value: any) => void;
+  handleUpdateSettings: <K extends keyof Settings>(
+    key: K,
+    value: Settings[K],
+  ) => void;
   hasModel: () => boolean;
   getChats: (params: GetChatsParams, models?: Model[]) => void;
 }
@@ -135,11 +134,10 @@ const Home = ({ siteInfo }: { siteInfo: SiteInfoConfig }) => {
   });
 
   const {
-    state: { chats, currentMessages, models, user, userModelConfig },
+    state: { chats, currentMessages, models, user, userModelConfig, settings },
     dispatch,
   } = contextValue;
   const stopConversationRef = useRef<boolean>(false);
-  const { setTheme } = useTheme();
 
   const calcSelectModel = (chats: ChatResult[], models: Model[]) => {
     const lastChat = chats.findLast((x) => x.chatModelId);
@@ -275,6 +273,7 @@ const Home = ({ siteInfo }: { siteInfo: SiteInfoConfig }) => {
       value: { ...userModelConfig, ...value },
     });
   };
+
   const handleUpdateChat = (
     chats: ChatResult[],
     id: string,
@@ -302,6 +301,15 @@ const Home = ({ siteInfo }: { siteInfo: SiteInfoConfig }) => {
       value: calcSelectModel(chats, models),
     });
     dispatch({ field: 'userModelConfig', value: {} });
+  };
+
+  const handleUpdateSettings = <K extends keyof Settings>(
+    key: K,
+    value: Settings[K],
+  ) => {
+    settings[key] = value;
+    dispatch({ field: 'settings', value: settings });
+    saveSettings(settings);
   };
 
   const hasModel = () => {
@@ -370,23 +378,12 @@ const Home = ({ siteInfo }: { siteInfo: SiteInfoConfig }) => {
 
   useEffect(() => {
     setSiteInfo(siteInfo);
-    const settings = getSettings()
-    if (settings.language) {
-      dispatch({
-        field: 'language',
-        value: settings.language,
-      });
-    }
+    const settings = getSettings();
 
-    const showChatbar = localStorage.getItem('showChatbar');
-    if (showChatbar) {
-      dispatch({ field: 'showChatbar', value: showChatbar === 'true' });
-    }
-
-    const showPromptbar = localStorage.getItem('showPromptbar');
-    if (showPromptbar) {
-      dispatch({ field: 'showPromptbar', value: showPromptbar === 'true' });
-    }
+    dispatch({
+      field: 'settings',
+      value: settings,
+    });
   }, []);
 
   useEffect(() => {
@@ -446,6 +443,7 @@ const Home = ({ siteInfo }: { siteInfo: SiteInfoConfig }) => {
         handleUpdateSelectMessage,
         handleUpdateCurrentMessage,
         handleUpdateUserModelConfig,
+        handleUpdateSettings,
         hasModel,
         getChats,
       }}

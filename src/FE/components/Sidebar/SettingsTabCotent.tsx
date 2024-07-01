@@ -4,11 +4,7 @@ import { useForm } from 'react-hook-form';
 import { useTranslation } from 'next-i18next';
 import { useTheme } from 'next-themes';
 
-import { useCreateReducer } from '@/hooks/useCreateReducer';
-
-import { getSettings, saveSettings } from '@/utils/settings';
-
-import { Settings, Themes } from '@/types/settings';
+import { DEFAULT_THEME, Themes } from '@/utils/settings';
 
 import { HomeContext } from '@/pages/home/home';
 
@@ -20,16 +16,11 @@ import { z } from 'zod';
 
 const SettingsTabContent = () => {
   const { t } = useTranslation('settings');
-  const settings: Settings = getSettings();
-  const { state } = useCreateReducer<Settings>({
-    initialState: settings,
-  });
-
-  const { dispatch: homeDispatch } = useContext(HomeContext);
+  const { handleUpdateSettings } = useContext(HomeContext);
   const getStorageTheme = () => {
-    return localStorage.getItem('theme') || 'light';
+    return localStorage.getItem('theme') || DEFAULT_THEME;
   };
-  
+
   const formSchema = z.object({
     theme: z.string(),
     language: z.string(),
@@ -45,8 +36,7 @@ const SettingsTabContent = () => {
   });
 
   const onSubmit = (values: z.infer<typeof formSchema>) => {
-    homeDispatch({ field: 'language', value: values.language });
-    saveSettings(values);
+    handleUpdateSettings('language', values.language);
     setTheme(values.theme);
   };
 

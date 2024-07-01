@@ -7,7 +7,7 @@ import { formatNumberAsMoney } from '@/utils/common';
 import { ModelPriceUnit } from '@/utils/model';
 
 import { GetModelResult } from '@/types/admin';
-import { DEFAULT_LANGUAGE } from '@/types/settings';
+import { DEFAULT_LANGUAGE } from '@/utils/settings';
 import { ModelProviderTemplates } from '@/types/template';
 
 import { AddModelModal } from '@/components/Admin/Models/AddModelModal';

@@ -4,7 +4,7 @@ import { useTranslation } from 'next-i18next';
 import { serverSideTranslations } from 'next-i18next/serverSideTranslations';
 
 import { GetLoginServicesResult } from '@/types/admin';
-import { DEFAULT_LANGUAGE } from '@/types/settings';
+import { DEFAULT_LANGUAGE } from '@/utils/settings';
 
 import { LoginServiceModal } from '@/components/Admin/LoginService/LoginServiceModal';
 import { Button } from '@/components/ui/button';

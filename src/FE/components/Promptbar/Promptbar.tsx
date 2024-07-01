@@ -30,8 +30,9 @@ const PromptBar = () => {
   });
 
   const {
-    state: { prompts, showPromptbar },
+    state: { prompts, settings },
     dispatch: homeDispatch,
+    handleUpdateSettings,
     hasModel,
   } = useContext(HomeContext);
 
@@ -40,9 +41,9 @@ const PromptBar = () => {
     dispatch: promptDispatch,
   } = promptBarContextValue;
 
-  const handleTogglePromptbar = () => {
-    homeDispatch({ field: 'showPromptbar', value: !showPromptbar });
-    localStorage.setItem('showPromptbar', JSON.stringify(!showPromptbar));
+  const handleTogglePromptBar = () => {
+    const promptBar = !settings.showChatBar;
+    handleUpdateSettings('showPromptBar', promptBar);
   };
 
   const handleCreatePrompt = () => {
@@ -113,7 +114,7 @@ const PromptBar = () => {
         hasModel={hasModel}
         side={'right'}
         showOpenButton={false}
-        isOpen={showPromptbar}
+        isOpen={settings.showPromptBar}
         addItemButtonTitle={t('New prompt')}
         itemComponent={<Prompts prompts={filteredPrompts} />}
         items={filteredPrompts}
@@ -121,7 +122,7 @@ const PromptBar = () => {
         handleSearchTerm={(searchTerm: string) =>
           promptDispatch({ field: 'searchTerm', value: searchTerm })
         }
-        toggleOpen={handleTogglePromptbar}
+        toggleOpen={handleTogglePromptBar}
         handleCreateItem={handleCreatePrompt}
       />
     </PromptbarContext.Provider>

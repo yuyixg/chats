@@ -1,25 +1,33 @@
-import { DEFAULT_LANGUAGE, DEFAULT_THEME, Settings } from '@/types/settings';
-
 const STORAGE_KEY = 'settings';
+export const Themes = ['light', 'dark'];
+export const Languages = ['zh', 'en'];
+export const DEFAULT_LANGUAGE = 'zh';
+export const DEFAULT_THEME = 'light';
+
+export interface Settings {
+  language: (typeof Languages)[number];
+  showChatBar: boolean;
+  showPromptBar: boolean;
+}
+
+export const DEFAULT_SETTINGS = {
+  language: DEFAULT_LANGUAGE,
+  showChatBar: true,
+  showPromptBar: false,
+};
 
 export const getSettings = (): Settings => {
-  let settings: Settings = {
-    language: DEFAULT_LANGUAGE,
-  };
+  let settings = DEFAULT_SETTINGS;
   const settingsJson = localStorage.getItem(STORAGE_KEY);
   if (settingsJson) {
-    try {
-      let savedSettings = JSON.parse(settingsJson) as Settings;
-      settings = Object.assign(settings, savedSettings);
-    } catch (e) {
-      console.error(e);
-    }
+    let savedSettings = JSON.parse(settingsJson) as Settings;
+    settings = Object.assign(settings, savedSettings);
   }
   return settings;
 };
 
-export const saveSettings = (settings: Settings) => {
-  localStorage.setItem(STORAGE_KEY, JSON.stringify(settings));
+export const saveSettings = (value: Settings) => {
+  localStorage.setItem(STORAGE_KEY, JSON.stringify(value));
 };
 
 export const getSettingsLanguage = () => {

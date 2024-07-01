@@ -6,7 +6,7 @@ import { getSession } from '@/utils/session';
 import { getUserInfo } from '@/utils/user';
 
 import { UserRole } from '@/types/admin';
-import { DEFAULT_LANGUAGE } from '@/types/settings';
+import { DEFAULT_LANGUAGE } from '@/utils/settings';
 
 const Dashboard = () => {
   const [name, setName] = useState('');

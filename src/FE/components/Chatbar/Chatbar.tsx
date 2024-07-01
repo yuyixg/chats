@@ -24,9 +24,9 @@ export const Chatbar = () => {
   });
 
   const {
-    state: { chats, showChatbar, messageIsStreaming },
-    dispatch: homeDispatch,
+    state: { chats, settings, messageIsStreaming },
     handleDeleteChat: homeHandleDeleteChat,
+    handleUpdateSettings,
     handleSelectChat,
     handleNewChat,
     hasModel,
@@ -52,8 +52,8 @@ export const Chatbar = () => {
   };
 
   const handleToggleChatbar = () => {
-    homeDispatch({ field: 'showChatbar', value: !showChatbar });
-    localStorage.setItem('showChatbar', JSON.stringify(!showChatbar));
+    const showChatBar = !settings.showChatBar;
+    handleUpdateSettings('showChatBar', showChatBar);
   };
 
   useEffect(() => {
@@ -83,7 +83,7 @@ export const Chatbar = () => {
       <Sidebar<ChatResult>
         messageIsStreaming={messageIsStreaming}
         side={'left'}
-        isOpen={showChatbar}
+        isOpen={settings.showChatBar}
         addItemButtonTitle={t('New chat')}
         hasModel={hasModel}
         itemComponent={<Conversations chats={filteredChats} />}

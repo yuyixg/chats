@@ -7,7 +7,7 @@ import Image from 'next/image';
 import { hasContact } from '@/utils/website';
 
 import { GlobalConfigKeys, SiteInfoConfig } from '@/types/config';
-import { DEFAULT_LANGUAGE } from '@/types/settings';
+import { DEFAULT_LANGUAGE } from '@/utils/settings';
 import { LoginConfigsResult, LoginType } from '@/types/user';
 
 import AccountLoginCard from '@/components/Login/AccountLoginCard';

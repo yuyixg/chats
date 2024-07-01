@@ -6,7 +6,7 @@ import { serverSideTranslations } from 'next-i18next/serverSideTranslations';
 import { useThrottle } from '@/hooks/useThrottle';
 
 import { GetUserModelResult } from '@/types/admin';
-import { DEFAULT_LANGUAGE } from '@/types/settings';
+import { DEFAULT_LANGUAGE } from '@/utils/settings';
 
 import { AddUserModelModal } from '@/components/Admin/UserModels/AddUserModelModal';
 import { EditUserModelModal } from '@/components/Admin/UserModels/EditUserModelModal';

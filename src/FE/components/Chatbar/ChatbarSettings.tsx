@@ -37,6 +37,7 @@ export const ChatBarSettings = () => {
   const {
     state: { user },
     dispatch: homeDispatch,
+    handleUpdateSettings,
   } = useContext(HomeContext);
 
   const logout = () => {
@@ -89,7 +90,7 @@ export const ChatBarSettings = () => {
               text={t('Prompt Management')}
               icon={<IconBulbFilled size={18} />}
               onClick={() => {
-                homeDispatch({ field: 'showPromptbar', value: true });
+                handleUpdateSettings('showPromptBar', true);
               }}
             />
             <SidebarButton

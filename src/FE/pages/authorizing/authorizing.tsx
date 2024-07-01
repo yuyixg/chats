@@ -9,7 +9,7 @@ import { useRouter } from 'next/router';
 
 import { saveUserInfo, setUserSession } from '@/utils/user';
 
-import { DEFAULT_LANGUAGE } from '@/types/settings';
+import { DEFAULT_LANGUAGE } from '@/utils/settings';
 
 import { singIn } from '@/apis/userService';
 
