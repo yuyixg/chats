@@ -64,17 +64,12 @@ export interface ChatBody {
   userModelConfig: any;
 }
 
-export interface Conversation {
+export interface IChat {
   id: string;
-  name: string;
-  messages: Message[];
-  model: Model;
-  prompt: string;
-  temperature: number;
+  title: string;
+  chatModelId?: string;
+  modelName: string;
+  modelConfig: any;
+  userModelConfig: any;
   isShared: boolean;
-  totalPrice?: number;
-  fileServerConfig: {
-    id: string;
-    type: FileServicesType;
-  };
 }
