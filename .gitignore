@@ -44,3 +44,10 @@ cert
 
 #log
 logs.txt
+
+# backend
+/.vs
+/Debug
+/Release
+/src/BE/Chats.BE/obj
+/src/BE/Chats.BE/Chats.BE.csproj.user
