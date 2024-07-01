@@ -2,7 +2,7 @@
 
 `Chats`是一个集成多AI聊天大模型并可以独立动态管理配置每个AI大模型的网站
 
-![Chats](chats.png)
+![image](https://github.com/greywen/chats/assets/1317141/b0a6f8c1-31a2-4f59-9948-24ea8cd4ad72)
 
 ## 功能
 
