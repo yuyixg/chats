@@ -21,19 +21,6 @@ internal static class CORS
 
     public static void UseCORSMiddleware(this WebApplication app)
     {
-        string frontendUrl = app.Configuration.GetValue<string>("FE_URL") ?? throw new ArgumentNullException("FE_URL is required in the configuration");
-
-        // Handle OPTIONS requests before CORS middleware
-        app.Use(async (context, next) =>
-        {
-            if (context.Request.Method == "OPTIONS" && context.Request.Headers["Origin"] == frontendUrl)
-            {
-                context.Response.StatusCode = 204; // No Content
-                return;
-            }
-
-            await next.Invoke();
-        });
         app.UseCors("FrontendCORS");
     }
 }
