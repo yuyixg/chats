@@ -457,9 +457,6 @@ const handler = async (req: ChatsApiRequest, res: ChatsApiResponse) => {
       }
     }
   } catch (error: any) {
-    if (lastMessage && lastMessage.id !== messageId) {
-      await ChatMessagesManager.delete(lastMessage.id, userId);
-    }
     res.write(Buffer.from(transformToSSE({ success: false })));
     throw new InternalServerError(
       JSON.stringify({

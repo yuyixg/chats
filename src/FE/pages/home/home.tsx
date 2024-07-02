@@ -197,10 +197,10 @@ const Home = ({ siteInfo }: { siteInfo: SiteInfoConfig }) => {
       if (data.length > 0) {
         dispatch({ field: 'currentMessages', value: data });
         const lastMessage = data[data.length - 1];
-        const _selectMessages = getSelectMessages(data, lastMessage.id);
+        const selectMessageList = getSelectMessages(data, lastMessage.id);
         dispatch({
           field: 'selectMessages',
-          value: _selectMessages,
+          value: selectMessageList,
         });
         dispatch({ field: 'selectMessageLastId', value: lastMessage.id });
       } else {
@@ -226,18 +226,18 @@ const Home = ({ siteInfo }: { siteInfo: SiteInfoConfig }) => {
       if (data.length > 0) {
         dispatch({ field: 'currentMessages', value: data });
         const lastMessage = data[data.length - 1];
-        const _selectMessages = getSelectMessages(data, lastMessage.id);
+        const selectMessageList = getSelectMessages(data, lastMessage.id);
         if (lastMessage.role !== 'assistant') {
           dispatch({
             field: 'chatError',
             value: true,
           });
-          _selectMessages.push(chatErrorMessage(lastMessage.id));
+          selectMessageList.push(chatErrorMessage(lastMessage.id));
         }
 
         dispatch({
           field: 'selectMessages',
-          value: _selectMessages,
+          value: selectMessageList,
         });
         dispatch({ field: 'selectMessageLastId', value: lastMessage.id });
         dispatch({ field: 'userModelConfig', value: chat.userModelConfig });
@@ -259,10 +259,10 @@ const Home = ({ siteInfo }: { siteInfo: SiteInfoConfig }) => {
   };
 
   const handleUpdateSelectMessage = (messageId: string) => {
-    const _selectMessages = getSelectMessages(currentMessages, messageId);
+    const selectMessageList = getSelectMessages(currentMessages, messageId);
     dispatch({
       field: 'selectMessages',
-      value: _selectMessages,
+      value: selectMessageList,
     });
   };
 
@@ -278,23 +278,24 @@ const Home = ({ siteInfo }: { siteInfo: SiteInfoConfig }) => {
     id: string,
     params: HandleUpdateChatParams,
   ) => {
-    const _chats = chats.map((x) => {
+    const chatList = chats.map((x) => {
       if (x.id === id) return { ...x, ...params };
       return x;
     });
 
-    dispatch({ field: 'chats', value: _chats });
+    dispatch({ field: 'chats', value: chatList });
   };
 
   const handleDeleteChat = (id: string) => {
-    const _chats = chats.filter((x) => {
+    const chatList = chats.filter((x) => {
       return x.id !== id;
     });
-    dispatch({ field: 'chats', value: _chats });
+    dispatch({ field: 'chats', value: chatList });
     dispatch({ field: 'selectChat', value: undefined });
     dispatch({ field: 'selectMessageLastId', value: '' });
     dispatch({ field: 'currentMessages', value: [] });
     dispatch({ field: 'selectMessages', value: [] });
+    dispatch({ field: 'chatError', value: false });
     dispatch({
       field: 'selectModel',
       value: calcSelectModel(chats, models),
@@ -328,17 +329,17 @@ const Home = ({ siteInfo }: { siteInfo: SiteInfoConfig }) => {
         if (data.length > 0) {
           dispatch({ field: 'currentMessages', value: data });
           const lastMessage = data[data.length - 1];
-          const _selectMessages = getSelectMessages(data, lastMessage.id);
+          const selectMessageList = getSelectMessages(data, lastMessage.id);
           if (lastMessage.role !== 'assistant') {
             dispatch({
               field: 'chatError',
               value: true,
             });
-            _selectMessages.push(chatErrorMessage(lastMessage.id));
+            selectMessageList.push(chatErrorMessage(lastMessage.id));
           }
           dispatch({
             field: 'selectMessages',
-            value: _selectMessages,
+            value: selectMessageList,
           });
           dispatch({ field: 'selectMessageLastId', value: lastMessage.id });
         } else {
@@ -363,11 +364,11 @@ const Home = ({ siteInfo }: { siteInfo: SiteInfoConfig }) => {
         field: 'chatsPaging',
         value: { count, page, pageSize },
       });
-      let _chats = rows;
+      let chatList = rows;
       if (!modelList) {
-        _chats = rows.concat(chats);
+        chatList = rows.concat(chats);
       }
-      dispatch({ field: 'chats', value: _chats });
+      dispatch({ field: 'chats', value: chatList });
       if (modelList) {
         const selectChatId = getPathChatId(router.asPath) || getSelectChatId();
         selectChat(rows, selectChatId, modelList || models);

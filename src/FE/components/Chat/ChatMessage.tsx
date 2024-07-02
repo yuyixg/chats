@@ -26,6 +26,7 @@ import Tips from '../Tips/Tips';
 import { Button } from '../ui/button';
 import { Label } from '../ui/label';
 import ChangeModel from './ChangeModel';
+import ChatError from './ChatError';
 
 import { cn } from '@/lib/utils';
 import Decimal from 'decimal.js';
@@ -41,7 +42,7 @@ interface PropsMessage {
   outputTokens: number;
   inputPrice: Decimal;
   outputPrice: Decimal;
-  duration?: number;
+  duration: number;
 }
 
 export interface Props {
@@ -77,7 +78,12 @@ export const ChatMessage: FC<Props> = memo(
   }) => {
     const { t } = useTranslation('chat');
     const {
-      state: { selectChat, messageIsStreaming, currentChatMessageId },
+      state: {
+        selectChat,
+        messageIsStreaming,
+        chatError,
+        currentChatMessageId,
+      },
     } = useContext(HomeContext);
 
     const [isEditing, setIsEditing] = useState<boolean>(false);
@@ -490,7 +496,7 @@ export const ChatMessage: FC<Props> = memo(
                                   <GenerateInformation
                                     name={'duration'}
                                     value={
-                                      message?.duration?.toLocaleString() + 'ms'
+                                      message?.duration.toLocaleString() + 'ms'
                                     }
                                   />
                                   <GenerateInformation
@@ -556,7 +562,7 @@ export const ChatMessage: FC<Props> = memo(
                           }
                         />
                       )}
-                      {!readonly && (
+                      {!readonly && !chatError && (
                         <Tips
                           className="h-[28px]"
                           trigger={

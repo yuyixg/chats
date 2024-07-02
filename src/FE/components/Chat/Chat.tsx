@@ -204,7 +204,7 @@ export const Chat = memo(({ stopConversationRef }: Props) => {
         homeDispatch({ field: 'chatError', value: true });
         return;
       }
-
+      let errorChat = false;
       let text = '';
       const reader = data.getReader();
       const decoder = new TextDecoder();
@@ -237,9 +237,10 @@ export const Chat = memo(({ stopConversationRef }: Props) => {
       for await (const message of processBuffer()) {
         let value = JSON.parse(message);
         if (!value.success) {
+          errorChat = true;
           homeDispatch({
             field: 'chatError',
-            value: true,
+            value: errorChat,
           });
           controller.abort();
           break;
@@ -291,15 +292,17 @@ export const Chat = memo(({ stopConversationRef }: Props) => {
         });
       homeDispatch({ field: 'loading', value: false });
       homeDispatch({ field: 'messageIsStreaming', value: false });
-      setTimeout(() => {
-        handleUpdateCurrentMessage(selectChatId);
-      }, 100);
+      !errorChat &&
+        setTimeout(() => {
+          handleUpdateCurrentMessage(selectChatId);
+        }, 100);
       stopConversationRef.current = false;
     },
     [
       userModelConfig,
       chats,
       selectChat,
+      chatError,
       currentMessages,
       selectMessages,
       selectModel,
@@ -413,7 +416,7 @@ export const Chat = memo(({ stopConversationRef }: Props) => {
                   >
                     {hasModel() && (
                       <ChangeModel
-                        className=" font-semibold text-base"
+                        className="font-semibold text-base"
                         modelName={selectModel?.name}
                         onChangeModel={(model) => {
                           homeDispatch({
@@ -440,9 +443,6 @@ export const Chat = memo(({ stopConversationRef }: Props) => {
                       ?.childrenIds || [];
                   parentChildrenIds = [...parentChildrenIds].reverse();
                 }
-                if (lastMessage.id === current.id && chatError) {
-                  return <></>;
-                }
                 return (
                   <MemoizedChatMessage
                     key={current.id + index}
@@ -462,7 +462,7 @@ export const Chat = memo(({ stopConversationRef }: Props) => {
                       id: current.id!,
                       role: current.role,
                       content: current.content,
-                      duration: current.duration,
+                      duration: current.duration || 0,
                       inputTokens: current.inputTokens,
                       outputTokens: current.outputTokens,
                       inputPrice: current.inputPrice,
