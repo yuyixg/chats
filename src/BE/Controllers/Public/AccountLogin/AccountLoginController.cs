@@ -13,9 +13,9 @@ public class AccountLoginController(ChatsDB _db, ILogger<AccountLoginController>
     public async Task<IActionResult> Login([FromBody] LoginRequest request, [FromServices] PasswordHasher passwordHasher, CancellationToken cancellationToken)
     {
         object dto = request.AsLoginDto();
-        if (dto is WeChatLoginRequest)
+        if (dto is WeChatLoginRequest wx)
         {
-            return new OldBEActionResult();
+            return new OldBEActionResult(wx);
         }
         else if (dto is PasswordLoginRequest passwordDto)
         {
@@ -45,6 +45,7 @@ public class AccountLoginController(ChatsDB _db, ILogger<AccountLoginController>
             await _db.Sessions.Where(x => x.UserId == dbUser.Id).ExecuteDeleteAsync(cancellationToken);
             Session session = new()
             {
+                Id = Guid.NewGuid(),
                 UserId = dbUser.Id,
                 CreatedAt = DateTime.Now,
                 UpdatedAt = DateTime.Now,

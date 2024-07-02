@@ -1,9 +1,11 @@
 ﻿using Chats.BE.Services;
 using Microsoft.AspNetCore.Mvc;
+using System.Text;
+using System.Text.Json;
 
 namespace Chats.BE.Controllers.Common;
 
-public class OldBEActionResult : IActionResult
+public class OldBEActionResult(object? json) : IActionResult
 {
     public async Task ExecuteResultAsync(ActionContext context)
     {
@@ -17,12 +19,15 @@ public class OldBEActionResult : IActionResult
 
         // 构建请求
         HttpRequest request = context.HttpContext.Request;
-        HttpRequestMessage requestMessage = new()
+        using HttpRequestMessage requestMessage = new()
         {
             Method = new HttpMethod(request.Method),
             RequestUri = new Uri($"{oldBeUrl}{request.Path}{request.QueryString}"),
-            Content = new StreamContent(request.Body)
         };
+        if (json != null)
+        {
+            requestMessage.Content = new StringContent(JsonSerializer.Serialize(json), Encoding.UTF8, "application/json");
+        }
 
         // Copy request headers
         foreach (KeyValuePair<string, Microsoft.Extensions.Primitives.StringValues> header in request.Headers)
@@ -31,7 +36,7 @@ public class OldBEActionResult : IActionResult
         }
 
         // 发送请求到老的API
-        HttpResponseMessage responseMessage = await httpClient.SendAsync(requestMessage);
+        using HttpResponseMessage responseMessage = await httpClient.SendAsync(requestMessage, context.HttpContext.RequestAborted);
 
         // 回传响应
         HttpResponse response = context.HttpContext.Response;

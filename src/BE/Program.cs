@@ -18,6 +18,7 @@ public class Program
         builder.Services.AddEndpointsApiExplorer();
         builder.Services.AddSwaggerGen();
         builder.Services.AddDbContext<ChatsDB>();
+        builder.Services.AddHttpClient();
         builder.Services.AddSingleton<AppConfigService>();
         builder.Services.AddSingleton<PasswordHasher>();
 
@@ -38,6 +39,12 @@ public class Program
 
         app.UseAuthorization();
 
+        // enable buffering
+        app.Use(async (context, next) =>
+        {
+            context.Request.EnableBuffering();
+            await next();
+        });
         app.MapControllers();
 
         // Use the reverse proxy middleware
