@@ -18,11 +18,11 @@ public partial class User
 
     [Column("account")]
     [StringLength(1000)]
-    public string? Account { get; set; }
+    public string Account { get; set; } = null!;
 
     [Column("username")]
     [StringLength(1000)]
-    public string? Username { get; set; }
+    public string Username { get; set; } = null!;
 
     [Column("password")]
     [StringLength(1000)]

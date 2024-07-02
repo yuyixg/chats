@@ -21,6 +21,7 @@ public class Program
         builder.Services.AddHttpClient();
         builder.Services.AddSingleton<AppConfigService>();
         builder.Services.AddSingleton<PasswordHasher>();
+        builder.Services.AddScoped<CurrentUser>();
 
         builder.AddReverseProxy();
 
@@ -37,14 +38,8 @@ public class Program
 
         app.UseCORSMiddleware();
 
+        app.UseSessionAuthentication();
         app.UseAuthorization();
-
-        // enable buffering
-        app.Use(async (context, next) =>
-        {
-            context.Request.EnableBuffering();
-            await next();
-        });
         app.MapControllers();
 
         // Use the reverse proxy middleware
