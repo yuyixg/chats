@@ -38,13 +38,6 @@ public class Program
         app.UseCORSMiddleware();
 
         app.UseAuthorization();
-
-        // enable buffering
-        app.Use(async (context, next) =>
-        {
-            context.Request.EnableBuffering();
-            await next();
-        });
         app.MapControllers();
 
         // Use the reverse proxy middleware
