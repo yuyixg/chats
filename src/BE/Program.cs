@@ -21,6 +21,7 @@ public class Program
         builder.Services.AddHttpClient();
         builder.Services.AddSingleton<AppConfigService>();
         builder.Services.AddSingleton<PasswordHasher>();
+        builder.Services.AddScoped<CurrentUser>();
 
         builder.AddReverseProxy();
 
@@ -37,6 +38,7 @@ public class Program
 
         app.UseCORSMiddleware();
 
+        app.UseSessionAuthentication();
         app.UseAuthorization();
         app.MapControllers();
 
