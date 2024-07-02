@@ -42,7 +42,11 @@ interface Props {
 export const ConversationComponent = ({ chat }: Props) => {
   const { t } = useTranslation('chat');
   const {
-    state: { selectChatId, messageIsStreaming, chats },
+    state: {
+      selectChat: { id: selectChatId } = { id: undefined },
+      messageIsStreaming,
+      chats,
+    },
     handleSelectChat,
     handleUpdateChat,
   } = useContext(HomeContext);
@@ -61,10 +65,10 @@ export const ConversationComponent = ({ chat }: Props) => {
     }
   };
 
-  const handleChangeTitle = (selectChatId: string) => {
+  const handleChangeTitle = (chatId: string) => {
     if (title.trim().length > 0) {
-      putChats({ id: selectChatId!, title }).then(() => {
-        handleUpdateChat(chats, selectChatId, { title });
+      putChats({ id: chatId, title }).then(() => {
+        handleUpdateChat(chats, chatId, { title });
         toast.success(t('Save successful'));
         setTitle('');
         setTitleChanging(false);
@@ -139,7 +143,7 @@ export const ConversationComponent = ({ chat }: Props) => {
           } ${
             selectChatId === chat.id ? 'bg-[#ececec] dark:bg-[#262630]/90' : ''
           }`}
-          onClick={() => handleSelectChat(chat.id)}
+          onClick={() => handleSelectChat(chat)}
           disabled={messageIsStreaming}
         >
           {chat.isShared ? (
@@ -176,7 +180,7 @@ export const ConversationComponent = ({ chat }: Props) => {
                 <IconDots size={16} />
               </Button>
             </DropdownMenuTrigger>
-            <DropdownMenuContent className='w-42'>
+            <DropdownMenuContent className="w-42">
               <DropdownMenuItem
                 className="flex justify-start gap-2"
                 onClick={handleOpenChangeTitleModal}

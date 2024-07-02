@@ -54,14 +54,14 @@ const handler = async (req: ChatsApiRequest) => {
     });
     return data;
   } else if (req.method === 'POST') {
-    const { account, password, role } = req.body;
-    let isFound = await UsersManager.findByAccount(account);
+    const { username, password, role } = req.body;
+    let isFound = await UsersManager.findByAccount(username);
     if (isFound) {
       throw new BadRequest('User existed');
     }
     const user = await UsersManager.createUser({
-      account,
-      username: account,
+      account: username,
+      username,
       password,
       role,
     });

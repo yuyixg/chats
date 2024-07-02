@@ -24,10 +24,11 @@ export const Chatbar = () => {
   });
 
   const {
-    state: { chats, settings, messageIsStreaming },
+    state: { chats, selectModel, settings, messageIsStreaming },
     handleDeleteChat: homeHandleDeleteChat,
     handleUpdateSettings,
     handleSelectChat,
+    handleSelectModel,
     handleNewChat,
     hasModel,
     getChats,
@@ -39,14 +40,15 @@ export const Chatbar = () => {
   } = chatBarContextValue;
 
   const handleDeleteChat = (chatId: string) => {
-    const _chats = chats.filter((x) => x.id !== chatId);
+    const chatList = chats.filter((x) => x.id !== chatId);
     chatDispatch({ field: 'searchTerm', value: '' });
     homeHandleDeleteChat(chatId);
-    if (_chats.length > 0) {
-      const chatId = _chats[_chats.length - 1].id;
-      handleSelectChat(chatId);
-      saveSelectChatId(chatId);
+    if (chatList.length > 0) {
+      const chat = chatList[chatList.length - 1];
+      handleSelectChat(chat);
+      saveSelectChatId(chat.id);
     } else {
+      handleSelectModel(selectModel!);
       removeSelectChatId();
     }
   };

@@ -12,6 +12,7 @@ import toast from 'react-hot-toast';
 import { useTranslation } from 'next-i18next';
 
 import { throttle } from '@/utils/throttle';
+import { getUserSession } from '@/utils/user';
 
 import { ChatBody, Message, Role } from '@/types/chat';
 
@@ -30,7 +31,6 @@ import { getChat, postChats } from '@/apis/userService';
 import { cn } from '@/lib/utils';
 import Decimal from 'decimal.js';
 import { v4 as uuidv4 } from 'uuid';
-import { getUserSession } from '@/utils/user';
 
 interface Props {
   stopConversationRef: MutableRefObject<boolean>;
@@ -41,7 +41,7 @@ export const Chat = memo(({ stopConversationRef }: Props) => {
 
   const {
     state: {
-      selectChatId,
+      selectChat,
       selectModel,
       selectMessages,
       currentMessages,
@@ -62,7 +62,6 @@ export const Chat = memo(({ stopConversationRef }: Props) => {
   const [autoScrollEnabled, setAutoScrollEnabled] = useState<boolean>(true);
   const [showScrollDownButton, setShowScrollDownButton] =
     useState<boolean>(false);
-  const currentSelectChat = chats.find((x) => x.id === selectChatId);
 
   const messagesEndRef = useRef<HTMLDivElement>(null);
   const chatContainerRef = useRef<HTMLDivElement>(null);
@@ -82,32 +81,32 @@ export const Chat = memo(({ stopConversationRef }: Props) => {
       modelId: string = '',
     ) => {
       homeDispatch({ field: 'chatError', value: false });
-      let _selectChatId = selectChatId;
-      let _selectMessages = [...selectMessages];
-      let _chats = chats;
+      let selectChatId = selectChat?.id;
+      let selectMessageList = [...selectMessages];
+      let chatList = chats;
       let assistantParentId = messageId;
       if (!selectChatId) {
         const newChat = await postChats({ title: t('New Conversation') });
-        _selectChatId = newChat.id;
-        _chats.push(newChat);
-        homeDispatch({ field: 'selectChatId', value: newChat.id });
+        selectChatId = newChat.id;
+        chats.push(newChat);
+        homeDispatch({ field: 'selectChat', value: newChat });
         homeDispatch({ field: 'currentMessages', value: [] });
         homeDispatch({ field: 'selectMessages', value: [] });
-        homeDispatch({ field: 'chats', value: [..._chats] });
+        homeDispatch({ field: 'chats', value: [...chatList] });
       }
       if (messageId && isRegenerate) {
-        const messageIndex = _selectMessages.findIndex(
+        const messageIndex = selectMessageList.findIndex(
           (x) => x.id === messageId,
         );
         homeDispatch({ field: 'selectMessageLastId', value: messageId });
-        _selectMessages.splice(messageIndex + 1, _selectMessages.length);
+        selectMessageList.splice(messageIndex + 1, selectMessageList.length);
       } else {
         const userTempId = uuidv4();
         assistantParentId = userTempId;
         homeDispatch({ field: 'selectMessageLastId', value: userTempId });
-        const parentMessage = _selectMessages.find((x) => x.id == messageId);
+        const parentMessage = selectMessageList.find((x) => x.id == messageId);
         parentMessage && parentMessage?.childrenIds.unshift(userTempId);
-        const parentMessageIndex = _selectMessages.findIndex(
+        const parentMessageIndex = selectMessageList.findIndex(
           (x) => x.id == messageId,
         );
         const newUserMessage = {
@@ -123,16 +122,17 @@ export const Chat = memo(({ stopConversationRef }: Props) => {
           outputPrice: new Decimal(0),
         };
         let removeCount = -1;
-        if (parentMessageIndex !== -1) removeCount = _selectMessages.length - 1;
+        if (parentMessageIndex !== -1)
+          removeCount = selectMessageList.length - 1;
         if (!messageId) {
-          removeCount = _selectMessages.length;
+          removeCount = selectMessageList.length;
           homeDispatch({
             field: 'currentMessages',
             value: [...currentMessages, newUserMessage],
           });
         }
 
-        _selectMessages.splice(
+        selectMessageList.splice(
           parentMessageIndex + 1,
           removeCount,
           newUserMessage,
@@ -160,18 +160,18 @@ export const Chat = memo(({ stopConversationRef }: Props) => {
         field: 'currentChatMessageId',
         value: assistantTempId,
       });
-      _selectMessages.push(newAssistantMessage);
+      selectMessageList.push(newAssistantMessage);
 
       homeDispatch({
         field: 'selectMessages',
-        value: [..._selectMessages],
+        value: [...selectMessageList],
       });
       homeDispatch({ field: 'loading', value: true });
       homeDispatch({ field: 'messageIsStreaming', value: true });
       const messageContent = message.content;
       const chatBody: ChatBody = {
         modelId: modelId || selectModel?.id!,
-        chatId: _selectChatId!,
+        chatId: selectChatId,
         messageId,
         userMessage: messageContent,
         userModelConfig,
@@ -204,7 +204,7 @@ export const Chat = memo(({ stopConversationRef }: Props) => {
         homeDispatch({ field: 'chatError', value: true });
         return;
       }
-
+      let errorChat = false;
       let text = '';
       const reader = data.getReader();
       const decoder = new TextDecoder();
@@ -237,9 +237,10 @@ export const Chat = memo(({ stopConversationRef }: Props) => {
       for await (const message of processBuffer()) {
         let value = JSON.parse(message);
         if (!value.success) {
+          errorChat = true;
           homeDispatch({
             field: 'chatError',
-            value: true,
+            value: errorChat,
           });
           controller.abort();
           break;
@@ -250,33 +251,33 @@ export const Chat = memo(({ stopConversationRef }: Props) => {
         }
         text += value.result;
 
-        let lastMessages = _selectMessages[_selectMessages.length - 1];
+        let lastMessages = selectMessageList[selectMessageList.length - 1];
         lastMessages = {
           ...lastMessages,
           content: { text },
         };
 
-        _selectMessages.splice(-1, 1, lastMessages);
+        selectMessageList.splice(-1, 1, lastMessages);
 
         homeDispatch({
           field: 'selectMessages',
-          value: [..._selectMessages],
+          value: [...selectMessageList],
         });
       }
 
-      if (_selectMessages.length === 1) {
+      if (selectMessageList.length === 1) {
         const userMessageText = message.content.text!;
         const title =
           userMessageText.length > 30
             ? userMessageText.substring(0, 30) + '...'
             : userMessageText;
-        handleUpdateChat(_chats, _selectChatId!, {
+        handleUpdateChat(chatList, selectChatId, {
           title,
           chatModelId: selectModel?.id,
         });
       }
-      !chats.find((x) => x.id === _selectChatId)?.chatModelId &&
-        getChat(_selectChatId!).then((data) => {
+      !chats.find((x) => x.id === selectChatId)?.chatModelId &&
+        getChat(selectChatId).then((data) => {
           const _chats = chats.map((x) => {
             if (x.id === data.id) {
               return data;
@@ -291,15 +292,17 @@ export const Chat = memo(({ stopConversationRef }: Props) => {
         });
       homeDispatch({ field: 'loading', value: false });
       homeDispatch({ field: 'messageIsStreaming', value: false });
-      setTimeout(() => {
-        handleUpdateCurrentMessage(_selectChatId!);
-      }, 100);
+      !errorChat &&
+        setTimeout(() => {
+          handleUpdateCurrentMessage(selectChatId);
+        }, 100);
       stopConversationRef.current = false;
     },
     [
       userModelConfig,
       chats,
-      selectChatId,
+      selectChat,
+      chatError,
       currentMessages,
       selectMessages,
       selectModel,
@@ -403,7 +406,7 @@ export const Chat = memo(({ stopConversationRef }: Props) => {
             </>
           ) : (
             <>
-              {currentSelectChat && (
+              {selectChat?.id && (
                 <div className="sticky top-0 z-10 text-sm pt-[9px] bg-white dark:bg-[#262630] dark:text-neutral-200">
                   <div
                     className={cn(
@@ -413,7 +416,7 @@ export const Chat = memo(({ stopConversationRef }: Props) => {
                   >
                     {hasModel() && (
                       <ChangeModel
-                        className=" font-semibold text-base"
+                        className="font-semibold text-base"
                         modelName={selectModel?.name}
                         onChangeModel={(model) => {
                           homeDispatch({
@@ -440,9 +443,6 @@ export const Chat = memo(({ stopConversationRef }: Props) => {
                       ?.childrenIds || [];
                   parentChildrenIds = [...parentChildrenIds].reverse();
                 }
-                if (lastMessage.id === current.id && chatError) {
-                  return <></>;
-                }
                 return (
                   <MemoizedChatMessage
                     key={current.id + index}
@@ -462,7 +462,7 @@ export const Chat = memo(({ stopConversationRef }: Props) => {
                       id: current.id!,
                       role: current.role,
                       content: current.content,
-                      duration: current.duration,
+                      duration: current.duration || 0,
                       inputTokens: current.inputTokens,
                       outputTokens: current.outputTokens,
                       inputPrice: current.inputPrice,

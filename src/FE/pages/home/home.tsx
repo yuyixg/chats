@@ -24,16 +24,16 @@ import {
   getSettingsLanguage,
   saveSettings,
 } from '@/utils/settings';
+import { DEFAULT_LANGUAGE, Settings } from '@/utils/settings';
 import { getLoginUrl, getUserInfo, getUserSession } from '@/utils/user';
 import { UserSession } from '@/utils/user';
 import { setSiteInfo } from '@/utils/website';
 
-import { Role } from '@/types/chat';
+import { IChat, Role } from '@/types/chat';
 import { ChatMessage } from '@/types/chatMessage';
 import { GlobalConfigKeys, SiteInfoConfig } from '@/types/config';
 import { Model, UserModelConfig } from '@/types/model';
 import { Prompt } from '@/types/prompt';
-import { DEFAULT_LANGUAGE, Settings } from '@/utils/settings';
 
 import { Chat } from '@/components/Chat/Chat';
 import { Chatbar } from '@/components/Chatbar/Chatbar';
@@ -66,7 +66,7 @@ interface HomeInitialState {
   models: Model[];
   chats: ChatResult[];
   chatsPaging: { count: number; page: number; pageSize: number };
-  selectChatId: string | undefined;
+  selectChat: IChat;
   selectModel: Model | undefined;
   currentMessages: ChatMessage[];
   selectMessages: ChatMessage[];
@@ -92,7 +92,7 @@ const initialState: HomeInitialState = {
   chats: [],
   chatsPaging: { count: 0, page: 1, pageSize: 50 },
   selectModel: undefined,
-  selectChatId: undefined,
+  selectChat: {} as IChat,
   chatError: false,
   prompts: [],
   settings: DEFAULT_SETTINGS,
@@ -103,7 +103,7 @@ interface HomeContextProps {
   state: HomeInitialState;
   dispatch: Dispatch<ActionType<HomeInitialState>>;
   handleNewChat: () => void;
-  handleSelectChat: (chatId: string) => void;
+  handleSelectChat: (chat: IChat) => void;
   handleUpdateChat: (
     chats: ChatResult[],
     id: string,
@@ -181,7 +181,7 @@ const Home = ({ siteInfo }: { siteInfo: SiteInfoConfig }) => {
   const handleNewChat = () => {
     postChats({ title: t('New Conversation') }).then((data) => {
       const model = calcSelectModel(chats, models);
-      dispatch({ field: 'selectChatId', value: data.id });
+      dispatch({ field: 'selectChat', value: data });
       dispatch({ field: 'selectMessageLastId', value: '' });
       dispatch({ field: 'currentMessages', value: [] });
       dispatch({ field: 'selectMessages', value: [] });
@@ -197,10 +197,10 @@ const Home = ({ siteInfo }: { siteInfo: SiteInfoConfig }) => {
       if (data.length > 0) {
         dispatch({ field: 'currentMessages', value: data });
         const lastMessage = data[data.length - 1];
-        const _selectMessages = getSelectMessages(data, lastMessage.id);
+        const selectMessageList = getSelectMessages(data, lastMessage.id);
         dispatch({
           field: 'selectMessages',
-          value: _selectMessages,
+          value: selectMessageList,
         });
         dispatch({ field: 'selectMessageLastId', value: lastMessage.id });
       } else {
@@ -213,32 +213,31 @@ const Home = ({ siteInfo }: { siteInfo: SiteInfoConfig }) => {
     });
   };
 
-  const handleSelectChat = (chatId: string) => {
+  const handleSelectChat = (chat: IChat) => {
     dispatch({
       field: 'chatError',
       value: false,
     });
-    dispatch({ field: 'selectChatId', value: chatId });
-    const chat = chats.find((x) => x.id === chatId)!;
+    dispatch({ field: 'selectChat', value: chat });
     const selectModel =
-      getChatModel(chatId, models) || calcSelectModel(chats, models);
+      getChatModel(chat.id, models) || calcSelectModel(chats, models);
     selectModel && setStorageModelId(selectModel.id);
-    getUserMessages(chatId).then((data) => {
+    getUserMessages(chat.id).then((data) => {
       if (data.length > 0) {
         dispatch({ field: 'currentMessages', value: data });
         const lastMessage = data[data.length - 1];
-        const _selectMessages = getSelectMessages(data, lastMessage.id);
+        const selectMessageList = getSelectMessages(data, lastMessage.id);
         if (lastMessage.role !== 'assistant') {
           dispatch({
             field: 'chatError',
             value: true,
           });
-          _selectMessages.push(chatErrorMessage(lastMessage.id));
+          selectMessageList.push(chatErrorMessage(lastMessage.id));
         }
 
         dispatch({
           field: 'selectMessages',
-          value: _selectMessages,
+          value: selectMessageList,
         });
         dispatch({ field: 'selectMessageLastId', value: lastMessage.id });
         dispatch({ field: 'userModelConfig', value: chat.userModelConfig });
@@ -256,14 +255,14 @@ const Home = ({ siteInfo }: { siteInfo: SiteInfoConfig }) => {
       }
     });
     router.push('#/' + chat.id);
-    saveSelectChatId(chatId);
+    saveSelectChatId(chat.id);
   };
 
   const handleUpdateSelectMessage = (messageId: string) => {
-    const _selectMessages = getSelectMessages(currentMessages, messageId);
+    const selectMessageList = getSelectMessages(currentMessages, messageId);
     dispatch({
       field: 'selectMessages',
-      value: _selectMessages,
+      value: selectMessageList,
     });
   };
 
@@ -279,23 +278,24 @@ const Home = ({ siteInfo }: { siteInfo: SiteInfoConfig }) => {
     id: string,
     params: HandleUpdateChatParams,
   ) => {
-    const _chats = chats.map((x) => {
+    const chatList = chats.map((x) => {
       if (x.id === id) return { ...x, ...params };
       return x;
     });
 
-    dispatch({ field: 'chats', value: _chats });
+    dispatch({ field: 'chats', value: chatList });
   };
 
   const handleDeleteChat = (id: string) => {
-    const _chats = chats.filter((x) => {
+    const chatList = chats.filter((x) => {
       return x.id !== id;
     });
-    dispatch({ field: 'chats', value: _chats });
-    dispatch({ field: 'selectChatId', value: '' });
+    dispatch({ field: 'chats', value: chatList });
+    dispatch({ field: 'selectChat', value: undefined });
     dispatch({ field: 'selectMessageLastId', value: '' });
     dispatch({ field: 'currentMessages', value: [] });
     dispatch({ field: 'selectMessages', value: [] });
+    dispatch({ field: 'chatError', value: false });
     dispatch({
       field: 'selectModel',
       value: calcSelectModel(chats, models),
@@ -323,23 +323,23 @@ const Home = ({ siteInfo }: { siteInfo: SiteInfoConfig }) => {
   ) => {
     const chat = chatList.find((x) => x.id === chatId);
     if (chat) {
-      dispatch({ field: 'selectChatId', value: chatId });
+      dispatch({ field: 'selectChat', value: chat });
 
       getUserMessages(chat.id).then((data) => {
         if (data.length > 0) {
           dispatch({ field: 'currentMessages', value: data });
           const lastMessage = data[data.length - 1];
-          const _selectMessages = getSelectMessages(data, lastMessage.id);
+          const selectMessageList = getSelectMessages(data, lastMessage.id);
           if (lastMessage.role !== 'assistant') {
             dispatch({
               field: 'chatError',
               value: true,
             });
-            _selectMessages.push(chatErrorMessage(lastMessage.id));
+            selectMessageList.push(chatErrorMessage(lastMessage.id));
           }
           dispatch({
             field: 'selectMessages',
-            value: _selectMessages,
+            value: selectMessageList,
           });
           dispatch({ field: 'selectMessageLastId', value: lastMessage.id });
         } else {
@@ -364,11 +364,11 @@ const Home = ({ siteInfo }: { siteInfo: SiteInfoConfig }) => {
         field: 'chatsPaging',
         value: { count, page, pageSize },
       });
-      let _chats = rows;
+      let chatList = rows;
       if (!modelList) {
-        _chats = rows.concat(chats);
+        chatList = rows.concat(chats);
       }
-      dispatch({ field: 'chats', value: _chats });
+      dispatch({ field: 'chats', value: chatList });
       if (modelList) {
         const selectChatId = getPathChatId(router.asPath) || getSelectChatId();
         selectChat(rows, selectChatId, modelList || models);

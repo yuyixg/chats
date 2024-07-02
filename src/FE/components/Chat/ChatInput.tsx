@@ -54,9 +54,8 @@ export const ChatInput = ({
     state: {
       selectModel,
       messageIsStreaming,
-      models,
       prompts,
-      selectChatId,
+      selectChat,
       chatError,
     },
   } = useContext(HomeContext);
@@ -125,7 +124,7 @@ export const ChatInput = ({
 
   const handleStopChat = () => {
     stopConversationRef.current = true;
-    stopChat(selectChatId!);
+    stopChat(selectChat.id);
   };
 
   const handleKeyDown = (e: KeyboardEvent<HTMLTextAreaElement>) => {
@@ -230,7 +229,7 @@ export const ChatInput = ({
 
   useEffect(() => {
     setContent({ ...content, image: [] });
-  }, [selectModel, selectChatId]);
+  }, [selectModel, selectChat]);
 
   return (
     <div className="absolute bottom-0 left-0 w-full border-transparent bg-gradient-to-b from-transparent via-white to-white pt-6 dark:border-white/20 dark:via-[#262630] dark:to-[#262630] md:pt-2">
