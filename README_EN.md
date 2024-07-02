@@ -2,7 +2,7 @@
 
 `Chats` is a website that integrates multiple AI chat models and allows for independent dynamic configuration of each AI model.
 
-![Chats](chats.png)
+![image](https://github.com/greywen/chats/assets/1317141/2f73cfa6-6c0c-4edb-9e87-8c770b8f2fe1)
 
 ## Features
 
