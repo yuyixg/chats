@@ -9,13 +9,16 @@ namespace Chats.BE.DB;
 /// <summary>
 /// JSON
 /// </summary>
-[Table("DefaultModelProvider")]
-public partial class DefaultModelProvider
+[Table("ModelProvider")]
+[Index("Name", Name = "IX_ModelProvider")]
+public partial class ModelProvider
 {
     [Key]
+    public int Id { get; set; }
+
     [StringLength(50)]
     [Unicode(false)]
-    public string Provider { get; set; } = null!;
+    public string Name { get; set; } = null!;
 
     [StringLength(50)]
     public string DisplayName { get; set; } = null!;
@@ -27,4 +30,7 @@ public partial class DefaultModelProvider
     [StringLength(2000)]
     [Unicode(false)]
     public string InitialConfig { get; set; } = null!;
+
+    [InverseProperty("Provider")]
+    public virtual ICollection<ModelSetting> ModelSettings { get; set; } = new List<ModelSetting>();
 }
