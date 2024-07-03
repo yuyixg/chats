@@ -2,6 +2,7 @@
 using Chats.BE.DB;
 using Chats.BE.Infrastructure;
 using Chats.BE.Services;
+using Microsoft.AspNetCore.Authentication;
 
 namespace Chats.BE;
 
@@ -24,6 +25,10 @@ public class Program
         builder.Services.AddScoped<CurrentUser>();
         builder.Services.AddHttpContextAccessor();
 
+        // Add authentication and configure the default scheme
+        builder.Services.AddAuthentication("Bearer")
+            .AddScheme<AuthenticationSchemeOptions, SessionAuthenticationHandler>("Bearer", null);
+
         builder.AddReverseProxy();
 
         builder.AddCORSPolicies();
@@ -39,7 +44,7 @@ public class Program
 
         app.UseCORSMiddleware();
 
-        app.UseSessionAuthentication();
+        app.UseAuthentication();
         app.UseAuthorization();
         app.MapControllers();
 
