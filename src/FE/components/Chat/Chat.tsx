@@ -489,6 +489,7 @@ export const Chat = memo(({ stopConversationRef }: Props) => {
                   />
                 );
               })}
+
               <div className="flex relative m-auto justify-center md:max-w-2xl lg:max-w-2xl lg:px-0 xl:max-w-5xl">
                 {chatError && <ChatError />}
               </div>
