@@ -10,6 +10,9 @@ src/FE/node_modules
 
 # next.js
 src/FE/.next
+src/FE/public/sw.js
+src/FE/public/workbox-*.js
+
 /out/
 
 # production
