@@ -22,6 +22,7 @@ public class Program
         builder.Services.AddSingleton<AppConfigService>();
         builder.Services.AddSingleton<PasswordHasher>();
         builder.Services.AddScoped<CurrentUser>();
+        builder.Services.AddHttpContextAccessor();
 
         builder.AddReverseProxy();
 
