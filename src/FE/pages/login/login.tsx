@@ -111,7 +111,7 @@ export default function LoginPage({
             <div className="absolute inset-0 bg-zinc-900" />
             <div className="relative z-20 flex items-center text-lg font-medium">
               <Image
-                src="/chats.png"
+                src="/icons/chats.png"
                 width={32}
                 height={32}
                 className="mr-2 h-8 w-8"
