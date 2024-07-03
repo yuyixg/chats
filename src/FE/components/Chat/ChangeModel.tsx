@@ -75,7 +75,7 @@ const ChangeModel = ({
                 >
                   <Image
                     key={`img-${m.provider}`}
-                    src={`/${ModelProviderTemplates[m.provider].icon}`}
+                    src={`/logos/${ModelProviderTemplates[m.provider].icon}`}
                     alt="KeyCloak"
                     width={18}
                     height={18}

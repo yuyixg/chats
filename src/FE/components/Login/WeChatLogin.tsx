@@ -33,7 +33,7 @@ const WeChatLogin = (props: {
               variant="link"
             >
               <Image
-                src="/wechat.svg"
+                src="/logos/wechat.svg"
                 alt="WeChat"
                 width={0}
                 height={0}

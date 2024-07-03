@@ -4,6 +4,8 @@
   "private": true,
   "scripts": {
     "dev": "next dev",
+    "build:dev": "set NODE_ENV=development && npx prisma generate && next build",
+    "start:dev": "set NODE_ENV=development && npx prisma generate && next start",
     "build": "npx prisma generate && next build",
     "start": "npx prisma generate && next start",
     "lint": "next lint",
@@ -49,6 +51,7 @@
     "next": "^13.4.19",
     "next-auth": "^4.24.7",
     "next-i18next": "^13.2.2",
+    "next-pwa": "^5.6.0",
     "next-themes": "^0.3.0",
     "pg": "^8.12.0",
     "qrcode": "^1.5.3",

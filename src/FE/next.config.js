@@ -1,4 +1,16 @@
+const isDev = process.env?.NODE_ENV === 'development';
+console.log("-------------------");
+console.log("NODE_ENV", process.env?.NODE_ENV);
+console.log("-------------------");
+
 const { i18n } = require('./next-i18next.config');
+const withPWA = require('next-pwa')({
+  dest: 'public',
+  register: !isDev,
+  skipWaiting: !isDev,
+  disable: isDev,
+})
+
 /** @type {import('next').NextConfig} */
 const nextConfig = {
   i18n,
@@ -16,4 +28,4 @@ const nextConfig = {
   }
 };
 
-module.exports = nextConfig;
+module.exports = withPWA(nextConfig);

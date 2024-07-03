@@ -39,7 +39,7 @@ const KeyCloakLogin = (props: { loading?: boolean }) => {
               type="submit"
             >
               <Image
-                src="/keycloak.svg"
+                src="/logos/keycloak.svg"
                 alt="KeyCloak"
                 width={32}
                 height={32}
