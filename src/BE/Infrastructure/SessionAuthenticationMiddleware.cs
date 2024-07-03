@@ -41,9 +41,15 @@ public class SessionAuthenticationMiddleware(RequestDelegate _next)
                         new Claim(ClaimTypes.NameIdentifier, userInfo.Id.ToString()),
                         new Claim(ClaimTypes.Name, userInfo.UserName),
                         new Claim(ClaimTypes.Role, userInfo.Role),
-                        new Claim("provider", userInfo.Provider!),
-                        new Claim("provider-sub", userInfo.Sub!),
                     ], "Bearer");
+                    if (userInfo.Provider != null)
+                    {
+                        identity.AddClaim(new Claim("provider", userInfo.Provider));
+                    }
+                    if (userInfo.Sub != null)
+                    {
+                        identity.AddClaim(new Claim("provider-sub", userInfo.Sub));
+                    }
                     context.User = new ClaimsPrincipal(identity);
                 }
             }

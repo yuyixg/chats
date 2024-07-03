@@ -6,16 +6,15 @@ using Microsoft.EntityFrameworkCore;
 
 namespace Chats.BE.DB;
 
-[PrimaryKey("Provider", "Type")]
 [Table("ModelSetting")]
+[Index("ProviderId", "Type", Name = "IX_ModelSetting_ProviderId+Type")]
 public partial class ModelSetting
 {
     [Key]
-    [StringLength(50)]
-    [Unicode(false)]
-    public string Provider { get; set; } = null!;
+    public int Id { get; set; }
 
-    [Key]
+    public int ProviderId { get; set; }
+
     [StringLength(50)]
     [Unicode(false)]
     public string Type { get; set; } = null!;
@@ -48,4 +47,8 @@ public partial class ModelSetting
 
     [Column(TypeName = "decimal(9, 5)")]
     public decimal ResponseTokenPrice1M { get; set; }
+
+    [ForeignKey("ProviderId")]
+    [InverseProperty("ModelSettings")]
+    public virtual ModelProvider Provider { get; set; } = null!;
 }

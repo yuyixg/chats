@@ -1,6 +1,7 @@
 ﻿using Chats.BE.Controllers.Chats.Models.Dtos;
 using Chats.BE.Controllers.Chats.Models.JsonColumn;
 using Chats.BE.DB;
+using Chats.BE.DB.Extensions;
 using Chats.BE.Infrastructure;
 using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Mvc;
@@ -25,17 +26,30 @@ public class ModelsController : ControllerBase
         Dictionary<Guid, FileService> fileServices = await db.FileServices
             .Where(x => fileServiceIds.Contains(x.Id) && x.Enabled)
             .ToDictionaryAsync(x => x.Id, cancellationToken);
+        HashSet<ModelIdentifier> modelIds = chatModels.Values
+            .Select(x => x.ToIdentifier())
+            .ToHashSet();
+        Dictionary<ModelIdentifier, TemperatureOptions> temperatureOptions = db.ModelSettings
+            .Select(x => new
+            {
+                ModelId = new ModelIdentifier(x.Provider.Name, x.Type),
+                TemperatureOptions = new TemperatureOptions(x.MinTemperature, x.MaxTemperature)
+            })
+            .AsEnumerable()
+            .Where(x => modelIds.Contains(x.ModelId))
+            .ToDictionary(x => x.ModelId, x => x.TemperatureOptions);
 
         return Ok(userModels
             .Where(x => x.Enabled && chatModels.ContainsKey(x.ModelId))
             .Select(userModel =>
             {
                 ChatModel chatModel = chatModels[userModel.ModelId];
-                FileService? fileService = chatModel.FileServiceId == null ? null : 
+                FileService? fileService = chatModel.FileServiceId == null ? null :
                     fileServices.TryGetValue(chatModel.FileServiceId!.Value, out FileService? fs) ? fs :
                     null;
                 JsonModelConfig modelConfig = JsonSerializer.Deserialize<JsonModelConfig>(chatModel.ModelConfig)!;
-                return ModelResponse.FromAll(chatModel, userModel, modelConfig, fileService);
+                TemperatureOptions temperatureOption = temperatureOptions[chatModel.ToIdentifier()];
+                return ModelResponse.FromAll(chatModel, userModel, modelConfig, fileService, temperatureOption);
             })
             .ToArray());
     }

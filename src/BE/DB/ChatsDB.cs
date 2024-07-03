@@ -193,6 +193,15 @@ public partial class ChatsDB : DbContext
             entity.ToTable("ModelProvider", tb => tb.HasComment("JSON"));
         });
 
+        modelBuilder.Entity<ModelSetting>(entity =>
+        {
+            entity.Property(e => e.ProviderId).HasDefaultValue(1);
+
+            entity.HasOne(d => d.Provider).WithMany(p => p.ModelSettings)
+                .OnDelete(DeleteBehavior.ClientSetNull)
+                .HasConstraintName("FK_ModelSetting_ModelProvider");
+        });
+
         modelBuilder.Entity<Order>(entity =>
         {
             entity.HasKey(e => e.Id).HasName("Orders_pkey");
