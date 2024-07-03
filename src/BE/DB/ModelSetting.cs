@@ -7,8 +7,8 @@ using Microsoft.EntityFrameworkCore;
 namespace Chats.BE.DB;
 
 [PrimaryKey("Provider", "Type")]
-[Table("DefaultModelSetting")]
-public partial class DefaultModelSetting
+[Table("ModelSetting")]
+public partial class ModelSetting
 {
     [Key]
     [StringLength(50)]

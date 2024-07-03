@@ -9,8 +9,8 @@ namespace Chats.BE.DB;
 /// <summary>
 /// JSON
 /// </summary>
-[Table("DefaultModelProvider")]
-public partial class DefaultModelProvider
+[Table("ModelProvider")]
+public partial class ModelProvider
 {
     [Key]
     [StringLength(50)]

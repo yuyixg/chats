@@ -27,10 +27,6 @@ public partial class ChatsDB : DbContext
 
     public virtual DbSet<Counterfoil> Counterfoils { get; set; }
 
-    public virtual DbSet<DefaultModelProvider> DefaultModelProviders { get; set; }
-
-    public virtual DbSet<DefaultModelSetting> DefaultModelSettings { get; set; }
-
     public virtual DbSet<FileService> FileServices { get; set; }
 
     public virtual DbSet<InvitationCode> InvitationCodes { get; set; }
@@ -38,6 +34,10 @@ public partial class ChatsDB : DbContext
     public virtual DbSet<LoginService> LoginServices { get; set; }
 
     public virtual DbSet<ModelKey> ModelKeys { get; set; }
+
+    public virtual DbSet<ModelProvider> ModelProviders { get; set; }
+
+    public virtual DbSet<ModelSetting> ModelSettings { get; set; }
 
     public virtual DbSet<Order> Orders { get; set; }
 
@@ -152,18 +152,6 @@ public partial class ChatsDB : DbContext
             entity.Property(e => e.CreatedAt).HasDefaultValueSql("(getdate())");
         });
 
-        modelBuilder.Entity<DefaultModelProvider>(entity =>
-        {
-            entity.HasKey(e => e.Provider).HasName("PK_ModelProvider");
-
-            entity.ToTable("DefaultModelProvider", tb => tb.HasComment("JSON"));
-        });
-
-        modelBuilder.Entity<DefaultModelSetting>(entity =>
-        {
-            entity.HasKey(e => new { e.Provider, e.Type }).HasName("PK_ModelSetting");
-        });
-
         modelBuilder.Entity<FileService>(entity =>
         {
             entity.HasKey(e => e.Id).HasName("FileServices_pkey");
@@ -198,6 +186,11 @@ public partial class ChatsDB : DbContext
 
             entity.Property(e => e.Id).ValueGeneratedNever();
             entity.Property(e => e.CreatedAt).HasDefaultValueSql("(getdate())");
+        });
+
+        modelBuilder.Entity<ModelProvider>(entity =>
+        {
+            entity.ToTable("ModelProvider", tb => tb.HasComment("JSON"));
         });
 
         modelBuilder.Entity<Order>(entity =>
