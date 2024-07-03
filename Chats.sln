@@ -12,6 +12,8 @@ Project("{2150E333-8FDC-42A3-9474-1A3956D46DE8}") = "解决方案项", "解决�
 EndProject
 Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "Chats.BE", "src\BE\Chats.BE.csproj", "{FB97A747-DBE5-4D4B-8046-D534BD00A172}"
 EndProject
+Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "Chats.BE.Tests", "src\BE.Tests\Chats.BE.Tests.csproj", "{B785B397-23AB-4782-807B-C5D5001C1ECC}"
+EndProject
 Global
 	GlobalSection(SolutionConfigurationPlatforms) = preSolution
 		Debug|Any CPU = Debug|Any CPU
@@ -22,6 +24,10 @@ Global
 		{FB97A747-DBE5-4D4B-8046-D534BD00A172}.Debug|Any CPU.Build.0 = Debug|Any CPU
 		{FB97A747-DBE5-4D4B-8046-D534BD00A172}.Release|Any CPU.ActiveCfg = Release|Any CPU
 		{FB97A747-DBE5-4D4B-8046-D534BD00A172}.Release|Any CPU.Build.0 = Release|Any CPU
+		{B785B397-23AB-4782-807B-C5D5001C1ECC}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
+		{B785B397-23AB-4782-807B-C5D5001C1ECC}.Debug|Any CPU.Build.0 = Debug|Any CPU
+		{B785B397-23AB-4782-807B-C5D5001C1ECC}.Release|Any CPU.ActiveCfg = Release|Any CPU
+		{B785B397-23AB-4782-807B-C5D5001C1ECC}.Release|Any CPU.Build.0 = Release|Any CPU
 	EndGlobalSection
 	GlobalSection(SolutionProperties) = preSolution
 		HideSolutionNode = FALSE
