@@ -23,5 +23,5 @@ public record JsonModelConfig
     public bool? EnableSearch { get; init; }
 
     [JsonPropertyName("maxLength")]
-    public int MaxLength { get; init; }
+    public int? MaxLength { get; init; }
 }
