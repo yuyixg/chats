@@ -1,4 +1,4 @@
-import { useContext } from 'react';
+import { useContext, useState } from 'react';
 
 import Image from 'next/image';
 
@@ -8,6 +8,7 @@ import { ModelProviderTemplates } from '@/types/template';
 import { HomeContext } from '@/pages/home/home';
 
 import { IconChevronDown } from '../Icons';
+import Search from '../Search';
 import { Button } from '../ui/button';
 import {
   DropdownMenu,
@@ -25,22 +26,25 @@ import { cn } from '@/lib/utils';
 
 const ChangeModel = ({
   readonly,
-  modelName,
+  content,
   className,
   onChangeModel,
 }: {
   readonly?: boolean;
-  modelName?: string;
+  content?: string | React.JSX.Element;
   className?: string;
   onChangeModel: (model: Model) => void;
 }) => {
   const {
     state: { models },
   } = useContext(HomeContext);
-
+  const [searchTerm, setSearchTerm] = useState('');
   let modelGroup = [] as { provider: ModelProviders; child: Model[] }[];
   const groupModel = () => {
-    models.forEach((m) => {
+    const modelList = searchTerm
+      ? models.filter((model) => model.name.toLowerCase().includes(searchTerm))
+      : models;
+    modelList.forEach((m) => {
       const model = modelGroup.find((x) => x.provider === m.modelProvider);
       if (model) {
         model.child.push(m);
@@ -54,17 +58,29 @@ const ChangeModel = ({
   };
   groupModel();
 
+  const handleSearch = (value: string) => {
+    setSearchTerm(value);
+    groupModel();
+  };
+
   return (
     <DropdownMenu>
       <DropdownMenuTrigger asChild>
         <Button variant="ghost" className="p-1 m-0 h-auto" disabled={readonly}>
           <span className={cn('text-[#7d7d7d] font-medium', className)}>
-            {modelName}
+            {content && content}
           </span>
-          {!readonly && <IconChevronDown stroke="#7d7d7d" />}
+          {!readonly && typeof content === 'string' && <IconChevronDown stroke="#7d7d7d" />}
         </Button>
       </DropdownMenuTrigger>
-      <DropdownMenuContent className="w-42">
+      <DropdownMenuContent className="w-36">
+        <Search
+          className="p-2 mx-1"
+          containerClassName="pt-1 pb-1"
+          placeholder="Search..."
+          searchTerm={searchTerm}
+          onSearch={handleSearch}
+        />
         <DropdownMenuGroup>
           {modelGroup.map((m) => {
             return (
@@ -84,7 +100,7 @@ const ChangeModel = ({
                   {ModelProviderTemplates[m.provider].displayName}
                 </DropdownMenuSubTrigger>
                 <DropdownMenuPortal>
-                  <DropdownMenuSubContent>
+                  <DropdownMenuSubContent className="max-w-[64px] md:max-w-[200px]">
                     {m.child.map((x) => (
                       <DropdownMenuItem
                         key={x.id}

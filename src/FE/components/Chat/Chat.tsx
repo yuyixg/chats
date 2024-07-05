@@ -417,7 +417,7 @@ export const Chat = memo(({ stopConversationRef }: Props) => {
                     {hasModel() && (
                       <ChangeModel
                         className="font-semibold text-base"
-                        modelName={selectModel?.name}
+                        content={selectModel?.name}
                         onChangeModel={(model) => {
                           homeDispatch({
                             field: 'selectModel',

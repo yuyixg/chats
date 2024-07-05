@@ -28,7 +28,7 @@ const KeyCloakLogin = (props: { loading?: boolean }) => {
       <input
         type="hidden"
         name="callbackUrl"
-        value={`${location.origin}/authorizing`}
+        value={`${location.origin}/authorizing?provider=Keycloak`}
       />
       <TooltipProvider>
         <Tooltip>

@@ -24,7 +24,7 @@ export const ChangeModelAction = (props: Props) => {
             onChangeModel={(model) => {
               onChangeModel && onChangeModel(model.id);
             }}
-            modelName={modelName!}
+            content={modelName}
           />
         }
         content={t('Change Model')!}

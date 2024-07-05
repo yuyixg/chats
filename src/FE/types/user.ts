@@ -1,7 +1,7 @@
 import Decimal from 'decimal.js';
 
 export enum LoginType {
-  'KeyCloak' = 'KeyCloak',
+  'KeyCloak' = 'Keycloak',
   'WeChat' = 'WeChat',
   'Phone' = 'Phone',
 }
@@ -20,6 +20,7 @@ export interface SingInParams {
   username?: string;
   password?: string;
   code?: string;
+  provider?: string;
 }
 
 export interface SingInResult {

@@ -68,6 +68,7 @@ interface HomeInitialState {
   chatsPaging: { count: number; page: number; pageSize: number };
   selectChat: IChat;
   selectModel: Model | undefined;
+  selectModels: Model[];
   currentMessages: ChatMessage[];
   selectMessages: ChatMessage[];
   selectMessageLastId: string;
@@ -92,6 +93,7 @@ const initialState: HomeInitialState = {
   chats: [],
   chatsPaging: { count: 0, page: 1, pageSize: 50 },
   selectModel: undefined,
+  selectModels: [],
   selectChat: {} as IChat,
   chatError: false,
   prompts: [],
