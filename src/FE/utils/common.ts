@@ -65,4 +65,4 @@ export function calcHrtime(hrtime: [number, number]) {
 export const PhoneRegExp = /^[1][3,4,5,6,7,8,9][0-9]{9}$/;
 export const SmsExpirationSeconds = 300;
 
-export const gitApiUrl = () => (window as any)['API_URL'] || '';
+export const getApiUrl = () => (window as any)['API_URL'] || '';
