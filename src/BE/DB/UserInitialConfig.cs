@@ -7,6 +7,7 @@ using Microsoft.EntityFrameworkCore;
 namespace Chats.BE.DB;
 
 [Table("UserInitialConfig")]
+[Index("InvitationCodeId", Name = "IX_UserInitialConfig_InvitationCodeId")]
 public partial class UserInitialConfig
 {
     [Key]
@@ -36,4 +37,8 @@ public partial class UserInitialConfig
 
     [Column("invitationCodeId")]
     public Guid? InvitationCodeId { get; set; }
+
+    [ForeignKey("InvitationCodeId")]
+    [InverseProperty("UserInitialConfigs")]
+    public virtual InvitationCode? InvitationCode { get; set; }
 }

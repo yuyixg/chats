@@ -9,7 +9,7 @@ public class KeycloakConfigStore(ChatsDB db)
 {
     public async Task<KeycloakConfig?> GetKeycloakConfig(CancellationToken cancellationToken)
     {
-        LoginService? loginService = await db.LoginServices.SingleOrDefaultAsync(s => s.Type == KnownLoginServices.Keycloak, cancellationToken);
+        LoginService? loginService = await db.LoginServices.SingleOrDefaultAsync(s => s.Type == KnownLoginProviders.Keycloak, cancellationToken);
         if (loginService == null)
         {
             return null;

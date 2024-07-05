@@ -1,9 +1,12 @@
 ﻿using System.Text.Json.Serialization;
 
-namespace Chats.BE.Controllers.Public.AccountLogin;
+namespace Chats.BE.Controllers.Public.AccountLogin.Dtos;
 
 public record LoginRequest
 {
+    [JsonPropertyName("provider")]
+    public string? Provider { get; init; }
+
     [JsonPropertyName("username")]
     public string? UserName { get; init; }
 
@@ -22,8 +25,9 @@ public record LoginRequest
                 UserName = UserName!,
                 Password = Password!
             },
-            { Code: not null } => new WeChatLoginRequest
+            { Code: not null, Provider: not null } => new SsoLoginRequest
             {
+                Provider = Provider!,
                 Code = Code!
             },
             _ => throw new ArgumentException("Invalid login request")

@@ -85,5 +85,5 @@ public partial class User
     public virtual ICollection<UserInvitation> UserInvitations { get; set; } = new List<UserInvitation>();
 
     [InverseProperty("User")]
-    public virtual ICollection<UserModel> UserModels { get; set; } = new List<UserModel>();
+    public virtual UserModel? UserModel { get; set; }
 }

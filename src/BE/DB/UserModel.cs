@@ -6,7 +6,7 @@ using Microsoft.EntityFrameworkCore;
 
 namespace Chats.BE.DB;
 
-[Index("UserId", Name = "IDX_UserModels_userId")]
+[Index("UserId", Name = "IX_UserModels_UserId", IsUnique = true)]
 public partial class UserModel
 {
     [Key]
@@ -28,6 +28,6 @@ public partial class UserModel
     public DateTime UpdatedAt { get; set; }
 
     [ForeignKey("UserId")]
-    [InverseProperty("UserModels")]
+    [InverseProperty("UserModel")]
     public virtual User User { get; set; } = null!;
 }

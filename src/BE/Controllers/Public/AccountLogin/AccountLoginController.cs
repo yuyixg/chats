@@ -1,69 +1,98 @@
 ﻿using Chats.BE.Controllers.Common;
+using Chats.BE.Controllers.Public.AccountLogin.Dtos;
 using Chats.BE.DB;
 using Chats.BE.Services;
+using Chats.BE.Services.Common;
+using Chats.BE.Services.Keycloak;
 using Microsoft.AspNetCore.Mvc;
 using Microsoft.EntityFrameworkCore;
 
 namespace Chats.BE.Controllers.Public.AccountLogin;
 
 [Route("api/public/account-login")]
-public class AccountLoginController(ChatsDB _db, ILogger<AccountLoginController> logger) : ControllerBase
+public class AccountLoginController(ChatsDB db, ILogger<AccountLoginController> logger, SessionManager sessionManager) : ControllerBase
 {
     [HttpPost]
-    public async Task<IActionResult> Login([FromBody] LoginRequest request, [FromServices] PasswordHasher passwordHasher, CancellationToken cancellationToken)
+    public async Task<IActionResult> Login(
+        [FromBody] LoginRequest request,
+        [FromServices] PasswordHasher passwordHasher,
+        [FromServices] KeycloakConfigStore kcStore,
+        [FromServices] UserManager userManager,
+        CancellationToken cancellationToken)
     {
         object dto = request.AsLoginDto();
-        if (dto is WeChatLoginRequest wx)
+        if (dto is SsoLoginRequest sso)
         {
-            return new OldBEActionResult(wx);
+            if (sso.Provider == null) // WeChat
+            {
+                return new OldBEActionResult(sso);
+            }
+            else if (sso.Provider == KnownLoginProviders.Keycloak)
+            {
+                return await KeycloakLogin(kcStore, userManager, sso, cancellationToken);
+            }
         }
         else if (dto is PasswordLoginRequest passwordDto)
         {
-            User? dbUser = await _db.Users.FirstOrDefaultAsync(x =>
-                x.Account == passwordDto.UserName ||
-                x.Phone == passwordDto.UserName ||
-                x.Email == passwordDto.UserName, cancellationToken);
-
-            if (dbUser == null)
-            {
-                logger.LogWarning("User not found: {UserName}", passwordDto.UserName);
-                return BadRequest("用户名或密码错误");
-            }
-            if (!dbUser.Enabled)
-            {
-                logger.LogWarning("User disabled: {UserName}", passwordDto.UserName);
-                return BadRequest("用户名或密码错误");
-            }
-            if (!passwordHasher.VerifyPassword(passwordDto.Password, dbUser.Password))
-            {
-                logger.LogWarning("Invalid password: {UserName}", passwordDto.UserName);
-                return BadRequest("用户名或密码错误");
-            }
-
-            bool hasPayService = await _db.PayServices.Where(x => x.Enabled).AnyAsync(cancellationToken);
-
-            await _db.Sessions.Where(x => x.UserId == dbUser.Id).ExecuteDeleteAsync(cancellationToken);
-            Session session = new()
-            {
-                Id = Guid.NewGuid(),
-                UserId = dbUser.Id,
-                CreatedAt = DateTime.Now,
-                UpdatedAt = DateTime.Now,
-            };
-            _db.Sessions.Add(session);
-            _db.SaveChanges();
-
-            return Ok(new LoginResponse
-            {
-                SessionId = session.Id,
-                UserName = dbUser.Username,
-                Role = dbUser.Role,
-                CanReCharge = hasPayService,
-            });
+            return await PasswordLogin(passwordHasher, passwordDto, cancellationToken);
         }
-        else
+
+        throw new InvalidOperationException("Invalid login request.");
+    }
+
+    private async Task<IActionResult> KeycloakLogin(KeycloakConfigStore kcStore, UserManager userManager, SsoLoginRequest sso, CancellationToken cancellationToken)
+    {
+        KeycloakConfig? kcConfig = await kcStore.GetKeycloakConfig(cancellationToken);
+        if (kcConfig == null)
         {
-            throw new InvalidOperationException("Invalid login request.");
+            return NotFound("Keycloak config not found");
         }
+
+        AccessTokenInfo token = await kcConfig.GetUserInfo(sso.Code, cancellationToken);
+        User user = await userManager.EnsureKeycloakUser(token, cancellationToken);
+        Guid sessionId = await sessionManager.RefreshUserSessionId(user.Id, cancellationToken);
+        bool hasPayService = await db.PayServices.Where(x => x.Enabled).AnyAsync(cancellationToken);
+        return Ok(new LoginResponse
+        {
+            SessionId = sessionId,
+            UserName = user.Username,
+            Role = user.Role,
+            CanReCharge = hasPayService,
+        });
+    }
+
+    private async Task<IActionResult> PasswordLogin(PasswordHasher passwordHasher, PasswordLoginRequest passwordDto, CancellationToken cancellationToken)
+    {
+        User? dbUser = await db.Users.FirstOrDefaultAsync(x =>
+                        x.Account == passwordDto.UserName ||
+                        x.Phone == passwordDto.UserName ||
+                        x.Email == passwordDto.UserName, cancellationToken);
+
+        if (dbUser == null)
+        {
+            logger.LogWarning("User not found: {UserName}", passwordDto.UserName);
+            return BadRequest("用户名或密码错误");
+        }
+        if (!dbUser.Enabled)
+        {
+            logger.LogWarning("User disabled: {UserName}", passwordDto.UserName);
+            return BadRequest("用户名或密码错误");
+        }
+        if (!passwordHasher.VerifyPassword(passwordDto.Password, dbUser.Password))
+        {
+            logger.LogWarning("Invalid password: {UserName}", passwordDto.UserName);
+            return BadRequest("用户名或密码错误");
+        }
+
+        bool hasPayService = await db.PayServices.Where(x => x.Enabled).AnyAsync(cancellationToken);
+        Guid sessionId = await sessionManager.RefreshUserSessionId(dbUser.Id, cancellationToken);
+
+        return Ok(new LoginResponse
+        {
+            SessionId = sessionId,
+            UserName = dbUser.Username,
+            Role = dbUser.Role,
+            CanReCharge = hasPayService,
+        });
     }
 }

@@ -26,6 +26,8 @@ public class Program
         builder.Services.AddScoped<CurrentUser>();
         builder.Services.AddSingleton<CsrfTokenService>();
         builder.Services.AddScoped<KeycloakConfigStore>();
+        builder.Services.AddScoped<UserManager>();
+        builder.Services.AddScoped<SessionManager>();
         builder.Services.AddHttpContextAccessor();
 
         // Add authentication and configure the default scheme

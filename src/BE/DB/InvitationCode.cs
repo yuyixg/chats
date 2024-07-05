@@ -31,5 +31,8 @@ public partial class InvitationCode
     public bool IsDeleted { get; set; }
 
     [InverseProperty("InvitationCode")]
+    public virtual ICollection<UserInitialConfig> UserInitialConfigs { get; set; } = new List<UserInitialConfig>();
+
+    [InverseProperty("InvitationCode")]
     public virtual ICollection<UserInvitation> UserInvitations { get; set; } = new List<UserInvitation>();
 }

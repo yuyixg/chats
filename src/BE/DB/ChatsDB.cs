@@ -73,8 +73,6 @@ public partial class ChatsDB : DbContext
             entity.HasIndex(e => e.UserId, "IX_BalanceLogs_UserId").HasFillFactor(80);
 
             entity.Property(e => e.Id).ValueGeneratedNever();
-            entity.Property(e => e.CreatedAt).HasDefaultValueSql("(getdate())");
-            entity.Property(e => e.MessageId).HasDefaultValueSql("(NULL)");
 
             entity.HasOne(d => d.Message).WithMany(p => p.BalanceLogs).HasConstraintName("FK_BalanceLogs_ChatMessages");
 
@@ -86,8 +84,6 @@ public partial class ChatsDB : DbContext
         modelBuilder.Entity<Chat>(entity =>
         {
             entity.Property(e => e.Id).ValueGeneratedNever();
-            entity.Property(e => e.CreatedAt).HasDefaultValueSql("(getdate())");
-            entity.Property(e => e.UserModelConfig).HasDefaultValue("{}");
 
             entity.HasOne(d => d.ChatModel).WithMany(p => p.Chats)
                 .OnDelete(DeleteBehavior.SetNull)
@@ -109,11 +105,8 @@ public partial class ChatsDB : DbContext
             entity.HasIndex(e => e.UserId, "IX_ChatMessages_UserId").HasFillFactor(80);
 
             entity.Property(e => e.Id).ValueGeneratedNever();
-            entity.Property(e => e.CreatedAt).HasDefaultValueSql("(getdate())");
 
-            entity.HasOne(d => d.Chat).WithMany(p => p.ChatMessages)
-                .OnDelete(DeleteBehavior.ClientSetNull)
-                .HasConstraintName("FK_ChatMessages_Chats");
+            entity.HasOne(d => d.Chat).WithMany(p => p.ChatMessages).HasConstraintName("FK_ChatMessages_Chats");
 
             entity.HasOne(d => d.ChatModel).WithMany(p => p.ChatMessages).HasConstraintName("FK_ChatMessages_ChatModels");
 
@@ -129,11 +122,6 @@ public partial class ChatsDB : DbContext
             entity.HasKey(e => e.Id).HasName("ChatModels_pkey");
 
             entity.Property(e => e.Id).ValueGeneratedNever();
-            entity.Property(e => e.CreatedAt).HasDefaultValueSql("(getdate())");
-            entity.Property(e => e.Enabled).HasDefaultValue(true);
-            entity.Property(e => e.FileConfig).HasDefaultValue("{}");
-            entity.Property(e => e.ModelConfig).HasDefaultValue("{}");
-            entity.Property(e => e.PriceConfig).HasDefaultValue("{}");
 
             entity.HasOne(d => d.FileService).WithMany(p => p.ChatModels)
                 .OnDelete(DeleteBehavior.SetNull)
@@ -149,7 +137,6 @@ public partial class ChatsDB : DbContext
             entity.HasKey(e => e.Id).HasName("Counterfoils_pkey");
 
             entity.Property(e => e.Id).ValueGeneratedNever();
-            entity.Property(e => e.CreatedAt).HasDefaultValueSql("(getdate())");
         });
 
         modelBuilder.Entity<FileService>(entity =>
@@ -157,9 +144,6 @@ public partial class ChatsDB : DbContext
             entity.HasKey(e => e.Id).HasName("FileServices_pkey");
 
             entity.Property(e => e.Id).ValueGeneratedNever();
-            entity.Property(e => e.Configs).HasDefaultValue("{}");
-            entity.Property(e => e.CreatedAt).HasDefaultValueSql("(getdate())");
-            entity.Property(e => e.Enabled).HasDefaultValue(true);
         });
 
         modelBuilder.Entity<InvitationCode>(entity =>
@@ -167,7 +151,6 @@ public partial class ChatsDB : DbContext
             entity.HasKey(e => e.Id).HasName("InvitationCode_pkey");
 
             entity.Property(e => e.Id).ValueGeneratedNever();
-            entity.Property(e => e.CreatedAt).HasDefaultValueSql("(getdate())");
         });
 
         modelBuilder.Entity<LoginService>(entity =>
@@ -175,9 +158,6 @@ public partial class ChatsDB : DbContext
             entity.HasKey(e => e.Id).HasName("LoginServices_pkey");
 
             entity.Property(e => e.Id).ValueGeneratedNever();
-            entity.Property(e => e.Configs).HasDefaultValue("{}");
-            entity.Property(e => e.CreatedAt).HasDefaultValueSql("(getdate())");
-            entity.Property(e => e.Enabled).HasDefaultValue(true);
         });
 
         modelBuilder.Entity<ModelKey>(entity =>
@@ -185,7 +165,6 @@ public partial class ChatsDB : DbContext
             entity.HasKey(e => e.Id).HasName("ModelKeys_pkey");
 
             entity.Property(e => e.Id).ValueGeneratedNever();
-            entity.Property(e => e.CreatedAt).HasDefaultValueSql("(getdate())");
         });
 
         modelBuilder.Entity<ModelProvider>(entity =>
@@ -195,8 +174,6 @@ public partial class ChatsDB : DbContext
 
         modelBuilder.Entity<ModelSetting>(entity =>
         {
-            entity.Property(e => e.ProviderId).HasDefaultValue(1);
-
             entity.HasOne(d => d.Provider).WithMany(p => p.ModelSettings)
                 .OnDelete(DeleteBehavior.ClientSetNull)
                 .HasConstraintName("FK_ModelSetting_ModelProvider");
@@ -207,7 +184,6 @@ public partial class ChatsDB : DbContext
             entity.HasKey(e => e.Id).HasName("Orders_pkey");
 
             entity.Property(e => e.Id).ValueGeneratedNever();
-            entity.Property(e => e.CreatedAt).HasDefaultValueSql("(getdate())");
 
             entity.HasOne(d => d.CreateUser).WithMany(p => p.Orders)
                 .OnDelete(DeleteBehavior.ClientSetNull)
@@ -219,8 +195,6 @@ public partial class ChatsDB : DbContext
             entity.HasKey(e => e.Id).HasName("PayServices_pkey");
 
             entity.Property(e => e.Id).ValueGeneratedNever();
-            entity.Property(e => e.CreatedAt).HasDefaultValueSql("(getdate())");
-            entity.Property(e => e.Enabled).HasDefaultValue(true);
         });
 
         modelBuilder.Entity<Prompt>(entity =>
@@ -228,7 +202,6 @@ public partial class ChatsDB : DbContext
             entity.HasKey(e => e.Id).HasName("Prompts_pkey");
 
             entity.Property(e => e.Id).ValueGeneratedNever();
-            entity.Property(e => e.CreatedAt).HasDefaultValueSql("(getdate())");
 
             entity.HasOne(d => d.CreateUser).WithMany(p => p.Prompts)
                 .OnDelete(DeleteBehavior.ClientSetNull)
@@ -240,7 +213,6 @@ public partial class ChatsDB : DbContext
             entity.HasKey(e => e.Id).HasName("RequestLogs_pkey");
 
             entity.Property(e => e.Id).ValueGeneratedNever();
-            entity.Property(e => e.CreatedAt).HasDefaultValueSql("(getdate())");
 
             entity.HasOne(d => d.User).WithMany(p => p.RequestLogs)
                 .OnDelete(DeleteBehavior.SetNull)
@@ -250,7 +222,6 @@ public partial class ChatsDB : DbContext
         modelBuilder.Entity<Session>(entity =>
         {
             entity.Property(e => e.Id).ValueGeneratedNever();
-            entity.Property(e => e.CreatedAt).HasDefaultValueSql("(getdate())");
 
             entity.HasOne(d => d.User).WithMany(p => p.Sessions)
                 .OnDelete(DeleteBehavior.ClientSetNull)
@@ -262,7 +233,6 @@ public partial class ChatsDB : DbContext
             entity.HasKey(e => e.Id).HasName("Sms_pkey");
 
             entity.Property(e => e.Id).ValueGeneratedNever();
-            entity.Property(e => e.CreatedAt).HasDefaultValueSql("(getdate())");
         });
 
         modelBuilder.Entity<User>(entity =>
@@ -270,9 +240,6 @@ public partial class ChatsDB : DbContext
             entity.HasKey(e => e.Id).HasName("Users_pkey");
 
             entity.Property(e => e.Id).ValueGeneratedNever();
-            entity.Property(e => e.CreatedAt).HasDefaultValueSql("(getdate())");
-            entity.Property(e => e.Enabled).HasDefaultValue(true);
-            entity.Property(e => e.Role).HasDefaultValue("-");
         });
 
         modelBuilder.Entity<UserBalance>(entity =>
@@ -280,7 +247,6 @@ public partial class ChatsDB : DbContext
             entity.HasKey(e => e.Id).HasName("UserBalances_pkey");
 
             entity.Property(e => e.Id).ValueGeneratedNever();
-            entity.Property(e => e.CreatedAt).HasDefaultValueSql("(getdate())");
 
             entity.HasOne(d => d.User).WithOne(p => p.UserBalance)
                 .OnDelete(DeleteBehavior.ClientSetNull)
@@ -292,8 +258,8 @@ public partial class ChatsDB : DbContext
             entity.HasKey(e => e.Id).HasName("UserInitialConfig_pkey");
 
             entity.Property(e => e.Id).ValueGeneratedNever();
-            entity.Property(e => e.CreatedAt).HasDefaultValueSql("(getdate())");
-            entity.Property(e => e.Models).HasDefaultValue("[]");
+
+            entity.HasOne(d => d.InvitationCode).WithMany(p => p.UserInitialConfigs).HasConstraintName("FK_UserInitialConfig_InvitationCode");
         });
 
         modelBuilder.Entity<UserInvitation>(entity =>
@@ -314,10 +280,8 @@ public partial class ChatsDB : DbContext
             entity.HasKey(e => e.Id).HasName("UserModels_pkey");
 
             entity.Property(e => e.Id).ValueGeneratedNever();
-            entity.Property(e => e.CreatedAt).HasDefaultValueSql("(getdate())");
-            entity.Property(e => e.Models).HasDefaultValue("[]");
 
-            entity.HasOne(d => d.User).WithMany(p => p.UserModels)
+            entity.HasOne(d => d.User).WithOne(p => p.UserModel)
                 .OnDelete(DeleteBehavior.ClientSetNull)
                 .HasConstraintName("UserModels_userId_fkey");
         });
