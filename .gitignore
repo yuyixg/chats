@@ -50,8 +50,6 @@ logs.txt
 
 # backend
 /.vs
-/Debug
-/Release
-/src/BE/Chats.BE.csproj.user
-/src/BE/obj
-/src/BE/bin
+*.user
+/src/**/obj
+/src/**/bin
