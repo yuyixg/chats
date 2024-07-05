@@ -1,4 +1,4 @@
-import { gitApiUrl } from '@/utils/common';
+import { getApiUrl } from '@/utils/common';
 import { getLoginUrl, getUserSession } from '@/utils/user';
 
 export type RequestModel = {
@@ -17,7 +17,7 @@ export const useFetch = () => {
     request: any,
     signal?: AbortSignal,
   ) => {
-    const apiPrefix = gitApiUrl();
+    const apiPrefix = getApiUrl();
     const apiUrl = `${apiPrefix}${url}`;
     const requestUrl = request?.params ? `${apiUrl}${request.params}` : apiUrl;
 

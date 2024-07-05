@@ -11,7 +11,7 @@ import {
 } from '../ui/tooltip';
 
 import { getCsrfToken } from '@/apis/userService';
-import { gitApiUrl } from '@/utils/common';
+import { getApiUrl } from '@/utils/common';
 
 const KeyCloakLogin = (props: { loading?: boolean }) => {
   const { loading } = props;
@@ -23,7 +23,7 @@ const KeyCloakLogin = (props: { loading?: boolean }) => {
   }, []);
 
   return (
-    <form action={`${gitApiUrl()}/api/auth/signin/keycloak`} method="POST">
+    <form action={`${getApiUrl()}/api/auth/signin/keycloak`} method="POST">
       <input type="hidden" name="csrfToken" value={csrfToken} />
       <input
         type="hidden"
