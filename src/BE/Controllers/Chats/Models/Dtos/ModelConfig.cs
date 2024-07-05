@@ -11,10 +11,10 @@ public record ModelConfig
     [JsonPropertyName("temperature")]
     public required double Temperature { get; init; }
 
-    [JsonPropertyName("enableSearch")]
+    [JsonPropertyName("enableSearch"), JsonIgnore(Condition = JsonIgnoreCondition.WhenWritingNull)]
     public bool? EnableSearch { get; init; }
 
-    [JsonPropertyName("maxLength")]
+    [JsonPropertyName("maxLength"), JsonIgnore(Condition = JsonIgnoreCondition.WhenWritingNull)]
     public int? MaxLength { get; init; }
 
     public static ModelConfig FromJson(JsonModelConfig modelConfig)
