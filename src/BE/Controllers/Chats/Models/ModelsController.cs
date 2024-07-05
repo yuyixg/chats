@@ -10,7 +10,7 @@ using System.Text.Json;
 
 namespace Chats.BE.Controllers.Chats.Models;
 
-[Route("api/[controller]"), Authorize]
+[Route("api/models"), Authorize]
 public class ModelsController : ControllerBase
 {
     [HttpGet]

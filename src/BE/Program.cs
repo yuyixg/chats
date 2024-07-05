@@ -2,6 +2,7 @@
 using Chats.BE.DB;
 using Chats.BE.Infrastructure;
 using Chats.BE.Services;
+using Chats.BE.Services.Keycloak;
 using Microsoft.AspNetCore.Authentication;
 
 namespace Chats.BE;
@@ -24,6 +25,7 @@ public class Program
         builder.Services.AddSingleton<PasswordHasher>();
         builder.Services.AddScoped<CurrentUser>();
         builder.Services.AddSingleton<CsrfTokenService>();
+        builder.Services.AddScoped<KeycloakConfigStore>();
         builder.Services.AddHttpContextAccessor();
 
         // Add authentication and configure the default scheme

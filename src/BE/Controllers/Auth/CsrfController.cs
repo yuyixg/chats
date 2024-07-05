@@ -3,7 +3,7 @@ using Microsoft.AspNetCore.Mvc;
 
 namespace Chats.BE.Controllers.Auth;
 
-[Route("api/auth/[controller]")]
+[Route("api/auth/csrf")]
 public class CsrfController(CsrfTokenService csrf) : ControllerBase
 {
     [HttpGet]
