@@ -1,12 +1,11 @@
 ﻿using Chats.BE.Controllers.Auth.Dtos;
-using Chats.BE.DB;
 using Chats.BE.Services;
 using Chats.BE.Services.Keycloak;
 using Microsoft.AspNetCore.Mvc;
 
 namespace Chats.BE.Controllers.Auth;
 
-[Route("api/auth/signin/[controller]")]
+[Route("api/auth/signin/keycloak")]
 public class KeycloakController(CsrfTokenService csrf, KeycloakConfigStore kcStore) : ControllerBase
 {
     [HttpPost]
