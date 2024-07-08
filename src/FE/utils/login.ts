@@ -5,7 +5,7 @@ export function getLoginConfigs(type: LoginType) {
 }
 
 export const LoginDefaultTemplates = {
-  [LoginType.KeyCloak]: {
+  [LoginType.Keycloak]: {
     wellKnown: '',
     clientId: '',
     secret: '',

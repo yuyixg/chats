@@ -1,6 +1,4 @@
-import { FC, memo, useContext, useEffect, useRef, useState } from 'react';
-
-import { useTranslation } from 'next-i18next';
+import { FC, memo, useContext } from 'react';
 
 import { Message } from '@/types/chat';
 import { PropsMessage } from '@/types/components/chat';
@@ -9,19 +7,9 @@ import { HomeContext } from '@/pages/home/home';
 
 import { IconRobot } from '@/components/Icons/index';
 
-import { CodeBlock } from '../../Markdown/CodeBlock';
-import { MemoizedReactMarkdown } from '../../Markdown/MemoizedReactMarkdown';
-import ChangeModelAction from './ChangeModelAction';
-import CopyAction from './CopyAction';
-import GenerateInformationAction from './GenerateInformationAction';
-import PaginationAction from './PaginationAction';
-import RegenerateAction from './RegenerateAction';
+import ResponseMessage from './ResponseMessage';
+import ResponseMessageActions from './ResponseMessageActions';
 import UserMessage from './UserMessage';
-
-import { cn } from '@/lib/utils';
-import rehypeMathjax from 'rehype-mathjax';
-import remarkGfm from 'remark-gfm';
-import remarkMath from 'remark-math';
 
 export interface Props {
   readonly?: boolean;
@@ -84,113 +72,25 @@ export const ChatMessage: FC<Props> = memo(
               />
             ) : (
               <>
-                <div className="pr-4 md:pr-0">
-                  <MemoizedReactMarkdown
-                    className="prose dark:prose-invert flex-1"
-                    remarkPlugins={[remarkGfm, remarkMath]}
-                    rehypePlugins={[rehypeMathjax]}
-                    components={{
-                      code({ node, className, inline, children, ...props }) {
-                        if (children.length) {
-                          if (children[0] == '▍') {
-                            return (
-                              <span className="animate-pulse cursor-default mt-1">
-                                ▍
-                              </span>
-                            );
-                          }
+                <ResponseMessage
+                  currentChatMessageId={currentChatMessageId}
+                  message={message}
+                  parentId={parentId}
+                  currentSelectIndex={currentSelectIndex}
+                  parentChildrenIds={parentChildrenIds}
+                />
 
-                          children[0] = (children[0] as string).replace(
-                            '`▍`',
-                            '▍',
-                          );
-                        }
-
-                        const match = /language-(\w+)/.exec(className || '');
-
-                        return !inline ? (
-                          <CodeBlock
-                            key={Math.random()}
-                            language={(match && match[1]) || ''}
-                            value={String(children).replace(/\n$/, '')}
-                            {...props}
-                          />
-                        ) : (
-                          <code className={className} {...props}>
-                            {children}
-                          </code>
-                        );
-                      },
-                      table({ children }) {
-                        return (
-                          <table className="border-collapse border border-black px-3 py-1 dark:border-white">
-                            {children}
-                          </table>
-                        );
-                      },
-                      th({ children }) {
-                        return (
-                          <th className="break-words border border-black bg-gray-500 px-3 py-1 text-white dark:border-white">
-                            {children}
-                          </th>
-                        );
-                      },
-                      td({ children }) {
-                        return (
-                          <td className="break-words border border-black px-3 py-1 dark:border-white">
-                            {children}
-                          </td>
-                        );
-                      },
-                    }}
-                  >
-                    {`${message.content.text}${
-                      messageIsStreaming && message.id == currentChatMessageId
-                        ? '`▍`'
-                        : ''
-                    }`}
-                  </MemoizedReactMarkdown>
-                </div>
-
-                {!messageIsStreaming ? (
-                  <div className="flex gap-1 flex-wrap ml-[-8px]">
-                    <PaginationAction
-                      hidden={assistantChildrenIds.length <= 1}
-                      disabledPrev={
-                        assistantCurrentSelectIndex === 0 || messageIsStreaming
-                      }
-                      disabledNext={
-                        assistantCurrentSelectIndex ===
-                          assistantChildrenIds.length - 1 || messageIsStreaming
-                      }
-                      messageIds={assistantChildrenIds}
-                      currentSelectIndex={assistantCurrentSelectIndex}
-                      onChangeMessage={onChangeMessage}
-                    />
-                    <div
-                      className={cn(
-                        lastMessageId === message.id ? 'visible' : 'invisible',
-                        'flex gap-0 items-center  group-hover:visible focus:visible',
-                      )}
-                    >
-                      <CopyAction text={message.content.text} />
-                      <GenerateInformationAction message={message} />
-                      <RegenerateAction
-                        hidden={chatError}
-                        onRegenerate={onRegenerate}
-                      />
-                      <ChangeModelAction
-                        readonly={readonly}
-                        onChangeModel={(modelId: string) => {
-                          onRegenerate && onRegenerate(modelId);
-                        }}
-                        modelName={modelName!}
-                      />
-                    </div>
-                  </div>
-                ) : (
-                  <div className="h-9"></div>
-                )}
+                <ResponseMessageActions
+                  hidden={messageIsStreaming}
+                  readonly={readonly}
+                  message={message}
+                  lastMessageId={lastMessageId}
+                  modelName={modelName}
+                  assistantCurrentSelectIndex={assistantCurrentSelectIndex}
+                  assistantChildrenIds={assistantChildrenIds}
+                  onChangeMessage={onChangeMessage}
+                  onRegenerate={onRegenerate}
+                />
               </>
             )}
           </div>

@@ -4,10 +4,10 @@ import { useTranslation } from 'next-i18next';
 import { serverSideTranslations } from 'next-i18next/serverSideTranslations';
 import Image from 'next/image';
 
+import { DEFAULT_LANGUAGE } from '@/utils/settings';
 import { hasContact } from '@/utils/website';
 
 import { GlobalConfigKeys, SiteInfoConfig } from '@/types/config';
-import { DEFAULT_LANGUAGE } from '@/utils/settings';
 import { LoginConfigsResult, LoginType } from '@/types/user';
 
 import AccountLoginCard from '@/components/Login/AccountLoginCard';
@@ -209,7 +209,7 @@ export default function LoginPage({
                             loading={loginLoading}
                           />
                         )}
-                        {loginTypes.includes(LoginType.KeyCloak) && (
+                        {loginTypes.includes(LoginType.Keycloak) && (
                           <KeyCloakLogin loading={loginLoading} />
                         )}
                       </div>
