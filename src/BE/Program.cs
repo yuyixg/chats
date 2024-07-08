@@ -28,6 +28,7 @@ public class Program
         builder.Services.AddScoped<KeycloakConfigStore>();
         builder.Services.AddScoped<UserManager>();
         builder.Services.AddScoped<SessionManager>();
+        builder.Services.AddScoped<HostUrlService>();
         builder.Services.AddHttpContextAccessor();
 
         // Add authentication and configure the default scheme

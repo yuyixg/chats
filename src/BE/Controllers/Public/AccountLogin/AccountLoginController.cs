@@ -18,6 +18,7 @@ public class AccountLoginController(ChatsDB db, ILogger<AccountLoginController> 
         [FromServices] PasswordHasher passwordHasher,
         [FromServices] KeycloakConfigStore kcStore,
         [FromServices] UserManager userManager,
+        [FromServices] HostUrlService hostUrl,
         CancellationToken cancellationToken)
     {
         object dto = request.AsLoginDto();
@@ -27,9 +28,9 @@ public class AccountLoginController(ChatsDB db, ILogger<AccountLoginController> 
             {
                 return new OldBEActionResult(sso);
             }
-            else if (sso.Provider == KnownLoginProviders.Keycloak)
+            else if (sso.Provider.Equals(KnownLoginProviders.Keycloak, StringComparison.OrdinalIgnoreCase))
             {
-                return await KeycloakLogin(kcStore, userManager, sso, cancellationToken);
+                return await KeycloakLogin(kcStore, userManager, sso, hostUrl, cancellationToken);
             }
         }
         else if (dto is PasswordLoginRequest passwordDto)
@@ -40,7 +41,7 @@ public class AccountLoginController(ChatsDB db, ILogger<AccountLoginController> 
         throw new InvalidOperationException("Invalid login request.");
     }
 
-    private async Task<IActionResult> KeycloakLogin(KeycloakConfigStore kcStore, UserManager userManager, SsoLoginRequest sso, CancellationToken cancellationToken)
+    private async Task<IActionResult> KeycloakLogin(KeycloakConfigStore kcStore, UserManager userManager, SsoLoginRequest sso, HostUrlService hostUrl, CancellationToken cancellationToken)
     {
         KeycloakConfig? kcConfig = await kcStore.GetKeycloakConfig(cancellationToken);
         if (kcConfig == null)
@@ -48,7 +49,7 @@ public class AccountLoginController(ChatsDB db, ILogger<AccountLoginController> 
             return NotFound("Keycloak config not found");
         }
 
-        AccessTokenInfo token = await kcConfig.GetUserInfo(sso.Code, cancellationToken);
+        AccessTokenInfo token = await kcConfig.GetUserInfo(sso.Code, hostUrl.GetKeycloakSsoRedirectUrl(), cancellationToken);
         User user = await userManager.EnsureKeycloakUser(token, cancellationToken);
         Guid sessionId = await sessionManager.RefreshUserSessionId(user.Id, cancellationToken);
         bool hasPayService = await db.PayServices.Where(x => x.Enabled).AnyAsync(cancellationToken);

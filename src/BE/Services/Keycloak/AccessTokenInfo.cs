@@ -43,7 +43,7 @@ public record AccessTokenInfo
     public required string Acr { get; init; }
 
     [JsonPropertyName("allowed-origins")]
-    public required List<string> AllowedOrigins { get; init; }
+    public List<string>? AllowedOrigins { get; init; }
 
     [JsonPropertyName("realm_access")]
     public required RealmAccess RealmAccess { get; init; }
