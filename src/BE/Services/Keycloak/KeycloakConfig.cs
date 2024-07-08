@@ -22,7 +22,7 @@ public record KeycloakConfig
         return $"{authorizationEndpoint}?client_id={ClientId}&redirect_uri={redirectUrl}&response_type=code&scope={scope}";
     }
 
-    public async Task<AccessTokenInfo> GetUserInfo(string code, CancellationToken cancellationToken)
+    public async Task<AccessTokenInfo> GetUserInfo(string code, string redirectUrl, CancellationToken cancellationToken)
     {
         KeycloakOAuthConfig config = await LoadWellknown(cancellationToken);
 
@@ -33,7 +33,7 @@ public record KeycloakConfig
             ["client_id"] = ClientId,
             ["client_secret"] = Secret,
             ["code"] = code,
-            ["redirect_uri"] = "http://localhost:3000/auth/callback"
+            ["redirect_uri"] = redirectUrl,
         }), cancellationToken);
 
         if (!resp.IsSuccessStatusCode)
