@@ -63,14 +63,20 @@ const ChangeModel = ({
     groupModel();
   };
 
+  const handleOpenMenu = () => {
+    setSearchTerm('');
+  };
+
   return (
-    <DropdownMenu>
+    <DropdownMenu onOpenChange={handleOpenMenu}>
       <DropdownMenuTrigger asChild>
         <Button variant="ghost" className="p-1 m-0 h-auto" disabled={readonly}>
           <span className={cn('text-[#7d7d7d] font-medium', className)}>
             {content && content}
           </span>
-          {!readonly && typeof content === 'string' && <IconChevronDown stroke="#7d7d7d" />}
+          {!readonly && typeof content === 'string' && (
+            <IconChevronDown stroke="#7d7d7d" />
+          )}
         </Button>
       </DropdownMenuTrigger>
       <DropdownMenuContent className="w-36">
