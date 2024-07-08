@@ -45,7 +45,7 @@ export default async function auth(req: NextApiRequest, res: NextApiResponse) {
               role: '-',
               email: profile?.email,
             });
-            await UsersManager.initialUser(user.id!, LoginType.KeyCloak);
+            await UsersManager.initialUser(user.id!, LoginType.Keycloak);
           }
 
           const session = await SessionsManager.generateSession(user.id!);

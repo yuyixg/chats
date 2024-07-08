@@ -23,29 +23,6 @@ interface MessageNode {
   modelName: string;
 }
 
-const findChildren = (nodes: MessageNode[], parentId: string): string[] => {
-  return nodes
-    .filter((node) => node.parentId === parentId && node.role === 'user')
-    .map((node) => node.id);
-};
-
-const findResponseChildren = (
-  nodes: MessageNode[],
-  parentId: string,
-): string[] => {
-  return nodes
-    .filter((node) => node.parentId === parentId && node.role === 'assistant')
-    .map((node) => node.id);
-};
-
-const calculateMessages = (nodes: MessageNode[]): MessageNode[] => {
-  return nodes.map((node) => ({
-    ...node,
-    childrenIds: findChildren(nodes, node.id).reverse(),
-    assistantChildrenIds: findResponseChildren(nodes, node.parentId),
-  }));
-};
-
 const handler = async (req: ChatsApiRequest) => {
   if (req.method === 'GET') {
     const { chatId } = req.query as { chatId: string };
@@ -69,7 +46,7 @@ const handler = async (req: ChatsApiRequest) => {
         modelName: chatModel?.name,
       } as MessageNode;
     });
-    return calculateMessages(messages);
+    return messages;
   }
 };
 

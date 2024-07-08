@@ -1,5 +1,7 @@
 import { useFetch } from '@/hooks/useFetch';
 
+import { calculateMessages } from '@/utils/message';
+
 import { PostPromptParams, PutPromptParams } from '@/types/admin';
 import { ChatMessage } from '@/types/chatMessage';
 import { Model } from '@/types/model';
@@ -48,7 +50,9 @@ export const changeUserPassword = (newPassword: string) => {
 
 export const getUserMessages = (chatId: string): Promise<ChatMessage[]> => {
   const fetchService = useFetch();
-  return fetchService.get('/api/messages?chatId=' + chatId);
+  return fetchService.get('/api/messages?chatId=' + chatId).then((data: any) => {
+    return calculateMessages(data) as any;
+  });
 };
 
 export const getChatsByPaging = (

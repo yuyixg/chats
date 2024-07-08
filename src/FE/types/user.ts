@@ -1,7 +1,7 @@
 import Decimal from 'decimal.js';
 
 export enum LoginType {
-  'KeyCloak' = 'KeyCloak',
+  'Keycloak' = 'Keycloak',
   'WeChat' = 'WeChat',
   'Phone' = 'Phone',
 }

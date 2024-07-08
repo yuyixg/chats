@@ -41,14 +41,14 @@ const KeyCloakLogin = (props: { loading?: boolean }) => {
             >
               <Image
                 src="/logos/keycloak.svg"
-                alt="KeyCloak"
+                alt="Keycloak"
                 width={32}
                 height={32}
                 className="h-8 w-8 rounded-md dark:bg-white"
               />
             </Button>
           </TooltipTrigger>
-          <TooltipContent>KeyCloak</TooltipContent>
+          <TooltipContent>Keycloak</TooltipContent>
         </Tooltip>
       </TooltipProvider>
     </form>
