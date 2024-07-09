@@ -42,7 +42,7 @@ public record ModelResponse
             Name = model.Name,
             ModelProvider = model.ModelProvider,
             ModelUsage = ModelUsage.FromJson(userModel),
-            ModelConfigOptions = ModelConfigOption.FromJson(temperatureOptions),
+            ModelConfigOptions = ModelConfigOption.FromTemperature(temperatureOptions),
             ModelConfigs = ModelConfig.FromJson(modelConfig),
             FileConfig = model.FileConfig,
             FileServerConfigs = FileServerConfig.FromFileService(fileService)

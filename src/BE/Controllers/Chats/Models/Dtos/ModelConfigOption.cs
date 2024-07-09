@@ -7,7 +7,10 @@ public record ModelConfigOption
     [JsonPropertyName("temperature")]
     public required TemperatureOptions Temperature { get; init; }
 
-    public static ModelConfigOption FromJson(TemperatureOptions temperatureOptions)
+    [JsonPropertyName("enableSearch"), JsonIgnore(Condition = JsonIgnoreCondition.WhenWritingNull)]
+    public bool? EnableSearch { get; init; }
+
+    public static ModelConfigOption FromTemperature(TemperatureOptions temperatureOptions)
     {
         return new ModelConfigOption
         {
