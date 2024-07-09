@@ -12,6 +12,7 @@ namespace Chats.BE.Controllers.Chats.ModelUsage;
 [Route("api/user/model-usage"), Authorize]
 public class ModelUsageController(ChatsDB db, CurrentUser currentUser) : ControllerBase
 {
+    [HttpGet]
     public async Task<ActionResult> GetUserModelUsage(Guid modelId, CancellationToken cancellationToken)
     {
         string? userModels = await db.UserModels
