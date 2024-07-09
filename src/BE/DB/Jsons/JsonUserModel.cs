@@ -1,6 +1,6 @@
 ﻿using System.Text.Json.Serialization;
 
-namespace Chats.BE.Controllers.Chats.Models.JsonColumn;
+namespace Chats.BE.DB.Jsons;
 
 public record JsonUserModel
 {

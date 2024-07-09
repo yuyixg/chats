@@ -1,7 +1,7 @@
 ﻿using Chats.BE.Controllers.Chats.Models.Dtos;
-using Chats.BE.Controllers.Chats.Models.JsonColumn;
 using Chats.BE.DB;
 using Chats.BE.DB.Extensions;
+using Chats.BE.DB.Jsons;
 using Chats.BE.Infrastructure;
 using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Mvc;

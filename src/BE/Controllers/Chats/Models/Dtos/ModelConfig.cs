@@ -1,4 +1,4 @@
-﻿using Chats.BE.Controllers.Chats.Models.JsonColumn;
+﻿using Chats.BE.DB.Jsons;
 using System.Text.Json.Serialization;
 
 namespace Chats.BE.Controllers.Chats.Models.Dtos;
