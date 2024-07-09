@@ -1,7 +1,6 @@
 import { useEffect, useState } from 'react';
 import toast from 'react-hot-toast';
 
-import { NextApiRequest } from 'next';
 import { useTranslation } from 'next-i18next';
 import { serverSideTranslations } from 'next-i18next/serverSideTranslations';
 import { useRouter } from 'next/router';
@@ -48,13 +47,7 @@ export default function Authorizing() {
   );
 }
 
-export const getServerSideProps = async ({
-  req,
-  locale,
-}: {
-  req: NextApiRequest;
-  locale: string;
-}) => {
+export const getServerSideProps = async ({ locale }: { locale: string }) => {
   return {
     props: {
       ...(await serverSideTranslations(locale ?? DEFAULT_LANGUAGE, ['login'])),
