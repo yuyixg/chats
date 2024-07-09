@@ -1,4 +1,3 @@
-import { SessionProvider } from 'next-auth/react';
 import { Toaster } from 'react-hot-toast';
 import { QueryClient, QueryClientProvider } from 'react-query';
 
@@ -28,9 +27,7 @@ function App({ Component, pageProps }: AppProps<{}> | any) {
             <Component {...pageProps} />
           </AdminLayout>
         ) : route.pathname.includes('/authorizing') ? (
-          <SessionProvider>
-            <Component {...pageProps} />
-          </SessionProvider>
+          <Component {...pageProps} />
         ) : (
           <Component {...pageProps} />
         )}
