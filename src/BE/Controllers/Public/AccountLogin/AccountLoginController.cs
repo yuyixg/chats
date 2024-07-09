@@ -4,6 +4,7 @@ using Chats.BE.DB;
 using Chats.BE.Services;
 using Chats.BE.Services.Common;
 using Chats.BE.Services.Keycloak;
+using Chats.BE.Services.Sessions;
 using Microsoft.AspNetCore.Mvc;
 using Microsoft.EntityFrameworkCore;
 

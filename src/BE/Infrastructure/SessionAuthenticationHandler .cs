@@ -1,4 +1,5 @@
 ﻿using Chats.BE.DB;
+using Chats.BE.Services.Sessions;
 using Microsoft.AspNetCore.Authentication;
 using Microsoft.EntityFrameworkCore;
 using Microsoft.Extensions.Options;
@@ -10,6 +11,7 @@ namespace Chats.BE.Infrastructure;
 public class SessionAuthenticationHandler(
     IOptionsMonitor<AuthenticationSchemeOptions> options,
     ILoggerFactory loggerFactory,
+    SessionManager sessionManager,
     UrlEncoder encoder,
     ChatsDB db) : AuthenticationHandler<AuthenticationSchemeOptions>(options, loggerFactory, encoder)
 {
@@ -29,18 +31,7 @@ public class SessionAuthenticationHandler(
             return AuthenticateResult.Fail("Invalid session id.");
         }
 
-        var userInfo = await db.Sessions
-            .Include(x => x.User)
-            .Where(x => x.Id == sessionId)
-            .Select(x => new
-            {
-                x.User.Id,
-                UserName = x.User.Username,
-                x.User.Role,
-                x.User.Sub,
-                x.User.Provider
-            })
-            .FirstOrDefaultAsync();
+        SessionEntry? userInfo = await sessionManager.GetCachedUserInfoBySession(sessionId);
 
         if (userInfo == null)
         {
@@ -50,7 +41,7 @@ public class SessionAuthenticationHandler(
 
         List<Claim> claims = 
         [
-            new Claim(ClaimTypes.NameIdentifier, userInfo.Id.ToString()),
+            new Claim(ClaimTypes.NameIdentifier, userInfo.UserId.ToString()),
             new Claim(ClaimTypes.Name, userInfo.UserName),
             new Claim(ClaimTypes.Role, userInfo.Role)
         ];
