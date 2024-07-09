@@ -1,4 +1,5 @@
 ﻿using Chats.BE.Controllers.Chats.Models.Dtos;
+using Chats.BE.DB;
 using System.Text.Json;
 using System.Text.Json.Serialization;
 
@@ -26,6 +27,20 @@ public record ChatsResponse
 
     [JsonPropertyName("isShared")]
     public required bool IsShared { get; init; }
+
+    public static ChatsResponse FromDB(Chat chat)
+    {
+        return new ChatsResponse()
+        {
+            Id = chat.Id,
+            Title = chat.Title,
+            ChatModelId = chat.ChatModelId,
+            ModelName = chat.ChatModel?.Name,
+            ModelConfig = chat.ChatModel?.ModelConfig == null ? [] : JsonSerializer.Deserialize<Dictionary<string, object?>>(chat.ChatModel!.ModelConfig)!,
+            UserModelConfig = JsonSerializer.Deserialize<Dictionary<string, object?>>(chat.UserModelConfig)!,
+            IsShared = chat.IsShared
+        };
+    }
 }
 
 public record ChatsResponseTemp
