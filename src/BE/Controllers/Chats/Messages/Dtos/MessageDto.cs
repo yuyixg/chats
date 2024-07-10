@@ -1,14 +1,18 @@
-﻿using System.Text.Json.Serialization;
+﻿using System.Text.Json;
+using System.Text.Json.Serialization;
 
 namespace Chats.BE.Controllers.Chats.Messages.Dtos;
 
-public record MessageDto
+[JsonPolymorphic]
+[JsonDerivedType(typeof(RequestMessageDto))]
+[JsonDerivedType(typeof(ResponseMessageDto))]
+public abstract record MessageDto
 {
     [JsonPropertyName("id")]
-    public required string Id { get; init; }
+    public required Guid Id { get; init; }
 
     [JsonPropertyName("parentId")]
-    public required string? ParentId { get; init; }
+    public required Guid? ParentId { get; init; }
 
     [JsonPropertyName("role")]
     public required string Role { get; init; }
@@ -20,9 +24,9 @@ public record MessageDto
     public required DateTime CreatedAt { get; init; }
 }
 
-public record UserMessageDto : MessageDto;
+public record RequestMessageDto : MessageDto;
 
-public record AssistantMessageDto : MessageDto
+public record ResponseMessageDto : MessageDto
 {
     [JsonPropertyName("inputTokens")]
     public required int InputTokens { get; init; }
@@ -31,10 +35,10 @@ public record AssistantMessageDto : MessageDto
     public required int OutputTokens { get; init; }
 
     [JsonPropertyName("inputPrice")]
-    public required string InputPrice { get; init; }
+    public required decimal InputPrice { get; init; }
 
     [JsonPropertyName("outputPrice")]
-    public required string OutputPrice { get; init; }
+    public required decimal OutputPrice { get; init; }
 
     [JsonPropertyName("duration")]
     public required int Duration { get; init; }
@@ -49,5 +53,52 @@ public record MessageContentDto
     public required string Text { get; init; }
 
     [JsonPropertyName("image")]
-    public required List<string> Image { get; init; }
+    public List<string>? Image { get; init; }
+}
+
+public record ChatMessageTemp
+{
+    public required Guid Id { get; init; }
+    public required Guid? ParentId { get; init; }
+    public required string Role { get; init; }
+    public required string Content { get; init; }
+    public required int InputTokens { get; init; }
+    public required int OutputTokens { get; init; }
+    public required decimal InputPrice { get; init; }
+    public required decimal OutputPrice { get; init; }
+    public required DateTime CreatedAt { get; init; }
+    public required int Duration { get; init; }
+    public required string? ModelName { get; init; }
+
+    public MessageDto ToDto()
+    {
+        if (ModelName == null)
+        {
+            return new RequestMessageDto()
+            {
+                Id = Id,
+                ParentId = ParentId,
+                Role = Role,
+                Content = JsonSerializer.Deserialize<MessageContentDto>(Content)!,
+                CreatedAt = CreatedAt
+            };
+        }
+        else
+        {
+            return new ResponseMessageDto()
+            {
+                Id = Id,
+                ParentId = ParentId,
+                Role = Role,
+                Content = JsonSerializer.Deserialize<MessageContentDto>(Content)!,
+                CreatedAt = CreatedAt,
+                InputTokens = InputTokens,
+                OutputTokens = OutputTokens,
+                InputPrice = InputPrice,
+                OutputPrice = OutputPrice,
+                Duration = Duration,
+                ModelName = ModelName
+            };
+        }
+    }
 }

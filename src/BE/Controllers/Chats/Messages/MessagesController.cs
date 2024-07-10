@@ -2,15 +2,37 @@
 using Chats.BE.DB;
 using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Mvc;
+using Microsoft.EntityFrameworkCore;
 
 namespace Chats.BE.Controllers.Chats.Messages;
 
 [Route("api/messages"), Authorize]
 public class MessagesController(ChatsDB db) : ControllerBase
 {
-    //[HttpGet]
-    //public async Task<ActionResult<MessageDto[]>> GetMessages([FromQuery] Guid chatId)
-    //{
-    //    throw new NotImplementedException();
-    //}
+    [HttpGet]
+    public async Task<ActionResult<MessageDto[]>> GetMessages([FromQuery] Guid chatId, CancellationToken cancellationToken)
+    {
+        MessageDto[] messages = await db.ChatMessages
+            .Where(m => m.ChatId == chatId)
+            .Select(x => new ChatMessageTemp()
+            {
+                Id = x.Id,
+                ParentId = x.ParentId,
+                Role = x.Role,
+                Content = x.Messages,
+                InputTokens = x.InputTokens,
+                OutputTokens = x.OutputTokens,
+                InputPrice = x.InputPrice,
+                OutputPrice = x.OutputPrice,
+                CreatedAt = x.CreatedAt,
+                Duration = x.Duration,
+                ModelName = x.ChatModel!.Name
+            })
+            .OrderBy(x => x.CreatedAt)
+            .AsAsyncEnumerable()
+            .Select(x => x.ToDto())
+            .ToArrayAsync(cancellationToken);
+
+        return Ok(messages);
+    }
 }
