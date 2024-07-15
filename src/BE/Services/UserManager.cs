@@ -22,6 +22,7 @@ public class UserManager(ChatsDB db)
         {
             user = new User
             {
+                Id = Guid.NewGuid(), 
                 Provider = KnownLoginProviders.Keycloak,
                 Sub = token.Sub,
                 Account = token.GetSuggestedUserName(),
@@ -30,7 +31,10 @@ public class UserManager(ChatsDB db)
                 Role = "-",
                 Email = token.Email,
                 Enabled = true, 
+                CreatedAt = DateTime.UtcNow,
+                UpdatedAt = DateTime.UtcNow,
             };
+            await InitializeUserWithoutSave(user, KnownLoginProviders.Keycloak, null, cancellationToken);
             db.Users.Add(user);
             await db.SaveChangesAsync(cancellationToken);
         }
@@ -38,7 +42,7 @@ public class UserManager(ChatsDB db)
         return user;
     }
 
-    public async Task InitializeUser(User newUser, string provider, string? invitationCode, CancellationToken cancellationToken)
+    public async Task InitializeUserWithoutSave(User newUser, string provider, string? invitationCode, CancellationToken cancellationToken)
     {
         newUser.UserBalance = new()
         {
@@ -58,7 +62,7 @@ public class UserManager(ChatsDB db)
         };
 
         UserInitialConfig? config = await db.UserInitialConfigs
-            .OrderBy(x =>
+            .OrderByDescending(x =>
                 x.LoginType == provider ? 10 : 1 +
                 x.InvitationCode!.Value == invitationCode ? 10 : 1)
             .FirstOrDefaultAsync(cancellationToken);
@@ -84,6 +88,5 @@ public class UserManager(ChatsDB db)
                 Value = config.Price,
             });
         }
-        db.SaveChanges();
     }
 }
