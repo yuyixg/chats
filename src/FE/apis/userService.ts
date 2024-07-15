@@ -67,7 +67,7 @@ export const getChatsByPaging = (
 
 export const getChat = (id: string): Promise<ChatResult> => {
   const fetchService = useFetch();
-  return fetchService.get('/api/user/chats?id=' + id);
+  return fetchService.get('/api/user/chats/' + id);
 };
 
 export const postChats = (params: PostChatParams): Promise<ChatResult> => {

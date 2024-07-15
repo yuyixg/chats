@@ -31,6 +31,7 @@ import { getChat, postChats } from '@/apis/userService';
 import { cn } from '@/lib/utils';
 import Decimal from 'decimal.js';
 import { v4 as uuidv4 } from 'uuid';
+import { getApiUrl } from '@/utils/common';
 
 interface Props {
   stopConversationRef: MutableRefObject<boolean>;
@@ -88,7 +89,7 @@ export const Chat = memo(({ stopConversationRef }: Props) => {
       if (!selectChatId) {
         const newChat = await postChats({ title: t('New Conversation') });
         selectChatId = newChat.id;
-        chats.push(newChat);
+        chats.unshift(newChat);
         homeDispatch({ field: 'selectChat', value: newChat });
         homeDispatch({ field: 'currentMessages', value: [] });
         homeDispatch({ field: 'selectMessages', value: [] });
@@ -179,7 +180,7 @@ export const Chat = memo(({ stopConversationRef }: Props) => {
       let body = JSON.stringify(chatBody);
 
       const controller = new AbortController();
-      const response = await fetch('api/chats', {
+      const response = await fetch(`${getApiUrl()}/api/chats`, {
         method: 'POST',
         headers: {
           'Content-Type': 'application/json',

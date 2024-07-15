@@ -188,7 +188,7 @@ const Home = ({ siteInfo }: { siteInfo: SiteInfoConfig }) => {
       dispatch({ field: 'currentMessages', value: [] });
       dispatch({ field: 'selectMessages', value: [] });
       dispatch({ field: 'chatError', value: false });
-      dispatch({ field: 'chats', value: [...chats, data] });
+      dispatch({ field: 'chats', value: [data, ...chats] });
       handleSelectModel(model!);
       router.push('#/' + data.id);
     });

@@ -36,7 +36,6 @@ export const Conversations = ({ chats }: Props) => {
     <div className="flex w-full flex-col gap-1">
       {chats
         .slice()
-        .reverse()
         .map((chat, index) => (
           <ConversationComponent key={index} chat={chat} />
         ))}
