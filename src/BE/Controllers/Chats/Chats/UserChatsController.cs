@@ -14,6 +14,9 @@ public class UserChatsController(ChatsDB db, CurrentUser currentUser) : Controll
     [HttpGet("{chatId}")]
     public async Task<ActionResult<ChatsResponse>> GetOneChat(Guid chatId, CancellationToken cancellationToken)
     {
+        // Wait for 1 second to ensure that title was updated
+        await Task.Delay(1000, cancellationToken);
+
         ChatsResponseTemp? temp = await db.Chats
             .Where(x => x.Id == chatId && x.UserId == currentUser.Id && !x.IsDeleted)
             .Select(x => new ChatsResponseTemp()
