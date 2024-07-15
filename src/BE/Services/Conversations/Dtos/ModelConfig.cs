@@ -1,7 +1,7 @@
 ﻿using Chats.BE.DB.Jsons;
 using System.Text.Json.Serialization;
 
-namespace Chats.BE.Controllers.Chats.Models.Dtos;
+namespace Chats.BE.Services.Conversations.Dtos;
 
 public record ModelConfig
 {

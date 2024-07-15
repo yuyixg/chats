@@ -1,5 +1,6 @@
 ﻿using Chats.BE.DB;
 using Chats.BE.DB.Jsons;
+using Chats.BE.Services.Conversations.Dtos;
 using System.Text.Json.Serialization;
 
 namespace Chats.BE.Controllers.Chats.Models.Dtos;

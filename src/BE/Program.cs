@@ -2,6 +2,7 @@
 using Chats.BE.DB;
 using Chats.BE.Infrastructure;
 using Chats.BE.Services;
+using Chats.BE.Services.Conversations;
 using Chats.BE.Services.Keycloak;
 using Chats.BE.Services.Sessions;
 using Microsoft.AspNetCore.Authentication;
@@ -31,6 +32,7 @@ public class Program
         builder.Services.AddScoped<SessionManager>();
         builder.Services.AddScoped<HostUrlService>();
         builder.Services.AddSingleton<SessionCache>();
+        builder.Services.AddSingleton<ConversationFactory>();
         builder.Services.AddHttpContextAccessor();
 
         // Add authentication and configure the default scheme
