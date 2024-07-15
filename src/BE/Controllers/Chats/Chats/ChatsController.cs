@@ -1,4 +1,5 @@
 ﻿using Chats.BE.Controllers.Chats.Chats.Dtos;
+using Chats.BE.Controllers.Common.Dtos;
 using Chats.BE.DB;
 using Chats.BE.Infrastructure;
 using Microsoft.AspNetCore.Authorization;
@@ -11,7 +12,7 @@ namespace Chats.BE.Controllers.Chats.Chats;
 public class ChatsController(ChatsDB db, CurrentUser currentUser) : ControllerBase
 {
     [HttpGet]
-    public async Task<ActionResult<PagingResult<ChatsResponse>>> GetChats(PagingRequest request, CancellationToken cancellationToken)
+    public async Task<ActionResult<PagedResult<ChatsResponse>>> GetChats(PagingRequest request, CancellationToken cancellationToken)
     {
         IQueryable<Chat> query = db.Chats
             .Include(x => x.ChatModel)
@@ -21,7 +22,7 @@ public class ChatsController(ChatsDB db, CurrentUser currentUser) : ControllerBa
             query = query.Where(x => x.Title.Contains(request.Query));
         }
 
-        PagingResult<ChatsResponse> result = await PagingResult.From(query
+        PagedResult<ChatsResponse> result = await PagedResult.FromQuery(query
             .OrderBy(x => x.CreatedAt)
             .Select(x => new ChatsResponseTemp()
             {
@@ -32,7 +33,8 @@ public class ChatsController(ChatsDB db, CurrentUser currentUser) : ControllerBa
                 ModelConfig = x.ChatModel!.ModelConfig,
                 IsShared = x.IsShared,
                 UserModelConfig = x.UserModelConfig,
-            }),
+            }), 
+            request,
             x => x.ToResponse(), cancellationToken);
         return Ok(result);
     }

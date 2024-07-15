@@ -3,7 +3,7 @@ using Microsoft.AspNetCore.Mvc;
 using System.Text;
 using System.Text.Json;
 
-namespace Chats.BE.Controllers.Common;
+namespace Chats.BE.Controllers.Common.Results;
 
 public class OldBEActionResult(object? json) : IActionResult
 {

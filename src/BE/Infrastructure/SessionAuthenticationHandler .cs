@@ -1,7 +1,5 @@
-﻿using Chats.BE.DB;
-using Chats.BE.Services.Sessions;
+﻿using Chats.BE.Services.Sessions;
 using Microsoft.AspNetCore.Authentication;
-using Microsoft.EntityFrameworkCore;
 using Microsoft.Extensions.Options;
 using System.Security.Claims;
 using System.Text.Encodings.Web;
@@ -12,8 +10,7 @@ public class SessionAuthenticationHandler(
     IOptionsMonitor<AuthenticationSchemeOptions> options,
     ILoggerFactory loggerFactory,
     SessionManager sessionManager,
-    UrlEncoder encoder,
-    ChatsDB db) : AuthenticationHandler<AuthenticationSchemeOptions>(options, loggerFactory, encoder)
+    UrlEncoder encoder) : AuthenticationHandler<AuthenticationSchemeOptions>(options, loggerFactory, encoder)
 {
     private readonly ILogger<SessionAuthenticationHandler> _logger = loggerFactory.CreateLogger<SessionAuthenticationHandler>();
 

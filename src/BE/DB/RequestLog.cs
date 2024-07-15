@@ -32,21 +32,23 @@ public partial class RequestLog
     public int StatusCode { get; set; }
 
     [Column("responseTime")]
-    [StringLength(1000)]
+    [StringLength(50)]
+    [Unicode(false)]
     public string ResponseTime { get; set; } = null!;
 
     [Column("requestTime")]
-    [StringLength(1000)]
+    [StringLength(50)]
+    [Unicode(false)]
     public string RequestTime { get; set; } = null!;
 
     [Column("headers")]
-    public string? Headers { get; set; }
+    public string Headers { get; set; } = null!;
 
     [Column("request")]
-    public string? Request { get; set; }
+    public string Request { get; set; } = null!;
 
     [Column("response")]
-    public string? Response { get; set; }
+    public string Response { get; set; } = null!;
 
     [Column("createdAt")]
     public DateTime CreatedAt { get; set; }
