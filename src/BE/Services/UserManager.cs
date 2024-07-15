@@ -1,10 +1,7 @@
 ﻿using Chats.BE.DB;
 using Chats.BE.Services.Common;
 using Chats.BE.Services.Keycloak;
-using Microsoft.AspNetCore.Identity;
-using Microsoft.AspNetCore.SignalR;
 using Microsoft.EntityFrameworkCore;
-using System.Reflection.Metadata.Ecma335;
 
 namespace Chats.BE.Services;
 
