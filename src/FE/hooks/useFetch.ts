@@ -34,7 +34,6 @@ export const useFetch = () => {
           ? {}
           : { 'Content-type': 'application/json' }),
     };
-    if (apiPrefix) { headers.credentials = 'include'; }
 
     return fetch(requestUrl, {
       ...requestBody,

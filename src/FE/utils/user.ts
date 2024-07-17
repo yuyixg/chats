@@ -50,7 +50,7 @@ export const setUserSession = (sessionId: string) => {
   );
 };
 
-export const getUserSession = () => {
+export const getUserSession = () : string => {
   const session = JSON.parse(localStorage.getItem('session') || '{}');
   if (session?.expires && session?.expires > new Date().getTime())
     return session.sessionId;

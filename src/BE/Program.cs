@@ -32,7 +32,7 @@ public class Program
         builder.Services.AddScoped<SessionManager>();
         builder.Services.AddScoped<HostUrlService>();
         builder.Services.AddSingleton<SessionCache>();
-        builder.Services.AddSingleton<ConversationFactory>();
+        builder.Services.AddScoped<ConversationFactory>();
         builder.Services.AddHttpContextAccessor();
 
         // Add authentication and configure the default scheme

@@ -7,6 +7,8 @@ import { getFileEndpoint } from '@/utils/file';
 
 import { FileServicesType } from '@/types/file';
 import { ChatModelFileConfig } from '@/types/model';
+import { getApiUrl } from '@/utils/common';
+import { getUserSession } from '@/utils/user';
 
 interface Props {
   onSuccessful?: (url: string) => void;
@@ -47,13 +49,16 @@ const UploadButton: React.FunctionComponent<Props> = ({
     try {
       if (file) {
         const { id: serverId, type: serverType } = fileServerConfig!;
-        const url = getFileEndpoint(serverType, serverId);
+        const url = `${getApiUrl()}/${getFileEndpoint(serverType, serverId)}`;
         onUploading && onUploading();
         if (serverType === FileServicesType.Local) {
           const fileForm = new FormData();
           fileForm.append('file', file);
           const response = await fetch(url, {
             method: 'POST',
+            headers: {
+              Authorization: `Bearer ${getUserSession()}`,
+            },
             body: fileForm,
           });
           const { getUrl } = await response.json();
@@ -69,6 +74,10 @@ const UploadButton: React.FunctionComponent<Props> = ({
           );
           const res = await fetch(url, {
             method: 'POST',
+            headers: {
+              'Content-Type': 'application/json',
+              Authorization: `Bearer ${getUserSession()}`,
+            },
             body: JSON.stringify({
               fileName: file.name.replace(fileType, ''),
               fileType: fileType.replace('.', ''),

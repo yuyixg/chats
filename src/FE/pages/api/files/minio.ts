@@ -17,7 +17,7 @@ const handler = async (req: ChatsApiRequest) => {
     configs: { accessKey, accessSecret, endpoint, bucketName },
   } = fileServer;
 
-  const { fileName, fileType } = JSON.parse(req.body) as {
+  const { fileName, fileType } = req.body as {
     fileName: string;
     fileType: string;
   };
