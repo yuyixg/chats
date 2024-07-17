@@ -14,7 +14,7 @@ public class ConversationController : ControllerBase
         [FromServices] ConversationFactory conversationFactory, 
         CancellationToken cancellationToken)
     {
-        ConversationService s = conversationFactory.CreateConversationService(request.ModelId, request.UserModelConfig);
+        ConversationService s = await conversationFactory.CreateConversationService(request.ModelId, cancellationToken);
         throw new NotImplementedException();
     }
 }

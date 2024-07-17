@@ -34,7 +34,7 @@ public partial class ChatModel
     public string? Remarks { get; set; }
 
     [Column("modelKeysId")]
-    public Guid? ModelKeysId { get; set; }
+    public Guid ModelKeysId { get; set; }
 
     [Column("fileServiceId")]
     public Guid? FileServiceId { get; set; }
@@ -72,5 +72,5 @@ public partial class ChatModel
 
     [ForeignKey("ModelKeysId")]
     [InverseProperty("ChatModels")]
-    public virtual ModelKey? ModelKeys { get; set; }
+    public virtual ModelKey ModelKeys { get; set; } = null!;
 }
