@@ -14,6 +14,7 @@ public class PromptsController(ChatsDB db, CurrentUser currentUser) : Controller
     public async Task<ActionResult<PromptsDto[]>> GetPrompts(CancellationToken cancellationToken)
     {
         PromptsDto[] prompts = await db.Prompts
+            .Where(x => x.CreateUserId == currentUser.Id)
             .OrderBy(x => x.UpdatedAt)
             .Select(x => new PromptsDto()
             {
