@@ -4,6 +4,7 @@ using Chats.BE.Infrastructure;
 using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Mvc;
 using Microsoft.EntityFrameworkCore;
+using OpenAI.Chat;
 
 namespace Chats.BE.Controllers.Chats.Messages;
 
@@ -14,7 +15,7 @@ public class MessagesController(ChatsDB db, CurrentUser currentUser) : Controlle
     public async Task<ActionResult<MessageDto[]>> GetMessages([FromQuery] Guid chatId, CancellationToken cancellationToken)
     {
         MessageDto[] messages = await db.ChatMessages
-            .Where(m => m.ChatId == chatId && m.UserId == currentUser.Id)
+            .Where(m => m.ChatId == chatId && m.UserId == currentUser.Id && m.Role != "system")
             .Select(x => new ChatMessageTemp()
             {
                 Id = x.Id,

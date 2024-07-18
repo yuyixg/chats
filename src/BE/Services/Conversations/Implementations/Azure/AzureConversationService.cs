@@ -4,6 +4,7 @@ using Azure.AI.OpenAI;
 using Chats.BE.Services.Conversations.Dtos;
 using OpenAI;
 using OpenAI.Chat;
+using System.Runtime.CompilerServices;
 
 namespace Chats.BE.Services.Conversations.Implementations.Azure;
 
@@ -11,22 +12,22 @@ public class AzureConversationService : ConversationService
 {
     public string SuggestedType { get; }
     private ChatClient ChatClient { get; }
-    public JsonAzureModelConfig ModelConfig { get; }
+    public JsonAzureModelConfig GlobalModelConfig { get; }
 
     public AzureConversationService(string keyConfigText, string suggestedType, string modelConfigText)
     {
         JsonAzureApiConfig keyConfig = JsonAzureApiConfig.Parse(keyConfigText);
-        ModelConfig = JsonAzureModelConfig.Parse(modelConfigText);
+        GlobalModelConfig = JsonAzureModelConfig.Parse(modelConfigText);
         OpenAIClient api = new AzureOpenAIClient(new Uri(keyConfig.Host), new AzureKeyCredential(keyConfig.ApiKey));
         SuggestedType = suggestedType;
-        ChatClient = api.GetChatClient(ModelConfig.DeploymentName);
+        ChatClient = api.GetChatClient(GlobalModelConfig.DeploymentName);
     }
 
-    public override async IAsyncEnumerable<ConversationSegment> ChatStreamed(ChatMessage[] messages, ModelConfig config, CancellationToken cancellationToken)
+    public override async IAsyncEnumerable<ConversationSegment> ChatStreamed(ChatMessage[] messages, ModelConfig userModelConfig, [EnumeratorCancellation] CancellationToken cancellationToken)
     {
         ChatCompletionOptions chatCompletionOptions = new()
         {
-            Temperature = ModelConfig.Temperature,
+            Temperature = userModelConfig.Temperature,
             MaxTokens = SuggestedType switch
             {
                 "gpt-3.5-turbo" => null,
