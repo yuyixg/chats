@@ -373,7 +373,7 @@ export const ChatInput = ({
           // </div>
         )}
       </div>
-      <div className="px-3 pt-2 pb-3 text-center text-[12px] text-black/50 dark:text-white/50 md:px-4 md:pt-3 md:pb-4">
+      <div className="px-3 pt-1 pb-2 text-center text-[11px] text-black/50 dark:text-white/50 md:px-4 md:pt-2 md:pb-2">
         {t('Large language models may generate misleading error messages, please validate key information.')}
       </div>
     </div>
