@@ -3,6 +3,7 @@ using Chats.BE.Controllers.Chats.Messages.Dtos;
 using Chats.BE.DB;
 using Chats.BE.DB.Jsons;
 using Chats.BE.Infrastructure;
+using Chats.BE.Services.Common;
 using Chats.BE.Services.Conversations;
 using Chats.BE.Services.Conversations.Dtos;
 using Microsoft.AspNetCore.Authorization;
@@ -11,6 +12,7 @@ using Microsoft.EntityFrameworkCore;
 using OpenAI.Chat;
 using System.Diagnostics;
 using System.Text;
+using System.Text.Encodings.Web;
 using System.Text.Json;
 using DBChatMessage = Chats.BE.DB.ChatMessage;
 using OpenAIChatMessage = OpenAI.Chat.ChatMessage;
@@ -18,7 +20,7 @@ using OpenAIChatMessage = OpenAI.Chat.ChatMessage;
 namespace Chats.BE.Controllers.Chats.Conversations;
 
 [Route("api/chats2"), Authorize]
-public class ConversationController(ChatsDB db, CurrentUser currentUser) : ControllerBase
+public class ConversationController(ChatsDB db, CurrentUser currentUser, ILogger<ConversationController> logger) : ControllerBase
 {
     [HttpPost]
     public async Task<IActionResult> StartConversationStreamed(
@@ -35,14 +37,19 @@ public class ConversationController(ChatsDB db, CurrentUser currentUser) : Contr
             return BadRequest("Model not found");
         }
 
-        UserModel userModel = await db.UserModels
-            .Where(x => x.UserId == currentUser.Id)
+        JsonPriceConfig priceConfig = JsonSerializer.Deserialize<JsonPriceConfig>(cm.PriceConfig)!;
+
+        var userInfo = await db.Users
+            .Where(x => x.Id == currentUser.Id)
+            .Select(x => new
+            {
+                UserModels = x.UserModel!,
+                UserBalance = x.UserBalance!
+            })
             .SingleAsync(cancellationToken);
-        JsonUserModel[] userModelConfigs = JsonSerializer.Deserialize<JsonUserModel[]>(userModel.Models)!;
-        JsonUserModel? userModelConfig = userModelConfigs.FirstOrDefault(x => x.ModelId == request.ModelId);
-        UserBalance userBalance = await db.UserBalances
-            .Where(x => x.UserId == currentUser.Id)
-            .SingleAsync(cancellationToken);
+        List<JsonUserModel> userModelConfigs = JsonSerializer.Deserialize<List<JsonUserModel>>(userInfo.UserModels.Models)!;
+        int userModelConfigIndex = userModelConfigs.FindIndex(x => x.ModelId == request.ModelId);
+        JsonUserModel? userModelConfig = userModelConfigs[userModelConfigIndex];
         if (userModelConfig == null)
         {
             return BadRequest("User model not found");
@@ -51,11 +58,11 @@ public class ConversationController(ChatsDB db, CurrentUser currentUser) : Contr
         {
             return BadRequest("User model is disabled");
         }
-        if (DateTime.Parse(userModelConfig.Expires) < DateTime.UtcNow)
+        if (userModelConfig.Expires != "-" && DateTime.Parse(userModelConfig.Expires) < DateTime.UtcNow)
         {
             return BadRequest("User model is expired");
         }
-        if (userModelConfig.Counts == "0" && userModelConfig.Tokens == "0" && userBalance.Balance == 0)
+        if (userModelConfig.Counts == "0" && userModelConfig.Tokens == "0" && userInfo.UserBalance.Balance == 0 && !priceConfig.IsFree())
         {
             return BadRequest("User model is out of balance");
         }
@@ -123,53 +130,109 @@ public class ConversationController(ChatsDB db, CurrentUser currentUser) : Contr
         ];
 
         ConversationService s = await conversationFactory.CreateConversationService(cm, cancellationToken);
-        ConversationSegment? lastSegment = null;
+        ConversationSegment lastSegment = new() { TextSegment = "", InputTokenCount = 0, OutputTokenCount = 0 };
         Response.Headers.ContentType = "text/event-stream";
         Response.Headers.CacheControl = "no-cache";
         Response.Headers.Connection = "keep-alive";
-        ReadOnlyMemory<byte> dataU8 = "data:"u8.ToArray();
-        ReadOnlyMemory<byte> lfu8 = "\n"u8.ToArray();
         StringBuilder responseText = new();
+        UserModelBalanceCost cost = null!;
+        Stopwatch sw = Stopwatch.StartNew();
         try
         {
-            Stopwatch sw = Stopwatch.StartNew();
+            UserModelBalanceCalculator calculator = new(userModelConfig, userInfo.UserBalance.Balance);
+            cost = calculator.GetNewBalance(0, 0, priceConfig);
+
             await foreach (ConversationSegment seg in s.ChatStreamed(messageLine, request.UserModelConfig, cancellationToken))
             {
                 lastSegment = seg;
-                SseResponseLine responseObj = new() { Result = seg.TextSegment, Success = true };
-                await Response.Body.WriteAsync(dataU8);
-                await Response.Body.WriteAsync(JsonSerializer.SerializeToUtf8Bytes(responseObj));
-                await Response.Body.WriteAsync(lfu8);
-                await Response.Body.FlushAsync();
+                UserModelBalanceCost currentCost = calculator.GetNewBalance(seg.InputTokenCount, seg.OutputTokenCount, priceConfig);
+                if (cost.IsSufficient)
+                {
+                    cost = currentCost;
+                }
+                else
+                {
+                    // insufficient balance, use previous cost
+                    responseText.Append("\n⚠Insufficient balance - 余额不足!");
+                    break;
+                }
+
+                if (seg.TextSegment == string.Empty) continue;
+                await YieldResponse(new() { Result = seg.TextSegment, Success = true });
                 responseText.Append(seg.TextSegment);
             }
-            int elapsedMs = (int)sw.ElapsedMilliseconds;
 
-            if (lastSegment != null)
-            {
-                // insert new assistant message
-                DBChatMessage assistantMessage = new()
-                {
-                    Id = Guid.NewGuid(),
-                    ChatId = request.ChatId,
-                    UserId = currentUser.Id,
-                    Role = DBConversationRoles.Assistant,
-                    Messages = MessageContentDto.FromText(responseText.ToString()).ToJson(),
-                    CreatedAt = DateTime.UtcNow,
-                    ParentId = userMessage.Id,
-                    Duration = elapsedMs,
-                    InputTokens = lastSegment.InputTokenCount,
-                    OutputTokens = lastSegment.OutputTokenCount,
-                    //InputPrice = lastSegment.InputPrice,
-                };
-                db.ChatMessages.Add(assistantMessage);
-            }
             return new EmptyResult();
         }
-        catch (Exception)
+        catch (Exception e)
         {
-            throw new NotImplementedException();
+            logger.LogError(e, "Error in conversation");
+            string errorTextToResponse = "\n⚠Error in conversation - 对话出错!";
+            responseText.Append(errorTextToResponse);
+            await YieldResponse(new SseResponseLine { Result = errorTextToResponse, Success = false });
         }
+
+        int elapsedMs = (int)sw.ElapsedMilliseconds;
+
+        // success
+        // insert new assistant message
+        DBChatMessage assistantMessage = new()
+        {
+            Id = Guid.NewGuid(),
+            ChatId = request.ChatId,
+            UserId = currentUser.Id,
+            Role = DBConversationRoles.Assistant,
+            Messages = MessageContentDto.FromText(responseText.ToString()).ToJson(),
+            CreatedAt = DateTime.UtcNow,
+            ParentId = userMessage.Id,
+            Duration = elapsedMs,
+            InputTokens = lastSegment.InputTokenCount,
+            OutputTokens = lastSegment.OutputTokenCount,
+            InputPrice = cost.InputTokenPrice,
+            OutputPrice = cost.OutputTokenPrice,
+        };
+        db.ChatMessages.Add(assistantMessage);
+
+        UpdateBalance(userInfo.UserModels, userInfo.UserBalance, userModelConfigs, userModelConfigIndex, userModelConfig, cost, assistantMessage.Id);
+        await db.SaveChangesAsync(cancellationToken);
+
+        return new EmptyResult();
+    }
+
+    private void UpdateBalance(UserModel userModel, UserBalance userBalance, List<JsonUserModel> userModelConfigs, int userModelConfigIndex, JsonUserModel userModelConfig, UserModelBalanceCost cost, Guid assistantMessageId)
+    {
+        if (cost.CostCount > 0 || cost.CostTokens > 0)
+        {
+            userModelConfigs[userModelConfigIndex] = userModelConfig;
+            userModel.Models = JsonSerializer.Serialize(userModelConfigs);
+        }
+        if (cost.CostBalance > 0)
+        {
+            db.BalanceLogs.Add(new()
+            {
+                Id = Guid.NewGuid(),
+                UserId = currentUser.Id,
+                CreatedAt = DateTime.UtcNow,
+                CreateUserId = currentUser.Id,
+                MessageId = assistantMessageId,
+                Value = cost.CostBalance,
+                Type = (int)BalanceLogType.Cost,
+                UpdatedAt = DateTime.UtcNow,
+            });
+            userBalance.Balance -= cost.CostBalance;
+        }
+    }
+
+    static ReadOnlyMemory<byte> dataU8 = "data:"u8.ToArray();
+    static ReadOnlyMemory<byte> lfu8 = "\n"u8.ToArray();
+    static JsonSerializerOptions JsonSerializerOptions = new() { Encoder = JavaScriptEncoder.UnsafeRelaxedJsonEscaping };
+
+    private async Task YieldResponse(SseResponseLine line)
+    {
+        await Response.Body.WriteAsync(dataU8);
+        await Response.Body.WriteAsync(JsonSerializer.SerializeToUtf8Bytes(line, JsonSerializerOptions));
+        await Response.Body.WriteAsync(lfu8);
+        await Response.Body.FlushAsync();
     }
 
     static IEnumerable<OpenAIChatMessage> GetMessageTree(MessageLiteDto[] existingMessages, Guid? fromParentId)

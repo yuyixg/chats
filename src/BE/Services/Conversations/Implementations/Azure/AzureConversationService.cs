@@ -37,8 +37,16 @@ public class AzureConversationService : ConversationService
             }
         };
 
-        int inputTokenCount = messages.Sum(x => x.Content.Where(x => x.Kind == ChatMessageContentPartKind.Text).Sum(x => GPT3Tokenizer.Encode(x.Text).Count));
+        int inputTokenCount = messages.Sum(GetTokenCount);
         int outputTokenCount = 0;
+        // notify inputTokenCount first to better support price calculation
+        yield return new ConversationSegment
+        {
+            TextSegment = "",
+            InputTokenCount = inputTokenCount,
+            OutputTokenCount = 0,
+        };
+
         await foreach (StreamingChatCompletionUpdate delta in ChatClient.CompleteChatStreamingAsync(messages, chatCompletionOptions, cancellationToken))
         {
             // bug:
@@ -55,5 +63,22 @@ public class AzureConversationService : ConversationService
                 OutputTokenCount = outputTokenCount,
             };
         }
+    }
+
+    static int GetTokenCount(ChatMessage chatMessage)
+    {
+        return chatMessage.Content.Sum(GetTokenCountForPart);
+    }
+
+    static int GetTokenCountForPart(ChatMessageContentPart part)
+    {
+        return part.Kind switch
+        {
+            var x when x == ChatMessageContentPartKind.Text => GPT3Tokenizer.Encode(part.Text).Count,
+            // https://platform.openai.com/docs/guides/vision/calculating-costs
+            // assume image is ~2048x4096 in detail: high, mosts 1105 tokens
+            var x when x == ChatMessageContentPartKind.Image => 1105,
+            _ => 0,
+        };
     }
 }
