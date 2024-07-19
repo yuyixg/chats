@@ -5,11 +5,11 @@ namespace Chats.BE.Services.Conversations.Dtos;
 
 public record ModelConfig
 {
-    [JsonPropertyName("prompt")]
-    public required string Prompt { get; init; }
+    [JsonPropertyName("prompt"), JsonIgnore(Condition = JsonIgnoreCondition.WhenWritingNull)]
+    public string? Prompt { get; init; }
 
-    [JsonPropertyName("temperature")]
-    public required float Temperature { get; init; }
+    [JsonPropertyName("temperature"), JsonIgnore(Condition = JsonIgnoreCondition.WhenWritingNull)]
+    public float? Temperature { get; init; }
 
     [JsonPropertyName("enableSearch"), JsonIgnore(Condition = JsonIgnoreCondition.WhenWritingNull)]
     public bool? EnableSearch { get; init; }

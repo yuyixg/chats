@@ -23,7 +23,7 @@ public class AzureConversationService : ConversationService
         ChatClient = api.GetChatClient(GlobalModelConfig.DeploymentName);
     }
 
-    public override async IAsyncEnumerable<ConversationSegment> ChatStreamed(ChatMessage[] messages, ModelConfig userModelConfig, [EnumeratorCancellation] CancellationToken cancellationToken)
+    public override async IAsyncEnumerable<ConversationSegment> ChatStreamed(IReadOnlyList<ChatMessage> messages, ModelConfig userModelConfig, [EnumeratorCancellation] CancellationToken cancellationToken)
     {
         ChatCompletionOptions chatCompletionOptions = new()
         {

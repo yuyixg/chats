@@ -19,7 +19,7 @@ using OpenAIChatMessage = OpenAI.Chat.ChatMessage;
 
 namespace Chats.BE.Controllers.Chats.Conversations;
 
-[Route("api/chats2"), Authorize]
+[Route("api/chats"), Authorize]
 public class ConversationController(ChatsDB db, CurrentUser currentUser, ILogger<ConversationController> logger) : ControllerBase
 {
     [HttpPost]
@@ -34,7 +34,7 @@ public class ConversationController(ChatsDB db, CurrentUser currentUser, ILogger
             .FirstOrDefaultAsync(x => x.Id == request.ModelId, cancellationToken: cancellationToken);
         if (cm == null)
         {
-            return BadRequest("Model not found");
+            return BadRequestMessage("The Model does not exist or access is denied.");
         }
 
         JsonPriceConfig priceConfig = JsonSerializer.Deserialize<JsonPriceConfig>(cm.PriceConfig)!;
@@ -52,22 +52,22 @@ public class ConversationController(ChatsDB db, CurrentUser currentUser, ILogger
         JsonUserModel? userModelConfig = userModelConfigs[userModelConfigIndex];
         if (userModelConfig == null)
         {
-            return BadRequest("User model not found");
+            return BadRequestMessage("The Model does not exist or access is denied.");
         }
         if (!userModelConfig.Enabled)
         {
-            return BadRequest("User model is disabled");
+            return BadRequestMessage("The Model does not exist or access is denied.");
         }
         if (userModelConfig.Expires != "-" && DateTime.Parse(userModelConfig.Expires) < DateTime.UtcNow)
         {
-            return BadRequest("User model is expired");
+            return BadRequestMessage("Subscription has expired");
         }
         if (userModelConfig.Counts == "0" && userModelConfig.Tokens == "0" && userInfo.UserBalance.Balance == 0 && !priceConfig.IsFree())
         {
-            return BadRequest("User model is out of balance");
+            return BadRequestMessage("Insufficient balance");
         }
 
-        MessageLiteDto[] existingMessages = await db.ChatMessages
+        Dictionary<Guid, MessageLiteDto> existingMessages = await db.ChatMessages
             .Where(x => x.ChatId == request.ChatId && x.UserId == currentUser.Id)
             .Select(x => new MessageLiteTemp()
             {
@@ -78,8 +78,9 @@ public class ConversationController(ChatsDB db, CurrentUser currentUser, ILogger
             })
             .ToAsyncEnumerable()
             .Select(x => x.ToDto())
-            .ToArrayAsync(cancellationToken);
+            .ToDictionaryAsync(x => x.Id, x => x, cancellationToken);
         MessageLiteDto? systemMessage = existingMessages
+            .Values
             .Where(x => x.Role == DBConversationRoles.System)
             .FirstOrDefault();
         // insert system message if it doesn't exist
@@ -87,7 +88,7 @@ public class ConversationController(ChatsDB db, CurrentUser currentUser, ILogger
         {
             if (request.UserModelConfig.Prompt == null)
             {
-                return BadRequest("Prompt is required for the first message");
+                return BadRequestMessage("Prompt is required for the first message");
             }
 
             DBChatMessage toBeInsert = new()
@@ -110,24 +111,13 @@ public class ConversationController(ChatsDB db, CurrentUser currentUser, ILogger
             };
         }
 
-        // insert new user message
-        DBChatMessage userMessage = new()
-        {
-            Id = Guid.NewGuid(),
-            ChatId = request.ChatId,
-            UserId = currentUser.Id,
-            Role = DBConversationRoles.User,
-            Messages = request.UserMessage.ToJson(),
-            CreatedAt = DateTime.UtcNow,
-            ParentId = request.MessageId,
-        };
-        db.ChatMessages.Add(userMessage);
-
-        OpenAIChatMessage[] messageLine =
+        List<OpenAIChatMessage> messageToSend =
         [
             new SystemChatMessage(systemMessage.Content.Text),
-            ..GetMessageTree(existingMessages, userMessage.ParentId),
+            ..GetMessageTree(existingMessages, request.MessageId),
         ];
+
+        MessageLiteDto userMessage = GetUserMessage(request, existingMessages, messageToSend);
 
         ConversationService s = await conversationFactory.CreateConversationService(cm, cancellationToken);
         ConversationSegment lastSegment = new() { TextSegment = "", InputTokenCount = 0, OutputTokenCount = 0 };
@@ -142,7 +132,7 @@ public class ConversationController(ChatsDB db, CurrentUser currentUser, ILogger
             UserModelBalanceCalculator calculator = new(userModelConfig, userInfo.UserBalance.Balance);
             cost = calculator.GetNewBalance(0, 0, priceConfig);
 
-            await foreach (ConversationSegment seg in s.ChatStreamed(messageLine, request.UserModelConfig, cancellationToken))
+            await foreach (ConversationSegment seg in s.ChatStreamed(messageToSend, request.UserModelConfig, cancellationToken))
             {
                 lastSegment = seg;
                 UserModelBalanceCost currentCost = calculator.GetNewBalance(seg.InputTokenCount, seg.OutputTokenCount, priceConfig);
@@ -161,8 +151,6 @@ public class ConversationController(ChatsDB db, CurrentUser currentUser, ILogger
                 await YieldResponse(new() { Result = seg.TextSegment, Success = true });
                 responseText.Append(seg.TextSegment);
             }
-
-            return new EmptyResult();
         }
         catch (Exception e)
         {
@@ -190,6 +178,7 @@ public class ConversationController(ChatsDB db, CurrentUser currentUser, ILogger
             OutputTokens = lastSegment.OutputTokenCount,
             InputPrice = cost.InputTokenPrice,
             OutputPrice = cost.OutputTokenPrice,
+            ChatModelId = cm.Id,
         };
         db.ChatMessages.Add(assistantMessage);
 
@@ -197,6 +186,43 @@ public class ConversationController(ChatsDB db, CurrentUser currentUser, ILogger
         await db.SaveChangesAsync(cancellationToken);
 
         return new EmptyResult();
+    }
+
+    private BadRequestObjectResult BadRequestMessage(string message)
+    {
+        return BadRequest(new { message });
+    }
+
+    private MessageLiteDto GetUserMessage(ConversationRequest request, Dictionary<Guid, MessageLiteDto> existingMessages, List<OpenAIChatMessage> messageToSend)
+    {
+        // new user message
+        if (request.MessageId != null && existingMessages.TryGetValue(request.MessageId.Value, out MessageLiteDto? parentMessage) && parentMessage.Role == DBConversationRoles.User)
+        {
+            // existing user message
+            return existingMessages[request.MessageId!.Value];
+        }
+
+        // insert new user message
+        DBChatMessage dbUserMessage = new()
+        {
+            Id = Guid.NewGuid(),
+            ChatId = request.ChatId,
+            UserId = currentUser.Id,
+            Role = DBConversationRoles.User,
+            Messages = request.UserMessage.ToJson(),
+            CreatedAt = DateTime.UtcNow,
+            ParentId = request.MessageId,
+        };
+        db.ChatMessages.Add(dbUserMessage);
+        MessageLiteDto userMessage = new()
+        {
+            Id = dbUserMessage.Id,
+            Content = request.UserMessage,
+            Role = dbUserMessage.Role,
+            ParentId = dbUserMessage.ParentId,
+        };
+        messageToSend.Add(ContentToMessage(userMessage));
+        return userMessage;
     }
 
     private void UpdateBalance(UserModel userModel, UserBalance userBalance, List<JsonUserModel> userModelConfigs, int userModelConfigIndex, JsonUserModel userModelConfig, UserModelBalanceCost cost, Guid assistantMessageId)
@@ -235,19 +261,18 @@ public class ConversationController(ChatsDB db, CurrentUser currentUser, ILogger
         await Response.Body.FlushAsync();
     }
 
-    static IEnumerable<OpenAIChatMessage> GetMessageTree(MessageLiteDto[] existingMessages, Guid? fromParentId)
+    static IEnumerable<OpenAIChatMessage> GetMessageTree(Dictionary<Guid, MessageLiteDto> existingMessages, Guid? fromParentId)
     {
-        Dictionary<Guid, MessageLiteDto> existingMessageMaps = existingMessages.ToDictionary(k => k.Id, v => v);
         LinkedList<MessageLiteDto> line = [];
         Guid? currentParentId = fromParentId;
         while (currentParentId != null)
         {
-            if (!existingMessageMaps.ContainsKey(currentParentId.Value))
+            if (!existingMessages.ContainsKey(currentParentId.Value))
             {
                 break;
             }
-            line.AddFirst(existingMessageMaps[currentParentId.Value]);
-            currentParentId = existingMessageMaps[currentParentId.Value].ParentId;
+            line.AddFirst(existingMessages[currentParentId.Value]);
+            currentParentId = existingMessages[currentParentId.Value].ParentId;
         }
         return line.Select(ContentToMessage);
     }

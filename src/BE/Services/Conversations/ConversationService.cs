@@ -5,5 +5,5 @@ namespace Chats.BE.Services.Conversations;
 
 public abstract class ConversationService
 {
-    public abstract IAsyncEnumerable<ConversationSegment> ChatStreamed(ChatMessage[] messages, ModelConfig config, CancellationToken cancellationToken);
+    public abstract IAsyncEnumerable<ConversationSegment> ChatStreamed(IReadOnlyList<ChatMessage> messages, ModelConfig config, CancellationToken cancellationToken);
 }
