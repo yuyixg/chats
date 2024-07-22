@@ -1,6 +1,7 @@
 ﻿using Chats.BE.DB;
 using Chats.BE.Services.Conversations.Implementations.Azure;
 using Chats.BE.Services.Conversations.Implementations.DashScope;
+using Chats.BE.Services.Conversations.Implementations.Kimi;
 
 namespace Chats.BE.Services.Conversations;
 
@@ -24,7 +25,7 @@ public class ConversationFactory
             KnownModelProvider.QianFan => throw new NotImplementedException(),
             KnownModelProvider.QianWen => new DashScopeConversationService(cm.KeyConfigText, cm.SuggestedType, cm.ModelConfigText),
             KnownModelProvider.ZhiPuAI => throw new NotImplementedException(),
-            KnownModelProvider.Moonshot => throw new NotImplementedException(),
+            KnownModelProvider.Moonshot => new KimiConversationService(cm.KeyConfigText, cm.SuggestedType, cm.ModelConfigText),
             KnownModelProvider.HunYuan => throw new NotImplementedException(),
             _ => throw new ArgumentException("Invalid model type")
         };

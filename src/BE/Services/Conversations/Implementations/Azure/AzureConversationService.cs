@@ -23,6 +23,8 @@ public class AzureConversationService : ConversationService
     private ChatClient ChatClient { get; }
     private JsonAzureModelConfig GlobalModelConfig { get; }
 
+    private bool IsVision => SuggestedType == "gpt-4-vision";
+
     public AzureConversationService(string keyConfigText, string suggestedType, string modelConfigText)
     {
         JsonAzureApiConfig keyConfig = JsonAzureApiConfig.Parse(keyConfigText);
@@ -46,6 +48,11 @@ public class AzureConversationService : ConversationService
             },
             User = currentUser.Id.ToString(),
         };
+
+        if (!IsVision)
+        {
+            messages = messages.Select(RemoveImages).ToList();
+        }
 
         int inputTokenCount = messages.Sum(GetTokenCount);
         int outputTokenCount = 0;
@@ -73,6 +80,19 @@ public class AzureConversationService : ConversationService
                 OutputTokenCount = outputTokenCount,
             };
         }
+    }
+
+    private static ChatMessage RemoveImages(ChatMessage message)
+    {
+        return message switch
+        {
+            UserChatMessage userChatMessage => new UserChatMessage(userChatMessage.Content.Select(c => c.Kind switch
+            {
+                var x when x == ChatMessageContentPartKind.Image => ChatMessageContentPart.CreateTextMessageContentPart(c.ImageUri.ToString()),
+                _ => c,
+            })),
+            _ => message,
+        };
     }
 
     static int GetTokenCount(ChatMessage chatMessage)
