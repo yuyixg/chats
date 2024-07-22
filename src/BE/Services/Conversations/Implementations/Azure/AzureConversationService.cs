@@ -1,6 +1,7 @@
 ﻿using AI.Dev.OpenAI.GPT;
 using Azure;
 using Azure.AI.OpenAI;
+using Chats.BE.Infrastructure;
 using Chats.BE.Services.Conversations.Dtos;
 using OpenAI;
 using OpenAI.Chat;
@@ -31,7 +32,7 @@ public class AzureConversationService : ConversationService
         ChatClient = api.GetChatClient(GlobalModelConfig.DeploymentName);
     }
 
-    public override async IAsyncEnumerable<ConversationSegment> ChatStreamed(IReadOnlyList<ChatMessage> messages, ModelConfig userModelConfig, [EnumeratorCancellation] CancellationToken cancellationToken)
+    public override async IAsyncEnumerable<ConversationSegment> ChatStreamed(IReadOnlyList<ChatMessage> messages, ModelConfig userModelConfig, CurrentUser currentUser, [EnumeratorCancellation] CancellationToken cancellationToken)
     {
         ChatCompletionOptions chatCompletionOptions = new()
         {
@@ -42,7 +43,8 @@ public class AzureConversationService : ConversationService
                 "gpt-4" => null,
                 "gpt-4-vision" => 4096,
                 _ => 4096,
-            }
+            },
+            User = currentUser.Id.ToString(),
         };
 
         int inputTokenCount = messages.Sum(GetTokenCount);

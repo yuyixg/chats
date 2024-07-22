@@ -24,8 +24,8 @@ public class ModelUsageController(ChatsDB db, CurrentUser currentUser) : Control
             return NotFound();
         }
 
-        JsonUserModel[] jsonUserModels = JsonSerializer.Deserialize<JsonUserModel[]>(userModels)!;
-        JsonUserModel? userModel = jsonUserModels.FirstOrDefault(x => x.ModelId == modelId);
+        JsonTokenBalance[] jsonUserModels = JsonSerializer.Deserialize<JsonTokenBalance[]>(userModels)!;
+        JsonTokenBalance? userModel = jsonUserModels.FirstOrDefault(x => x.ModelId == modelId);
         if (userModel == null)
         {
             return NotFound();

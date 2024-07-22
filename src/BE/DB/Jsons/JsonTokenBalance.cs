@@ -2,7 +2,7 @@
 
 namespace Chats.BE.DB.Jsons;
 
-public record JsonUserModel
+public record JsonTokenBalance
 {
     [JsonPropertyName("modelId")]
     public required Guid ModelId { get; init; }

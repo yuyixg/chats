@@ -10,6 +10,9 @@ using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Mvc;
 using Microsoft.EntityFrameworkCore;
 using OpenAI.Chat;
+using Sdcb.DashScope;
+using System.ClientModel;
+using System.ClientModel.Primitives;
 using System.Diagnostics;
 using System.Text;
 using System.Text.Encodings.Web;
@@ -39,30 +42,31 @@ public class ConversationController(ChatsDB db, CurrentUser currentUser, ILogger
 
         JsonPriceConfig priceConfig = JsonSerializer.Deserialize<JsonPriceConfig>(cm.PriceConfig)!;
 
-        var userInfo = await db.Users
+        var miscInfo = await db.Users
             .Where(x => x.Id == currentUser.Id)
             .Select(x => new
             {
                 UserModels = x.UserModel!,
-                UserBalance = x.UserBalance!
+                UserBalance = x.UserBalance!,
+                ThisChat = db.Chats.Single(x => x.Id == request.ChatId && x.UserId == currentUser.Id)
             })
             .SingleAsync(cancellationToken);
-        List<JsonUserModel> userModelConfigs = JsonSerializer.Deserialize<List<JsonUserModel>>(userInfo.UserModels.Models)!;
-        int userModelConfigIndex = userModelConfigs.FindIndex(x => x.ModelId == request.ModelId);
-        JsonUserModel? userModelConfig = userModelConfigs[userModelConfigIndex];
-        if (userModelConfig == null)
+        List<JsonTokenBalance> tokenBalances = JsonSerializer.Deserialize<List<JsonTokenBalance>>(miscInfo.UserModels.Models)!;
+        int tokenBalanceIndex = tokenBalances.FindIndex(x => x.ModelId == request.ModelId);
+        JsonTokenBalance? tokenBalance = tokenBalances[tokenBalanceIndex];
+        if (tokenBalance == null)
         {
             return BadRequestMessage("The Model does not exist or access is denied.");
         }
-        if (!userModelConfig.Enabled)
+        if (!tokenBalance.Enabled)
         {
             return BadRequestMessage("The Model does not exist or access is denied.");
         }
-        if (userModelConfig.Expires != "-" && DateTime.Parse(userModelConfig.Expires) < DateTime.UtcNow)
+        if (tokenBalance.Expires != "-" && DateTime.Parse(tokenBalance.Expires) < DateTime.UtcNow)
         {
             return BadRequestMessage("Subscription has expired");
         }
-        if (userModelConfig.Counts == "0" && userModelConfig.Tokens == "0" && userInfo.UserBalance.Balance == 0 && !priceConfig.IsFree())
+        if (tokenBalance.Counts == "0" && tokenBalance.Tokens == "0" && miscInfo.UserBalance.Balance == 0 && !priceConfig.IsFree())
         {
             return BadRequestMessage("Insufficient balance");
         }
@@ -109,6 +113,12 @@ public class ConversationController(ChatsDB db, CurrentUser currentUser, ILogger
                 Role = DBConversationRoles.System,
                 ParentId = null,
             };
+
+            miscInfo.ThisChat.Title = request.UserMessage.Text[..Math.Min(30, request.UserMessage.Text.Length)];
+        }
+        else
+        {
+            request = request with { UserModelConfig = JsonSerializer.Deserialize<ModelConfig>(miscInfo.ThisChat.UserModelConfig)! };
         }
 
         List<OpenAIChatMessage> messageToSend =
@@ -119,7 +129,7 @@ public class ConversationController(ChatsDB db, CurrentUser currentUser, ILogger
 
         MessageLiteDto userMessage = GetUserMessage(request, existingMessages, messageToSend);
 
-        ConversationService s = await conversationFactory.CreateConversationService(cm, cancellationToken);
+        ConversationService s = conversationFactory.CreateConversationService(cm);
         ConversationSegment lastSegment = new() { TextSegment = "", InputTokenCount = 0, OutputTokenCount = 0 };
         Response.Headers.ContentType = "text/event-stream";
         Response.Headers.CacheControl = "no-cache";
@@ -129,10 +139,10 @@ public class ConversationController(ChatsDB db, CurrentUser currentUser, ILogger
         Stopwatch sw = Stopwatch.StartNew();
         try
         {
-            UserModelBalanceCalculator calculator = new(userModelConfig, userInfo.UserBalance.Balance);
+            UserModelBalanceCalculator calculator = new(tokenBalance, miscInfo.UserBalance.Balance);
             cost = calculator.GetNewBalance(0, 0, priceConfig);
 
-            await foreach (ConversationSegment seg in s.ChatStreamed(messageToSend, request.UserModelConfig, cancellationToken))
+            await foreach (ConversationSegment seg in s.ChatStreamed(messageToSend, request.UserModelConfig, currentUser, cancellationToken))
             {
                 lastSegment = seg;
                 UserModelBalanceCost currentCost = calculator.GetNewBalance(seg.InputTokenCount, seg.OutputTokenCount, priceConfig);
@@ -152,12 +162,18 @@ public class ConversationController(ChatsDB db, CurrentUser currentUser, ILogger
                 responseText.Append(seg.TextSegment);
             }
         }
+        catch (Exception e) when (e is DashScopeException || e is ClientResultException)
+        {
+            logger.LogError(e, "Error in conversation for message: {userMessageId}", userMessage.Id);
+            responseText.Append(e.Message);
+            await YieldResponse(new SseResponseLine { Result = e.Message, Success = true });
+        }
         catch (Exception e)
         {
-            logger.LogError(e, "Error in conversation");
+            logger.LogError(e, "Error in conversation for message: {userMessageId}", userMessage.Id);
             string errorTextToResponse = "\n⚠Error in conversation - 对话出错!";
             responseText.Append(errorTextToResponse);
-            await YieldResponse(new SseResponseLine { Result = errorTextToResponse, Success = false });
+            await YieldResponse(new SseResponseLine { Result = errorTextToResponse, Success = true });
         }
 
         int elapsedMs = (int)sw.ElapsedMilliseconds;
@@ -182,7 +198,8 @@ public class ConversationController(ChatsDB db, CurrentUser currentUser, ILogger
         };
         db.ChatMessages.Add(assistantMessage);
 
-        UpdateBalance(userInfo.UserModels, userInfo.UserBalance, userModelConfigs, userModelConfigIndex, userModelConfig, cost, assistantMessage.Id);
+        UpdateBalance(miscInfo.UserModels, miscInfo.UserBalance, tokenBalances, tokenBalanceIndex, tokenBalance, cost, assistantMessage.Id);
+        
         await db.SaveChangesAsync(cancellationToken);
 
         return new EmptyResult();
@@ -225,7 +242,7 @@ public class ConversationController(ChatsDB db, CurrentUser currentUser, ILogger
         return userMessage;
     }
 
-    private void UpdateBalance(UserModel userModel, UserBalance userBalance, List<JsonUserModel> userModelConfigs, int userModelConfigIndex, JsonUserModel userModelConfig, UserModelBalanceCost cost, Guid assistantMessageId)
+    private void UpdateBalance(UserModel userModel, UserBalance userBalance, List<JsonTokenBalance> userModelConfigs, int userModelConfigIndex, JsonTokenBalance userModelConfig, UserModelBalanceCost cost, Guid assistantMessageId)
     {
         if (cost.CostCount > 0 || cost.CostTokens > 0)
         {
@@ -249,9 +266,9 @@ public class ConversationController(ChatsDB db, CurrentUser currentUser, ILogger
         }
     }
 
-    static ReadOnlyMemory<byte> dataU8 = "data:"u8.ToArray();
-    static ReadOnlyMemory<byte> lfu8 = "\n"u8.ToArray();
-    static JsonSerializerOptions JsonSerializerOptions = new() { Encoder = JavaScriptEncoder.UnsafeRelaxedJsonEscaping };
+    private readonly static ReadOnlyMemory<byte> dataU8 = "data:"u8.ToArray();
+    private readonly static ReadOnlyMemory<byte> lfu8 = "\n"u8.ToArray();
+    private readonly static JsonSerializerOptions JsonSerializerOptions = new() { Encoder = JavaScriptEncoder.UnsafeRelaxedJsonEscaping };
 
     private async Task YieldResponse(SseResponseLine line)
     {

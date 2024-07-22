@@ -11,7 +11,7 @@ public record JsonDashScopeModelConfig
     public required float Temperature { get; init; }
 
     [JsonPropertyName("version")]
-    public required string Version { get; init; }
+    public required string ModelName { get; init; }
 
     [JsonPropertyName("enableSearch")]
     public bool? EnableSearch { get; init; }

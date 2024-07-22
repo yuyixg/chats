@@ -6,7 +6,7 @@ namespace Chats.BE.Services.Conversations;
 
 public class ConversationFactory
 {
-    public Task<ConversationService> CreateConversationService(ChatModel chatModel, CancellationToken cancellationToken)
+    public ConversationService CreateConversationService(ChatModel chatModel)
     {
         var cm = new
         {
@@ -28,6 +28,6 @@ public class ConversationFactory
             KnownModelProvider.HunYuan => throw new NotImplementedException(),
             _ => throw new ArgumentException("Invalid model type")
         };
-        return Task.FromResult(cs);
+        return cs;
     }
 }

@@ -9,7 +9,7 @@ public record UserModelBalanceCost(int? Counts, int? Tokens, decimal Balance, in
     public decimal CostBalance => InputTokenPrice + OutputTokenPrice;
     public decimal RemainingBalance => Balance - CostBalance;
 
-    public JsonUserModel ToJsonUserModel(JsonUserModel existing)
+    public JsonTokenBalance ToJsonUserModel(JsonTokenBalance existing)
     {
         return existing with
         {
@@ -26,7 +26,7 @@ public record UserModelBalanceCost(int? Counts, int? Tokens, decimal Balance, in
 
 public record UserModelBalanceCalculator(int? Counts, int? Tokens, decimal Balance)
 {
-    public UserModelBalanceCalculator(JsonUserModel jsonUserModel, decimal balance) : this(
+    public UserModelBalanceCalculator(JsonTokenBalance jsonUserModel, decimal balance) : this(
         jsonUserModel.Counts == "-" ? null : int.Parse(jsonUserModel.Counts),
         jsonUserModel.Tokens == "-" ? null : int.Parse(jsonUserModel.Tokens),
         balance)

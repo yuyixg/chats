@@ -17,7 +17,7 @@ public class ModelsController : ControllerBase
     public async Task<ActionResult<ModelResponse[]>> Get([FromServices] ChatsDB db, [FromServices] CurrentUser user, CancellationToken cancellationToken)
     {
         string? userModelsString = (await db.UserModels.SingleOrDefaultAsync(x => x.UserId == user.Id, cancellationToken))?.Models;
-        JsonUserModel[] userModels = userModelsString == null ? [] : JsonSerializer.Deserialize<JsonUserModel[]>(userModelsString)!;
+        JsonTokenBalance[] userModels = userModelsString == null ? [] : JsonSerializer.Deserialize<JsonTokenBalance[]>(userModelsString)!;
         HashSet<Guid> chatModelIds = userModels.Select(x => x.ModelId).ToHashSet();
         Dictionary<Guid, ChatModel> chatModels = await db.ChatModels
             .Where(x => chatModelIds.Contains(x.Id) && x.Enabled)
