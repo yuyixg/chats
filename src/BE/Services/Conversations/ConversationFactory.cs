@@ -1,5 +1,6 @@
 ﻿using Chats.BE.DB;
 using Chats.BE.Services.Conversations.Implementations.Azure;
+using Chats.BE.Services.Conversations.Implementations.DashScope;
 
 namespace Chats.BE.Services.Conversations;
 
@@ -21,7 +22,7 @@ public class ConversationFactory
             KnownModelProvider.OpenAI => throw new NotImplementedException(),
             KnownModelProvider.Azure => new AzureConversationService(cm.KeyConfigText, cm.SuggestedType, cm.ModelConfigText),
             KnownModelProvider.QianFan => throw new NotImplementedException(),
-            KnownModelProvider.QianWen => throw new NotImplementedException(),
+            KnownModelProvider.QianWen => new DashScopeConversationService(cm.KeyConfigText, cm.SuggestedType, cm.ModelConfigText),
             KnownModelProvider.ZhiPuAI => throw new NotImplementedException(),
             KnownModelProvider.Moonshot => throw new NotImplementedException(),
             KnownModelProvider.HunYuan => throw new NotImplementedException(),

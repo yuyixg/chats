@@ -10,9 +10,17 @@ namespace Chats.BE.Services.Conversations.Implementations.Azure;
 
 public class AzureConversationService : ConversationService
 {
-    public string SuggestedType { get; }
+    /// <summary>
+    /// possible values:
+    /// <list type="bullet">
+    /// <item>gpt-3.5-turbo</item>
+    /// <item>gpt-4</item>
+    /// <item>gpt-4-vision</item>
+    /// </list>
+    /// </summary>
+    private string SuggestedType { get; }
     private ChatClient ChatClient { get; }
-    public JsonAzureModelConfig GlobalModelConfig { get; }
+    private JsonAzureModelConfig GlobalModelConfig { get; }
 
     public AzureConversationService(string keyConfigText, string suggestedType, string modelConfigText)
     {
@@ -28,7 +36,7 @@ public class AzureConversationService : ConversationService
         ChatCompletionOptions chatCompletionOptions = new()
         {
             Temperature = userModelConfig.Temperature,
-            MaxTokens = SuggestedType switch
+            MaxTokens = userModelConfig.MaxLength ?? SuggestedType switch
             {
                 "gpt-3.5-turbo" => null,
                 "gpt-4" => null,

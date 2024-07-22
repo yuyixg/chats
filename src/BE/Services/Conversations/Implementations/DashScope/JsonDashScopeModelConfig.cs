@@ -1,0 +1,18 @@
+﻿using System.Text.Json.Serialization;
+
+namespace Chats.BE.Services.Conversations.Implementations.DashScope;
+
+public record JsonDashScopeModelConfig
+{
+    [JsonPropertyName("prompt")]
+    public required string Prompt { get; init; }
+
+    [JsonPropertyName("temperature")]
+    public required float Temperature { get; init; }
+
+    [JsonPropertyName("version")]
+    public required string Version { get; init; }
+
+    [JsonPropertyName("enableSearch")]
+    public bool? EnableSearch { get; init; }
+}
