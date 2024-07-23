@@ -6,6 +6,7 @@ using Chats.BE.Services.Conversations.Dtos;
 using OpenAI;
 using OpenAI.Chat;
 using System.Runtime.CompilerServices;
+using System.Text.Json;
 
 namespace Chats.BE.Services.Conversations.Implementations.Azure;
 
@@ -28,7 +29,7 @@ public class AzureConversationService : ConversationService
     public AzureConversationService(string keyConfigText, string suggestedType, string modelConfigText)
     {
         JsonAzureApiConfig keyConfig = JsonAzureApiConfig.Parse(keyConfigText);
-        GlobalModelConfig = JsonAzureModelConfig.Parse(modelConfigText);
+        GlobalModelConfig = JsonSerializer.Deserialize<JsonAzureModelConfig>(modelConfigText)!;
         OpenAIClient api = new AzureOpenAIClient(new Uri(keyConfig.Host), new AzureKeyCredential(keyConfig.ApiKey));
         SuggestedType = suggestedType;
         ChatClient = api.GetChatClient(GlobalModelConfig.DeploymentName);
