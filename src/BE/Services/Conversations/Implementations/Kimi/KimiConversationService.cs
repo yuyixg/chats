@@ -42,7 +42,7 @@ public class KimiConversationService : ConversationService
 
         ChatCompletionOptions chatCompletionOptions = new()
         {
-            Temperature = config.Temperature,
+            Temperature = config.Temperature ?? GlobalModelConfig.Temperature,
             MaxTokens = config.MaxLength,
             User = currentUser.Id.ToString(),
         };
