@@ -101,4 +101,39 @@ public class UserChatsController(ChatsDB db, CurrentUser currentUser) : Controll
             .ExecuteDeleteAsync(cancellationToken);
         return NoContent();
     }
+
+    [HttpPut("{chatId}")]
+    public async Task<IActionResult> UpdateChats(Guid chatId, [FromBody] UpdateChatsRequest request, CancellationToken cancellationToken)
+    {
+        Chat? chat = await db.Chats
+            .Where(x => x.Id == chatId && x.UserId == currentUser.Id)
+            .FirstOrDefaultAsync(cancellationToken);
+        if (chat == null)
+        {
+            return NotFound();
+        }
+
+        if (request.Title != null)
+        {
+            chat.Title = request.Title;
+        }
+        if (request.ModelId != null)
+        {
+            chat.ChatModelId = request.ModelId;
+        }
+        if (request.UserModelConfig != null)
+        {
+            chat.UserModelConfig = request.UserModelConfig;
+        }
+        if (request.IsShared != null)
+        {
+            chat.IsShared = request.IsShared.Value;
+        }
+        if (request.IsDeleted != null)
+        {
+            chat.IsDeleted = request.IsDeleted.Value;
+        }
+        await db.SaveChangesAsync(cancellationToken);
+        return NoContent();
+    }
 }
