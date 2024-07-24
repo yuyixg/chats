@@ -51,7 +51,7 @@ public class UserChatsController(ChatsDB db, CurrentUser currentUser) : Controll
             query = query.Where(x => x.Title.Contains(request.Query));
         }
 
-        PagedResult<ChatsResponse> result = await PagedResult.FromQuery(query
+        PagedResult<ChatsResponse> result = await PagedResult.FromTempQuery(query
             .Select(x => new ChatsResponseTemp()
             {
                 Id = x.Id,
