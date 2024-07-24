@@ -2,6 +2,7 @@
 using Chats.BE.Services.Conversations.Implementations.Azure;
 using Chats.BE.Services.Conversations.Implementations.DashScope;
 using Chats.BE.Services.Conversations.Implementations.GLM;
+using Chats.BE.Services.Conversations.Implementations.Hunyuan;
 using Chats.BE.Services.Conversations.Implementations.Kimi;
 using Chats.BE.Services.Conversations.Implementations.QianFan;
 
@@ -28,7 +29,7 @@ public class ConversationFactory
             KnownModelProvider.QianWen => new DashScopeConversationService(cm.KeyConfigText, cm.SuggestedType, cm.ModelConfigText),
             KnownModelProvider.ZhiPuAI => new GLMConversationService(cm.KeyConfigText, cm.SuggestedType, cm.ModelConfigText),
             KnownModelProvider.Moonshot => new KimiConversationService(cm.KeyConfigText, cm.SuggestedType, cm.ModelConfigText),
-            KnownModelProvider.HunYuan => throw new NotImplementedException(),
+            KnownModelProvider.HunYuan => new HunyuanConversationService(cm.KeyConfigText, cm.SuggestedType, cm.ModelConfigText),
             _ => throw new ArgumentException("Invalid model type")
         };
         return cs;

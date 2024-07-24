@@ -12,7 +12,6 @@ using Microsoft.EntityFrameworkCore;
 using OpenAI.Chat;
 using Sdcb.DashScope;
 using System.ClientModel;
-using System.ClientModel.Primitives;
 using System.Diagnostics;
 using System.Text;
 using System.Text.Encodings.Web;
