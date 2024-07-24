@@ -4,6 +4,7 @@ using Chats.BE.DB;
 using Chats.BE.Services;
 using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Mvc;
+using Microsoft.EntityFrameworkCore;
 
 namespace Chats.BE.Controllers.Admin.AdminUser;
 
@@ -55,5 +56,41 @@ public class AdminUserController(ChatsDB db) : ControllerBase
 
         await db.SaveChangesAsync(cancellationToken);
         return Ok();
+    }
+
+    [HttpPost]
+    public async Task<IActionResult> CreateUser([FromBody] CreateUserDto dto, [FromServices] PasswordHasher passwordHasher, [FromServices] UserManager userManager, CancellationToken cancellationToken)
+    {
+        User? existingUser = await db.Users.FirstOrDefaultAsync(x => 
+            x.Account == dto.UserName || 
+            x.Phone == dto.UserName || 
+            x.Email == dto.UserName || 
+            x.Email == dto.Email ||
+            x.Phone == dto.Phone, cancellationToken);
+        if (existingUser != null)
+        {
+            return BadRequest("User existed");
+        }
+
+
+        User user = new()
+        {
+            Id = Guid.NewGuid(),
+            Account = dto.UserName,
+            Username = dto.UserName,
+            Email = dto.Email,
+            Phone = dto.Phone,
+            Role = dto.Role,
+            Avatar = dto.Avatar,
+            Enabled = dto.Enabled,
+            Provider = null,
+            Password = passwordHasher.HashPassword(dto.Password),
+            CreatedAt = DateTime.UtcNow,
+            UpdatedAt = DateTime.UtcNow,
+        };
+        db.Users.Add(user);
+        await userManager.InitializeUserWithoutSave(user, null, null, cancellationToken);
+        await db.SaveChangesAsync(cancellationToken);
+        return Created();
     }
 }
