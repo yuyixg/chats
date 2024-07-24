@@ -129,7 +129,6 @@ public class ConversationController(ChatsDB db, CurrentUser currentUser, ILogger
 
         MessageLiteDto userMessage = GetUserMessage(request, existingMessages, messageToSend);
 
-        ConversationService s = conversationFactory.CreateConversationService(cm);
         ConversationSegment lastSegment = new() { TextSegment = "", InputTokenCount = 0, OutputTokenCount = 0 };
         Response.Headers.ContentType = "text/event-stream";
         Response.Headers.CacheControl = "no-cache";
@@ -142,6 +141,7 @@ public class ConversationController(ChatsDB db, CurrentUser currentUser, ILogger
             UserModelBalanceCalculator calculator = new(tokenBalance, miscInfo.UserBalance.Balance);
             cost = calculator.GetNewBalance(0, 0, priceConfig);
 
+            using ConversationService s = conversationFactory.CreateConversationService(cm);
             await foreach (ConversationSegment seg in s.ChatStreamed(messageToSend, request.UserModelConfig, currentUser, cancellationToken))
             {
                 lastSegment = seg;

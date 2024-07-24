@@ -15,6 +15,7 @@ namespace Chats.BE.Services.Conversations.Implementations.DashScope;
 public class DashScopeConversationService : ConversationService
 {
     private JsonDashScopeModelConfig GlobalModelConfig { get; }
+    private DashScopeClient Client { get; }
     private TextGenerationClient ChatClient { get; }
     /// <summary>
     /// possible values:
@@ -31,7 +32,8 @@ public class DashScopeConversationService : ConversationService
     {
         JsonDashScopeConfig keyConfig = JsonSerializer.Deserialize<JsonDashScopeConfig>(keyConfigText)!;
         GlobalModelConfig = JsonSerializer.Deserialize<JsonDashScopeModelConfig>(modelConfigText)!;
-        ChatClient = new DashScopeClient(keyConfig.ApiKey).TextGeneration;
+        Client = new DashScopeClient(keyConfig.ApiKey);
+        ChatClient = Client.TextGeneration;
         SuggestedType = suggestedType;
     }
 
@@ -108,5 +110,10 @@ public class DashScopeConversationService : ConversationService
             AssistantChatMessage assistantMessage => ChatVLMessage.FromAssistant(assistantMessage.Content.Single(x => x.Kind == ChatMessageContentPartKind.Text).Text),
             _ => throw new ArgumentException($"Unknown message type: {message.GetType()}")
         };
+    }
+
+    protected override void Disposing()
+    {
+        Client.Dispose();
     }
 }

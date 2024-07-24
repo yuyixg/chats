@@ -67,4 +67,9 @@ public class QianFanConversationService : ConversationService
             _ => throw new ArgumentException($"Unknown message type: {message.GetType()}")
         };
     }
+
+    protected override void Disposing()
+    {
+        ChatClient.Dispose();
+    }
 }

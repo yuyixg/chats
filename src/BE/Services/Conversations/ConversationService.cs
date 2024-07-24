@@ -4,7 +4,15 @@ using OpenAI.Chat;
 
 namespace Chats.BE.Services.Conversations;
 
-public abstract class ConversationService
+public abstract class ConversationService : IDisposable
 {
     public abstract IAsyncEnumerable<ConversationSegment> ChatStreamed(IReadOnlyList<ChatMessage> messages, ModelConfig config, CurrentUser currentUser, CancellationToken cancellationToken);
+
+    public void Dispose()
+    {
+        Disposing();
+        GC.SuppressFinalize(this);
+    }
+
+    protected virtual void Disposing() { }
 }
