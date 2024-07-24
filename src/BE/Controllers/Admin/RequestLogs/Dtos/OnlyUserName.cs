@@ -1,6 +1,6 @@
 ﻿using System.Text.Json.Serialization;
 
-namespace Chats.BE.Controllers.Admin.Dtos;
+namespace Chats.BE.Controllers.Admin.RequestLogs.Dtos;
 
 public class OnlyUserName
 {
