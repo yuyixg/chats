@@ -3,6 +3,7 @@ using Chats.BE.Services.Conversations.Implementations.Azure;
 using Chats.BE.Services.Conversations.Implementations.DashScope;
 using Chats.BE.Services.Conversations.Implementations.GLM;
 using Chats.BE.Services.Conversations.Implementations.Kimi;
+using Chats.BE.Services.Conversations.Implementations.QianFan;
 
 namespace Chats.BE.Services.Conversations;
 
@@ -23,7 +24,7 @@ public class ConversationFactory
         {
             KnownModelProvider.OpenAI => throw new NotImplementedException(),
             KnownModelProvider.Azure => new AzureConversationService(cm.KeyConfigText, cm.SuggestedType, cm.ModelConfigText),
-            KnownModelProvider.QianFan => throw new NotImplementedException(),
+            KnownModelProvider.QianFan => new QianFanConversationService(cm.KeyConfigText, cm.ModelConfigText),
             KnownModelProvider.QianWen => new DashScopeConversationService(cm.KeyConfigText, cm.SuggestedType, cm.ModelConfigText),
             KnownModelProvider.ZhiPuAI => new GLMConversationService(cm.KeyConfigText, cm.SuggestedType, cm.ModelConfigText),
             KnownModelProvider.Moonshot => new KimiConversationService(cm.KeyConfigText, cm.SuggestedType, cm.ModelConfigText),

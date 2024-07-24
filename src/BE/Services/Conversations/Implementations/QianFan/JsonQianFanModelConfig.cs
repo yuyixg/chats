@@ -8,8 +8,11 @@ public record JsonQianFanModelConfig
     public required string Prompt { get; init; }
 
     [JsonPropertyName("temperature")]
-    public required double Temperature { get; init; }
+    public required float Temperature { get; init; }
 
     [JsonPropertyName("model")]
     public required string Model { get; init; }
+
+    [JsonPropertyName("enableSearch")]
+    public bool? EnableSearch { get; init; }
 }
