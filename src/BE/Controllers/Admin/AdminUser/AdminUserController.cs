@@ -1,5 +1,7 @@
-﻿using Chats.BE.Controllers.Common.Dtos;
+﻿using Chats.BE.Controllers.Admin.AdminUser.Dtos;
+using Chats.BE.Controllers.Common.Dtos;
 using Chats.BE.DB;
+using Chats.BE.Services;
 using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Mvc;
 
@@ -34,5 +36,24 @@ public class AdminUserController(ChatsDB db) : ControllerBase
             UserModelId = x.UserModel!.Id,
             Models = x.UserModel!.Models,
         }), pagingRequest, x => x.ToDto(), cancellationToken);
+    }
+
+    [HttpPut]
+    public async Task<IActionResult> UpdateUser([FromBody] UpdateUserDto dto, [FromServices] PasswordHasher passwordHasher, CancellationToken cancellationToken)
+    {
+        User? user = await db.Users.FindAsync(dto.UserId, cancellationToken);
+        if (user == null)
+        {
+            return NotFound();
+        }
+
+        dto.ApplyToUser(user, passwordHasher);
+        if (db.ChangeTracker.HasChanges())
+        {
+            user.UpdatedAt = DateTime.UtcNow;
+        }
+
+        await db.SaveChangesAsync(cancellationToken);
+        return Ok();
     }
 }

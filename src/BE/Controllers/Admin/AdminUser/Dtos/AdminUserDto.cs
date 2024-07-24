@@ -2,7 +2,7 @@
 using System.Text.Json;
 using System.Text.Json.Serialization;
 
-namespace Chats.BE.Controllers.Admin.AdminUser;
+namespace Chats.BE.Controllers.Admin.AdminUser.Dtos;
 
 public record AdminUserDto
 {
