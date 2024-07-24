@@ -66,10 +66,7 @@ public class AccountLoginController(ChatsDB db, ILogger<AccountLoginController> 
 
     private async Task<IActionResult> PasswordLogin(PasswordHasher passwordHasher, PasswordLoginRequest passwordDto, CancellationToken cancellationToken)
     {
-        User? dbUser = await db.Users.FirstOrDefaultAsync(x =>
-                        x.Account == passwordDto.UserName ||
-                        x.Phone == passwordDto.UserName ||
-                        x.Email == passwordDto.UserName, cancellationToken);
+        User? dbUser = await db.Users.FirstOrDefaultAsync(x => x.Account == passwordDto.UserName, cancellationToken);
 
         if (dbUser == null)
         {

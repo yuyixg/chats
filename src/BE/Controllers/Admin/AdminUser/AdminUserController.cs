@@ -61,12 +61,7 @@ public class AdminUserController(ChatsDB db) : ControllerBase
     [HttpPost]
     public async Task<IActionResult> CreateUser([FromBody] CreateUserDto dto, [FromServices] PasswordHasher passwordHasher, [FromServices] UserManager userManager, CancellationToken cancellationToken)
     {
-        User? existingUser = await db.Users.FirstOrDefaultAsync(x => 
-            x.Account == dto.UserName || 
-            x.Phone == dto.UserName || 
-            x.Email == dto.UserName || 
-            x.Email == dto.Email ||
-            x.Phone == dto.Phone, cancellationToken);
+        User? existingUser = await db.Users.FirstOrDefaultAsync(x => x.Account == dto.UserName, cancellationToken);
         if (existingUser != null)
         {
             return BadRequest("User existed");
