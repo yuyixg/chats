@@ -142,8 +142,7 @@ const Home = ({ siteInfo }: { siteInfo: SiteInfoConfig }) => {
   const stopConversationRef = useRef<boolean>(false);
 
   const calcSelectModel = (chats: ChatResult[], models: Model[]) => {
-    const lastChat = chats.findLast((x) => x.chatModelId);
-    const model = models.find((x) => x.id === lastChat?.chatModelId);
+    const model = models.find((x) => x.id === chats[0]?.chatModelId);
     if (model) return model;
     else return models.length > 0 ? models[0] : undefined;
   };

@@ -25,7 +25,7 @@ public class QianFanConversationService : ConversationService
         GlobalModelConfig = JsonSerializer.Deserialize<JsonQianFanModelConfig>(modelConfigText)!;
     }
 
-    public override async IAsyncEnumerable<ConversationSegment> ChatStreamed(IReadOnlyList<OpenAIChatMessage> messages, ModelConfig config, CurrentUser currentUser, [EnumeratorCancellation] CancellationToken cancellationToken)
+    public override IAsyncEnumerable<ConversationSegment> ChatStreamed(IReadOnlyList<OpenAIChatMessage> messages, ModelConfig config, CurrentUser currentUser, [EnumeratorCancellation] CancellationToken cancellationToken)
     {
         KnownModel model = new KnownModel(GlobalModelConfig.Model);
         throw new NotImplementedException();
