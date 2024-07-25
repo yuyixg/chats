@@ -162,6 +162,11 @@ public class ConversationController(ChatsDB db, CurrentUser currentUser, ILogger
                 if (seg.TextSegment == string.Empty) continue;
                 await YieldResponse(new() { Result = seg.TextSegment, Success = true });
                 responseText.Append(seg.TextSegment);
+
+                if (cancellationToken.IsCancellationRequested)
+                {
+                    break;
+                }
             }
         }
         catch (Exception e) when (e is DashScopeException || e is ClientResultException)

@@ -81,6 +81,7 @@ export const Chat = memo(({ stopConversationRef }: Props) => {
       isRegenerate: boolean,
       modelId: string = '',
     ) => {
+      const isChatEmpty = selectMessages.length === 0;
       homeDispatch({ field: 'chatError', value: false });
       let selectChatId = selectChat?.id;
       let selectMessageList = [...selectMessages];
@@ -266,19 +267,9 @@ export const Chat = memo(({ stopConversationRef }: Props) => {
         });
       }
 
-      if (selectMessageList.length === 1) {
-        const userMessageText = message.content.text!;
-        const title =
-          userMessageText.length > 30
-            ? userMessageText.substring(0, 30) + '...'
-            : userMessageText;
-        handleUpdateChat(chatList, selectChatId, {
-          title,
-          chatModelId: selectModel?.id,
-        });
-      }
-      !chats.find((x) => x.id === selectChatId)?.chatModelId &&
-        getChat(selectChatId).then((data) => {
+      if (isChatEmpty) {
+        setTimeout(async () => {
+          const data = await getChat(selectChatId);
           const _chats = chats.map((x) => {
             if (x.id === data.id) {
               return data;
@@ -290,13 +281,15 @@ export const Chat = memo(({ stopConversationRef }: Props) => {
             value: data.userModelConfig,
           });
           homeDispatch({ field: 'chats', value: _chats });
-        });
+        }, 100);
+      }
+
       homeDispatch({ field: 'loading', value: false });
       homeDispatch({ field: 'messageIsStreaming', value: false });
       !errorChat &&
         setTimeout(() => {
           handleUpdateCurrentMessage(selectChatId);
-        }, 100);
+        }, 200);
       stopConversationRef.current = false;
     },
     [
@@ -352,7 +345,7 @@ export const Chat = memo(({ stopConversationRef }: Props) => {
     throttledScrollDown();
   }, [selectMessages, throttledScrollDown]);
 
-  useEffect(() => {}, [userModelConfig]);
+  useEffect(() => { }, [userModelConfig]);
 
   return (
     <div className="relative flex-1 overflow-hidden bg-white dark:bg-[#262630]">
