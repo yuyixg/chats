@@ -118,25 +118,11 @@ public class UserChatsController(ChatsDB db, CurrentUser currentUser) : Controll
             return NotFound();
         }
 
-        if (request.Title != null)
+        request.ApplyToChats(chat);
+        if (db.ChangeTracker.HasChanges())
         {
-            chat.Title = request.Title;
-        }
-        if (request.ModelId != null)
-        {
-            chat.ChatModelId = request.ModelId;
-        }
-        if (request.UserModelConfig != null)
-        {
-            chat.UserModelConfig = request.UserModelConfig;
-        }
-        if (request.IsShared != null)
-        {
-            chat.IsShared = request.IsShared.Value;
-        }
-        if (request.IsDeleted != null)
-        {
-            chat.IsDeleted = request.IsDeleted.Value;
+            // TODO: should update UpdatedAt field
+            // chat.CreatedAt = DateTime.UtcNow;
         }
         await db.SaveChangesAsync(cancellationToken);
         return NoContent();
