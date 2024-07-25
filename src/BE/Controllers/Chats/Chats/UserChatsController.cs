@@ -70,12 +70,17 @@ public class UserChatsController(ChatsDB db, CurrentUser currentUser) : Controll
     [HttpPost]
     public async Task<ActionResult<ChatsResponse>> CreateChats([FromBody] CreateChatsRequest request, CancellationToken cancellationToken)
     {
+        Chat? lastChat = await db.Chats
+            .Where(x => x.UserId == currentUser.Id && !x.IsDeleted)
+            .OrderByDescending(x => x.CreatedAt)
+            .FirstOrDefaultAsync(cancellationToken);
+
         Chat chat = new()
         {
             Id = Guid.NewGuid(),
             UserId = currentUser.Id,
             Title = request.Title,
-            ChatModelId = null,
+            ChatModelId = lastChat?.ChatModelId,
             IsShared = false,
             CreatedAt = DateTime.UtcNow,
             IsDeleted = false,
