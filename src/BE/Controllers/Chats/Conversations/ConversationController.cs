@@ -3,6 +3,7 @@ using Chats.BE.Controllers.Chats.Messages.Dtos;
 using Chats.BE.DB;
 using Chats.BE.DB.Jsons;
 using Chats.BE.Infrastructure;
+using Chats.BE.Services;
 using Chats.BE.Services.Common;
 using Chats.BE.Services.Conversations;
 using Chats.BE.Services.Conversations.Dtos;
@@ -27,6 +28,7 @@ public class ConversationController(ChatsDB db, CurrentUser currentUser, ILogger
     [HttpPost]
     public async Task<IActionResult> StartConversationStreamed(
         [FromBody] ConversationRequest request,
+        [FromServices] BalanceService balanceService,
         [FromServices] ConversationFactory conversationFactory,
         CancellationToken cancellationToken)
     {
@@ -168,12 +170,21 @@ public class ConversationController(ChatsDB db, CurrentUser currentUser, ILogger
             responseText.Append(e.Message);
             await YieldResponse(new SseResponseLine { Result = e.Message, Success = true });
         }
+        catch (TaskCanceledException)
+        {
+            // do nothing if cancelled
+        }
         catch (Exception e)
         {
             logger.LogError(e, "Error in conversation for message: {userMessageId}", userMessage.Id);
             string errorTextToResponse = "\n⚠Error in conversation - 对话出错!";
             responseText.Append(errorTextToResponse);
             await YieldResponse(new SseResponseLine { Result = errorTextToResponse, Success = true });
+        }
+        finally
+        {
+            // cancel the conversation because following code is credit deduction related
+            cancellationToken = CancellationToken.None;
         }
 
         int elapsedMs = (int)sw.ElapsedMilliseconds;
@@ -199,8 +210,11 @@ public class ConversationController(ChatsDB db, CurrentUser currentUser, ILogger
         db.ChatMessages.Add(assistantMessage);
 
         UpdateBalance(miscInfo.UserModels, miscInfo.UserBalance, tokenBalances, tokenBalanceIndex, tokenBalance, cost, assistantMessage.Id);
-        
         await db.SaveChangesAsync(cancellationToken);
+        if (cost.CostBalance > 0)
+        {
+            _ = balanceService.AsyncUpdateBalance(currentUser.Id);
+        }
 
         return new EmptyResult();
     }
@@ -262,7 +276,6 @@ public class ConversationController(ChatsDB db, CurrentUser currentUser, ILogger
                 Type = (int)BalanceLogType.Cost,
                 UpdatedAt = DateTime.UtcNow,
             });
-            userBalance.Balance -= cost.CostBalance;
         }
     }
 
