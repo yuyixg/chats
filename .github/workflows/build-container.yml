@@ -22,17 +22,13 @@ jobs:
           cd src/FE
           docker build -t chats .
 
-      - name: Tag container with 'latest' & date
+      - name: Tag container with latest and run number
         run: |
-          DATE=$(date +'%Y%m%d')
           docker tag chats ${{ secrets.DOCKER_REGISTRY }}/${{ secrets.DOCKER_NAMESPACE }}/chats:r-${{ github.run_number }}
-          docker tag chats ${{ secrets.DOCKER_REGISTRY }}/${{ secrets.DOCKER_NAMESPACE }}/chats:$DATE
           docker tag chats ${{ secrets.DOCKER_REGISTRY }}/${{ secrets.DOCKER_NAMESPACE }}/chats:latest
-
-      # Push both 'latest' and 'date' tags
+          
       - name: Push container
         run: |
           DATE=$(date +'%Y%m%d')
           docker push ${{ secrets.DOCKER_REGISTRY }}/${{ secrets.DOCKER_NAMESPACE }}/chats:r-${{ github.run_number }}
-          docker push ${{ secrets.DOCKER_REGISTRY }}/${{ secrets.DOCKER_NAMESPACE }}/chats:$DATE
           docker push ${{ secrets.DOCKER_REGISTRY }}/${{ secrets.DOCKER_NAMESPACE }}/chats:latest
