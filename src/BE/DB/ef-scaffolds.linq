@@ -1,7 +1,4 @@
-<Query Kind="Statements">
-  <NuGetReference>Newtonsoft.Json</NuGetReference>
-  <Namespace>Newtonsoft.Json.Linq</Namespace>
-</Query>
+<Query Kind="Statements" />
 
 string projectFolder = new FileInfo(Util.CurrentQueryPath).Directory!.Parent!.ToString();
 string provider = "Microsoft.EntityFrameworkCore.SqlServer";
