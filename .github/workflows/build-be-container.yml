@@ -28,6 +28,5 @@ jobs:
           
       - name: Push container
         run: |
-          DATE=$(date +'%Y%m%d')
           docker push ${{ secrets.DOCKER_REGISTRY }}/${{ secrets.DOCKER_NAMESPACE }}/chats-be:r-${{ github.run_number }}
           docker push ${{ secrets.DOCKER_REGISTRY }}/${{ secrets.DOCKER_NAMESPACE }}/chats-be:latest
