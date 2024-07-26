@@ -6,7 +6,7 @@ using Microsoft.EntityFrameworkCore;
 
 namespace Chats.BE.DB;
 
-public partial class Sm
+public partial class Sms
 {
     [Key]
     [Column("id")]

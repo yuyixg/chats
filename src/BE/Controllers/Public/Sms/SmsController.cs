@@ -11,6 +11,5 @@ public class SmsController(ChatsDB db) : ControllerBase
     //[HttpPost]
     //public async Task<IActionResult> SendLoginSms(SmsLoginRequest dto)
     //{
-
     //}
 }
