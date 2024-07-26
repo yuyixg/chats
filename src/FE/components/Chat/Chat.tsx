@@ -11,6 +11,7 @@ import toast from 'react-hot-toast';
 
 import { useTranslation } from 'next-i18next';
 
+import { getApiUrl } from '@/utils/common';
 import { throttle } from '@/utils/throttle';
 import { getUserSession } from '@/utils/user';
 
@@ -27,11 +28,10 @@ import { ModelSelect } from './ModelSelect';
 import { SystemPrompt } from './SystemPrompt';
 import { TemperatureSlider } from './Temperature';
 
-import { getChat, postChats } from '@/apis/userService';
+import { getChat, postChats, putUserChatModel } from '@/apis/userService';
 import { cn } from '@/lib/utils';
 import Decimal from 'decimal.js';
 import { v4 as uuidv4 } from 'uuid';
-import { getApiUrl } from '@/utils/common';
 
 interface Props {
   stopConversationRef: MutableRefObject<boolean>;
@@ -55,7 +55,6 @@ export const Chat = memo(({ stopConversationRef }: Props) => {
     },
     handleUpdateSelectMessage,
     handleUpdateCurrentMessage,
-    handleUpdateChat,
     handleUpdateUserModelConfig,
     hasModel,
     dispatch: homeDispatch,
@@ -345,7 +344,7 @@ export const Chat = memo(({ stopConversationRef }: Props) => {
     throttledScrollDown();
   }, [selectMessages, throttledScrollDown]);
 
-  useEffect(() => { }, [userModelConfig]);
+  useEffect(() => {}, [userModelConfig]);
 
   return (
     <div className="relative flex-1 overflow-hidden bg-white dark:bg-[#262630]">
@@ -417,6 +416,7 @@ export const Chat = memo(({ stopConversationRef }: Props) => {
                             field: 'selectModel',
                             value: model,
                           });
+                          putUserChatModel(selectChat.id, model.id);
                         }}
                       />
                     )}
@@ -441,6 +441,7 @@ export const Chat = memo(({ stopConversationRef }: Props) => {
                   <MemoizedChatMessage
                     key={current.id + index}
                     modelName={current.modelName}
+                    modelId={current.modelId}
                     currentSelectIndex={parentChildrenIds.findIndex(
                       (x) => x === current.id,
                     )}

@@ -20,6 +20,7 @@ export interface Props {
   assistantCurrentSelectIndex: number;
   parentChildrenIds: string[];
   modelName?: string;
+  modelId?: string;
   lastMessageId: string;
   message: PropsMessage;
   onChangeMessage?: (messageId: string) => void;
@@ -36,6 +37,7 @@ export const ChatMessage: FC<Props> = memo(
     assistantCurrentSelectIndex,
     parentId,
     modelName,
+    modelId,
     lastMessageId,
     message,
     onEdit,
@@ -52,7 +54,7 @@ export const ChatMessage: FC<Props> = memo(
           <div className="min-w-[28px] text-right font-bold">
             {message.role === 'assistant' && <IconRobot size={28} />}
           </div>
-          
+
           <div className="prose mt-[2px] w-full px-4 dark:prose-invert">
             {message.role === 'user' && (
               <UserMessage
@@ -82,6 +84,7 @@ export const ChatMessage: FC<Props> = memo(
                 message={message}
                 lastMessageId={lastMessageId}
                 modelName={modelName}
+                modelId={modelId}
                 assistantCurrentSelectIndex={assistantCurrentSelectIndex}
                 assistantChildrenIds={assistantChildrenIds}
                 onChangeMessage={onChangeMessage}

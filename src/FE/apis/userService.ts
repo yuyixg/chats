@@ -190,3 +190,10 @@ export const getSiteInfo = () => {
   const fetchServer = useFetch();
   return fetchServer.get<GetSiteInfoResult>('/api/public/siteInfo');
 };
+
+export const putUserChatModel = (chatId: string, modelId: string) => {
+  const fetchServer = useFetch();
+  return fetchServer.put('/api/user/chats/' + chatId, {
+    body: { modelId },
+  });
+};

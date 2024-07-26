@@ -30,7 +30,7 @@ import { setSiteInfo } from '@/utils/website';
 
 import { IChat, Role } from '@/types/chat';
 import { ChatMessage } from '@/types/chatMessage';
-import { GlobalConfigKeys, SiteInfoConfig } from '@/types/config';
+import { SiteInfoConfig } from '@/types/config';
 import { Model, UserModelConfig } from '@/types/model';
 import { Prompt } from '@/types/prompt';
 
@@ -146,7 +146,11 @@ const Home = ({ siteInfo }: { siteInfo: SiteInfoConfig }) => {
     else return models.length > 0 ? models[0] : undefined;
   };
 
-  const getChatModel = (chatId: string, models: Model[]) => {
+  const getChatModel = (
+    chats: ChatResult[],
+    chatId: string,
+    models: Model[],
+  ) => {
     const chatModelId = chats.find((x) => x.id === chatId)?.chatModelId;
     const model = models.find((x) => x.id === chatModelId);
     return model;
@@ -168,7 +172,7 @@ const Home = ({ siteInfo }: { siteInfo: SiteInfoConfig }) => {
   };
 
   const handleSelectModel = (model: Model) => {
-    if(!model) return;
+    if (!model) return;
     const { modelConfig } = model;
     dispatch({ field: 'selectModel', value: model });
     handleUpdateUserModelConfig({
@@ -221,7 +225,7 @@ const Home = ({ siteInfo }: { siteInfo: SiteInfoConfig }) => {
     });
     dispatch({ field: 'selectChat', value: chat });
     const selectModel =
-      getChatModel(chat.id, models) || calcSelectModel(chats, models);
+      getChatModel(chats, chat.id, models) || calcSelectModel(chats, models);
     selectModel && setStorageModelId(selectModel.id);
     getUserMessages(chat.id).then((data) => {
       if (data.length > 0) {
@@ -351,7 +355,8 @@ const Home = ({ siteInfo }: { siteInfo: SiteInfoConfig }) => {
           });
         }
         const model =
-          getChatModel(chat?.id, models) || calcSelectModel(chatList, models);
+          getChatModel(chatList, chat?.id, models) ||
+          calcSelectModel(chatList, models);
         handleSelectModel(model!);
       });
     }

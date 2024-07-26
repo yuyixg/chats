@@ -17,6 +17,7 @@ interface Props {
   readonly?: boolean;
   message: PropsMessage;
   modelName?: string;
+  modelId?: string;
   lastMessageId: string | null;
   assistantCurrentSelectIndex: number;
   assistantChildrenIds: string[];
@@ -26,13 +27,14 @@ interface Props {
 
 const ResponseMessageActions = (props: Props) => {
   const {
-    state: { chatError, messageIsStreaming },
+    state: { messageIsStreaming },
   } = useContext(HomeContext);
 
   const {
     readonly,
     message,
     modelName,
+    modelId,
     lastMessageId,
     assistantCurrentSelectIndex,
     assistantChildrenIds,
@@ -66,7 +68,11 @@ const ResponseMessageActions = (props: Props) => {
           >
             <CopyAction text={message.content.text} />
             <GenerateInformationAction message={message} />
-            <RegenerateAction onRegenerate={onRegenerate} />
+            <RegenerateAction
+              onRegenerate={() => {
+                onRegenerate && onRegenerate(modelId);
+              }}
+            />
             <ChangeModelAction
               readonly={readonly}
               onChangeModel={(modelId: string) => {

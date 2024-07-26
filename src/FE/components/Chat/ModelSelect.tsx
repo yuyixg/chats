@@ -58,7 +58,9 @@ export const ModelSelect = () => {
       </div>
       {modelUsage &&
       (modelUsage.tokens === '-' || modelUsage.counts === '-') ? (
-        <span className='text-xs pt-1'>{t('unit-price')}: ￥{modelUsage.prices} (1M tokens)</span>
+        <span className="text-xs pt-1">
+          {t('unit-price')}: ￥{modelUsage.prices} (1M tokens)
+        </span>
       ) : (
         <>
           {modelUsage && (
@@ -74,7 +76,9 @@ export const ModelSelect = () => {
                     {formatNumberAsMoney(+modelUsage.tokens)}
                   </span>
                 ) : (
-                  <span>{t('unit-price')}: ￥{modelUsage.prices} (1M tokens)</span>
+                  <span>
+                    {t('unit-price')}: ￥{modelUsage.prices} (1M tokens)
+                  </span>
                 )}
               </div>
               <div className="flex justify-end">
