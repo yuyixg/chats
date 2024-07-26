@@ -44,6 +44,9 @@ public record ResponseMessageDto : MessageDto
     [JsonPropertyName("duration")]
     public required int Duration { get; init; }
 
+    [JsonPropertyName("modelId")]
+    public required Guid ModelId { get; init; }
+
     [JsonPropertyName("modelName")]
     public required string? ModelName { get; init; }
 }
@@ -82,11 +85,12 @@ public record ChatMessageTemp
     public required decimal OutputPrice { get; init; }
     public required DateTime CreatedAt { get; init; }
     public required int Duration { get; init; }
+    public required Guid? ModelId { get; init; }
     public required string? ModelName { get; init; }
 
     public MessageDto ToDto()
     {
-        if (ModelName == null)
+        if (ModelId == null)
         {
             return new RequestMessageDto()
             {
@@ -111,6 +115,7 @@ public record ChatMessageTemp
                 InputPrice = InputPrice,
                 OutputPrice = OutputPrice,
                 Duration = Duration,
+                ModelId = ModelId!.Value,
                 ModelName = ModelName
             };
         }
