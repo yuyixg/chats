@@ -2,15 +2,15 @@
 
 namespace Chats.BE.DB.Jsons;
 
-public record JsonUserModel
+public record JsonTokenBalance
 {
     [JsonPropertyName("modelId")]
     public required Guid ModelId { get; init; }
 
-    [JsonPropertyName("tokens")]
+    [JsonPropertyName("tokens"), JsonConverter(typeof(NumberToStringConverter))]
     public required string Tokens { get; init; }
 
-    [JsonPropertyName("counts")]
+    [JsonPropertyName("counts"), JsonConverter(typeof(NumberToStringConverter))]
     public required string Counts { get; init; }
 
     [JsonPropertyName("expires")]

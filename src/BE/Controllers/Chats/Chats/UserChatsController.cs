@@ -14,9 +14,6 @@ public class UserChatsController(ChatsDB db, CurrentUser currentUser) : Controll
     [HttpGet("{chatId}")]
     public async Task<ActionResult<ChatsResponse>> GetOneChat(Guid chatId, CancellationToken cancellationToken)
     {
-        // Wait for 1 second to ensure that title was updated
-        await Task.Delay(1000, cancellationToken);
-
         ChatsResponseTemp? temp = await db.Chats
             .Where(x => x.Id == chatId && x.UserId == currentUser.Id && !x.IsDeleted)
             .Select(x => new ChatsResponseTemp()
@@ -51,7 +48,7 @@ public class UserChatsController(ChatsDB db, CurrentUser currentUser) : Controll
             query = query.Where(x => x.Title.Contains(request.Query));
         }
 
-        PagedResult<ChatsResponse> result = await PagedResult.FromQuery(query
+        PagedResult<ChatsResponse> result = await PagedResult.FromTempQuery(query
             .Select(x => new ChatsResponseTemp()
             {
                 Id = x.Id,
@@ -70,12 +67,17 @@ public class UserChatsController(ChatsDB db, CurrentUser currentUser) : Controll
     [HttpPost]
     public async Task<ActionResult<ChatsResponse>> CreateChats([FromBody] CreateChatsRequest request, CancellationToken cancellationToken)
     {
+        Chat? lastChat = await db.Chats
+            .Where(x => x.UserId == currentUser.Id && !x.IsDeleted)
+            .OrderByDescending(x => x.CreatedAt)
+            .FirstOrDefaultAsync(cancellationToken);
+
         Chat chat = new()
         {
             Id = Guid.NewGuid(),
             UserId = currentUser.Id,
             Title = request.Title,
-            ChatModelId = null,
+            ChatModelId = lastChat?.ChatModelId,
             IsShared = false,
             CreatedAt = DateTime.UtcNow,
             IsDeleted = false,
@@ -99,6 +101,27 @@ public class UserChatsController(ChatsDB db, CurrentUser currentUser) : Controll
         await db.Chats
             .Where(x => x.Id == chatId)
             .ExecuteDeleteAsync(cancellationToken);
+        return NoContent();
+    }
+
+    [HttpPut("{chatId}")]
+    public async Task<IActionResult> UpdateChats(Guid chatId, [FromBody] UpdateChatsRequest request, CancellationToken cancellationToken)
+    {
+        Chat? chat = await db.Chats
+            .Where(x => x.Id == chatId && x.UserId == currentUser.Id)
+            .FirstOrDefaultAsync(cancellationToken);
+        if (chat == null)
+        {
+            return NotFound();
+        }
+
+        request.ApplyToChats(chat);
+        if (db.ChangeTracker.HasChanges())
+        {
+            // TODO: should update UpdatedAt field
+            // chat.CreatedAt = DateTime.UtcNow;
+        }
+        await db.SaveChangesAsync(cancellationToken);
         return NoContent();
     }
 }

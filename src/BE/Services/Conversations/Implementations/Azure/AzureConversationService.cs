@@ -1,43 +1,70 @@
 ﻿using AI.Dev.OpenAI.GPT;
 using Azure;
 using Azure.AI.OpenAI;
+using Chats.BE.Infrastructure;
 using Chats.BE.Services.Conversations.Dtos;
 using OpenAI;
 using OpenAI.Chat;
+using System.Runtime.CompilerServices;
+using System.Text.Json;
 
 namespace Chats.BE.Services.Conversations.Implementations.Azure;
 
 public class AzureConversationService : ConversationService
 {
-    public string SuggestedType { get; }
+    /// <summary>
+    /// possible values:
+    /// <list type="bullet">
+    /// <item>gpt-3.5-turbo</item>
+    /// <item>gpt-4</item>
+    /// <item>gpt-4-vision</item>
+    /// </list>
+    /// </summary>
+    private string SuggestedType { get; }
     private ChatClient ChatClient { get; }
-    public JsonAzureModelConfig ModelConfig { get; }
+    private JsonAzureModelConfig GlobalModelConfig { get; }
+
+    private bool IsVision => SuggestedType == "gpt-4-vision";
 
     public AzureConversationService(string keyConfigText, string suggestedType, string modelConfigText)
     {
         JsonAzureApiConfig keyConfig = JsonAzureApiConfig.Parse(keyConfigText);
-        ModelConfig = JsonAzureModelConfig.Parse(modelConfigText);
+        GlobalModelConfig = JsonSerializer.Deserialize<JsonAzureModelConfig>(modelConfigText)!;
         OpenAIClient api = new AzureOpenAIClient(new Uri(keyConfig.Host), new AzureKeyCredential(keyConfig.ApiKey));
         SuggestedType = suggestedType;
-        ChatClient = api.GetChatClient(ModelConfig.DeploymentName);
+        ChatClient = api.GetChatClient(GlobalModelConfig.DeploymentName);
     }
 
-    public override async IAsyncEnumerable<ConversationSegment> ChatStreamed(ChatMessage[] messages, ModelConfig config, CancellationToken cancellationToken)
+    public override async IAsyncEnumerable<ConversationSegment> ChatStreamed(IReadOnlyList<ChatMessage> messages, ModelConfig userModelConfig, CurrentUser currentUser, [EnumeratorCancellation] CancellationToken cancellationToken)
     {
         ChatCompletionOptions chatCompletionOptions = new()
         {
-            Temperature = ModelConfig.Temperature,
-            MaxTokens = SuggestedType switch
+            Temperature = userModelConfig.Temperature,
+            MaxTokens = userModelConfig.MaxLength ?? SuggestedType switch
             {
                 "gpt-3.5-turbo" => null,
                 "gpt-4" => null,
                 "gpt-4-vision" => 4096,
                 _ => 4096,
-            }
+            },
+            User = currentUser.Id.ToString(),
         };
 
-        int inputTokenCount = messages.Sum(x => x.Content.Where(x => x.Kind == ChatMessageContentPartKind.Text).Sum(x => GPT3Tokenizer.Encode(x.Text).Count));
+        if (!IsVision)
+        {
+            messages = messages.Select(RemoveImages).ToList();
+        }
+
+        int inputTokenCount = messages.Sum(GetTokenCount);
         int outputTokenCount = 0;
+        // notify inputTokenCount first to better support price calculation
+        yield return new ConversationSegment
+        {
+            TextSegment = "",
+            InputTokenCount = inputTokenCount,
+            OutputTokenCount = 0,
+        };
+
         await foreach (StreamingChatCompletionUpdate delta in ChatClient.CompleteChatStreamingAsync(messages, chatCompletionOptions, cancellationToken))
         {
             // bug:
@@ -54,5 +81,35 @@ public class AzureConversationService : ConversationService
                 OutputTokenCount = outputTokenCount,
             };
         }
+    }
+
+    private static ChatMessage RemoveImages(ChatMessage message)
+    {
+        return message switch
+        {
+            UserChatMessage userChatMessage => new UserChatMessage(userChatMessage.Content.Select(c => c.Kind switch
+            {
+                var x when x == ChatMessageContentPartKind.Image => ChatMessageContentPart.CreateTextMessageContentPart(c.ImageUri.ToString()),
+                _ => c,
+            })),
+            _ => message,
+        };
+    }
+
+    static int GetTokenCount(ChatMessage chatMessage)
+    {
+        return chatMessage.Content.Sum(GetTokenCountForPart);
+    }
+
+    static int GetTokenCountForPart(ChatMessageContentPart part)
+    {
+        return part.Kind switch
+        {
+            var x when x == ChatMessageContentPartKind.Text => GPT3Tokenizer.Encode(part.Text).Count,
+            // https://platform.openai.com/docs/guides/vision/calculating-costs
+            // assume image is ~2048x4096 in detail: high, mosts 1105 tokens
+            var x when x == ChatMessageContentPartKind.Image => 1105,
+            _ => 0,
+        };
     }
 }

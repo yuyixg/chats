@@ -26,7 +26,7 @@ public static class PagedResult
         };
     }
 
-    public static async Task<PagedResult<TFinal>> FromQuery<TTemp, TFinal>(IQueryable<TTemp> rows, PagingRequest pagingRequest, Converter<TTemp, TFinal> tempConverter, CancellationToken cancellationToken) where TFinal : class where TTemp : class
+    public static async Task<PagedResult<TFinal>> FromTempQuery<TTemp, TFinal>(IQueryable<TTemp> rows, PagingRequest pagingRequest, Converter<TTemp, TFinal> tempConverter, CancellationToken cancellationToken) where TFinal : class where TTemp : class
     {
         TTemp[] tempData = await rows
             .Skip((pagingRequest.Page - 1) * pagingRequest.PageSize)

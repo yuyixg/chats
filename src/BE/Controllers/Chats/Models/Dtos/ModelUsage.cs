@@ -14,7 +14,7 @@ public record ModelUsage
     [JsonPropertyName("tokens")]
     public required string Tokens { get; init; }
 
-    public static ModelUsage FromJson(JsonUserModel userModel)
+    public static ModelUsage FromJson(JsonTokenBalance userModel)
     {
         return new ModelUsage
         {

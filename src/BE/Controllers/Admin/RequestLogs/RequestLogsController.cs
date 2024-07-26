@@ -1,11 +1,11 @@
-﻿using Chats.BE.Controllers.Admin.Dtos;
+﻿using Chats.BE.Controllers.Admin.RequestLogs.Dtos;
 using Chats.BE.Controllers.Common.Dtos;
 using Chats.BE.DB;
 using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Mvc;
 using Microsoft.EntityFrameworkCore;
 
-namespace Chats.BE.Controllers.Admin;
+namespace Chats.BE.Controllers.Admin.RequestLogs;
 
 [Route("api/admin/request-logs"), Authorize(Roles = "admin")]
 public class RequestLogsController(ChatsDB db) : ControllerBase
@@ -48,9 +48,9 @@ public class RequestLogsController(ChatsDB db) : ControllerBase
                 StatusCode = x.StatusCode,
                 User = x.UserId != null ? new OnlyUserName { Username = x.User!.Username } : null,
                 CreatedAt = x.CreatedAt,
-                Request = x.Request, 
-                Response = x.Response, 
-                Headers = x.Headers, 
+                Request = x.Request,
+                Response = x.Response,
+                Headers = x.Headers,
                 RequestTime = x.RequestTime,
                 ResponseTime = x.ResponseTime,
                 UserId = x.UserId,

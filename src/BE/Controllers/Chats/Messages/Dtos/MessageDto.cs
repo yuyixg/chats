@@ -1,4 +1,5 @@
-﻿using System.Text.Json;
+﻿using System.Text.Encodings.Web;
+using System.Text.Json;
 using System.Text.Json.Serialization;
 
 namespace Chats.BE.Controllers.Chats.Messages.Dtos;
@@ -52,8 +53,21 @@ public record MessageContentDto
     [JsonPropertyName("text")]
     public required string Text { get; init; }
 
-    [JsonPropertyName("image")]
+    [JsonPropertyName("image"), JsonIgnore(Condition = JsonIgnoreCondition.WhenWritingNull)]
     public List<string>? Image { get; init; }
+
+    public static MessageContentDto FromText(string text)
+    {
+        return new MessageContentDto
+        {
+            Text = text
+        };
+    }
+
+    public string ToJson()
+    {
+        return JsonSerializer.Serialize(this, new JsonSerializerOptions { Encoder = JavaScriptEncoder.UnsafeRelaxedJsonEscaping });
+    }
 }
 
 public record ChatMessageTemp

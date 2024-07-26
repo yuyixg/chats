@@ -5,29 +5,34 @@ namespace Chats.BE.DB.Jsons;
 public record JsonPriceConfig
 {
     [JsonPropertyName("input")]
-    public required decimal PromptTokenPrice { get; init; }
+    public required decimal InputTokenPrice { get; init; }
 
     [JsonPropertyName("out")]
-    public required decimal ResponseTokenPrice { get; init; }
+    public required decimal OutputTokenPrice { get; init; }
 
     public JsonPriceConfig1M To1M()
     {
         return new JsonPriceConfig1M
         {
-            PromptTokenPrice1M = PromptTokenPrice * 1000000,
-            ResponseTokenPrice1M = ResponseTokenPrice * 1000000
+            InputTokenPrice1M = InputTokenPrice * 1000000,
+            OutputTokenPrice1M = OutputTokenPrice * 1000000
         };
+    }
+
+    public bool IsFree()
+    {
+        return InputTokenPrice == 0 && OutputTokenPrice == 0;
     }
 }
 
 public record JsonPriceConfig1M
 {
-    public required decimal PromptTokenPrice1M { get; init; }
+    public required decimal InputTokenPrice1M { get; init; }
 
-    public required decimal ResponseTokenPrice1M { get; init; }
+    public required decimal OutputTokenPrice1M { get; init; }
 
     public override string ToString()
     {
-        return $"{PromptTokenPrice1M:F2}/{ResponseTokenPrice1M:F2}";
+        return $"{InputTokenPrice1M:F2}/{OutputTokenPrice1M:F2}";
     }
 }

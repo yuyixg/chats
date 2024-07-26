@@ -34,7 +34,7 @@ public record ModelResponse
     [JsonPropertyName("fileServerConfig")]
     public required FileServerConfig? FileServerConfigs { get; init; }
 
-    public static ModelResponse FromAll(ChatModel model, JsonUserModel userModel, JsonModelConfig modelConfig, FileService? fileService, TemperatureOptions temperatureOptions)
+    public static ModelResponse FromAll(ChatModel model, JsonTokenBalance userModel, JsonModelConfig modelConfig, FileService? fileService, TemperatureOptions temperatureOptions)
     {
         return new ModelResponse
         {

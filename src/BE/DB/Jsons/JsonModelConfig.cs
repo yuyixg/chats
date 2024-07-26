@@ -8,7 +8,7 @@ public record JsonModelConfig
     public required string Prompt { get; init; }
 
     [JsonPropertyName("temperature")]
-    public required double Temperature { get; init; }
+    public required float Temperature { get; init; }
 
     [JsonPropertyName("model")]
     public string? Model { get; init; }

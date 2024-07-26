@@ -4,6 +4,7 @@ using Chats.BE.Controllers.Public.AccountLogin.Dtos;
 using Chats.BE.DB;
 using Chats.BE.Services;
 using Chats.BE.Services.Common;
+using Chats.BE.Services.Configs;
 using Chats.BE.Services.Keycloak;
 using Chats.BE.Services.Sessions;
 using Microsoft.AspNetCore.Mvc;
@@ -18,7 +19,7 @@ public class AccountLoginController(ChatsDB db, ILogger<AccountLoginController> 
     public async Task<IActionResult> Login(
         [FromBody] LoginRequest request,
         [FromServices] PasswordHasher passwordHasher,
-        [FromServices] KeycloakConfigStore kcStore,
+        [FromServices] GlobalDBConfig kcStore,
         [FromServices] UserManager userManager,
         [FromServices] HostUrlService hostUrl,
         CancellationToken cancellationToken)
@@ -43,7 +44,7 @@ public class AccountLoginController(ChatsDB db, ILogger<AccountLoginController> 
         throw new InvalidOperationException("Invalid login request.");
     }
 
-    private async Task<IActionResult> KeycloakLogin(KeycloakConfigStore kcStore, UserManager userManager, SsoLoginRequest sso, HostUrlService hostUrl, CancellationToken cancellationToken)
+    private async Task<IActionResult> KeycloakLogin(GlobalDBConfig kcStore, UserManager userManager, SsoLoginRequest sso, HostUrlService hostUrl, CancellationToken cancellationToken)
     {
         KeycloakConfig? kcConfig = await kcStore.GetKeycloakConfig(cancellationToken);
         if (kcConfig == null)
@@ -66,10 +67,7 @@ public class AccountLoginController(ChatsDB db, ILogger<AccountLoginController> 
 
     private async Task<IActionResult> PasswordLogin(PasswordHasher passwordHasher, PasswordLoginRequest passwordDto, CancellationToken cancellationToken)
     {
-        User? dbUser = await db.Users.FirstOrDefaultAsync(x =>
-                        x.Account == passwordDto.UserName ||
-                        x.Phone == passwordDto.UserName ||
-                        x.Email == passwordDto.UserName, cancellationToken);
+        User? dbUser = await db.Users.FirstOrDefaultAsync(x => x.Account == passwordDto.UserName, cancellationToken);
 
         if (dbUser == null)
         {

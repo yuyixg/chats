@@ -66,7 +66,7 @@ const ResponseMessageActions = (props: Props) => {
           >
             <CopyAction text={message.content.text} />
             <GenerateInformationAction message={message} />
-            <RegenerateAction hidden={chatError} onRegenerate={onRegenerate} />
+            <RegenerateAction onRegenerate={onRegenerate} />
             <ChangeModelAction
               readonly={readonly}
               onChangeModel={(modelId: string) => {

@@ -2,6 +2,7 @@
 using Chats.BE.DB;
 using Chats.BE.Infrastructure;
 using Chats.BE.Services;
+using Chats.BE.Services.Configs;
 using Chats.BE.Services.Conversations;
 using Chats.BE.Services.Keycloak;
 using Chats.BE.Services.Sessions;
@@ -27,12 +28,13 @@ public class Program
         builder.Services.AddSingleton<PasswordHasher>();
         builder.Services.AddScoped<CurrentUser>();
         builder.Services.AddSingleton<CsrfTokenService>();
-        builder.Services.AddScoped<KeycloakConfigStore>();
+        builder.Services.AddScoped<GlobalDBConfig>();
         builder.Services.AddScoped<UserManager>();
         builder.Services.AddScoped<SessionManager>();
         builder.Services.AddScoped<HostUrlService>();
         builder.Services.AddSingleton<SessionCache>();
-        builder.Services.AddScoped<ConversationFactory>();
+        builder.Services.AddSingleton<ConversationFactory>();
+        builder.Services.AddSingleton<BalanceService>();
         builder.Services.AddHttpContextAccessor();
 
         // Add authentication and configure the default scheme

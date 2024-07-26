@@ -1,36 +1,37 @@
 ﻿using Chats.BE.DB;
 using Chats.BE.Services.Conversations.Implementations.Azure;
-using Microsoft.EntityFrameworkCore;
+using Chats.BE.Services.Conversations.Implementations.DashScope;
+using Chats.BE.Services.Conversations.Implementations.GLM;
+using Chats.BE.Services.Conversations.Implementations.Hunyuan;
+using Chats.BE.Services.Conversations.Implementations.Kimi;
+using Chats.BE.Services.Conversations.Implementations.QianFan;
 
 namespace Chats.BE.Services.Conversations;
 
-public class ConversationFactory(ChatsDB db)
+public class ConversationFactory
 {
-    public async Task<ConversationService> CreateConversationService(Guid modelId, CancellationToken cancellationToken)
+    public ConversationService CreateConversationService(ChatModel chatModel)
     {
-        var cm = await db.ChatModels
-            .Include(x => x.ModelKeys)
-            .Where(x => x.Id == modelId && x.Enabled)
-            .Select(x => new
-            {
-                Provider = x.ModelKeys.Type,
-                KeyConfigText = x.ModelKeys.Configs,
-                ModelConfigText = x.ModelConfig,
-                SuggestedType = x.ModelVersion,
-            })
-            .SingleOrDefaultAsync(cancellationToken) ?? throw new ArgumentException("Model not found or not enabled");
+        var cm = new
+        {
+            Provider = chatModel.ModelKeys.Type,
+            KeyConfigText = chatModel.ModelKeys.Configs,
+            ModelConfigText = chatModel.ModelConfig,
+            SuggestedType = chatModel.ModelVersion,
+        };
 
         KnownModelProvider knownModelProvider = Enum.Parse<KnownModelProvider>(cm.Provider);
-        return knownModelProvider switch
+        ConversationService cs = knownModelProvider switch
         {
             KnownModelProvider.OpenAI => throw new NotImplementedException(),
             KnownModelProvider.Azure => new AzureConversationService(cm.KeyConfigText, cm.SuggestedType, cm.ModelConfigText),
-            KnownModelProvider.QianFan => throw new NotImplementedException(),
-            KnownModelProvider.QianWen => throw new NotImplementedException(),
-            KnownModelProvider.ZhiPuAI => throw new NotImplementedException(),
-            KnownModelProvider.Moonshot => throw new NotImplementedException(),
-            KnownModelProvider.HunYuan => throw new NotImplementedException(),
+            KnownModelProvider.QianFan => new QianFanConversationService(cm.KeyConfigText, cm.ModelConfigText),
+            KnownModelProvider.QianWen => new DashScopeConversationService(cm.KeyConfigText, cm.SuggestedType, cm.ModelConfigText),
+            KnownModelProvider.ZhiPuAI => new GLMConversationService(cm.KeyConfigText, cm.SuggestedType, cm.ModelConfigText),
+            KnownModelProvider.Moonshot => new KimiConversationService(cm.KeyConfigText, cm.SuggestedType, cm.ModelConfigText),
+            KnownModelProvider.HunYuan => new HunyuanConversationService(cm.KeyConfigText, cm.SuggestedType, cm.ModelConfigText),
             _ => throw new ArgumentException("Invalid model type")
         };
+        return cs;
     }
 }

@@ -39,7 +39,7 @@ public class UserManager(ChatsDB db)
         return user;
     }
 
-    public async Task InitializeUserWithoutSave(User newUser, string provider, string? invitationCode, CancellationToken cancellationToken)
+    public async Task InitializeUserWithoutSave(User newUser, string? provider, string? invitationCode, CancellationToken cancellationToken)
     {
         newUser.UserBalance = new()
         {

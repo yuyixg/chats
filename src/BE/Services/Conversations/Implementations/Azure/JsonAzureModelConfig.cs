@@ -1,5 +1,4 @@
-﻿using System.Text.Json;
-using System.Text.Json.Serialization;
+﻿using System.Text.Json.Serialization;
 
 namespace Chats.BE.Services.Conversations.Implementations.Azure;
 
@@ -16,9 +15,4 @@ public record JsonAzureModelConfig
 
     [JsonPropertyName("deploymentName")]
     public required string DeploymentName { get; init; }
-
-    internal static JsonAzureModelConfig Parse(string modelConfigText)
-    {
-        return JsonSerializer.Deserialize<JsonAzureModelConfig>(modelConfigText)!;
-    }
 }

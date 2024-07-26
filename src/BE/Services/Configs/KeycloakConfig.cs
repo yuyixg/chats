@@ -1,7 +1,8 @@
 ﻿using System.Text.Json.Serialization;
 using System.Threading;
+using Chats.BE.Services.Keycloak;
 
-namespace Chats.BE.Services.Keycloak;
+namespace Chats.BE.Services.Configs;
 
 public record KeycloakConfig
 {
