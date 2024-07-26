@@ -174,7 +174,7 @@ export const Chat = memo(({ stopConversationRef }: Props) => {
       const chatBody: ChatBody = {
         modelId: modelId || selectModel?.id!,
         chatId: selectChatId,
-        messageId,
+        messageId: messageId || null,
         userMessage: messageContent,
         userModelConfig,
       };

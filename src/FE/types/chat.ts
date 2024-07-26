@@ -59,7 +59,7 @@ export interface HunYuanMessage {
 export interface ChatBody {
   modelId: string;
   userMessage: Content;
-  messageId: string;
+  messageId: string | null;
   chatId: string;
   userModelConfig: any;
 }
