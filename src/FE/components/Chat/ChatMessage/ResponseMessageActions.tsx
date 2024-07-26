@@ -61,7 +61,7 @@ const ResponseMessageActions = (props: Props) => {
           <div
             className={cn(
               lastMessageId === message.id ? 'visible' : 'invisible',
-              'flex gap-0 items-center  group-hover:visible focus:visible',
+              'flex gap-0 items-center group-hover:visible focus:visible',
             )}
           >
             <CopyAction text={message.content.text} />

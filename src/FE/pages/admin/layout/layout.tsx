@@ -4,8 +4,6 @@ import { useTranslation } from 'next-i18next';
 import Image from 'next/image';
 import { useRouter } from 'next/router';
 
-import { getSession } from '@/utils/session';
-
 import { Nav } from '@/components/Admin/Nav/Nav';
 import {
   IconChartPie,
@@ -91,13 +89,13 @@ const AdminLayout = ({
       },
       title: t('Login Service'),
     },
-    {
-      url: '/admin/pay-service',
-      icon: (stroke?: string) => {
-        return <IconCreditCard stroke={stroke} />;
-      },
-      title: t('Pay Service'),
-    },
+    // {
+    //   url: '/admin/pay-service',
+    //   icon: (stroke?: string) => {
+    //     return <IconCreditCard stroke={stroke} />;
+    //   },
+    //   title: t('Pay Service'),
+    // },
     {
       url: '/admin/request-logs',
       icon: (stroke?: string) => {

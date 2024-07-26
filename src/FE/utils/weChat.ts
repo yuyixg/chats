@@ -1,6 +1,5 @@
 import { InternalServerError } from './error';
 
-import { IWeChatAuthResult } from '@/managers/users';
 
 export function redirectToWeChatAuthUrl(redirectUri: string) {
   const scope = 'snsapi_base';
@@ -18,7 +17,7 @@ export async function weChatAuth(appId: string, secret: string, code: string) {
         },
       },
     );
-    const response: IWeChatAuthResult = await res.json();
+    const response = await res.json();
     if (response.errcode) {
       throw new InternalServerError(JSON.stringify(response));
     }

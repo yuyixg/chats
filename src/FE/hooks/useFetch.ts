@@ -17,7 +17,7 @@ export const useFetch = () => {
     request: any,
     signal?: AbortSignal,
   ) => {
-    const apiPrefix = getApiUrl();
+    const apiPrefix = typeof window !== "undefined" ? getApiUrl() : process.env.API_URL;
     const apiUrl = `${apiPrefix}${url}`;
     const requestUrl = request?.params ? `${apiUrl}${request.params}` : apiUrl;
 

@@ -16,9 +16,7 @@ import PhoneLoginCard from '@/components/Login/PhoneLoginCard';
 import PhoneRegisterCard from '@/components/Login/PhoneRegisterCard';
 import WeChatLogin from '@/components/Login/WeChatLogin';
 import { Tabs, TabsContent, TabsList, TabsTrigger } from '@/components/ui/tabs';
-
-import { ConfigsManager } from '@/managers';
-import { LoginServiceManager } from '@/managers/loginService';
+import { getLoginProviders, getSiteInfo } from '@/apis/userService';
 
 enum TabKeys {
   PHONE = 'phone',
@@ -232,15 +230,13 @@ export default function LoginPage({
 }
 
 export const getServerSideProps = async ({ locale }: { locale: string }) => {
-  const siteInfo = await ConfigsManager.get<SiteInfoConfig>(
-    GlobalConfigKeys.siteInfo,
-  );
+  const siteInfo = await getSiteInfo();
 
-  const loginConfigList = await LoginServiceManager.findAllEnabled();
+  const loginConfigList = await getLoginProviders();
   const loginConfigs = loginConfigList.map((x) => {
-    const configs = JSON.parse(x?.configs || '{}');
+    const configs = x?.config;
     return {
-      type: x.type,
+      type: x.key,
       configs: {
         appId: configs?.appId || null,
       },

@@ -17,7 +17,6 @@ import {
 import { getSelectMessages } from '@/utils/message';
 import { getStorageModelId, setStorageModelId } from '@/utils/model';
 import { formatPrompt } from '@/utils/promptVariable';
-import { getSession } from '@/utils/session';
 import {
   DEFAULT_SETTINGS,
   getSettings,
@@ -44,12 +43,12 @@ import {
   ChatResult,
   GetChatsParams,
   getChatsByPaging,
+  getSiteInfo,
   getUserMessages,
   getUserModels,
   getUserPrompts,
   postChats,
 } from '@/apis/userService';
-import { ConfigsManager } from '@/managers';
 import Decimal from 'decimal.js';
 import { v4 as uuidv4 } from 'uuid';
 
@@ -170,6 +169,7 @@ const Home = ({ siteInfo }: { siteInfo: SiteInfoConfig }) => {
   };
 
   const handleSelectModel = (model: Model) => {
+    if(!model) return;
     const { modelConfig } = model;
     dispatch({ field: 'selectModel', value: model });
     handleUpdateUserModelConfig({
@@ -497,15 +497,11 @@ export const getServerSideProps = async ({
   locale: string;
   req: any;
 }) => {
-  const siteInfo = await ConfigsManager.get<SiteInfoConfig>(
-    GlobalConfigKeys.siteInfo,
-  );
-  const session = await getSession(req.headers.cookie);
+  const siteInfo = await getSiteInfo();
   return {
     props: {
       siteInfo: siteInfo || {},
       locale,
-      session,
       ...(await serverSideTranslations(locale ?? DEFAULT_LANGUAGE, [
         'common',
         'chat',

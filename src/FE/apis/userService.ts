@@ -8,7 +8,9 @@ import { Model } from '@/types/model';
 import { PageResult, Paging } from '@/types/page';
 import { Prompt } from '@/types/prompt';
 import {
+  GetLoginProvidersResult,
   GetModelUsageResult,
+  GetSiteInfoResult,
   GetUserBalanceResult,
   LoginConfigsResult,
   SingInParams,
@@ -50,9 +52,11 @@ export const changeUserPassword = (newPassword: string) => {
 
 export const getUserMessages = (chatId: string): Promise<ChatMessage[]> => {
   const fetchService = useFetch();
-  return fetchService.get('/api/messages?chatId=' + chatId).then((data: any) => {
-    return calculateMessages(data) as any;
-  });
+  return fetchService
+    .get('/api/messages?chatId=' + chatId)
+    .then((data: any) => {
+      return calculateMessages(data) as any;
+    });
 };
 
 export const getChatsByPaging = (
@@ -167,9 +171,22 @@ export const signByPhone = (
     body: { phone, smsCode },
   });
 };
+
 export const getUserModelUsage = (modelId: string) => {
   const fetchServer = useFetch();
   return fetchServer.get<GetModelUsageResult>(
     '/api/user/model-usage?modelId=' + modelId,
   );
+};
+
+export const getLoginProviders = () => {
+  const fetchServer = useFetch();
+  return fetchServer.get<GetLoginProvidersResult[]>(
+    '/api/public/login-providers',
+  );
+};
+
+export const getSiteInfo = () => {
+  const fetchServer = useFetch();
+  return fetchServer.get<GetSiteInfoResult>('/api/public/siteInfo');
 };

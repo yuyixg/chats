@@ -118,3 +118,18 @@ export interface GetModelUsageResult {
   expires: string;
   prices?: string;
 }
+
+export interface GetLoginProvidersResult {
+  id: string;
+  key: LoginType;
+  config: {
+    appId?: string;
+  };
+}
+
+export interface GetSiteInfoResult {
+  filingNumber: string;
+  contact: {
+    qqGroupNumber: string;
+  };
+}

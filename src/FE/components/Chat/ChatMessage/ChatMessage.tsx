@@ -43,25 +43,18 @@ export const ChatMessage: FC<Props> = memo(
     onRegenerate,
   }) => {
     const {
-      state: { messageIsStreaming, chatError, currentChatMessageId },
+      state: { messageIsStreaming, currentChatMessageId },
     } = useContext(HomeContext);
 
     return (
-      <div
-        className={`group md:px-4 ${
-          message.role === 'assistant'
-            ? 'text-gray-800 dark:text-gray-100'
-            : 'text-gray-800 dark:text-gray-100'
-        }`}
-        style={{ overflowWrap: 'anywhere' }}
-      >
+      <div className={'group md:px-4 text-gray-800 dark:text-gray-100'}>
         <div className="relative m-auto flex px-4 py-[10px] text-base md:max-w-2xl lg:max-w-2xl lg:px-0 xl:max-w-5xl">
           <div className="min-w-[28px] text-right font-bold">
             {message.role === 'assistant' && <IconRobot size={28} />}
           </div>
-
+          
           <div className="prose mt-[2px] w-full px-4 dark:prose-invert">
-            {message.role === 'user' ? (
+            {message.role === 'user' && (
               <UserMessage
                 message={message}
                 parentId={parentId}
@@ -70,28 +63,30 @@ export const ChatMessage: FC<Props> = memo(
                 onChangeMessage={onChangeMessage}
                 onEdit={onEdit}
               />
-            ) : (
-              <>
-                <ResponseMessage
-                  currentChatMessageId={currentChatMessageId}
-                  message={message}
-                  parentId={parentId}
-                  currentSelectIndex={currentSelectIndex}
-                  parentChildrenIds={parentChildrenIds}
-                />
+            )}
 
-                <ResponseMessageActions
-                  hidden={messageIsStreaming}
-                  readonly={readonly}
-                  message={message}
-                  lastMessageId={lastMessageId}
-                  modelName={modelName}
-                  assistantCurrentSelectIndex={assistantCurrentSelectIndex}
-                  assistantChildrenIds={assistantChildrenIds}
-                  onChangeMessage={onChangeMessage}
-                  onRegenerate={onRegenerate}
-                />
-              </>
+            {message.role === 'assistant' && (
+              <ResponseMessage
+                currentChatMessageId={currentChatMessageId}
+                message={message}
+                parentId={parentId}
+                currentSelectIndex={currentSelectIndex}
+                parentChildrenIds={parentChildrenIds}
+              />
+            )}
+
+            {message.role === 'assistant' && (
+              <ResponseMessageActions
+                hidden={messageIsStreaming}
+                readonly={readonly}
+                message={message}
+                lastMessageId={lastMessageId}
+                modelName={modelName}
+                assistantCurrentSelectIndex={assistantCurrentSelectIndex}
+                assistantChildrenIds={assistantChildrenIds}
+                onChangeMessage={onChangeMessage}
+                onRegenerate={onRegenerate}
+              />
             )}
           </div>
         </div>

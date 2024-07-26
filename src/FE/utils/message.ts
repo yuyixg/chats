@@ -1,8 +1,6 @@
 import { ChatMessage, MessageNode } from '@/types/chatMessage';
-import { ChatModelPriceConfig } from '@/types/model';
 
 import Decimal from 'decimal.js';
-
 
 export const calcInputTokenPrice = (
   inputTokenCount: number,
@@ -11,8 +9,11 @@ export const calcInputTokenPrice = (
   return new Decimal(inputTokenCount * inputPrice);
 };
 
-export const calcOutputTokenPrice = (outTokenCount: number, outPrice: number) => {
-  return  new Decimal(outTokenCount * outPrice);
+export const calcOutputTokenPrice = (
+  outTokenCount: number,
+  outPrice: number,
+) => {
+  return new Decimal(outTokenCount * outPrice);
 };
 
 function findMessageChildren(
@@ -67,13 +68,16 @@ export function getSelectMessages(
   return selectMessages;
 }
 
-const findChildren = (nodes: MessageNode[], parentId: string): string[] => {
+const findUserMessageChildren = (
+  nodes: MessageNode[],
+  parentId: string,
+): string[] => {
   return nodes
     .filter((node) => node.parentId === parentId && node.role === 'user')
     .map((node) => node.id);
 };
 
-const findResponseChildren = (
+const findResponseMessageChildren = (
   nodes: MessageNode[],
   parentId: string | null,
 ): string[] => {
@@ -85,7 +89,7 @@ const findResponseChildren = (
 export const calculateMessages = (nodes: MessageNode[]): MessageNode[] => {
   return nodes.map((node) => ({
     ...node,
-    childrenIds: findChildren(nodes, node.id).reverse(),
-    assistantChildrenIds: findResponseChildren(nodes, node.parentId),
+    childrenIds: findUserMessageChildren(nodes, node.id).reverse(),
+    assistantChildrenIds: findResponseMessageChildren(nodes, node.parentId),
   }));
 };
