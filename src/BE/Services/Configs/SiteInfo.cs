@@ -8,7 +8,7 @@ public record Contact
     public required string QQGroupNumber { get; init; }
 }
 
-public record FilingInfo
+public record SiteInfo
 {
     [JsonPropertyName("filingNumber")]
     public required string WebsiteRegistrationNumber { get; init; }
