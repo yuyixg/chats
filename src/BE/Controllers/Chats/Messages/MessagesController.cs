@@ -28,6 +28,7 @@ public class MessagesController(ChatsDB db, CurrentUser currentUser) : Controlle
                 OutputPrice = x.OutputPrice,
                 CreatedAt = x.CreatedAt,
                 Duration = x.Duration,
+                ModelId = x.ChatModelId,
                 ModelName = x.ChatModel!.Name
             })
             .OrderBy(x => x.CreatedAt)
