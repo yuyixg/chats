@@ -1,4 +1,5 @@
-﻿using Chats.BE.DB;
+﻿using Chats.BE.Controllers.Public.AccountLogin.Dtos;
+using Chats.BE.DB;
 using Microsoft.EntityFrameworkCore;
 using System.Runtime.Caching;
 
@@ -54,5 +55,18 @@ public class SessionManager(ChatsDB db, SessionCache sessionCache)
         }
 
         return sessionEntry;
+    }
+
+    public async Task<LoginResponse> GenerateSessionForUser(User user, CancellationToken cancellationToken)
+    {
+        Guid sessionId = await RefreshUserSessionId(user.Id, cancellationToken);
+        bool hasPayService = await db.PayServices.Where(x => x.Enabled).AnyAsync(cancellationToken);
+        return new LoginResponse
+        {
+            SessionId = sessionId,
+            UserName = user.Username,
+            Role = user.Role,
+            CanReCharge = hasPayService,
+        };
     }
 }

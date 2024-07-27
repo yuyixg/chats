@@ -1,6 +1,7 @@
 ﻿using Chats.BE.Controllers.Common;
 using Chats.BE.Controllers.Common.Results;
 using Chats.BE.Controllers.Public.AccountLogin.Dtos;
+using Chats.BE.Controllers.Public.SMSs.Dtos;
 using Chats.BE.DB;
 using Chats.BE.Services;
 using Chats.BE.Services.Common;
@@ -12,10 +13,10 @@ using Microsoft.EntityFrameworkCore;
 
 namespace Chats.BE.Controllers.Public.AccountLogin;
 
-[Route("api/public/account-login")]
+[Route("api/public")]
 public class AccountLoginController(ChatsDB db, ILogger<AccountLoginController> logger, SessionManager sessionManager) : ControllerBase
 {
-    [HttpPost]
+    [HttpPost("account-login")]
     public async Task<IActionResult> Login(
         [FromBody] LoginRequest request,
         [FromServices] PasswordHasher passwordHasher,
@@ -54,18 +55,10 @@ public class AccountLoginController(ChatsDB db, ILogger<AccountLoginController> 
 
         AccessTokenInfo token = await kcConfig.GetUserInfo(sso.Code, hostUrl.GetKeycloakSsoRedirectUrl(), cancellationToken);
         User user = await userManager.EnsureKeycloakUser(token, cancellationToken);
-        Guid sessionId = await sessionManager.RefreshUserSessionId(user.Id, cancellationToken);
-        bool hasPayService = await db.PayServices.Where(x => x.Enabled).AnyAsync(cancellationToken);
-        return Ok(new LoginResponse
-        {
-            SessionId = sessionId,
-            UserName = user.Username,
-            Role = user.Role,
-            CanReCharge = hasPayService,
-        });
+        return Ok(await sessionManager.GenerateSessionForUser(user, cancellationToken));
     }
 
-    private async Task<IActionResult> PasswordLogin(PasswordHasher passwordHasher, PasswordLoginRequest passwordDto, CancellationToken cancellationToken)
+    private async Task<ActionResult> PasswordLogin(PasswordHasher passwordHasher, PasswordLoginRequest passwordDto, CancellationToken cancellationToken)
     {
         User? dbUser = await db.Users.FirstOrDefaultAsync(x => x.Account == passwordDto.UserName, cancellationToken);
 
@@ -85,15 +78,6 @@ public class AccountLoginController(ChatsDB db, ILogger<AccountLoginController> 
             return BadRequest("用户名或密码错误");
         }
 
-        bool hasPayService = await db.PayServices.Where(x => x.Enabled).AnyAsync(cancellationToken);
-        Guid sessionId = await sessionManager.RefreshUserSessionId(dbUser.Id, cancellationToken);
-
-        return Ok(new LoginResponse
-        {
-            SessionId = sessionId,
-            UserName = dbUser.Username,
-            Role = dbUser.Role,
-            CanReCharge = hasPayService,
-        });
+        return Ok(await sessionManager.GenerateSessionForUser(dbUser, cancellationToken));
     }
 }

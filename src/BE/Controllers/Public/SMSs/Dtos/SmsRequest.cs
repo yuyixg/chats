@@ -1,9 +1,8 @@
-﻿using System.ComponentModel.DataAnnotations;
-using System.Configuration;
+﻿using System.Configuration;
 using System.Text.Json.Serialization;
 using Chats.BE.Services.Common;
 
-namespace Chats.BE.Controllers.Public.SMSs;
+namespace Chats.BE.Controllers.Public.SMSs.Dtos;
 
 public record SmsRequest
 {

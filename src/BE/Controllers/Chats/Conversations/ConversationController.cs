@@ -1,5 +1,6 @@
 ﻿using Chats.BE.Controllers.Chats.Conversations.Dtos;
 using Chats.BE.Controllers.Chats.Messages.Dtos;
+using Chats.BE.Controllers.Common;
 using Chats.BE.DB;
 using Chats.BE.DB.Jsons;
 using Chats.BE.Infrastructure;
@@ -38,7 +39,7 @@ public class ConversationController(ChatsDB db, CurrentUser currentUser, ILogger
             .FirstOrDefaultAsync(x => x.Id == request.ModelId, cancellationToken: cancellationToken);
         if (cm == null)
         {
-            return BadRequestMessage("The Model does not exist or access is denied.");
+            return this.BadRequestMessage("The Model does not exist or access is denied.");
         }
 
         JsonPriceConfig priceConfig = JsonSerializer.Deserialize<JsonPriceConfig>(cm.PriceConfig)!;
@@ -57,19 +58,19 @@ public class ConversationController(ChatsDB db, CurrentUser currentUser, ILogger
         JsonTokenBalance? tokenBalance = tokenBalances[tokenBalanceIndex];
         if (tokenBalance == null)
         {
-            return BadRequestMessage("The Model does not exist or access is denied.");
+            return this.BadRequestMessage("The Model does not exist or access is denied.");
         }
         if (!tokenBalance.Enabled)
         {
-            return BadRequestMessage("The Model does not exist or access is denied.");
+            return this.BadRequestMessage("The Model does not exist or access is denied.");
         }
         if (tokenBalance.Expires != "-" && DateTime.Parse(tokenBalance.Expires) < DateTime.UtcNow)
         {
-            return BadRequestMessage("Subscription has expired");
+            return this.BadRequestMessage("Subscription has expired");
         }
         if (tokenBalance.Counts == "0" && tokenBalance.Tokens == "0" && miscInfo.UserBalance.Balance == 0 && !priceConfig.IsFree())
         {
-            return BadRequestMessage("Insufficient balance");
+            return this.BadRequestMessage("Insufficient balance");
         }
 
         Dictionary<Guid, MessageLiteDto> existingMessages = await db.ChatMessages
@@ -93,7 +94,7 @@ public class ConversationController(ChatsDB db, CurrentUser currentUser, ILogger
         {
             if (request.UserModelConfig.Prompt == null)
             {
-                return BadRequestMessage("Prompt is required for the first message");
+                return this.BadRequestMessage("Prompt is required for the first message");
             }
 
             DBChatMessage toBeInsert = new()
@@ -222,11 +223,6 @@ public class ConversationController(ChatsDB db, CurrentUser currentUser, ILogger
         }
 
         return new EmptyResult();
-    }
-
-    private BadRequestObjectResult BadRequestMessage(string message)
-    {
-        return BadRequest(new { message });
     }
 
     private MessageLiteDto GetUserMessage(ConversationRequest request, Dictionary<Guid, MessageLiteDto> existingMessages, List<OpenAIChatMessage> messageToSend)
