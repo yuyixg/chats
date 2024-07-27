@@ -286,12 +286,11 @@ public class ConversationController(ChatsDB db, CurrentUser currentUser, ILogger
 
     private readonly static ReadOnlyMemory<byte> dataU8 = "data:"u8.ToArray();
     private readonly static ReadOnlyMemory<byte> lfu8 = "\n"u8.ToArray();
-    private readonly static JsonSerializerOptions JsonSerializerOptions = new() { Encoder = JavaScriptEncoder.UnsafeRelaxedJsonEscaping };
 
     private async Task YieldResponse(SseResponseLine line)
     {
         await Response.Body.WriteAsync(dataU8);
-        await Response.Body.WriteAsync(JsonSerializer.SerializeToUtf8Bytes(line, JsonSerializerOptions));
+        await Response.Body.WriteAsync(JsonSerializer.SerializeToUtf8Bytes(line, JSON.JsonSerializerOptions));
         await Response.Body.WriteAsync(lfu8);
         await Response.Body.FlushAsync();
     }

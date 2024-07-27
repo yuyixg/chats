@@ -1,4 +1,5 @@
-﻿using System.Text.Encodings.Web;
+﻿using Chats.BE.Services;
+using System.Text.Encodings.Web;
 using System.Text.Json;
 using System.Text.Json.Serialization;
 
@@ -69,7 +70,7 @@ public record MessageContentDto
 
     public string ToJson()
     {
-        return JsonSerializer.Serialize(this, new JsonSerializerOptions { Encoder = JavaScriptEncoder.UnsafeRelaxedJsonEscaping });
+        return JSON.Serialize(this);
     }
 }
 
