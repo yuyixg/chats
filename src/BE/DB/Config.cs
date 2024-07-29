@@ -6,12 +6,13 @@ using Microsoft.EntityFrameworkCore;
 
 namespace Chats.BE.DB;
 
-[Keyless]
 [Index("Key", Name = "Configs_key_key", IsUnique = true)]
 public partial class Config
 {
+    [Key]
     [Column("key")]
-    [StringLength(1000)]
+    [StringLength(50)]
+    [Unicode(false)]
     public string Key { get; set; } = null!;
 
     [Column("value")]

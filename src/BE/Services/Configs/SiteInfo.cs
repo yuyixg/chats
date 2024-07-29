@@ -6,6 +6,9 @@ public record Contact
 {
     [JsonPropertyName("qqGroupNumber")]
     public required string QQGroupNumber { get; init; }
+
+    [JsonPropertyName("qqGroupQrCodeLink")]
+    public required string QQGroupQrCodeLink { get; init; }
 }
 
 public record SiteInfo

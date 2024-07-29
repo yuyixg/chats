@@ -19,6 +19,7 @@ export interface SiteInfoConfig {
   filingNumber: string;
   contact: {
     qqGroupNumber: string;
+    qqGroupQrCodeLink: string;
   };
 }
 

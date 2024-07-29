@@ -1,5 +1,4 @@
 import { useTranslation } from 'next-i18next';
-import Image from 'next/image';
 
 import { getSiteInfo } from '@/utils/website';
 
@@ -24,12 +23,12 @@ const ContactModal = (props: IProps) => {
             {contact?.qqGroupNumber && (
               <div>
                 <div className="flex justify-center">
-                  <Image
-                    key={'qq.png'}
-                    src={'/qq.png'}
+                  <img
+                    key={'qq.webp'}
+                    src={contact.qqGroupQrCodeLink}
                     alt="qq"
-                    width={180}
-                    height={180}
+                    width={220}
+                    height={220}
                     className="h-[120px] w-[120px] rounded-md dark:bg-white"
                   />
                 </div>
