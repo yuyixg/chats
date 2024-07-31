@@ -72,6 +72,7 @@ public class AzureConversationService : ConversationService
             if (delta.Id == null) yield break;
 
             if (delta.FinishReason == ChatFinishReason.Stop) yield break;
+            if (delta.ContentUpdate.Count == 0) continue;
 
             outputTokenCount += GPT3Tokenizer.Encode(delta.ContentUpdate[0].Text).Count;
             yield return new ConversationSegment
