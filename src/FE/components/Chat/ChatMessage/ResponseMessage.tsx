@@ -26,8 +26,9 @@ const ResponseMessage = (props: Props) => {
 
   const { message, currentChatMessageId } = props;
 
+
   return (
-    <div className="pr-4 md:pr-0">
+    <div className="pr-0">
       <MemoizedReactMarkdown
         className="prose dark:prose-invert flex-1"
         remarkPlugins={[remarkGfm, remarkMath]}
@@ -58,6 +59,9 @@ const ResponseMessage = (props: Props) => {
                 {children}
               </code>
             );
+          },
+          p({ children }) {
+            return <p className='md-p'>{children}</p>
           },
           table({ children }) {
             return (

@@ -46,16 +46,16 @@ export const ChatMessage: FC<Props> = memo(
   }) => {
     const {
       state: { messageIsStreaming, currentChatMessageId },
-    } = useContext(HomeContext);
+    } = useContext(HomeContext);    
 
     return (
       <div className={'group md:px-4 text-gray-800 dark:text-gray-100'}>
         <div className="relative m-auto flex px-4 py-[10px] text-base md:max-w-2xl lg:max-w-2xl lg:px-0 xl:max-w-5xl">
-          <div className="min-w-[28px] text-right font-bold">
+          <div className="min-w-[28px] text-right font-bold hidden lg:block pr-2">
             {message.role === 'assistant' && <IconRobot size={28} />}
           </div>
 
-          <div className="prose mt-[2px] w-full px-4 dark:prose-invert">
+          <div className="prose mt-[2px] w-full dark:prose-invert rounded-r-md">
             {message.role === 'user' && (
               <UserMessage
                 message={message}

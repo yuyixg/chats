@@ -116,3 +116,7 @@ select:focus {
 .tbody-hover:hover td {
   background-color: hsl(var(--muted));
 }
+
+.md-p {
+  white-space: pre-wrap;
+}
