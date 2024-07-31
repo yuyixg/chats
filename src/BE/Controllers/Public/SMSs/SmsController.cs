@@ -67,7 +67,7 @@ public class SmsController(ChatsDB db, GlobalDBConfig globalConfig, ILogger<SmsC
 
     async Task<IActionResult> SendRegisterSms(string phone, string invitationCode, CancellationToken cancellationToken)
     {
-        InvitationCode? code = await db.InvitationCodes.FirstOrDefaultAsync(x => x.Value == invitationCode, cancellationToken);
+        InvitationCode? code = await db.InvitationCodes.FirstOrDefaultAsync(x => x.Value == invitationCode && !x.IsDeleted, cancellationToken);
         if (code == null)
         {
             return this.BadRequestMessage("Invalid invitation code.");

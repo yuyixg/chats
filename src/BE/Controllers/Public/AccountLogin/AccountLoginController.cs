@@ -124,4 +124,67 @@ public class AccountLoginController(ChatsDB db, ILogger<AccountLoginController> 
 
         return Ok(await sessionManager.GenerateSessionForUser(user, cancellationToken));
     }
+
+    [HttpPost("phone-register")]
+    public async Task<IActionResult> PhoneRegister([FromBody] PhoneRegisterRequest req, [FromServices] UserManager userManager, CancellationToken cancellationToken)
+    {
+        InvitationCode? code = await db.InvitationCodes.FirstOrDefaultAsync(x => x.Value == req.InvitationCode && !x.IsDeleted, cancellationToken);
+        if (code == null)
+        {
+            return this.BadRequestMessage("Invalid invitation code.");
+        }
+
+        User? existingUser = await db.Users.FirstOrDefaultAsync(x => x.Phone == req.Phone, cancellationToken);
+        if (existingUser != null)
+        {
+            return this.BadRequestMessage("Phone number already registered.");
+        }
+
+        Sms? existingSms = await db.Sms
+            .Where(x => x.SignName == req.Phone && x.Type == (short)SmsType.Register && x.Status == (short)SmsStatus.WaitingForVerification)
+            .OrderByDescending(x => x.CreatedAt)
+            .FirstOrDefaultAsync(cancellationToken);
+        if (existingSms == null)
+        {
+            return this.BadRequestMessage("Sms not sent.");
+        }
+
+        if (existingSms.Code != req.SmsCode)
+        {
+            db.Remove(existingSms);
+            await db.SaveChangesAsync(cancellationToken);
+            return this.BadRequestMessage("Invalid code.");
+        }
+
+        if (existingSms.CreatedAt + TimeSpan.FromSeconds(SmsController.SmsExpirationSeconds) < DateTime.UtcNow)
+        {
+            return this.BadRequestMessage("Sms expired.");
+        }
+
+        User user = new()
+        {
+            Id = Guid.NewGuid(),
+            Phone = req.Phone,
+            Enabled = true,
+            CreatedAt = DateTime.UtcNow,
+            UpdatedAt = DateTime.UtcNow,
+            Account = req.Phone,
+            Username = req.Phone,
+            Password = null,
+            Avatar = null,
+            Email = null, 
+            Provider = KnownLoginProviders.Phone,
+            Role = "-",
+            Sub = null, 
+        };
+        user.UserInvitation = new UserInvitation()
+        {
+            UserId = user.Id,
+            InvitationCodeId = code.Id,
+        };
+        db.Users.Add(user);
+        await userManager.InitializeUserWithoutSave(user, KnownLoginProviders.Phone, req.InvitationCode, cancellationToken);
+        await db.SaveChangesAsync(cancellationToken);
+        return Ok(await sessionManager.GenerateSessionForUser(user, cancellationToken));
+    }
 }

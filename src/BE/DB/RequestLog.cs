@@ -48,7 +48,7 @@ public partial class RequestLog
     public string Request { get; set; } = null!;
 
     [Column("response")]
-    public string Response { get; set; } = null!;
+    public string? Response { get; set; }
 
     [Column("createdAt")]
     public DateTime CreatedAt { get; set; }
