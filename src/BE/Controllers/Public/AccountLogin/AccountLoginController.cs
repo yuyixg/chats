@@ -124,20 +124,4 @@ public class AccountLoginController(ChatsDB db, ILogger<AccountLoginController> 
 
         return Ok(await sessionManager.GenerateSessionForUser(user, cancellationToken));
     }
-
-    [HttpPost("invitation-code")]
-    public async Task<IActionResult> VerifyInvitationCode([FromBody] VerifyInvitationCodeRequest req, CancellationToken cancellationToken)
-    {
-        InvitationCode? code = await db.InvitationCodes.FirstOrDefaultAsync(x => x.Value == req.Code, cancellationToken);
-        if (code == null)
-        {
-            return this.BadRequestMessage("Invalid invitation code.");
-        }
-        if (code.Count <= 0)
-        {
-            return this.BadRequestMessage("Invitation code expired.");
-        }
-
-        return Ok();
-    }
 }
