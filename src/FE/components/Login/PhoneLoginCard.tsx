@@ -21,7 +21,7 @@ import {
 } from '@/components/ui/form';
 import { Input } from '@/components/ui/input';
 
-import { postSignCode, signByPhone } from '@/apis/userService';
+import { sendLoginSmsCode, signByPhone } from '@/apis/userService';
 import { zodResolver } from '@hookform/resolvers/zod';
 import { z } from 'zod';
 
@@ -76,7 +76,7 @@ const PhoneLoginCard = (props: {
     setSending(true);
     if (form.formState.isValid) {
       const phone = form.getValues('phone');
-      postSignCode(phone, SmsType.SignIn)
+      sendLoginSmsCode(phone)
         .then(() => {
           toast.success(t('SMS sent successfully'));
           setIsSendCode(true);

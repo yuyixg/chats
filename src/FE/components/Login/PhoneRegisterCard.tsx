@@ -24,9 +24,8 @@ import { Input } from '@/components/ui/input';
 import ContactModal from '../Sidebar/ContactModal';
 
 import {
-  postSignCode,
   registerByPhone,
-  verifyInvitationCode,
+  sendRegisterSmsCode,
 } from '@/apis/userService';
 import { zodResolver } from '@hookform/resolvers/zod';
 import { z } from 'zod';
@@ -85,37 +84,23 @@ const PhoneRegisterCard = (props: {
     return () => clearInterval(timer);
   }, [isSendCode, seconds]);
 
-  const sendCode = () => {
+  const sendCode = async () => {
     setSending(true);
     if (form.formState.isValid) {
       const invitationCode = form.getValues('invitationCode');
-      verifyInvitationCode(invitationCode!)
-        .then(() => {
-          const phone = form.getValues('phone');
-          postSignCode(phone, SmsType.Register)
-            .then(() => {
-              toast.success(t('SMS sent successfully'));
-              setIsSendCode(true);
-            })
-            .catch(async (response) => {
-              const body = await response.json();
-              toast.error(
-                body.message || t('SMS send failed, please try again later'),
-              );
-            })
-            .finally(() => {
-              setSending(false);
-            });
-        })
-        .catch(async (response) => {
-          const body = await response.json();
-          toast.error(
-            body.message || t('SMS send failed, please try again later'),
-          );
-        })
-        .finally(() => {
-          setSending(false);
-        });
+      try {
+        const phone = form.getValues('phone');
+        await sendRegisterSmsCode(phone, invitationCode);
+        toast.success(t('SMS sent successfully'));
+        setIsSendCode(true);
+      } catch (resp: any) {
+        const body = await resp.json();
+        toast.error(
+          body.message || t('SMS send failed, please try again later'),
+        );
+      } finally {
+        setSending(false);
+      }
     }
   };
 

@@ -12,4 +12,7 @@ public record SmsRequest
 
     [JsonPropertyName("type")]
     public required SmsType Type { get; init; }
+
+    [JsonPropertyName("invitationCode")]
+    public string? InvitationCode { get; init; }
 }
