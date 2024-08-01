@@ -11,7 +11,7 @@ public record JsonAzureModelConfig
     public float? Temperature { get; init; }
 
     [JsonPropertyName("version")]
-    public required string Version { get; init; }
+    public string? Version { get; init; }
 
     [JsonPropertyName("deploymentName")]
     public required string DeploymentName { get; init; }
