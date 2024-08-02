@@ -46,7 +46,7 @@ public record ModelResponse
             ModelUsage = ModelUsage.FromJson(userModel),
             ModelConfigOptions = ModelConfigOption.FromTemperature(temperatureOptions),
             ModelConfigs = ModelConfig.FromJson(modelConfig),
-            FileConfig = model.FileConfig != null ? JsonSerializer.Deserialize<JsonFileConfig>(model.FileConfig) : null,
+            FileConfig = string.IsNullOrEmpty(model.FileConfig) ? null : JsonSerializer.Deserialize<JsonFileConfig>(model.FileConfig),
             FileServerConfigs = FileServerConfig.FromFileService(fileService)
         };
     }
