@@ -139,16 +139,17 @@ export const deleteUserPrompts = (id: string) => {
   return fetchServer.delete('/api/prompts?id=' + id);
 };
 
-export const postSignCode = (phone: string, type: SmsType) => {
+const postSignCode = (phone: string, type: SmsType, invitationCode: string | null = null) => {
   const fetchServer = useFetch();
-  return fetchServer.post('/api/public/sms', { body: { phone, type } });
+  return fetchServer.post('/api/public/sms', { body: { phone, type, invitationCode } });
 };
 
-export const verifyInvitationCode = (invitationCode: string) => {
-  const fetchServer = useFetch();
-  return fetchServer.post('/api/public/invitation-code', {
-    body: { invitationCode },
-  });
+export const sendLoginSmsCode = (phone: string) => {
+  return postSignCode(phone, SmsType.SignIn);
+};
+
+export const sendRegisterSmsCode = (phone: string, invitationCode: string | undefined) => {
+  return postSignCode(phone, SmsType.Register, invitationCode);
 };
 
 export const registerByPhone = (

@@ -82,7 +82,7 @@ public partial class User
     public virtual UserBalance? UserBalance { get; set; }
 
     [InverseProperty("User")]
-    public virtual ICollection<UserInvitation> UserInvitations { get; set; } = new List<UserInvitation>();
+    public virtual UserInvitation? UserInvitation { get; set; }
 
     [InverseProperty("User")]
     public virtual UserModel? UserModel { get; set; }

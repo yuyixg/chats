@@ -298,13 +298,11 @@ public partial class ChatsDB : DbContext
 
         modelBuilder.Entity<UserInvitation>(entity =>
         {
-            entity.Property(e => e.Id).ValueGeneratedNever();
-
             entity.HasOne(d => d.InvitationCode).WithMany(p => p.UserInvitations)
                 .OnDelete(DeleteBehavior.ClientSetNull)
                 .HasConstraintName("FK_UserInvitation_InvitationCode");
 
-            entity.HasOne(d => d.User).WithMany(p => p.UserInvitations)
+            entity.HasOne(d => d.User).WithOne(p => p.UserInvitation)
                 .OnDelete(DeleteBehavior.ClientSetNull)
                 .HasConstraintName("FK_UserInvitation_Users");
         });

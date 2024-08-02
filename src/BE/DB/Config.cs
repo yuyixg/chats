@@ -11,7 +11,7 @@ public partial class Config
 {
     [Key]
     [Column("key")]
-    [StringLength(50)]
+    [StringLength(100)]
     [Unicode(false)]
     public string Key { get; set; } = null!;
 

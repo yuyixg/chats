@@ -6,19 +6,15 @@ using Microsoft.EntityFrameworkCore;
 
 namespace Chats.BE.DB;
 
+[PrimaryKey("UserId", "InvitationCodeId")]
 [Table("UserInvitation")]
-[Index("InvitationCodeId", Name = "IX_UserInvitation_InvitationCodeId")]
-[Index("UserId", Name = "IX_UserInvitation_UserId")]
+[Index("UserId", Name = "IX_UserInvitation_UserId", IsUnique = true)]
 public partial class UserInvitation
 {
     [Key]
-    [Column("id")]
-    public Guid Id { get; set; }
-
-    [Column("userId")]
     public Guid UserId { get; set; }
 
-    [Column("invitationCodeId")]
+    [Key]
     public Guid InvitationCodeId { get; set; }
 
     [ForeignKey("InvitationCodeId")]
@@ -26,6 +22,6 @@ public partial class UserInvitation
     public virtual InvitationCode InvitationCode { get; set; } = null!;
 
     [ForeignKey("UserId")]
-    [InverseProperty("UserInvitations")]
+    [InverseProperty("UserInvitation")]
     public virtual User User { get; set; } = null!;
 }
