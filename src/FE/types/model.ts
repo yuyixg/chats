@@ -1,3 +1,4 @@
+import { FileUploadServerConfig } from './components/upload';
 import { FileServicesType } from './file';
 
 export interface ModelConfig {
@@ -19,10 +20,7 @@ export interface Model {
     };
   };
   modelConfig: ModelConfig;
-  fileServerConfig: {
-    id: string;
-    type: FileServicesType;
-  };
+  fileServerConfig: FileUploadServerConfig;
   fileConfig?: ChatModelFileConfig;
   enabled?: boolean;
   modelUsage: ModelUsage;
@@ -73,8 +71,8 @@ export enum ModelProviders {
 
 export interface ChatModelFileConfig {
   type: string;
-  fileMaxSize: number;
-  maxCount: number;
+  maxSize: number;
+  count: number;
 }
 
 export interface ChatModelApiConfig {

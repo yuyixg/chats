@@ -1,24 +1,21 @@
 import { useEffect, useRef } from 'react';
-import toast from 'react-hot-toast';
 
 import { useTranslation } from 'next-i18next';
 
-import { getFileEndpoint } from '@/utils/file';
+import { checkFileSizeCanUpload, uploadFile } from '@/utils/uploadFile';
 
-import { FileServicesType } from '@/types/file';
+import {
+  FileUploadServerConfig,
+  UploadFailType,
+} from '@/types/components/upload';
 import { ChatModelFileConfig } from '@/types/model';
-import { getApiUrl } from '@/utils/common';
-import { getUserSession } from '@/utils/user';
 
 interface Props {
   onSuccessful?: (url: string) => void;
   onUploading?: () => void;
-  onFailed?: () => void;
+  onFailed?: (type?: UploadFailType) => void;
   children?: React.ReactNode;
-  fileServerConfig?: {
-    id: string;
-    type: FileServicesType;
-  };
+  fileServerConfig?: FileUploadServerConfig;
   fileConfig: ChatModelFileConfig;
   maxFileSize?: number;
 }
@@ -33,78 +30,23 @@ const UploadButton: React.FunctionComponent<Props> = ({
 }: Props) => {
   const { t } = useTranslation('chat');
   const uploadRef = useRef<HTMLInputElement>(null);
-  const { fileMaxSize } = fileConfig || { fileMaxSize: 0 };
+  const { maxSize } = fileConfig || { maxSize: 0 };
   const changeFile = async (event: any) => {
     const file = event?.target?.files[0];
-    if (fileMaxSize && file?.size / 1024 > fileMaxSize) {
-      toast.error(
-        t(`The file size limit is {{fileSize}}`, {
-          fileSize: fileMaxSize / 1024 + 'MB',
-        }),
-      );
-      onFailed && onFailed();
+    if (checkFileSizeCanUpload(maxSize, file.size)) {
+      onFailed && onFailed(UploadFailType.size);
       return;
     }
 
     try {
       if (file) {
-        const { id: serverId, type: serverType } = fileServerConfig!;
-        const url = `${getApiUrl()}/${getFileEndpoint(serverType, serverId)}`;
-        onUploading && onUploading();
-        if (serverType === FileServicesType.Local) {
-          const fileForm = new FormData();
-          fileForm.append('file', file);
-          const response = await fetch(url, {
-            method: 'POST',
-            headers: {
-              Authorization: `Bearer ${getUserSession()}`,
-            },
-            body: fileForm,
-          });
-          const { getUrl } = await response.json();
-          if (!response.ok) {
-            onFailed && onFailed();
-            toast.error(t('File upload failed'));
-          }
-          onSuccessful && onSuccessful(getUrl);
-        } else {
-          const fileType = file.name.substring(
-            file.name.lastIndexOf('.'),
-            file.name.length,
-          );
-          const res = await fetch(url, {
-            method: 'POST',
-            headers: {
-              'Content-Type': 'application/json',
-              Authorization: `Bearer ${getUserSession()}`,
-            },
-            body: JSON.stringify({
-              fileName: file.name.replace(fileType, ''),
-              fileType: fileType.replace('.', ''),
-            }),
-          });
-          const { putUrl, getUrl } = await res.json();
-
-          fetch(putUrl, {
-            method: 'PUT',
-            body: file,
-            headers: {
-              'Content-Type': '',
-            },
-          })
-            .then((response) => {
-              if (response.ok) {
-                onSuccessful && onSuccessful(getUrl);
-              } else {
-                toast.error(response?.statusText);
-              }
-            })
-            .catch((error) => {
-              onFailed && onFailed();
-              toast.error(t('File upload failed'));
-              console.error(error);
-            });
-        }
+        uploadFile(
+          file,
+          fileServerConfig!,
+          onUploading,
+          onSuccessful,
+          onFailed,
+        );
       }
     } catch (error) {
       console.error(error);
