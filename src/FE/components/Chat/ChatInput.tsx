@@ -14,6 +14,7 @@ import { useTranslation } from 'next-i18next';
 import { isMobile } from '@/utils/common';
 
 import { Content, Message } from '@/types/chat';
+import { UploadFailType } from '@/types/components/upload';
 import { Prompt } from '@/types/prompt';
 
 import { HomeContext } from '@/pages/home/home';
@@ -26,6 +27,7 @@ import {
   IconStopFilled,
 } from '@/components/Icons/index';
 
+import PasteUpload from '../PasteUpload/PasteUpload';
 import UploadButton from '../UploadButton';
 import { PromptList } from './PromptList';
 import { VariableModal } from './VariableModal';
@@ -50,13 +52,7 @@ export const ChatInput = ({
   const { t } = useTranslation('chat');
 
   const {
-    state: {
-      selectModel,
-      messageIsStreaming,
-      prompts,
-      selectChat,
-      chatError,
-    },
+    state: { selectModel, messageIsStreaming, prompts, selectChat, chatError },
   } = useContext(HomeContext);
 
   const { fileConfig, fileServerConfig, modelConfig } = selectModel || {};
@@ -216,6 +212,42 @@ export const ChatInput = ({
     }
   };
 
+  const canUploadFile = () => {
+    return (
+      fileServerConfig &&
+      !uploading &&
+      content?.image?.length !== fileConfig?.count
+    );
+  };
+
+  const handleUploadFailed = (type?: UploadFailType) => {
+    setUploading(false);
+    if (type === UploadFailType.size) {
+      toast.error(
+        t(`The file size limit is {{fileSize}}`, {
+          fileSize: fileConfig!.maxSize / 1024 + 'MB',
+        }),
+      );
+    } else {
+      toast.error(t('File upload failed'));
+    }
+  };
+
+  const handleUploadSuccessful = (url: string) => {
+    setContent((pre) => {
+      const image = pre.image!.concat(url);
+      return {
+        text: pre.text,
+        image,
+      };
+    });
+    setUploading(false);
+  };
+
+  const handleUploading = () => {
+    setUploading(true);
+  };
+
   useEffect(() => {
     if (textareaRef && textareaRef.current) {
       textareaRef.current.style.height = 'inherit';
@@ -305,28 +337,26 @@ export const ChatInput = ({
                   <IconSend size={18} />
                 )}
               </button>
-              {fileServerConfig &&
-                !uploading &&
-                content?.image?.length !== fileConfig?.maxCount && (
-                  <UploadButton
-                    fileServerConfig={fileServerConfig}
-                    fileConfig={fileConfig!}
-                    onUploading={() => setUploading(true)}
-                    onFailed={() => setUploading(false)}
-                    onSuccessful={(url: string) => {
-                      setContent((pre) => {
-                        const image = pre.image!.concat(url);
-                        return {
-                          text: pre.text,
-                          image,
-                        };
-                      });
-                      setUploading(false);
-                    }}
-                  >
-                    <IconPaperclip size={18} />
-                  </UploadButton>
-                )}
+              {canUploadFile() && (
+                <UploadButton
+                  fileServerConfig={fileServerConfig}
+                  fileConfig={fileConfig!}
+                  onUploading={handleUploading}
+                  onFailed={handleUploadFailed}
+                  onSuccessful={handleUploadSuccessful}
+                >
+                  <IconPaperclip size={18} />
+                </UploadButton>
+              )}
+              {canUploadFile() && (
+                <PasteUpload
+                  fileServerConfig={fileServerConfig!}
+                  fileConfig={fileConfig!}
+                  onUploading={handleUploading}
+                  onFailed={handleUploadFailed}
+                  onSuccessful={handleUploadSuccessful}
+                />
+              )}
             </div>
 
             {showScrollDownButton && (
@@ -374,7 +404,9 @@ export const ChatInput = ({
         )}
       </div>
       <div className="px-3 pt-1 pb-2 text-center text-[11px] text-black/50 dark:text-white/50 md:px-4 md:pt-2 md:pb-2">
-        {t('Large language models may generate misleading error messages, please validate key information.')}
+        {t(
+          'Large language models may generate misleading error messages, please validate key information.',
+        )}
       </div>
     </div>
   );
