@@ -2,6 +2,8 @@ import { FC, memo, useEffect, useRef, useState } from 'react';
 
 import { useTranslation } from 'next-i18next';
 
+import { formatNumberAsMoney } from '@/utils/common';
+
 import { Content, Message, Role } from '@/types/chat';
 
 import {
@@ -13,18 +15,16 @@ import {
   IconRobot,
   IconUser,
 } from '@/components/Icons/index';
+import Tips from '@/components/Tips/Tips';
+import { Label } from '@/components/ui/label';
 
 import { CodeBlock } from '../../Markdown/CodeBlock';
 import { MemoizedReactMarkdown } from '../../Markdown/MemoizedReactMarkdown';
 import { Button } from '../../ui/button';
 
-import rehypeMathjax from 'rehype-mathjax';
-import remarkGfm from 'remark-gfm';
-import remarkMath from 'remark-math';
-import Tips from '@/components/Tips/Tips';
-import { Label } from '@/components/ui/label';
-import { formatNumberAsMoney } from '@/utils/common';
 import Decimal from 'decimal.js';
+import rehypeKatex from 'rehype-katex';
+import remarkMath from 'remark-math';
 
 interface PropsMessage {
   id: string;
@@ -92,10 +92,11 @@ export const ChatMessage: FC<Props> = memo(
 
     return (
       <div
-        className={`group md:px-4 ${message.role === 'assistant'
-          ? 'text-gray-800 dark:text-gray-100'
-          : 'text-gray-800 dark:text-gray-100'
-          }`}
+        className={`group md:px-4 ${
+          message.role === 'assistant'
+            ? 'text-gray-800 dark:text-gray-100'
+            : 'text-gray-800 dark:text-gray-100'
+        }`}
         style={{ overflowWrap: 'anywhere' }}
       >
         <div className="relative m-auto flex px-4 py-[10px] text-base md:max-w-2xl lg:max-w-2xl lg:px-0 xl:max-w-5xl">
@@ -124,10 +125,11 @@ export const ChatMessage: FC<Props> = memo(
                       ))}
                   </div>
                   <div
-                    className={`prose whitespace-pre-wrap dark:prose-invert ${message.content?.image && message.content.image.length > 0
-                      ? 'mt-2'
-                      : ''
-                      }`}
+                    className={`prose whitespace-pre-wrap dark:prose-invert ${
+                      message.content?.image && message.content.image.length > 0
+                        ? 'mt-2'
+                        : ''
+                    }`}
                   >
                     {message.content.text}
                   </div>
@@ -151,8 +153,9 @@ export const ChatMessage: FC<Props> = memo(
                           <IconChevronLeft stroke="#7d7d7d" />
                         </Button>
                         <span className="font-bold text-[#7d7d7d]">
-                          {`${currentSelectIndex + 1}/${parentChildrenIds.length
-                            }`}
+                          {`${currentSelectIndex + 1}/${
+                            parentChildrenIds.length
+                          }`}
                         </span>
                         <Button
                           variant="ghost"
@@ -179,8 +182,8 @@ export const ChatMessage: FC<Props> = memo(
                 <div className="pr-4 md:pr-0">
                   <MemoizedReactMarkdown
                     className="prose dark:prose-invert flex-1"
-                    remarkPlugins={[remarkGfm, remarkMath]}
-                    rehypePlugins={[rehypeMathjax]}
+                    remarkPlugins={[remarkMath]}
+                    rehypePlugins={[rehypeKatex as any]}
                     components={{
                       code({ node, className, inline, children, ...props }) {
                         if (children.length) {
@@ -257,8 +260,9 @@ export const ChatMessage: FC<Props> = memo(
                         <IconChevronLeft stroke="#7d7d7d" />
                       </Button>
                       <span className="font-bold text-[#7d7d7d]">
-                        {`${assistantCurrentSelectIndex + 1}/${assistantChildrenIds.length
-                          }`}
+                        {`${assistantCurrentSelectIndex + 1}/${
+                          assistantChildrenIds.length
+                        }`}
                       </span>
                       <Button
                         variant="ghost"
@@ -279,8 +283,9 @@ export const ChatMessage: FC<Props> = memo(
                     </div>
                   )}
                   <div
-                    className={`flex gap-1 ${isLastMessage ? 'visible' : 'invisible'
-                      } group-hover:visible focus:visible`}
+                    className={`flex gap-1 ${
+                      isLastMessage ? 'visible' : 'invisible'
+                    } group-hover:visible focus:visible`}
                   >
                     {messagedCopied ? (
                       <Button variant="ghost" className="p-1 m-0 h-auto">
@@ -319,7 +324,9 @@ export const ChatMessage: FC<Props> = memo(
                             <div className="grid grid-cols-1 items-center">
                               <GenerateInformation
                                 name={'duration'}
-                                value={message?.duration?.toLocaleString() + 'ms'}
+                                value={
+                                  message?.duration?.toLocaleString() + 'ms'
+                                }
                               />
                               <GenerateInformation
                                 name={'prompt_tokens'}
@@ -331,41 +338,45 @@ export const ChatMessage: FC<Props> = memo(
                               />
                               <GenerateInformation
                                 name={'total_tokens'}
-                                value={`${message.inputTokens + message.outputTokens}`}
+                                value={`${
+                                  message.inputTokens + message.outputTokens
+                                }`}
                               />
                               <GenerateInformation
                                 name={'speed'}
                                 value={
                                   message?.duration
                                     ? (
-                                      (message.outputTokens /
-                                        (message?.duration || 0)) *
-                                      1000
-                                    ).toFixed(2) + ' tokens/s'
+                                        (message.outputTokens /
+                                          (message?.duration || 0)) *
+                                        1000
+                                      ).toFixed(2) + ' tokens/s'
                                     : '-'
                                 }
                               />
                               <GenerateInformation
                                 name={'prompt_price'}
-                                value={'￥' + formatNumberAsMoney(
-                                  +message.inputPrice,
-                                  6,
-                                )}
+                                value={
+                                  '￥' +
+                                  formatNumberAsMoney(+message.inputPrice, 6)
+                                }
                               />
                               <GenerateInformation
                                 name={'response_price'}
-                                value={'￥' + formatNumberAsMoney(
-                                  +message.outputPrice,
-                                  6,
-                                )}
+                                value={
+                                  '￥' +
+                                  formatNumberAsMoney(+message.outputPrice, 6)
+                                }
                               />
                               <GenerateInformation
                                 name={'total_price'}
-                                value={'￥' + formatNumberAsMoney(
-                                  +message.inputPrice +
-                                  +message.outputPrice,
-                                  6,
-                                )}
+                                value={
+                                  '￥' +
+                                  formatNumberAsMoney(
+                                    +message.inputPrice + +message.outputPrice,
+                                    6,
+                                  )
+                                }
                               />
                             </div>
                           </div>
