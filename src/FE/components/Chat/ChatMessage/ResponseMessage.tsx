@@ -7,8 +7,7 @@ import { HomeContext } from '@/pages/home/home';
 import { CodeBlock } from '@/components/Markdown/CodeBlock';
 import { MemoizedReactMarkdown } from '@/components/Markdown/MemoizedReactMarkdown';
 
-import rehypeMathjax from 'rehype-mathjax';
-import remarkGfm from 'remark-gfm';
+import rehypeKatex from 'rehype-katex';
 import remarkMath from 'remark-math';
 
 interface Props {
@@ -26,13 +25,27 @@ const ResponseMessage = (props: Props) => {
 
   const { message, currentChatMessageId } = props;
 
+  function preprocessLaTeX(content: string) {
+    // Replace block-level LaTeX delimiters \[ \] with $$ $$
+
+    const blockProcessedContent = content.replace(
+      /\\\[(.*?)\\\]/gs,
+      (_, equation) => `$$${equation}$$`,
+    );
+    // Replace inline LaTeX delimiters \( \) with $ $
+    const inlineProcessedContent = blockProcessedContent.replace(
+      /\\\((.*?)\\\)/gs,
+      (_, equation) => `$${equation}$`,
+    );
+    return inlineProcessedContent;
+  }
 
   return (
     <div className="pr-0">
       <MemoizedReactMarkdown
         className="prose dark:prose-invert flex-1"
-        remarkPlugins={[remarkGfm, remarkMath]}
-        rehypePlugins={[rehypeMathjax]}
+        remarkPlugins={[remarkMath]}
+        rehypePlugins={[rehypeKatex as any]}
         components={{
           code({ node, className, inline, children, ...props }) {
             if (children.length) {
@@ -61,7 +74,7 @@ const ResponseMessage = (props: Props) => {
             );
           },
           p({ children }) {
-            return <p className='md-p'>{children}</p>
+            return <p className="md-p">{children}</p>;
           },
           table({ children }) {
             return (
@@ -86,7 +99,7 @@ const ResponseMessage = (props: Props) => {
           },
         }}
       >
-        {`${message.content.text}${
+        {`${preprocessLaTeX(message.content.text!)}${
           messageIsStreaming && message.id == currentChatMessageId ? '`▍`' : ''
         }`}
       </MemoizedReactMarkdown>

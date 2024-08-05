@@ -11,6 +11,7 @@ import ResponseMessage from './ResponseMessage';
 import ResponseMessageActions from './ResponseMessageActions';
 import UserMessage from './UserMessage';
 
+
 export interface Props {
   readonly?: boolean;
   parentId: string | null;
@@ -46,7 +47,7 @@ export const ChatMessage: FC<Props> = memo(
   }) => {
     const {
       state: { messageIsStreaming, currentChatMessageId },
-    } = useContext(HomeContext);    
+    } = useContext(HomeContext);
 
     return (
       <div className={'group md:px-4 text-gray-800 dark:text-gray-100'}>
