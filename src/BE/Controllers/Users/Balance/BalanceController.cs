@@ -22,25 +22,26 @@ public class BalanceController(ChatsDB db, CurrentUser currentUser) : Controller
         return Ok(balance);
     }
 
-    [HttpGet("balance-7-days")]
-    public async Task<ActionResult<Dictionary<DateOnly, decimal>>> GetBalance7Days(int timezoneOffset, CancellationToken cancellationToken)
+    [HttpGet("balance-7-days-usage")]
+    public async Task<ActionResult<Dictionary<DateTime, decimal>>> GetBalance7Days(int timezoneOffset, CancellationToken cancellationToken)
     {
         DateTime now = DateTime.UtcNow;
         DateTime start = now.AddDays(-days);
-        Dictionary<DateOnly, decimal> history = await db.BalanceLogs
+        DateTime[] dates = Enumerable.Range(0, days)
+            .Select(day => now.AddMinutes(-timezoneOffset).AddDays(-day).Date)
+            .ToArray();
+        Dictionary<DateTime, decimal> history = (await db.BalanceLogs
             .Where(x => x.UserId == currentUser.Id && x.CreatedAt >= start && x.CreatedAt <= now)
             .Select(x => new
             {
-                Date = DateOnly.FromDateTime(x.CreatedAt.AddMinutes(-timezoneOffset)), // Timezone
+                Date = x.CreatedAt.AddMinutes(-timezoneOffset).Date, // Timezone
                 Amount = x.Value,
             })
+            .ToArrayAsync(cancellationToken))
             .GroupBy(x => x.Date)
-            .ToDictionaryAsync(k => k.Key, v => v.Sum(y => y.Amount), cancellationToken);
+            .ToDictionary(k => k.Key, v => v.Sum(y => y.Amount));
 
-        DateOnly[] dates = Enumerable.Range(0, days)
-            .Select(day => DateOnly.FromDateTime(start.AddMinutes(-timezoneOffset)).AddDays(-day))
-            .ToArray();
-        foreach (DateOnly date in dates)
+        foreach (DateTime date in dates)
         {
             if (!history.ContainsKey(date))
             {
