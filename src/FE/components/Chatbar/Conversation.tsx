@@ -67,7 +67,7 @@ export const ConversationComponent = ({ chat }: Props) => {
 
   const handleChangeTitle = (chatId: string) => {
     if (title.trim().length > 0) {
-      putChats({ id: chatId, title }).then(() => {
+      putChats(chatId, { title }).then(() => {
         handleUpdateChat(chats, chatId, { title });
         toast.success(t('Save successful'));
         setTitle('');

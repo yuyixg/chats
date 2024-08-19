@@ -24,7 +24,7 @@ export const SharedMessageModal = (props: IProps) => {
 
   const handleSharedMessage = () => {
     setLoading(true);
-    putChats({ id: chat.id, isShared: true })
+    putChats(chat.id, { isShared: true })
       .then(() => {
         onShareChange(true);
         handleCopySharedUrl();
@@ -36,7 +36,7 @@ export const SharedMessageModal = (props: IProps) => {
 
   const handleCloseShared = () => {
     setLoading(true);
-    putChats({ id: chat.id, isShared: false })
+    putChats(chat.id, { isShared: false })
       .then(() => {
         onShareChange(false);
         toast.success(t('Save successful'));

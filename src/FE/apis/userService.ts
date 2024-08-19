@@ -38,7 +38,6 @@ export interface PostChatParams {
 }
 
 export interface PutChatParams {
-  id: string;
   title?: string;
   isShared?: boolean;
 }
@@ -79,9 +78,9 @@ export const postChats = (params: PostChatParams): Promise<ChatResult> => {
   return fetchService.post('/api/user/chats', { body: params });
 };
 
-export const putChats = (params: PutChatParams) => {
+export const putChats = (chatId: string, params: PutChatParams) => {
   const fetchService = useFetch();
-  return fetchService.put('/api/user/chats', { body: params });
+  return fetchService.put(`/api/user/chats/${chatId}`, { body: params });
 };
 
 export const stopChat = (chatId: string) => {
