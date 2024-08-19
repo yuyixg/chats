@@ -91,7 +91,7 @@ export const stopChat = (chatId: string) => {
 
 export const deleteChats = (id: string) => {
   const fetchService = useFetch();
-  return fetchService.delete('/api/user/chats?id=' + id);
+  return fetchService.delete(`/api/user/chats/${id}`);
 };
 
 export const getCsrfToken = (): Promise<{ csrfToken: string }> => {

@@ -98,9 +98,19 @@ public class UserChatsController(ChatsDB db, CurrentUser currentUser) : Controll
             return NotFound();
         }
 
-        await db.Chats
-            .Where(x => x.Id == chatId)
-            .ExecuteDeleteAsync(cancellationToken);
+        if (await db.ChatMessages.AnyAsync(m => m.ChatId == chatId, cancellationToken))
+        {
+            await db.Chats
+                .Where(x => x.Id == chatId)
+                .ExecuteUpdateAsync(x => x.SetProperty(y => y.IsDeleted, true), cancellationToken);
+        }
+        else
+        {
+            await db.Chats
+                .Where(x => x.Id == chatId)
+                .ExecuteDeleteAsync(cancellationToken);
+        }
+
         return NoContent();
     }
 
