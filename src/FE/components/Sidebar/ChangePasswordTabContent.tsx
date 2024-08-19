@@ -86,12 +86,15 @@ export const ChangePasswordTabContent = () => {
         router.push(getLoginUrl());
         setLoading(false);
       })
-      .catch(() => {
-        toast.error(
-          t(
-            'Operation failed! Please try again later, or contact technical personnel.',
-          ),
-        );
+      .catch(async (e) => {
+        try {
+          const errorResponse = await e.json();
+          console.log(errorResponse);
+          toast.error(t(errorResponse.message || 'Operation failed! Please try again later, or contact technical personnel.'));
+        } catch (jsonError) {
+          console.log('Error is not in JSON format:', jsonError);
+          toast.error(t('Operation failed! Please try again later, or contact technical personnel.'));
+        }
       })
       .finally(() => {
         setLoading(false);
