@@ -37,7 +37,7 @@ public record LogEntry
     public required string Request { get; init; }
 
     [JsonPropertyName("response")]
-    public required string Response { get; init; }
+    public string? Response { get; init; }
 
     [JsonPropertyName("createdAt")]
     public required DateTime CreatedAt { get; init; }
