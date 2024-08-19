@@ -17,7 +17,7 @@ public class ChangePasswordController(ChatsDB db, CurrentUser currentUser, Passw
     {
         if (!IsStrongEnoughPassword(req.NewPassword))
         {
-            return this.BadRequestMessage("Password should be at least 6 characters long and contain at least one lowercase letter, one uppercase letter, and one digit");
+            return this.BadRequestMessage(NotMeetPasswordRule);
         }
 
         User? user = await db.Users
@@ -49,7 +49,7 @@ public class ChangePasswordController(ChatsDB db, CurrentUser currentUser, Passw
 
         if (!IsStrongEnoughPassword(req.NewPassword))
         {
-            return this.BadRequestMessage("Password should be at least 6 characters long and contain at least one lowercase letter, one uppercase letter, and one digit");
+            return this.BadRequestMessage(NotMeetPasswordRule);
         }
 
         User? user = await db.Users
@@ -76,9 +76,12 @@ public class ChangePasswordController(ChatsDB db, CurrentUser currentUser, Passw
         return Ok();
     }
 
+    private const string NotMeetPasswordRule 
+        = "Password should be at least 8 characters long and contain at least three of the following: one lowercase letter, one uppercase letter, one digit, and one special character.";
+
     private static bool IsStrongEnoughPassword(string password)
     {
-        if (string.IsNullOrEmpty(password) || password.Length < 6)
+        if (string.IsNullOrEmpty(password) || password.Length < 8)
         {
             return false;
         }
@@ -86,6 +89,7 @@ public class ChangePasswordController(ChatsDB db, CurrentUser currentUser, Passw
         bool hasLowercase = false;
         bool hasUppercase = false;
         bool hasDigit = false;
+        bool hasSpecialChar = false;
 
         foreach (char c in password)
         {
@@ -101,8 +105,15 @@ public class ChangePasswordController(ChatsDB db, CurrentUser currentUser, Passw
             {
                 hasDigit = true;
             }
+            else if (!char.IsLetterOrDigit(c))
+            {
+                hasSpecialChar = true;
+            }
         }
 
-        return hasLowercase && hasUppercase && hasDigit;
+        // 检查至少有三种不同的字符类型
+        int typesCount = (hasLowercase ? 1 : 0) + (hasUppercase ? 1 : 0) + (hasDigit ? 1 : 0) + (hasSpecialChar ? 1 : 0);
+
+        return typesCount >= 3;
     }
 }
