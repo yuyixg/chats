@@ -1,14 +1,16 @@
-﻿using Chats.BE.Controllers.Admin.Common;
+﻿using Chats.BE.Controllers.Admin.AdminModels.Dtos;
+using Chats.BE.Controllers.Admin.Common;
 using Chats.BE.DB;
+using Chats.BE.Services;
 using Microsoft.AspNetCore.Mvc;
 using Microsoft.EntityFrameworkCore;
 
 namespace Chats.BE.Controllers.Admin.AdminModels;
 
-[Route("api/admin/models"), AuthorizeAdmin]
+[Route("api/admin"), AuthorizeAdmin]
 public class AdminModelsController(ChatsDB db) : ControllerBase
 {
-    [HttpGet]
+    [HttpGet("models")]
     public async Task<ActionResult<AdminModelDto[]>> GetAdminModels(bool all, CancellationToken cancellationToken)
     {
         IQueryable<ChatModel> query = db.ChatModels;
@@ -34,5 +36,19 @@ public class AdminModelsController(ChatsDB db) : ControllerBase
             .AsAsyncEnumerable()
             .Select(x => x.ToDto())
             .ToArrayAsync(cancellationToken);
+    }
+
+    [HttpPut("user-models")]
+    public async Task<ActionResult> UpdateUserModels([FromBody] UpdateUserModelRequest req, CancellationToken cancellationToken)
+    {
+        UserModel? userModel = await db.UserModels
+            .FindAsync(req.UserModelId, cancellationToken);
+        if (userModel == null) return NotFound();
+
+        userModel.UpdatedAt = DateTime.UtcNow;
+        userModel.Models = JSON.Serialize(req.Models.Where(x => x.Enabled));
+        await db.SaveChangesAsync(cancellationToken);
+
+        return NoContent();
     }
 }

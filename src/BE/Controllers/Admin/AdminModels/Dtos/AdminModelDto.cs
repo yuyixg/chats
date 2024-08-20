@@ -2,7 +2,7 @@
 using System.Text.Json;
 using System.Text.Json.Serialization;
 
-namespace Chats.BE.Controllers.Admin.AdminModels;
+namespace Chats.BE.Controllers.Admin.AdminModels.Dtos;
 
 public record AdminModelDto
 {

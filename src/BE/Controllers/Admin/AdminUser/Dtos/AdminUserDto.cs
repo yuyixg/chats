@@ -78,7 +78,7 @@ public record AdminUserDtoTemp
             Enabled = Enabled,
             CreatedAt = CreatedAt,
             UserModelId = UserModelId,
-            Models = JsonSerializer.Deserialize<JsonTokenBalance[]>(Models)!,
+            Models = JsonSerializer.Deserialize<IEnumerable<JsonTokenBalance>>(Models)!.Where(x => x.Enabled).ToArray(),
         };
     }
 }
