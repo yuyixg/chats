@@ -1,15 +1,15 @@
-﻿using Chats.BE.Controllers.Admin.UserBalances.Dtos;
+﻿using Chats.BE.Controllers.Admin.Common;
+using Chats.BE.Controllers.Admin.UserBalances.Dtos;
 using Chats.BE.DB;
 using Chats.BE.Infrastructure;
 using Chats.BE.Services;
 using Chats.BE.Services.Common;
-using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Mvc;
 using Microsoft.EntityFrameworkCore;
 
 namespace Chats.BE.Controllers.Admin.UserBalances;
 
-[Route("api/admin/user-balances"), Authorize(Roles = "admin")]
+[Route("api/admin/user-balances"), AuthorizeAdmin]
 public class UserBalancesController(ChatsDB db, CurrentUser currentUser, BalanceService balanceService) : ControllerBase
 {
     [HttpPut]

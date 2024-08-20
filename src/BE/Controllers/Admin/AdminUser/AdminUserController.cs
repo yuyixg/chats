@@ -1,14 +1,14 @@
 ﻿using Chats.BE.Controllers.Admin.AdminUser.Dtos;
+using Chats.BE.Controllers.Admin.Common;
 using Chats.BE.Controllers.Common.Dtos;
 using Chats.BE.DB;
 using Chats.BE.Services;
-using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Mvc;
 using Microsoft.EntityFrameworkCore;
 
 namespace Chats.BE.Controllers.Admin.AdminUser;
 
-[Route("api/admin/users"), Authorize(Roles = "admin")]
+[Route("api/admin/users"), AuthorizeAdmin]
 public class AdminUserController(ChatsDB db) : ControllerBase
 {
     [HttpGet]
