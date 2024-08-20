@@ -9,6 +9,8 @@ import { MemoizedReactMarkdown } from '@/components/Markdown/MemoizedReactMarkdo
 
 import rehypeKatex from 'rehype-katex';
 import remarkMath from 'remark-math';
+import remarkGfm from 'remark-gfm';
+import { preprocessLaTeX } from '@/utils/chats';
 
 interface Props {
   currentChatMessageId: string;
@@ -25,26 +27,11 @@ const ResponseMessage = (props: Props) => {
 
   const { message, currentChatMessageId } = props;
 
-  function preprocessLaTeX(content: string) {
-    // Replace block-level LaTeX delimiters \[ \] with $$ $$
-
-    const blockProcessedContent = content.replace(
-      /\\\[(.*?)\\\]/gs,
-      (_, equation) => `$$${equation}$$`,
-    );
-    // Replace inline LaTeX delimiters \( \) with $ $
-    const inlineProcessedContent = blockProcessedContent.replace(
-      /\\\((.*?)\\\)/gs,
-      (_, equation) => `$${equation}$`,
-    );
-    return inlineProcessedContent;
-  }
-
   return (
     <div className="pr-0">
       <MemoizedReactMarkdown
         className="prose dark:prose-invert flex-1"
-        remarkPlugins={[remarkMath]}
+        remarkPlugins={[remarkMath, remarkGfm]}
         rehypePlugins={[rehypeKatex as any]}
         components={{
           code({ node, className, inline, children, ...props }) {

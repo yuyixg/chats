@@ -25,6 +25,8 @@ import { Button } from '../../ui/button';
 import Decimal from 'decimal.js';
 import rehypeKatex from 'rehype-katex';
 import remarkMath from 'remark-math';
+import remarkGfm from 'remark-gfm';
+import { preprocessLaTeX } from '@/utils/chats';
 
 interface PropsMessage {
   id: string;
@@ -182,7 +184,7 @@ export const ChatMessage: FC<Props> = memo(
                 <div className="pr-4 md:pr-0">
                   <MemoizedReactMarkdown
                     className="prose dark:prose-invert flex-1"
-                    remarkPlugins={[remarkMath]}
+                    remarkPlugins={[remarkMath, remarkGfm]}
                     rehypePlugins={[rehypeKatex as any]}
                     components={{
                       code({ node, className, inline, children, ...props }) {
@@ -239,7 +241,7 @@ export const ChatMessage: FC<Props> = memo(
                       },
                     }}
                   >
-                    {`${message.content.text}`}
+                    {preprocessLaTeX(message.content.text)}
                   </MemoizedReactMarkdown>
                 </div>
 
