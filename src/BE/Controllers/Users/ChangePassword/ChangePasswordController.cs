@@ -36,7 +36,7 @@ public class ChangePasswordController(ChatsDB db, CurrentUser currentUser, Passw
         user.Password = passwordHasher.HashPassword(req.NewPassword);
         user.UpdatedAt = DateTime.UtcNow;
         await db.SaveChangesAsync(cancellationToken);
-        return Ok();
+        return NoContent();
     }
 
     [HttpPut("reset-password")]
@@ -73,7 +73,7 @@ public class ChangePasswordController(ChatsDB db, CurrentUser currentUser, Passw
         user.Password = passwordHasher.HashPassword(req.NewPassword);
         user.UpdatedAt = DateTime.UtcNow;
         await db.SaveChangesAsync(cancellationToken);
-        return Ok();
+        return NoContent();
     }
 
     private const string NotMeetPasswordRule 

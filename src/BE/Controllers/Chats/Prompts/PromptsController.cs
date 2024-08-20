@@ -46,7 +46,7 @@ public class PromptsController(ChatsDB db, CurrentUser currentUser) : Controller
         }
         db.Prompts.Remove(prompt);
         await db.SaveChangesAsync(cancellationToken);
-        return Ok();
+        return NoContent();
     }
 
     [HttpPut]

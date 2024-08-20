@@ -131,6 +131,6 @@ public class SmsController(ChatsDB db, GlobalDBConfig globalConfig, ILogger<SmsC
             CreatedAt = DateTime.UtcNow,
         });
         await db.SaveChangesAsync(cancellationToken);
-        return Ok();
+        return NoContent();
     }
 }

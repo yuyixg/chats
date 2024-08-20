@@ -13,7 +13,7 @@ namespace Chats.BE.Controllers.Chats.ModelUsage;
 public class ModelUsageController(ChatsDB db, CurrentUser currentUser) : ControllerBase
 {
     [HttpGet]
-    public async Task<ActionResult> GetUserModelUsage(Guid modelId, CancellationToken cancellationToken)
+    public async Task<ActionResult<ModelUsageResponse>> GetUserModelUsage(Guid modelId, CancellationToken cancellationToken)
     {
         string? userModels = await db.UserModels
             .Where(x => x.UserId == currentUser.Id)

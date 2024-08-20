@@ -5,9 +5,9 @@ using System.Text.Json;
 
 namespace Chats.BE.Controllers.Common.Results;
 
-public class OldBEActionResult(object? json) : IActionResult
+public class OldBEActionResult(object? json) : ActionResult
 {
-    public async Task ExecuteResultAsync(ActionContext context)
+    public async override Task ExecuteResultAsync(ActionContext context)
     {
         // 获取老的API URL
         AppConfigService appConfigService = context.HttpContext.RequestServices.GetRequiredService<AppConfigService>();

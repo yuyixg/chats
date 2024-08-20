@@ -10,8 +10,8 @@ namespace Chats.BE.Controllers.Chats.Conversations;
 public class StopChatController : ControllerBase
 {
     [HttpPost]
-    public OkResult Stub()
+    public NoContentResult Stub()
     {
-        return Ok();
+        return NoContent();
     }
 }

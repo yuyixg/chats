@@ -55,7 +55,7 @@ public class AdminUserController(ChatsDB db) : ControllerBase
         }
 
         await db.SaveChangesAsync(cancellationToken);
-        return Ok();
+        return NoContent();
     }
 
     [HttpPost]

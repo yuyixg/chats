@@ -17,7 +17,7 @@ namespace Chats.BE.Controllers.Public.AccountLogin;
 public class AccountLoginController(ChatsDB db, ILogger<AccountLoginController> logger, SessionManager sessionManager) : ControllerBase
 {
     [HttpPost("account-login")]
-    public async Task<IActionResult> Login(
+    public async Task<ActionResult> Login(
         [FromBody] LoginRequest request,
         [FromServices] PasswordHasher passwordHasher,
         [FromServices] GlobalDBConfig kcStore,
@@ -45,7 +45,7 @@ public class AccountLoginController(ChatsDB db, ILogger<AccountLoginController> 
         throw new InvalidOperationException("Invalid login request.");
     }
 
-    private async Task<IActionResult> KeycloakLogin(GlobalDBConfig kcStore, UserManager userManager, SsoLoginRequest sso, HostUrlService hostUrl, CancellationToken cancellationToken)
+    private async Task<ActionResult> KeycloakLogin(GlobalDBConfig kcStore, UserManager userManager, SsoLoginRequest sso, HostUrlService hostUrl, CancellationToken cancellationToken)
     {
         KeycloakConfig? kcConfig = await kcStore.GetKeycloakConfig(cancellationToken);
         if (kcConfig == null)
