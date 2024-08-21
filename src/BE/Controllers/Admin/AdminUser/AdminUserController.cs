@@ -77,7 +77,7 @@ public class AdminUserController(ChatsDB db) : ControllerBase
             Phone = dto.Phone,
             Role = dto.Role,
             Avatar = dto.Avatar,
-            Enabled = dto.Enabled,
+            Enabled = dto.Enabled ?? false,
             Provider = null,
             Password = passwordHasher.HashPassword(dto.Password),
             CreatedAt = DateTime.UtcNow,

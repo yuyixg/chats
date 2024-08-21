@@ -8,7 +8,7 @@ public record CreateUserDto
     public required string UserName { get; init; }
 
     [JsonPropertyName("enabled")]
-    public required bool Enabled { get; init; }
+    public bool? Enabled { get; init; }
 
     [JsonPropertyName("phone")]
     public required string Phone { get; init; }
