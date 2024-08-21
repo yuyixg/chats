@@ -110,10 +110,7 @@ export const ModelKeysModal = (props: IProps) => {
     if (!form.formState.isValid) return;
     let p = null;
     if (selected) {
-      p = putModelKeys({
-        ...values,
-        id: selected.id,
-      } as PutModelKeysParams);
+      p = putModelKeys(selected.id, values as PutModelKeysParams);
     } else {
       p = postModelKeys(values as PostModelKeysParams);
     }
@@ -129,12 +126,21 @@ export const ModelKeysModal = (props: IProps) => {
     });
   }
 
-  function onDelete() {
-    deleteModelKeys(selected?.id!).then(() => {
+  async function onDelete() {
+    try {
+      await deleteModelKeys(selected?.id!);
       onSuccessful();
       toast.success(t('Deleted successful!'));
-    });
-  }
+    }
+    catch (err: any) {
+      try {
+        const resp = await err.json();
+        toast.error(resp.message);
+      } catch {
+        toast.error(t('Operation failed! Please try again later, or contact technical personnel.'));
+      }
+    }
+  };
 
   useEffect(() => {
     const subscription = form.watch((value, { name, type }) => {

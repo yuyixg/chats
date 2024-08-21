@@ -230,16 +230,16 @@ export const postModelKeys = (params: PostModelKeysParams) => {
   });
 };
 
-export const putModelKeys = (params: PutModelKeysParams) => {
+export const putModelKeys = (id: string, params: PutModelKeysParams) => {
   const fetchService = useFetch();
-  return fetchService.put('/api/admin/model-keys', {
+  return fetchService.put(`/api/admin/model-keys/${id}`, {
     body: params,
   });
 };
 
 export const deleteModelKeys = (id: string) => {
   const fetchService = useFetch();
-  return fetchService.delete('/api/admin/model-keys?id=' + id);
+  return fetchService.delete(`/api/admin/model-keys/${id}`);
 };
 
 export const getUserInitialConfig = () => {

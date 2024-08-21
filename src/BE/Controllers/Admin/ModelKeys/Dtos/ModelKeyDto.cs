@@ -1,4 +1,5 @@
-﻿using System.Text.Json;
+﻿using Chats.BE.DB.Jsons;
+using System.Text.Json;
 using System.Text.Json.Nodes;
 using System.Text.Json.Serialization;
 
@@ -23,16 +24,11 @@ public record ModelKeyDtoTemp
             Id = Id,
             Type = Type,
             Name = Name,
-            Configs = (JsonObject)JsonNode.Parse(Configs)!,
+            Configs = JsonSerializer.Deserialize<JsonModelKey>(Configs)!,
             CreatedAt = CreatedAt,
         };
 
-        if (maskFields)
-        {
-            dto.MaskFields();
-        }
-
-        return dto;
+        return maskFields ? dto.WithMaskedKeys() : dto;
     }
 }
 
@@ -48,23 +44,13 @@ public record ModelKeyDto
     public required string Name { get; init; }
 
     [JsonPropertyName("configs")]
-    public required JsonObject Configs { get; init; }
+    public required JsonModelKey Configs { get; init; }
 
     [JsonPropertyName("createdAt")]
     public required DateTime CreatedAt { get; init; }
 
-    public void MaskFields()
+    public ModelKeyDto WithMaskedKeys()
     {
-        foreach (string fieldToMask in FieldsToMask)
-        {
-            JsonNode? maskNode = Configs[fieldToMask];
-            if (maskNode != null && maskNode.GetValueKind() == JsonValueKind.String)
-            {
-                string plainText = maskNode.GetValue<string>();
-                Configs[fieldToMask] = plainText[..5] + "****" + plainText[^2..];
-            }
-        }
+        return this with { Configs = Configs.WithMaskedKey() };
     }
-
-    private static string[] FieldsToMask { get; } = ["apiKey", "secret"];
 }
