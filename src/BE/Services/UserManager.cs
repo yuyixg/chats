@@ -58,6 +58,7 @@ public class UserManager(ChatsDB db)
             UpdatedAt = DateTime.UtcNow,
         };
 
+        provider ??= "-";
         UserInitialConfig? config = await db.UserInitialConfigs
             .OrderByDescending(x =>
                 x.LoginType == provider ? 10 : 1 +

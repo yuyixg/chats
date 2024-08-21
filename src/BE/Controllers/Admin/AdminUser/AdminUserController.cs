@@ -67,7 +67,6 @@ public class AdminUserController(ChatsDB db) : ControllerBase
             return BadRequest("User existed");
         }
 
-
         User user = new()
         {
             Id = Guid.NewGuid(),
