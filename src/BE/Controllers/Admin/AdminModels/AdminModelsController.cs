@@ -42,7 +42,7 @@ public class AdminModelsController(ChatsDB db) : ControllerBase
     [HttpPut("models")]
     public async Task<ActionResult> UpdateModel([FromBody] UpdateModelRequest req, CancellationToken cancellationToken)
     {
-        ChatModel? cm = await db.ChatModels.FindAsync(req.ModelId, cancellationToken);
+        ChatModel? cm = await db.ChatModels.FindAsync([req.ModelId], cancellationToken);
         if (cm == null) return NotFound();
 
         if (cm.ModelVersion != req.ModelVersion)
@@ -62,7 +62,7 @@ public class AdminModelsController(ChatsDB db) : ControllerBase
         if (db.ChangeTracker.HasChanges())
         {
             cm.UpdatedAt = DateTime.UtcNow;
-            await db.SaveChangesAsync();
+            await db.SaveChangesAsync(cancellationToken);
         }
 
         return NoContent();
@@ -72,7 +72,7 @@ public class AdminModelsController(ChatsDB db) : ControllerBase
     public async Task<ActionResult> UpdateUserModels([FromBody] UpdateUserModelRequest req, CancellationToken cancellationToken)
     {
         UserModel? userModel = await db.UserModels
-            .FindAsync(req.UserModelId, cancellationToken);
+            .FindAsync([req.UserModelId], cancellationToken);
         if (userModel == null) return NotFound();
 
         userModel.UpdatedAt = DateTime.UtcNow;
