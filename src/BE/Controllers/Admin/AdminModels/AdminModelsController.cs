@@ -39,24 +39,28 @@ public class AdminModelsController(ChatsDB db) : ControllerBase
             .ToArrayAsync(cancellationToken);
     }
 
-    [HttpPut("models")]
-    public async Task<ActionResult> UpdateModel([FromBody] UpdateModelRequest req, CancellationToken cancellationToken)
+    [HttpPut("models/{modelId}")]
+    public async Task<ActionResult> UpdateModel(Guid modelId, [FromBody] UpdateModelRequest req, CancellationToken cancellationToken)
     {
-        ChatModel? cm = await db.ChatModels.FindAsync([req.ModelId], cancellationToken);
+        ChatModel? cm = await db.ChatModels.FindAsync([modelId], cancellationToken);
         if (cm == null) return NotFound();
 
         if (cm.ModelVersion != req.ModelVersion)
         {
-            string? newModelProvider = await db.ModelSettings
-                .Where(x => x.Type == req.ModelVersion)
-                .Select(x => x.Provider.Name)
+            string? modelProvider = await db.ModelKeys
+                .Where(x => x.Id == req.ModelKeysId)
+                .Select(x => x.Type)
                 .SingleOrDefaultAsync(cancellationToken);
-            if (newModelProvider == null)
+                if (modelProvider == null)
+                {
+                    return this.BadRequestMessage("Model version not found");
+                }
+            if (modelProvider == null)
             {
                 return this.BadRequestMessage("Model version not found");
             }
 
-            cm.ModelProvider = newModelProvider;
+            cm.ModelProvider = modelProvider;
         }
         req.ApplyTo(cm);
         if (db.ChangeTracker.HasChanges())
@@ -66,6 +70,32 @@ public class AdminModelsController(ChatsDB db) : ControllerBase
         }
 
         return NoContent();
+    }
+
+    [HttpPost("models")]
+    public async Task<ActionResult> CreateModel([FromBody] UpdateModelRequest req, CancellationToken cancellationToken)
+    {
+        string? modelProvider = await db.ModelKeys
+            .Where(x => x.Id == req.ModelKeysId)
+            .Select(x => x.Type)
+            .SingleOrDefaultAsync(cancellationToken);
+        if (modelProvider == null)
+        {
+            return this.BadRequestMessage("Model version not found");
+        }
+
+        ChatModel toCreate = new()
+        {
+            Id = Guid.NewGuid(), 
+            CreatedAt = DateTime.UtcNow, 
+            UpdatedAt = DateTime.UtcNow, 
+            ModelProvider = modelProvider
+        };
+        req.ApplyTo(toCreate);
+        db.ChatModels.Add(toCreate);
+        await db.SaveChangesAsync(cancellationToken);
+
+        return Created();
     }
 
     [HttpPut("user-models")]

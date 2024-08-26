@@ -8,9 +8,6 @@ namespace Chats.BE.Controllers.Admin.AdminModels.Dtos;
 
 public record UpdateModelRequest
 {
-    [JsonPropertyName("modelId")]
-    public required Guid ModelId { get; init; }
-
     [JsonPropertyName("name")]
     public required string Name { get; init; }
 

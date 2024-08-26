@@ -102,7 +102,7 @@ export const EditModelModal = (props: IProps) => {
 
   function onSubmit(values: z.infer<typeof formSchema>) {
     if (!form.formState.isValid) return;
-    putModels(values as PutModelParams)
+    putModels(values.modelId!, values as PutModelParams)
       .then(() => {
         onSuccessful();
         toast.success(t('Save successful!'));

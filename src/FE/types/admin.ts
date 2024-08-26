@@ -64,7 +64,6 @@ export interface GetModelResult {
 }
 
 export interface PutModelParams {
-  modelId: string;
   name: string;
   enabled?: boolean;
   modelConfig: string;

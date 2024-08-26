@@ -68,9 +68,9 @@ export const getModels = (all: boolean = true): Promise<GetModelResult[]> => {
   return fetchService.get('/api/admin/models?all=' + all);
 };
 
-export const putModels = (params: PutModelParams): Promise<any> => {
+export const putModels = (modelId: string, params: PutModelParams): Promise<any> => {
   const fetchService = useFetch();
-  return fetchService.put('/api/admin/models', {
+  return fetchService.put(`/api/admin/models/${modelId}`, {
     body: params,
   });
 };
