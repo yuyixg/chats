@@ -1,5 +1,6 @@
 ﻿using Chats.BE.Controllers.Admin.AdminModels.Dtos;
 using Chats.BE.Controllers.Admin.Common;
+using Chats.BE.Controllers.Common;
 using Chats.BE.DB;
 using Chats.BE.Services;
 using Microsoft.AspNetCore.Mvc;
@@ -36,6 +37,35 @@ public class AdminModelsController(ChatsDB db) : ControllerBase
             .AsAsyncEnumerable()
             .Select(x => x.ToDto())
             .ToArrayAsync(cancellationToken);
+    }
+
+    [HttpPut("models")]
+    public async Task<ActionResult> UpdateModel([FromBody] UpdateModelRequest req, CancellationToken cancellationToken)
+    {
+        ChatModel? cm = await db.ChatModels.FindAsync(req.ModelId, cancellationToken);
+        if (cm == null) return NotFound();
+
+        if (cm.ModelVersion != req.ModelVersion)
+        {
+            string? newModelProvider = await db.ModelSettings
+                .Where(x => x.Type == req.ModelVersion)
+                .Select(x => x.Provider.Name)
+                .SingleOrDefaultAsync(cancellationToken);
+            if (newModelProvider == null)
+            {
+                return this.BadRequestMessage("Model version not found");
+            }
+
+            cm.ModelProvider = newModelProvider;
+        }
+        req.ApplyTo(cm);
+        if (db.ChangeTracker.HasChanges())
+        {
+            cm.UpdatedAt = DateTime.UtcNow;
+            await db.SaveChangesAsync();
+        }
+
+        return NoContent();
     }
 
     [HttpPut("user-models")]

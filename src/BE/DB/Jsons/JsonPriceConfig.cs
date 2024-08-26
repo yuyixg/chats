@@ -14,8 +14,8 @@ public record JsonPriceConfig
     {
         return new JsonPriceConfig1M
         {
-            InputTokenPrice1M = InputTokenPrice * 1000000,
-            OutputTokenPrice1M = OutputTokenPrice * 1000000
+            InputTokenPrice1M = InputTokenPrice * JsonPriceConfig1M.Unit,
+            OutputTokenPrice1M = OutputTokenPrice * JsonPriceConfig1M.Unit
         };
     }
 
@@ -27,9 +27,22 @@ public record JsonPriceConfig
 
 public record JsonPriceConfig1M
 {
+    [JsonPropertyName("input")]
     public required decimal InputTokenPrice1M { get; init; }
 
+    [JsonPropertyName("out")]
     public required decimal OutputTokenPrice1M { get; init; }
+
+    public static decimal Unit = 1_000_000;
+
+    public JsonPriceConfig ToRaw()
+    {
+        return new JsonPriceConfig
+        {
+            InputTokenPrice = InputTokenPrice1M / Unit,
+            OutputTokenPrice = OutputTokenPrice1M / Unit, 
+        };
+    }
 
     public override string ToString()
     {
