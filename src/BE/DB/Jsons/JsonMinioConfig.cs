@@ -1,7 +1,8 @@
-﻿using System.Text.Json;
+﻿using Chats.BE.Services.Common;
+using System.Text.Json;
 using System.Text.Json.Serialization;
 
-namespace Chats.BE.Controllers.Chats.Files.Dtos;
+namespace Chats.BE.DB.Jsons;
 
 public record JsonMinioConfig
 {
@@ -20,5 +21,14 @@ public record JsonMinioConfig
     public static JsonMinioConfig Parse(string json)
     {
         return JsonSerializer.Deserialize<JsonMinioConfig>(json)!;
+    }
+
+    public JsonMinioConfig WithMaskedKeys()
+    {
+        return this with
+        {
+            AccessKey = AccessKey.ToMasked(), 
+            AccessSecret = AccessSecret.ToMasked()
+        };
     }
 }

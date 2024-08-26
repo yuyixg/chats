@@ -14,6 +14,11 @@ Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "Chats.BE", "src\BE\Chats.BE
 EndProject
 Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "Chats.BE.Tests", "src\BE.Tests\Chats.BE.Tests.csproj", "{B785B397-23AB-4782-807B-C5D5001C1ECC}"
 EndProject
+Project("{2150E333-8FDC-42A3-9474-1A3956D46DE8}") = "scripts", "scripts", "{04AEF080-BF5C-4CD7-BB7E-3D509A0FD3F6}"
+	ProjectSection(SolutionItems) = preProject
+		src\scripts\real-time-request-logs.linq = src\scripts\real-time-request-logs.linq
+	EndProjectSection
+EndProject
 Global
 	GlobalSection(SolutionConfigurationPlatforms) = preSolution
 		Debug|Any CPU = Debug|Any CPU
@@ -31,6 +36,9 @@ Global
 	EndGlobalSection
 	GlobalSection(SolutionProperties) = preSolution
 		HideSolutionNode = FALSE
+	EndGlobalSection
+	GlobalSection(NestedProjects) = preSolution
+		{04AEF080-BF5C-4CD7-BB7E-3D509A0FD3F6} = {6C78A2EB-D01E-4634-BBA7-85F12BF86232}
 	EndGlobalSection
 	GlobalSection(ExtensibilityGlobals) = postSolution
 		SolutionGuid = {95C9C38D-AE58-4010-8FEF-0134C15F36B6}

@@ -2,6 +2,7 @@
 using Amazon.S3.Model;
 using Chats.BE.Controllers.Chats.Files.Dtos;
 using Chats.BE.DB;
+using Chats.BE.DB.Jsons;
 using Microsoft.AspNetCore.Mvc;
 using Microsoft.EntityFrameworkCore;
 

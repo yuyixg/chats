@@ -1,4 +1,5 @@
-﻿using System.Text.Json.Serialization;
+﻿using Chats.BE.Services.Common;
+using System.Text.Json.Serialization;
 
 namespace Chats.BE.DB.Jsons;
 
@@ -15,14 +16,12 @@ public record JsonModelKey
 
     public JsonModelKey WithMaskedKey()
     {
-        string maskedApiKey = ApiKey.Length > 7 ? ApiKey[..5] + "****" + ApiKey[^2..] : ApiKey;
-        string? maskedSecret = Secret is not null && Secret.Length > 7 ? Secret[..5] + "****" + Secret[^2..] : null;
-        return this with { ApiKey = maskedApiKey, Secret = maskedSecret };
+        return this with { ApiKey = ApiKey.ToMasked(), Secret = Secret.ToMaskedNull() };
     }
 
     public bool IsMaskedEquals(JsonModelKey inputKey)
     {
-        if (inputKey.LooksLikeMasked())
+        if (inputKey.ApiKey.SeemsMasked())
         {
             return WithMaskedKey() == inputKey;
         }
@@ -30,10 +29,5 @@ public record JsonModelKey
         {
             return this == inputKey;
         }
-    }
-
-    public bool LooksLikeMasked()
-    {
-        return ApiKey.Length == 11 && ApiKey[5..9] == "****";
     }
 }
