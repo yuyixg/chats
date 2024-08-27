@@ -16,7 +16,7 @@
   </Connection>
 </Query>
 
-DateTime current = RequestLogs.Select(x => x.CreatedAt).Max();
+DateTime current = RequestLogs.Select(x => (DateTime?)x.CreatedAt).Max() ?? DateTime.MinValue;
 while (true)
 {
 	var data = RequestLogs
