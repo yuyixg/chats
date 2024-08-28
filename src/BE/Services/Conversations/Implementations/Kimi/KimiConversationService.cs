@@ -7,6 +7,7 @@ using System.ClientModel;
 using System.Text.Json;
 using AI.Dev.OpenAI.GPT;
 using System.Runtime.CompilerServices;
+using Chats.BE.DB.Jsons;
 
 namespace Chats.BE.Services.Conversations.Implementations.Kimi;
 
@@ -36,7 +37,7 @@ public class KimiConversationService : ConversationService
         ChatClient = api.GetChatClient(SuggestedType);
     }
 
-    public override async IAsyncEnumerable<ConversationSegment> ChatStreamed(IReadOnlyList<ChatMessage> messages, ModelConfig config, CurrentUser currentUser, [EnumeratorCancellation] CancellationToken cancellationToken)
+    public override async IAsyncEnumerable<ConversationSegment> ChatStreamed(IReadOnlyList<ChatMessage> messages, JsonUserModelConfig config, CurrentUser currentUser, [EnumeratorCancellation] CancellationToken cancellationToken)
     {
         messages = messages.Select(RemoveImages).ToList();
 

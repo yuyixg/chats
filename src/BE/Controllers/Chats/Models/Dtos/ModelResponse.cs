@@ -1,6 +1,5 @@
 ﻿using Chats.BE.DB;
 using Chats.BE.DB.Jsons;
-using Chats.BE.Services.Conversations.Dtos;
 using System.Text.Json;
 using System.Text.Json.Serialization;
 
@@ -27,7 +26,7 @@ public record ModelResponse
     public required ModelConfigOption ModelConfigOptions { get; init; }
 
     [JsonPropertyName("modelConfig")]
-    public required ModelConfig ModelConfigs { get; init; }
+    public required JsonUserModelConfig ModelConfigs { get; init; }
 
     [JsonPropertyName("fileConfig")]
     public required JsonFileConfig? FileConfig { get; init; }
@@ -45,7 +44,7 @@ public record ModelResponse
             ModelProvider = model.ModelProvider,
             ModelUsage = ModelUsage.FromJson(userModel),
             ModelConfigOptions = ModelConfigOption.FromTemperature(temperatureOptions),
-            ModelConfigs = ModelConfig.FromJson(modelConfig),
+            ModelConfigs = JsonUserModelConfig.FromJson(modelConfig),
             FileConfig = string.IsNullOrEmpty(model.FileConfig) ? null : JsonSerializer.Deserialize<JsonFileConfig>(model.FileConfig),
             FileServerConfigs = FileServerConfig.FromFileService(fileService)
         };

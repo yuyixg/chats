@@ -1,5 +1,4 @@
 ﻿using Chats.BE.Services;
-using System.Text.Encodings.Web;
 using System.Text.Json;
 using System.Text.Json.Serialization;
 
@@ -66,6 +65,11 @@ public record MessageContentDto
         {
             Text = text
         };
+    }
+
+    public static MessageContentDto Parse(string rawText)
+    {
+        return JsonSerializer.Deserialize<MessageContentDto>(rawText)!;
     }
 
     public string ToJson()

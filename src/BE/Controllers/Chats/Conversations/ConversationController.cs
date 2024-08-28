@@ -121,7 +121,7 @@ public class ConversationController(ChatsDB db, CurrentUser currentUser, ILogger
         }
         else
         {
-            request = request with { UserModelConfig = JsonSerializer.Deserialize<ModelConfig>(miscInfo.ThisChat.UserModelConfig)! };
+            request = request with { UserModelConfig = JsonSerializer.Deserialize<JsonUserModelConfig>(miscInfo.ThisChat.UserModelConfig)! };
         }
 
         List<OpenAIChatMessage> messageToSend =

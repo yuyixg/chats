@@ -11,10 +11,10 @@ export interface ChatMessage {
   content: Content;
   modelName?: string;
   modelId?: string;
-  inputPrice: Decimal;
-  outputPrice: Decimal;
-  inputTokens: number;
-  outputTokens: number;
+  inputPrice?: Decimal;
+  outputPrice?: Decimal;
+  inputTokens?: number;
+  outputTokens?: number;
   duration?: number;
 }
 

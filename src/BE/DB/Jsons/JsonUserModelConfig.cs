@@ -1,9 +1,8 @@
-﻿using Chats.BE.DB.Jsons;
-using System.Text.Json.Serialization;
+﻿using System.Text.Json.Serialization;
 
-namespace Chats.BE.Services.Conversations.Dtos;
+namespace Chats.BE.DB.Jsons;
 
-public record ModelConfig
+public record JsonUserModelConfig
 {
     [JsonPropertyName("prompt"), JsonIgnore(Condition = JsonIgnoreCondition.WhenWritingNull)]
     public string? Prompt { get; init; }
@@ -17,9 +16,9 @@ public record ModelConfig
     [JsonPropertyName("maxLength"), JsonIgnore(Condition = JsonIgnoreCondition.WhenWritingNull)]
     public int? MaxLength { get; init; }
 
-    public static ModelConfig FromJson(JsonModelConfig modelConfig)
+    public static JsonUserModelConfig FromJson(JsonModelConfig modelConfig)
     {
-        return new ModelConfig
+        return new JsonUserModelConfig
         {
             Prompt = modelConfig.Prompt,
             Temperature = modelConfig.Temperature,

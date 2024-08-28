@@ -1,5 +1,5 @@
 ﻿using Chats.BE.Controllers.Chats.Messages.Dtos;
-using Chats.BE.Services.Conversations.Dtos;
+using Chats.BE.DB.Jsons;
 using System.Text.Json.Serialization;
 
 namespace Chats.BE.Controllers.Chats.Conversations.Dtos;
@@ -19,5 +19,5 @@ public record ConversationRequest
     public required MessageContentDto UserMessage { get; init; }
 
     [JsonPropertyName("userModelConfig")]
-    public required ModelConfig UserModelConfig { get; init; }
+    public required JsonUserModelConfig UserModelConfig { get; init; }
 }

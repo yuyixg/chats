@@ -1,6 +1,7 @@
 ﻿using AI.Dev.OpenAI.GPT;
 using Azure;
 using Azure.AI.OpenAI;
+using Chats.BE.DB.Jsons;
 using Chats.BE.Infrastructure;
 using Chats.BE.Services.Conversations.Dtos;
 using OpenAI;
@@ -35,7 +36,7 @@ public class AzureConversationService : ConversationService
         ChatClient = api.GetChatClient(GlobalModelConfig.DeploymentName);
     }
 
-    public override async IAsyncEnumerable<ConversationSegment> ChatStreamed(IReadOnlyList<ChatMessage> messages, ModelConfig userModelConfig, CurrentUser currentUser, [EnumeratorCancellation] CancellationToken cancellationToken)
+    public override async IAsyncEnumerable<ConversationSegment> ChatStreamed(IReadOnlyList<ChatMessage> messages, JsonUserModelConfig userModelConfig, CurrentUser currentUser, [EnumeratorCancellation] CancellationToken cancellationToken)
     {
         ChatCompletionOptions chatCompletionOptions = new()
         {

@@ -12,6 +12,7 @@ using AssistantChatMessage = OpenAI.Chat.AssistantChatMessage;
 using ChatMessageContentPartKind = OpenAI.Chat.ChatMessageContentPartKind;
 using TencentCloud.Hunyuan.V20230901.Models;
 using System.Runtime.CompilerServices;
+using Chats.BE.DB.Jsons;
 
 namespace Chats.BE.Services.Conversations.Implementations.Hunyuan;
 
@@ -43,7 +44,7 @@ public class HunyuanConversationService : ConversationService
         }, "", new ClientProfile() { HttpProfile = new() { Endpoint = keyConfig.Host } });
     }
 
-    public override async IAsyncEnumerable<ConversationSegment> ChatStreamed(IReadOnlyList<ChatMessage> messages, ModelConfig config, CurrentUser currentUser, [EnumeratorCancellation] CancellationToken cancellationToken)
+    public override async IAsyncEnumerable<ConversationSegment> ChatStreamed(IReadOnlyList<ChatMessage> messages, JsonUserModelConfig config, CurrentUser currentUser, [EnumeratorCancellation] CancellationToken cancellationToken)
     {
         Message[] msgs = IsVision ?
             messages.Select(OpenAIMessageToHunyuanVLMessage).ToArray() :

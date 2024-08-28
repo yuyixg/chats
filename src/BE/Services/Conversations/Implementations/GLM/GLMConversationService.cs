@@ -7,6 +7,7 @@ using System.ClientModel;
 using System.Text.Json;
 using AI.Dev.OpenAI.GPT;
 using System.Runtime.CompilerServices;
+using Chats.BE.DB.Jsons;
 
 namespace Chats.BE.Services.Conversations.Implementations.GLM;
 
@@ -36,7 +37,7 @@ public class GLMConversationService : ConversationService
         ChatClient = api.GetChatClient(GlobalModelConfig.Model);
     }
 
-    public override async IAsyncEnumerable<ConversationSegment> ChatStreamed(IReadOnlyList<ChatMessage> messages, ModelConfig config, CurrentUser currentUser, [EnumeratorCancellation] CancellationToken cancellationToken)
+    public override async IAsyncEnumerable<ConversationSegment> ChatStreamed(IReadOnlyList<ChatMessage> messages, JsonUserModelConfig config, CurrentUser currentUser, [EnumeratorCancellation] CancellationToken cancellationToken)
     {
         if (!IsVision)
         {

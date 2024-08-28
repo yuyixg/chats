@@ -8,6 +8,7 @@ using UserChatMessage = OpenAI.Chat.UserChatMessage;
 using SystemChatMessage = OpenAI.Chat.SystemChatMessage;
 using AssistantChatMessage = OpenAI.Chat.AssistantChatMessage;
 using ChatMessageContentPartKind = OpenAI.Chat.ChatMessageContentPartKind;
+using Chats.BE.DB.Jsons;
 
 namespace Chats.BE.Services.Conversations.Implementations.QianFan;
 
@@ -24,7 +25,7 @@ public class QianFanConversationService : ConversationService
         GlobalModelConfig = JsonSerializer.Deserialize<JsonQianFanModelConfig>(modelConfigText)!;
     }
 
-    public override async IAsyncEnumerable<ConversationSegment> ChatStreamed(IReadOnlyList<OpenAIChatMessage> messages, ModelConfig config, CurrentUser currentUser, [EnumeratorCancellation] CancellationToken cancellationToken)
+    public override async IAsyncEnumerable<ConversationSegment> ChatStreamed(IReadOnlyList<OpenAIChatMessage> messages, JsonUserModelConfig config, CurrentUser currentUser, [EnumeratorCancellation] CancellationToken cancellationToken)
     {
         KnownModel model = new(GlobalModelConfig.Model);
         ChatMessage[] qianFanMessages = messages

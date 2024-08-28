@@ -9,6 +9,7 @@ using SystemChatMessage = OpenAI.Chat.SystemChatMessage;
 using AssistantChatMessage = OpenAI.Chat.AssistantChatMessage;
 using ChatMessageContentPartKind = OpenAI.Chat.ChatMessageContentPartKind;
 using System.Runtime.CompilerServices;
+using Chats.BE.DB.Jsons;
 
 namespace Chats.BE.Services.Conversations.Implementations.DashScope;
 
@@ -38,7 +39,7 @@ public class DashScopeConversationService : ConversationService
     }
 
 
-    public override async IAsyncEnumerable<ConversationSegment> ChatStreamed(IReadOnlyList<OpenAIChatMessage> messages, ModelConfig config, CurrentUser currentUser, [EnumeratorCancellation] CancellationToken cancellationToken)
+    public override async IAsyncEnumerable<ConversationSegment> ChatStreamed(IReadOnlyList<OpenAIChatMessage> messages, JsonUserModelConfig config, CurrentUser currentUser, [EnumeratorCancellation] CancellationToken cancellationToken)
     {
         ChatParameters chatParameters = new()
         {
