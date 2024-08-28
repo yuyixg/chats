@@ -14,6 +14,7 @@ import { ChatMessage as ChatMessageComponent } from '@/components/Admin/Messages
 import { Button } from '@/components/ui/button';
 
 import { getShareMessage } from '@/apis/adminService';
+import Decimal from 'decimal.js';
 
 export default function ShareMessage() {
   const router = useRouter();
@@ -83,10 +84,10 @@ export default function ShareMessage() {
                   role: current.role,
                   content: current.content,
                   duration: current.duration,
-                  inputTokens: current.inputTokens,
-                  outputTokens: current.outputTokens,
-                  inputPrice: current.inputPrice,
-                  outputPrice: current.outputPrice,
+                  inputTokens: current.inputTokens || 0,
+                  outputTokens: current.outputTokens || 0,
+                  inputPrice: current.inputPrice || new Decimal(0),
+                  outputPrice: current.outputPrice || new Decimal(0),
                 }}
               />
             );
