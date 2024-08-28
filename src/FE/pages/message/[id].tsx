@@ -105,10 +105,10 @@ export default function MessageDetails() {
                 role: current.role,
                 content: current.content,
                 duration: current.duration,
-                inputTokens: current.inputTokens,
-                outputTokens: current.outputTokens,
-                inputPrice: current.inputPrice,
-                outputPrice: current.outputPrice,
+                inputTokens: current.inputTokens || 0,
+                outputTokens: current.outputTokens || 0,
+                inputPrice: current.inputPrice || new Decimal(0),
+                outputPrice: current.outputPrice || new Decimal(0),
               }}
             />
           );
