@@ -458,10 +458,10 @@ export const Chat = memo(({ stopConversationRef }: Props) => {
                       role: current.role,
                       content: current.content,
                       duration: current.duration || 0,
-                      inputTokens: current.inputTokens,
-                      outputTokens: current.outputTokens,
-                      inputPrice: current.inputPrice,
-                      outputPrice: current.outputPrice,
+                      inputTokens: current.inputTokens || 0,
+                      outputTokens: current.outputTokens || 0,
+                      inputPrice: current.inputPrice || new Decimal(0),
+                      outputPrice: current.outputPrice || new Decimal(0),
                     }}
                     onChangeMessage={(messageId) => {
                       handleUpdateSelectMessage(messageId);
