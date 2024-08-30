@@ -1,7 +1,9 @@
 ﻿using Chats.BE.Controllers.Admin.FileServices.Dtos;
 using Chats.BE.DB;
+using Chats.BE.DB.Jsons;
 using Microsoft.AspNetCore.Mvc;
 using Microsoft.EntityFrameworkCore;
+using System.Text.Json;
 
 namespace Chats.BE.Controllers.Admin.FileServices;
 
@@ -42,5 +44,24 @@ public class FileServiceController(ChatsDB db) : ControllerBase
                 .ToArray();
             return Ok(data);
         }
+    }
+
+    [HttpPut]
+    public async Task<ActionResult> UpdateFileService([FromBody] FileServiceUpdateRequest req, CancellationToken cancellationToken)
+    {
+        FileService? existingData = await db.FileServices.FindAsync([req.Id], cancellationToken);
+        if (existingData == null)
+        {
+            return NotFound();
+        }
+
+        req.ApplyTo(existingData);
+        if (db.ChangeTracker.HasChanges())
+        {
+            existingData.UpdatedAt = DateTime.UtcNow;
+            await db.SaveChangesAsync(cancellationToken);
+        }
+
+        return NoContent();
     }
 }

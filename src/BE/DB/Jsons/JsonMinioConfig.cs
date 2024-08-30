@@ -31,4 +31,16 @@ public record JsonMinioConfig
             AccessSecret = AccessSecret.ToMasked()
         };
     }
+
+    public bool IsMaskedEquals(JsonMinioConfig inputConfig)
+    {
+        if (inputConfig.AccessKey.SeemsMasked())
+        {
+            return WithMaskedKeys() == inputConfig;
+        }
+        else
+        {
+            return this == inputConfig;
+        }
+    }
 }
