@@ -143,6 +143,7 @@ export interface GetMessageDetailsResult {
 }
 
 export interface GetFileServicesResult extends PutFileServicesParams {
+  id: string;
   createdAt: string;
   updatedAt: string;
 }
