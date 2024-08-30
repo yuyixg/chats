@@ -1,9 +1,8 @@
 ﻿using Chats.BE.Controllers.Admin.FileServices.Dtos;
+using Chats.BE.Controllers.Common;
 using Chats.BE.DB;
-using Chats.BE.DB.Jsons;
 using Microsoft.AspNetCore.Mvc;
 using Microsoft.EntityFrameworkCore;
-using System.Text.Json;
 
 namespace Chats.BE.Controllers.Admin.FileServices;
 
@@ -46,10 +45,10 @@ public class FileServiceController(ChatsDB db) : ControllerBase
         }
     }
 
-    [HttpPut]
-    public async Task<ActionResult> UpdateFileService([FromBody] FileServiceUpdateRequest req, CancellationToken cancellationToken)
+    [HttpPut("{fileServiceId}")]
+    public async Task<ActionResult> UpdateFileService(Guid fileServiceId, [FromBody] FileServiceUpdateRequest req, CancellationToken cancellationToken)
     {
-        FileService? existingData = await db.FileServices.FindAsync([req.Id], cancellationToken);
+        FileService? existingData = await db.FileServices.FindAsync([fileServiceId], cancellationToken);
         if (existingData == null)
         {
             return NotFound();
@@ -62,6 +61,43 @@ public class FileServiceController(ChatsDB db) : ControllerBase
             await db.SaveChangesAsync(cancellationToken);
         }
 
+        return NoContent();
+    }
+
+    [HttpPost]
+    public async Task CreateFileService([FromBody] FileServiceUpdateRequest req, CancellationToken cancellationToken)
+    {
+        db.FileServices.Add(new FileService
+        {
+            Id = Guid.NewGuid(),
+            Name = req.Name,
+            Type = req.Type,
+            Enabled = req.Enabled,
+            Configs = req.Configs,
+            CreatedAt = DateTime.UtcNow,
+            UpdatedAt = DateTime.UtcNow,
+        });
+        await db.SaveChangesAsync();
+    }
+
+    [HttpDelete("{fileServiceId}")]
+    public async Task<ActionResult> DeleteFileService(Guid fileServiceId, CancellationToken cancellationToken)
+    {
+        if (await db.ChatModels
+            .Where(x => x.FileServiceId == fileServiceId)
+            .AnyAsync(cancellationToken))
+        {
+            return this.BadRequestMessage("Cannot delete file service that is being used by chat models");
+        }
+
+        FileService? existingData = await db.FileServices.FindAsync([fileServiceId], cancellationToken);
+        if (existingData == null)
+        {
+            return NotFound();
+        }
+
+        db.FileServices.Remove(existingData);
+        await db.SaveChangesAsync(cancellationToken);
         return NoContent();
     }
 }

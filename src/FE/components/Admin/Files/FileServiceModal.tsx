@@ -115,10 +115,7 @@ export const FileServiceModal = (props: IProps) => {
     if (!form.formState.isValid) return;
     let p = null;
     if (selected) {
-      p = putFileService({
-        ...values,
-        id: selected.id,
-      } as PutFileServicesParams);
+      p = putFileService(selected.id, values as PutFileServicesParams);
     } else {
       p = postFileService(values as PostFileServicesParams);
     }

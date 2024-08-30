@@ -23,5 +23,4 @@ export interface PostFileServicesParams {
 }
 
 export interface PutFileServicesParams extends PostFileServicesParams {
-  id: string;
 }

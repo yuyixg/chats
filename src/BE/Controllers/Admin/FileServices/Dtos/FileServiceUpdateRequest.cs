@@ -7,9 +7,6 @@ namespace Chats.BE.Controllers.Admin.FileServices.Dtos;
 
 public record FileServiceUpdateRequest
 {
-    [JsonPropertyName("id")]
-    public required Guid Id { get; init; }
-
     [JsonPropertyName("name")]
     public required string Name { get; init; }
 

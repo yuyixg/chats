@@ -152,9 +152,9 @@ export const postFileService = (params: PostFileServicesParams) => {
   });
 };
 
-export const putFileService = (params: PutFileServicesParams) => {
+export const putFileService = (id: string, params: PutFileServicesParams) => {
   const fetchService = useFetch();
-  return fetchService.put('/api/admin/file-service', {
+  return fetchService.put(`/api/admin/file-service/${id}`, {
     body: params,
   });
 };
