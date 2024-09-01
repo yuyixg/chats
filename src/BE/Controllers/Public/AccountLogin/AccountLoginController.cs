@@ -3,6 +3,7 @@ using Chats.BE.Controllers.Common.Results;
 using Chats.BE.Controllers.Public.AccountLogin.Dtos;
 using Chats.BE.Controllers.Public.SMSs;
 using Chats.BE.DB;
+using Chats.BE.DB.Jsons;
 using Chats.BE.Services;
 using Chats.BE.Services.Common;
 using Chats.BE.Services.Configs;
@@ -47,7 +48,7 @@ public class AccountLoginController(ChatsDB db, ILogger<AccountLoginController> 
 
     private async Task<ActionResult> KeycloakLogin(GlobalDBConfig kcStore, UserManager userManager, SsoLoginRequest sso, HostUrlService hostUrl, CancellationToken cancellationToken)
     {
-        KeycloakConfig? kcConfig = await kcStore.GetKeycloakConfig(cancellationToken);
+        JsonKeycloakConfig? kcConfig = await kcStore.GetKeycloakConfig(cancellationToken);
         if (kcConfig == null)
         {
             return NotFound("Keycloak config not found");

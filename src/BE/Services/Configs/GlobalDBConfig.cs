@@ -1,4 +1,5 @@
 ﻿using Chats.BE.DB;
+using Chats.BE.DB.Jsons;
 using Chats.BE.Services.Common;
 using Microsoft.EntityFrameworkCore;
 using System.Text.Json;
@@ -7,7 +8,7 @@ namespace Chats.BE.Services.Configs;
 
 public class GlobalDBConfig(ChatsDB db, ILogger<GlobalDBConfig> logger)
 {
-    public async Task<KeycloakConfig?> GetKeycloakConfig(CancellationToken cancellationToken)
+    public async Task<JsonKeycloakConfig?> GetKeycloakConfig(CancellationToken cancellationToken)
     {
         LoginService? loginService = await db.LoginServices.SingleOrDefaultAsync(s => s.Type == KnownLoginProviders.Keycloak, cancellationToken);
         if (loginService == null)
@@ -15,7 +16,7 @@ public class GlobalDBConfig(ChatsDB db, ILogger<GlobalDBConfig> logger)
             return null;
         }
 
-        return JsonSerializer.Deserialize<KeycloakConfig>(loginService.Configs);
+        return JsonSerializer.Deserialize<JsonKeycloakConfig>(loginService.Configs);
     }
 
     public Task<TencentSmsConfig> GetTencentSmsConfig(CancellationToken cancellationToken) => GetRequiredConfigByKey<TencentSmsConfig>("tencentSms", cancellationToken);

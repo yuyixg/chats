@@ -1,10 +1,11 @@
 ﻿using System.Text.Json.Serialization;
 using System.Threading;
+using Chats.BE.Services.Common;
 using Chats.BE.Services.Keycloak;
 
-namespace Chats.BE.Services.Configs;
+namespace Chats.BE.DB.Jsons;
 
-public record KeycloakConfig
+public record JsonKeycloakConfig
 {
     [JsonPropertyName("wellKnown")]
     public required string WellKnown { get; init; }
@@ -58,5 +59,22 @@ public record KeycloakConfig
         }
 
         throw new InvalidOperationException($"Failed to get Keycloak well-known configuration: {await response.Content.ReadAsStringAsync(cancellationToken)}");
+    }
+
+    public JsonKeycloakConfig WithMaskedSecret()
+    {
+        return this with { Secret = Secret.ToMasked() };
+    }
+
+    public bool IsMaskedEquals(JsonKeycloakConfig other)
+    {
+        if (other.Secret.SeemsMasked())
+        {
+            return WithMaskedSecret() == other;
+        }
+        else
+        {
+            return this == other;
+        }
     }
 }

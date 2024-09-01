@@ -1,4 +1,5 @@
 ﻿using Chats.BE.Controllers.Auth.Dtos;
+using Chats.BE.DB.Jsons;
 using Chats.BE.Services;
 using Chats.BE.Services.Configs;
 using Microsoft.AspNetCore.Mvc;
@@ -16,7 +17,7 @@ public class KeycloakController(CsrfTokenService csrf, GlobalDBConfig globalConf
             return BadRequest("Invalid CSRF token");
         }
 
-        KeycloakConfig? config = await globalConfig.GetKeycloakConfig(cancellationToken);
+        JsonKeycloakConfig? config = await globalConfig.GetKeycloakConfig(cancellationToken);
         if (config == null)
         {
             return NotFound("Keycloak config not found");
