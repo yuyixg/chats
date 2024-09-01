@@ -5,7 +5,7 @@ using Microsoft.AspNetCore.Mvc;
 
 namespace Chats.BE.Controllers.Admin.InitialConfigs;
 
-[Route("api/admin/user-config"), AuthorizeAdmin]
+[Route("api/admin/user-config2"), AuthorizeAdmin]
 public class InititalConfigController(ChatsDB db) : ControllerBase
 {
     [HttpGet]
