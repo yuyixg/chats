@@ -8,7 +8,7 @@ namespace Chats.BE.DB;
 
 [PrimaryKey("UserId", "InvitationCodeId")]
 [Table("UserInvitation")]
-[Index("UserId", Name = "IX_UserInvitation_UserId", IsUnique = true)]
+[Index("UserId", Name = "IX_UserInvitation_User", IsUnique = true)]
 public partial class UserInvitation
 {
     [Key]

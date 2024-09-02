@@ -61,14 +61,14 @@ public partial class ChatModel
     public DateTime UpdatedAt { get; set; }
 
     [InverseProperty("ChatModel")]
-    public virtual ICollection<ChatMessage> ChatMessages { get; set; } = new List<ChatMessage>();
-
-    [InverseProperty("ChatModel")]
-    public virtual ICollection<Chat> Chats { get; set; } = new List<Chat>();
+    public virtual ICollection<Conversation> Conversations { get; set; } = new List<Conversation>();
 
     [ForeignKey("FileServiceId")]
     [InverseProperty("ChatModels")]
     public virtual FileService? FileService { get; set; }
+
+    [InverseProperty("ChatModel")]
+    public virtual ICollection<MessageResponse> MessageResponses { get; set; } = new List<MessageResponse>();
 
     [ForeignKey("ModelKeysId")]
     [InverseProperty("ChatModels")]

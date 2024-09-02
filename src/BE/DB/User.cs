@@ -58,13 +58,10 @@ public partial class User
     public DateTime UpdatedAt { get; set; }
 
     [InverseProperty("User")]
-    public virtual ICollection<BalanceLog> BalanceLogs { get; set; } = new List<BalanceLog>();
+    public virtual ICollection<Conversation> Conversations { get; set; } = new List<Conversation>();
 
     [InverseProperty("User")]
-    public virtual ICollection<ChatMessage> ChatMessages { get; set; } = new List<ChatMessage>();
-
-    [InverseProperty("User")]
-    public virtual ICollection<Chat> Chats { get; set; } = new List<Chat>();
+    public virtual ICollection<Message> Messages { get; set; } = new List<Message>();
 
     [InverseProperty("CreateUser")]
     public virtual ICollection<Order> Orders { get; set; } = new List<Order>();
@@ -77,6 +74,12 @@ public partial class User
 
     [InverseProperty("User")]
     public virtual ICollection<Session> Sessions { get; set; } = new List<Session>();
+
+    [InverseProperty("CreditUser")]
+    public virtual ICollection<TransactionLog> TransactionLogCreditUsers { get; set; } = new List<TransactionLog>();
+
+    [InverseProperty("User")]
+    public virtual ICollection<TransactionLog> TransactionLogUsers { get; set; } = new List<TransactionLog>();
 
     [InverseProperty("User")]
     public virtual UserBalance? UserBalance { get; set; }
