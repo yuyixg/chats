@@ -62,4 +62,19 @@ public class InititalConfigController(ChatsDB db) : ControllerBase
         await db.SaveChangesAsync(cancellationToken);
         return NoContent();
     }
+
+    [HttpPost]
+    public async Task CreateInitialConfig([FromBody] UserInitialConfigCreateRequest req, CancellationToken cancellationToken)
+    {
+        UserInitialConfig newOne = new()
+        {
+            Id = Guid.NewGuid(), 
+            CreatedAt = DateTime.UtcNow, 
+            UpdatedAt = DateTime.UtcNow, 
+        };
+
+        req.ApplyTo(newOne);
+        await db.UserInitialConfigs.AddAsync(newOne, cancellationToken);
+        await db.SaveChangesAsync(cancellationToken);
+    }
 }

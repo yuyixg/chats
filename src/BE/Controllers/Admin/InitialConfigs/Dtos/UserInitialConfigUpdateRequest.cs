@@ -34,3 +34,30 @@ public class UserInitialConfigUpdateRequest
         config.InvitationCodeId = InvitationCodeId;
     }
 }
+
+public class UserInitialConfigCreateRequest
+{
+    [JsonPropertyName("name")]
+    public required string Name { get; init; }
+
+    [JsonPropertyName("loginType")]
+    public required string LoginType { get; init; }
+
+    [JsonPropertyName("models")]
+    public required JsonTokenBalance[] Models { get; init; }
+
+    [JsonPropertyName("price")]
+    public required string Price { get; init; }
+
+    [JsonPropertyName("invitationCodeId")]
+    public required Guid? InvitationCodeId { get; init; }
+
+    public void ApplyTo(UserInitialConfig config)
+    {
+        config.Name = Name;
+        config.LoginType = LoginType;
+        config.Models = JsonSerializer.Serialize(Models);
+        config.Price = decimal.Parse(Price);
+        config.InvitationCodeId = InvitationCodeId;
+    }
+}
