@@ -1,4 +1,6 @@
-﻿using Chats.BE.DB.Jsons;
+﻿using Chats.BE.DB;
+using Chats.BE.DB.Jsons;
+using System.Text.Json;
 using System.Text.Json.Serialization;
 
 namespace Chats.BE.Controllers.Admin.InitialConfigs.Dtos;
@@ -21,5 +23,14 @@ public class UserInitialConfigUpdateRequest
     public required string Price { get; init; }
 
     [JsonPropertyName("invitationCodeId")]
-    public required string InvitationCodeId { get; init; }
+    public required Guid? InvitationCodeId { get; init; }
+
+    public void ApplyTo(UserInitialConfig config)
+    {
+        config.Name = Name;
+        config.LoginType = LoginType;
+        config.Models = JsonSerializer.Serialize(Models);
+        config.Price = decimal.Parse(Price);
+        config.InvitationCodeId = InvitationCodeId;
+    }
 }

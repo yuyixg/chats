@@ -2,6 +2,7 @@
 using Chats.BE.Controllers.Admin.InitialConfigs.Dtos;
 using Chats.BE.DB;
 using Microsoft.AspNetCore.Mvc;
+using Microsoft.EntityFrameworkCore;
 
 namespace Chats.BE.Controllers.Admin.InitialConfigs;
 
@@ -27,5 +28,24 @@ public class InititalConfigController(ChatsDB db) : ControllerBase
             .Select(x => x.ToDto())
             .ToArray();
         return data;
+    }
+
+    [HttpPut]
+    public async Task<ActionResult> UpdateInitialConfig([FromBody] UserInitialConfigUpdateRequest req, CancellationToken cancellationToken)
+    {
+        UserInitialConfig? existingConfig = await db.UserInitialConfigs.FindAsync([req.Id], cancellationToken);
+        if (existingConfig == null)
+        {
+            return NotFound();
+        }
+
+        req.ApplyTo(existingConfig);
+        if (db.ChangeTracker.HasChanges())
+        {
+            existingConfig.UpdatedAt = DateTime.UtcNow;
+            await db.SaveChangesAsync(cancellationToken);
+        }
+
+        return NoContent();
     }
 }
