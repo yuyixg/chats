@@ -5,7 +5,7 @@ using Microsoft.AspNetCore.Mvc;
 
 namespace Chats.BE.Controllers.Admin.InitialConfigs;
 
-[Route("api/admin/user-config2"), AuthorizeAdmin]
+[Route("api/admin/user-config"), AuthorizeAdmin]
 public class InititalConfigController(ChatsDB db) : ControllerBase
 {
     [HttpGet]
@@ -20,7 +20,7 @@ public class InititalConfigController(ChatsDB db) : ControllerBase
                 LoginType = x.LoginType ?? "-",
                 Models = x.Models,
                 Price = x.Price,
-                InvitationCodeId = x.InvitationCodeId.ToString() ?? "-",
+                InvitationCodeId = x.InvitationCodeId,
                 InvitationCode = x.InvitationCode!.Value ?? "-",
             })
             .AsEnumerable()

@@ -40,7 +40,7 @@ public class UserInitialConfigDtoTemp
 
     public required decimal Price { get; init; }
 
-    public required string InvitationCodeId { get; init; }
+    public required Guid? InvitationCodeId { get; init; }
 
     public required string InvitationCode { get; init; }
 
@@ -57,7 +57,7 @@ public class UserInitialConfigDtoTemp
                 .ThenByDescending(x => x.Counts)
                 .ThenByDescending(x => x.Expires)],
             Price = Price.ToString(),
-            InvitationCodeId = InvitationCodeId,
+            InvitationCodeId = InvitationCodeId?.ToString() ?? "-",
             InvitationCode = InvitationCode
         };
     }
