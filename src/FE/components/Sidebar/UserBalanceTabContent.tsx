@@ -2,8 +2,6 @@ import { useEffect, useState } from 'react';
 
 import { useTranslation } from 'next-i18next';
 
-import { GetUserBalanceLogsResult, GetUserBalanceResult } from '@/types/user';
-
 import { Separator } from '../ui/separator';
 import {
   Table,
@@ -14,32 +12,30 @@ import {
   TableRow,
 } from '../ui/table';
 
-import { getUserBalance } from '@/apis/userService';
+import {
+  GetBalance7DaysUsageResult,
+  getBalance7DaysUsage,
+  getUserBalanceOnly,
+} from '@/apis/userService';
 
 const UserBalanceTabContent = () => {
   const { t } = useTranslation('sidebar');
-  const [balanceData, setBalanceData] = useState<GetUserBalanceResult>();
+  const [balanceLogs, setBalanceLogs] = useState<GetBalance7DaysUsageResult>({});
+  const [totalBalance, setTotalBalance] = useState(0);
 
   useEffect(() => {
-    getUserBalance().then((data) => {
-      const logs: GetUserBalanceLogsResult[] = [];
-      data.logs.forEach((x) => {
-        const date = new Date(x.date).toLocaleDateString();
-        const log = logs.find((x) => x.date === date);
-        if (log) {
-          log.value += +x.value;
-        } else {
-          logs.push({ date, value: +x.value });
-        }
-      });
-      setBalanceData({ balance: data.balance, logs });
+    getBalance7DaysUsage().then((data) => {
+      setBalanceLogs(data);
+    });
+    getUserBalanceOnly().then((data) => {
+      setTotalBalance(data);
     });
   }, []);
   return (
     <>
       <div className="flex gap-2 items-center">
         <span>{t('Balance')}</span>
-        {(+(balanceData?.balance || 0)).toFixed(2)} {t('Yuan')}
+        {(+(totalBalance || 0)).toFixed(2)} {t('Yuan')}
       </div>
       <Separator className="my-2" />
       <div className="flex flex-col gap-2">
@@ -52,11 +48,11 @@ const UserBalanceTabContent = () => {
             </TableRow>
           </TableHeader>
           <TableBody>
-            {balanceData?.logs.map((log) => (
-              <TableRow key={log.date}>
-                <TableCell className="h-8 py-2">{log.date}</TableCell>
+            {Object.keys(balanceLogs).map((date) => (
+              <TableRow key={date}>
+                <TableCell className="h-8 py-2">{new Date(date).toLocaleDateString()}</TableCell>
                 <TableCell className="h-8 py-2">
-                  {(+(log?.value || 0)).toFixed(2)}
+                  {(+(balanceLogs[date] || 0)).toFixed(2)}
                 </TableCell>
               </TableRow>
             ))}

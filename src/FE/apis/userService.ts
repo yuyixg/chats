@@ -48,6 +48,10 @@ export interface PostUserPassword {
   confirmPassword: string;
 }
 
+export interface GetBalance7DaysUsageResult {
+  [key: string]: number;
+}
+
 export const changeUserPassword = (params: PostUserPassword) => {
   const fetchService = useFetch();
   return fetchService.put('/api/user/reset-password', {
@@ -117,6 +121,18 @@ export const getUserModels = () => {
 export const getUserBalance = () => {
   const fetchServer = useFetch();
   return fetchServer.get<GetUserBalanceResult>('/api/user/balance');
+};
+
+export const getUserBalanceOnly = () => {
+  const fetchServer = useFetch();
+  return fetchServer.get<number>('/api/user/balance-only');
+};
+
+export const getBalance7DaysUsage = () => {
+  const fetchServer = useFetch();
+  return fetchServer.get<GetBalance7DaysUsageResult>(
+    '/api/user/balance-7-days-usage',
+  );
 };
 
 export const getLoginProvider = () => {
