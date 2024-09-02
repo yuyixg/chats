@@ -1,4 +1,5 @@
-﻿using Chats.BE.Controllers.Chats.Messages.Dtos;
+﻿using Chats.BE.Controllers.Chats.Conversations.Dtos;
+using Chats.BE.Controllers.Chats.Messages.Dtos;
 using Chats.BE.DB.Jsons;
 using Chats.BE.Services.Conversations;
 using System.Text.Json;
@@ -29,7 +30,7 @@ public record AdminMessageDtoTemp
     public required string Name { get; init; }
     public required string ModelName { get; init; }
     public required string ModelConfigText { get; init; }
-    public required string UserModelConfigText { get; init; }
+    public required JsonUserModelConfig UserModelConfigText { get; init; }
 
     public JsonModelConfig JsonModelConfig => JsonSerializer.Deserialize<JsonModelConfig>(ModelConfigText)!;
 
@@ -117,16 +118,16 @@ public record AdminMessageAssistantItem : AdminMessageBasicItem
 
 public record AdminMessageItemTemp
 {
-    public required Guid Id { get; init; }
-    public Guid? ParentId { get; init; }
+    public required long Id { get; init; }
+    public required long? ParentId { get; init; }
     public string? ModelName { get; init; }
     public required DateTime CreatedAt { get; init; }
     public required int InputTokens { get; init; }
     public required int OutputTokens { get; init; }
     public required decimal InputPrice { get; init; }
     public required decimal OutputPrice { get; init; }
-    public required string Role { get; init; }
-    public required string ContentText { get; init; }
+    public required DBConversationRoles Role { get; init; }
+    public required DBMessageSegment[] Content { get; init; }
     public required int Duration { get; init; }
 
     public static AdminMessageBasicItem[] ToDtos(AdminMessageItemTemp[] temps)
@@ -140,7 +141,7 @@ public record AdminMessageItemTemp
                     ParentId = x.ParentId,
                     CreatedAt = x.CreatedAt,
                     Role = x.Role,
-                    Content = MessageContentDto.Parse(x.ContentText),
+                    Content = MessageContentDto.Parse(x.Content),
                     ChildrenIds = temps
                         .Where(v => v.ParentId == x.Id && v.Role == DBConversationRoles.User)
                         .Select(v => v.Id)

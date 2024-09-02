@@ -1,4 +1,5 @@
 ﻿using Chats.BE.DB;
+using Chats.BE.DB.Enums;
 using Chats.BE.Services.Common;
 using Chats.BE.Services.Keycloak;
 using Microsoft.EntityFrameworkCore;
@@ -75,15 +76,13 @@ public class UserManager(ChatsDB db)
         {
             newUser.UserBalance.Balance = config.Price;
             newUser.UserModel.Models = config.Models; // See JsonUserModel
-            db.BalanceLogs.Add(new BalanceLog
+            db.TransactionLogs.Add(new TransactionLog()
             {
-                Id = Guid.NewGuid(),
                 UserId = newUser.Id,
-                CreateUserId = newUser.Id,
-                Type = (int)BalanceLogType.Initial,
+                CreditUserId = newUser.Id,
+                TransactionTypeId = (byte)DBTransactionType.Initial,
                 CreatedAt = DateTime.UtcNow,
-                UpdatedAt = DateTime.UtcNow,
-                Value = config.Price,
+                Amount = config.Price,
             });
         }
     }

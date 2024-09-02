@@ -21,7 +21,7 @@ public partial class Conversation
 
     public Guid ChatModelId { get; set; }
 
-    public double? Temperature { get; set; }
+    public float? Temperature { get; set; }
 
     public bool? EnableSearch { get; set; }
 

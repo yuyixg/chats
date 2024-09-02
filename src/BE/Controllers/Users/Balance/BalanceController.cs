@@ -1,5 +1,6 @@
 ﻿using Chats.BE.Controllers.Users.Balance.Dtos;
 using Chats.BE.DB;
+using Chats.BE.DB.Enums;
 using Chats.BE.Infrastructure;
 using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Mvc;
@@ -30,12 +31,12 @@ public class BalanceController(ChatsDB db, CurrentUser currentUser) : Controller
         DateTime[] dates = Enumerable.Range(0, days)
             .Select(day => now.AddMinutes(-timezoneOffset).AddDays(-day).Date)
             .ToArray();
-        Dictionary<DateTime, decimal> history = (await db.BalanceLogs
-            .Where(x => x.UserId == currentUser.Id && x.CreatedAt >= start && x.CreatedAt <= now)
+        Dictionary<DateTime, decimal> history = (await db.TransactionLogs
+            .Where(x => x.UserId == currentUser.Id && x.CreatedAt >= start && x.CreatedAt <= now && x.TransactionTypeId == (byte)DBTransactionType.Cost)
             .Select(x => new
             {
                 Date = x.CreatedAt.AddMinutes(-timezoneOffset).Date, // Timezone
-                Amount = x.Value,
+                Amount = x.Amount,
             })
             .ToArrayAsync(cancellationToken))
             .GroupBy(x => x.Date)
@@ -59,13 +60,13 @@ public class BalanceController(ChatsDB db, CurrentUser currentUser) : Controller
             .Where(x => x.Id == currentUser.Id)
             .Select(x => x.UserBalance!.Balance)
             .FirstOrDefaultAsync(cancellationToken);
-        LegacyBalanceLog[] logs = await db.BalanceLogs
-            .Where(x => x.UserId == currentUser.Id && x.CreatedAt >= DateTime.UtcNow.AddDays(-days))
+        LegacyBalanceLog[] logs = await db.TransactionLogs
+            .Where(x => x.UserId == currentUser.Id && x.CreatedAt >= DateTime.UtcNow.AddDays(-days) && x.TransactionTypeId == (byte)DBTransactionType.Cost)
             .OrderByDescending(x => x.CreatedAt)
             .Select(x => new LegacyBalanceLog
             {
                 Date = x.CreatedAt,
-                Amount = x.Value,
+                Amount = x.Amount,
             })
             .ToArrayAsync(cancellationToken);
         return Ok(new LegacyBalanceDto

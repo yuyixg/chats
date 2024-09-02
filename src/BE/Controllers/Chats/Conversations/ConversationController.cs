@@ -2,10 +2,10 @@
 using Chats.BE.Controllers.Chats.Messages.Dtos;
 using Chats.BE.Controllers.Common;
 using Chats.BE.DB;
+using Chats.BE.DB.Enums;
 using Chats.BE.DB.Jsons;
 using Chats.BE.Infrastructure;
 using Chats.BE.Services;
-using Chats.BE.Services.Common;
 using Chats.BE.Services.Conversations;
 using Chats.BE.Services.Conversations.Dtos;
 using Microsoft.AspNetCore.Authorization;
@@ -16,9 +16,7 @@ using Sdcb.DashScope;
 using System.ClientModel;
 using System.Diagnostics;
 using System.Text;
-using System.Text.Encodings.Web;
 using System.Text.Json;
-using DBChatMessage = Chats.BE.DB.ChatMessage;
 using OpenAIChatMessage = OpenAI.Chat.ChatMessage;
 
 namespace Chats.BE.Controllers.Chats.Conversations;
@@ -50,7 +48,7 @@ public class ConversationController(ChatsDB db, CurrentUser currentUser, ILogger
             {
                 UserModels = x.UserModel!,
                 UserBalance = x.UserBalance!,
-                ThisChat = db.Chats.Single(x => x.Id == request.ChatId && x.UserId == currentUser.Id)
+                ThisChat = db.Conversations.Single(x => x.Id == request.ConversationId && x.UserId == currentUser.Id)
             })
             .SingleAsync(cancellationToken);
         List<JsonTokenBalance> tokenBalances = JsonSerializer.Deserialize<List<JsonTokenBalance>>(miscInfo.UserModels.Models)!;
@@ -73,17 +71,15 @@ public class ConversationController(ChatsDB db, CurrentUser currentUser, ILogger
             return this.BadRequestMessage("Insufficient balance");
         }
 
-        Dictionary<Guid, MessageLiteDto> existingMessages = await db.ChatMessages
-            .Where(x => x.ChatId == request.ChatId && x.UserId == currentUser.Id)
-            .Select(x => new MessageLiteTemp()
+        Dictionary<long, MessageLiteDto> existingMessages = await db.Messages
+            .Where(x => x.ConversationId == request.ConversationId && x.UserId == currentUser.Id)
+            .Select(x => new MessageLiteDto()
             {
                 Id = x.Id,
-                Content = x.Messages,
-                Role = x.Role,
+                Content = x.MessageContents.ToArray(),
+                Role = (DBConversationRoles)x.ChatRoleId,
                 ParentId = x.ParentId,
             })
-            .ToAsyncEnumerable()
-            .Select(x => x.ToDto())
             .ToDictionaryAsync(x => x.Id, x => x, cancellationToken);
         MessageLiteDto? systemMessage = existingMessages
             .Values
@@ -97,16 +93,22 @@ public class ConversationController(ChatsDB db, CurrentUser currentUser, ILogger
                 return this.BadRequestMessage("Prompt is required for the first message");
             }
 
-            DBChatMessage toBeInsert = new()
+            Message toBeInsert = new()
             {
-                Id = Guid.NewGuid(),
-                ChatId = request.ChatId,
+                ConversationId = request.ConversationId,
                 UserId = currentUser.Id,
-                Role = DBConversationRoles.System,
-                Messages = MessageContentDto.FromText(request.UserModelConfig.Prompt).ToJson(),
+                ChatRoleId = (byte)DBConversationRoles.System,
+                MessageContents =
+                [
+                    new MessageContent()
+                    {
+                        ContentTypeId = (byte)DBMessageContentType.Text,
+                        Content = Encoding.Unicode.GetBytes(request.UserModelConfig.Prompt),
+                    }
+                ], 
                 CreatedAt = DateTime.UtcNow,
             };
-            db.ChatMessages.Add(toBeInsert);
+            db.Messages.Add(toBeInsert);
 
             systemMessage = new MessageLiteDto
             {
@@ -197,25 +199,35 @@ public class ConversationController(ChatsDB db, CurrentUser currentUser, ILogger
 
         // success
         // insert new assistant message
-        DBChatMessage assistantMessage = new()
+        TransactionLog? transactionLog = CreateTransactionLog(miscInfo.UserModels, tokenBalances, tokenBalanceIndex, tokenBalance, cost);
+        Message assistantMessage = new()
         {
-            Id = Guid.NewGuid(),
-            ChatId = request.ChatId,
+            ConversationId = request.ConversationId,
             UserId = currentUser.Id,
-            Role = DBConversationRoles.Assistant,
-            Messages = MessageContentDto.FromText(responseText.ToString()).ToJson(),
+            ChatRoleId = (byte)DBConversationRoles.Assistant,
+            MessageContents =
+            [
+                new MessageContent()
+                {
+                    ContentTypeId = (byte)DBMessageContentType.Text,
+                    Content = Encoding.Unicode.GetBytes(responseText.ToString()),
+                }
+            ],
             CreatedAt = DateTime.UtcNow,
             ParentId = userMessage.Id,
-            Duration = elapsedMs,
-            InputTokens = lastSegment.InputTokenCount,
-            OutputTokens = lastSegment.OutputTokenCount,
-            InputPrice = cost.InputTokenPrice,
-            OutputPrice = cost.OutputTokenPrice,
-            ChatModelId = cm.Id,
+            MessageResponse = new MessageResponse()
+            {
+                DurationMs = elapsedMs,
+                InputTokenCount = lastSegment.InputTokenCount,
+                OutputTokenCount = lastSegment.OutputTokenCount,
+                InputCost = cost.InputTokenPrice,
+                OutputCost = cost.OutputTokenPrice,
+                ChatModelId = cm.Id,
+                TransactionLog = transactionLog,
+            }
         };
-        db.ChatMessages.Add(assistantMessage);
+        db.Messages.Add(assistantMessage);
 
-        UpdateBalance(miscInfo.UserModels, miscInfo.UserBalance, tokenBalances, tokenBalanceIndex, tokenBalance, cost, assistantMessage.Id);
         await db.SaveChangesAsync(cancellationToken);
         if (cost.CostBalance > 0)
         {
@@ -235,12 +247,11 @@ public class ConversationController(ChatsDB db, CurrentUser currentUser, ILogger
         }
 
         // insert new user message
-        DBChatMessage dbUserMessage = new()
+        Message dbUserMessage = new()
         {
-            Id = Guid.NewGuid(),
-            ChatId = request.ChatId,
+            ConversationId = request.ConversationId,
             UserId = currentUser.Id,
-            Role = DBConversationRoles.User,
+            ChatRoleId = (byte)DBConversationRoles.User,
             Messages = request.UserMessage.ToJson(),
             CreatedAt = DateTime.UtcNow,
             ParentId = request.MessageId,
@@ -257,7 +268,7 @@ public class ConversationController(ChatsDB db, CurrentUser currentUser, ILogger
         return userMessage;
     }
 
-    private void UpdateBalance(UserModel userModel, UserBalance userBalance, List<JsonTokenBalance> userModelConfigs, int userModelConfigIndex, JsonTokenBalance userModelConfig, UserModelBalanceCost cost, Guid assistantMessageId)
+    private TransactionLog? CreateTransactionLog(UserModel userModel, List<JsonTokenBalance> userModelConfigs, int userModelConfigIndex, JsonTokenBalance userModelConfig, UserModelBalanceCost cost)
     {
         if (cost.CostCount > 0 || cost.CostTokens > 0)
         {
@@ -266,18 +277,18 @@ public class ConversationController(ChatsDB db, CurrentUser currentUser, ILogger
         }
         if (cost.CostBalance > 0)
         {
-            db.BalanceLogs.Add(new()
+            TransactionLog transactionLog = new()
             {
-                Id = Guid.NewGuid(),
                 UserId = currentUser.Id,
                 CreatedAt = DateTime.UtcNow,
-                CreateUserId = currentUser.Id,
-                MessageId = assistantMessageId,
-                Value = cost.CostBalance,
-                Type = (int)BalanceLogType.Cost,
-                UpdatedAt = DateTime.UtcNow,
-            });
+                CreditUserId = currentUser.Id,
+                Amount = -cost.CostBalance,
+                TransactionTypeId = (byte)DBTransactionType.Cost,
+            };
+            db.TransactionLogs.Add(transactionLog);
+            return transactionLog;
         }
+        return null;
     }
 
     private readonly static ReadOnlyMemory<byte> dataU8 = "data:"u8.ToArray();

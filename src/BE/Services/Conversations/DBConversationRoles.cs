@@ -1,8 +1,8 @@
 ﻿namespace Chats.BE.Services.Conversations;
 
-public static class DBConversationRoles
+public enum DBConversationRoles
 {
-    public const string System = "system";
-    public const string User = "user";
-    public const string Assistant = "assistant";
+    System = 1, 
+    User = 2,
+    Assistant = 3,
 }

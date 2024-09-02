@@ -22,7 +22,13 @@ public partial class MessageResponse
 
     public int DurationMs { get; set; }
 
-    public long TransactionLogId { get; set; }
+    [Column(TypeName = "decimal(14, 8)")]
+    public decimal InputCost { get; init; }
+
+    [Column(TypeName = "decimal(14, 8)")]
+    public decimal OutputCost { get; init; }
+
+    public long? TransactionLogId { get; set; }
 
     [ForeignKey("ChatModelId")]
     [InverseProperty("MessageResponses")]
@@ -34,5 +40,5 @@ public partial class MessageResponse
 
     [ForeignKey("TransactionLogId")]
     [InverseProperty("MessageResponse")]
-    public virtual TransactionLog TransactionLog { get; set; } = null!;
+    public virtual TransactionLog? TransactionLog { get; set; }
 }

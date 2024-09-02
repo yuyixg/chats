@@ -15,9 +15,9 @@ public class BalanceService(IServiceScopeFactory serviceScopeFactory)
             await db.UserBalances
                 .Where(x => x.UserId == userId)
                 .ExecuteUpdateAsync(userBalance => userBalance.SetProperty(p => p.Balance, v =>
-                    db.BalanceLogs
+                    db.TransactionLogs
                         .Where(x => x.UserId == userId)
-                        .Sum(x => x.Type == (int)BalanceLogType.Initial || x.Type == (int)BalanceLogType.Charge ? x.Value : x.Type == (int)BalanceLogType.Cost ? -x.Value : 0)
+                        .Sum(x => x.Amount)
                     ));
         });
     }
@@ -27,9 +27,9 @@ public class BalanceService(IServiceScopeFactory serviceScopeFactory)
         await db.UserBalances
             .Where(x => x.UserId == userId)
             .ExecuteUpdateAsync(userBalance => userBalance.SetProperty(p => p.Balance, v =>
-                db.BalanceLogs
+                db.TransactionLogs
                     .Where(x => x.UserId == userId)
-                    .Sum(x => x.Type == (int)BalanceLogType.Initial || x.Type == (int)BalanceLogType.Charge ? x.Value : x.Type == (int)BalanceLogType.Cost ? -x.Value : 0)
+                    .Sum(x => x.Amount)
                 ), cancellationToken);
     }
 }

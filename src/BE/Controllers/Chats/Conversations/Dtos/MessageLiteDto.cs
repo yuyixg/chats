@@ -1,31 +1,31 @@
-﻿using Chats.BE.Controllers.Chats.Messages.Dtos;
-using System.Text.Json;
+﻿using Chats.BE.DB.Enums;
+using Chats.BE.Services.Conversations;
+using OpenAI.Chat;
+using System.Text;
 
 namespace Chats.BE.Controllers.Chats.Conversations.Dtos;
 
-public record MessageLiteTemp
-{
-    public required Guid Id { get; init; }
-    public required Guid? ParentId { get; init; }
-    public required string Role { get; init; }
-    public required string Content { get; init; }
-
-    public MessageLiteDto ToDto()
-    {
-        return new MessageLiteDto
-        {
-            Id = Id,
-            ParentId = ParentId,
-            Role = Role,
-            Content = JsonSerializer.Deserialize<MessageContentDto>(Content)!
-        };
-    }
-}
-
 public record MessageLiteDto
 {
-    public required Guid Id { get; init; }
-    public required Guid? ParentId { get; init; }
-    public required string Role { get; init; }
-    public required MessageContentDto Content { get; init; }
+    public required long Id { get; init; }
+    public required long? ParentId { get; init; }
+    public required DBConversationRoles Role { get; init; }
+    public required DBMessageSegment[] Content { get; init; }
+}
+
+public record DBMessageSegment
+{
+    public required DBMessageContentType ContentType { get; init; }
+
+    public required byte[] Content { get; init; }
+
+    public ChatMessageContentPart ToOpenAI()
+    {
+        return ContentType switch
+        {
+            DBMessageContentType.Text => ChatMessageContentPart.CreateTextMessageContentPart(Encoding.Unicode.GetString(Content)),
+            DBMessageContentType.ImageUrl => ChatMessageContentPart.CreateImageMessageContentPart(new Uri(Encoding.UTF8.GetString(Content))),
+            _ => throw new NotImplementedException()
+        };
+    }
 }

@@ -1,4 +1,5 @@
-﻿using Chats.BE.Services;
+﻿using Chats.BE.DB;
+using Chats.BE.Services;
 using System.Text.Json;
 using System.Text.Json.Serialization;
 
@@ -75,6 +76,15 @@ public record MessageContentDto
     public string ToJson()
     {
         return JSON.Serialize(this);
+    }
+
+    public MessageContent[] ToMessageContents()
+    {
+        return 
+        [
+            MessageContent.FromText(Text), 
+            ..(Image ?? []).Select(MessageContent.FromImageUrl)
+        ];
     }
 }
 
