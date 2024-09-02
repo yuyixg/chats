@@ -13,6 +13,8 @@ import SidebarActionButton from '@/components/SidebarActionButton';
 import PromptbarContext from '../PromptBar.context';
 import { PromptModal } from './PromptModal';
 
+import { getUserPromptDetail } from '@/apis/userService';
+
 interface Props {
   prompt: Prompt;
 }
@@ -27,6 +29,7 @@ export const PromptComponent = ({ prompt }: Props) => {
   const [showModal, setShowModal] = useState<boolean>(false);
   const [isDeleting, setIsDeleting] = useState(false);
   const [isRenaming, setIsRenaming] = useState(false);
+  const [promptDetail, setPromptDetail] = useState<Prompt>();
 
   const handleUpdate = (prompt: Prompt) => {
     handleUpdatePrompt(prompt);
@@ -54,6 +57,14 @@ export const PromptComponent = ({ prompt }: Props) => {
     setIsDeleting(true);
   };
 
+  const handlePromptDetail = (e: any) => {
+    e.stopPropagation();
+    getUserPromptDetail(prompt.id).then((data) => {
+      setPromptDetail(data);
+      setShowModal(true);
+    });
+  };
+
   useEffect(() => {
     if (isRenaming) {
       setIsDeleting(false);
@@ -67,8 +78,7 @@ export const PromptComponent = ({ prompt }: Props) => {
       <button
         className="flex w-full cursor-pointer items-center gap-3 rounded-lg p-3 text-sm transition-colors duration-200 hover:bg-[#ececec] hover:dark:bg-[#262630]/90"
         onClick={(e) => {
-          e.stopPropagation();
-          setShowModal(true);
+          handlePromptDetail(e);
         }}
       >
         <IconBulbFilled size={18} />
@@ -100,7 +110,7 @@ export const PromptComponent = ({ prompt }: Props) => {
 
       {showModal && (
         <PromptModal
-          prompt={prompt}
+          prompt={promptDetail!}
           onClose={() => setShowModal(false)}
           onUpdatePrompt={handleUpdate}
         />

@@ -46,6 +46,7 @@ import {
   getSiteInfo,
   getUserMessages,
   getUserModels,
+  getUserPromptBrief,
   getUserPrompts,
   postChats,
 } from '@/apis/userService';
@@ -418,7 +419,7 @@ const Home = ({ siteInfo }: { siteInfo: SiteInfoConfig }) => {
         getChats({ page: 1, pageSize: 50 }, modelData);
       });
 
-      getUserPrompts().then((data) => {
+      getUserPromptBrief().then((data) => {
         dispatch({ field: 'prompts', value: data });
       });
     }

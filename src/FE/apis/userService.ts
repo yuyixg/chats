@@ -6,7 +6,7 @@ import { PostPromptParams, PutPromptParams } from '@/types/admin';
 import { ChatMessage } from '@/types/chatMessage';
 import { Model } from '@/types/model';
 import { PageResult, Paging } from '@/types/page';
-import { Prompt } from '@/types/prompt';
+import { IdName, Prompt } from '@/types/prompt';
 import {
   GetLoginProvidersResult,
   GetModelUsageResult,
@@ -123,6 +123,16 @@ export const getUserPrompts = () => {
   return fetchServer.get<Prompt[]>('/api/prompts');
 };
 
+export const getUserPromptBrief = () => {
+  const fetchServer = useFetch();
+  return fetchServer.get<IdName[]>('/api/prompts/brief');
+};
+
+export const getUserPromptDetail = (id: string) => {
+  const fetchServer = useFetch();
+  return fetchServer.get<Prompt>('/api/prompts/' + id);
+};
+
 export const postUserPrompts = (params: PostPromptParams) => {
   const fetchServer = useFetch();
   return fetchServer.post('/api/prompts', { body: params });
@@ -138,16 +148,25 @@ export const deleteUserPrompts = (id: string) => {
   return fetchServer.delete('/api/prompts?id=' + id);
 };
 
-const postSignCode = (phone: string, type: SmsType, invitationCode: string | null = null) => {
+const postSignCode = (
+  phone: string,
+  type: SmsType,
+  invitationCode: string | null = null,
+) => {
   const fetchServer = useFetch();
-  return fetchServer.post('/api/public/sms', { body: { phone, type, invitationCode } });
+  return fetchServer.post('/api/public/sms', {
+    body: { phone, type, invitationCode },
+  });
 };
 
 export const sendLoginSmsCode = (phone: string) => {
   return postSignCode(phone, SmsType.SignIn);
 };
 
-export const sendRegisterSmsCode = (phone: string, invitationCode: string | undefined) => {
+export const sendRegisterSmsCode = (
+  phone: string,
+  invitationCode: string | undefined,
+) => {
   return postSignCode(phone, SmsType.Register, invitationCode);
 };
 
