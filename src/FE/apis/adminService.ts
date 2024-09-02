@@ -303,5 +303,5 @@ export const postInvitationCode = (params: PostInvitationCodeParams) => {
 
 export const deleteInvitationCode = (id: string) => {
   const fetchServer = useFetch();
-  return fetchServer.delete('/api/admin/invitation-code?id=' + id);
+  return fetchServer.delete('/api/admin/invitation-code/' + id);
 };

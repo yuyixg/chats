@@ -1,10 +1,10 @@
 import React, { useEffect, useState } from 'react';
-import toast from 'react-hot-toast';
 
 import { useTranslation } from 'next-i18next';
 import { serverSideTranslations } from 'next-i18next/serverSideTranslations';
 
 import { DEFAULT_LANGUAGE } from '@/utils/settings';
+
 import { GetInvitationCodeResult } from '@/types/user';
 
 import { InvitationCodeModal } from '@/components/Admin/InvitationCode/InvitationCodeModal';
@@ -19,7 +19,7 @@ import {
   TableRow,
 } from '@/components/ui/table';
 
-import { deleteInvitationCode, getInvitationCode } from '@/apis/adminService';
+import { getInvitationCode } from '@/apis/adminService';
 
 export default function InvitationCode() {
   const { t } = useTranslation('admin');
@@ -51,30 +51,13 @@ export default function InvitationCode() {
     setIsOpen(true);
   };
 
-  const onDelete = (id: string) => {
-    deleteInvitationCode(id)
-      .then(() => {
-        toast.success(t('Delete successful!'));
-        init();
-      })
-      .catch(() => {
-        toast.error(
-          t(
-            'Operation failed! Please try again later, or contact technical personnel.',
-          ),
-        );
-      })
-      .finally(() => {
-        setDeleting(false);
-      });
-  };
-
   return (
     <>
       <div className="flex flex-col gap-4 mb-4">
         <div className="flex justify-end gap-3 items-center">
           <Button
             onClick={() => {
+              setSelected(null);
               setIsOpen(true);
             }}
             color="primary"

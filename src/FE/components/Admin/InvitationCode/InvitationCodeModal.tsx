@@ -18,7 +18,11 @@ import { Form, FormField } from '../../ui/form';
 import FormInput from '../../ui/form/input';
 import { FormFieldType, IFormFieldOption } from '../../ui/form/type';
 
-import { postInvitationCode, putInvitationCode } from '@/apis/adminService';
+import {
+  deleteInvitationCode,
+  postInvitationCode,
+  putInvitationCode,
+} from '@/apis/adminService';
 import { zodResolver } from '@hookform/resolvers/zod';
 import { z } from 'zod';
 
@@ -89,6 +93,21 @@ export const InvitationCodeModal = (props: IProps) => {
     });
   }
 
+  const onDelete = () => {
+    deleteInvitationCode(selected!.id)
+      .then(() => {
+        onSuccessful();
+        toast.success(t('Delete successful!'));
+      })
+      .catch(() => {
+        toast.error(
+          t(
+            'Operation failed! Please try again later, or contact technical personnel.',
+          ),
+        );
+      });
+  };
+
   useEffect(() => {
     if (isOpen) {
       form.reset();
@@ -119,6 +138,11 @@ export const InvitationCodeModal = (props: IProps) => {
               />
             ))}
             <DialogFooter className="pt-4">
+              {selected && (
+                <Button type="button" variant="destructive" onClick={onDelete}>
+                  {t('Delete')}
+                </Button>
+              )}
               <Button type="submit">{t('Save')}</Button>
             </DialogFooter>
           </form>
