@@ -1,4 +1,4 @@
-import { useEffect } from 'react';
+import { useEffect, useState } from 'react';
 import { useForm } from 'react-hook-form';
 import toast from 'react-hot-toast';
 
@@ -8,11 +8,19 @@ import { useRouter } from 'next/router';
 import { saveUserInfo, setUserSession } from '@/utils/user';
 
 import { Button } from '@/components/ui/button';
-import { Form, FormField } from '@/components/ui/form';
+import {
+  Form,
+  FormControl,
+  FormField,
+  FormItem,
+  FormLabel,
+} from '@/components/ui/form';
 
+import { IconEye, IconEyeOff } from '../Icons';
 import { Card, CardContent } from '../ui/card';
 import FormInput from '../ui/form/input';
 import { FormFieldType, IFormFieldOption } from '../ui/form/type';
+import { Input } from '../ui/input';
 
 import { singIn } from '@/apis/userService';
 import { zodResolver } from '@hookform/resolvers/zod';
@@ -26,6 +34,7 @@ const AccountLoginCard = (props: {
   const { loginLoading, openLoading, closeLoading } = props;
   const { t } = useTranslation('login');
   const router = useRouter();
+  const [showPassword, setShowPassword] = useState(false);
 
   useEffect(() => {
     form.formState.isValid;
@@ -45,12 +54,29 @@ const AccountLoginCard = (props: {
       label: t('Your password'),
       defaultValue: '',
       render: (options: IFormFieldOption, field: FormFieldType) => (
-        <FormInput
-          autocomplete="on"
-          type="password"
-          options={options}
-          field={field}
-        />
+        <FormItem className="pb-4 pt-2">
+          <FormLabel>{options.label}</FormLabel>
+          <FormControl>
+            <div className="flex">
+              <Input
+                autoComplete="on"
+                type={showPassword ? 'text' : 'password'}
+                placeholder={options?.placeholder}
+                {...field}
+              />
+              <Button
+                type="button"
+                variant="link"
+                className="absolute right-10 text-center px-2 pt-2.5"
+                onClick={() => {
+                  setShowPassword(!showPassword);
+                }}
+              >
+                {showPassword ? <IconEye /> : <IconEyeOff />}{' '}
+              </Button>
+            </div>
+          </FormControl>
+        </FormItem>
       ),
     },
   ];
