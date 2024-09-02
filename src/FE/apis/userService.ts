@@ -42,10 +42,16 @@ export interface PutChatParams {
   isShared?: boolean;
 }
 
-export const changeUserPassword = (newPassword: string) => {
+export interface PostUserPassword {
+  oldPassword: string;
+  newPassword: string;
+  confirmPassword: string;
+}
+
+export const changeUserPassword = (params: PostUserPassword) => {
   const fetchService = useFetch();
-  return fetchService.put('/api/user/change-password', {
-    body: { newPassword },
+  return fetchService.put('/api/user/reset-password', {
+    body: { ...params },
   });
 };
 
