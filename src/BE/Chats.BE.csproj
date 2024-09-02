@@ -23,7 +23,6 @@
     <PackageReference Include="System.Runtime.Caching" Version="8.0.0" />
     <PackageReference Include="TencentCloudSDK.Hunyuan" Version="3.0.1054" />
     <PackageReference Include="TencentCloudSDK.Sms" Version="3.0.1056" />
-    <PackageReference Include="Yarp.ReverseProxy" Version="2.1.0" />
   </ItemGroup>
 
   <ItemGroup>

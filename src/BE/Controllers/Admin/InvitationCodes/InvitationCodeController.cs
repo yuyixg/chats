@@ -41,7 +41,7 @@ public class InvitationCodeController(ChatsDB db) : ControllerBase
         code.Count = req.Count;
         if (db.ChangeTracker.HasChanges())
         {
-            await db.SaveChangesAsync();
+            await db.SaveChangesAsync(cancellationToken);
         }
         return NoContent();
     }
@@ -64,7 +64,7 @@ public class InvitationCodeController(ChatsDB db) : ControllerBase
             db.InvitationCodes.Remove(code);
         }
 
-        await db.SaveChangesAsync();
+        await db.SaveChangesAsync(cancellationToken);
         return NoContent();
     }
 

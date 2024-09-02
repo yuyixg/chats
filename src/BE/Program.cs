@@ -1,10 +1,8 @@
-
 using Chats.BE.DB;
 using Chats.BE.Infrastructure;
 using Chats.BE.Services;
 using Chats.BE.Services.Configs;
 using Chats.BE.Services.Conversations;
-using Chats.BE.Services.Keycloak;
 using Chats.BE.Services.Sessions;
 using Microsoft.AspNetCore.Authentication;
 
@@ -41,8 +39,6 @@ public class Program
         builder.Services.AddAuthentication("Bearer")
             .AddScheme<AuthenticationSchemeOptions, SessionAuthenticationHandler>("Bearer", null);
 
-        builder.AddReverseProxy();
-
         builder.AddCORSPolicies();
 
         WebApplication app = builder.Build();
@@ -59,9 +55,6 @@ public class Program
         app.UseAuthentication();
         app.UseAuthorization();
         app.MapControllers();
-
-        // Use the reverse proxy middleware
-        app.MapReverseProxy();
 
         app.Run();
     }
