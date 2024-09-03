@@ -72,7 +72,7 @@ public record AdminMessageBasicItem
     [JsonPropertyName("assistantChildrenIds")]
     public required List<string> AssistantChildrenIds { get; init; }
 
-    public AdminMessageAssistantItem WithAssistantDetails(int duration, int inputTokens, int outputTokens, string inputPrice, string outputPrice, string modelName)
+    public AdminMessageAssistantItem WithAssistantDetails(int duration, int inputTokens, int outputTokens, decimal inputPrice, decimal outputPrice, string modelName)
     {
         return new AdminMessageAssistantItem
         {
@@ -86,8 +86,8 @@ public record AdminMessageBasicItem
             Duration = duration, 
             InputTokens = inputTokens,
             OutputTokens = outputTokens,
-            InputPrice = inputPrice,
-            OutputPrice = outputPrice,
+            InputPrice = inputPrice.ToString(),
+            OutputPrice = outputPrice.ToString(),
             ModelName = modelName,
         };
     }
@@ -120,13 +120,13 @@ public record AdminMessageItemTemp
     public required long? ParentId { get; init; }
     public string? ModelName { get; init; }
     public required DateTime CreatedAt { get; init; }
-    public required int InputTokens { get; init; }
-    public required int OutputTokens { get; init; }
-    public required decimal InputPrice { get; init; }
-    public required decimal OutputPrice { get; init; }
     public required DBConversationRole Role { get; init; }
     public required DBMessageSegment[] Content { get; init; }
-    public required int Duration { get; init; }
+    public required int? InputTokens { get; init; }
+    public required int? OutputTokens { get; init; }
+    public required decimal? InputPrice { get; init; }
+    public required decimal? OutputPrice { get; init; }
+    public required int? Duration { get; init; }
 
     public static AdminMessageBasicItem[] ToDtos(AdminMessageItemTemp[] temps)
     {
@@ -152,7 +152,7 @@ public record AdminMessageItemTemp
 
                 if (x.Role == DBConversationRole.Assistant)
                 {
-                    return basicItem.WithAssistantDetails(x.Duration, x.InputTokens, x.OutputTokens, x.InputPrice.ToString(), x.OutputPrice.ToString(), x.ModelName!);
+                    return basicItem.WithAssistantDetails(x.Duration!.Value, x.InputTokens!.Value, x.OutputTokens!.Value, x.InputPrice!.Value, x.OutputPrice!.Value, x.ModelName!);
                 }
                 else
                 {

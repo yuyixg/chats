@@ -142,7 +142,7 @@ public class ConversationController(ChatsDB db, CurrentUser currentUser, ILogger
             ..GetMessageTree(existingMessages, request.MessageId),
         ];
 
-        MessageLiteDto userMessage = GetUserMessage(request, existingMessages);
+        MessageLiteDto userMessage = await GetUserMessage(request, existingMessages);
         messageToSend.Add(userMessage.ToOpenAI());
 
         ConversationSegment lastSegment = new() { TextSegment = "", InputTokenCount = 0, OutputTokenCount = 0 };
@@ -248,7 +248,7 @@ public class ConversationController(ChatsDB db, CurrentUser currentUser, ILogger
         return new EmptyResult();
     }
 
-    private MessageLiteDto GetUserMessage(ConversationRequest request, Dictionary<long, MessageLiteDto> existingMessages)
+    private async Task<MessageLiteDto> GetUserMessage(ConversationRequest request, Dictionary<long, MessageLiteDto> existingMessages)
     {
         // new user message
         if (request.MessageId != null && existingMessages.TryGetValue(request.MessageId.Value, out MessageLiteDto? parentMessage) && parentMessage.Role == DBConversationRole.User)
@@ -268,6 +268,7 @@ public class ConversationController(ChatsDB db, CurrentUser currentUser, ILogger
             ParentId = request.MessageId,
         };
         db.Messages.Add(dbUserMessage);
+        await db.SaveChangesAsync();
         MessageLiteDto userMessage = new()
         {
             Id = dbUserMessage.Id,

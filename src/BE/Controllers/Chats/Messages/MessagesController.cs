@@ -1,5 +1,7 @@
-﻿using Chats.BE.Controllers.Chats.Messages.Dtos;
+﻿using Chats.BE.Controllers.Chats.Conversations.Dtos;
+using Chats.BE.Controllers.Chats.Messages.Dtos;
 using Chats.BE.DB;
+using Chats.BE.DB.Enums;
 using Chats.BE.Infrastructure;
 using Chats.BE.Services.Conversations;
 using Microsoft.AspNetCore.Authorization;
@@ -23,14 +25,18 @@ public class MessagesController(ChatsDB db, CurrentUser currentUser) : Controlle
                 Role = (DBConversationRole)x.ChatRoleId,
                 Content = x.MessageContents
                     .OrderBy(x => x.Id)
-                    .Select(x => x.ToSegment())
+                    .Select(x => new DBMessageSegment
+                    {
+                        ContentType = (DBMessageContentType)x.ContentTypeId,
+                        Content = x.Content
+                    })
                     .ToArray(),
-                InputTokens = x.MessageResponse!.InputTokenCount,
-                OutputTokens = x.MessageResponse!.OutputTokenCount,
-                InputPrice = x.MessageResponse!.InputCost,
-                OutputPrice = x.MessageResponse!.OutputCost,
                 CreatedAt = x.CreatedAt,
-                Duration = x.MessageResponse!.DurationMs,
+                InputTokens = x.MessageResponse!.InputTokenCount,
+                OutputTokens = x.MessageResponse.OutputTokenCount,
+                InputPrice = x.MessageResponse.InputCost,
+                OutputPrice = x.MessageResponse.OutputCost,
+                Duration = x.MessageResponse.DurationMs,
                 ModelId = x.MessageResponse.ChatModelId,
                 ModelName = x.MessageResponse.ChatModel.Name
             })

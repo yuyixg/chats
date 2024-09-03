@@ -94,12 +94,12 @@ public record ChatMessageTemp
     public required long? ParentId { get; init; }
     public required DBConversationRole Role { get; init; }
     public required DBMessageSegment[] Content { get; init; }
-    public required int InputTokens { get; init; }
-    public required int OutputTokens { get; init; }
-    public required decimal InputPrice { get; init; }
-    public required decimal OutputPrice { get; init; }
+    public required int? InputTokens { get; init; }
+    public required int? OutputTokens { get; init; }
+    public required decimal? InputPrice { get; init; }
+    public required decimal? OutputPrice { get; init; }
     public required DateTime CreatedAt { get; init; }
-    public required int Duration { get; init; }
+    public required int? Duration { get; init; }
     public required Guid? ModelId { get; init; }
     public required string? ModelName { get; init; }
 
@@ -125,11 +125,11 @@ public record ChatMessageTemp
                 Role = Role.ToString().ToLowerInvariant(),
                 Content = MessageContentDto.FromSegments(Content),
                 CreatedAt = CreatedAt,
-                InputTokens = InputTokens,
-                OutputTokens = OutputTokens,
-                InputPrice = InputPrice,
-                OutputPrice = OutputPrice,
-                Duration = Duration,
+                InputTokens = InputTokens!.Value,
+                OutputTokens = OutputTokens!.Value,
+                InputPrice = InputPrice!.Value,
+                OutputPrice = OutputPrice!.Value,
+                Duration = Duration!.Value,
                 ModelId = ModelId!.Value,
                 ModelName = ModelName
             };
