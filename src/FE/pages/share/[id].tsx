@@ -11,33 +11,39 @@ import { GetMessageDetailsResult } from '@/types/admin';
 import { ChatMessage } from '@/types/chatMessage';
 
 import { ChatMessage as ChatMessageComponent } from '@/components/Admin/Messages/ChatMessage';
+import PageNotFound from '@/components/PageNotFound/PageNotFound';
 import { Button } from '@/components/ui/button';
 
 import { getShareMessage } from '@/apis/adminService';
 import Decimal from 'decimal.js';
-import PageNotFound from '@/components/PageNotFound/PageNotFound';
 
 export default function ShareMessage() {
   const router = useRouter();
   const { id } = router.query as { id: string };
   const [chat, setChat] = useState<GetMessageDetailsResult | null>(null);
   const [selectMessages, setSelectMessages] = useState<ChatMessage[]>([]);
+  const [loading, setLoading] = useState(true);
   const [currentMessages, setCurrentMessages] = useState<ChatMessage[]>([]);
 
   useEffect(() => {
-    getShareMessage(id!).then((data) => {
-      document.title = data.name;
-      if (data.messages.length > 0) {
-        setChat(data);
-        setCurrentMessages(data.messages);
-        const lastMessage = data.messages[data.messages.length - 1];
-        const _selectMessages = getSelectMessages(
-          data.messages,
-          lastMessage.id,
-        );
-        setSelectMessages(_selectMessages);
-      }
-    });
+    setLoading(true);
+    getShareMessage(id!)
+      .then((data) => {
+        document.title = data.name;
+        if (data.messages.length > 0) {
+          setChat(data);
+          setCurrentMessages(data.messages);
+          const lastMessage = data.messages[data.messages.length - 1];
+          const _selectMessages = getSelectMessages(
+            data.messages,
+            lastMessage.id,
+          );
+          setSelectMessages(_selectMessages);
+        }
+      })
+      .finally(() => {
+        setLoading(false);
+      });
   }, []);
 
   const onMessageChange = (messageId: string) => {
@@ -46,9 +52,8 @@ export default function ShareMessage() {
   };
 
   const showChat = () => {
-    return (
+    return chat ? (
       <>
-        {' '}
         <div className="w-full">
           {chat &&
             selectMessages.map((current, index) => {
@@ -108,10 +113,12 @@ export default function ShareMessage() {
           </div>
         </div>
       </>
+    ) : (
+      <PageNotFound />
     );
   };
 
-  return chat ? showChat() : <PageNotFound />;
+  return loading ? <></> : showChat();
 }
 
 export const getServerSideProps = async ({ locale }: { locale: string }) => {
