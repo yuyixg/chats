@@ -32,7 +32,7 @@ import UploadButton from '../UploadButton';
 import { PromptList } from './PromptList';
 import { VariableModal } from './VariableModal';
 
-import { stopChat } from '@/apis/userService';
+import { getUserPromptDetail, stopChat } from '@/apis/userService';
 
 interface Props {
   onSend: (message: Message) => void;
@@ -186,17 +186,20 @@ export const ChatInput = ({
 
   const handleInitModal = () => {
     const selectedPrompt = filteredPrompts[activePromptIndex];
-    if (selectedPrompt) {
-      setContent((prevContent) => {
-        const newContent = prevContent.text?.replace(
-          /\/\w*$/,
-          selectedPrompt.content,
-        );
-        return { ...prevContent, text: newContent };
+    selectedPrompt &&
+      getUserPromptDetail(selectedPrompt.id).then((data) => {
+        selectedPrompt.content = data.content;
+        selectedPrompt.description = data.description;
+        setContent((prevContent) => {
+          const newContent = prevContent.text?.replace(
+            /\/\w*$/,
+            selectedPrompt.content,
+          );
+          return { ...prevContent, text: newContent };
+        });
+        handlePromptSelect(selectedPrompt);
+        setShowPromptList(false);
       });
-      handlePromptSelect(selectedPrompt);
-    }
-    setShowPromptList(false);
   };
 
   const handleSubmit = (updatedVariables: string[]) => {
