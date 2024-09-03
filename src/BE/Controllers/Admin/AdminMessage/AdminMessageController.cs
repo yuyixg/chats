@@ -18,7 +18,7 @@ public class AdminMessageController(ChatsDB db, CurrentUser currentUser) : Contr
     [HttpGet("messages")]
     public async Task<ActionResult<PagedResult<AdminChatsDto>>> GetMessages([FromQuery] PagingRequest req, CancellationToken cancellationToken)
     {
-        IQueryable<Chat> chats = db.Chats
+        IQueryable<Conversation> chats = db.Conversations
             .Where(x => x.User.Role != "admin" || x.UserId == currentUser.Id);
         if (!string.IsNullOrEmpty(req.Query))
         {
@@ -36,7 +36,11 @@ public class AdminMessageController(ChatsDB db, CurrentUser currentUser) : Contr
                 ModelName = x.ChatModel!.Name,
                 Title = x.Title,
                 UserName = x.User.Username,
-                JsonUserModelConfig = x.UserModelConfig,
+                JsonUserModelConfig = new JsonUserModelConfig()
+                {
+                    Temperature = x.Temperature, 
+                    EnableSearch = x.EnableSearch,
+                },
             }), req, x => x.ToDto(), cancellationToken);
     }
 
@@ -76,7 +80,7 @@ public class AdminMessageController(ChatsDB db, CurrentUser currentUser) : Contr
                 OutputTokens = x.MessageResponse.OutputTokenCount,
                 InputPrice = x.MessageResponse.InputCost,
                 OutputPrice = x.MessageResponse.OutputCost,
-                Role = (DBConversationRoles)x.ChatRoleId,
+                Role = (DBConversationRole)x.ChatRoleId,
                 Content = x.MessageContents
                     .Select(x => new DBMessageSegment 
                     { 

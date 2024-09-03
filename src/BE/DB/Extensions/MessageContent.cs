@@ -1,4 +1,5 @@
-﻿using Chats.BE.DB.Enums;
+﻿using Chats.BE.Controllers.Chats.Conversations.Dtos;
+using Chats.BE.DB.Enums;
 using OpenAI.Chat;
 using System.Text;
 
@@ -13,6 +14,15 @@ public partial class MessageContent
             DBMessageContentType.Text => ChatMessageContentPart.CreateTextMessageContentPart(Encoding.Unicode.GetString(Content)),
             DBMessageContentType.ImageUrl => ChatMessageContentPart.CreateImageMessageContentPart(new Uri(Encoding.UTF8.GetString(Content))),
             _ => throw new NotImplementedException()
+        };
+    }
+
+    public DBMessageSegment ToSegment()
+    {
+        return new DBMessageSegment
+        {
+            ContentType = (DBMessageContentType)ContentTypeId,
+            Content = Content
         };
     }
 

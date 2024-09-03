@@ -34,17 +34,15 @@ public record AdminMessageDtoTemp
 
     public JsonModelConfig JsonModelConfig => JsonSerializer.Deserialize<JsonModelConfig>(ModelConfigText)!;
 
-    public JsonUserModelConfig JsonUserModelConfig => JsonSerializer.Deserialize<JsonUserModelConfig>(UserModelConfigText)!;
-
     public AdminMessageDto ToDto(AdminMessageBasicItem[] messages)
     {
         return new AdminMessageDto
         {
             Name = Name,
             ModelName = ModelName,
-            ModelTemperature = JsonUserModelConfig.Temperature ?? JsonModelConfig.Temperature,
-            ModelPrompt = messages.FirstOrDefault(x => x.Role == DBConversationRoles.System)?.Content.Text,
-            Messages = messages.Where(x => x.Role != DBConversationRoles.System).ToArray(),
+            ModelTemperature = UserModelConfigText.Temperature ?? JsonModelConfig.Temperature,
+            ModelPrompt = messages.FirstOrDefault(x => x.Role.Equals(DBConversationRole.System.ToString(), StringComparison.OrdinalIgnoreCase))?.Content.Text,
+            Messages = messages.Where(x => !x.Role.Equals(DBConversationRole.System.ToString(), StringComparison.OrdinalIgnoreCase)).ToArray(),
         };
     }
 }
@@ -54,10 +52,10 @@ public record AdminMessageDtoTemp
 public record AdminMessageBasicItem
 {
     [JsonPropertyName("id")]
-    public required Guid Id { get; init; }
+    public required string Id { get; init; }
 
     [JsonPropertyName("parentId")]
-    public Guid? ParentId { get; init; }
+    public string? ParentId { get; init; }
 
     [JsonPropertyName("createdAt")]
     public required DateTime CreatedAt { get; init; }
@@ -69,10 +67,10 @@ public record AdminMessageBasicItem
     public required MessageContentDto Content { get; init; }
 
     [JsonPropertyName("childrenIds")]
-    public required List<Guid> ChildrenIds { get; init; }
+    public required List<string> ChildrenIds { get; init; }
 
     [JsonPropertyName("assistantChildrenIds")]
-    public required List<Guid> AssistantChildrenIds { get; init; }
+    public required List<string> AssistantChildrenIds { get; init; }
 
     public AdminMessageAssistantItem WithAssistantDetails(int duration, int inputTokens, int outputTokens, string inputPrice, string outputPrice, string modelName)
     {
@@ -126,7 +124,7 @@ public record AdminMessageItemTemp
     public required int OutputTokens { get; init; }
     public required decimal InputPrice { get; init; }
     public required decimal OutputPrice { get; init; }
-    public required DBConversationRoles Role { get; init; }
+    public required DBConversationRole Role { get; init; }
     public required DBMessageSegment[] Content { get; init; }
     public required int Duration { get; init; }
 
@@ -137,22 +135,22 @@ public record AdminMessageItemTemp
             {
                 AdminMessageBasicItem basicItem = new()
                 {
-                    Id = x.Id,
-                    ParentId = x.ParentId,
+                    Id = x.Id.ToString(),
+                    ParentId = x.ParentId?.ToString(),
                     CreatedAt = x.CreatedAt,
-                    Role = x.Role,
-                    Content = MessageContentDto.Parse(x.Content),
+                    Role = x.Role.ToString().ToLowerInvariant(),
+                    Content = MessageContentDto.FromSegments(x.Content),
                     ChildrenIds = temps
-                        .Where(v => v.ParentId == x.Id && v.Role == DBConversationRoles.User)
-                        .Select(v => v.Id)
+                        .Where(v => v.ParentId == x.Id && v.Role == DBConversationRole.User)
+                        .Select(v => v.Id.ToString())
                         .ToList(),
                     AssistantChildrenIds = temps
-                        .Where(v => v.ParentId == x.ParentId && v.Role == DBConversationRoles.Assistant)
-                        .Select(v => v.Id)
+                        .Where(v => v.ParentId == x.ParentId && v.Role == DBConversationRole.Assistant)
+                        .Select(v => v.Id.ToString())
                         .ToList(),
                 };
 
-                if (x.Role == DBConversationRoles.Assistant)
+                if (x.Role == DBConversationRole.Assistant)
                 {
                     return basicItem.WithAssistantDetails(x.Duration, x.InputTokens, x.OutputTokens, x.InputPrice.ToString(), x.OutputPrice.ToString(), x.ModelName!);
                 }

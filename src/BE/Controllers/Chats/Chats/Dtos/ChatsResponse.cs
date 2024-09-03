@@ -46,7 +46,7 @@ public record ChatsResponse
 
 public record ChatsResponseTemp
 {
-    public required Guid Id { get; init; }
+    public required int Id { get; init; }
 
     public required string Title { get; init; }
 
@@ -56,7 +56,7 @@ public record ChatsResponseTemp
 
     public required string? ModelConfig { get; init; }
 
-    public required string UserModelConfig { get; init; }
+    public required JsonUserModelConfig UserModelConfig { get; init; }
 
     public required bool IsShared { get; init; }
 
@@ -69,7 +69,7 @@ public record ChatsResponseTemp
             ChatModelId = ChatModelId,
             ModelName = ModelName,
             ModelConfig = ModelConfig == null ? [] : JsonSerializer.Deserialize<Dictionary<string, object?>>(ModelConfig)!,
-            UserModelConfig = JsonSerializer.Deserialize<Dictionary<string, object?>>(UserModelConfig)!,
+            UserModelConfig = UserModelConfig,
             IsShared = IsShared
         };
     }
