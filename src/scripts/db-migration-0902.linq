@@ -1,4 +1,4 @@
-<Query Kind="Expression">
+<Query Kind="Program">
   <Connection>
     <ID>35a33e06-2204-4d18-88ea-ce7dedb2c722</ID>
     <NamingServiceVersion>2</NamingServiceVersion>
@@ -16,3 +16,63 @@
   </Connection>
 </Query>
 
+void Main()
+{
+	GuidInt64Mapping balanceLogIds = new();
+	foreach (Guid id in BalanceLogs.Select(x => x.Id))
+	{
+		balanceLogIds.MapGuid(id);
+	}
+	
+	GuidInt32Mapping chatsIds = new();
+	foreach (Guid id in Chats.Select(x => x.Id))
+	{
+		chatsIds.MapGuid(id);
+	}
+	
+	GuidInt64Mapping messageIds = new();
+	foreach (Guid id in ChatMessages.Select(x => x.Id))
+	{
+		messageIds.MapGuid(id);
+	}
+}
+
+public class GuidInt32Mapping
+{
+	int _nextId = 1;
+	Dictionary<Guid, int> _mapping = new();
+	
+	public int MapGuid(Guid guid)
+	{
+		if (_mapping.TryGetValue(guid, out int id))
+		{
+			return id;
+		}
+		else
+		{
+			int newId = _nextId++;;
+			_mapping[guid] = newId;
+			return newId;
+		}
+	}
+}
+
+public class GuidInt64Mapping
+{
+	long _nextId = 1;
+	Dictionary<Guid, long> _mapping = new();
+
+	public long MapGuid(Guid guid)
+	{
+		if (_mapping.TryGetValue(guid, out long id))
+		{
+			return id;
+		}
+		else
+		{
+			long newId = _nextId++; ;
+			_mapping[guid] = newId;
+			return newId;
+		}
+	}
+}
