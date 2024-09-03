@@ -23,10 +23,10 @@ public partial class MessageResponse
     public int DurationMs { get; set; }
 
     [Column(TypeName = "decimal(14, 8)")]
-    public decimal InputCost { get; init; }
+    public decimal InputCost { get; set; }
 
     [Column(TypeName = "decimal(14, 8)")]
-    public decimal OutputCost { get; init; }
+    public decimal OutputCost { get; set; }
 
     public long? TransactionLogId { get; set; }
 

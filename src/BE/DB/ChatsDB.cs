@@ -177,9 +177,7 @@ public partial class ChatsDB : DbContext
                 .OnDelete(DeleteBehavior.ClientSetNull)
                 .HasConstraintName("FK_MessageResponse_Message");
 
-            entity.HasOne(d => d.TransactionLog).WithOne(p => p.MessageResponse)
-                .OnDelete(DeleteBehavior.ClientSetNull)
-                .HasConstraintName("FK_MessageResponse_TransactionLog");
+            entity.HasOne(d => d.TransactionLog).WithOne(p => p.MessageResponse).HasConstraintName("FK_MessageResponse_TransactionLog");
         });
 
         modelBuilder.Entity<ModelKey>(entity =>
