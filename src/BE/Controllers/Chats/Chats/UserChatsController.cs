@@ -81,13 +81,16 @@ public class UserChatsController(ChatsDB db, CurrentUser currentUser) : Controll
         string? jsonModel = await db.UserModels
                 .Where(x => x.UserId == currentUser.Id)
                 .Select(x => x.Models)
-                .FirstOrDefaultAsync();
+                .FirstOrDefaultAsync(cancellationToken);
         if (jsonModel == null) return this.BadRequestMessage("No model available(no data).");
         HashSet<Guid> userModels = JsonSerializer.Deserialize<JsonTokenBalance[]>(jsonModel)!
             .Where(x => x.Enabled)
             .Select(x => x.ModelId)
             .ToHashSet();
-        if (userModels.Count == 0)
+        HashSet<Guid> validModels = [.. db.ChatModels
+            .Where(x => userModels.Contains(x.Id) && x.Enabled)
+            .Select(x => x.Id)];
+        if (validModels.Count == 0)
         {
             return this.BadRequestMessage("No model available.");
         }
@@ -107,13 +110,13 @@ public class UserChatsController(ChatsDB db, CurrentUser currentUser) : Controll
             .Where(x => x.UserId == currentUser.Id && !x.IsDeleted)
             .OrderByDescending(x => x.CreatedAt)
             .FirstOrDefaultAsync(cancellationToken);
-        if (lastChat?.ChatModelId != null && userModels.Contains(lastChat.ChatModelId))
+        if (lastChat?.ChatModelId != null && validModels.Contains(lastChat.ChatModelId))
         {
             chat.ChatModelId = lastChat.ChatModelId;
         }
         else
         {
-            chat.ChatModelId = userModels.First();
+            chat.ChatModelId = validModels.First();
         }
         db.Conversations.Add(chat);
         await db.SaveChangesAsync(cancellationToken);
