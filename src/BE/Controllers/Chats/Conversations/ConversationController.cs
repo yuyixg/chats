@@ -108,7 +108,7 @@ public class ConversationController(ChatsDB db, CurrentUser currentUser, ILogger
                         ContentTypeId = (byte)DBMessageContentType.Text,
                         Content = Encoding.Unicode.GetBytes(request.UserModelConfig.Prompt),
                     }
-                ], 
+                ],
                 CreatedAt = DateTime.UtcNow,
             };
             db.Messages.Add(toBeInsert);
@@ -126,12 +126,12 @@ public class ConversationController(ChatsDB db, CurrentUser currentUser, ILogger
         }
         else
         {
-            request = request with 
-            { 
+            request = request with
+            {
                 UserModelConfig = new JsonUserModelConfig
                 {
                     EnableSearch = miscInfo.ThisChat.EnableSearch,
-                    Temperature = miscInfo.ThisChat.Temperature, 
+                    Temperature = miscInfo.ThisChat.Temperature,
                 }
             };
         }
@@ -156,22 +156,21 @@ public class ConversationController(ChatsDB db, CurrentUser currentUser, ILogger
         {
             UserModelBalanceCalculator calculator = new(tokenBalance, miscInfo.UserBalance.Balance);
             cost = calculator.GetNewBalance(0, 0, priceConfig);
+            if (!cost.IsSufficient)
+            {
+                throw new InsufficientBalanceException();
+            }
 
             using ConversationService s = conversationFactory.CreateConversationService(cm);
             await foreach (ConversationSegment seg in s.ChatStreamed(messageToSend, request.UserModelConfig, currentUser, cancellationToken))
             {
                 lastSegment = seg;
                 UserModelBalanceCost currentCost = calculator.GetNewBalance(seg.InputTokenCount, seg.OutputTokenCount, priceConfig);
-                if (cost.IsSufficient)
+                if (!currentCost.IsSufficient)
                 {
-                    cost = currentCost;
+                    throw new InsufficientBalanceException();
                 }
-                else
-                {
-                    // insufficient balance, use previous cost
-                    responseText.Append("\n⚠Insufficient balance - 余额不足!");
-                    break;
-                }
+                cost = currentCost;
 
                 if (seg.TextSegment == string.Empty) continue;
                 await YieldResponse(new() { Result = seg.TextSegment, Success = true });
@@ -182,6 +181,10 @@ public class ConversationController(ChatsDB db, CurrentUser currentUser, ILogger
                     break;
                 }
             }
+        }
+        catch (InsufficientBalanceException)
+        {
+            responseText.Append("\n⚠Insufficient balance - 余额不足!");
         }
         catch (Exception e) when (e is DashScopeException || e is ClientResultException)
         {
@@ -263,7 +266,7 @@ public class ConversationController(ChatsDB db, CurrentUser currentUser, ILogger
             ConversationId = request.ConversationId,
             UserId = currentUser.Id,
             ChatRoleId = (byte)DBConversationRole.User,
-            MessageContents = request.UserMessage.ToMessageContents(), 
+            MessageContents = request.UserMessage.ToMessageContents(),
             CreatedAt = DateTime.UtcNow,
             ParentId = request.MessageId,
         };
