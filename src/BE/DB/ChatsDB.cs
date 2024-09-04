@@ -138,9 +138,7 @@ public partial class ChatsDB : DbContext
                 .OnDelete(DeleteBehavior.ClientSetNull)
                 .HasConstraintName("FK_Message_ChatRole");
 
-            entity.HasOne(d => d.Conversation).WithMany(p => p.Messages)
-                .OnDelete(DeleteBehavior.ClientSetNull)
-                .HasConstraintName("FK_Message_Conversation");
+            entity.HasOne(d => d.Conversation).WithMany(p => p.Messages).HasConstraintName("FK_Message_Conversation");
 
             entity.HasOne(d => d.Parent).WithMany(p => p.InverseParent).HasConstraintName("FK_Message_ParentMessage");
 
@@ -173,9 +171,7 @@ public partial class ChatsDB : DbContext
                 .OnDelete(DeleteBehavior.ClientSetNull)
                 .HasConstraintName("FK_MessageResponse_ChatModels");
 
-            entity.HasOne(d => d.Message).WithOne(p => p.MessageResponse)
-                .OnDelete(DeleteBehavior.ClientSetNull)
-                .HasConstraintName("FK_MessageResponse_Message");
+            entity.HasOne(d => d.Message).WithOne(p => p.MessageResponse).HasConstraintName("FK_MessageResponse_Message");
 
             entity.HasOne(d => d.TransactionLog).WithOne(p => p.MessageResponse).HasConstraintName("FK_MessageResponse_TransactionLog");
         });
