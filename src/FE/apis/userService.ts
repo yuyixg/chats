@@ -49,7 +49,8 @@ export interface PostUserPassword {
 }
 
 export interface GetBalance7DaysUsageResult {
-  [key: string]: number;
+  date: string;
+  costAmount: number;
 }
 
 export const changeUserPassword = (params: PostUserPassword) => {
@@ -93,11 +94,6 @@ export const putChats = (chatId: string, params: PutChatParams) => {
   return fetchService.put(`/api/user/chats/${chatId}`, { body: params });
 };
 
-export const stopChat = (chatId: string) => {
-  const fetchService = useFetch();
-  return fetchService.post('/api/user/chat-stop', { body: { chatId } });
-};
-
 export const deleteChats = (id: string) => {
   const fetchService = useFetch();
   return fetchService.delete(`/api/user/chats/${id}`);
@@ -130,8 +126,8 @@ export const getUserBalanceOnly = () => {
 
 export const getBalance7DaysUsage = () => {
   const fetchServer = useFetch();
-  return fetchServer.get<GetBalance7DaysUsageResult>(
-    '/api/user/balance-7-days-usage',
+  return fetchServer.get<GetBalance7DaysUsageResult[]>(
+    `/api/user/7-days-usage?timezoneOffset=${new Date().getTimezoneOffset()}`,
   );
 };
 
