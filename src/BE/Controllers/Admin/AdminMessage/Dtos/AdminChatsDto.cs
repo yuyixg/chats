@@ -1,4 +1,5 @@
-﻿using System.Text.Json;
+﻿using Chats.BE.DB.Jsons;
+using System.Text.Json;
 using System.Text.Json.Serialization;
 
 namespace Chats.BE.Controllers.Admin.AdminMessage.Dtos;
@@ -6,7 +7,7 @@ namespace Chats.BE.Controllers.Admin.AdminMessage.Dtos;
 public record AdminChatsDto
 {
     [JsonPropertyName("id")]
-    public required Guid Id { get; init; }
+    public required string Id { get; init; }
 
     [JsonPropertyName("username")]
     public required string UserName { get; init; }
@@ -24,7 +25,7 @@ public record AdminChatsDto
     public required bool IsShared { get; init; }
 
     [JsonPropertyName("userModelConfig")]
-    public required Dictionary<string, object> UserModelConfig { get; init; }
+    public required JsonUserModelConfig UserModelConfig { get; init; }
 
     [JsonPropertyName("createdAt")]
     public required DateTime CreatedAt { get; init; }
@@ -32,7 +33,7 @@ public record AdminChatsDto
 
 public record AdminChatsDtoTemp
 {
-    public required Guid Id { get; init; }
+    public required int Id { get; init; }
 
     public required string UserName { get; init; }
 
@@ -44,7 +45,7 @@ public record AdminChatsDtoTemp
 
     public required bool IsShared { get; init; }
 
-    public required string JsonUserModelConfig { get; init; }
+    public required JsonUserModelConfig JsonUserModelConfig { get; init; }
 
     public required DateTime CreatedAt { get; init; }
 
@@ -52,13 +53,13 @@ public record AdminChatsDtoTemp
     {
         return new AdminChatsDto
         {
-            Id = Id,
+            Id = Id.ToString(),
             UserName = UserName,
             Title = Title,
             ModelName = ModelName,
             IsDeleted = IsDeleted,
             IsShared = IsShared,
-            UserModelConfig = JsonSerializer.Deserialize<Dictionary<string, object>>(JsonUserModelConfig)!,
+            UserModelConfig = JsonUserModelConfig,
             CreatedAt = CreatedAt
         };
     }

@@ -2,10 +2,10 @@
 using Chats.BE.Controllers.Chats.Messages.Dtos;
 using Chats.BE.Controllers.Common;
 using Chats.BE.DB;
+using Chats.BE.DB.Enums;
 using Chats.BE.DB.Jsons;
 using Chats.BE.Infrastructure;
 using Chats.BE.Services;
-using Chats.BE.Services.Common;
 using Chats.BE.Services.Conversations;
 using Chats.BE.Services.Conversations.Dtos;
 using Microsoft.AspNetCore.Authorization;
@@ -16,9 +16,7 @@ using Sdcb.DashScope;
 using System.ClientModel;
 using System.Diagnostics;
 using System.Text;
-using System.Text.Encodings.Web;
 using System.Text.Json;
-using DBChatMessage = Chats.BE.DB.ChatMessage;
 using OpenAIChatMessage = OpenAI.Chat.ChatMessage;
 
 namespace Chats.BE.Controllers.Chats.Conversations;
@@ -50,7 +48,7 @@ public class ConversationController(ChatsDB db, CurrentUser currentUser, ILogger
             {
                 UserModels = x.UserModel!,
                 UserBalance = x.UserBalance!,
-                ThisChat = db.Chats.Single(x => x.Id == request.ChatId && x.UserId == currentUser.Id)
+                ThisChat = db.Conversations.Single(x => x.Id == request.ConversationId && x.UserId == currentUser.Id)
             })
             .SingleAsync(cancellationToken);
         List<JsonTokenBalance> tokenBalances = JsonSerializer.Deserialize<List<JsonTokenBalance>>(miscInfo.UserModels.Models)!;
@@ -73,21 +71,22 @@ public class ConversationController(ChatsDB db, CurrentUser currentUser, ILogger
             return this.BadRequestMessage("Insufficient balance");
         }
 
-        Dictionary<Guid, MessageLiteDto> existingMessages = await db.ChatMessages
-            .Where(x => x.ChatId == request.ChatId && x.UserId == currentUser.Id)
-            .Select(x => new MessageLiteTemp()
+        Dictionary<long, MessageLiteDto> existingMessages = await db.Messages
+            .Where(x => x.ConversationId == request.ConversationId && x.UserId == currentUser.Id)
+            .Select(x => new MessageLiteDto()
             {
                 Id = x.Id,
-                Content = x.Messages,
-                Role = x.Role,
+                Content = x.MessageContents
+                    .OrderBy(x => x.Id)
+                    .Select(x => x.ToSegment())
+                    .ToArray(),
+                Role = (DBConversationRole)x.ChatRoleId,
                 ParentId = x.ParentId,
             })
-            .ToAsyncEnumerable()
-            .Select(x => x.ToDto())
             .ToDictionaryAsync(x => x.Id, x => x, cancellationToken);
         MessageLiteDto? systemMessage = existingMessages
             .Values
-            .Where(x => x.Role == DBConversationRoles.System)
+            .Where(x => x.Role == DBConversationRole.System)
             .FirstOrDefault();
         // insert system message if it doesn't exist
         if (systemMessage == null)
@@ -97,22 +96,28 @@ public class ConversationController(ChatsDB db, CurrentUser currentUser, ILogger
                 return this.BadRequestMessage("Prompt is required for the first message");
             }
 
-            DBChatMessage toBeInsert = new()
+            Message toBeInsert = new()
             {
-                Id = Guid.NewGuid(),
-                ChatId = request.ChatId,
+                ConversationId = request.ConversationId,
                 UserId = currentUser.Id,
-                Role = DBConversationRoles.System,
-                Messages = MessageContentDto.FromText(request.UserModelConfig.Prompt).ToJson(),
+                ChatRoleId = (byte)DBConversationRole.System,
+                MessageContents =
+                [
+                    new MessageContent()
+                    {
+                        ContentTypeId = (byte)DBMessageContentType.Text,
+                        Content = Encoding.Unicode.GetBytes(request.UserModelConfig.Prompt),
+                    }
+                ],
                 CreatedAt = DateTime.UtcNow,
             };
-            db.ChatMessages.Add(toBeInsert);
+            db.Messages.Add(toBeInsert);
 
             systemMessage = new MessageLiteDto
             {
                 Id = toBeInsert.Id,
-                Content = MessageContentDto.FromText(request.UserModelConfig.Prompt),
-                Role = DBConversationRoles.System,
+                Content = [toBeInsert.MessageContents.First().ToSegment()],
+                Role = DBConversationRole.System,
                 ParentId = null,
             };
 
@@ -121,16 +126,24 @@ public class ConversationController(ChatsDB db, CurrentUser currentUser, ILogger
         }
         else
         {
-            request = request with { UserModelConfig = JsonSerializer.Deserialize<JsonUserModelConfig>(miscInfo.ThisChat.UserModelConfig)! };
+            request = request with
+            {
+                UserModelConfig = new JsonUserModelConfig
+                {
+                    EnableSearch = miscInfo.ThisChat.EnableSearch,
+                    Temperature = miscInfo.ThisChat.Temperature,
+                }
+            };
         }
 
         List<OpenAIChatMessage> messageToSend =
         [
-            new SystemChatMessage(systemMessage.Content.Text),
+            systemMessage.Content[0].ToOpenAISystemChatMessage(),
             ..GetMessageTree(existingMessages, request.MessageId),
         ];
 
-        MessageLiteDto userMessage = GetUserMessage(request, existingMessages, messageToSend);
+        MessageLiteDto userMessage = await GetUserMessage(request, existingMessages);
+        messageToSend.Add(userMessage.ToOpenAI());
 
         ConversationSegment lastSegment = new() { TextSegment = "", InputTokenCount = 0, OutputTokenCount = 0 };
         Response.Headers.ContentType = "text/event-stream";
@@ -143,22 +156,21 @@ public class ConversationController(ChatsDB db, CurrentUser currentUser, ILogger
         {
             UserModelBalanceCalculator calculator = new(tokenBalance, miscInfo.UserBalance.Balance);
             cost = calculator.GetNewBalance(0, 0, priceConfig);
+            if (!cost.IsSufficient)
+            {
+                throw new InsufficientBalanceException();
+            }
 
             using ConversationService s = conversationFactory.CreateConversationService(cm);
             await foreach (ConversationSegment seg in s.ChatStreamed(messageToSend, request.UserModelConfig, currentUser, cancellationToken))
             {
                 lastSegment = seg;
                 UserModelBalanceCost currentCost = calculator.GetNewBalance(seg.InputTokenCount, seg.OutputTokenCount, priceConfig);
-                if (cost.IsSufficient)
+                if (!currentCost.IsSufficient)
                 {
-                    cost = currentCost;
+                    throw new InsufficientBalanceException();
                 }
-                else
-                {
-                    // insufficient balance, use previous cost
-                    responseText.Append("\n⚠Insufficient balance - 余额不足!");
-                    break;
-                }
+                cost = currentCost;
 
                 if (seg.TextSegment == string.Empty) continue;
                 await YieldResponse(new() { Result = seg.TextSegment, Success = true });
@@ -169,6 +181,10 @@ public class ConversationController(ChatsDB db, CurrentUser currentUser, ILogger
                     break;
                 }
             }
+        }
+        catch (InsufficientBalanceException)
+        {
+            responseText.Append("\n⚠Insufficient balance - 余额不足!");
         }
         catch (Exception e) when (e is DashScopeException || e is ClientResultException)
         {
@@ -197,25 +213,35 @@ public class ConversationController(ChatsDB db, CurrentUser currentUser, ILogger
 
         // success
         // insert new assistant message
-        DBChatMessage assistantMessage = new()
+        TransactionLog? transactionLog = CreateTransactionLog(miscInfo.UserModels, tokenBalances, tokenBalanceIndex, tokenBalance, cost);
+        Message assistantMessage = new()
         {
-            Id = Guid.NewGuid(),
-            ChatId = request.ChatId,
+            ConversationId = request.ConversationId,
             UserId = currentUser.Id,
-            Role = DBConversationRoles.Assistant,
-            Messages = MessageContentDto.FromText(responseText.ToString()).ToJson(),
+            ChatRoleId = (byte)DBConversationRole.Assistant,
+            MessageContents =
+            [
+                new MessageContent()
+                {
+                    ContentTypeId = (byte)DBMessageContentType.Text,
+                    Content = Encoding.Unicode.GetBytes(responseText.ToString()),
+                }
+            ],
             CreatedAt = DateTime.UtcNow,
             ParentId = userMessage.Id,
-            Duration = elapsedMs,
-            InputTokens = lastSegment.InputTokenCount,
-            OutputTokens = lastSegment.OutputTokenCount,
-            InputPrice = cost.InputTokenPrice,
-            OutputPrice = cost.OutputTokenPrice,
-            ChatModelId = cm.Id,
+            MessageResponse = new MessageResponse()
+            {
+                DurationMs = elapsedMs,
+                InputTokenCount = lastSegment.InputTokenCount,
+                OutputTokenCount = lastSegment.OutputTokenCount,
+                InputCost = cost.InputTokenPrice,
+                OutputCost = cost.OutputTokenPrice,
+                ChatModelId = cm.Id,
+                TransactionLog = transactionLog,
+            }
         };
-        db.ChatMessages.Add(assistantMessage);
+        db.Messages.Add(assistantMessage);
 
-        UpdateBalance(miscInfo.UserModels, miscInfo.UserBalance, tokenBalances, tokenBalanceIndex, tokenBalance, cost, assistantMessage.Id);
         await db.SaveChangesAsync(cancellationToken);
         if (cost.CostBalance > 0)
         {
@@ -225,39 +251,38 @@ public class ConversationController(ChatsDB db, CurrentUser currentUser, ILogger
         return new EmptyResult();
     }
 
-    private MessageLiteDto GetUserMessage(ConversationRequest request, Dictionary<Guid, MessageLiteDto> existingMessages, List<OpenAIChatMessage> messageToSend)
+    private async Task<MessageLiteDto> GetUserMessage(ConversationRequest request, Dictionary<long, MessageLiteDto> existingMessages)
     {
         // new user message
-        if (request.MessageId != null && existingMessages.TryGetValue(request.MessageId.Value, out MessageLiteDto? parentMessage) && parentMessage.Role == DBConversationRoles.User)
+        if (request.MessageId != null && existingMessages.TryGetValue(request.MessageId.Value, out MessageLiteDto? parentMessage) && parentMessage.Role == DBConversationRole.User)
         {
             // existing user message
             return existingMessages[request.MessageId!.Value];
         }
 
         // insert new user message
-        DBChatMessage dbUserMessage = new()
+        Message dbUserMessage = new()
         {
-            Id = Guid.NewGuid(),
-            ChatId = request.ChatId,
+            ConversationId = request.ConversationId,
             UserId = currentUser.Id,
-            Role = DBConversationRoles.User,
-            Messages = request.UserMessage.ToJson(),
+            ChatRoleId = (byte)DBConversationRole.User,
+            MessageContents = request.UserMessage.ToMessageContents(),
             CreatedAt = DateTime.UtcNow,
             ParentId = request.MessageId,
         };
-        db.ChatMessages.Add(dbUserMessage);
+        db.Messages.Add(dbUserMessage);
+        await db.SaveChangesAsync();
         MessageLiteDto userMessage = new()
         {
             Id = dbUserMessage.Id,
-            Content = request.UserMessage,
-            Role = dbUserMessage.Role,
+            Content = request.UserMessage.ToMessageSegments(),
+            Role = (DBConversationRole)dbUserMessage.ChatRoleId,
             ParentId = dbUserMessage.ParentId,
         };
-        messageToSend.Add(ContentToMessage(userMessage));
         return userMessage;
     }
 
-    private void UpdateBalance(UserModel userModel, UserBalance userBalance, List<JsonTokenBalance> userModelConfigs, int userModelConfigIndex, JsonTokenBalance userModelConfig, UserModelBalanceCost cost, Guid assistantMessageId)
+    private TransactionLog? CreateTransactionLog(UserModel userModel, List<JsonTokenBalance> userModelConfigs, int userModelConfigIndex, JsonTokenBalance userModelConfig, UserModelBalanceCost cost)
     {
         if (cost.CostCount > 0 || cost.CostTokens > 0)
         {
@@ -266,18 +291,18 @@ public class ConversationController(ChatsDB db, CurrentUser currentUser, ILogger
         }
         if (cost.CostBalance > 0)
         {
-            db.BalanceLogs.Add(new()
+            TransactionLog transactionLog = new()
             {
-                Id = Guid.NewGuid(),
                 UserId = currentUser.Id,
                 CreatedAt = DateTime.UtcNow,
-                CreateUserId = currentUser.Id,
-                MessageId = assistantMessageId,
-                Value = cost.CostBalance,
-                Type = (int)BalanceLogType.Cost,
-                UpdatedAt = DateTime.UtcNow,
-            });
+                CreditUserId = currentUser.Id,
+                Amount = -cost.CostBalance,
+                TransactionTypeId = (byte)DBTransactionType.Cost,
+            };
+            db.TransactionLogs.Add(transactionLog);
+            return transactionLog;
         }
+        return null;
     }
 
     private readonly static ReadOnlyMemory<byte> dataU8 = "data:"u8.ToArray();
@@ -291,10 +316,10 @@ public class ConversationController(ChatsDB db, CurrentUser currentUser, ILogger
         await Response.Body.FlushAsync();
     }
 
-    static IEnumerable<OpenAIChatMessage> GetMessageTree(Dictionary<Guid, MessageLiteDto> existingMessages, Guid? fromParentId)
+    static IEnumerable<OpenAIChatMessage> GetMessageTree(Dictionary<long, MessageLiteDto> existingMessages, long? fromParentId)
     {
         LinkedList<MessageLiteDto> line = [];
-        Guid? currentParentId = fromParentId;
+        long? currentParentId = fromParentId;
         while (currentParentId != null)
         {
             if (!existingMessages.ContainsKey(currentParentId.Value))
@@ -304,24 +329,6 @@ public class ConversationController(ChatsDB db, CurrentUser currentUser, ILogger
             line.AddFirst(existingMessages[currentParentId.Value]);
             currentParentId = existingMessages[currentParentId.Value].ParentId;
         }
-        return line.Select(ContentToMessage);
-    }
-
-    static OpenAIChatMessage ContentToMessage(MessageLiteDto dto)
-    {
-        List<ChatMessageContentPart> parts = [];
-        if (dto.Content.Image != null)
-        {
-            parts.AddRange(dto.Content.Image.Select(x => ChatMessageContentPart.CreateImageMessageContentPart(new Uri(x))));
-        }
-        parts.Add(ChatMessageContentPart.CreateTextMessageContentPart(dto.Content.Text));
-
-        return dto.Role switch
-        {
-            DBConversationRoles.System => new SystemChatMessage(dto.Content.Text),
-            DBConversationRoles.User => new UserChatMessage(parts),
-            DBConversationRoles.Assistant => new AssistantChatMessage(dto.Content.Text),
-            _ => throw new NotImplementedException(),
-        };
+        return line.Select(x => x.ToOpenAI());
     }
 }

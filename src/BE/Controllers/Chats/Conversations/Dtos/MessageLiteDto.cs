@@ -1,31 +1,52 @@
-﻿using Chats.BE.Controllers.Chats.Messages.Dtos;
-using System.Text.Json;
+﻿using Chats.BE.DB.Enums;
+using Chats.BE.Services.Conversations;
+using OpenAI.Chat;
+using System.Text;
 
 namespace Chats.BE.Controllers.Chats.Conversations.Dtos;
 
-public record MessageLiteTemp
+public record MessageLiteDto
 {
-    public required Guid Id { get; init; }
-    public required Guid? ParentId { get; init; }
-    public required string Role { get; init; }
-    public required string Content { get; init; }
+    public required long Id { get; init; }
+    public required long? ParentId { get; init; }
+    public required DBConversationRole Role { get; init; }
+    public required DBMessageSegment[] Content { get; init; }
 
-    public MessageLiteDto ToDto()
+    public ChatMessage ToOpenAI()
     {
-        return new MessageLiteDto
+        return Role switch
         {
-            Id = Id,
-            ParentId = ParentId,
-            Role = Role,
-            Content = JsonSerializer.Deserialize<MessageContentDto>(Content)!
+            DBConversationRole.System => Content[0].ToOpenAISystemChatMessage(),
+            DBConversationRole.User => new UserChatMessage(Content.Select(c => c.ToOpenAI())),
+            DBConversationRole.Assistant => Content[0].ToOpenAIAssistantChatMessage(),
+            _ => throw new NotImplementedException()
         };
     }
 }
 
-public record MessageLiteDto
+public record DBMessageSegment
 {
-    public required Guid Id { get; init; }
-    public required Guid? ParentId { get; init; }
-    public required string Role { get; init; }
-    public required MessageContentDto Content { get; init; }
+    public required DBMessageContentType ContentType { get; init; }
+
+    public required byte[] Content { get; init; }
+
+    public ChatMessageContentPart ToOpenAI()
+    {
+        return ContentType switch
+        {
+            DBMessageContentType.Text => ChatMessageContentPart.CreateTextMessageContentPart(Encoding.Unicode.GetString(Content)),
+            DBMessageContentType.ImageUrl => ChatMessageContentPart.CreateImageMessageContentPart(new Uri(Encoding.UTF8.GetString(Content))),
+            _ => throw new NotImplementedException()
+        };
+    }
+
+    public SystemChatMessage ToOpenAISystemChatMessage()
+    {
+        return new SystemChatMessage(Encoding.Unicode.GetString(Content));
+    }
+
+    public AssistantChatMessage ToOpenAIAssistantChatMessage()
+    {
+        return new AssistantChatMessage(Encoding.Unicode.GetString(Content));
+    }
 }

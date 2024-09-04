@@ -1,4 +1,6 @@
 ﻿using Chats.BE.DB;
+using Chats.BE.DB.Jsons;
+using System.Text.Json;
 using System.Text.Json.Serialization;
 
 namespace Chats.BE.Controllers.Chats.Chats.Dtos;
@@ -20,7 +22,7 @@ public class UpdateChatsRequest
     [JsonPropertyName("isDeleted")]
     public bool? IsDeleted { get; set; }
 
-    public void ApplyToChats(Chat chat)
+    public void ApplyToChats(Conversation chat)
     {
         if (Title != null)
         {
@@ -28,11 +30,13 @@ public class UpdateChatsRequest
         }
         if (ModelId != null)
         {
-            chat.ChatModelId = ModelId;
+            chat.ChatModelId = ModelId.Value;
         }
         if (UserModelConfig != null)
         {
-            chat.UserModelConfig = UserModelConfig;
+            JsonUserModelConfig obj = JsonSerializer.Deserialize<JsonUserModelConfig>(UserModelConfig)!;
+            chat.Temperature = obj.Temperature;
+            chat.EnableSearch = obj.EnableSearch;
         }
         if (IsShared != null)
         {

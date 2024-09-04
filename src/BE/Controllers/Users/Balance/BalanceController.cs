@@ -1,5 +1,6 @@
 ﻿using Chats.BE.Controllers.Users.Balance.Dtos;
 using Chats.BE.DB;
+using Chats.BE.DB.Enums;
 using Chats.BE.Infrastructure;
 using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Mvc;
@@ -22,7 +23,7 @@ public class BalanceController(ChatsDB db, CurrentUser currentUser) : Controller
         return Ok(balance);
     }
 
-    [HttpGet("balance-7-days-usage")]
+    [HttpGet("balance-7-days-usage"), Obsolete("use 7-days-usage instead.")]
     public async Task<ActionResult<Dictionary<DateTime, decimal>>> GetBalance7Days(int timezoneOffset, CancellationToken cancellationToken)
     {
         DateTime now = DateTime.UtcNow;
@@ -30,12 +31,12 @@ public class BalanceController(ChatsDB db, CurrentUser currentUser) : Controller
         DateTime[] dates = Enumerable.Range(0, days)
             .Select(day => now.AddMinutes(-timezoneOffset).AddDays(-day).Date)
             .ToArray();
-        Dictionary<DateTime, decimal> history = (await db.BalanceLogs
-            .Where(x => x.UserId == currentUser.Id && x.CreatedAt >= start && x.CreatedAt <= now)
+        Dictionary<DateTime, decimal> history = (await db.TransactionLogs
+            .Where(x => x.UserId == currentUser.Id && x.CreatedAt >= start && x.CreatedAt <= now && x.TransactionTypeId == (byte)DBTransactionType.Cost)
             .Select(x => new
             {
                 Date = x.CreatedAt.AddMinutes(-timezoneOffset).Date, // Timezone
-                Amount = x.Value,
+                Amount = -x.Amount,
             })
             .ToArrayAsync(cancellationToken))
             .GroupBy(x => x.Date)
@@ -52,26 +53,41 @@ public class BalanceController(ChatsDB db, CurrentUser currentUser) : Controller
         return Ok(history);
     }
 
-    [HttpGet("balance")]
-    public async Task<ActionResult<LegacyBalanceDto>> GetLegacyBalance(CancellationToken cancellationToken)
+    [HttpGet("7-days-usage")]
+    public async Task<DailyCostDto[]> GetBalance7Days2(int timezoneOffset, CancellationToken cancellationToken)
     {
-        decimal balance = await db.Users
-            .Where(x => x.Id == currentUser.Id)
-            .Select(x => x.UserBalance!.Balance)
-            .FirstOrDefaultAsync(cancellationToken);
-        LegacyBalanceLog[] logs = await db.BalanceLogs
-            .Where(x => x.UserId == currentUser.Id && x.CreatedAt >= DateTime.UtcNow.AddDays(-days))
-            .OrderByDescending(x => x.CreatedAt)
-            .Select(x => new LegacyBalanceLog
+        DateTime now = DateTime.UtcNow;
+        DateTime start = now.AddDays(-days);
+        DateTime[] dates = Enumerable.Range(0, days)
+            .Select(day => now.AddMinutes(-timezoneOffset).AddDays(-day).Date)
+            .ToArray();
+        Dictionary<DateTime, decimal> history = (await db.TransactionLogs
+            .Where(x => x.UserId == currentUser.Id && x.CreatedAt >= start && x.CreatedAt <= now && x.TransactionTypeId == (byte)DBTransactionType.Cost)
+            .Select(x => new
             {
-                Date = x.CreatedAt,
-                Amount = x.Value,
+                Date = x.CreatedAt.AddMinutes(-timezoneOffset).Date, // Timezone
+                Amount = -x.Amount,
             })
-            .ToArrayAsync(cancellationToken);
-        return Ok(new LegacyBalanceDto
+            .ToArrayAsync(cancellationToken))
+            .GroupBy(x => x.Date)
+            .ToDictionary(k => k.Key, v => v.Sum(y => y.Amount));
+
+        foreach (DateTime date in dates)
         {
-            Balance = balance,
-            Logs = logs
-        });
+            if (!history.ContainsKey(date))
+            {
+                history[date] = 0;
+            }
+        }
+
+        DailyCostDto[] result = [.. history
+            .Select(x => new DailyCostDto
+            {
+                Date = new DateOnly(x.Key.Year, x.Key.Month, x.Key.Day),
+                CostAmount = x.Value,
+            })
+            .OrderByDescending(x => x.Date)];
+
+        return result;
     }
 }

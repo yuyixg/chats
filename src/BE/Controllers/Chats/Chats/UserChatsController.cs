@@ -1,10 +1,13 @@
 ﻿using Chats.BE.Controllers.Chats.Chats.Dtos;
+using Chats.BE.Controllers.Common;
 using Chats.BE.Controllers.Common.Dtos;
 using Chats.BE.DB;
+using Chats.BE.DB.Jsons;
 using Chats.BE.Infrastructure;
 using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Mvc;
 using Microsoft.EntityFrameworkCore;
+using System.Text.Json;
 
 namespace Chats.BE.Controllers.Chats.Chats;
 
@@ -12,9 +15,9 @@ namespace Chats.BE.Controllers.Chats.Chats;
 public class UserChatsController(ChatsDB db, CurrentUser currentUser) : ControllerBase
 {
     [HttpGet("{chatId}")]
-    public async Task<ActionResult<ChatsResponse>> GetOneChat(Guid chatId, CancellationToken cancellationToken)
+    public async Task<ActionResult<ChatsResponse>> GetOneChat(int chatId, CancellationToken cancellationToken)
     {
-        ChatsResponseTemp? temp = await db.Chats
+        ChatsResponseTemp? temp = await db.Conversations
             .Where(x => x.Id == chatId && x.UserId == currentUser.Id && !x.IsDeleted)
             .Select(x => new ChatsResponseTemp()
             {
@@ -24,7 +27,11 @@ public class UserChatsController(ChatsDB db, CurrentUser currentUser) : Controll
                 ModelName = x.ChatModel!.Name,
                 ModelConfig = x.ChatModel!.ModelConfig,
                 IsShared = x.IsShared,
-                UserModelConfig = x.UserModelConfig,
+                UserModelConfig = new JsonUserModelConfig
+                {
+                    Temperature = x.Temperature, 
+                    EnableSearch = x.EnableSearch, 
+                },
             })
             .FirstOrDefaultAsync(cancellationToken);
 
@@ -39,7 +46,7 @@ public class UserChatsController(ChatsDB db, CurrentUser currentUser) : Controll
     [HttpGet]
     public async Task<ActionResult<PagedResult<ChatsResponse>>> GetChats([FromQuery] PagingRequest request, CancellationToken cancellationToken)
     {
-        IQueryable<Chat> query = db.Chats
+        IQueryable<Conversation> query = db.Conversations
             .Include(x => x.ChatModel)
             .Where(x => x.UserId == currentUser.Id && !x.IsDeleted)
             .OrderByDescending(x => x.CreatedAt);
@@ -57,7 +64,11 @@ public class UserChatsController(ChatsDB db, CurrentUser currentUser) : Controll
                 ModelName = x.ChatModel!.Name,
                 ModelConfig = x.ChatModel!.ModelConfig,
                 IsShared = x.IsShared,
-                UserModelConfig = x.UserModelConfig,
+                UserModelConfig = new JsonUserModelConfig
+                {
+                    EnableSearch = x.EnableSearch, 
+                    Temperature = x.Temperature,
+                },
             }),
             request,
             x => x.ToResponse(), cancellationToken);
@@ -67,46 +78,70 @@ public class UserChatsController(ChatsDB db, CurrentUser currentUser) : Controll
     [HttpPost]
     public async Task<ActionResult<ChatsResponse>> CreateChats([FromBody] CreateChatsRequest request, CancellationToken cancellationToken)
     {
-        Chat? lastChat = await db.Chats
-            .Where(x => x.UserId == currentUser.Id && !x.IsDeleted)
-            .OrderByDescending(x => x.CreatedAt)
-            .FirstOrDefaultAsync(cancellationToken);
-
-        Chat chat = new()
+        string? jsonModel = await db.UserModels
+                .Where(x => x.UserId == currentUser.Id)
+                .Select(x => x.Models)
+                .FirstOrDefaultAsync(cancellationToken);
+        if (jsonModel == null) return this.BadRequestMessage("No model available(no data).");
+        HashSet<Guid> userModels = JsonSerializer.Deserialize<JsonTokenBalance[]>(jsonModel)!
+            .Where(x => x.Enabled)
+            .Select(x => x.ModelId)
+            .ToHashSet();
+        HashSet<Guid> validModels = [.. db.ChatModels
+            .Where(x => userModels.Contains(x.Id) && x.Enabled)
+            .Select(x => x.Id)];
+        if (validModels.Count == 0)
         {
-            Id = Guid.NewGuid(),
+            return this.BadRequestMessage("No model available.");
+        }
+
+        Conversation chat = new()
+        {
             UserId = currentUser.Id,
             Title = request.Title,
-            ChatModelId = lastChat?.ChatModelId,
             IsShared = false,
             CreatedAt = DateTime.UtcNow,
             IsDeleted = false,
-            UserModelConfig = "{}",
+            Temperature = null, 
+            EnableSearch = null, 
         };
-        db.Chats.Add(chat);
+
+        Conversation? lastChat = await db.Conversations
+            .Where(x => x.UserId == currentUser.Id && !x.IsDeleted)
+            .OrderByDescending(x => x.CreatedAt)
+            .FirstOrDefaultAsync(cancellationToken);
+        if (lastChat?.ChatModelId != null && validModels.Contains(lastChat.ChatModelId))
+        {
+            chat.ChatModelId = lastChat.ChatModelId;
+        }
+        else
+        {
+            chat.ChatModelId = validModels.First();
+        }
+        db.Conversations.Add(chat);
         await db.SaveChangesAsync(cancellationToken);
         return Ok(ChatsResponse.FromDB(chat));
     }
 
     [HttpDelete("{chatId}")]
-    public async Task<IActionResult> DeleteChats(Guid chatId, CancellationToken cancellationToken)
+    public async Task<IActionResult> DeleteChats(int chatId, CancellationToken cancellationToken)
     {
-        bool exists = await db.Chats
+        bool exists = await db.Conversations
             .AnyAsync(x => x.Id == chatId && x.UserId == currentUser.Id, cancellationToken);
         if (!exists)
         {
             return NotFound();
         }
 
-        if (await db.ChatMessages.AnyAsync(m => m.ChatId == chatId, cancellationToken))
+        if (await db.Messages.AnyAsync(m => m.ConversationId == chatId, cancellationToken))
         {
-            await db.Chats
+            await db.Conversations
                 .Where(x => x.Id == chatId)
                 .ExecuteUpdateAsync(x => x.SetProperty(y => y.IsDeleted, true), cancellationToken);
         }
         else
         {
-            await db.Chats
+            await db.Conversations
                 .Where(x => x.Id == chatId)
                 .ExecuteDeleteAsync(cancellationToken);
         }
@@ -115,9 +150,9 @@ public class UserChatsController(ChatsDB db, CurrentUser currentUser) : Controll
     }
 
     [HttpPut("{chatId}")]
-    public async Task<IActionResult> UpdateChats(Guid chatId, [FromBody] UpdateChatsRequest request, CancellationToken cancellationToken)
+    public async Task<IActionResult> UpdateChats(int chatId, [FromBody] UpdateChatsRequest request, CancellationToken cancellationToken)
     {
-        Chat? chat = await db.Chats
+        Conversation? chat = await db.Conversations
             .Where(x => x.Id == chatId && x.UserId == currentUser.Id)
             .FirstOrDefaultAsync(cancellationToken);
         if (chat == null)
@@ -128,10 +163,8 @@ public class UserChatsController(ChatsDB db, CurrentUser currentUser) : Controll
         request.ApplyToChats(chat);
         if (db.ChangeTracker.HasChanges())
         {
-            // TODO: should update UpdatedAt field
-            // chat.CreatedAt = DateTime.UtcNow;
+            await db.SaveChangesAsync(cancellationToken);
         }
-        await db.SaveChangesAsync(cancellationToken);
         return NoContent();
     }
 }

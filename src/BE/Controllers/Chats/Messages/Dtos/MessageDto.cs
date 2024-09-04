@@ -1,4 +1,9 @@
-﻿using Chats.BE.Services;
+﻿using Chats.BE.Controllers.Chats.Conversations.Dtos;
+using Chats.BE.DB;
+using Chats.BE.DB.Enums;
+using Chats.BE.Services;
+using Chats.BE.Services.Conversations;
+using System.Text;
 using System.Text.Json;
 using System.Text.Json.Serialization;
 
@@ -10,10 +15,10 @@ namespace Chats.BE.Controllers.Chats.Messages.Dtos;
 public abstract record MessageDto
 {
     [JsonPropertyName("id")]
-    public required Guid Id { get; init; }
+    public required string Id { get; init; }
 
     [JsonPropertyName("parentId")]
-    public required Guid? ParentId { get; init; }
+    public required string? ParentId { get; init; }
 
     [JsonPropertyName("role")]
     public required string Role { get; init; }
@@ -59,37 +64,42 @@ public record MessageContentDto
     [JsonPropertyName("image"), JsonIgnore(Condition = JsonIgnoreCondition.WhenWritingNull)]
     public List<string>? Image { get; init; }
 
-    public static MessageContentDto FromText(string text)
+    public MessageContent[] ToMessageContents()
     {
-        return new MessageContentDto
+        return 
+        [
+            MessageContent.FromText(Text), 
+            ..(Image ?? []).Select(MessageContent.FromImageUrl)
+        ];
+    }
+
+    public static MessageContentDto FromSegments(DBMessageSegment[] segments)
+    {
+        return new MessageContentDto()
         {
-            Text = text
+            Text = string.Join("\n", segments.Where(x => x.ContentType == DBMessageContentType.Text).Select(x => Encoding.Unicode.GetString(x.Content))),
+            Image = segments.Where(x => x.ContentType == DBMessageContentType.ImageUrl).Select(x => Encoding.UTF8.GetString(x.Content)).ToList()
         };
     }
-
-    public static MessageContentDto Parse(string rawText)
+    
+    public DBMessageSegment[] ToMessageSegments()
     {
-        return JsonSerializer.Deserialize<MessageContentDto>(rawText)!;
-    }
-
-    public string ToJson()
-    {
-        return JSON.Serialize(this);
+        return ToMessageContents().Select(x => x.ToSegment()).ToArray();
     }
 }
 
 public record ChatMessageTemp
 {
-    public required Guid Id { get; init; }
-    public required Guid? ParentId { get; init; }
-    public required string Role { get; init; }
-    public required string Content { get; init; }
-    public required int InputTokens { get; init; }
-    public required int OutputTokens { get; init; }
-    public required decimal InputPrice { get; init; }
-    public required decimal OutputPrice { get; init; }
+    public required long Id { get; init; }
+    public required long? ParentId { get; init; }
+    public required DBConversationRole Role { get; init; }
+    public required DBMessageSegment[] Content { get; init; }
+    public required int? InputTokens { get; init; }
+    public required int? OutputTokens { get; init; }
+    public required decimal? InputPrice { get; init; }
+    public required decimal? OutputPrice { get; init; }
     public required DateTime CreatedAt { get; init; }
-    public required int Duration { get; init; }
+    public required int? Duration { get; init; }
     public required Guid? ModelId { get; init; }
     public required string? ModelName { get; init; }
 
@@ -99,10 +109,10 @@ public record ChatMessageTemp
         {
             return new RequestMessageDto()
             {
-                Id = Id,
-                ParentId = ParentId,
-                Role = Role,
-                Content = JsonSerializer.Deserialize<MessageContentDto>(Content)!,
+                Id = Id.ToString(),
+                ParentId = ParentId?.ToString(),
+                Role = Role.ToString().ToLowerInvariant(),
+                Content = MessageContentDto.FromSegments(Content),
                 CreatedAt = CreatedAt
             };
         }
@@ -110,16 +120,16 @@ public record ChatMessageTemp
         {
             return new ResponseMessageDto()
             {
-                Id = Id,
-                ParentId = ParentId,
-                Role = Role,
-                Content = JsonSerializer.Deserialize<MessageContentDto>(Content)!,
+                Id = Id.ToString(),
+                ParentId = ParentId?.ToString(),
+                Role = Role.ToString().ToLowerInvariant(),
+                Content = MessageContentDto.FromSegments(Content),
                 CreatedAt = CreatedAt,
-                InputTokens = InputTokens,
-                OutputTokens = OutputTokens,
-                InputPrice = InputPrice,
-                OutputPrice = OutputPrice,
-                Duration = Duration,
+                InputTokens = InputTokens!.Value,
+                OutputTokens = OutputTokens!.Value,
+                InputPrice = InputPrice!.Value,
+                OutputPrice = OutputPrice!.Value,
+                Duration = Duration!.Value,
                 ModelId = ModelId!.Value,
                 ModelName = ModelName
             };

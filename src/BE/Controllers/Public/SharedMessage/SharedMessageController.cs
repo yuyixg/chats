@@ -10,9 +10,9 @@ namespace Chats.BE.Controllers.Public.PublicMessage;
 public class SharedMessageController(ChatsDB db) : ControllerBase
 {
     [HttpGet]
-    public async Task<ActionResult<AdminMessageDto>> GetSharedMessage(Guid chatId, CancellationToken cancellationToken)
+    public async Task<ActionResult<AdminMessageDto>> GetSharedMessage(int chatId, CancellationToken cancellationToken)
     {
-        if (!await db.Chats.AnyAsync(x => x.Id == chatId && x.IsShared && !x.IsDeleted, cancellationToken: cancellationToken))
+        if (!await db.Conversations.AnyAsync(x => x.Id == chatId && x.IsShared && !x.IsDeleted, cancellationToken: cancellationToken))
         {
             return NotFound();
         }

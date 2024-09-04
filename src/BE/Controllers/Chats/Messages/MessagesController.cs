@@ -1,5 +1,7 @@
-﻿using Chats.BE.Controllers.Chats.Messages.Dtos;
+﻿using Chats.BE.Controllers.Chats.Conversations.Dtos;
+using Chats.BE.Controllers.Chats.Messages.Dtos;
 using Chats.BE.DB;
+using Chats.BE.DB.Enums;
 using Chats.BE.Infrastructure;
 using Chats.BE.Services.Conversations;
 using Microsoft.AspNetCore.Authorization;
@@ -12,24 +14,31 @@ namespace Chats.BE.Controllers.Chats.Messages;
 public class MessagesController(ChatsDB db, CurrentUser currentUser) : ControllerBase
 {
     [HttpGet]
-    public async Task<ActionResult<MessageDto[]>> GetMessages([FromQuery] Guid chatId, CancellationToken cancellationToken)
+    public async Task<ActionResult<MessageDto[]>> GetMessages([FromQuery] int chatId, CancellationToken cancellationToken)
     {
-        MessageDto[] messages = await db.ChatMessages
-            .Where(m => m.ChatId == chatId && m.UserId == currentUser.Id && m.Role != DBConversationRoles.System)
+        MessageDto[] messages = await db.Messages
+            .Where(m => m.ConversationId == chatId && m.UserId == currentUser.Id && m.ChatRoleId != (byte)DBConversationRole.System)
             .Select(x => new ChatMessageTemp()
             {
                 Id = x.Id,
                 ParentId = x.ParentId,
-                Role = x.Role,
-                Content = x.Messages,
-                InputTokens = x.InputTokens,
-                OutputTokens = x.OutputTokens,
-                InputPrice = x.InputPrice,
-                OutputPrice = x.OutputPrice,
+                Role = (DBConversationRole)x.ChatRoleId,
+                Content = x.MessageContents
+                    .OrderBy(x => x.Id)
+                    .Select(x => new DBMessageSegment
+                    {
+                        ContentType = (DBMessageContentType)x.ContentTypeId,
+                        Content = x.Content
+                    })
+                    .ToArray(),
                 CreatedAt = x.CreatedAt,
-                Duration = x.Duration,
-                ModelId = x.ChatModelId,
-                ModelName = x.ChatModel!.Name
+                InputTokens = x.MessageResponse!.InputTokenCount,
+                OutputTokens = x.MessageResponse.OutputTokenCount,
+                InputPrice = x.MessageResponse.InputCost,
+                OutputPrice = x.MessageResponse.OutputCost,
+                Duration = x.MessageResponse.DurationMs,
+                ModelId = x.MessageResponse.ChatModelId,
+                ModelName = x.MessageResponse.ChatModel.Name
             })
             .OrderBy(x => x.CreatedAt)
             .AsAsyncEnumerable()

@@ -64,7 +64,7 @@ export default function MessageDetails() {
           <div>{chat?.modelName}</div>
           <div>{chat?.modelTemperature}­°C</div>
           <div>
-            {chatSummary.tokenUsed}/{chatSummary.calculatedPrice.toFixed(2)}￥
+            {chatSummary.tokenUsed}/{chatSummary.calculatedPrice.toFixed(8)}￥
           </div>
         </div>
       )}
