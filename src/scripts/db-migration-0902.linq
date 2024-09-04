@@ -2,6 +2,7 @@
   <Namespace>System.Text.Json.Serialization</Namespace>
   <Namespace>System.Text.Json</Namespace>
   <Namespace>Microsoft.EntityFrameworkCore.Storage</Namespace>
+  <Namespace>Microsoft.Data.SqlClient</Namespace>
 </Query>
 
 void Main()
@@ -11,19 +12,19 @@ void Main()
 	GuidInt64Mapping balanceLogIds = new();
 	foreach (Guid id in BalanceLogs.Select(x => x.Id))
 	{
-		balanceLogIds.MapGuid(id);
+		balanceLogIds.Add(id);
 	}
 
 	GuidInt32Mapping chatsIds = new();
 	foreach (Guid id in Chats.Select(x => x.Id))
 	{
-		chatsIds.MapGuid(id);
+		chatsIds.Add(id);
 	}
 
 	GuidInt64Mapping messageIds = new();
 	foreach (Guid id in ChatMessages.Select(x => x.Id))
 	{
-		messageIds.MapGuid(id);
+		messageIds.Add(id);
 	}
 
 	Dictionary<Guid, Guid> messageBalanceMap = BalanceLogs
@@ -32,80 +33,112 @@ void Main()
 
 	Dictionary<Guid, Guid> userDefaultModelId = GetUserDefaultChatModelId();
 
-	using (IDbContextTransaction tran = Database.BeginTransaction())
-	using (var _ = new IdentityInsertScope(this))
+	using (var tran = Database.BeginTransaction())
 	{
-		foreach (BalanceLogs b in BalanceLogs.AsNoTracking())
+		using (var idInsert = new IdentityInsertScope(this, "TransactionLog"))
 		{
-			TransactionLogs.Add(new TransactionLog()
+			foreach (BalanceLogs b in BalanceLogs.AsNoTracking())
 			{
-				Id = balanceLogIds.MapGuid(b.Id), 
-				Amount = b.Value
-			});
+				TransactionLogs.Add(new TransactionLog()
+				{
+					Id = balanceLogIds[b.Id],
+					Amount = b.Type == (byte)DBTransactionType.Cost ? -b.Value : b.Value,
+					CreatedAt = b.CreatedAt,
+					CreditUserId = b.CreateUserId,
+					TransactionTypeId = (byte)b.Type,
+					UserId = b.UserId,
+				});
+			}
+			SaveChanges();
 		}
-		foreach (Chats c in Chats.Include(x => x.ChatMessages).AsNoTracking())
+
+		List<Chats> chats = Chats.Include(x => x.ChatMessages).AsNoTracking().ToList();
+		using (var idInsert = new IdentityInsertScope(this, "Conversation"))
 		{
-			JsonUserModelConfig userModelConfig = JsonSerializer.Deserialize<JsonUserModelConfig>(c.UserModelConfig)!;
-			Conversations.Add(new Conversation()
+			foreach (Chats c in chats)
 			{
-				Id = chatsIds.MapGuid(c.Id),
-				ChatModelId = c.ChatModelId ?? userDefaultModelId[c.UserId],
-				CreatedAt = c.CreatedAt,
-				Temperature = userModelConfig.Temperature,
-				EnableSearch = userModelConfig.EnableSearch,
-				IsDeleted = c.IsDeleted,
-				IsShared = c.IsShared,
-				Title = c.Title,
-				UserId = c.UserId,
-				Messages = c.ChatMessages.Select(ConvertMessage).ToList(),
-			});
+				JsonUserModelConfig userModelConfig = JsonSerializer.Deserialize<JsonUserModelConfig>(c.UserModelConfig)!;
+				Conversations.Add(new Conversation()
+				{
+					Id = chatsIds[c.Id],
+					ChatModelId = c.ChatModelId ?? userDefaultModelId[c.UserId],
+					CreatedAt = c.CreatedAt,
+					Temperature = userModelConfig.Temperature,
+					EnableSearch = userModelConfig.EnableSearch,
+					IsDeleted = c.IsDeleted,
+					IsShared = c.IsShared,
+					Title = c.Title,
+					UserId = c.UserId,
+				});
+			}
+			SaveChanges();
 		}
-		
+
+		using (var idInsert = new IdentityInsertScope(this, "Message"))
+		{
+			foreach (Chats c in chats)
+			{
+				foreach (ChatMessages msg in c.ChatMessages)
+				{
+					Message newMsg = new Message()
+					{
+						Id = messageIds[msg.Id],
+						ChatRoleId = msg.Role switch
+						{
+							"system" => 1,
+							"user" => 2,
+							"assistant" => 3,
+							_ => throw new NotImplementedException(),
+						},
+						ConversationId = chatsIds[msg.ChatId],
+						CreatedAt = msg.CreatedAt,
+						ParentId = msg.ParentId != null ? messageIds[msg.ParentId.Value] : null,
+						UserId = msg.UserId,
+						MessageResponse = msg.ChatModelId != null ? new MessageResponse()
+						{
+							ChatModelId = msg.ChatModelId.Value,
+							DurationMs = msg.Duration,
+							InputCost = msg.InputPrice,
+							InputTokenCount = msg.InputTokens,
+							MessageId = messageIds[msg.Id],
+							OutputCost = msg.OutputPrice,
+							OutputTokenCount = msg.OutputTokens,
+							TransactionLogId = messageBalanceMap.TryGetValue(msg.Id, out Guid balanceId) ? balanceLogIds[balanceId] : null,
+						} : null,
+						//MessageContents = MakeContents(msg.Messages),
+					};
+					Messages.Add(newMsg);
+				}
+			}
+			SaveChanges();
+		}
+
+		foreach (Chats c in chats)
+		{
+			foreach (ChatMessages msg in c.ChatMessages)
+			{
+				foreach (MessageContent mc in MakeContents(msg.Messages))
+				{
+					mc.MessageId = messageIds[msg.Id];
+					MessageContents.Add(mc);
+				}
+			}
+		}
 		SaveChanges();
+
 		tran.Commit();
 	}
 
-	Message ConvertMessage(ChatMessages msg)
-	{
-		return new Message()
-		{
-			Id = messageIds.MapGuid(msg.Id),
-			ChatRoleId = msg.Role switch
-			{
-				"system" => 1,
-				"user" => 2,
-				"assistant" => 3,
-				_ => throw new NotImplementedException(),
-			},
-			ConversationId = chatsIds.MapGuid(msg.ChatId),
-			CreatedAt = msg.CreatedAt,
-			ParentId = msg.ParentId != null ? messageIds.MapGuid(msg.ParentId.Value) : null,
-			UserId = msg.UserId,
-			MessageResponse = msg.ChatModelId != null ? new MessageResponse()
-			{
-				ChatModelId = msg.ChatModelId.Value,
-				DurationMs = msg.Duration,
-				InputCost = msg.InputPrice,
-				InputTokenCount = msg.InputTokens,
-				MessageId = messageIds.MapGuid(msg.Id),
-				OutputCost = msg.OutputPrice,
-				OutputTokenCount = msg.OutputTokens,
-				TransactionLogId = balanceLogIds.MapGuid(messageBalanceMap[msg.Id]), 
-			} : null, 
-			MessageContents = MakeContents(msg.Messages), 
-		};
-	}
-	
 	List<MessageContent> MakeContents(string message)
 	{
 		MessageContentDto dto = JsonSerializer.Deserialize<MessageContentDto>(message)!;
-		return 
+		return
 		[
 			new MessageContent { ContentTypeId = (byte)DBMessageContentType.Text, Content = Encoding.Unicode.GetBytes(dto.Text) },
 			..(dto.Image ?? []).Select(x => new MessageContent()
 			{
-				ContentTypeId = (byte)DBMessageContentType.ImageUrl, 
-				Content = Encoding.UTF8.GetBytes(x), 
+				ContentTypeId = (byte)DBMessageContentType.ImageUrl,
+				Content = Encoding.UTF8.GetBytes(x),
 			})
 		];
 	}
@@ -136,10 +169,11 @@ void ResetTablesAndIdentity()
 		{
 			// 清空表数据并重置自增 ID
 			string resetTablesSql = @"
-                DELETE FROM [dbo].[Conversation]; DBCC CHECKIDENT ('[dbo].[Conversation]', RESEED, 0);
+                DELETE FROM [dbo].[MessageContent]; DBCC CHECKIDENT ('[dbo].[MessageContent]', RESEED, 0);
+				DELETE FROM [dbo].[MessageResponse];
                 DELETE FROM [dbo].[Message]; DBCC CHECKIDENT ('[dbo].[Message]', RESEED, 0);
                 DELETE FROM [dbo].[TransactionLog]; DBCC CHECKIDENT ('[dbo].[TransactionLog]', RESEED, 0);
-                DELETE FROM [dbo].[MessageContent]; DBCC CHECKIDENT ('[dbo].[MessageContent]', RESEED, 0);
+                DELETE FROM [dbo].[Conversation]; DBCC CHECKIDENT ('[dbo].[Conversation]', RESEED, 0);
             ";
 
 			Database.ExecuteSqlRaw(resetTablesSql);
@@ -159,45 +193,36 @@ void ResetTablesAndIdentity()
 public class IdentityInsertScope : IDisposable
 {
 	private readonly DbContext _context;
-	private readonly List<string> _tables = new List<string> { "Conversation", "Message", "TransactionLog", "MessageContent" };
+	private readonly string _tableName;
+	public const string Conversation = "Conversation";
+	public const string Message = "Message";
+	public const string TransactionLog = "TransactionLog";
+	public const string MessageContent = "MessageContent";
 
-	public IdentityInsertScope(DbContext context)
+
+	public IdentityInsertScope(DbContext context, string tableName)
 	{
 		_context = context;
-
-		// 开启每个表的 IDENTITY_INSERT
-		foreach (var table in _tables)
-		{
-			_context.Database.ExecuteSqlRaw($"SET IDENTITY_INSERT [dbo].[{table}] ON");
-		}
+		_tableName = tableName;
+		TrySetIdentityInsert(tableName, true);
 	}
 
 	public void Dispose()
 	{
-		// 关闭每个表的 IDENTITY_INSERT
-		foreach (var table in _tables)
-		{
-			_context.Database.ExecuteSqlRaw($"SET IDENTITY_INSERT [dbo].[{table}] OFF");
-		}
+		TrySetIdentityInsert(_tableName, false);
 	}
-}
 
-public class GuidInt32Mapping
-{
-	int _nextId = 1;
-	Dictionary<Guid, int> _mapping = new();
-
-	public int MapGuid(Guid guid)
+	public void TrySetIdentityInsert(string table, bool enable)
 	{
-		if (_mapping.TryGetValue(guid, out int id))
+		try
 		{
-			return id;
+			string state = enable ? "ON" : "OFF";
+			_context.Database.ExecuteSqlRaw($"SET IDENTITY_INSERT [dbo].[{table}] {state}");
 		}
-		else
+		catch (SqlException ex)
 		{
-			int newId = _nextId++; ;
-			_mapping[guid] = newId;
-			return newId;
+			// 如果我们遇到错误，可以根据需要进行处理或记录日志
+			Console.WriteLine($"Error setting IDENTITY_INSERT for table '{table}': {ex.Message}");
 		}
 	}
 }
@@ -207,17 +232,35 @@ public class GuidInt64Mapping
 	long _nextId = 1;
 	Dictionary<Guid, long> _mapping = new();
 
-	public long MapGuid(Guid guid)
+	public void Add(Guid guid)
 	{
-		if (_mapping.TryGetValue(guid, out long id))
+		_mapping.Add(guid, _nextId++);
+	}
+
+	public long this[Guid guid]
+	{
+		get
 		{
-			return id;
+			return _mapping[guid];
 		}
-		else
+	}
+}
+
+public class GuidInt32Mapping
+{
+	int _nextId = 1;
+	Dictionary<Guid, int> _mapping = new();
+
+	public void Add(Guid guid)
+	{
+		_mapping.Add(guid, _nextId++);
+	}
+
+	public int this[Guid guid]
+	{
+		get
 		{
-			long newId = _nextId++; ;
-			_mapping[guid] = newId;
-			return newId;
+			return _mapping[guid];
 		}
 	}
 }
@@ -286,4 +329,11 @@ public enum DBMessageContentType : byte
 {
 	Text = 1,
 	ImageUrl = 2,
+}
+
+public enum DBTransactionType : byte
+{
+	Charge = 1,
+	Cost = 2,
+	Initial = 3,
 }
