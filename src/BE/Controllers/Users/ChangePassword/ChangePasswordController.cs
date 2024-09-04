@@ -12,33 +12,6 @@ namespace Chats.BE.Controllers.Users.ChangePassword;
 [Route("api/user"), Authorize]
 public class ChangePasswordController(ChatsDB db, CurrentUser currentUser, PasswordHasher passwordHasher) : ControllerBase
 {
-    [HttpPut("change-password")]
-    public async Task<ActionResult> LegacyChangePassword([FromBody] LegacyChangePasswordRequest req, CancellationToken cancellationToken)
-    {
-        if (!IsStrongEnoughPassword(req.NewPassword))
-        {
-            return this.BadRequestMessage(NotMeetPasswordRule);
-        }
-
-        User? user = await db.Users
-            .Where(x => x.Id == currentUser.Id)
-            .FirstOrDefaultAsync(cancellationToken);
-        if (user == null)
-        {
-            return NotFound();
-        }
-
-        if (passwordHasher.VerifyPassword(req.NewPassword, user.Password))
-        {
-            return this.BadRequestMessage("New password should be different from the old one");
-        }
-
-        user.Password = passwordHasher.HashPassword(req.NewPassword);
-        user.UpdatedAt = DateTime.UtcNow;
-        await db.SaveChangesAsync(cancellationToken);
-        return NoContent();
-    }
-
     [HttpPut("reset-password")]
     public async Task<ActionResult> ResetPassword([FromBody] ResetPasswordRequest req, CancellationToken cancellationToken)
     {
