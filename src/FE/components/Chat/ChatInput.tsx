@@ -32,7 +32,7 @@ import UploadButton from '../UploadButton';
 import { PromptList } from './PromptList';
 import { VariableModal } from './VariableModal';
 
-import { getUserPromptDetail, stopChat } from '@/apis/userService';
+import { getUserPromptDetail } from '@/apis/userService';
 
 interface Props {
   onSend: (message: Message) => void;
@@ -119,7 +119,6 @@ export const ChatInput = ({
 
   const handleStopChat = () => {
     stopConversationRef.current = true;
-    stopChat(selectChat.id);
   };
 
   const handleKeyDown = (e: KeyboardEvent<HTMLTextAreaElement>) => {

@@ -20,7 +20,9 @@ import {
 
 const UserBalanceTabContent = () => {
   const { t } = useTranslation('sidebar');
-  const [balanceLogs, setBalanceLogs] = useState<GetBalance7DaysUsageResult>({});
+  const [balanceLogs, setBalanceLogs] = useState<GetBalance7DaysUsageResult[]>(
+    [],
+  );
   const [totalBalance, setTotalBalance] = useState(0);
 
   useEffect(() => {
@@ -48,11 +50,13 @@ const UserBalanceTabContent = () => {
             </TableRow>
           </TableHeader>
           <TableBody>
-            {Object.keys(balanceLogs).map((date) => (
-              <TableRow key={date}>
-                <TableCell className="h-8 py-2">{new Date(date).toLocaleDateString()}</TableCell>
+            {balanceLogs.map((x) => (
+              <TableRow key={x.date}>
                 <TableCell className="h-8 py-2">
-                  {(+(balanceLogs[date] || 0)).toFixed(2)}
+                  {new Date(x.date).toLocaleDateString()}
+                </TableCell>
+                <TableCell className="h-8 py-2">
+                  {(+(x.costAmount || 0)).toFixed(2)}
                 </TableCell>
               </TableRow>
             ))}
