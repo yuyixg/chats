@@ -36,7 +36,7 @@ public class BalanceController(ChatsDB db, CurrentUser currentUser) : Controller
             .Select(x => new
             {
                 Date = x.CreatedAt.AddMinutes(-timezoneOffset).Date, // Timezone
-                Amount = x.Amount,
+                Amount = -x.Amount,
             })
             .ToArrayAsync(cancellationToken))
             .GroupBy(x => x.Date)
