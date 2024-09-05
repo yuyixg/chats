@@ -5,6 +5,7 @@ on:
       - main
     paths:
       - 'src/BE/**'
+      - '.github/workflows/build-be-container.yml'
   workflow_dispatch:
 
 jobs:
@@ -30,6 +31,11 @@ jobs:
         run: |
           docker push ${{ secrets.DOCKER_REGISTRY }}/${{ secrets.DOCKER_NAMESPACE }}/chats-be:r-${{ github.run_number }}
           docker push ${{ secrets.DOCKER_REGISTRY }}/${{ secrets.DOCKER_NAMESPACE }}/chats-be:latest
+
   deploy-dev-stg:
     needs: build-container
     uses: ./.github/workflows/deploy.yml
+    secrets:
+      SSH_PRIVATE_KEY: ${{ secrets.SSH_PRIVATE_KEY }}
+      DOCKER_REGISTRY: ${{ secrets.DOCKER_REGISTRY }}
+      DOCKER_NAMESPACE: ${{ secrets.DOCKER_NAMESPACE }}

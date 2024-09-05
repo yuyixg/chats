@@ -5,6 +5,7 @@ on:
       - main
     paths:
       - 'src/FE/**'
+      - '.github/workflows/build-container.yml'
   workflow_dispatch:
 
 jobs:
@@ -36,3 +37,7 @@ jobs:
   deploy-dev-stg:
     needs: build-container
     uses: ./.github/workflows/deploy.yml
+    secrets:
+      SSH_PRIVATE_KEY: ${{ secrets.SSH_PRIVATE_KEY }}
+      DOCKER_REGISTRY: ${{ secrets.DOCKER_REGISTRY }}
+      DOCKER_NAMESPACE: ${{ secrets.DOCKER_NAMESPACE }}

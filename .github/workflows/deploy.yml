@@ -28,3 +28,4 @@ jobs:
             sed -i "s/^FRONTEND_VERSION=.*/FRONTEND_VERSION=latest/" ~/chats/stg.env
             sed -i "s/^BACKEND_VERSION=.*/BACKEND_VERSION=latest/" ~/chats/stg.env
             ./dev.sh && ./stg.sh
+            EOF
