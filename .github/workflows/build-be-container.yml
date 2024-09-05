@@ -6,6 +6,7 @@ on:
     paths:
       - 'src/BE/**'
       - '.github/workflows/build-be-container.yml'
+      - '.github/workflows/deploy.yml'
   workflow_dispatch:
 
 jobs:
