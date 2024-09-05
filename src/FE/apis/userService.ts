@@ -4,7 +4,7 @@ import { calculateMessages } from '@/utils/message';
 
 import { PostPromptParams, PutPromptParams } from '@/types/admin';
 import { ChatMessage } from '@/types/chatMessage';
-import { Model } from '@/types/model';
+import { DBModelProvider, Model } from '@/types/model';
 import { PageResult, Paging } from '@/types/page';
 import { IdName, Prompt } from '@/types/prompt';
 import {
@@ -30,6 +30,7 @@ export interface ChatResult {
   modelConfig: any;
   userModelConfig: any;
   isShared: boolean;
+  modelProvider: DBModelProvider;
 }
 
 export interface PostChatParams {

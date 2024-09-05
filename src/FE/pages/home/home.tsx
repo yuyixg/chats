@@ -47,7 +47,6 @@ import {
   getUserMessages,
   getUserModels,
   getUserPromptBrief,
-  getUserPrompts,
   postChats,
 } from '@/apis/userService';
 import Decimal from 'decimal.js';

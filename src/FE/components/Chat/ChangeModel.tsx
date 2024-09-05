@@ -1,12 +1,11 @@
 import { useContext, useState } from 'react';
 
-import Image from 'next/image';
-
 import { Model, ModelProviders } from '@/types/model';
 import { ModelProviderTemplates } from '@/types/template';
 
 import { HomeContext } from '@/pages/home/home';
 
+import ChatIcon from '../ChatIcon/ChatIcon';
 import { IconChevronDown } from '../Icons';
 import Search from '../Search';
 import { Button } from '../ui/button';
@@ -95,14 +94,7 @@ const ChangeModel = ({
                   key={`trigger-${m.provider}`}
                   className="p-2 flex gap-2"
                 >
-                  <Image
-                    key={`img-${m.provider}`}
-                    src={`/logos/${ModelProviderTemplates[m.provider].icon}`}
-                    alt="Keycloak"
-                    width={18}
-                    height={18}
-                    className="h-4 w-4 rounded-md dark:bg-white"
-                  />
+                  <ChatIcon provider={m.provider} />
                   {ModelProviderTemplates[m.provider].displayName}
                 </DropdownMenuSubTrigger>
                 <DropdownMenuPortal>
