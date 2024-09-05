@@ -142,8 +142,36 @@ public class ConversationController(ChatsDB db, CurrentUser currentUser, ILogger
             ..GetMessageTree(existingMessages, request.MessageId),
         ];
 
-        MessageLiteDto userMessage = await GetUserMessage(request, existingMessages);
-        messageToSend.Add(userMessage.ToOpenAI());
+        // new user message
+        MessageLiteDto userMessage;
+        if (request.MessageId != null && existingMessages.TryGetValue(request.MessageId.Value, out MessageLiteDto? parentMessage) && parentMessage.Role == DBConversationRole.User)
+        {
+            // existing user message
+            userMessage = existingMessages[request.MessageId!.Value];
+            messageToSend.Add(userMessage.ToOpenAI());
+        }
+        else
+        {
+            // insert new user message
+            Message dbUserMessage = new()
+            {
+                ConversationId = request.ConversationId,
+                UserId = currentUser.Id,
+                ChatRoleId = (byte)DBConversationRole.User,
+                MessageContents = request.UserMessage.ToMessageContents(),
+                CreatedAt = DateTime.UtcNow,
+                ParentId = request.MessageId,
+            };
+            db.Messages.Add(dbUserMessage);
+            await db.SaveChangesAsync();
+            userMessage = new()
+            {
+                Id = dbUserMessage.Id,
+                Content = request.UserMessage.ToMessageSegments(),
+                Role = (DBConversationRole)dbUserMessage.ChatRoleId,
+                ParentId = dbUserMessage.ParentId,
+            };
+        }
 
         ConversationSegment lastSegment = new() { TextSegment = "", InputTokenCount = 0, OutputTokenCount = 0 };
         Response.Headers.ContentType = "text/event-stream";
@@ -249,37 +277,6 @@ public class ConversationController(ChatsDB db, CurrentUser currentUser, ILogger
         }
 
         return new EmptyResult();
-    }
-
-    private async Task<MessageLiteDto> GetUserMessage(ConversationRequest request, Dictionary<long, MessageLiteDto> existingMessages)
-    {
-        // new user message
-        if (request.MessageId != null && existingMessages.TryGetValue(request.MessageId.Value, out MessageLiteDto? parentMessage) && parentMessage.Role == DBConversationRole.User)
-        {
-            // existing user message
-            return existingMessages[request.MessageId!.Value];
-        }
-
-        // insert new user message
-        Message dbUserMessage = new()
-        {
-            ConversationId = request.ConversationId,
-            UserId = currentUser.Id,
-            ChatRoleId = (byte)DBConversationRole.User,
-            MessageContents = request.UserMessage.ToMessageContents(),
-            CreatedAt = DateTime.UtcNow,
-            ParentId = request.MessageId,
-        };
-        db.Messages.Add(dbUserMessage);
-        await db.SaveChangesAsync();
-        MessageLiteDto userMessage = new()
-        {
-            Id = dbUserMessage.Id,
-            Content = request.UserMessage.ToMessageSegments(),
-            Role = (DBConversationRole)dbUserMessage.ChatRoleId,
-            ParentId = dbUserMessage.ParentId,
-        };
-        return userMessage;
     }
 
     private TransactionLog? CreateTransactionLog(UserModel userModel, List<JsonTokenBalance> userModelConfigs, int userModelConfigIndex, JsonTokenBalance userModelConfig, UserModelBalanceCost cost)

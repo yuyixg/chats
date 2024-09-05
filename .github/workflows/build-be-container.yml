@@ -30,12 +30,3 @@ jobs:
         run: |
           docker push ${{ secrets.DOCKER_REGISTRY }}/${{ secrets.DOCKER_NAMESPACE }}/chats-be:r-${{ github.run_number }}
           docker push ${{ secrets.DOCKER_REGISTRY }}/${{ secrets.DOCKER_NAMESPACE }}/chats-be:latest
-
-      - name: Save BACKEND_VERSION
-        run: echo "BACKEND_VERSION=r-${{ github.run_number }}" > BACKEND_VERSION.txt
-
-      - name: Upload artifact
-        uses: actions/upload-artifact@v4
-        with:
-          name: backend-version
-          path: BACKEND_VERSION.txt

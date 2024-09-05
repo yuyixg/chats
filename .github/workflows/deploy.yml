@@ -1,5 +1,14 @@
 name: Deploy
 on:
+  workflow_run:
+    workflows: ["Build Container", "Build BE Container"]
+    types:
+      - completed
+    branches:
+      - main
+    paths:
+      - 'src/FE/**'
+      - 'src/BE/**'
   workflow_dispatch:
 
 jobs:
@@ -10,27 +19,14 @@ jobs:
         with:
             ssh-private-key: ${{ secrets.SSH_PRIVATE_KEY }}
 
-      - name: Download artifact for frontend
-        uses: actions/download-artifact@v4
-        with:
-          name: frontend-version
-          path: .
-
-      - name: Download artifact for backend
-        uses: actions/download-artifact@v4
-        with:
-          name: backend-version
-          path: .
-
-      - name: Load FRONTEND_VERSION & BACKEND_VERSION
-        run: |
-            source FRONTEND_VERSION.txt
-            source BACKEND_VERSION.txt
-
-
       - name: take a look
         run: |
           ssh -o StrictHostKeyChecking=no -p 22 zhoujie@home.starworks.cc << 'EOF'
-            ls
+            docker pull ${{ secrets.DOCKER_REGISTRY }}/${{ secrets.DOCKER_NAMESPACE }}/chats:latest
+            docker pull ${{ secrets.DOCKER_REGISTRY }}/${{ secrets.DOCKER_NAMESPACE }}/chats-be:latest
             cd chats
-            dir
+            sed -i "s/^FRONTEND_VERSION=.*/FRONTEND_VERSION=latest/" ~/chats/dev.env
+            sed -i "s/^BACKEND_VERSION=.*/BACKEND_VERSION=latest/" ~/chats/dev.env
+            sed -i "s/^FRONTEND_VERSION=.*/FRONTEND_VERSION=latest/" ~/chats/stg.env
+            sed -i "s/^BACKEND_VERSION=.*/BACKEND_VERSION=latest/" ~/chats/stg.env
+            ./dev.sh && ./stg.sh
