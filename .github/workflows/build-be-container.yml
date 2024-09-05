@@ -21,12 +21,12 @@ jobs:
 
       - name: Build container
         run: |
-          dotnet publish ./src/BE/Chats.BE.csproj -c Release --os linux --arch x64 /t:PublishContainer
+          dotnet publish ./src/BE/Chats.BE.csproj -c Release --os linux --arch x64 /t:PublishContainer /p:ContainerRepository=chats
 
       - name: Tag container with 'latest' & run number
         run: |
-          docker tag Chats.BE ${{ secrets.DOCKER_REGISTRY }}/${{ secrets.DOCKER_NAMESPACE }}/chats-be:r-${{ github.run_number }}
-          docker tag Chats.BE ${{ secrets.DOCKER_REGISTRY }}/${{ secrets.DOCKER_NAMESPACE }}/chats-be:latest
+          docker tag chats ${{ secrets.DOCKER_REGISTRY }}/${{ secrets.DOCKER_NAMESPACE }}/chats-be:r-${{ github.run_number }}
+          docker tag chats ${{ secrets.DOCKER_REGISTRY }}/${{ secrets.DOCKER_NAMESPACE }}/chats-be:latest
           
       - name: Push container
         run: |
