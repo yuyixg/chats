@@ -1,5 +1,6 @@
 ﻿using Chats.BE.Controllers.Chats.Models.Dtos;
 using Chats.BE.DB;
+using Chats.BE.DB.Enums;
 using Chats.BE.DB.Jsons;
 using System.Text.Json;
 using System.Text.Json.Serialization;
@@ -9,7 +10,7 @@ namespace Chats.BE.Controllers.Chats.Chats.Dtos;
 public record ChatsResponse
 {
     [JsonPropertyName("id")]
-    public required int Id { get; init; }
+    public required string Id { get; init; }
 
     [JsonPropertyName("title")]
     public required string Title { get; init; }
@@ -29,17 +30,21 @@ public record ChatsResponse
     [JsonPropertyName("isShared")]
     public required bool IsShared { get; init; }
 
+    [JsonPropertyName("modelProvider")]
+    public DBModelProvider ModelProvider { get; init; }
+
     public static ChatsResponse FromDB(Conversation chat)
     {
         return new ChatsResponse()
         {
-            Id = chat.Id,
+            Id = chat.Id.ToString(),
             Title = chat.Title,
             ChatModelId = chat.ChatModelId,
-            ModelName = chat.ChatModel?.Name,
-            ModelConfig = chat.ChatModel?.ModelConfig == null ? [] : JsonSerializer.Deserialize<Dictionary<string, object?>>(chat.ChatModel!.ModelConfig)!,
+            ModelName = chat.ChatModel.Name,
+            ModelConfig = JsonSerializer.Deserialize<Dictionary<string, object?>>(chat.ChatModel!.ModelConfig)!,
             UserModelConfig = new JsonUserModelConfig { EnableSearch = chat.EnableSearch, Temperature = chat.Temperature },
-            IsShared = chat.IsShared
+            IsShared = chat.IsShared,
+            ModelProvider = Enum.Parse<DBModelProvider>(chat.ChatModel.ModelProvider), 
         };
     }
 }
@@ -60,17 +65,20 @@ public record ChatsResponseTemp
 
     public required bool IsShared { get; init; }
 
+    public required DBModelProvider ModelProvider { get; init; }
+
     public ChatsResponse ToResponse()
     {
         return new ChatsResponse()
         {
-            Id = Id,
+            Id = Id.ToString(),
             Title = Title,
             ChatModelId = ChatModelId,
             ModelName = ModelName,
             ModelConfig = ModelConfig == null ? [] : JsonSerializer.Deserialize<Dictionary<string, object?>>(ModelConfig)!,
             UserModelConfig = UserModelConfig,
-            IsShared = IsShared
+            IsShared = IsShared, 
+            ModelProvider = ModelProvider,
         };
     }
 }
