@@ -1,5 +1,6 @@
 ﻿using Chats.BE.Controllers.Chats.Models.Dtos;
 using Chats.BE.DB;
+using Chats.BE.DB.Enums;
 using Chats.BE.DB.Jsons;
 using System.Text.Json;
 using System.Text.Json.Serialization;
@@ -29,6 +30,9 @@ public record ChatsResponse
     [JsonPropertyName("isShared")]
     public required bool IsShared { get; init; }
 
+    [JsonPropertyName("modelProvider")]
+    public required DBModelProvider ModelProvider { get; init; }
+
     public static ChatsResponse FromDB(Conversation chat)
     {
         return new ChatsResponse()
@@ -36,10 +40,11 @@ public record ChatsResponse
             Id = chat.Id,
             Title = chat.Title,
             ChatModelId = chat.ChatModelId,
-            ModelName = chat.ChatModel?.Name,
-            ModelConfig = chat.ChatModel?.ModelConfig == null ? [] : JsonSerializer.Deserialize<Dictionary<string, object?>>(chat.ChatModel!.ModelConfig)!,
+            ModelName = chat.ChatModel.Name,
+            ModelConfig = JsonSerializer.Deserialize<Dictionary<string, object?>>(chat.ChatModel!.ModelConfig)!,
             UserModelConfig = new JsonUserModelConfig { EnableSearch = chat.EnableSearch, Temperature = chat.Temperature },
-            IsShared = chat.IsShared
+            IsShared = chat.IsShared,
+            ModelProvider = Enum.Parse<DBModelProvider>(chat.ChatModel.ModelProvider), 
         };
     }
 }
@@ -60,6 +65,8 @@ public record ChatsResponseTemp
 
     public required bool IsShared { get; init; }
 
+    public required DBModelProvider ModelProvider { get; init; }
+
     public ChatsResponse ToResponse()
     {
         return new ChatsResponse()
@@ -70,7 +77,8 @@ public record ChatsResponseTemp
             ModelName = ModelName,
             ModelConfig = ModelConfig == null ? [] : JsonSerializer.Deserialize<Dictionary<string, object?>>(ModelConfig)!,
             UserModelConfig = UserModelConfig,
-            IsShared = IsShared
+            IsShared = IsShared, 
+            ModelProvider = ModelProvider,
         };
     }
 }

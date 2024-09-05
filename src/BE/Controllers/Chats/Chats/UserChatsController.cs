@@ -2,6 +2,7 @@
 using Chats.BE.Controllers.Common;
 using Chats.BE.Controllers.Common.Dtos;
 using Chats.BE.DB;
+using Chats.BE.DB.Enums;
 using Chats.BE.DB.Jsons;
 using Chats.BE.Infrastructure;
 using Microsoft.AspNetCore.Authorization;
@@ -32,6 +33,7 @@ public class UserChatsController(ChatsDB db, CurrentUser currentUser) : Controll
                     Temperature = x.Temperature, 
                     EnableSearch = x.EnableSearch, 
                 },
+                ModelProvider = Enum.Parse<DBModelProvider>(x.ChatModel.ModelProvider),
             })
             .FirstOrDefaultAsync(cancellationToken);
 
@@ -64,6 +66,7 @@ public class UserChatsController(ChatsDB db, CurrentUser currentUser) : Controll
                 ModelName = x.ChatModel!.Name,
                 ModelConfig = x.ChatModel!.ModelConfig,
                 IsShared = x.IsShared,
+                ModelProvider = Enum.Parse<DBModelProvider>(x.ChatModel.ModelProvider), 
                 UserModelConfig = new JsonUserModelConfig
                 {
                     EnableSearch = x.EnableSearch, 
