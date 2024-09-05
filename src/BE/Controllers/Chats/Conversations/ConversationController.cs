@@ -148,7 +148,6 @@ public class ConversationController(ChatsDB db, CurrentUser currentUser, ILogger
         {
             // existing user message
             userMessage = existingMessages[request.MessageId!.Value];
-            messageToSend.Add(userMessage.ToOpenAI());
         }
         else
         {
@@ -171,6 +170,7 @@ public class ConversationController(ChatsDB db, CurrentUser currentUser, ILogger
                 Role = (DBConversationRole)dbUserMessage.ChatRoleId,
                 ParentId = dbUserMessage.ParentId,
             };
+            messageToSend.Add(userMessage.ToOpenAI());
         }
 
         ConversationSegment lastSegment = new() { TextSegment = "", InputTokenCount = 0, OutputTokenCount = 0 };

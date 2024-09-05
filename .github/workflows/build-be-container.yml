@@ -30,3 +30,6 @@ jobs:
         run: |
           docker push ${{ secrets.DOCKER_REGISTRY }}/${{ secrets.DOCKER_NAMESPACE }}/chats-be:r-${{ github.run_number }}
           docker push ${{ secrets.DOCKER_REGISTRY }}/${{ secrets.DOCKER_NAMESPACE }}/chats-be:latest
+  deploy-dev-stg:
+    needs: build-container
+    uses: ./.github/workflows/deploy.yml
