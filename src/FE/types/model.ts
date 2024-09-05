@@ -1,5 +1,4 @@
 import { FileUploadServerConfig } from './components/upload';
-import { FileServicesType } from './file';
 
 export interface ModelConfig {
   prompt: string;
@@ -67,6 +66,18 @@ export enum ModelProviders {
   Moonshot = 'Moonshot',
   ZhiPuAI = 'ZhiPuAI',
   HunYuan = 'HunYuan',
+}
+
+export enum DBModelProvider {
+  Azure = 1,
+  HunYuan = 2,
+  LingYi = 3,
+  Moonshot = 4,
+  OpenAI = 5,
+  QianFan = 6,
+  QianWen = 7,
+  Spark = 8,
+  ZhiPuAI = 9,
 }
 
 export interface ChatModelFileConfig {

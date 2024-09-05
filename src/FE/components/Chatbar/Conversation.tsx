@@ -9,6 +9,8 @@ import toast from 'react-hot-toast';
 
 import { useTranslation } from 'next-i18next';
 
+import { DBModelProvider, ModelProviders } from '@/types/model';
+
 import { HomeContext } from '@/pages/home/home';
 
 import ChatbarContext from '@/components/Chatbar/Chatbar.context';
@@ -24,6 +26,7 @@ import {
 } from '@/components/Icons/index';
 
 import { SharedMessageModal } from '../Chat/SharedMessageModal';
+import ChatIcon from '../ChatIcon/ChatIcon';
 import SidebarActionButton from '../SidebarActionButton';
 import { Button } from '../ui/button';
 import {
@@ -125,8 +128,11 @@ export const ConversationComponent = ({ chat }: Props) => {
   return (
     <div className="relative flex items-center">
       {isChanging && selectChatId === chat.id ? (
-        <div className="flex w-full items-center gap-3 rounded-lg text-black dark:text-white dark:bg-[#262630]/90 p-3">
-          <IconMessage size={18} />
+        <div className="flex w-full items-center gap-2 rounded-lg text-black dark:text-white dark:bg-[#262630]/90 p-3">
+          <ChatIcon
+            isShard={chat.isShared}
+            provider={DBModelProvider[chat.modelProvider] as ModelProviders}
+          />
           <input
             className="mr-12 flex-1 overflow-hidden overflow-ellipsis border-neutral-400 bg-transparent text-left text-[12.5px] leading-3 outline-none text-black dark:text-white"
             type="text"
@@ -138,7 +144,7 @@ export const ConversationComponent = ({ chat }: Props) => {
         </div>
       ) : (
         <button
-          className={`flex w-full cursor-pointer items-center gap-3 rounded-lg p-3 text-sm transition-colors duration-200 hover:bg-[#cdcdcd] hover:dark:bg-[#262630] ${
+          className={`flex w-full cursor-pointer items-center gap-2 rounded-lg p-3 text-sm transition-colors duration-200 hover:bg-[#cdcdcd] hover:dark:bg-[#262630] ${
             messageIsStreaming ? 'disabled:cursor-not-allowed' : ''
           } ${
             selectChatId === chat.id ? 'bg-[#ececec] dark:bg-[#262630]/90' : ''
@@ -146,11 +152,10 @@ export const ConversationComponent = ({ chat }: Props) => {
           onClick={() => handleSelectChat(chat)}
           disabled={messageIsStreaming}
         >
-          {chat.isShared ? (
-            <IconMessageShare size={18} />
-          ) : (
-            <IconMessage size={18} />
-          )}
+          <ChatIcon
+            isShard={chat.isShared}
+            provider={DBModelProvider[chat.modelProvider] as ModelProviders}
+          />
           <div
             className={`relative max-h-5 flex-1 overflow-hidden text-ellipsis whitespace-nowrap break-all text-left text-[12.5px] leading-4 ${
               selectChatId === chat.id ? 'pr-12' : 'pr-1'
