@@ -13,3 +13,5 @@ jobs:
         run: |
           ssh -o StrictHostKeyChecking=no -p 22 zhoujie@home.starworks.cc << 'EOF'
             ls
+            cd chats
+            dir
