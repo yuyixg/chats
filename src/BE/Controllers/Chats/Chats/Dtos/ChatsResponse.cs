@@ -10,7 +10,7 @@ namespace Chats.BE.Controllers.Chats.Chats.Dtos;
 public record ChatsResponse
 {
     [JsonPropertyName("id")]
-    public required int Id { get; init; }
+    public required string Id { get; init; }
 
     [JsonPropertyName("title")]
     public required string Title { get; init; }
@@ -31,13 +31,13 @@ public record ChatsResponse
     public required bool IsShared { get; init; }
 
     [JsonPropertyName("modelProvider")]
-    public required DBModelProvider ModelProvider { get; init; }
+    public DBModelProvider ModelProvider { get; init; }
 
     public static ChatsResponse FromDB(Conversation chat)
     {
         return new ChatsResponse()
         {
-            Id = chat.Id,
+            Id = chat.Id.ToString(),
             Title = chat.Title,
             ChatModelId = chat.ChatModelId,
             ModelName = chat.ChatModel.Name,
@@ -71,7 +71,7 @@ public record ChatsResponseTemp
     {
         return new ChatsResponse()
         {
-            Id = Id,
+            Id = Id.ToString(),
             Title = Title,
             ChatModelId = ChatModelId,
             ModelName = ModelName,

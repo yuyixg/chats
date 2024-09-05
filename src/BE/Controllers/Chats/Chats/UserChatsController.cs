@@ -123,6 +123,11 @@ public class UserChatsController(ChatsDB db, CurrentUser currentUser) : Controll
         }
         db.Conversations.Add(chat);
         await db.SaveChangesAsync(cancellationToken);
+
+        // load ChatModel Provider here
+        chat.ChatModel = await db.ChatModels
+            .Where(x => x.Id == chat.ChatModelId)
+            .SingleAsync(cancellationToken);
         return Ok(ChatsResponse.FromDB(chat));
     }
 
