@@ -9,6 +9,25 @@ jobs:
       - uses: webfactory/ssh-agent@v0.9.0
         with:
             ssh-private-key: ${{ secrets.SSH_PRIVATE_KEY }}
+
+      - name: Download artifact for frontend
+        uses: actions/download-artifact@v4
+        with:
+          name: frontend-version
+          path: .
+
+      - name: Download artifact for backend
+        uses: actions/download-artifact@v4
+        with:
+          name: backend-version
+          path: .
+
+      - name: Load FRONTEND_VERSION & BACKEND_VERSION
+        run: |
+            source FRONTEND_VERSION.txt
+            source BACKEND_VERSION.txt
+
+
       - name: take a look
         run: |
           ssh -o StrictHostKeyChecking=no -p 22 zhoujie@home.starworks.cc << 'EOF'
