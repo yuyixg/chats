@@ -1,12 +1,14 @@
 name: Deploy
+
 on:
-  workflow_call:
-    secrets:
-      required:
-        - SSH_PRIVATE_KEY
-        - DOCKER_REGISTRY
-        - DOCKER_NAMESPACE
   workflow_dispatch:
+
+workflow_call:
+  secrets:
+      required:
+      - SSH_PRIVATE_KEY
+      - DOCKER_REGISTRY
+      - DOCKER_NAMESPACE
 
 jobs:
   deploy:
