@@ -34,7 +34,7 @@ jobs:
           docker push ${{ secrets.DOCKER_REGISTRY }}/${{ secrets.DOCKER_NAMESPACE }}/chats:latest
 
       - name: Save FRONTEND_VERSION
-        run: echo "FRONTEND_VERSION=r-${{ github.run_number }}" > FRONTEND_VERSION.txt
+        run: echo "r-${{ github.run_number }}" > FRONTEND_VERSION.txt
 
       - name: Upload artifact
         uses: actions/upload-artifact@v4
