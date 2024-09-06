@@ -48,7 +48,7 @@ public class GLMConversationService : ConversationService
         {
             Temperature = config.Temperature,
             MaxTokens = config.MaxLength,
-            User = currentUser.Id.ToString(),
+            EndUserId = currentUser.Id.ToString(),
         };
 
         int inputTokenCount = messages.Sum(GetTokenCount);

@@ -48,7 +48,7 @@ public class AzureConversationService : ConversationService
                 "gpt-4-vision" => 4096,
                 _ => 4096,
             },
-            User = currentUser.Id.ToString(),
+            EndUserId = currentUser.Id.ToString(),
         };
 
         if (!IsVision)
