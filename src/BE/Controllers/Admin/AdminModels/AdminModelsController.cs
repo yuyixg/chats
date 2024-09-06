@@ -2,9 +2,14 @@
 using Chats.BE.Controllers.Admin.Common;
 using Chats.BE.Controllers.Common;
 using Chats.BE.DB;
+using Chats.BE.DB.Jsons;
+using Chats.BE.Infrastructure;
 using Chats.BE.Services;
+using Chats.BE.Services.Conversations;
+using Chats.BE.Services.Conversations.Dtos;
 using Microsoft.AspNetCore.Mvc;
 using Microsoft.EntityFrameworkCore;
+using OpenAI.Chat;
 
 namespace Chats.BE.Controllers.Admin.AdminModels;
 
@@ -39,7 +44,7 @@ public class AdminModelsController(ChatsDB db) : ControllerBase
             .ToArrayAsync(cancellationToken);
     }
 
-    [HttpPut("models/{modelId}")]
+    [HttpPut("models/{modelId:guid}")]
     public async Task<ActionResult> UpdateModel(Guid modelId, [FromBody] UpdateModelRequest req, CancellationToken cancellationToken)
     {
         ChatModel? cm = await db.ChatModels.FindAsync([modelId], cancellationToken);
@@ -96,6 +101,35 @@ public class AdminModelsController(ChatsDB db) : ControllerBase
         await db.SaveChangesAsync(cancellationToken);
 
         return Created();
+    }
+
+    [HttpPost("models/validate")]
+    public async Task<ActionResult> ValidateModel(
+        [FromBody] UpdateModelRequest req, 
+        [FromServices] ConversationFactory conversationFactory,
+        [FromServices] CurrentUser currentUser,
+        CancellationToken cancellationToken)
+    {
+        ModelKey? modelProvider = await db.ModelKeys
+            .Where(x => x.Id == req.ModelKeysId)
+            .SingleOrDefaultAsync(cancellationToken);
+        if (modelProvider == null)
+        {
+            return this.BadRequestMessage("Model version not found");
+        }
+
+        ConversationService s = conversationFactory.CreateConversationService(Enum.Parse<KnownModelProvider>(modelProvider.Type), modelProvider.Configs, req.ModelConfig, req.ModelVersion);
+        try
+        {
+            await foreach (ConversationSegment seg in s.ChatStreamed([new UserChatMessage("1+1=?")], new JsonUserModelConfig { }, currentUser, cancellationToken))
+            {
+            }
+            return Ok();
+        }
+        catch (Exception e)
+        {
+            return this.BadRequestMessage(e.Message);
+        }
     }
 
     [HttpPut("user-models")]

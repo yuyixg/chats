@@ -189,7 +189,11 @@ public class ConversationController(ChatsDB db, CurrentUser currentUser, ILogger
                 throw new InsufficientBalanceException();
             }
 
-            using ConversationService s = conversationFactory.CreateConversationService(cm);
+            using ConversationService s = conversationFactory.CreateConversationService(
+                Enum.Parse<KnownModelProvider>(cm.ModelKeys.Type), 
+                cm.ModelKeys.Configs, 
+                cm.ModelConfig, 
+                cm.ModelVersion);
             await foreach (ConversationSegment seg in s.ChatStreamed(messageToSend, request.UserModelConfig, currentUser, cancellationToken))
             {
                 lastSegment = seg;
