@@ -23,41 +23,11 @@ public class BalanceController(ChatsDB db, CurrentUser currentUser) : Controller
         return Ok(balance);
     }
 
-    [HttpGet("balance-7-days-usage"), Obsolete("use 7-days-usage instead.")]
-    public async Task<ActionResult<Dictionary<DateTime, decimal>>> GetBalance7Days(int timezoneOffset, CancellationToken cancellationToken)
-    {
-        DateTime now = DateTime.UtcNow;
-        DateTime start = now.AddDays(-days);
-        DateTime[] dates = Enumerable.Range(0, days)
-            .Select(day => now.AddMinutes(-timezoneOffset).AddDays(-day).Date)
-            .ToArray();
-        Dictionary<DateTime, decimal> history = (await db.TransactionLogs
-            .Where(x => x.UserId == currentUser.Id && x.CreatedAt >= start && x.CreatedAt <= now && x.TransactionTypeId == (byte)DBTransactionType.Cost)
-            .Select(x => new
-            {
-                Date = x.CreatedAt.AddMinutes(-timezoneOffset).Date, // Timezone
-                Amount = -x.Amount,
-            })
-            .ToArrayAsync(cancellationToken))
-            .GroupBy(x => x.Date)
-            .ToDictionary(k => k.Key, v => v.Sum(y => y.Amount));
-
-        foreach (DateTime date in dates)
-        {
-            if (!history.ContainsKey(date))
-            {
-                history[date] = 0;
-            }
-        }
-
-        return Ok(history);
-    }
-
     [HttpGet("7-days-usage")]
     public async Task<DailyCostDto[]> GetBalance7Days2(int timezoneOffset, CancellationToken cancellationToken)
     {
         DateTime now = DateTime.UtcNow;
-        DateTime start = now.AddDays(-days);
+        DateTime start = now.Date.AddDays(-days + 1).AddMinutes(timezoneOffset);
         DateTime[] dates = Enumerable.Range(0, days)
             .Select(day => now.AddMinutes(-timezoneOffset).AddDays(-day).Date)
             .ToArray();
