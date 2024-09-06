@@ -121,7 +121,7 @@ public class ConversationController(ChatsDB db, CurrentUser currentUser, ILogger
                 ParentId = null,
             };
 
-            miscInfo.ThisChat.Title = request.UserMessage.Text[..Math.Min(30, request.UserMessage.Text.Length)];
+            miscInfo.ThisChat.Title = request.UserMessage.Text[..Math.Min(50, request.UserMessage.Text.Length)];
             miscInfo.ThisChat.ChatModelId = request.ModelId;
         }
         else
