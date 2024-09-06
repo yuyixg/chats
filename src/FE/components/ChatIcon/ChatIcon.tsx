@@ -3,7 +3,7 @@ import Image from 'next/image';
 import { ModelProviders } from '@/types/model';
 import { ModelProviderTemplates } from '@/types/template';
 
-import { IconArrowUpRight } from '../Icons';
+import { IconShare } from '../Icons';
 
 import { cn } from '@/lib/utils';
 
@@ -23,15 +23,12 @@ const ChatIcon = (props: Props) => {
         alt={provider}
         width={18}
         height={18}
+        style={{ background: 'transparent' }}
         className={cn('h-4 w-4 rounded-md dark:bg-white', className)}
       />
       {isShard && (
-        <span className="w-2 h-2 rounded-full absolute top-[22px] left-[22px] bg-gray-100">
-          <IconArrowUpRight
-            stroke={'hsl(var(--primary))'}
-            className="w-2 h-2"
-            size={2}
-          />
+        <span className="w-2 h-2 absolute top-[22px] left-[21px]">
+          <IconShare stroke={'hsl(var(--primary))'} className="w-2 h-2" />
         </span>
       )}
     </div>
