@@ -222,7 +222,7 @@ public class ConversationController(ChatsDB db, CurrentUser currentUser, ILogger
         {
             logger.LogError(e, "Error in conversation for message: {userMessageId}", userMessage.Id);
             responseText.Append(e.Message);
-            await YieldResponse(new SseResponseLine { Result = e.Message, Success = true });
+            await YieldResponse(new SseResponseLine { Result = e.Message, Success = false });
         }
         catch (TaskCanceledException)
         {
@@ -233,7 +233,7 @@ public class ConversationController(ChatsDB db, CurrentUser currentUser, ILogger
             logger.LogError(e, "Error in conversation for message: {userMessageId}", userMessage.Id);
             string errorTextToResponse = "\n⚠Error in conversation - 对话出错!";
             responseText.Append(errorTextToResponse);
-            await YieldResponse(new SseResponseLine { Result = errorTextToResponse, Success = true });
+            await YieldResponse(new SseResponseLine { Result = errorTextToResponse, Success = false });
         }
         finally
         {
