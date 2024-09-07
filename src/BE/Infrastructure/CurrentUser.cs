@@ -1,4 +1,8 @@
-﻿using System.Security.Claims;
+﻿using Chats.BE.DB;
+using Chats.BE.DB.Jsons;
+using Microsoft.EntityFrameworkCore;
+using System.Security.Claims;
+using System.Text.Json;
 
 namespace Chats.BE.Infrastructure;
 
@@ -20,4 +24,26 @@ public class CurrentUser
     public string Role { get; }
     public string? Provider { get; }
     public string? ProviderSub { get; }
+
+    public async Task<ChatModel[]> GetValidModels(ChatsDB db, CancellationToken cancellationToken)
+    {
+        string? userModels = await db.UserModels
+            .Where(x => x.UserId == Id)
+            .Select(x => x.Models)
+            .FirstOrDefaultAsync(cancellationToken);
+        if (userModels == null) return [];
+
+        JsonTokenBalance[] balances = (JsonSerializer.Deserialize<JsonTokenBalance[]>(userModels) ?? [])
+            .Where(x => x.Enabled)
+            .ToArray();
+        if (balances.Length == 0) return [];
+
+        ChatModel[] validModels = await db.ChatModels
+            .Include(x => x.ModelKeys)
+            .Where(x => balances.Select(x => x.ModelId).Contains(x.Id) && x.Enabled)
+            .OrderBy(x => x.Rank)
+            .ToArrayAsync(cancellationToken);
+
+        return validModels;
+    }
 }
