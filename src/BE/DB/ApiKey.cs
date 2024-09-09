@@ -7,7 +7,7 @@ using Microsoft.EntityFrameworkCore;
 namespace Chats.BE.DB;
 
 [Table("ApiKey")]
-[Index("ApiKey1", Name = "IX_UserApiKey_Key", IsUnique = true)]
+[Index("Key", Name = "IX_UserApiKey_Key", IsUnique = true)]
 [Index("UserId", Name = "IX_UserApiKey_User")]
 public partial class ApiKey
 {
@@ -16,10 +16,12 @@ public partial class ApiKey
 
     public Guid UserId { get; set; }
 
-    [Column("ApiKey")]
     [StringLength(200)]
     [Unicode(false)]
-    public string ApiKey1 { get; set; } = null!;
+    public string Key { get; set; } = null!;
+
+    [StringLength(50)]
+    public string? Comment { get; set; }
 
     public bool AllowEnumerate { get; set; }
 
