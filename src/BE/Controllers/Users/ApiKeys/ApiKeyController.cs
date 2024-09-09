@@ -32,6 +32,20 @@ public class ApiKeyController(ChatsDB db, CurrentUser currentUser) : ControllerB
         return result;
     }
 
+    [HttpGet("{apiKeyId}")]
+    public async Task<ActionResult<Guid[]>> GetApiKeySupportedModels(int apiKeyId, CancellationToken cancellationToken)
+    {
+        ApiKey? dbEntry = await db.ApiKeys
+            .Include(x => x.Models)
+            .Where(x => x.UserId == currentUser.Id)
+            .Where(x => x.Id == apiKeyId)
+            .FirstOrDefaultAsync(cancellationToken);
+
+        if (dbEntry is null) return NotFound();
+
+        return Ok(dbEntry.Models.Select(x => x.Id).ToArray());
+    }
+
     [HttpPost]
     public async Task<ListApiKeyDto> CreateApiKey(CancellationToken cancellationToken)
     {
