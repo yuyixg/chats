@@ -8,13 +8,10 @@ namespace Chats.BE.DB;
 
 [Table("Message")]
 [Index("ConversationId", Name = "IX_Message_Conversation")]
-[Index("UserId", Name = "IX_Message_User")]
 public partial class Message
 {
     [Key]
     public long Id { get; set; }
-
-    public Guid UserId { get; set; }
 
     public int ConversationId { get; set; }
 
@@ -44,8 +41,4 @@ public partial class Message
     [ForeignKey("ParentId")]
     [InverseProperty("InverseParent")]
     public virtual Message? Parent { get; set; }
-
-    [ForeignKey("UserId")]
-    [InverseProperty("Messages")]
-    public virtual User User { get; set; } = null!;
 }

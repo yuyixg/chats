@@ -58,19 +58,13 @@ public partial class User
     public DateTime UpdatedAt { get; set; }
 
     [InverseProperty("User")]
-    public virtual ICollection<Conversation> Conversations { get; set; } = new List<Conversation>();
+    public virtual ICollection<ApiKey> ApiKeys { get; set; } = new List<ApiKey>();
 
     [InverseProperty("User")]
-    public virtual ICollection<Message> Messages { get; set; } = new List<Message>();
-
-    [InverseProperty("CreateUser")]
-    public virtual ICollection<Order> Orders { get; set; } = new List<Order>();
+    public virtual ICollection<Conversation> Conversations { get; set; } = new List<Conversation>();
 
     [InverseProperty("CreateUser")]
     public virtual ICollection<Prompt> Prompts { get; set; } = new List<Prompt>();
-
-    [InverseProperty("User")]
-    public virtual ICollection<RequestLog> RequestLogs { get; set; } = new List<RequestLog>();
 
     [InverseProperty("User")]
     public virtual ICollection<Session> Sessions { get; set; } = new List<Session>();

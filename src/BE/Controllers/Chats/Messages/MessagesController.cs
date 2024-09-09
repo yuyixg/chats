@@ -17,7 +17,7 @@ public class MessagesController(ChatsDB db, CurrentUser currentUser) : Controlle
     public async Task<ActionResult<MessageDto[]>> GetMessages([FromQuery] int chatId, CancellationToken cancellationToken)
     {
         MessageDto[] messages = await db.Messages
-            .Where(m => m.ConversationId == chatId && m.UserId == currentUser.Id && m.ChatRoleId != (byte)DBConversationRole.System)
+            .Where(m => m.ConversationId == chatId && m.Conversation.UserId == currentUser.Id && m.ChatRoleId != (byte)DBConversationRole.System)
             .Select(x => new ChatMessageTemp()
             {
                 Id = x.Id,

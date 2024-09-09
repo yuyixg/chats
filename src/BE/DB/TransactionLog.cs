@@ -25,6 +25,9 @@ public partial class TransactionLog
 
     public DateTime CreatedAt { get; set; }
 
+    [InverseProperty("TransactionLog")]
+    public virtual ApiUsage? ApiUsage { get; set; }
+
     [ForeignKey("CreditUserId")]
     [InverseProperty("TransactionLogCreditUsers")]
     public virtual User? CreditUser { get; set; }

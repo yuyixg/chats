@@ -61,6 +61,9 @@ public partial class ChatModel
     public DateTime UpdatedAt { get; set; }
 
     [InverseProperty("ChatModel")]
+    public virtual ICollection<ApiUsage> ApiUsages { get; set; } = new List<ApiUsage>();
+
+    [InverseProperty("ChatModel")]
     public virtual ICollection<Conversation> Conversations { get; set; } = new List<Conversation>();
 
     [ForeignKey("FileServiceId")]
@@ -73,4 +76,8 @@ public partial class ChatModel
     [ForeignKey("ModelKeysId")]
     [InverseProperty("ChatModels")]
     public virtual ModelKey ModelKeys { get; set; } = null!;
+
+    [ForeignKey("ModelId")]
+    [InverseProperty("Models")]
+    public virtual ICollection<ApiKey> ApiKeys { get; set; } = new List<ApiKey>();
 }

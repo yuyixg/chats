@@ -72,7 +72,7 @@ public class ConversationController(ChatsDB db, CurrentUser currentUser, ILogger
         }
 
         Dictionary<long, MessageLiteDto> existingMessages = await db.Messages
-            .Where(x => x.ConversationId == request.ConversationId && x.UserId == currentUser.Id)
+            .Where(x => x.ConversationId == request.ConversationId && x.Conversation.UserId == currentUser.Id)
             .Select(x => new MessageLiteDto()
             {
                 Id = x.Id,
@@ -99,7 +99,6 @@ public class ConversationController(ChatsDB db, CurrentUser currentUser, ILogger
             Message toBeInsert = new()
             {
                 ConversationId = request.ConversationId,
-                UserId = currentUser.Id,
                 ChatRoleId = (byte)DBConversationRole.System,
                 MessageContents =
                 [
@@ -155,7 +154,6 @@ public class ConversationController(ChatsDB db, CurrentUser currentUser, ILogger
             Message dbUserMessage = new()
             {
                 ConversationId = request.ConversationId,
-                UserId = currentUser.Id,
                 ChatRoleId = (byte)DBConversationRole.User,
                 MessageContents = request.UserMessage.ToMessageContents(),
                 CreatedAt = DateTime.UtcNow,
@@ -249,7 +247,6 @@ public class ConversationController(ChatsDB db, CurrentUser currentUser, ILogger
         Message assistantMessage = new()
         {
             ConversationId = request.ConversationId,
-            UserId = currentUser.Id,
             ChatRoleId = (byte)DBConversationRole.Assistant,
             MessageContents =
             [

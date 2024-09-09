@@ -60,7 +60,7 @@ public class SessionManager(ChatsDB db, SessionCache sessionCache)
     public async Task<LoginResponse> GenerateSessionForUser(User user, CancellationToken cancellationToken)
     {
         Guid sessionId = await RefreshUserSessionId(user.Id, cancellationToken);
-        bool hasPayService = await db.PayServices.Where(x => x.Enabled).AnyAsync(cancellationToken);
+        bool hasPayService = false;
         return new LoginResponse
         {
             SessionId = sessionId,

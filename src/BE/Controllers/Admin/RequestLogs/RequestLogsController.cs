@@ -13,54 +13,60 @@ public class RequestLogsController(ChatsDB db) : ControllerBase
     [HttpPost]
     public async Task<ActionResult<PagedResult<RequestLogDto>>> GetRequestLogs([FromBody] PagingRequest pagingRequest, CancellationToken cancellationToken)
     {
-        IQueryable<RequestLogDto> query = db.RequestLogs
-            .Select(x => new RequestLogDto()
-            {
-                Id = x.Id,
-                Ip = x.Ip,
-                Method = x.Method,
-                Url = x.Url,
-                StatusCode = x.StatusCode,
-                Username = x.User!.Username,
-                CreatedAt = x.CreatedAt
-            })
-            .OrderByDescending(x => x.CreatedAt)
-            .AsQueryable();
-        if (!string.IsNullOrWhiteSpace(pagingRequest.Query))
-        {
-            query = query.Where(x => x.Username == pagingRequest.Query);
-        }
+        //IQueryable<RequestLogDto> query = db.RequestLogs
+        //    .Select(x => new RequestLogDto()
+        //    {
+        //        Id = x.Id,
+        //        Ip = x.Ip,
+        //        Method = x.Method,
+        //        Url = x.Url,
+        //        StatusCode = x.StatusCode,
+        //        Username = x.User!.Username,
+        //        CreatedAt = x.CreatedAt
+        //    })
+        //    .OrderByDescending(x => x.CreatedAt)
+        //    .AsQueryable();
+        //if (!string.IsNullOrWhiteSpace(pagingRequest.Query))
+        //{
+        //    query = query.Where(x => x.Username == pagingRequest.Query);
+        //}
 
-        return Ok(await PagedResult.FromQuery(query, pagingRequest, cancellationToken));
+        //return Ok(await PagedResult.FromQuery(query, pagingRequest, cancellationToken));
+        return Ok(new PagedResult<RequestLogDto>()
+        {
+            Count = 0,
+            Rows = []
+        });
     }
 
     [HttpGet]
     public async Task<ActionResult<LogEntry>> GetRequestLogDetails([FromQuery] Guid id, CancellationToken cancellationToken)
     {
-        LogEntry? requestLog = await db.RequestLogs
-            .Where(x => x.Id == id)
-            .Select(x => new LogEntry()
-            {
-                Id = x.Id,
-                Ip = x.Ip,
-                Method = x.Method,
-                Url = x.Url,
-                StatusCode = x.StatusCode,
-                User = x.UserId != null ? new OnlyUserName { Username = x.User!.Username } : null,
-                CreatedAt = x.CreatedAt,
-                Request = x.Request,
-                Response = x.Response,
-                Headers = x.Headers,
-                RequestTime = x.RequestTime,
-                ResponseTime = x.ResponseTime,
-                UserId = x.UserId,
-            })
-            .FirstOrDefaultAsync(cancellationToken);
-        if (requestLog == null)
-        {
-            return NotFound();
-        }
+        return NotFound();
+        //LogEntry? requestLog = await db.RequestLogs
+        //    .Where(x => x.Id == id)
+        //    .Select(x => new LogEntry()
+        //    {
+        //        Id = x.Id,
+        //        Ip = x.Ip,
+        //        Method = x.Method,
+        //        Url = x.Url,
+        //        StatusCode = x.StatusCode,
+        //        User = x.UserId != null ? new OnlyUserName { Username = x.User!.Username } : null,
+        //        CreatedAt = x.CreatedAt,
+        //        Request = x.Request,
+        //        Response = x.Response,
+        //        Headers = x.Headers,
+        //        RequestTime = x.RequestTime,
+        //        ResponseTime = x.ResponseTime,
+        //        UserId = x.UserId,
+        //    })
+        //    .FirstOrDefaultAsync(cancellationToken);
+        //if (requestLog == null)
+        //{
+        //    return NotFound();
+        //}
 
-        return Ok(requestLog);
+        //return Ok(requestLog);
     }
 }
