@@ -10,6 +10,9 @@ public record ListApiKeyDto
     [JsonPropertyName("key")]
     public required string Key { get; init; }
 
+    [JsonPropertyName("isRevoked")]
+    public required bool IsRevoked { get; init; }
+
     [JsonPropertyName("comment")]
     public required string? Comment { get; init; }
 

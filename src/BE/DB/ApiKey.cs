@@ -20,6 +20,8 @@ public partial class ApiKey
     [Unicode(false)]
     public string Key { get; set; } = null!;
 
+    public bool IsRevoked { get; set; }
+
     [StringLength(50)]
     public string? Comment { get; set; }
 
@@ -28,6 +30,8 @@ public partial class ApiKey
     public bool AllowAllModels { get; set; }
 
     public DateTime Expires { get; set; }
+
+    public bool IsDeleted { get; set; }
 
     public DateTime CreatedAt { get; set; }
 

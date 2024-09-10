@@ -15,11 +15,12 @@ public class ApiKeyController(ChatsDB db, CurrentUser currentUser) : ControllerB
     public async Task<ListApiKeyDto[]> ListMyApiKeys(CancellationToken cancellationToken)
     {
         ListApiKeyDto[] result = await db.ApiKeys
-            .Where(x => x.UserId == currentUser.Id)
+            .Where(x => x.UserId == currentUser.Id && !x.IsDeleted)
             .Select(x => new ListApiKeyDto
             {
                 Id = x.Id,
                 Key = x.Key,
+                IsRevoked = x.IsRevoked,
                 Comment = x.Comment,
                 AllowEnumerate = x.AllowEnumerate,
                 AllowAllModels = x.AllowAllModels,
@@ -37,7 +38,7 @@ public class ApiKeyController(ChatsDB db, CurrentUser currentUser) : ControllerB
     {
         ApiKey? dbEntry = await db.ApiKeys
             .Include(x => x.Models)
-            .Where(x => x.UserId == currentUser.Id)
+            .Where(x => x.UserId == currentUser.Id && !x.IsDeleted)
             .Where(x => x.Id == apiKeyId)
             .FirstOrDefaultAsync(cancellationToken);
 
@@ -54,6 +55,8 @@ public class ApiKeyController(ChatsDB db, CurrentUser currentUser) : ControllerB
             UserId = currentUser.Id,
             Key = $"sk-{Guid.NewGuid()}",
             Comment = $"New api key - {DateTime.UtcNow:yyyyMMdd}",
+            IsRevoked = false, 
+            IsDeleted = false, 
             AllowEnumerate = false,
             AllowAllModels = false,
             Expires = DateTime.UtcNow.AddYears(1),
@@ -67,6 +70,7 @@ public class ApiKeyController(ChatsDB db, CurrentUser currentUser) : ControllerB
         {
             Id = dbEntry.Id,
             Key = dbEntry.Key,
+            IsRevoked = dbEntry.IsRevoked,
             Comment = dbEntry.Comment,
             AllowEnumerate = dbEntry.AllowEnumerate,
             AllowAllModels = dbEntry.AllowAllModels,
@@ -81,14 +85,25 @@ public class ApiKeyController(ChatsDB db, CurrentUser currentUser) : ControllerB
     public async Task<ActionResult> DeleteApiKey(int apiKeyId, CancellationToken cancellationToken)
     {
         ApiKey? dbEntry = await db.ApiKeys
-            .Where(x => x.UserId == currentUser.Id)
+            .Where(x => x.UserId == currentUser.Id && !x.IsDeleted)
             .Where(x => x.Id == apiKeyId)
             .FirstOrDefaultAsync(cancellationToken);
+        if (dbEntry == null) return NotFound();
 
-        if (dbEntry is null) return NotFound();
+        bool everUsed = await db.ApiUsages
+            .AnyAsync(x => x.ApiKeyId == apiKeyId, cancellationToken);
+        if (everUsed)
+        {
+            dbEntry.IsDeleted = true;
+            dbEntry.UpdatedAt = DateTime.UtcNow;
+            await db.SaveChangesAsync(cancellationToken);
+        }
+        else
+        {
+            db.ApiKeys.Remove(dbEntry);
+            await db.SaveChangesAsync(cancellationToken);
+        }
 
-        db.ApiKeys.Remove(dbEntry);
-        await db.SaveChangesAsync(cancellationToken);
         return NoContent();
     }
 
@@ -97,17 +112,13 @@ public class ApiKeyController(ChatsDB db, CurrentUser currentUser) : ControllerB
     {
         ApiKey? dbEntry = await db.ApiKeys
             .Include(x => x.Models)
-            .Where(x => x.UserId == currentUser.Id)
+            .Where(x => x.UserId == currentUser.Id && !x.IsDeleted)
             .Where(x => x.Id == apiKeyId)
             .FirstOrDefaultAsync(cancellationToken);
 
         if (dbEntry is null) return NotFound();
 
-        dbEntry.Comment = dto.Comment;
-        dbEntry.AllowEnumerate = dto.AllowEnumerate;
-        dbEntry.AllowAllModels = dto.AllowAllModels;
-        dbEntry.Expires = dto.Expires;
-        dbEntry.Models = dto.Models.Select(x => new ChatModel { Id = x }).ToList();
+        dto.ApplyTo(dbEntry);
         if (db.ChangeTracker.HasChanges())
         {
             dbEntry.UpdatedAt = DateTime.UtcNow;
