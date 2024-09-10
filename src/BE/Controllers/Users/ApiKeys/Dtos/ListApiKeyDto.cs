@@ -33,4 +33,7 @@ public record ListApiKeyDto
 
     [JsonPropertyName("lastUsedAt")]
     public required DateTime? LastUsedAt { get; init; }
+
+    [JsonPropertyName("modelCount")]
+    public required int ModelCount { get; init; }
 }
