@@ -5,6 +5,9 @@ using Chats.BE.Infrastructure;
 using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Mvc;
 using Microsoft.EntityFrameworkCore;
+using System.Numerics;
+using System.Security.Cryptography;
+using System.Text;
 
 namespace Chats.BE.Controllers.Users.ApiKeys;
 
@@ -51,10 +54,11 @@ public class ApiKeyController(ChatsDB db, CurrentUser currentUser) : ControllerB
     [HttpPost]
     public async Task<ListApiKeyDto> CreateApiKey(CancellationToken cancellationToken)
     {
+        const int keyLength = 48;
         ApiKey dbEntry = new()
         {
             UserId = currentUser.Id,
-            Key = $"sk-{Guid.NewGuid()}",
+            Key = $"sk-{GenerateBase62Key(keyLength)}",
             Comment = $"New api key - {DateTime.UtcNow:yyyyMMdd}",
             IsRevoked = false, 
             IsDeleted = false, 
@@ -81,6 +85,37 @@ public class ApiKeyController(ChatsDB db, CurrentUser currentUser) : ControllerB
             LastUsedAt = null, 
             ModelCount = 0
         };
+    }
+
+    static string GenerateBase62Key(int length)
+    {
+        const string Base62Chars = "0123456789ABCDEFGHIJKLMNOPQRSTUVWXYZabcdefghijklmnopqrstuvwxyz";
+
+        // Calculate the number of bytes needed to generate a secure key of the specified length
+        int byteSize = (int)Math.Ceiling(length * 5.954196310386875 / 8);
+
+        // Generate random bytes
+        byte[] randomBytes = new byte[byteSize];
+        RandomNumberGenerator.Fill(randomBytes);
+
+        // Convert to BigInteger
+        BigInteger bigInt = new(randomBytes, isUnsigned: true);
+
+        // Build Base62 string
+        StringBuilder base62 = new();
+        while (bigInt > 0 && base62.Length < length)
+        {
+            bigInt = BigInteger.DivRem(bigInt, 62, out BigInteger remainder);
+            base62.Insert(0, Base62Chars[(int)remainder]);
+        }
+
+        // Pad the key if it's shorter than the desired length
+        while (base62.Length < length)
+        {
+            base62.Insert(0, '0');
+        }
+
+        return base62.ToString();
     }
 
     [HttpDelete("{apiKeyId}")]

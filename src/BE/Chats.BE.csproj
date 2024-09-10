@@ -25,8 +25,4 @@
     <PackageReference Include="TencentCloudSDK.Sms" Version="3.0.1082" />
   </ItemGroup>
 
-  <ItemGroup>
-    <Folder Include="Services\Conversations\Implementations\OpenAI\" />
-  </ItemGroup>
-
 </Project>

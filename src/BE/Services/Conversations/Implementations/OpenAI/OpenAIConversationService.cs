@@ -1,17 +1,17 @@
 ﻿using AI.Dev.OpenAI.GPT;
-using Azure;
-using Azure.AI.OpenAI;
 using Chats.BE.DB.Jsons;
 using Chats.BE.Infrastructure;
 using Chats.BE.Services.Conversations.Dtos;
-using OpenAI;
+using Chats.BE.Services.Conversations.Implementations.Azure;
 using OpenAI.Chat;
+using OpenAI;
 using System.Runtime.CompilerServices;
 using System.Text.Json;
+using System.ClientModel;
 
-namespace Chats.BE.Services.Conversations.Implementations.Azure;
+namespace Chats.BE.Services.Conversations.Implementations.OpenAI;
 
-public class AzureConversationService : ConversationService
+public class OpenAIConversationService : ConversationService
 {
     /// <summary>
     /// possible values:
@@ -23,15 +23,18 @@ public class AzureConversationService : ConversationService
     /// </summary>
     private string SuggestedType { get; }
     private ChatClient ChatClient { get; }
-    private JsonAzureModelConfig GlobalModelConfig { get; }
+    private JsonOpenAIModelConfig GlobalModelConfig { get; }
 
     private bool IsVision => SuggestedType == "gpt-4-vision";
 
-    public AzureConversationService(string keyConfigText, string suggestedType, string modelConfigText)
+    public OpenAIConversationService(string keyConfigText, string suggestedType, string modelConfigText)
     {
         JsonAzureApiConfig keyConfig = JsonAzureApiConfig.Parse(keyConfigText);
-        GlobalModelConfig = JsonSerializer.Deserialize<JsonAzureModelConfig>(modelConfigText)!;
-        OpenAIClient api = new AzureOpenAIClient(new Uri(keyConfig.Host), new AzureKeyCredential(keyConfig.ApiKey));
+        GlobalModelConfig = JsonSerializer.Deserialize<JsonOpenAIModelConfig>(modelConfigText)!;
+        OpenAIClient api = new(new ApiKeyCredential(keyConfig.ApiKey), new OpenAIClientOptions()
+        {
+            Endpoint = !string.IsNullOrEmpty(keyConfig.Host) ? new Uri(keyConfig.Host) : null,
+        });
         SuggestedType = suggestedType;
         ChatClient = api.GetChatClient(GlobalModelConfig.DeploymentName);
     }
