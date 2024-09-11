@@ -19,6 +19,7 @@ import { ChatBody, Message, Role } from '@/types/chat';
 
 import { HomeContext } from '@/pages/home/home';
 
+import { ModeToggle } from '../ModeToggle/ModeTooggle';
 import ChangeModel from './ChangeModel';
 import ChatError from './ChatError';
 import { ChatInput } from './ChatInput';
@@ -400,7 +401,7 @@ export const Chat = memo(({ stopConversationRef }: Props) => {
           ) : (
             <>
               {selectChat?.id && (
-                <div className="sticky top-0 z-10 text-sm pt-[9px] bg-white dark:bg-[#262630] dark:text-neutral-200">
+                <div className="sticky top-0 pt-1 z-10 text-sm bg-white dark:bg-[#262630] dark:text-neutral-200 flex items-center justify-between">
                   <div
                     className={cn(
                       'ml-[84px] flex justify-start items-center',
@@ -420,6 +421,9 @@ export const Chat = memo(({ stopConversationRef }: Props) => {
                         }}
                       />
                     )}
+                  </div>
+                  <div className="flex justify-start px-[6px]">
+                    <ModeToggle />
                   </div>
                 </div>
               )}
