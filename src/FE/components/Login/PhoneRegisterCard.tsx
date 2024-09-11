@@ -21,12 +21,9 @@ import {
 } from '@/components/ui/form';
 import { Input } from '@/components/ui/input';
 
-import ContactModal from '../Sidebar/ContactModal';
+import ContactModal from '../ContactModal/ContactModal';
 
-import {
-  registerByPhone,
-  sendRegisterSmsCode,
-} from '@/apis/userService';
+import { registerByPhone, sendRegisterSmsCode } from '@/apis/userService';
 import { zodResolver } from '@hookform/resolvers/zod';
 import { z } from 'zod';
 

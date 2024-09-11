@@ -8,7 +8,13 @@ import { useRouter } from 'next/router';
 import { clearUserInfo, clearUserSession, getLoginUrl } from '@/utils/user';
 
 import { Button } from '../ui/button';
-import { DialogFooter } from '../ui/dialog';
+import {
+  Dialog,
+  DialogContent,
+  DialogFooter,
+  DialogHeader,
+  DialogTitle,
+} from '../ui/dialog';
 import { Form, FormField } from '../ui/form';
 import FormInput from '../ui/form/input';
 import { FormFieldType, IFormFieldOption } from '../ui/form/type';
@@ -17,7 +23,13 @@ import { changeUserPassword } from '@/apis/userService';
 import { zodResolver } from '@hookform/resolvers/zod';
 import { z } from 'zod';
 
-export const ChangePasswordTabContent = () => {
+interface Props {
+  isOpen: boolean;
+  onClose: () => void;
+}
+
+export const ChangePasswordModal = (props: Props) => {
+  const { isOpen, onClose } = props;
   const { t } = useTranslation('sidebar');
   const router = useRouter();
   const [loading, setLoading] = useState(false);
@@ -55,7 +67,9 @@ export const ChangePasswordTabContent = () => {
       .string()
       .regex(
         /^(?=.*[a-z])(?=.*[A-Z])(?=.*\d)|(?=.*[a-z])(?=.*[A-Z])(?=.*\W)|(?=.*[a-z])(?=.*\d)(?=.*\W)|(?=.*[A-Z])(?=.*\d)(?=.*\W).{6,}$/,
-        t('It must contain at least 6 characters, and 3 of the 4 must be upper case, lower case, special characters, and numbers.')!
+        t(
+          'It must contain at least 6 characters, and 3 of the 4 must be upper case, lower case, special characters, and numbers.',
+        )!,
       )
       .min(
         6,
@@ -68,7 +82,9 @@ export const ChangePasswordTabContent = () => {
       .string()
       .regex(
         /^(?=.*[a-z])(?=.*[A-Z])(?=.*\d)|(?=.*[a-z])(?=.*[A-Z])(?=.*\W)|(?=.*[a-z])(?=.*\d)(?=.*\W)|(?=.*[A-Z])(?=.*\d)(?=.*\W).{6,}$/,
-        t('It must contain at least 6 characters, and 3 of the 4 must be upper case, lower case, special characters, and numbers.')!
+        t(
+          'It must contain at least 6 characters, and 3 of the 4 must be upper case, lower case, special characters, and numbers.',
+        )!,
       )
       .min(
         6,
@@ -134,22 +150,29 @@ export const ChangePasswordTabContent = () => {
   }, []);
 
   return (
-    <Form {...form}>
-      <form onSubmit={form.handleSubmit(onSubmit)}>
-        {formFields.map((item) => (
-          <FormField
-            key={item.name}
-            control={form.control}
-            name={item.name as never}
-            render={({ field }) => item.render(item, field)}
-          />
-        ))}
-        <DialogFooter className="pt-4">
-          <Button disabled={loading} type="submit">
-            {t('Confirm')}
-          </Button>
-        </DialogFooter>
-      </form>
-    </Form>
+    <Dialog open={isOpen} onOpenChange={onClose}>
+      <DialogContent className="w-full w- max-w-2xl">
+        <DialogHeader className="mb-[16px]">
+          <DialogTitle>{t('Change Password')}</DialogTitle>
+        </DialogHeader>
+        <Form {...form}>
+          <form onSubmit={form.handleSubmit(onSubmit)}>
+            {formFields.map((item) => (
+              <FormField
+                key={item.name}
+                control={form.control}
+                name={item.name as never}
+                render={({ field }) => item.render(item, field)}
+              />
+            ))}
+            <DialogFooter className="pt-4">
+              <Button disabled={loading} type="submit">
+                {t('Confirm')}
+              </Button>
+            </DialogFooter>
+          </form>
+        </Form>
+      </DialogContent>
+    </Dialog>
   );
 };

@@ -10,12 +10,15 @@ import { hasContact } from '@/utils/website';
 import { GlobalConfigKeys, SiteInfoConfig } from '@/types/config';
 import { LoginConfigsResult, LoginType } from '@/types/user';
 
+import ContactModal from '@/components/ContactModal/ContactModal';
 import AccountLoginCard from '@/components/Login/AccountLoginCard';
 import KeyCloakLogin from '@/components/Login/KeyCloakLogin';
 import PhoneLoginCard from '@/components/Login/PhoneLoginCard';
 import PhoneRegisterCard from '@/components/Login/PhoneRegisterCard';
 import WeChatLogin from '@/components/Login/WeChatLogin';
+import { Button } from '@/components/ui/button';
 import { Tabs, TabsContent, TabsList, TabsTrigger } from '@/components/ui/tabs';
+
 import { getLoginProviders, getSiteInfo } from '@/apis/userService';
 
 enum TabKeys {
@@ -36,6 +39,7 @@ export default function LoginPage({
   loginConfigs: LoginConfigsResult[];
 }) {
   const { t } = useTranslation('login');
+  const [contactOpenModal, setContactOpenModal] = useState(false);
   const [isClient, setIsClient] = useState(false);
   const LoginHeaders: LoginHeader = {
     phone: {
@@ -220,9 +224,25 @@ export default function LoginPage({
                   {siteInfo?.filingNumber}
                 </span>
                 © 2024 Chats™ . All Rights Reserved.
+                {hasContact() && (
+                  <Button
+                    variant="link"
+                    onClick={() => {
+                      setContactOpenModal(true);
+                    }}
+                  >
+                    联系我们
+                  </Button>
+                )}
               </p>
             </div>
           </div>
+          <ContactModal
+            isOpen={contactOpenModal}
+            onClose={() => {
+              setContactOpenModal(false);
+            }}
+          />
         </div>
       )}
     </>
