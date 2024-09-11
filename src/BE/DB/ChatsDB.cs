@@ -163,7 +163,7 @@ public partial class ChatsDB : DbContext
 
         modelBuilder.Entity<Message>(entity =>
         {
-            entity.HasKey(e => e.Id).HasName("PK_ChatMessage");
+            entity.HasKey(e => e.Id).HasName("PK_ChatMessage2");
 
             entity.HasOne(d => d.ChatRole).WithMany(p => p.Messages)
                 .OnDelete(DeleteBehavior.ClientSetNull)

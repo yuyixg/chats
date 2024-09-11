@@ -5,6 +5,9 @@ using Chats.BE.Infrastructure;
 using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Mvc;
 using Microsoft.EntityFrameworkCore;
+using System.Numerics;
+using System.Security.Cryptography;
+using System.Text;
 
 namespace Chats.BE.Controllers.Users.ApiKeys;
 
@@ -15,18 +18,20 @@ public class ApiKeyController(ChatsDB db, CurrentUser currentUser) : ControllerB
     public async Task<ListApiKeyDto[]> ListMyApiKeys(CancellationToken cancellationToken)
     {
         ListApiKeyDto[] result = await db.ApiKeys
-            .Where(x => x.UserId == currentUser.Id)
+            .Where(x => x.UserId == currentUser.Id && !x.IsDeleted)
             .Select(x => new ListApiKeyDto
             {
                 Id = x.Id,
                 Key = x.Key,
+                IsRevoked = x.IsRevoked,
                 Comment = x.Comment,
                 AllowEnumerate = x.AllowEnumerate,
                 AllowAllModels = x.AllowAllModels,
                 Expires = x.Expires,
                 CreatedAt = x.CreatedAt,
                 UpdatedAt = x.UpdatedAt,
-                LastUsedAt = x.ApiUsages.MaxBy(x => x.Id)!.CreatedAt
+                LastUsedAt = x.ApiUsages.MaxBy(x => x.Id)!.CreatedAt, 
+                ModelCount = x.Models.Count
             })
             .ToArrayAsync(cancellationToken);
         return result;
@@ -37,7 +42,7 @@ public class ApiKeyController(ChatsDB db, CurrentUser currentUser) : ControllerB
     {
         ApiKey? dbEntry = await db.ApiKeys
             .Include(x => x.Models)
-            .Where(x => x.UserId == currentUser.Id)
+            .Where(x => x.UserId == currentUser.Id && !x.IsDeleted)
             .Where(x => x.Id == apiKeyId)
             .FirstOrDefaultAsync(cancellationToken);
 
@@ -49,11 +54,14 @@ public class ApiKeyController(ChatsDB db, CurrentUser currentUser) : ControllerB
     [HttpPost]
     public async Task<ListApiKeyDto> CreateApiKey(CancellationToken cancellationToken)
     {
+        const int keyLength = 48;
         ApiKey dbEntry = new()
         {
             UserId = currentUser.Id,
-            Key = $"sk-{Guid.NewGuid()}",
+            Key = $"sk-{GenerateBase62Key(keyLength)}",
             Comment = $"New api key - {DateTime.UtcNow:yyyyMMdd}",
+            IsRevoked = false, 
+            IsDeleted = false, 
             AllowEnumerate = false,
             AllowAllModels = false,
             Expires = DateTime.UtcNow.AddYears(1),
@@ -67,28 +75,72 @@ public class ApiKeyController(ChatsDB db, CurrentUser currentUser) : ControllerB
         {
             Id = dbEntry.Id,
             Key = dbEntry.Key,
+            IsRevoked = dbEntry.IsRevoked,
             Comment = dbEntry.Comment,
             AllowEnumerate = dbEntry.AllowEnumerate,
             AllowAllModels = dbEntry.AllowAllModels,
             Expires = dbEntry.Expires,
             CreatedAt = dbEntry.CreatedAt,
             UpdatedAt = dbEntry.UpdatedAt,
-            LastUsedAt = null
+            LastUsedAt = null, 
+            ModelCount = 0
         };
+    }
+
+    static string GenerateBase62Key(int length)
+    {
+        const string Base62Chars = "0123456789ABCDEFGHIJKLMNOPQRSTUVWXYZabcdefghijklmnopqrstuvwxyz";
+
+        // Calculate the number of bytes needed to generate a secure key of the specified length
+        int byteSize = (int)Math.Ceiling(length * 5.954196310386875 / 8);
+
+        // Generate random bytes
+        byte[] randomBytes = new byte[byteSize];
+        RandomNumberGenerator.Fill(randomBytes);
+
+        // Convert to BigInteger
+        BigInteger bigInt = new(randomBytes, isUnsigned: true);
+
+        // Build Base62 string
+        StringBuilder base62 = new();
+        while (bigInt > 0 && base62.Length < length)
+        {
+            bigInt = BigInteger.DivRem(bigInt, 62, out BigInteger remainder);
+            base62.Insert(0, Base62Chars[(int)remainder]);
+        }
+
+        // Pad the key if it's shorter than the desired length
+        while (base62.Length < length)
+        {
+            base62.Insert(0, '0');
+        }
+
+        return base62.ToString();
     }
 
     [HttpDelete("{apiKeyId}")]
     public async Task<ActionResult> DeleteApiKey(int apiKeyId, CancellationToken cancellationToken)
     {
         ApiKey? dbEntry = await db.ApiKeys
-            .Where(x => x.UserId == currentUser.Id)
+            .Where(x => x.UserId == currentUser.Id && !x.IsDeleted)
             .Where(x => x.Id == apiKeyId)
             .FirstOrDefaultAsync(cancellationToken);
+        if (dbEntry == null) return NotFound();
 
-        if (dbEntry is null) return NotFound();
+        bool everUsed = await db.ApiUsages
+            .AnyAsync(x => x.ApiKeyId == apiKeyId, cancellationToken);
+        if (everUsed)
+        {
+            dbEntry.IsDeleted = true;
+            dbEntry.UpdatedAt = DateTime.UtcNow;
+            await db.SaveChangesAsync(cancellationToken);
+        }
+        else
+        {
+            db.ApiKeys.Remove(dbEntry);
+            await db.SaveChangesAsync(cancellationToken);
+        }
 
-        db.ApiKeys.Remove(dbEntry);
-        await db.SaveChangesAsync(cancellationToken);
         return NoContent();
     }
 
@@ -97,17 +149,13 @@ public class ApiKeyController(ChatsDB db, CurrentUser currentUser) : ControllerB
     {
         ApiKey? dbEntry = await db.ApiKeys
             .Include(x => x.Models)
-            .Where(x => x.UserId == currentUser.Id)
+            .Where(x => x.UserId == currentUser.Id && !x.IsDeleted)
             .Where(x => x.Id == apiKeyId)
             .FirstOrDefaultAsync(cancellationToken);
 
         if (dbEntry is null) return NotFound();
 
-        dbEntry.Comment = dto.Comment;
-        dbEntry.AllowEnumerate = dto.AllowEnumerate;
-        dbEntry.AllowAllModels = dto.AllowAllModels;
-        dbEntry.Expires = dto.Expires;
-        dbEntry.Models = dto.Models.Select(x => new ChatModel { Id = x }).ToList();
+        dto.ApplyTo(dbEntry);
         if (db.ChangeTracker.HasChanges())
         {
             dbEntry.UpdatedAt = DateTime.UtcNow;
