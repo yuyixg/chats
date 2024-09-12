@@ -189,7 +189,7 @@ export default function UserModels() {
 
           {userModels.map((user) => (
             <TableBody
-              emptyText={t('No data')!}
+              
               key={user.userId}
               className="tbody-hover"
               style={{ borderTop: '1px solid hsl(var(--muted))' }}

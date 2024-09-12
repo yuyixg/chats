@@ -72,7 +72,7 @@ export default function PayService() {
             </TableRow>
           </TableHeader>
           <TableBody
-            emptyText={t('No data')!}
+            
             isLoading={loading}
             isEmpty={services.length === 0}
           >

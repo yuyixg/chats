@@ -68,7 +68,7 @@ export default function Messages() {
             </TableRow>
           </TableHeader>
           <TableBody
-            emptyText={t('No data')!}
+            
             isLoading={loading}
             isEmpty={messages.count === 0}
           >

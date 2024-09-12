@@ -3,8 +3,9 @@ import React, { useEffect, useState } from 'react';
 import { useTranslation } from 'next-i18next';
 import { serverSideTranslations } from 'next-i18next/serverSideTranslations';
 
-import { GetModelKeysResult } from '@/types/admin';
 import { DEFAULT_LANGUAGE } from '@/utils/settings';
+
+import { GetModelKeysResult } from '@/types/admin';
 import { ModelProviderTemplates } from '@/types/template';
 
 import { ModelKeysModal } from '@/components/Admin/ModelKeys/ModelKeysModal';
@@ -73,11 +74,7 @@ export default function ModelKeys() {
               <TableHead>{t('Created Time')}</TableHead>
             </TableRow>
           </TableHeader>
-          <TableBody
-            emptyText={t('No data')!}
-            isLoading={loading}
-            isEmpty={services.length === 0}
-          >
+          <TableBody isLoading={loading} isEmpty={services.length === 0}>
             {services.map((item) => (
               <TableRow
                 className="cursor-pointer"

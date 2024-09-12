@@ -75,7 +75,7 @@ export default function RequestLogs() {
             </TableRow>
           </TableHeader>
           <TableBody
-            emptyText={t('No data')!}
+            
             isLoading={loading}
             isEmpty={requestLogs.count === 0}
           >

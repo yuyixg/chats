@@ -54,6 +54,20 @@ export interface GetBalance7DaysUsageResult {
   costAmount: number;
 }
 
+export interface GetUserApiKeyResult {
+  id: number;
+  key: string;
+  isRevoked: boolean;
+  comment: string;
+  allowEnumerate: boolean;
+  allowAllModels: boolean;
+  expires: string;
+  createdAt: string;
+  updatedAt: string;
+  lastUsedAt: string;
+  modelCount: number;
+}
+
 export const changeUserPassword = (params: PostUserPassword) => {
   const fetchService = useFetch();
   return fetchService.put('/api/user/reset-password', {
@@ -234,4 +248,24 @@ export const putUserChatModel = (chatId: string, modelId: string) => {
   return fetchServer.put('/api/user/chats/' + chatId, {
     body: { modelId },
   });
+};
+
+export const getUserApiKey = () => {
+  const fetchServer = useFetch();
+  return fetchServer.get<GetUserApiKeyResult[]>('/api/user/api-key');
+};
+
+export const postUserApiKey = () => {
+  const fetchServer = useFetch();
+  return fetchServer.post<GetUserApiKeyResult>('/api/user/api-key');
+};
+
+export const putUserApiKey = (id: number, body: any) => {
+  const fetchServer = useFetch();
+  return fetchServer.put('/api/user/api-key/' + id, { body });
+};
+
+export const deleteUserApiKey = (id: number) => {
+  const fetchServer = useFetch();
+  return fetchServer.delete('/api/user/api-key/' + id);
 };

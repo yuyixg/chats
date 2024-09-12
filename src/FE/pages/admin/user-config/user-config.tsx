@@ -145,7 +145,7 @@ export default function UserInitialConfig() {
 
           {configList.map((config) => (
             <TableBody
-              emptyText={t('No data')!}
+              
               key={config.id}
               className="tbody-hover"
               style={{ borderTop: '1px solid hsl(var(--muted))' }}

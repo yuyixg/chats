@@ -73,7 +73,7 @@ export default function Configs() {
             </TableRow>
           </TableHeader>
           <TableBody
-            emptyText={t('No data')!}
+            
             isLoading={loading}
             isEmpty={configs.length === 0}
           >

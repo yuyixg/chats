@@ -71,7 +71,7 @@ const TableBody = React.forwardRef<HTMLTableSectionElement, TableBodyProps>(
           <td className="text-center align-middle p-4 h-32" colSpan={100}>
             {emptyContent || (
               <div className="flex flex-col space-y-3 text-muted-foreground">
-                {emptyText || 'No data'}
+                {emptyText || '没有找到相关数据'}
               </div>
             )}
           </td>

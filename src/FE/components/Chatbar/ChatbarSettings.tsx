@@ -11,6 +11,7 @@ import { HomeContext } from '@/pages/home/home';
 
 import {
   IconBulbFilled,
+  IconKey,
   IconLogout,
   IconMoneybag,
   IconPasswordUser,
@@ -19,6 +20,7 @@ import {
 } from '@/components/Icons/index';
 
 import { ChangePasswordModal } from '../ChangePasswordModal/ChangePasswordModal';
+import { SettingModal } from '../SettingModal/SettingModal';
 import { SidebarButton } from '../Sidebar/SidebarButton';
 import UserBalanceModal from '../UserBalanceModal/UserBalanceModal';
 import { Popover, PopoverContent, PopoverTrigger } from '../ui/popover';
@@ -32,9 +34,13 @@ export const ChatBarSettings = () => {
   const [changePwdModalOpen, setChangePwdModalOpen] = useState<boolean>(false);
   const [userBalanceModalOpen, setUserBalanceModalOpen] =
     useState<boolean>(false);
+  const [settingSheetOpen, setSettingSheetOpen] = useState<boolean>(false);
 
   const {
-    state: { user },
+    state: {
+      user,
+      settings: { showPromptBar },
+    },
     handleUpdateSettings,
   } = useContext(HomeContext);
 
@@ -85,11 +91,19 @@ export const ChatBarSettings = () => {
                 setUserBalanceModalOpen(true);
               }}
             />
+            <Separator className="my-2" />
             <SidebarButton
               text={t('Prompt Management')}
               icon={<IconBulbFilled size={18} />}
               onClick={() => {
-                handleUpdateSettings('showPromptBar', true);
+                handleUpdateSettings('showPromptBar', !showPromptBar);
+              }}
+            />
+            <SidebarButton
+              text={`${t('API Key Management')}`}
+              icon={<IconKey size={18} />}
+              onClick={() => {
+                setSettingSheetOpen(true);
               }}
             />
             <Separator className="my-2" />
@@ -126,6 +140,13 @@ export const ChatBarSettings = () => {
           }}
         />
       )}
+
+      <SettingModal
+        isOpen={settingSheetOpen}
+        onClose={() => {
+          setSettingSheetOpen(false);
+        }}
+      />
     </div>
   );
 };

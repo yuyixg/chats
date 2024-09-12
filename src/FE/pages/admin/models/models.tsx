@@ -84,7 +84,7 @@ export default function Models() {
             </TableRow>
           </TableHeader>
           <TableBody
-            emptyText={t('No data')!}
+            
             isLoading={loading}
             isEmpty={models.length === 0}
           >

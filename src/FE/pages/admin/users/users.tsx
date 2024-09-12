@@ -152,7 +152,7 @@ export default function Users() {
             </TableRow>
           </TableHeader>
           <TableBody
-            emptyText={t('No data')!}
+            
             isLoading={loading}
             isEmpty={users.rows.length === 0}
           >

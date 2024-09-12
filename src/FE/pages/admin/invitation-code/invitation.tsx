@@ -76,7 +76,7 @@ export default function InvitationCode() {
             </TableRow>
           </TableHeader>
           <TableBody
-            emptyText={t('No data')!}
+            
             isLoading={loading}
             isEmpty={codes.length === 0}
           >
