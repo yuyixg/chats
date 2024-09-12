@@ -32,7 +32,7 @@ public class ApiKeyController(ChatsDB db, CurrentUser currentUser) : ControllerB
                 Expires = x.Expires,
                 CreatedAt = x.CreatedAt,
                 UpdatedAt = x.UpdatedAt,
-                LastUsedAt = x.ApiUsages.MaxBy(x => x.Id)!.CreatedAt, 
+                LastUsedAt = x.ApiUsages.FirstOrDefault(v => v.Id == x.ApiUsages.Select(x => x.Id).Max())!.CreatedAt, 
                 ModelCount = x.Models.Count
             })
             .ToArrayAsync(cancellationToken);
