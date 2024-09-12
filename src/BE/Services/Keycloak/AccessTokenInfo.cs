@@ -9,62 +9,8 @@ namespace Chats.BE.Services.Keycloak;
 
 public record AccessTokenInfo
 {
-    [JsonPropertyName("exp")]
-    public required int Exp { get; init; }
-
-    [JsonPropertyName("iat")]
-    public required int Iat { get; init; }
-
-    [JsonPropertyName("auth_time")]
-    public required int AuthTime { get; init; }
-
-    [JsonPropertyName("jti")]
-    public required string Jti { get; init; }
-
-    [JsonPropertyName("iss")]
-    public required string Iss { get; init; }
-
-    [JsonPropertyName("aud")]
-    public required string Aud { get; init; }
-
     [JsonPropertyName("sub")]
     public required string Sub { get; init; }
-
-    [JsonPropertyName("typ")]
-    public required string Typ { get; init; }
-
-    [JsonPropertyName("azp")]
-    public required string Azp { get; init; }
-
-    [JsonPropertyName("session_state")]
-    public required string SessionState { get; init; }
-
-    [JsonPropertyName("acr")]
-    public required string Acr { get; init; }
-
-    [JsonPropertyName("allowed-origins")]
-    public List<string>? AllowedOrigins { get; init; }
-
-    [JsonPropertyName("realm_access")]
-    public required RealmAccess RealmAccess { get; init; }
-
-    [JsonPropertyName("resource_access")]
-    public required Dictionary<string, ResourceAccess> ResourceAccess { get; init; }
-
-    [JsonPropertyName("scope")]
-    public required string Scope { get; init; }
-
-    [JsonPropertyName("sid")]
-    public required string Sid { get; init; }
-
-    [JsonPropertyName("email_verified")]
-    public required bool EmailVerified { get; init; }
-
-    [JsonPropertyName("name")]
-    public required string Name { get; init; }
-
-    [JsonPropertyName("preferred_username")]
-    public required string PreferredUsername { get; init; }
 
     [JsonPropertyName("given_name")]
     public required string GivenName { get; init; }
