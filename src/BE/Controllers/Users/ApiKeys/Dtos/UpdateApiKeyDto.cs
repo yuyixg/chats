@@ -29,7 +29,17 @@ public class UpdateApiKeyDto
         if (AllowEnumerate is not null) apiKey.AllowEnumerate = AllowEnumerate.Value;
         if (AllowAllModels is not null) apiKey.AllowAllModels = AllowAllModels.Value;
         if (Expires is not null) apiKey.Expires = Expires.Value;
-        if (Models is not null) apiKey.Models = Models.Select(x => new ChatModel { Id = x }).ToList();
+        if (Models is not null)
+        {
+            if (AllowAllModels == true)
+            {
+                apiKey.Models.Clear();
+            }
+            else
+            {
+                apiKey.Models = Models.Select(x => new ChatModel { Id = x }).ToList();
+            }
+        }
         if (IsRevoked is not null) apiKey.IsRevoked = IsRevoked.Value;
     }
 }
