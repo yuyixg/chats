@@ -1,6 +1,7 @@
 ﻿using Chats.BE.Controllers.Users.ApiKeys.Dtos;
 using Chats.BE.DB;
 using Chats.BE.DB.Enums;
+using Chats.BE.DB.Jsons;
 using Chats.BE.Infrastructure;
 using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Mvc;
@@ -8,6 +9,7 @@ using Microsoft.EntityFrameworkCore;
 using System.Numerics;
 using System.Security.Cryptography;
 using System.Text;
+using System.Text.Json;
 
 namespace Chats.BE.Controllers.Users.ApiKeys;
 
@@ -30,7 +32,7 @@ public class ApiKeyController(ChatsDB db, CurrentUser currentUser) : ControllerB
                 Expires = x.Expires,
                 CreatedAt = x.CreatedAt,
                 UpdatedAt = x.UpdatedAt,
-                LastUsedAt = x.ApiUsages.MaxBy(x => x.Id)!.CreatedAt, 
+                LastUsedAt = x.ApiUsages.FirstOrDefault(v => v.Id == x.ApiUsages.Select(x => x.Id).Max())!.CreatedAt, 
                 ModelCount = x.Models.Count
             })
             .ToArrayAsync(cancellationToken);
@@ -41,14 +43,20 @@ public class ApiKeyController(ChatsDB db, CurrentUser currentUser) : ControllerB
     public async Task<ActionResult<Guid[]>> GetApiKeySupportedModels(int apiKeyId, CancellationToken cancellationToken)
     {
         ApiKey? dbEntry = await db.ApiKeys
-            .Include(x => x.Models)
             .Where(x => x.UserId == currentUser.Id && !x.IsDeleted)
             .Where(x => x.Id == apiKeyId)
             .FirstOrDefaultAsync(cancellationToken);
 
         if (dbEntry is null) return NotFound();
-
-        return Ok(dbEntry.Models.Select(x => x.Id).ToArray());
+        if (dbEntry.AllowAllModels)
+        {
+            ChatModel[] allowedModels = await currentUser.GetValidModels(db, cancellationToken);
+            return Ok(allowedModels.Select(x => x.Id).ToArray());
+        }
+        else
+        {
+            return Ok(dbEntry.Models.Select(x => x.Id).ToArray());
+        }
     }
 
     [HttpPost]
@@ -62,8 +70,8 @@ public class ApiKeyController(ChatsDB db, CurrentUser currentUser) : ControllerB
             Comment = $"New api key - {DateTime.UtcNow:yyyyMMdd}",
             IsRevoked = false, 
             IsDeleted = false, 
-            AllowEnumerate = false,
-            AllowAllModels = false,
+            AllowEnumerate = true,
+            AllowAllModels = true,
             Expires = DateTime.UtcNow.AddYears(1),
             CreatedAt = DateTime.UtcNow,
             UpdatedAt = DateTime.UtcNow
@@ -145,7 +153,7 @@ public class ApiKeyController(ChatsDB db, CurrentUser currentUser) : ControllerB
     }
 
     [HttpPut("{apiKeyId}")]
-    public async Task<ActionResult> UpdateApiKey(int apiKeyId, UpdateApiKeyDto dto, CancellationToken cancellationToken)
+    public async Task<ActionResult> UpdateApiKey(int apiKeyId, [FromBody] UpdateApiKeyDto dto, CancellationToken cancellationToken)
     {
         ApiKey? dbEntry = await db.ApiKeys
             .Include(x => x.Models)

@@ -3,7 +3,7 @@ using System.Text.Json.Serialization;
 
 namespace Chats.BE.Controllers.Users.ApiKeys.Dtos;
 
-public class UpdateApiKeyDto
+public record UpdateApiKeyDto
 {
     [JsonPropertyName("comment")]
     public string? Comment { get; init; }
