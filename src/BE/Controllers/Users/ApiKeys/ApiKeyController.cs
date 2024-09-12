@@ -153,7 +153,7 @@ public class ApiKeyController(ChatsDB db, CurrentUser currentUser) : ControllerB
     }
 
     [HttpPut("{apiKeyId}")]
-    public async Task<ActionResult> UpdateApiKey(int apiKeyId, UpdateApiKeyDto dto, CancellationToken cancellationToken)
+    public async Task<ActionResult> UpdateApiKey(int apiKeyId, [FromBody] UpdateApiKeyDto dto, CancellationToken cancellationToken)
     {
         ApiKey? dbEntry = await db.ApiKeys
             .Include(x => x.Models)
