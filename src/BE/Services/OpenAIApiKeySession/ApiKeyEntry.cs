@@ -7,6 +7,7 @@ public record ApiKeyEntry : SessionEntry
 {
     public required int ApiKeyId { get; init; }
     public required string ApiKey { get; init; }
+    public required DateTime Expires { get; init; }
 
     public override List<Claim> ToClaims()
     {

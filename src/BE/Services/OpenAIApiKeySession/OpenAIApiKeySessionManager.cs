@@ -10,7 +10,7 @@ public class OpenAIApiKeySessionManager(ChatsDB db, OpenAIApiKeySessionCache ses
         ApiKeyEntry? sessionEntry = await db.ApiKeys
             .Include(x => x.User)
             .Include(x => x.Models)
-            .Where(x => x.Key == apiKey)
+            .Where(x => x.Key == apiKey && !x.IsDeleted)
             .Select(x => new ApiKeyEntry()
             {
                 UserId = x.User.Id,
@@ -20,6 +20,7 @@ public class OpenAIApiKeySessionManager(ChatsDB db, OpenAIApiKeySessionCache ses
                 Provider = x.User.Provider,
                 ApiKey = apiKey,
                 ApiKeyId = x.Id,
+                Expires = x.Expires
             })
             .FirstOrDefaultAsync(cancellationToken);
         return sessionEntry;

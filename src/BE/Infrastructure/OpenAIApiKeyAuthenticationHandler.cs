@@ -1,5 +1,4 @@
 ﻿using Chats.BE.Services.OpenAIApiKeySession;
-using Chats.BE.Services.Sessions;
 using Microsoft.AspNetCore.Authentication;
 using Microsoft.Extensions.Options;
 using System.Security.Claims;
@@ -30,6 +29,11 @@ public class OpenAIApiKeyAuthenticationHandler(
         if (userInfo == null)
         {
             return AuthenticateResult.Fail($"Invalid API Key: {apiKey}");
+        }
+
+        if (userInfo.Expires < DateTime.UtcNow)
+        {
+            return AuthenticateResult.Fail($"API Key expired: {apiKey}");
         }
 
         var identity = new ClaimsIdentity(userInfo.ToClaims(), Scheme.Name);
