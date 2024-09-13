@@ -8,10 +8,11 @@ using Microsoft.EntityFrameworkCore;
 namespace Chats.BE.Controllers.Admin.RequestLogs;
 
 [Route("api/admin/request-logs"), AuthorizeAdmin]
-public class RequestLogsController(ChatsDB db) : ControllerBase
+public class RequestLogsController : ControllerBase
 {
     [HttpPost]
-    public async Task<ActionResult<PagedResult<RequestLogDto>>> GetRequestLogs([FromBody] PagingRequest pagingRequest, CancellationToken cancellationToken)
+    [System.Diagnostics.CodeAnalysis.SuppressMessage("Style", "IDE0060:删除未使用的参数", Justification = "<挂起>")]
+    public ActionResult<PagedResult<RequestLogDto>> GetRequestLogs([FromBody] PagingRequest pagingRequest)
     {
         //IQueryable<RequestLogDto> query = db.RequestLogs
         //    .Select(x => new RequestLogDto()
@@ -32,6 +33,7 @@ public class RequestLogsController(ChatsDB db) : ControllerBase
         //}
 
         //return Ok(await PagedResult.FromQuery(query, pagingRequest, cancellationToken));
+
         return Ok(new PagedResult<RequestLogDto>()
         {
             Count = 0,
@@ -40,7 +42,8 @@ public class RequestLogsController(ChatsDB db) : ControllerBase
     }
 
     [HttpGet]
-    public async Task<ActionResult<LogEntry>> GetRequestLogDetails([FromQuery] Guid id, CancellationToken cancellationToken)
+    [System.Diagnostics.CodeAnalysis.SuppressMessage("Style", "IDE0060:删除未使用的参数", Justification = "<挂起>")]
+    public ActionResult<LogEntry> GetRequestLogDetails([FromQuery] Guid id)
     {
         return NotFound();
         //LogEntry? requestLog = await db.RequestLogs

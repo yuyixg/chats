@@ -1,7 +1,7 @@
 ﻿using Chats.BE.Controllers.Public.AccountLogin.Dtos;
 using Chats.BE.DB;
+using Chats.BE.Services.OpenAIApiKeySession;
 using Microsoft.EntityFrameworkCore;
-using System.Runtime.Caching;
 
 namespace Chats.BE.Services.Sessions;
 

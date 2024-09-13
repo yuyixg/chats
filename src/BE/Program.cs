@@ -3,6 +3,7 @@ using Chats.BE.Infrastructure;
 using Chats.BE.Services;
 using Chats.BE.Services.Configs;
 using Chats.BE.Services.Conversations;
+using Chats.BE.Services.OpenAIApiKeySession;
 using Chats.BE.Services.Sessions;
 using Microsoft.AspNetCore.Authentication;
 
@@ -25,19 +26,24 @@ public class Program
         builder.Services.AddSingleton<AppConfigService>();
         builder.Services.AddSingleton<PasswordHasher>();
         builder.Services.AddScoped<CurrentUser>();
+        builder.Services.AddScoped<CurrentApiKey>();
         builder.Services.AddSingleton<CsrfTokenService>();
         builder.Services.AddScoped<GlobalDBConfig>();
         builder.Services.AddScoped<UserManager>();
-        builder.Services.AddScoped<SessionManager>();
-        builder.Services.AddScoped<HostUrlService>();
         builder.Services.AddSingleton<SessionCache>();
+        builder.Services.AddScoped<SessionManager>();
+        builder.Services.AddScoped<UserModelManager>();
+        builder.Services.AddSingleton<OpenAIApiKeySessionCache>();
+        builder.Services.AddScoped<OpenAIApiKeySessionManager>();
+        builder.Services.AddScoped<HostUrlService>();
         builder.Services.AddSingleton<ConversationFactory>();
         builder.Services.AddSingleton<BalanceService>();
         builder.Services.AddHttpContextAccessor();
 
         // Add authentication and configure the default scheme
-        builder.Services.AddAuthentication("Bearer")
-            .AddScheme<AuthenticationSchemeOptions, SessionAuthenticationHandler>("Bearer", null);
+        builder.Services.AddAuthentication("SessionId")
+            .AddScheme<AuthenticationSchemeOptions, SessionAuthenticationHandler>("SessionId", null)
+            .AddScheme<AuthenticationSchemeOptions, OpenAIApiKeyAuthenticationHandler>("OpenAIApiKey", null);
 
         builder.AddCORSPolicies();
 

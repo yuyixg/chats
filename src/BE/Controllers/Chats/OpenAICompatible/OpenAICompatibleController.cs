@@ -7,6 +7,8 @@ using Chats.BE.Infrastructure;
 using Chats.BE.Services;
 using Chats.BE.Services.Conversations;
 using Chats.BE.Services.Conversations.Dtos;
+using Chats.BE.Services.OpenAIApiKeySession;
+using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Mvc;
 using OpenAI.Chat;
 using System.ClientModel.Primitives;
@@ -15,8 +17,8 @@ using System.Text.Json.Nodes;
 
 namespace Chats.BE.Controllers.Chats.OpenAICompatible;
 
-[Route("api/openai-compatible"), AuthorizeAdmin]
-public class OpenAICompatibleController(ChatsDB db, CurrentUser currentUser, ConversationFactory cf) : ControllerBase
+[Route("api/openai-compatible"), Authorize(AuthenticationSchemes = "OpenAIApiKey")]
+public class OpenAICompatibleController(ChatsDB db, CurrentApiKey apiKey, ConversationFactory cf, UserModelManager userModelManager) : ControllerBase
 {
     [HttpPost("chat/completions")]
     public async Task<ActionResult> ChatCompletion([FromBody] JsonObject json, CancellationToken cancellationToken)
@@ -29,7 +31,7 @@ public class OpenAICompatibleController(ChatsDB db, CurrentUser currentUser, Con
         string? modelName = json["model"]?.ToString();
         if (modelName == null) return ModelNotExists(modelName);
 
-        ChatModel[] validModels = await currentUser.GetValidModels(db, cancellationToken);
+        ChatModel[] validModels = await userModelManager.GetValidModelsByApiKey(apiKey.ApiKey, cancellationToken);
         ChatModel? cm = validModels.FirstOrDefault(x => x.Id.ToString() == modelName || x.Name == modelName);
         if (cm == null) return ModelNotExists(modelName);
 
@@ -52,7 +54,7 @@ public class OpenAICompatibleController(ChatsDB db, CurrentUser currentUser, Con
             Temperature = json["temperature"]?.GetValue<float>(),
             EnableSearch = json["enable_search"]?.GetValue<bool>(),
             MaxLength = json["max_length"]?.GetValue<int>(), 
-        }, currentUser, cancellationToken))
+        }, apiKey.User, cancellationToken))
         {
             ChatCompletionChunk chunk = new()
             {
@@ -116,5 +118,22 @@ public class OpenAICompatibleController(ChatsDB db, CurrentUser currentUser, Con
         {
             throw new NotImplementedException();
         }
+    }
+
+    [HttpGet("models")]
+    public async Task<ActionResult<ModelListDto>> GetModels(CancellationToken cancellationToken)
+    {
+        ChatModel[] models = await userModelManager.GetValidModelsByApiKey(apiKey.ApiKey, cancellationToken);
+        return Ok(new ModelListDto
+        {
+            Object = "list",
+            Data = models.Select(x => new ModelListItemDto
+            {
+                Id = x.Name,
+                Created = new DateTimeOffset(x.CreatedAt, TimeSpan.Zero).ToUnixTimeSeconds(),
+                Object = "model",
+                OwnedBy = x.ModelKeys.Type
+            }).ToArray()
+        });
     }
 }
