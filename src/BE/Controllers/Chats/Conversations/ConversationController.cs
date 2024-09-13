@@ -160,7 +160,7 @@ public class ConversationController(ChatsDB db, CurrentUser currentUser, ILogger
                 ParentId = request.MessageId,
             };
             db.Messages.Add(dbUserMessage);
-            await db.SaveChangesAsync();
+            await db.SaveChangesAsync(cancellationToken);
             userMessage = new()
             {
                 Id = dbUserMessage.Id,

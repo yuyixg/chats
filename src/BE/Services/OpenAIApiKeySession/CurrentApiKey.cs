@@ -11,4 +11,6 @@ public class CurrentApiKey(CurrentUser currentUser, IHttpContextAccessor httpCon
     public CurrentUser User { get; } = currentUser;
 
     public string ApiKey { get; } = httpContextAccessor.HttpContext!.User.FindFirstValue("api-key") ?? throw new InvalidOperationException("API Key is null");
+
+    public int ApiKeyId { get; } = int.Parse(httpContextAccessor.HttpContext!.User.FindFirstValue("api-key-id") ?? throw new InvalidOperationException("API Key is null"));
 }

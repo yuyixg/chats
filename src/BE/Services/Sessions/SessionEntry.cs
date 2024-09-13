@@ -10,7 +10,7 @@ public record SessionEntry
     public required string? Provider { get; init; }
     public required string? Sub { get; init; }
 
-    public List<Claim> ToClaims()
+    public virtual List<Claim> ToClaims()
     {
         List<Claim> claims =
         [

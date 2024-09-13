@@ -25,16 +25,14 @@ public class OpenAIApiKeyAuthenticationHandler(
         string authorizationHeaderString = authorizationHeader.ToString();
         string apiKey = authorizationHeaderString.Split(' ').Last();
 
-        SessionEntry? userInfo = await sessionManager.GetCachedUserInfoByApiKey(apiKey);
+        ApiKeyEntry? userInfo = await sessionManager.GetCachedUserInfoByApiKey(apiKey);
 
         if (userInfo == null)
         {
             return AuthenticateResult.Fail($"Invalid API Key: {apiKey}");
         }
 
-        List<Claim> claims = userInfo.ToClaims();
-        claims.Add(new Claim("api-key", apiKey));
-        var identity = new ClaimsIdentity(claims, Scheme.Name);
+        var identity = new ClaimsIdentity(userInfo.ToClaims(), Scheme.Name);
         var principal = new ClaimsPrincipal(identity);
         var ticket = new AuthenticationTicket(principal, Scheme.Name);
 
