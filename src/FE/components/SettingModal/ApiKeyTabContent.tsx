@@ -15,9 +15,11 @@ import {
   TableRow,
 } from '@/components/ui/table';
 
+import CopyButton from '../Button/CopyButton';
 import DateTimePopover from '../Popover/DateTimePopover';
 import DeletePopover from '../Popover/DeletePopover';
 import { Button } from '../ui/button';
+import { Card, CardContent } from '../ui/card';
 import { Input } from '../ui/input';
 
 import {
@@ -28,10 +30,12 @@ import {
   putUserApiKey,
 } from '@/apis/userService';
 
+let timer: NodeJS.Timeout;
 export const ApiKeyTab = () => {
   const { t } = useTranslation('sidebar');
   const [loading, setLoading] = useState(false);
   const [apiKeys, setApiKeys] = useState<GetUserApiKeyResult[]>([]);
+  type GetUserApiKeyType = keyof GetUserApiKeyResult;
 
   const initData = () => {
     getUserApiKey()
@@ -54,28 +58,31 @@ export const ApiKeyTab = () => {
     });
   };
 
-  const changeApiKeyBy = (
+  const changeApiKeyBy = <K extends GetUserApiKeyType>(
     index: number,
-    type: 'expires' | 'comment',
-    value: any,
+    type: K,
+    value: GetUserApiKeyResult[K],
   ) => {
     const apiKey = apiKeys[index];
-    putUserApiKey(apiKey.id, { [type]: value })
-      .then(() => {
-        setApiKeys((prev) => {
-          const data = [...prev];
-          data[index][type] = value;
-          return data;
+    setApiKeys((prev) => {
+      const data = [...prev];
+      data[index][type] = value;
+      return data;
+    });
+    clearTimeout(timer);
+    timer = setTimeout(() => {
+      putUserApiKey(apiKey.id, { [type]: value })
+        .then(() => {
+          toast.success(t('Save successful!'));
+        })
+        .catch(() => {
+          toast.error(
+            t(
+              'Operation failed! Please try again later, or contact technical personnel.',
+            ),
+          );
         });
-        toast.success(t('Save successful!'));
-      })
-      .catch(() => {
-        toast.error(
-          t(
-            'Operation failed! Please try again later, or contact technical personnel.',
-          ),
-        );
-      });
+    }, 1000);
   };
 
   const removeApiKey = (id: number) => {
@@ -104,74 +111,82 @@ export const ApiKeyTab = () => {
           {t('Create')}
         </Button>
       </div>
-      <div className="mb-2">
-        <div className="flex text-sm items-center">
-          API Url：
-          <Link target="_blank" href={getApiUrl() + '/api/openai-compatible'}>
+      <Card className="mt-2 bg-muted">
+        <CardContent className="p-4">
+          <div className="flex text-sm items-center overflow-hidden text-ellipsis whitespace-nowrap">
+            API URL：
             {getApiUrl() + '/api/openai-compatible'}
-          </Link>
-        </div>
-        <div className="flex text-sm items-center">
-          参考文档：
-          <Link
-            target="_blank"
-            className="text-blue-600 dark:text-blue-500 hover:underline"
-            href="https://platform.openai.com/docs/guides/chat-completions"
-          >
-            https://platform.openai.com/docs/guides/chat-completions
-          </Link>
-        </div>
-      </div>
-      <Table>
-        <TableHeader>
-          <TableRow className="pointer-events-none">
-            <TableHead>{t('Key')}</TableHead>
-            <TableHead>{t('Comment')}</TableHead>
-            <TableHead>{t('Expires')}</TableHead>
-            <TableHead>{t('LastUsedAt')}</TableHead>
-            <TableHead>{t('Actions')}</TableHead>
-          </TableRow>
-        </TableHeader>
-        <TableBody isEmpty={apiKeys.length === 0} isLoading={loading}>
-          {apiKeys.map((x, index) => {
-            return (
-              <TableRow>
-                <TableCell className="min-w-[128px] max-w-[128px] overflow-hidden text-ellipsis">
-                  {x.key}
-                </TableCell>
-                <TableCell className="min-w-[128px] max-w-[128px]">
-                  <Input
-                    value={x.comment}
-                    onChange={(e) => {
-                      changeApiKeyBy(index, 'comment', e.target.value);
-                    }}
-                  />
-                </TableCell>
-                <TableCell className="min-w-[172px] max-w-[172px]">
-                  <DateTimePopover
-                    value={x.expires}
-                    onSelect={(date: Date) => {
-                      changeApiKeyBy(index, 'expires', date);
-                    }}
-                  />
-                </TableCell>
-                <TableCell className="min-w-[128px] max-w-[128px]">
-                  {x.lastUsedAt
-                    ? new Date(x.lastUsedAt).toLocaleDateString()
-                    : '-'}
-                </TableCell>
-                <TableCell className="max-w-[32px]">
-                  <DeletePopover
-                    onDelete={() => {
-                      removeApiKey(x.id);
-                    }}
-                  />
-                </TableCell>
-              </TableRow>
-            );
-          })}
-        </TableBody>
-      </Table>
+          </div>
+          <div className="flex text-sm items-center overflow-hidden text-ellipsis whitespace-nowrap">
+            参考文档：
+            <Link
+              target="_blank"
+              className="text-blue-600 dark:text-blue-500 hover:underline"
+              href="https://platform.openai.com/docs/guides/chat-completions"
+            >
+              https://platform.openai.com/docs/guides/chat-completions
+            </Link>
+          </div>
+        </CardContent>
+      </Card>
+      <Card className="mt-2">
+        <Table>
+          <TableHeader>
+            <TableRow className="pointer-events-none">
+              <TableHead>{t('Key')}</TableHead>
+              <TableHead>{t('Comment')}</TableHead>
+              <TableHead>{t('Expires')}</TableHead>
+              <TableHead>{t('LastUsedAt')}</TableHead>
+              <TableHead>{t('Actions')}</TableHead>
+            </TableRow>
+          </TableHeader>
+          <TableBody isEmpty={apiKeys.length === 0} isLoading={loading}>
+            {apiKeys.map((x, index) => {
+              return (
+                <TableRow key={x.id}>
+                  <TableCell className="min-w-[128px] max-w-[128px]">
+                    <div className="flex items-center">
+                      <div className="w-[128px] overflow-hidden text-ellipsis whitespace-nowrap">
+                        {x.key}
+                      </div>
+                      <CopyButton value={x.key} />
+                    </div>
+                  </TableCell>
+                  <TableCell className="min-w-[128px] max-w-[128px]">
+                    <Input
+                      className="border-none"
+                      value={x.comment}
+                      onChange={(e) => {
+                        changeApiKeyBy(index, 'comment', e.target.value);
+                      }}
+                    />
+                  </TableCell>
+                  <TableCell className="min-w-[172px] max-w-[172px]">
+                    <DateTimePopover
+                      value={x.expires}
+                      onSelect={(date: Date) => {
+                        changeApiKeyBy(index, 'expires', date as any);
+                      }}
+                    />
+                  </TableCell>
+                  <TableCell className="min-w-[128px] max-w-[128px]">
+                    {x.lastUsedAt
+                      ? new Date(x.lastUsedAt).toLocaleDateString()
+                      : '-'}
+                  </TableCell>
+                  <TableCell className="max-w-[64px]">
+                    <DeletePopover
+                      onDelete={() => {
+                        removeApiKey(x.id);
+                      }}
+                    />
+                  </TableCell>
+                </TableRow>
+              );
+            })}
+          </TableBody>
+        </Table>
+      </Card>
     </div>
   );
 };

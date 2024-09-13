@@ -262,7 +262,7 @@ export const postUserApiKey = () => {
 
 export const putUserApiKey = (id: number, body: any) => {
   const fetchServer = useFetch();
-  return fetchServer.put('/api/user/api-key/' + id, { body });
+  return fetchServer.put<string>('/api/user/api-key/' + id, { body });
 };
 
 export const deleteUserApiKey = (id: number) => {
