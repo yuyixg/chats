@@ -12,7 +12,7 @@ interface Props {
 }
 
 export default function CopyButton(props: Props) {
-  const { t } = useTranslation('common');
+  const { t } = useTranslation('client');
   const { value, onCopy } = props;
   const [isCopied, setIsCopied] = useState<Boolean>(false);
 

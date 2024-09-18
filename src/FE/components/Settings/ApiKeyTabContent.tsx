@@ -31,7 +31,7 @@ import {
 
 let timer: NodeJS.Timeout;
 export const ApiKeyTab = () => {
-  const { t } = useTranslation('sidebar');
+  const { t } = useTranslation('client');
   const [loading, setLoading] = useState(false);
   const [apiKeys, setApiKeys] = useState<GetUserApiKeyResult[]>([]);
   type GetUserApiKeyType = keyof GetUserApiKeyResult;
@@ -117,7 +117,7 @@ export const ApiKeyTab = () => {
             {getApiUrl() + '/api/openai-compatible'}
           </div>
           <div className="flex text-sm items-center overflow-hidden text-ellipsis whitespace-nowrap">
-            参考文档：
+            {t('Refer to the documentation:')}
             <Link
               target="_blank"
               className="text-blue-600 dark:text-blue-500 hover:underline"

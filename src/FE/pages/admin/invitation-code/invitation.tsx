@@ -75,11 +75,7 @@ export default function InvitationCode() {
               <TableHead>{t('Created User')}</TableHead>
             </TableRow>
           </TableHeader>
-          <TableBody
-            
-            isLoading={loading}
-            isEmpty={codes.length === 0}
-          >
+          <TableBody isLoading={loading} isEmpty={codes.length === 0}>
             {codes.map((item) => (
               <TableRow
                 className="cursor-pointer"
@@ -110,10 +106,7 @@ export default function InvitationCode() {
 export const getServerSideProps = async ({ locale }: { locale: string }) => {
   return {
     props: {
-      ...(await serverSideTranslations(locale ?? DEFAULT_LANGUAGE, [
-        'common',
-        'admin',
-      ])),
+      ...(await serverSideTranslations(locale ?? DEFAULT_LANGUAGE, ['admin'])),
     },
   };
 };

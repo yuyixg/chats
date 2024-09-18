@@ -18,7 +18,7 @@ import { Conversations } from './Conversations';
 import { ChatResult } from '@/apis/clientApis';
 
 export const Chatbar = () => {
-  const { t } = useTranslation('chat');
+  const { t } = useTranslation('client');
 
   const chatBarContextValue = useCreateReducer<ChatbarInitialState>({
     initialState,

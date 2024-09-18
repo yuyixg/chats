@@ -15,7 +15,7 @@ interface IProps {
 }
 
 const ContactModal = (props: IProps) => {
-  const { t } = useTranslation('sidebar');
+  const { t } = useTranslation('client');
   const { isOpen, onClose } = props;
   const contact = getSiteInfo().contact;
 

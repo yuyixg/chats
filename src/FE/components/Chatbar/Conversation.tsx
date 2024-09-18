@@ -40,7 +40,7 @@ interface Props {
 }
 
 export const ConversationComponent = ({ chat }: Props) => {
-  const { t } = useTranslation('chat');
+  const { t } = useTranslation('client');
   const {
     state: {
       selectChat: { id: selectChatId } = { id: undefined },

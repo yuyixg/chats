@@ -32,7 +32,7 @@ const AccountLoginCard = (props: {
   closeLoading: Function;
 }) => {
   const { loginLoading, openLoading, closeLoading } = props;
-  const { t } = useTranslation('login');
+  const { t } = useTranslation('client');
   const router = useRouter();
   const [showPassword, setShowPassword] = useState(false);
 

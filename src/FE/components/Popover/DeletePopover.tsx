@@ -10,7 +10,7 @@ interface Props {
   onCancel?: () => void;
 }
 export default function DeletePopover(props: Props) {
-  const { t } = useTranslation('sidebar');
+  const { t } = useTranslation('client');
   const { onDelete, onCancel } = props;
   const [isOpen, setIsOpen] = useState(false);
 

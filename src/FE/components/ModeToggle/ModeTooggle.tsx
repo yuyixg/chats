@@ -15,7 +15,7 @@ import {
 } from '@/components/ui/dropdown-menu';
 
 export function ModeToggle() {
-  const { t } = useTranslation('chat');
+  const { t } = useTranslation('client');
   const { setTheme } = useTheme();
 
   return (

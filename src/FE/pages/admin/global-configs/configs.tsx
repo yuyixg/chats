@@ -4,6 +4,7 @@ import { useTranslation } from 'next-i18next';
 import { serverSideTranslations } from 'next-i18next/serverSideTranslations';
 
 import { DEFAULT_LANGUAGE } from '@/utils/settings';
+
 import { GetConfigsResult } from '@/types/user';
 
 import { GlobalConfigsModal } from '@/components/Admin/GlobalConfigs/GlobalConfigsModal';
@@ -72,11 +73,7 @@ export default function Configs() {
               <TableHead>{t('Description')}</TableHead>
             </TableRow>
           </TableHeader>
-          <TableBody
-            
-            isLoading={loading}
-            isEmpty={configs.length === 0}
-          >
+          <TableBody isLoading={loading} isEmpty={configs.length === 0}>
             {configs.map((item) => (
               <TableRow
                 className="cursor-pointer"
@@ -109,10 +106,7 @@ export default function Configs() {
 export const getServerSideProps = async ({ locale }: { locale: string }) => {
   return {
     props: {
-      ...(await serverSideTranslations(locale ?? DEFAULT_LANGUAGE, [
-        'common',
-        'admin',
-      ])),
+      ...(await serverSideTranslations(locale ?? DEFAULT_LANGUAGE, ['admin'])),
     },
   };
 };

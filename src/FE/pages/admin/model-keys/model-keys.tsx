@@ -110,10 +110,7 @@ export default function ModelKeys() {
 export const getServerSideProps = async ({ locale }: { locale: string }) => {
   return {
     props: {
-      ...(await serverSideTranslations(locale ?? DEFAULT_LANGUAGE, [
-        'common',
-        'admin',
-      ])),
+      ...(await serverSideTranslations(locale ?? DEFAULT_LANGUAGE, ['admin'])),
     },
   };
 };

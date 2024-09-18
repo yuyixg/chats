@@ -67,7 +67,7 @@ export const ChatMessage: FC<Props> = memo(
     onChangeMessage,
   }) => {
     const [messagedCopied, setMessageCopied] = useState(false);
-    const { t } = useTranslation('chat');
+    const { t } = useTranslation('client');
 
     const copyOnClick = () => {
       if (!navigator.clipboard) return;

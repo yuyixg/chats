@@ -15,7 +15,7 @@ interface Props {
 }
 
 export const Conversations = ({ chats }: Props) => {
-  const { t } = useTranslation('chat');
+  const { t } = useTranslation('client');
   const {
     state: { chatsPaging },
     getChats,

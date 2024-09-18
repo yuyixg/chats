@@ -5,8 +5,9 @@ import { serverSideTranslations } from 'next-i18next/serverSideTranslations';
 
 import { useThrottle } from '@/hooks/useThrottle';
 
-import { GetUserModelResult } from '@/types/admin';
 import { DEFAULT_LANGUAGE } from '@/utils/settings';
+
+import { GetUserModelResult } from '@/types/admin';
 
 import { AddUserModelModal } from '@/components/Admin/UserModels/AddUserModelModal';
 import { EditUserModelModal } from '@/components/Admin/UserModels/EditUserModelModal';
@@ -189,7 +190,6 @@ export default function UserModels() {
 
           {userModels.map((user) => (
             <TableBody
-              
               key={user.userId}
               className="tbody-hover"
               style={{ borderTop: '1px solid hsl(var(--muted))' }}
@@ -259,10 +259,7 @@ export default function UserModels() {
 export const getServerSideProps = async ({ locale }: { locale: string }) => {
   return {
     props: {
-      ...(await serverSideTranslations(locale ?? DEFAULT_LANGUAGE, [
-        'common',
-        'admin',
-      ])),
+      ...(await serverSideTranslations(locale ?? DEFAULT_LANGUAGE, ['admin'])),
     },
   };
 };

@@ -1,5 +1,6 @@
 import { useEffect, useState } from 'react';
 
+import { useTranslation } from 'next-i18next';
 import Image from 'next/image';
 
 import { Button } from '@/components/ui/button';
@@ -9,12 +10,14 @@ import {
   TooltipProvider,
   TooltipTrigger,
 } from '@/components/ui/tooltip';
+
 import WeChatLoginModal from './WeChatLoginModal';
 
 const WeChatLogin = (props: {
   configs: { appId: string };
   loading?: boolean;
 }) => {
+  const { t } = useTranslation('client');
   const { loading, configs } = props;
   const [weChatModal, setWeChatModal] = useState(false);
   useEffect(() => {}, []);
@@ -41,7 +44,7 @@ const WeChatLogin = (props: {
               />
             </Button>
           </TooltipTrigger>
-          <TooltipContent>微信登录</TooltipContent>
+          <TooltipContent>{t('WeChat Login')}</TooltipContent>
         </Tooltip>
       </TooltipProvider>
       {weChatModal && (

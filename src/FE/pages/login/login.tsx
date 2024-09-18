@@ -38,7 +38,7 @@ export default function LoginPage({
   siteInfo: SiteInfoConfig;
   loginConfigs: LoginConfigsResult[];
 }) {
-  const { t } = useTranslation('login');
+  const { t } = useTranslation('client');
   const [contactOpenModal, setContactOpenModal] = useState(false);
   const [isClient, setIsClient] = useState(false);
   const LoginHeaders: LoginHeader = {
@@ -113,7 +113,7 @@ export default function LoginPage({
             <div className="absolute inset-0 bg-zinc-900" />
             <div className="relative z-20 flex items-center text-lg font-medium">
               <Image
-                src="/icons/chats.png"
+                src="/icons/logo.png"
                 width={32}
                 height={32}
                 className="mr-2 h-8 w-8"
@@ -231,7 +231,7 @@ export default function LoginPage({
                       setContactOpenModal(true);
                     }}
                   >
-                    联系我们
+                    {t('Contact')}
                   </Button>
                 )}
               </p>
@@ -265,10 +265,7 @@ export const getServerSideProps = async ({ locale }: { locale: string }) => {
 
   return {
     props: {
-      ...(await serverSideTranslations(locale ?? DEFAULT_LANGUAGE, [
-        'login',
-        'sidebar',
-      ])),
+      ...(await serverSideTranslations(locale ?? DEFAULT_LANGUAGE, ['client'])),
       siteInfo,
       loginConfigs,
     },

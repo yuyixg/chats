@@ -28,7 +28,7 @@ const UploadButton: React.FunctionComponent<Props> = ({
   fileServerConfig,
   children,
 }: Props) => {
-  const { t } = useTranslation('chat');
+  const { t } = useTranslation('client');
   const uploadRef = useRef<HTMLInputElement>(null);
   const { maxSize } = fileConfig || { maxSize: 0 };
   const changeFile = async (event: any) => {

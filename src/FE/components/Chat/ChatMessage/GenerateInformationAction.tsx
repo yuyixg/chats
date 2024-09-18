@@ -15,7 +15,7 @@ interface Props {
 }
 
 export const GenerateInformationAction = (props: Props) => {
-  const { t } = useTranslation('chat');
+  const { t } = useTranslation('client');
   const { message, hidden } = props;
 
   const GenerateInformation = (props: { name: string; value: string }) => {

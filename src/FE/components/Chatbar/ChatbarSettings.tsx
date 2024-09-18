@@ -33,7 +33,7 @@ import { getUserBalanceOnly } from '@/apis/clientApis';
 
 export const ChatBarSettings = () => {
   const router = useRouter();
-  const { t } = useTranslation('sidebar');
+  const { t } = useTranslation('client');
   const [changePwdModalOpen, setChangePwdModalOpen] = useState<boolean>(false);
   const [userBalanceModalOpen, setUserBalanceModalOpen] =
     useState<boolean>(false);

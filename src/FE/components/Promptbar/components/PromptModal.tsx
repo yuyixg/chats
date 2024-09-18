@@ -20,7 +20,7 @@ interface Props {
 }
 
 export const PromptModal: FC<Props> = ({ prompt, onClose, onUpdatePrompt }) => {
-  const { t } = useTranslation('prompt');
+  const { t } = useTranslation('client');
   const [name, setName] = useState(prompt.name);
   const [description, setDescription] = useState(prompt.description);
   const [content, setContent] = useState(prompt.content);

@@ -8,8 +8,7 @@ import { useRouter } from 'next/router';
 import { PhoneRegExp, SmsExpirationSeconds } from '@/utils/common';
 import { saveUserInfo, setUserSession } from '@/utils/user';
 
-import { SmsType } from '@/types/user';
-
+import ContactModal from '@/components/Modal/ContactModal';
 import { Button } from '@/components/ui/button';
 import { Card, CardContent } from '@/components/ui/card';
 import {
@@ -20,8 +19,6 @@ import {
   FormMessage,
 } from '@/components/ui/form';
 import { Input } from '@/components/ui/input';
-
-import ContactModal from '@/components/Modal/ContactModal';
 
 import { registerByPhone, sendRegisterSmsCode } from '@/apis/clientApis';
 import { zodResolver } from '@hookform/resolvers/zod';
@@ -34,7 +31,7 @@ const PhoneRegisterCard = (props: {
   showContact: boolean;
 }) => {
   const { loginLoading, openLoading, closeLoading, showContact } = props;
-  const { t } = useTranslation('login');
+  const { t } = useTranslation('client');
   const router = useRouter();
   const [seconds, setSeconds] = useState(SmsExpirationSeconds - 1);
   const [isSendCode, setIsSendCode] = useState(false);

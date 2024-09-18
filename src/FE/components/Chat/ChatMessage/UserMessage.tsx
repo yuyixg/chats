@@ -27,7 +27,7 @@ const UserMessage = (props: Props) => {
   const {
     state: { selectChat, messageIsStreaming },
   } = useContext(HomeContext);
-  const { t } = useTranslation('chat');
+  const { t } = useTranslation('client');
 
   const {
     message,

@@ -1,5 +1,7 @@
 import { useEffect, useState } from 'react';
 
+import { useTranslation } from 'next-i18next';
+
 import { Checkbox } from '@/components/ui/checkbox';
 
 const EnableNetworkSearch = (props: {
@@ -7,6 +9,7 @@ const EnableNetworkSearch = (props: {
   enable: boolean;
   onChange: (checked: boolean) => void;
 }) => {
+  const { t } = useTranslation('client');
   const { label, enable, onChange } = props;
   const [check, setCheck] = useState(enable);
 
@@ -32,7 +35,7 @@ const EnableNetworkSearch = (props: {
           htmlFor="enable-search"
           className="text-neutral-900 dark:text-neutral-100"
         >
-          {check ? '启用' : '关闭'}
+          {check ? t('Enable') : t('Close')}
         </label>
       </div>
     </div>

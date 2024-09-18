@@ -5,9 +5,10 @@ import { serverSideTranslations } from 'next-i18next/serverSideTranslations';
 
 import { useThrottle } from '@/hooks/useThrottle';
 
+import { DEFAULT_LANGUAGE } from '@/utils/settings';
+
 import { GetModelResult, GetUsersResult } from '@/types/admin';
 import { PageResult, Paging } from '@/types/page';
-import { DEFAULT_LANGUAGE } from '@/utils/settings';
 
 import PaginationContainer from '@/components/Admin/Pagiation/Pagiation';
 import { EditUserBalanceModal } from '@/components/Admin/Users/EditUserBalanceModel';
@@ -151,11 +152,7 @@ export default function Users() {
               <TableHead>{t('Created Time')}</TableHead>
             </TableRow>
           </TableHeader>
-          <TableBody
-            
-            isLoading={loading}
-            isEmpty={users.rows.length === 0}
-          >
+          <TableBody isLoading={loading} isEmpty={users.rows.length === 0}>
             {users.rows.map((item) => (
               <TableRow
                 className="cursor-pointer"
@@ -249,11 +246,7 @@ export default function Users() {
 export const getServerSideProps = async ({ locale }: { locale: string }) => {
   return {
     props: {
-      ...(await serverSideTranslations(locale ?? DEFAULT_LANGUAGE, [
-        'common',
-        'admin',
-        'pagination',
-      ])),
+      ...(await serverSideTranslations(locale ?? DEFAULT_LANGUAGE, ['admin'])),
     },
   };
 };

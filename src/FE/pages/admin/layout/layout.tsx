@@ -146,7 +146,7 @@ const AdminLayout = ({
             <Image
               className="h-8 w-8 rounded-sm"
               alt="Chats Logo"
-              src="/icons/chats.png"
+              src="/icons/logo.png"
               width={32}
               height={32}
             />

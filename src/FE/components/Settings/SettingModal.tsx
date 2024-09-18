@@ -13,7 +13,7 @@ interface Props {
 
 export const SettingModal = (props: Props) => {
   const { isOpen, onClose } = props;
-  const { t } = useTranslation('sidebar');
+  const { t } = useTranslation('client');
 
   useEffect(() => {}, []);
 

@@ -11,7 +11,7 @@ interface Props {
 
 const EditAction = (props: Props) => {
   const { onToggleEditing, disabled } = props;
-  const { t } = useTranslation('chat');
+  const { t } = useTranslation('client');
 
   return (
     <Tips

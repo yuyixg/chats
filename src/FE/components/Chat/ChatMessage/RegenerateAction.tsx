@@ -10,7 +10,7 @@ interface Props {
 }
 
 export const RegenerateAction = (props: Props) => {
-  const { t } = useTranslation('chat');
+  const { t } = useTranslation('client');
   const { onRegenerate, hidden } = props;
 
   const Render = () => {

@@ -11,7 +11,7 @@ import { saveUserInfo, setUserSession } from '@/utils/user';
 import { singIn } from '@/apis/clientApis';
 
 export default function Authorizing() {
-  const { t } = useTranslation('login');
+  const { t } = useTranslation('client');
   const [isClient, setIsClient] = useState(false);
   const router = useRouter();
   const { code, provider } = router.query as { code: string; provider: string };
@@ -33,7 +33,7 @@ export default function Authorizing() {
         router.push('/');
       })
       .catch(() => {
-        toast.error(t('授权失败,请稍后再试'));
+        toast.error(t('Authorization failed. Please try again later.'));
       });
   }, []);
   return (
@@ -50,7 +50,7 @@ export default function Authorizing() {
 export const getServerSideProps = async ({ locale }: { locale: string }) => {
   return {
     props: {
-      ...(await serverSideTranslations(locale ?? DEFAULT_LANGUAGE, ['login'])),
+      ...(await serverSideTranslations(locale ?? DEFAULT_LANGUAGE, ['client'])),
     },
   };
 };

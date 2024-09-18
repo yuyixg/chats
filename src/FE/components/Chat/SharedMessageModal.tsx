@@ -17,7 +17,7 @@ interface IProps {
 }
 
 export const SharedMessageModal = (props: IProps) => {
-  const { t } = useTranslation('chat');
+  const { t } = useTranslation('client');
   const { chat, isOpen, onClose, onShareChange } = props;
   const [loading, setLoading] = useState(false);
   const shareUrl = `${location.origin}/share/${chat.id}`;

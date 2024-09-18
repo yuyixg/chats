@@ -4,10 +4,10 @@ import { serverSideTranslations } from 'next-i18next/serverSideTranslations';
 import { useRouter } from 'next/router';
 
 import { getSelectMessages } from '@/utils/message';
+import { DEFAULT_LANGUAGE } from '@/utils/settings';
 
 import { GetMessageDetailsResult } from '@/types/admin';
 import { ChatMessage } from '@/types/chatMessage';
-import { DEFAULT_LANGUAGE } from '@/utils/settings';
 
 import { ChatMessage as ChatMessageComponent } from '@/components/Admin/Messages/ChatMessage';
 
@@ -39,7 +39,9 @@ export default function MessageDetails() {
         data.messages.forEach((x) => {
           x.inputPrice = new Decimal(x.inputPrice || 0);
           tokenUsed += ((x.inputTokens || 0) + (x.outputTokens || 0))!;
-          calculatedPrice = calculatedPrice.plus(x.inputPrice.plus(x.outputPrice || 0));
+          calculatedPrice = calculatedPrice.plus(
+            x.inputPrice.plus(x.outputPrice || 0),
+          );
         });
         setChatSummary({ tokenUsed, calculatedPrice });
         const lastMessage = data.messages[data.messages.length - 1];
@@ -120,10 +122,8 @@ export default function MessageDetails() {
 export const getServerSideProps = async ({ locale }: { locale: string }) => {
   return {
     props: {
-      ...(await serverSideTranslations(locale ?? DEFAULT_LANGUAGE, [
-        'common',
-        'markdown',
-      ])),
+      locale,
+      ...(await serverSideTranslations(locale ?? DEFAULT_LANGUAGE, ['client'])),
     },
   };
 };

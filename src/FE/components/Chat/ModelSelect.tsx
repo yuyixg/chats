@@ -11,7 +11,7 @@ import { HomeContext } from '@/pages/home/home';
 import { getUserModelUsage } from '@/apis/clientApis';
 
 export const ModelSelect = () => {
-  const { t } = useTranslation('chat');
+  const { t } = useTranslation('client');
 
   const {
     state: { selectModel, models },

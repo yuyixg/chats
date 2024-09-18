@@ -23,7 +23,7 @@ import {
 import { v4 as uuidv4 } from 'uuid';
 
 const PromptBar = () => {
-  const { t } = useTranslation('prompt');
+  const { t } = useTranslation('client');
 
   const promptBarContextValue = useCreateReducer<PromptbarInitialState>({
     initialState,

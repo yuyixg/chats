@@ -30,7 +30,7 @@ interface Props {
 
 export const ChangePasswordModal = (props: Props) => {
   const { isOpen, onClose } = props;
-  const { t } = useTranslation('sidebar');
+  const { t } = useTranslation('client');
   const router = useRouter();
   const [loading, setLoading] = useState(false);
 

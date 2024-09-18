@@ -11,7 +11,7 @@ interface Props {
 }
 
 export const ChangeModelAction = (props: Props) => {
-  const { t } = useTranslation('chat');
+  const { t } = useTranslation('client');
   const { modelName, readonly, onChangeModel, hidden } = props;
 
   const Render = () => {

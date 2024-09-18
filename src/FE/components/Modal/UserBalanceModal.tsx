@@ -30,7 +30,7 @@ interface Props {
 export const UserBalanceModal = (props: Props) => {
   const { isOpen, onClose } = props;
 
-  const { t } = useTranslation('sidebar');
+  const { t } = useTranslation('client');
   const [balanceLogs, setBalanceLogs] = useState<GetBalance7DaysUsageResult[]>(
     [],
   );

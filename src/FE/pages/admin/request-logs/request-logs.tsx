@@ -3,9 +3,10 @@ import React, { useEffect, useState } from 'react';
 import { useTranslation } from 'next-i18next';
 import { serverSideTranslations } from 'next-i18next/serverSideTranslations';
 
+import { DEFAULT_LANGUAGE } from '@/utils/settings';
+
 import { GetRequestLogsListResult } from '@/types/admin';
 import { PageResult, Paging } from '@/types/page';
-import { DEFAULT_LANGUAGE } from '@/utils/settings';
 import { StatusCodeColor } from '@/types/statusCode';
 
 import PaginationContainer from '@/components/Admin/Pagiation/Pagiation';
@@ -74,11 +75,7 @@ export default function RequestLogs() {
               <TableHead>{t('Created Time')}</TableHead>
             </TableRow>
           </TableHeader>
-          <TableBody
-            
-            isLoading={loading}
-            isEmpty={requestLogs.count === 0}
-          >
+          <TableBody isLoading={loading} isEmpty={requestLogs.count === 0}>
             {requestLogs?.rows.map((item) => (
               <TableRow
                 key={item.id}
@@ -136,11 +133,7 @@ export default function RequestLogs() {
 export const getServerSideProps = async ({ locale }: { locale: string }) => {
   return {
     props: {
-      ...(await serverSideTranslations(locale ?? DEFAULT_LANGUAGE, [
-        'common',
-        'admin',
-        'pagination',
-      ])),
+      ...(await serverSideTranslations(locale ?? DEFAULT_LANGUAGE, ['admin'])),
     },
   };
 };

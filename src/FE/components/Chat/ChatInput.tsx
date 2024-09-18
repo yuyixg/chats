@@ -49,7 +49,7 @@ export const ChatInput = ({
   textareaRef,
   showScrollDownButton,
 }: Props) => {
-  const { t } = useTranslation('chat');
+  const { t } = useTranslation('client');
 
   const {
     state: { selectModel, messageIsStreaming, prompts, selectChat, chatError },

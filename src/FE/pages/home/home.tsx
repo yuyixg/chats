@@ -129,7 +129,7 @@ export { initialState, HomeContext };
 
 const Home = ({ siteInfo }: { siteInfo: SiteInfoConfig }) => {
   const router = useRouter();
-  const { t } = useTranslation('chat');
+  const { t } = useTranslation('client');
   const contextValue = useCreateReducer<HomeInitialState>({
     initialState,
   });
@@ -497,14 +497,7 @@ export const getServerSideProps = async ({ locale }: { locale: string }) => {
     props: {
       siteInfo: siteInfo || {},
       locale,
-      ...(await serverSideTranslations(locale ?? DEFAULT_LANGUAGE, [
-        'common',
-        'chat',
-        'sidebar',
-        'markdown',
-        'prompt',
-        'settings',
-      ])),
+      ...(await serverSideTranslations(locale ?? DEFAULT_LANGUAGE, ['client'])),
     },
   };
 };

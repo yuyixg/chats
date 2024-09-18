@@ -1,8 +1,6 @@
-import { ReactNode, useContext } from 'react';
+import { ReactNode } from 'react';
 
 import { useTranslation } from 'next-i18next';
-
-import { HomeContext } from '@/pages/home/home';
 
 import {
   IconLayoutSidebar,
@@ -47,8 +45,7 @@ const Sidebar = <T,>({
   handleCreateItem,
   hasModel,
 }: Props<T>) => {
-  const { t } = useTranslation('prompt');
-  const { dispatch: homeDispatch } = useContext(HomeContext);
+  const { t } = useTranslation('client');
   return (
     <>
       <div
@@ -83,7 +80,6 @@ const Sidebar = <T,>({
                 <Button
                   onClick={() => {
                     handleCreateItem();
-                    // handleSearchTerm('');
                   }}
                   disabled={messageIsStreaming}
                   variant="ghost"
@@ -147,7 +143,6 @@ const Sidebar = <T,>({
                 <Button
                   onClick={() => {
                     handleCreateItem();
-                    // handleSearchTerm('');
                   }}
                   disabled={messageIsStreaming}
                   variant="ghost"

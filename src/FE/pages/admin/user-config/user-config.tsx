@@ -3,8 +3,9 @@ import React, { useEffect, useState } from 'react';
 import { useTranslation } from 'next-i18next';
 import { serverSideTranslations } from 'next-i18next/serverSideTranslations';
 
-import { GetModelResult } from '@/types/admin';
 import { DEFAULT_LANGUAGE } from '@/utils/settings';
+
+import { GetModelResult } from '@/types/admin';
 import { GetUserInitialConfigResult } from '@/types/user';
 
 import { UserInitialConfigModal } from '@/components/Admin/Users/UserInitialConfigModal';
@@ -145,38 +146,36 @@ export default function UserInitialConfig() {
 
           {configList.map((config) => (
             <TableBody
-              
               key={config.id}
               className="tbody-hover"
               style={{ borderTop: '1px solid hsl(var(--muted))' }}
             >
               {config.models.length > 0 ? (
-                config.models
-                  .map((model, index) => {
-                    return (
-                      <TableRow
-                        onClick={() => handleEditModal(config)}
-                        key={model.modelId}
-                        className={`${
-                          index !== config.models.length - 1 && 'border-none'
-                        }`}
-                      >
-                        {index === 0 && NameCell(config, config.models.length)}
-                        {index === 0 &&
-                          InitialPriceCell(config, config.models.length)}
-                        {index === 0 &&
-                          Cell(config.loginType, config.models.length)}
-                        {index === 0 &&
-                          Cell(config.invitationCode, config.models.length)}
-                        {ModelCell(
-                          models.find((x) => x.modelId === model.modelId)?.name,
-                        )}
-                        {ModelCell(model.tokens)}
-                        {ModelCell(model.counts)}
-                        {ModelCell(model.expires)}
-                      </TableRow>
-                    );
-                  })
+                config.models.map((model, index) => {
+                  return (
+                    <TableRow
+                      onClick={() => handleEditModal(config)}
+                      key={model.modelId}
+                      className={`${
+                        index !== config.models.length - 1 && 'border-none'
+                      }`}
+                    >
+                      {index === 0 && NameCell(config, config.models.length)}
+                      {index === 0 &&
+                        InitialPriceCell(config, config.models.length)}
+                      {index === 0 &&
+                        Cell(config.loginType, config.models.length)}
+                      {index === 0 &&
+                        Cell(config.invitationCode, config.models.length)}
+                      {ModelCell(
+                        models.find((x) => x.modelId === model.modelId)?.name,
+                      )}
+                      {ModelCell(model.tokens)}
+                      {ModelCell(model.counts)}
+                      {ModelCell(model.expires)}
+                    </TableRow>
+                  );
+                })
               ) : (
                 <TableRow
                   key={config.id}
@@ -212,10 +211,7 @@ export default function UserInitialConfig() {
 export const getServerSideProps = async ({ locale }: { locale: string }) => {
   return {
     props: {
-      ...(await serverSideTranslations(locale ?? DEFAULT_LANGUAGE, [
-        'common',
-        'admin',
-      ])),
+      ...(await serverSideTranslations(locale ?? DEFAULT_LANGUAGE, ['admin'])),
     },
   };
 };

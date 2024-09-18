@@ -25,7 +25,7 @@ export const TemperatureSlider: FC<Props> = ({
     state: {},
   } = useContext(HomeContext);
   const [temperature, setTemperature] = useState(defaultTemperature);
-  const { t } = useTranslation('chat');
+  const { t } = useTranslation('client');
   const handleChange = (value: number[]) => {
     const newValue = value[0];
     setTemperature(newValue);

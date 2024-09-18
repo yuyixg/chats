@@ -31,7 +31,7 @@ const PhoneLoginCard = (props: {
   closeLoading: Function;
 }) => {
   const { loginLoading, openLoading, closeLoading } = props;
-  const { t } = useTranslation('login');
+  const { t } = useTranslation('client');
   const router = useRouter();
   const [seconds, setSeconds] = useState(SmsExpirationSeconds - 1);
   const [isSendCode, setIsSendCode] = useState(false);

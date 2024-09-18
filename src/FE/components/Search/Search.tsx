@@ -22,7 +22,7 @@ const Search: FC<Props> = ({
   containerClassName,
   onSearch,
 }) => {
-  const { t } = useTranslation('sidebar');
+  const { t } = useTranslation('client');
   const [query, setQuery] = useState<string>('');
   const timeoutRef = useRef<number | undefined>(undefined);
   const {

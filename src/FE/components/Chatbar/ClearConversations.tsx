@@ -12,7 +12,7 @@ interface Props {
 export const ClearConversations: FC<Props> = ({ onClearConversations }) => {
   const [isConfirming, setIsConfirming] = useState<boolean>(false);
 
-  const { t } = useTranslation('sidebar');
+  const { t } = useTranslation('client');
 
   const handleClearConversations = () => {
     onClearConversations();

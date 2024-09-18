@@ -9,7 +9,7 @@ import { HomeContext } from '@/pages/home/home';
 import { getUserBalanceOnly } from '@/apis/clientApis';
 
 export const AccountBalance = () => {
-  const { t } = useTranslation('chat');
+  const { t } = useTranslation('client');
   const [balance, setBalance] = useState(0);
   const {
     state: {},

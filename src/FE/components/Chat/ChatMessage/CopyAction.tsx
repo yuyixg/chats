@@ -15,7 +15,7 @@ interface Props {
 }
 const CopyAction = (props: Props) => {
   const { text, triggerClassName, hidden = false } = props;
-  const { t } = useTranslation('chat');
+  const { t } = useTranslation('client');
   const [messagedCopied, setMessageCopied] = useState(false);
 
   const copyOnClick = (content?: string) => {

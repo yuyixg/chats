@@ -5,9 +5,9 @@ import { serverSideTranslations } from 'next-i18next/serverSideTranslations';
 
 import { formatNumberAsMoney } from '@/utils/common';
 import { ModelPriceUnit } from '@/utils/model';
+import { DEFAULT_LANGUAGE } from '@/utils/settings';
 
 import { GetModelResult } from '@/types/admin';
-import { DEFAULT_LANGUAGE } from '@/utils/settings';
 import { ModelProviderTemplates } from '@/types/template';
 
 import { AddModelModal } from '@/components/Admin/Models/AddModelModal';
@@ -83,11 +83,7 @@ export default function Models() {
               <TableHead className="w-16"></TableHead>
             </TableRow>
           </TableHeader>
-          <TableBody
-            
-            isLoading={loading}
-            isEmpty={models.length === 0}
-          >
+          <TableBody isLoading={loading} isEmpty={models.length === 0}>
             {models.map((item) => (
               <TableRow
                 className="cursor-pointer"
@@ -145,10 +141,7 @@ export default function Models() {
 export const getServerSideProps = async ({ locale }: { locale: string }) => {
   return {
     props: {
-      ...(await serverSideTranslations(locale ?? DEFAULT_LANGUAGE, [
-        'common',
-        'admin',
-      ])),
+      ...(await serverSideTranslations(locale ?? DEFAULT_LANGUAGE, ['admin'])),
     },
   };
 };

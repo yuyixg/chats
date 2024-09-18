@@ -6,7 +6,12 @@ import { useTranslation } from 'next-i18next';
 import { Prompt } from '@/types/prompt';
 
 import { Button } from '@/components/ui/button';
-import { Dialog, DialogContent, DialogHeader, DialogTitle } from '@/components/ui/dialog';
+import {
+  Dialog,
+  DialogContent,
+  DialogHeader,
+  DialogTitle,
+} from '@/components/ui/dialog';
 import { ScrollArea } from '@/components/ui/scroll-area';
 import { Textarea } from '@/components/ui/textarea';
 
@@ -23,7 +28,7 @@ export const VariableModal: FC<Props> = ({
   onSubmit,
   onClose,
 }) => {
-  const { t } = useTranslation('prompt');
+  const { t } = useTranslation('client');
   const [updatedVariables, setUpdatedVariables] = useState<
     { key: string; value: string }[]
   >(

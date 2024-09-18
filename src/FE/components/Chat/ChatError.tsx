@@ -4,7 +4,7 @@ import { IconError } from '@/components/Icons';
 import { Alert, AlertDescription } from '@/components/ui/alert';
 
 const ChatError = () => {
-  const { t } = useTranslation('chat');
+  const { t } = useTranslation('client');
   return (
     <Alert variant="destructive" className="bg-[#f93a370d]">
       <AlertDescription className="flex items-center gap-1">

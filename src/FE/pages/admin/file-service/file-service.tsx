@@ -3,8 +3,9 @@ import React, { useEffect, useState } from 'react';
 import { useTranslation } from 'next-i18next';
 import { serverSideTranslations } from 'next-i18next/serverSideTranslations';
 
-import { GetFileServicesResult } from '@/types/admin';
 import { DEFAULT_LANGUAGE } from '@/utils/settings';
+
+import { GetFileServicesResult } from '@/types/admin';
 
 import { FileServiceModal } from '@/components/Admin/Files/FileServiceModal';
 import { Button } from '@/components/ui/button';
@@ -72,11 +73,7 @@ export default function FileService() {
               <TableHead>{t('Created Time')}</TableHead>
             </TableRow>
           </TableHeader>
-          <TableBody
-            
-            isLoading={loading}
-            isEmpty={fileServices.length === 0}
-          >
+          <TableBody isLoading={loading} isEmpty={fileServices.length === 0}>
             {fileServices.map((item) => (
               <TableRow
                 className="cursor-pointer"
@@ -115,10 +112,7 @@ export default function FileService() {
 export const getServerSideProps = async ({ locale }: { locale: string }) => {
   return {
     props: {
-      ...(await serverSideTranslations(locale ?? DEFAULT_LANGUAGE, [
-        'common',
-        'admin',
-      ])),
+      ...(await serverSideTranslations(locale ?? DEFAULT_LANGUAGE, ['admin'])),
     },
   };
 };

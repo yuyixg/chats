@@ -3,9 +3,10 @@ import React, { useEffect, useState } from 'react';
 import { useTranslation } from 'next-i18next';
 import { serverSideTranslations } from 'next-i18next/serverSideTranslations';
 
+import { DEFAULT_LANGUAGE } from '@/utils/settings';
+
 import { GetUserMessageResult } from '@/types/admin';
 import { PageResult, Paging } from '@/types/page';
-import { DEFAULT_LANGUAGE } from '@/utils/settings';
 
 import PaginationContainer from '@/components/Admin/Pagiation/Pagiation';
 import { Badge } from '@/components/ui/badge';
@@ -67,11 +68,7 @@ export default function Messages() {
               <TableHead>{t('Status')}</TableHead>
             </TableRow>
           </TableHeader>
-          <TableBody
-            
-            isLoading={loading}
-            isEmpty={messages.count === 0}
-          >
+          <TableBody isLoading={loading} isEmpty={messages.count === 0}>
             {messages?.rows.map((item) => (
               <TableRow key={item.id}>
                 <TableCell
@@ -118,11 +115,7 @@ export default function Messages() {
 export const getServerSideProps = async ({ locale }: { locale: string }) => {
   return {
     props: {
-      ...(await serverSideTranslations(locale ?? DEFAULT_LANGUAGE, [
-        'common',
-        'admin',
-        'pagination',
-      ])),
+      ...(await serverSideTranslations(locale ?? DEFAULT_LANGUAGE, ['admin'])),
     },
   };
 };
