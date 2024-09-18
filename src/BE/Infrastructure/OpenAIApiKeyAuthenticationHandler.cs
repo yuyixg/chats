@@ -1,4 +1,4 @@
-﻿using Chats.BE.Services.Sessions;
+﻿using Chats.BE.Services.OpenAIApiKeySession;
 using Microsoft.AspNetCore.Authentication;
 using Microsoft.Extensions.Options;
 using System.Security.Claims;
@@ -6,10 +6,10 @@ using System.Text.Encodings.Web;
 
 namespace Chats.BE.Infrastructure;
 
-public class SessionAuthenticationHandler(
+public class OpenAIApiKeyAuthenticationHandler(
     IOptionsMonitor<AuthenticationSchemeOptions> options,
     ILoggerFactory loggerFactory,
-    SessionManager sessionManager,
+    OpenAIApiKeySessionManager sessionManager,
     UrlEncoder encoder) : AuthenticationHandler<AuthenticationSchemeOptions>(options, loggerFactory, encoder)
 {
     private readonly ILogger<SessionAuthenticationHandler> _logger = loggerFactory.CreateLogger<SessionAuthenticationHandler>();
@@ -22,15 +22,18 @@ public class SessionAuthenticationHandler(
         }
 
         string authorizationHeaderString = authorizationHeader.ToString();
-        if (!Guid.TryParse(authorizationHeaderString.Split(' ').Last(), out Guid sessionId))
-        {
-            return AuthenticateResult.Fail("Invalid session id.");
-        }
+        string apiKey = authorizationHeaderString.Split(' ').Last();
 
-        SessionEntry? userInfo = await sessionManager.GetCachedUserInfoBySession(sessionId);
+        ApiKeyEntry? userInfo = await sessionManager.GetCachedUserInfoByApiKey(apiKey);
+
         if (userInfo == null)
         {
-            return AuthenticateResult.Fail($"Invalid session id: {sessionId}");
+            return AuthenticateResult.Fail($"Invalid API Key: {apiKey}");
+        }
+
+        if (userInfo.Expires < DateTime.UtcNow)
+        {
+            return AuthenticateResult.Fail($"API Key expired: {apiKey}");
         }
 
         var identity = new ClaimsIdentity(userInfo.ToClaims(), Scheme.Name);

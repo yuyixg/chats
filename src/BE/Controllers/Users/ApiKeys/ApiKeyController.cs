@@ -3,6 +3,7 @@ using Chats.BE.DB;
 using Chats.BE.DB.Enums;
 using Chats.BE.DB.Jsons;
 using Chats.BE.Infrastructure;
+using Chats.BE.Services;
 using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Mvc;
 using Microsoft.EntityFrameworkCore;
@@ -40,7 +41,7 @@ public class ApiKeyController(ChatsDB db, CurrentUser currentUser) : ControllerB
     }
 
     [HttpGet("{apiKeyId}")]
-    public async Task<ActionResult<Guid[]>> GetApiKeySupportedModels(int apiKeyId, CancellationToken cancellationToken)
+    public async Task<ActionResult<Guid[]>> GetApiKeySupportedModels(int apiKeyId, [FromServices] UserModelManager userModelManager, CancellationToken cancellationToken)
     {
         ApiKey? dbEntry = await db.ApiKeys
             .Where(x => x.UserId == currentUser.Id && !x.IsDeleted)
@@ -50,7 +51,7 @@ public class ApiKeyController(ChatsDB db, CurrentUser currentUser) : ControllerB
         if (dbEntry is null) return NotFound();
         if (dbEntry.AllowAllModels)
         {
-            ChatModel[] allowedModels = await currentUser.GetValidModels(db, cancellationToken);
+            ChatModel[] allowedModels = await userModelManager.GetValidModelsByUserId(currentUser.Id, cancellationToken);
             return Ok(allowedModels.Select(x => x.Id).ToArray());
         }
         else
