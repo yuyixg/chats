@@ -494,13 +494,7 @@ const Home = ({ siteInfo }: { siteInfo: SiteInfoConfig }) => {
 
 export default Home;
 
-export const getServerSideProps = async ({
-  locale,
-  req,
-}: {
-  locale: string;
-  req: any;
-}) => {
+export const getServerSideProps = async ({ locale }: { locale: string }) => {
   const siteInfo = await getSiteInfo();
   return {
     props: {

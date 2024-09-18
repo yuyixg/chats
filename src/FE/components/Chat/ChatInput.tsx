@@ -187,16 +187,11 @@ export const ChatInput = ({
     const selectedPrompt = filteredPrompts[activePromptIndex];
     selectedPrompt &&
       getUserPromptDetail(selectedPrompt.id).then((data) => {
-        selectedPrompt.content = data.content;
-        selectedPrompt.description = data.description;
         setContent((prevContent) => {
-          const newContent = prevContent.text?.replace(
-            /\/\w*$/,
-            selectedPrompt.content,
-          );
+          const newContent = prevContent.text?.replace(/\/\w*$/, data.content);
           return { ...prevContent, text: newContent };
         });
-        handlePromptSelect(selectedPrompt);
+        handlePromptSelect(data);
         setShowPromptList(false);
       });
   };

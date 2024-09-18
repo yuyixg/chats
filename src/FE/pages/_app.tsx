@@ -9,7 +9,8 @@ import { ThemeProvider } from '@/components/theme-provider';
 
 import AdminLayout from './admin/layout/layout';
 import './globals.css';
-import 'katex/dist/katex.min.css'
+
+import 'katex/dist/katex.min.css';
 
 function App({ Component, pageProps }: AppProps<{}> | any) {
   const route = useRouter();
