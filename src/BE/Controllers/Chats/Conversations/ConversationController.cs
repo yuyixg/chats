@@ -1,5 +1,4 @@
 ﻿using Chats.BE.Controllers.Chats.Conversations.Dtos;
-using Chats.BE.Controllers.Chats.Messages.Dtos;
 using Chats.BE.Controllers.Common;
 using Chats.BE.DB;
 using Chats.BE.DB.Enums;
@@ -11,7 +10,6 @@ using Chats.BE.Services.Conversations.Dtos;
 using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Mvc;
 using Microsoft.EntityFrameworkCore;
-using OpenAI.Chat;
 using Sdcb.DashScope;
 using System.ClientModel;
 using System.Diagnostics;
@@ -214,7 +212,9 @@ public class ConversationController(ChatsDB db, CurrentUser currentUser, ILogger
         }
         catch (InsufficientBalanceException)
         {
-            responseText.Append("\n⚠Insufficient balance - 余额不足!");
+            string errorTextToResponse = "\n⚠Insufficient balance - 余额不足!";
+            responseText.Append(errorTextToResponse);
+            await YieldResponse(new SseResponseLine { Result = errorTextToResponse, Success = false });
         }
         catch (Exception e) when (e is DashScopeException || e is ClientResultException)
         {
