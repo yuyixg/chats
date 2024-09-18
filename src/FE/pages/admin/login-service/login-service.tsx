@@ -18,7 +18,7 @@ import {
   TableRow,
 } from '@/components/ui/table';
 
-import { getLoginServices } from '@/apis/adminService';
+import { getLoginServices } from '@/apis/adminApis';
 
 export default function LoginService() {
   const { t } = useTranslation('admin');

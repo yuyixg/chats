@@ -9,9 +9,9 @@ import {
   DialogContent,
   DialogHeader,
   DialogTitle,
-} from '../../ui/dialog';
+} from '@/components/ui/dialog';
 
-import { getRequestLogDetails } from '@/apis/adminService';
+import { getRequestLogDetails } from '@/apis/adminApis';
 
 interface IProps {
   requestLogId?: string;

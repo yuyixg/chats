@@ -4,7 +4,7 @@ import { useTranslation } from 'next-i18next';
 
 import { HomeContext } from '@/pages/home/home';
 
-import { Slider } from '../ui/slider';
+import { Slider } from '@/components/ui/slider';
 
 interface Props {
   label: string;

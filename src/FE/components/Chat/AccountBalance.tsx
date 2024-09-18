@@ -6,7 +6,7 @@ import { formatRMB } from '@/utils/common';
 
 import { HomeContext } from '@/pages/home/home';
 
-import { getUserBalanceOnly } from '@/apis/userService';
+import { getUserBalanceOnly } from '@/apis/clientApis';
 
 export const AccountBalance = () => {
   const { t } = useTranslation('chat');

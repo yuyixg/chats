@@ -8,7 +8,7 @@ import { useRouter } from 'next/router';
 import { DEFAULT_LANGUAGE } from '@/utils/settings';
 import { saveUserInfo, setUserSession } from '@/utils/user';
 
-import { singIn } from '@/apis/userService';
+import { singIn } from '@/apis/clientApis';
 
 export default function Authorizing() {
   const { t } = useTranslation('login');

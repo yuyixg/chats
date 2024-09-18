@@ -18,15 +18,18 @@ import {
   IconUser,
   IconUserCog,
 } from '@/components/Icons/index';
+import { ChangePasswordModal } from '@/components/Modal/ChangePasswordModal';
+import UserBalanceModal from '@/components/Modal/UserBalanceModal';
+import { SettingModal } from '@/components/Settings/SettingModal';
+import { SidebarButton } from '@/components/Sidebar/SidebarButton';
+import {
+  Popover,
+  PopoverContent,
+  PopoverTrigger,
+} from '@/components/ui/popover';
+import { Separator } from '@/components/ui/separator';
 
-import { ChangePasswordModal } from '../ChangePasswordModal/ChangePasswordModal';
-import { SettingModal } from '../SettingModal/SettingModal';
-import { SidebarButton } from '../Sidebar/SidebarButton';
-import UserBalanceModal from '../UserBalanceModal/UserBalanceModal';
-import { Popover, PopoverContent, PopoverTrigger } from '../ui/popover';
-import { Separator } from '../ui/separator';
-
-import { getUserBalanceOnly } from '@/apis/userService';
+import { getUserBalanceOnly } from '@/apis/clientApis';
 
 export const ChatBarSettings = () => {
   const router = useRouter();

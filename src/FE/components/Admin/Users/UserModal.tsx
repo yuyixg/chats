@@ -8,20 +8,20 @@ import { GetUsersResult } from '@/types/admin';
 
 import FormSwitch from '@/components/ui/form/switch';
 
-import { Button } from '../../ui/button';
+import { Button } from '@/components/ui/button';
 import {
   Dialog,
   DialogContent,
   DialogFooter,
   DialogHeader,
   DialogTitle,
-} from '../../ui/dialog';
-import { Form, FormField } from '../../ui/form';
-import FormInput from '../../ui/form/input';
-import FormSelect from '../../ui/form/select';
-import { FormFieldType, IFormFieldOption } from '../../ui/form/type';
+} from '@/components/ui/dialog';
+import { Form, FormField } from '@/components/ui/form';
+import FormInput from '@/components/ui/form/input';
+import FormSelect from '@/components/ui/form/select';
+import { FormFieldType, IFormFieldOption } from '@/components/ui/form/type';
 
-import { postUser, putUser } from '@/apis/adminService';
+import { postUser, putUser } from '@/apis/adminApis';
 import { zodResolver } from '@hookform/resolvers/zod';
 import { z } from 'zod';
 

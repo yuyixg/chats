@@ -1,4 +1,4 @@
-import { ChatResult } from '@/apis/userService';
+import { ChatResult } from '@/apis/clientApis';
 
 export interface ChatbarInitialState {
   searchTerm: string;

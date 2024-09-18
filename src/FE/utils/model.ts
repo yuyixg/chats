@@ -6,56 +6,6 @@ import {
 } from '@/types/model';
 import { getModelDefaultTemplate } from '@/types/template';
 
-import Decimal from 'decimal.js';
-
-export function verifyChat(model: any, userBalance: Decimal) {
-  const { tokens, counts, expires } = model;
-  let usages = {
-    balance: false,
-    tokens: false,
-    counts: false,
-    expires: true,
-  };
-
-  if (expires !== '-') {
-    if (new Date(expires + ' 23:59:59') < new Date()) {
-      usages.expires = false;
-      return usages;
-    }
-  }
-
-  if (counts === '-') {
-    usages.counts = true;
-    return usages;
-  }
-
-  if (counts !== '-') {
-    if (+counts > 0) {
-      usages.counts = true;
-      return usages;
-    }
-  }
-
-  if (tokens === '-') {
-    usages.tokens = true;
-    return usages;
-  }
-
-  if (tokens !== '-') {
-    if (+tokens >= 4096) {
-      usages.tokens = true;
-      return usages;
-    }
-  }
-
-  if (userBalance.gte(0)) {
-    usages.balance = true;
-    return usages;
-  }
-
-  return usages;
-}
-
 export function getModelConfigs(
   modelVersion: ModelVersions | undefined,
   modelProvider: ModelProviders,
@@ -84,17 +34,6 @@ export function getModelPriceConfig(
   modelProvider: ModelProviders,
 ) {
   return getModelConfigs(modelVersion, modelProvider, 'priceConfig');
-}
-
-export function getModelApiConfigJson(
-  modelVersion: ModelVersions | undefined,
-  modelProvider: ModelProviders,
-) {
-  return JSON.stringify(
-    getModelConfigs(modelVersion, modelProvider, 'apiConfig'),
-    null,
-    2,
-  );
 }
 
 export function getModelModelConfigJson(
@@ -149,13 +88,6 @@ export function conversionModelPriceToDisplay(priceConfig: string) {
   configs.input = configs.input * ModelPriceUnit;
   configs.out = configs.out * ModelPriceUnit;
   return JSON.stringify(configs, null, 2);
-}
-
-export function conversionModelPriceToSave(priceConfig: string) {
-  const configs = JSON.parse(priceConfig) as ChatModelPriceConfig;
-  configs.input = configs.input / ModelPriceUnit;
-  configs.out = configs.out / ModelPriceUnit;
-  return JSON.stringify(configs);
 }
 
 export function getStorageModelId() {

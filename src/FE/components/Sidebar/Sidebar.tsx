@@ -10,10 +10,9 @@ import {
   IconMistOff,
   IconSquarePlus,
 } from '@/components/Icons/index';
-
-import Search from '../Search';
-import Tips from '../Tips/Tips';
-import { Button } from '../ui/button';
+import Search from '@/components/Search';
+import Tips from '@/components/Tips/Tips';
+import { Button } from '@/components/ui/button';
 
 import { cn } from '@/lib/utils';
 

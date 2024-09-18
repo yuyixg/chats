@@ -5,7 +5,7 @@ import { appWithTranslation } from 'next-i18next';
 import type { AppProps } from 'next/app';
 import { useRouter } from 'next/router';
 
-import { ThemeProvider } from '@/components/theme-provider';
+import { ThemeProvider } from '@/components/Theme/ThemeProvider';
 
 import AdminLayout from './admin/layout/layout';
 import './globals.css';

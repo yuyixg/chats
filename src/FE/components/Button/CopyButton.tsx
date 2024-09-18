@@ -3,8 +3,8 @@ import toast from 'react-hot-toast';
 
 import { useTranslation } from 'next-i18next';
 
-import { IconCheck, IconClipboard } from '../Icons';
-import { Button } from '../ui/button';
+import { IconCheck, IconClipboard } from '@/components/Icons';
+import { Button } from '@/components/ui/button';
 
 interface Props {
   value: string;

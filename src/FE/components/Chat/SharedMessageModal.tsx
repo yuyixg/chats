@@ -3,11 +3,11 @@ import toast from 'react-hot-toast';
 
 import { useTranslation } from 'next-i18next';
 
-import { Button } from '../ui/button';
-import { Dialog, DialogContent, DialogHeader, DialogTitle } from '../ui/dialog';
-import { Input } from '../ui/input';
+import { Button } from '@/components/ui/button';
+import { Dialog, DialogContent, DialogHeader, DialogTitle } from '@/components/ui/dialog';
+import { Input } from '@/components/ui/input';
 
-import { ChatResult, putChats } from '@/apis/userService';
+import { ChatResult, putChats } from '@/apis/clientApis';
 
 interface IProps {
   chat: ChatResult;

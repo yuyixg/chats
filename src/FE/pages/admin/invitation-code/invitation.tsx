@@ -19,7 +19,7 @@ import {
   TableRow,
 } from '@/components/ui/table';
 
-import { getInvitationCode } from '@/apis/adminService';
+import { getInvitationCode } from '@/apis/adminApis';
 
 export default function InvitationCode() {
   const { t } = useTranslation('admin');

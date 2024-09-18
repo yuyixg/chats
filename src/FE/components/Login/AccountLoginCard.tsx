@@ -16,13 +16,13 @@ import {
   FormLabel,
 } from '@/components/ui/form';
 
-import { IconEye, IconEyeOff } from '../Icons';
-import { Card, CardContent } from '../ui/card';
-import FormInput from '../ui/form/input';
-import { FormFieldType, IFormFieldOption } from '../ui/form/type';
-import { Input } from '../ui/input';
+import { IconEye, IconEyeOff } from '@/components/Icons';
+import { Card, CardContent } from '@/components/ui/card';
+import FormInput from '@/components/ui/form/input';
+import { FormFieldType, IFormFieldOption } from '@/components/ui/form/type';
+import { Input } from '@/components/ui/input';
 
-import { singIn } from '@/apis/userService';
+import { singIn } from '@/apis/clientApis';
 import { zodResolver } from '@hookform/resolvers/zod';
 import { z } from 'zod';
 

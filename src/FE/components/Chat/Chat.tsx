@@ -19,7 +19,8 @@ import { ChatBody, Message, Role } from '@/types/chat';
 
 import { HomeContext } from '@/pages/home/home';
 
-import { ModeToggle } from '../ModeToggle/ModeTooggle';
+import { ModeToggle } from '@/components/ModeToggle/ModeTooggle';
+
 import ChangeModel from './ChangeModel';
 import ChatError from './ChatError';
 import { ChatInput } from './ChatInput';
@@ -29,7 +30,7 @@ import { ModelSelect } from './ModelSelect';
 import { SystemPrompt } from './SystemPrompt';
 import { TemperatureSlider } from './Temperature';
 
-import { getChat, postChats, putUserChatModel } from '@/apis/userService';
+import { getChat, postChats, putUserChatModel } from '@/apis/clientApis';
 import { cn } from '@/lib/utils';
 import Decimal from 'decimal.js';
 import { v4 as uuidv4 } from 'uuid';

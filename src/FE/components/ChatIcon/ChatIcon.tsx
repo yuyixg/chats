@@ -3,7 +3,7 @@ import Image from 'next/image';
 import { ModelProviders } from '@/types/model';
 import { ModelProviderTemplates } from '@/types/template';
 
-import { IconShare } from '../Icons';
+import { IconShare } from '@/components/Icons';
 
 import { cn } from '@/lib/utils';
 

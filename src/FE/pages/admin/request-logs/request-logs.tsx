@@ -21,7 +21,7 @@ import {
   TableRow,
 } from '@/components/ui/table';
 
-import { getRequestLogs } from '@/apis/adminService';
+import { getRequestLogs } from '@/apis/adminApis';
 
 export default function RequestLogs() {
   const { t } = useTranslation('admin');

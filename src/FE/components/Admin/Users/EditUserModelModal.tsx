@@ -24,16 +24,16 @@ import {
   TableRow,
 } from '@/components/ui/table';
 
-import { Button } from '../../ui/button';
+import { Button } from '@/components/ui/button';
 import {
   Dialog,
   DialogContent,
   DialogFooter,
   DialogHeader,
   DialogTitle,
-} from '../../ui/dialog';
+} from '@/components/ui/dialog';
 
-import { putUserModel } from '@/apis/adminService';
+import { putUserModel } from '@/apis/adminApis';
 import { cn } from '@/lib/utils';
 
 interface IProps {

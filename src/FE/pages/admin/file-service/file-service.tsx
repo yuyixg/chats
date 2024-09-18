@@ -18,7 +18,7 @@ import {
   TableRow,
 } from '@/components/ui/table';
 
-import { getFileServices } from '@/apis/adminService';
+import { getFileServices } from '@/apis/adminApis';
 
 export default function FileService() {
   const { t } = useTranslation('admin');

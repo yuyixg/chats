@@ -2,6 +2,7 @@ import { FC, memo, useEffect, useRef, useState } from 'react';
 
 import { useTranslation } from 'next-i18next';
 
+import { preprocessLaTeX } from '@/utils/chats';
 import { formatNumberAsMoney } from '@/utils/common';
 
 import { Content, Message, Role } from '@/types/chat';
@@ -15,18 +16,16 @@ import {
   IconRobot,
   IconUser,
 } from '@/components/Icons/index';
+import { CodeBlock } from '@/components/Markdown/CodeBlock';
+import { MemoizedReactMarkdown } from '@/components/Markdown/MemoizedReactMarkdown';
 import Tips from '@/components/Tips/Tips';
+import { Button } from '@/components/ui/button';
 import { Label } from '@/components/ui/label';
-
-import { CodeBlock } from '../../Markdown/CodeBlock';
-import { MemoizedReactMarkdown } from '../../Markdown/MemoizedReactMarkdown';
-import { Button } from '../../ui/button';
 
 import Decimal from 'decimal.js';
 import rehypeKatex from 'rehype-katex';
-import remarkMath from 'remark-math';
 import remarkGfm from 'remark-gfm';
-import { preprocessLaTeX } from '@/utils/chats';
+import remarkMath from 'remark-math';
 
 interface PropsMessage {
   id: string;

@@ -1,6 +1,6 @@
 import { useEffect, useState } from 'react';
 
-import { Checkbox } from '../ui/checkbox';
+import { Checkbox } from '@/components/ui/checkbox';
 
 const EnableNetworkSearch = (props: {
   label: string;

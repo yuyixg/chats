@@ -18,7 +18,7 @@ import {
   TableRow,
 } from '@/components/ui/table';
 
-import { getConfigs } from '@/apis/adminService';
+import { getConfigs } from '@/apis/adminApis';
 
 export default function Configs() {
   const { t } = useTranslation('admin');

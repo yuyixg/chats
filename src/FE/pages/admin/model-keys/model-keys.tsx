@@ -20,7 +20,7 @@ import {
   TableRow,
 } from '@/components/ui/table';
 
-import { getModelKeys } from '@/apis/adminService';
+import { getModelKeys } from '@/apis/adminApis';
 
 export default function ModelKeys() {
   const { t } = useTranslation('admin');

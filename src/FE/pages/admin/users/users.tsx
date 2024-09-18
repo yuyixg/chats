@@ -26,7 +26,7 @@ import {
   TableRow,
 } from '@/components/ui/table';
 
-import { getModels, getUsers } from '@/apis/adminService';
+import { getModels, getUsers } from '@/apis/adminApis';
 
 export default function Users() {
   const { t } = useTranslation('admin');

@@ -2,18 +2,18 @@ import { MouseEventHandler, useContext, useEffect, useState } from 'react';
 
 import { Prompt } from '@/types/prompt';
 
+import SidebarActionButton from '@/components/Button/SidebarActionButton';
 import {
   IconBulbFilled,
   IconCheck,
   IconTrash,
   IconX,
 } from '@/components/Icons/index';
-import SidebarActionButton from '@/components/SidebarActionButton';
 
 import PromptbarContext from '../PromptBar.context';
 import { PromptModal } from './PromptModal';
 
-import { getUserPromptDetail } from '@/apis/userService';
+import { getUserPromptDetail } from '@/apis/clientApis';
 
 interface Props {
   prompt: Prompt;

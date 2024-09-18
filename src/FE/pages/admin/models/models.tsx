@@ -23,7 +23,7 @@ import {
   TableRow,
 } from '@/components/ui/table';
 
-import { getModels } from '@/apis/adminService';
+import { getModels } from '@/apis/adminApis';
 
 export default function Models() {
   const { t } = useTranslation('admin');

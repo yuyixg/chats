@@ -13,7 +13,18 @@ import {
 } from '@/types/user';
 
 import { IconSquareRoundedX } from '@/components/Icons';
+import { Button } from '@/components/ui/button';
 import { Calendar } from '@/components/ui/calendar';
+import {
+  Dialog,
+  DialogContent,
+  DialogFooter,
+  DialogHeader,
+  DialogTitle,
+} from '@/components/ui/dialog';
+import { Form, FormControl, FormField } from '@/components/ui/form';
+import FormInput from '@/components/ui/form/input';
+import FormSelect from '@/components/ui/form/select';
 import { Input } from '@/components/ui/input';
 import {
   Popover,
@@ -30,24 +41,12 @@ import {
   TableRow,
 } from '@/components/ui/table';
 
-import { Button } from '../../ui/button';
-import {
-  Dialog,
-  DialogContent,
-  DialogFooter,
-  DialogHeader,
-  DialogTitle,
-} from '../../ui/dialog';
-import { Form, FormControl, FormField } from '../../ui/form';
-import FormInput from '../../ui/form/input';
-import FormSelect from '../../ui/form/select';
-
 import {
   deleteUserInitialConfig,
   getInvitationCode,
   postUserInitialConfig,
   putUserInitialConfig,
-} from '@/apis/adminService';
+} from '@/apis/adminApis';
 import { cn } from '@/lib/utils';
 import { zodResolver } from '@hookform/resolvers/zod';
 import Decimal from 'decimal.js';

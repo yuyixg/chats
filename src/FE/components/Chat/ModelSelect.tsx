@@ -8,7 +8,7 @@ import { GetModelUsageResult } from '@/types/user';
 
 import { HomeContext } from '@/pages/home/home';
 
-import { getUserModelUsage } from '@/apis/userService';
+import { getUserModelUsage } from '@/apis/clientApis';
 
 export const ModelSelect = () => {
   const { t } = useTranslation('chat');

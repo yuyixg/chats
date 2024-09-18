@@ -2,7 +2,7 @@ import React, { useEffect } from 'react';
 
 import { useTranslation } from 'next-i18next';
 
-import { Dialog, DialogContent, DialogHeader, DialogTitle } from '../ui/dialog';
+import { Dialog, DialogContent, DialogHeader, DialogTitle } from '@/components/ui/dialog';
 
 import { ApiKeyTab } from './ApiKeyTabContent';
 

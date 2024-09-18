@@ -4,19 +4,19 @@ import toast from 'react-hot-toast';
 
 import { useTranslation } from 'next-i18next';
 
-import { Button } from '../../ui/button';
+import { Button } from '@/components/ui/button';
 import {
   Dialog,
   DialogContent,
   DialogFooter,
   DialogHeader,
   DialogTitle,
-} from '../../ui/dialog';
-import { Form, FormField } from '../../ui/form';
-import FormInput from '../../ui/form/input';
-import { FormFieldType, IFormFieldOption } from '../../ui/form/type';
+} from '@/components/ui/dialog';
+import { Form, FormField } from '@/components/ui/form';
+import FormInput from '@/components/ui/form/input';
+import { FormFieldType, IFormFieldOption } from '@/components/ui/form/type';
 
-import { putUserBalance } from '@/apis/adminService';
+import { putUserBalance } from '@/apis/adminApis';
 import { zodResolver } from '@hookform/resolvers/zod';
 import Decimal from 'decimal.js';
 import { z } from 'zod';

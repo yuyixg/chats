@@ -19,7 +19,7 @@ import {
   TableRow,
 } from '@/components/ui/table';
 
-import { getModels, getUserInitialConfig } from '@/apis/adminService';
+import { getModels, getUserInitialConfig } from '@/apis/adminApis';
 
 export default function UserInitialConfig() {
   const { t } = useTranslation('admin');

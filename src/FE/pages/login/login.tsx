@@ -7,19 +7,19 @@ import Image from 'next/image';
 import { DEFAULT_LANGUAGE } from '@/utils/settings';
 import { hasContact } from '@/utils/website';
 
-import { GlobalConfigKeys, SiteInfoConfig } from '@/types/config';
+import { SiteInfoConfig } from '@/types/config';
 import { LoginConfigsResult, LoginType } from '@/types/user';
 
-import ContactModal from '@/components/ContactModal/ContactModal';
 import AccountLoginCard from '@/components/Login/AccountLoginCard';
 import KeyCloakLogin from '@/components/Login/KeyCloakLogin';
 import PhoneLoginCard from '@/components/Login/PhoneLoginCard';
 import PhoneRegisterCard from '@/components/Login/PhoneRegisterCard';
 import WeChatLogin from '@/components/Login/WeChatLogin';
+import ContactModal from '@/components/Modal/ContactModal';
 import { Button } from '@/components/ui/button';
 import { Tabs, TabsContent, TabsList, TabsTrigger } from '@/components/ui/tabs';
 
-import { getLoginProviders, getSiteInfo } from '@/apis/userService';
+import { getLoginProviders, getSiteInfo } from '@/apis/clientApis';
 
 enum TabKeys {
   PHONE = 'phone',

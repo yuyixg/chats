@@ -6,21 +6,21 @@ import { useTranslation } from 'next-i18next';
 
 import { GetUserModelResult } from '@/types/admin';
 
-import { Button } from '../../ui/button';
+import { Button } from '@/components/ui/button';
 import {
   Dialog,
   DialogContent,
   DialogFooter,
   DialogHeader,
   DialogTitle,
-} from '../../ui/dialog';
-import { Form, FormField } from '../../ui/form';
-import FormCalendar from '../../ui/form/calendar';
-import FormInput from '../../ui/form/input';
-import FormSwitch from '../../ui/form/switch';
-import { FormFieldType, IFormFieldOption } from '../../ui/form/type';
+} from '@/components/ui/dialog';
+import { Form, FormField } from '@/components/ui/form';
+import FormCalendar from '@/components/ui/form/calendar';
+import FormInput from '@/components/ui/form/input';
+import FormSwitch from '@/components/ui/form/switch';
+import { FormFieldType, IFormFieldOption } from '@/components/ui/form/type';
 
-import { putUserModel } from '@/apis/adminService';
+import { putUserModel } from '@/apis/adminApis';
 import { zodResolver } from '@hookform/resolvers/zod';
 import { z } from 'zod';
 

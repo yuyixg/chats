@@ -48,7 +48,7 @@ import {
   getUserModels,
   getUserPromptBrief,
   postChats,
-} from '@/apis/userService';
+} from '@/apis/clientApis';
 import Decimal from 'decimal.js';
 import { v4 as uuidv4 } from 'uuid';
 
@@ -470,10 +470,7 @@ const Home = ({ siteInfo }: { siteInfo: SiteInfoConfig }) => {
           >
             <div className="fixed w-screen h-screen top-1/2">
               <div className="flex justify-center">
-                <Spinner
-                  size="18"
-                  className="text-gray-500 dark:text-gray-50"
-                />
+                <Spinner className="text-gray-500 dark:text-gray-50" />
               </div>
             </div>
           </div>

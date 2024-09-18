@@ -2,15 +2,15 @@ import { useEffect, useState } from 'react';
 
 import Image from 'next/image';
 
-import { Button } from '../ui/button';
+import { Button } from '@/components/ui/button';
 import {
   Tooltip,
   TooltipContent,
   TooltipProvider,
   TooltipTrigger,
-} from '../ui/tooltip';
+} from '@/components/ui/tooltip';
 
-import { getCsrfToken } from '@/apis/userService';
+import { getCsrfToken } from '@/apis/clientApis';
 import { getApiUrl } from '@/utils/common';
 
 const KeyCloakLogin = (props: { loading?: boolean }) => {

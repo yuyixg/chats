@@ -1,7 +1,7 @@
 import { useTranslation } from 'next-i18next';
 
-import { IconError } from '../Icons';
-import { Alert, AlertDescription } from '../ui/alert';
+import { IconError } from '@/components/Icons';
+import { Alert, AlertDescription } from '@/components/ui/alert';
 
 const ChatError = () => {
   const { t } = useTranslation('chat');

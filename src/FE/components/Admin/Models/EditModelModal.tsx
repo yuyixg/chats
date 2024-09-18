@@ -30,20 +30,20 @@ import {
 } from '@/components/ui/popover';
 import { Skeleton } from '@/components/ui/skeleton';
 
-import { Button } from '../../ui/button';
+import { Button } from '@/components/ui/button';
 import {
   Dialog,
   DialogContent,
   DialogFooter,
   DialogHeader,
   DialogTitle,
-} from '../../ui/dialog';
-import { Form, FormField } from '../../ui/form';
-import FormInput from '../../ui/form/input';
-import FormSwitch from '../../ui/form/switch';
-import FormTextarea from '../../ui/form/textarea';
+} from '@/components/ui/dialog';
+import { Form, FormField } from '@/components/ui/form';
+import FormInput from '@/components/ui/form/input';
+import FormSwitch from '@/components/ui/form/switch';
+import FormTextarea from '@/components/ui/form/textarea';
 
-import { getFileServices, getModelKeys, putModels } from '@/apis/adminService';
+import { getFileServices, getModelKeys, putModels } from '@/apis/adminApis';
 import { zodResolver } from '@hookform/resolvers/zod';
 import { z } from 'zod';
 

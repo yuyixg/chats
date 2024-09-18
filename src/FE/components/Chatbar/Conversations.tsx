@@ -4,10 +4,11 @@ import { useTranslation } from 'next-i18next';
 
 import { HomeContext } from '@/pages/home/home';
 
-import { Button } from '../ui/button';
+import { Button } from '@/components/ui/button';
+
 import { ConversationComponent } from './Conversation';
 
-import { ChatResult } from '@/apis/userService';
+import { ChatResult } from '@/apis/clientApis';
 
 interface Props {
   chats: ChatResult[];
@@ -34,11 +35,9 @@ export const Conversations = ({ chats }: Props) => {
 
   return (
     <div className="flex w-full flex-col gap-1">
-      {chats
-        .slice()
-        .map((chat, index) => (
-          <ConversationComponent key={index} chat={chat} />
-        ))}
+      {chats.slice().map((chat, index) => (
+        <ConversationComponent key={index} chat={chat} />
+      ))}
       {!showMore && (
         <Button onClick={handleShowMore} className="text-[12px]" variant="link">
           {t('Show more')}

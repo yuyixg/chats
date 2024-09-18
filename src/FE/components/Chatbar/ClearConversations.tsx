@@ -3,8 +3,7 @@ import { FC, useState } from 'react';
 import { useTranslation } from 'next-i18next';
 
 import { IconCheck, IconTrash, IconX } from '@/components/Icons/index';
-
-import { SidebarButton } from '../Sidebar/SidebarButton';
+import { SidebarButton } from '@/components/Sidebar/SidebarButton';
 
 interface Props {
   onClearConversations: () => void;

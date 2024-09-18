@@ -2,7 +2,12 @@ import { useEffect, useState } from 'react';
 
 import { useTranslation } from 'next-i18next';
 
-import { Dialog, DialogContent, DialogHeader, DialogTitle } from '../ui/dialog';
+import {
+  Dialog,
+  DialogContent,
+  DialogHeader,
+  DialogTitle,
+} from '@/components/ui/dialog';
 import {
   Table,
   TableBody,
@@ -10,12 +15,12 @@ import {
   TableHead,
   TableHeader,
   TableRow,
-} from '../ui/table';
+} from '@/components/ui/table';
 
 import {
   GetBalance7DaysUsageResult,
   getBalance7DaysUsage,
-} from '@/apis/userService';
+} from '@/apis/clientApis';
 
 interface Props {
   isOpen: boolean;

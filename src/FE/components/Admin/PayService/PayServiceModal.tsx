@@ -16,20 +16,20 @@ import { PayServiceType } from '@/types/pay';
 
 import FormSelect from '@/components/ui/form/select';
 
-import { Button } from '../../ui/button';
+import { Button } from '@/components/ui/button';
 import {
   Dialog,
   DialogContent,
   DialogFooter,
   DialogHeader,
   DialogTitle,
-} from '../../ui/dialog';
-import { Form, FormField } from '../../ui/form';
-import FormSwitch from '../../ui/form/switch';
-import FormTextarea from '../../ui/form/textarea';
-import { FormFieldType, IFormFieldOption } from '../../ui/form/type';
+} from '@/components/ui/dialog';
+import { Form, FormField } from '@/components/ui/form';
+import FormSwitch from '@/components/ui/form/switch';
+import FormTextarea from '@/components/ui/form/textarea';
+import { FormFieldType, IFormFieldOption } from '@/components/ui/form/type';
 
-import { postPayService, putPayService } from '@/apis/adminService';
+import { postPayService, putPayService } from '@/apis/adminApis';
 import { zodResolver } from '@hookform/resolvers/zod';
 import { z } from 'zod';
 

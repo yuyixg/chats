@@ -7,19 +7,19 @@ import { useRouter } from 'next/router';
 
 import { clearUserInfo, clearUserSession, getLoginUrl } from '@/utils/user';
 
-import { Button } from '../ui/button';
+import { Button } from '@/components/ui/button';
 import {
   Dialog,
   DialogContent,
   DialogFooter,
   DialogHeader,
   DialogTitle,
-} from '../ui/dialog';
-import { Form, FormField } from '../ui/form';
-import FormInput from '../ui/form/input';
-import { FormFieldType, IFormFieldOption } from '../ui/form/type';
+} from '@/components/ui/dialog';
+import { Form, FormField } from '@/components/ui/form';
+import FormInput from '@/components/ui/form/input';
+import { FormFieldType, IFormFieldOption } from '@/components/ui/form/type';
 
-import { changeUserPassword } from '@/apis/userService';
+import { changeUserPassword } from '@/apis/clientApis';
 import { zodResolver } from '@hookform/resolvers/zod';
 import { z } from 'zod';
 

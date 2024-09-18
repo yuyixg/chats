@@ -1,8 +1,7 @@
 import { useTranslation } from 'next-i18next';
 
+import ChangeModel from '@/components/Chat/ChangeModel';
 import Tips from '@/components/Tips/Tips';
-
-import ChangeModel from '../ChangeModel';
 
 interface Props {
   hidden?: boolean;

@@ -5,10 +5,10 @@ import { ModelProviderTemplates } from '@/types/template';
 
 import { HomeContext } from '@/pages/home/home';
 
-import ChatIcon from '../ChatIcon/ChatIcon';
-import { IconChevronDown } from '../Icons';
-import Search from '../Search';
-import { Button } from '../ui/button';
+import ChatIcon from '@/components/ChatIcon/ChatIcon';
+import { IconChevronDown } from '@/components/Icons';
+import Search from '@/components/Search';
+import { Button } from '@/components/ui/button';
 import {
   DropdownMenu,
   DropdownMenuContent,
@@ -19,7 +19,7 @@ import {
   DropdownMenuSubContent,
   DropdownMenuSubTrigger,
   DropdownMenuTrigger,
-} from '../ui/dropdown-menu';
+} from '@/components/ui/dropdown-menu';
 
 import { cn } from '@/lib/utils';
 

@@ -2,8 +2,8 @@ import { useEffect } from 'react';
 
 import useExternal from '@/hooks/useExternal';
 
-import Spinner from '../Spinner';
-import { Dialog, DialogContent } from '../ui/dialog';
+import Spinner from '@/components/Spinner';
+import { Dialog, DialogContent } from '@/components/ui/dialog';
 
 const WeChatLoginModal = (props: {
   isOpen: boolean;
@@ -38,10 +38,7 @@ const WeChatLoginModal = (props: {
       <DialogContent className="w-[340px] h-[320px]">
         {status !== 'ready' && (
           <div className="flex justify-center items-center h-[300px]">
-            <Spinner
-              size="18"
-              className="mx-auto text-gray-500 dark:text-gray-50"
-            />
+            <Spinner className="mx-auto text-gray-500 dark:text-gray-50" />
           </div>
         )}
         <div

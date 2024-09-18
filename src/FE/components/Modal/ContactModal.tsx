@@ -2,7 +2,12 @@ import { useTranslation } from 'next-i18next';
 
 import { getSiteInfo } from '@/utils/website';
 
-import { Dialog, DialogContent, DialogHeader, DialogTitle } from '../ui/dialog';
+import {
+  Dialog,
+  DialogContent,
+  DialogHeader,
+  DialogTitle,
+} from '@/components/ui/dialog';
 
 interface IProps {
   isOpen: boolean;

@@ -21,7 +21,7 @@ import {
 } from '@/components/ui/form';
 import { Input } from '@/components/ui/input';
 
-import { sendLoginSmsCode, signByPhone } from '@/apis/userService';
+import { sendLoginSmsCode, signByPhone } from '@/apis/clientApis';
 import { zodResolver } from '@hookform/resolvers/zod';
 import { z } from 'zod';
 

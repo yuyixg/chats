@@ -10,8 +10,8 @@ import { Prompt } from '@/types/prompt';
 import { HomeContext } from '@/pages/home/home';
 
 import { Prompts } from './components/Prompts';
+import Sidebar from '@/components/Sidebar';
 
-import Sidebar from '../Sidebar';
 import PromptbarContext from './PromptBar.context';
 import { PromptbarInitialState, initialState } from './Promptbar.state';
 
@@ -19,7 +19,7 @@ import {
   deleteUserPrompts,
   postUserPrompts,
   putUserPrompts,
-} from '@/apis/userService';
+} from '@/apis/clientApis';
 import { v4 as uuidv4 } from 'uuid';
 
 const PromptBar = () => {

@@ -14,7 +14,7 @@ import { ChatMessage as ChatMessageComponent } from '@/components/Admin/Messages
 import PageNotFound from '@/components/PageNotFound/PageNotFound';
 import { Button } from '@/components/ui/button';
 
-import { getShareMessage } from '@/apis/adminService';
+import { getShareMessage } from '@/apis/adminApis';
 import Decimal from 'decimal.js';
 
 export default function ShareMessage() {

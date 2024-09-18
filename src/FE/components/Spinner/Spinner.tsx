@@ -3,14 +3,14 @@ interface Props {
   className?: string;
 }
 
-const Spinner = ({ size = '1em', className = '' }: Props) => {
+const Spinner = ({ className = '' }: Props) => {
   return (
     <svg
       className={`animate-spin ${className}`}
-      height={size}
-      width={size}
       xmlns="http://www.w3.org/2000/svg"
       fill="none"
+      width='24'
+      height='24'
       viewBox="0 0 24 24"
     >
       <circle

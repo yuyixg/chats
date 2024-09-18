@@ -1,11 +1,11 @@
 'use client';
 
-import { Moon, Sun } from 'lucide-react';
 import * as React from 'react';
 
 import { useTranslation } from 'next-i18next';
 import { useTheme } from 'next-themes';
 
+import { IconMoon, IconSun } from '@/components/Icons';
 import { Button } from '@/components/ui/button';
 import {
   DropdownMenu,
@@ -13,8 +13,6 @@ import {
   DropdownMenuItem,
   DropdownMenuTrigger,
 } from '@/components/ui/dropdown-menu';
-
-import { IconMoon, IconSun } from '../Icons';
 
 export function ModeToggle() {
   const { t } = useTranslation('chat');

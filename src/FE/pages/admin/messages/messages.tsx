@@ -20,7 +20,7 @@ import {
   TableRow,
 } from '@/components/ui/table';
 
-import { getMessages } from '@/apis/adminService';
+import { getMessages } from '@/apis/adminApis';
 
 export default function Messages() {
   const { t } = useTranslation('admin');

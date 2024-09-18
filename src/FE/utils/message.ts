@@ -2,20 +2,6 @@ import { ChatMessage, MessageNode } from '@/types/chatMessage';
 
 import Decimal from 'decimal.js';
 
-export const calcInputTokenPrice = (
-  inputTokenCount: number,
-  inputPrice: number,
-) => {
-  return new Decimal(inputTokenCount * inputPrice);
-};
-
-export const calcOutputTokenPrice = (
-  outTokenCount: number,
-  outPrice: number,
-) => {
-  return new Decimal(outTokenCount * outPrice);
-};
-
 function findMessageChildren(
   conversations: ChatMessage[],
   nodeId: string,

@@ -8,13 +8,14 @@ import { removeSelectChatId, saveSelectChatId } from '@/utils/chats';
 
 import { HomeContext } from '@/pages/home/home';
 
-import Sidebar from '../Sidebar';
+import Sidebar from '@/components/Sidebar';
+
 import ChatbarContext from './Chatbar.context';
 import { ChatbarInitialState, initialState } from './Chatbar.state';
 import { ChatBarSettings } from './ChatbarSettings';
 import { Conversations } from './Conversations';
 
-import { ChatResult } from '@/apis/userService';
+import { ChatResult } from '@/apis/clientApis';
 
 export const Chatbar = () => {
   const { t } = useTranslation('chat');

@@ -13,30 +13,27 @@ import { DBModelProvider, ModelProviders } from '@/types/model';
 
 import { HomeContext } from '@/pages/home/home';
 
+import SidebarActionButton from '@/components/Button/SidebarActionButton';
+import { SharedMessageModal } from '@/components/Chat/SharedMessageModal';
+import ChatIcon from '@/components/ChatIcon/ChatIcon';
 import ChatbarContext from '@/components/Chatbar/Chatbar.context';
 import {
   IconCheck,
   IconDots,
-  IconMessage,
-  IconMessageShare,
   IconPencil,
   IconShare,
   IconTrash,
   IconX,
 } from '@/components/Icons/index';
-
-import { SharedMessageModal } from '../Chat/SharedMessageModal';
-import ChatIcon from '../ChatIcon/ChatIcon';
-import SidebarActionButton from '../SidebarActionButton';
-import { Button } from '../ui/button';
+import { Button } from '@/components/ui/button';
 import {
   DropdownMenu,
   DropdownMenuContent,
   DropdownMenuItem,
   DropdownMenuTrigger,
-} from '../ui/dropdown-menu';
+} from '@/components/ui/dropdown-menu';
 
-import { ChatResult, deleteChats, putChats } from '@/apis/userService';
+import { ChatResult, deleteChats, putChats } from '@/apis/clientApis';
 
 interface Props {
   chat: ChatResult;

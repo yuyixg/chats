@@ -2,13 +2,13 @@ import { useEffect, useState } from 'react';
 
 import Image from 'next/image';
 
-import { Button } from '../ui/button';
+import { Button } from '@/components/ui/button';
 import {
   Tooltip,
   TooltipContent,
   TooltipProvider,
   TooltipTrigger,
-} from '../ui/tooltip';
+} from '@/components/ui/tooltip';
 import WeChatLoginModal from './WeChatLoginModal';
 
 const WeChatLogin = (props: {

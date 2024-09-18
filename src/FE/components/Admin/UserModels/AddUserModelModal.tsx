@@ -5,23 +5,23 @@ import { useTranslation } from 'next-i18next';
 
 import { GetModelResult, GetUserModelResult } from '@/types/admin';
 
-import { Button } from '../../ui/button';
+import { Button } from '@/components/ui/button';
 import {
   Dialog,
   DialogContent,
   DialogFooter,
   DialogHeader,
   DialogTitle
-} from '../../ui/dialog';
+} from '@/components/ui/dialog';
 import {
   Select,
   SelectContent,
   SelectItem,
   SelectTrigger,
   SelectValue,
-} from '../../ui/select';
+} from '@/components/ui/select';
 
-import { getModels, postUserModel, putUserModel } from '@/apis/adminService';
+import { getModels, postUserModel, putUserModel } from '@/apis/adminApis';
 
 interface IProps {
   isOpen: boolean;

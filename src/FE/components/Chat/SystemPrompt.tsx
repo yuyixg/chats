@@ -16,7 +16,7 @@ import { HomeContext } from '@/pages/home/home';
 import { PromptList } from './PromptList';
 import { VariableModal } from './VariableModal';
 
-import { getUserPromptDetail } from '@/apis/userService';
+import { getUserPromptDetail } from '@/apis/clientApis';
 
 interface Props {
   currentPrompt: string;

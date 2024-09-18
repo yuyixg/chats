@@ -19,6 +19,7 @@ import { Prompt } from '@/types/prompt';
 
 import { HomeContext } from '@/pages/home/home';
 
+import UploadButton from '@/components/Button/UploadButton';
 import {
   IconArrowDown,
   IconCircleX,
@@ -26,13 +27,12 @@ import {
   IconSend,
   IconStopFilled,
 } from '@/components/Icons/index';
+import PasteUpload from '@/components/PasteUpload/PasteUpload';
 
-import PasteUpload from '../PasteUpload/PasteUpload';
-import UploadButton from '../UploadButton';
 import { PromptList } from './PromptList';
 import { VariableModal } from './VariableModal';
 
-import { getUserPromptDetail } from '@/apis/userService';
+import { getUserPromptDetail } from '@/apis/clientApis';
 
 interface Props {
   onSend: (message: Message) => void;

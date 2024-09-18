@@ -6,6 +6,12 @@ import Link from 'next/link';
 
 import { getApiUrl } from '@/utils/common';
 
+import CopyButton from '@/components/Button/CopyButton';
+import DateTimePopover from '@/components/Popover/DateTimePopover';
+import DeletePopover from '@/components/Popover/DeletePopover';
+import { Button } from '@/components/ui/button';
+import { Card, CardContent } from '@/components/ui/card';
+import { Input } from '@/components/ui/input';
 import {
   Table,
   TableBody,
@@ -15,20 +21,13 @@ import {
   TableRow,
 } from '@/components/ui/table';
 
-import CopyButton from '../Button/CopyButton';
-import DateTimePopover from '../Popover/DateTimePopover';
-import DeletePopover from '../Popover/DeletePopover';
-import { Button } from '../ui/button';
-import { Card, CardContent } from '../ui/card';
-import { Input } from '../ui/input';
-
 import {
   GetUserApiKeyResult,
   deleteUserApiKey,
   getUserApiKey,
   postUserApiKey,
   putUserApiKey,
-} from '@/apis/userService';
+} from '@/apis/clientApis';
 
 let timer: NodeJS.Timeout;
 export const ApiKeyTab = () => {

@@ -11,7 +11,7 @@ import { DEFAULT_LANGUAGE } from '@/utils/settings';
 
 import { ChatMessage as ChatMessageComponent } from '@/components/Admin/Messages/ChatMessage';
 
-import { getMessageDetails } from '@/apis/adminService';
+import { getMessageDetails } from '@/apis/adminApis';
 import Decimal from 'decimal.js';
 
 export default function MessageDetails() {

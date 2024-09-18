@@ -50,8 +50,8 @@ export const setUserSession = (sessionId: string) => {
   );
 };
 
-export const getUserSession = () : string => {
-  if(typeof localStorage === 'undefined') return '';
+export const getUserSession = (): string => {
+  if (typeof localStorage === 'undefined') return '';
   const session = JSON.parse(localStorage.getItem('session') || '{}');
   if (session?.expires && session?.expires > new Date().getTime())
     return session.sessionId;
@@ -61,7 +61,3 @@ export const getUserSession = () : string => {
 export const clearUserSession = () => {
   localStorage.removeItem('session');
 };
-
-export function replacePassword(value: string): string {
-  return value.replace(/("password":")([^"]*)"/, '$1"');
-}

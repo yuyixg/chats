@@ -18,7 +18,7 @@ import {
   TableRow,
 } from '@/components/ui/table';
 
-import { getPayServices } from '@/apis/adminService';
+import { getPayServices } from '@/apis/adminApis';
 
 export default function PayService() {
   const { t } = useTranslation('admin');
