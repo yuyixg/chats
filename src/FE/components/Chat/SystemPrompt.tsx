@@ -16,6 +16,8 @@ import { HomeContext } from '@/pages/home/home';
 import { PromptList } from './PromptList';
 import { VariableModal } from './VariableModal';
 
+import { getUserPromptDetail } from '@/apis/userService';
+
 interface Props {
   currentPrompt: string;
   prompts: Prompt[];
@@ -67,12 +69,14 @@ export const SystemPrompt: FC<Props> = ({
 
   const handleInitModal = () => {
     const selectedPrompt = filteredPrompts[activePromptIndex];
-    setValue((prevVal) => {
-      const newContent = prevVal?.replace(/\/\w*$/, selectedPrompt.content);
-      return newContent;
-    });
-    handlePromptSelect(selectedPrompt);
-    setShowPromptList(false);
+    selectedPrompt &&
+      getUserPromptDetail(selectedPrompt.id).then((data) => {
+        setValue((prevContent) => {
+          return prevContent?.replace(/\/\w*$/, data.content);
+        });
+        handlePromptSelect(data);
+        setShowPromptList(false);
+      });
   };
 
   const parseVariables = (content: string) => {
