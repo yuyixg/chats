@@ -47,4 +47,39 @@ public class MessagesController(ChatsDB db, CurrentUser currentUser) : Controlle
 
         return Ok(messages);
     }
+
+    [HttpGet("v2")]
+    public async Task<ActionResult<MessageDto[]>> GetMessagesV2([FromQuery] int chatId, CancellationToken cancellationToken)
+    {
+        MessageDto[] messages = await db.Messages
+            .Where(m => m.ConversationId == chatId && m.Conversation.UserId == currentUser.Id)
+            .Select(x => new ChatMessageTemp()
+            {
+                Id = x.Id,
+                ParentId = x.ParentId,
+                Role = (DBConversationRole)x.ChatRoleId,
+                Content = x.MessageContents
+                    .OrderBy(x => x.Id)
+                    .Select(x => new DBMessageSegment
+                    {
+                        ContentType = (DBMessageContentType)x.ContentTypeId,
+                        Content = x.Content
+                    })
+                    .ToArray(),
+                CreatedAt = x.CreatedAt,
+                InputTokens = x.MessageResponse!.InputTokenCount,
+                OutputTokens = x.MessageResponse.OutputTokenCount,
+                InputPrice = x.MessageResponse.InputCost,
+                OutputPrice = x.MessageResponse.OutputCost,
+                Duration = x.MessageResponse.DurationMs,
+                ModelId = x.MessageResponse.ChatModelId,
+                ModelName = x.MessageResponse.ChatModel.Name
+            })
+            .OrderBy(x => x.CreatedAt)
+            .AsAsyncEnumerable()
+            .Select(x => x.ToDto())
+            .ToArrayAsync(cancellationToken);
+
+        return Ok(messages);
+    }
 }

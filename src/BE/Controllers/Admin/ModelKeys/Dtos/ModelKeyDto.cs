@@ -12,6 +12,10 @@ public record ModelKeyDtoTemp
 
     public required string Name { get; init; }
 
+    public required int EnabledModelCount { get; init; }
+
+    public required int TotalModelCount { get; init; }
+
     public required string Configs { get; init; }
 
     public required DateTime CreatedAt { get; init; }
@@ -25,6 +29,8 @@ public record ModelKeyDtoTemp
             Name = Name,
             Configs = JsonSerializer.Deserialize<JsonModelKey>(Configs)!,
             CreatedAt = CreatedAt,
+            EnabledModelCount = EnabledModelCount,
+            TotalModelCount = TotalModelCount
         };
 
         return maskFields ? dto.WithMaskedKeys() : dto;
@@ -41,6 +47,12 @@ public record ModelKeyDto
 
     [JsonPropertyName("name")]
     public required string Name { get; init; }
+
+    [JsonPropertyName("enabledModelCount")]
+    public required int EnabledModelCount { get; init; }
+
+    [JsonPropertyName("totalModelCount")]
+    public required int TotalModelCount { get; init; }
 
     [JsonPropertyName("configs")]
     public required JsonModelKey Configs { get; init; }

@@ -71,6 +71,7 @@ export default function ModelKeys() {
             <TableRow>
               <TableHead>{t('Key Name')}</TableHead>
               <TableHead>{t('Model Provider')}</TableHead>
+              <TableHead>{t('Model Count')}</TableHead>
               <TableHead>{t('Created Time')}</TableHead>
             </TableRow>
           </TableHeader>
@@ -88,6 +89,9 @@ export default function ModelKeys() {
                 </TableCell>
                 <TableCell>
                   {ModelProviderTemplates[item.type].displayName}
+                </TableCell>
+                <TableCell>
+                  {item.enabledModelCount === item.totalModelCount ? `${item.totalModelCount}` : `${item.enabledModelCount}/${item.totalModelCount}`}
                 </TableCell>
                 <TableCell>
                   {new Date(item.createdAt).toLocaleString()}

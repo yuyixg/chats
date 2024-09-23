@@ -212,6 +212,8 @@ export interface GetModelKeysResult {
   id: string;
   name: string;
   type: ModelProviders;
+  enabledModelCount: number;
+  totalModelCount: number;
   configs: string;
   createdAt: string;
 }

@@ -25,6 +25,8 @@ public class ModelKeysController(ChatsDB db) : ControllerBase
                 Name = x.Name,
                 Configs = x.Configs,
                 CreatedAt = x.CreatedAt,
+                EnabledModelCount = x.ChatModels.Count(x => x.Enabled),
+                TotalModelCount = x.ChatModels.Count
             })
             .AsEnumerable()
             .Select(x => x.ToDto())
