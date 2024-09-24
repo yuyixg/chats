@@ -214,7 +214,7 @@ public class ConversationController(ChatsDB db, CurrentUser currentUser, ILogger
         catch (Exception e) when (e is DashScopeException || e is ClientResultException)
         {
             errorText = e.Message;
-            logger.LogError(e, "Error in conversation for message: {userMessageId}", userMessage.Id);
+            logger.LogError(e, "Upstream error: {userMessageId}", userMessage.Id);
         }
         catch (TaskCanceledException)
         {
@@ -223,7 +223,7 @@ public class ConversationController(ChatsDB db, CurrentUser currentUser, ILogger
         }
         catch (Exception e)
         {
-            errorText = "Error in conversation";
+            errorText = "Unknown Error";
             logger.LogError(e, "Error in conversation for message: {userMessageId}", userMessage.Id);
         }
         finally

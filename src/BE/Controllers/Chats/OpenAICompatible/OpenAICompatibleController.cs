@@ -147,7 +147,7 @@ public class OpenAICompatibleController(ChatsDB db, CurrentApiKey apiKey, Conver
         }
         catch (Exception e) when (e is DashScopeException || e is ClientResultException)
         {
-            logger.LogError(e, "Error in api conversation");
+            logger.LogError(e, "Upstream error");
             await YieldError(OpenAICompatibleErrorCode.UpstreamError, e.Message, cancellationToken);
         }
         catch (TaskCanceledException)
@@ -156,7 +156,7 @@ public class OpenAICompatibleController(ChatsDB db, CurrentApiKey apiKey, Conver
         }
         catch (Exception e)
         {
-            logger.LogError(e, "Error in api conversation");
+            logger.LogError(e, "Unknown error");
             string errorTextToResponse = "\n⚠Error in conversation - 对话出错!";
             await YieldError(OpenAICompatibleErrorCode.Unknown, errorTextToResponse, cancellationToken);
         }
