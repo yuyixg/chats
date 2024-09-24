@@ -9,52 +9,39 @@ namespace Chats.BE.DB;
 public partial class User
 {
     [Key]
-    [Column("id")]
     public Guid Id { get; set; }
 
-    [Column("avatar")]
     [StringLength(1000)]
     public string? Avatar { get; set; }
 
-    [Column("account")]
     [StringLength(1000)]
     public string Account { get; set; } = null!;
 
-    [Column("username")]
     [StringLength(1000)]
     public string Username { get; set; } = null!;
 
-    [Column("password")]
     [StringLength(1000)]
     public string? Password { get; set; }
 
-    [Column("email")]
     [StringLength(1000)]
     public string? Email { get; set; }
 
-    [Column("phone")]
     [StringLength(1000)]
     public string? Phone { get; set; }
 
-    [Column("role")]
     [StringLength(1000)]
     public string Role { get; set; } = null!;
 
-    [Column("enabled")]
     public bool Enabled { get; set; }
 
-    [Column("provider")]
     [StringLength(1000)]
     public string? Provider { get; set; }
 
-    [Column("sub")]
     [StringLength(1000)]
     public string? Sub { get; set; }
 
-    [Column("createdAt")]
     public DateTime CreatedAt { get; set; }
 
-    [Column("updatedAt")]
     public DateTime UpdatedAt { get; set; }
 
     [InverseProperty("User")]
