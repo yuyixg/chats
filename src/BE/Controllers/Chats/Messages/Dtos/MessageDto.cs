@@ -104,7 +104,7 @@ public record MessageContentResponse
         return new MessageContentResponse()
         {
             Text = string.Join("\n", groups[DBMessageContentType.Text].Select(Encoding.Unicode.GetString)),
-            Image = groups[DBMessageContentType.ImageUrl].Select(Encoding.UTF8.GetString).ToList() switch { [] => null, var x => x }
+            Image = groups[DBMessageContentType.ImageUrl].Select(Encoding.UTF8.GetString).ToList() switch { [] => null, var x => x },
             Error = string.Join("\n", groups[DBMessageContentType.Error].Select(Encoding.UTF8.GetString)) switch { "" => null, var x => x }
         };
     }
