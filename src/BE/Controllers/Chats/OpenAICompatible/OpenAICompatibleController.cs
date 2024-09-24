@@ -1,5 +1,4 @@
-﻿using Chats.BE.Controllers.Chats.Conversations.Dtos;
-using Chats.BE.Controllers.Chats.Conversations;
+﻿using Chats.BE.Controllers.Chats.Conversations;
 using Chats.BE.Controllers.Chats.OpenAICompatible.Dtos;
 using Chats.BE.DB;
 using Chats.BE.DB.Jsons;
@@ -15,9 +14,7 @@ using System.ClientModel;
 using System.ClientModel.Primitives;
 using System.Text.Json;
 using System.Text.Json.Nodes;
-using Azure.Core;
 using Chats.BE.Controllers.Common;
-using Chats.BE.Infrastructure;
 using Microsoft.EntityFrameworkCore;
 using Chats.BE.DB.Enums;
 using System.Diagnostics;
