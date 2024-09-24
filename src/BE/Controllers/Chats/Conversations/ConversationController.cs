@@ -100,11 +100,7 @@ public class ConversationController(ChatsDB db, CurrentUser currentUser, ILogger
                 ChatRoleId = (byte)DBConversationRole.System,
                 MessageContents =
                 [
-                    new MessageContent()
-                    {
-                        ContentTypeId = (byte)DBMessageContentType.Text,
-                        Content = Encoding.Unicode.GetBytes(request.UserModelConfig.Prompt),
-                    }
+                    MessageContent.FromText(request.UserModelConfig.Prompt)
                 ],
                 CreatedAt = DateTime.UtcNow,
             };
@@ -174,6 +170,7 @@ public class ConversationController(ChatsDB db, CurrentUser currentUser, ILogger
         Response.Headers.CacheControl = "no-cache";
         Response.Headers.Connection = "keep-alive";
         StringBuilder responseText = new();
+        string? errorText = null;
         UserModelBalanceCost cost = null!;
         Stopwatch sw = Stopwatch.StartNew();
         try
@@ -212,26 +209,22 @@ public class ConversationController(ChatsDB db, CurrentUser currentUser, ILogger
         }
         catch (InsufficientBalanceException)
         {
-            string errorTextToResponse = "\n⚠Insufficient balance - 余额不足!";
-            responseText.Append(errorTextToResponse);
-            await YieldResponse(new SseResponseLine { Result = errorTextToResponse, Success = false });
+            errorText = "Insufficient balance";
         }
         catch (Exception e) when (e is DashScopeException || e is ClientResultException)
         {
+            errorText = e.Message;
             logger.LogError(e, "Error in conversation for message: {userMessageId}", userMessage.Id);
-            responseText.Append(e.Message);
-            await YieldResponse(new SseResponseLine { Result = e.Message, Success = false });
         }
         catch (TaskCanceledException)
         {
             // do nothing if cancelled
+            errorText = "Conversation cancelled";
         }
         catch (Exception e)
         {
+            errorText = "Error in conversation";
             logger.LogError(e, "Error in conversation for message: {userMessageId}", userMessage.Id);
-            string errorTextToResponse = "\n⚠Error in conversation - 对话出错!";
-            responseText.Append(errorTextToResponse);
-            await YieldResponse(new SseResponseLine { Result = errorTextToResponse, Success = false });
         }
         finally
         {
@@ -250,11 +243,7 @@ public class ConversationController(ChatsDB db, CurrentUser currentUser, ILogger
             ChatRoleId = (byte)DBConversationRole.Assistant,
             MessageContents =
             [
-                new MessageContent()
-                {
-                    ContentTypeId = (byte)DBMessageContentType.Text,
-                    Content = Encoding.Unicode.GetBytes(responseText.ToString()),
-                }
+                MessageContent.FromText(responseText.ToString()),
             ],
             CreatedAt = DateTime.UtcNow,
             ParentId = userMessage.Id,
@@ -269,6 +258,11 @@ public class ConversationController(ChatsDB db, CurrentUser currentUser, ILogger
                 TransactionLog = transactionLog,
             }
         };
+        if (errorText != null)
+        {
+            assistantMessage.MessageContents.Add(MessageContent.FromError(errorText));
+            await YieldResponse(new() { Result = errorText, Success = false });
+        }
         db.Messages.Add(assistantMessage);
 
         await db.SaveChangesAsync(cancellationToken);

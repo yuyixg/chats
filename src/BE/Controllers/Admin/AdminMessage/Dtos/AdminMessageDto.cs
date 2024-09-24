@@ -64,7 +64,7 @@ public record AdminMessageBasicItem
     public required string Role { get; init; }
 
     [JsonPropertyName("content")]
-    public required MessageContentDto Content { get; init; }
+    public required MessageContentResponse Content { get; init; }
 
     [JsonPropertyName("childrenIds")]
     public required List<string> ChildrenIds { get; init; }
@@ -139,7 +139,7 @@ public record AdminMessageItemTemp
                     ParentId = x.ParentId?.ToString(),
                     CreatedAt = x.CreatedAt,
                     Role = x.Role.ToString().ToLowerInvariant(),
-                    Content = MessageContentDto.FromSegments(x.Content),
+                    Content = MessageContentResponse.FromSegments(x.Content),
                     ChildrenIds = temps
                         .Where(v => v.ParentId == x.Id && v.Role == DBConversationRole.User)
                         .Select(v => v.Id.ToString())

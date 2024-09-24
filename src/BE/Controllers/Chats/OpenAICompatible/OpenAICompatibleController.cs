@@ -143,12 +143,12 @@ public class OpenAICompatibleController(ChatsDB db, CurrentApiKey apiKey, Conver
         }
         catch (InsufficientBalanceException)
         {
-            await YieldError("\n⚠Insufficient balance - 余额不足!", cancellationToken);
+            await YieldError(OpenAICompatibleErrorCode.InsufficientBalance, "⚠Insufficient balance - 余额不足!", cancellationToken);
         }
         catch (Exception e) when (e is DashScopeException || e is ClientResultException)
         {
             logger.LogError(e, "Error in api conversation");
-            await YieldError(e.Message, cancellationToken);
+            await YieldError(OpenAICompatibleErrorCode.UpstreamError, e.Message, cancellationToken);
         }
         catch (TaskCanceledException)
         {
@@ -158,7 +158,7 @@ public class OpenAICompatibleController(ChatsDB db, CurrentApiKey apiKey, Conver
         {
             logger.LogError(e, "Error in api conversation");
             string errorTextToResponse = "\n⚠Error in conversation - 对话出错!";
-            await YieldError(errorTextToResponse, cancellationToken);
+            await YieldError(OpenAICompatibleErrorCode.Unknown, errorTextToResponse, cancellationToken);
         }
         finally
         {
@@ -215,14 +215,14 @@ public class OpenAICompatibleController(ChatsDB db, CurrentApiKey apiKey, Conver
         });
     }
 
-    private async Task YieldError(string message, CancellationToken cancellationToken)
+    private async Task YieldError(OpenAICompatibleErrorCode code, string message, CancellationToken cancellationToken)
     {
         await Response.Body.WriteAsync(dataU8, cancellationToken);
         await JsonSerializer.SerializeAsync(Response.Body, new ErrorResponse()
         {
             Error = new ErrorDetail
             {
-                Code = "",
+                Code = code.ToString(),
                 Message = message,
                 Param = "",
                 Type = ""

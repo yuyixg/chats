@@ -6,6 +6,7 @@ using Chats.BE.Services.Conversations;
 using System.Text;
 using System.Text.Json;
 using System.Text.Json.Serialization;
+using static System.Runtime.InteropServices.JavaScript.JSType;
 
 namespace Chats.BE.Controllers.Chats.Messages.Dtos;
 
@@ -24,7 +25,7 @@ public abstract record MessageDto
     public required string Role { get; init; }
 
     [JsonPropertyName("content")]
-    public required MessageContentDto Content { get; init; }
+    public required MessageContentResponse Content { get; init; }
 
     [JsonPropertyName("createdAt")]
     public required DateTime CreatedAt { get; init; }
@@ -56,35 +57,56 @@ public record ResponseMessageDto : MessageDto
     public required string? ModelName { get; init; }
 }
 
-public record MessageContentDto
+public record MessageContentRequest
+{
+    [JsonPropertyName("text")]
+    public required string Text { get; init; }
+
+    [JsonPropertyName("image")]
+    public List<string>? Image { get; init; }
+
+    public MessageContent[] ToMessageContents()
+    {
+        return
+        [
+            MessageContent.FromText(Text),
+            ..(Image ?? []).Select(MessageContent.FromImageUrl),
+        ];
+    }
+
+    public DBMessageSegment[] ToMessageSegments()
+    {
+        return ToMessageContents().Select(x => x.ToSegment()).ToArray();
+    }
+}
+
+public record MessageContentResponse
 {
     [JsonPropertyName("text")]
     public required string Text { get; init; }
 
     [JsonPropertyName("image"), JsonIgnore(Condition = JsonIgnoreCondition.WhenWritingNull)]
-    public List<string>? Image { get; init; }
+    public required List<string>? Image { get; init; }
 
-    public MessageContent[] ToMessageContents()
-    {
-        return 
-        [
-            MessageContent.FromText(Text), 
-            ..(Image ?? []).Select(MessageContent.FromImageUrl)
-        ];
-    }
+    [JsonPropertyName("error"), JsonIgnore(Condition = JsonIgnoreCondition.WhenWritingNull)]
+    public required string? Error { get; init; }
 
-    public static MessageContentDto FromSegments(DBMessageSegment[] segments)
+    public static MessageContentResponse FromSegments(DBMessageSegment[] segments)
     {
-        return new MessageContentDto()
+        Dictionary<DBMessageContentType, byte[][]> groups = segments
+            .GroupBy(x => x.ContentType)
+            .ToDictionary(k => k.Key, v => v.Select(x => x.Content).ToArray());
+        foreach (DBMessageContentType ct in Enum.GetValuesAsUnderlyingType<DBMessageContentType>())
         {
-            Text = string.Join("\n", segments.Where(x => x.ContentType == DBMessageContentType.Text).Select(x => Encoding.Unicode.GetString(x.Content))),
-            Image = segments.Where(x => x.ContentType == DBMessageContentType.ImageUrl).Select(x => Encoding.UTF8.GetString(x.Content)).ToList()
+            if (!groups.ContainsKey(ct)) groups[ct] = [];
+        }
+
+        return new MessageContentResponse()
+        {
+            Text = string.Join("\n", groups[DBMessageContentType.Text].Select(Encoding.Unicode.GetString)),
+            Image = groups[DBMessageContentType.ImageUrl].Select(Encoding.UTF8.GetString).ToList(),
+            Error = string.Join("\n", groups[DBMessageContentType.Error].Select(Encoding.UTF8.GetString))
         };
-    }
-    
-    public DBMessageSegment[] ToMessageSegments()
-    {
-        return ToMessageContents().Select(x => x.ToSegment()).ToArray();
     }
 }
 
@@ -112,7 +134,7 @@ public record ChatMessageTemp
                 Id = Id.ToString(),
                 ParentId = ParentId?.ToString(),
                 Role = Role.ToString().ToLowerInvariant(),
-                Content = MessageContentDto.FromSegments(Content),
+                Content = MessageContentResponse.FromSegments(Content),
                 CreatedAt = CreatedAt
             };
         }
@@ -123,7 +145,7 @@ public record ChatMessageTemp
                 Id = Id.ToString(),
                 ParentId = ParentId?.ToString(),
                 Role = Role.ToString().ToLowerInvariant(),
-                Content = MessageContentDto.FromSegments(Content),
+                Content = MessageContentResponse.FromSegments(Content),
                 CreatedAt = CreatedAt,
                 InputTokens = InputTokens!.Value,
                 OutputTokens = OutputTokens!.Value,

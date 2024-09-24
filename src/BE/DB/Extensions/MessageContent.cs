@@ -35,4 +35,9 @@ public partial class MessageContent
     {
         return new MessageContent { Content = Encoding.UTF8.GetBytes(imageUrl), ContentTypeId = (byte)DBMessageContentType.ImageUrl };
     }
+
+    public static MessageContent FromError(string error)
+    {
+        return new MessageContent { Content = Encoding.UTF8.GetBytes(error), ContentTypeId = (byte)DBMessageContentType.Error };
+    }
 }
