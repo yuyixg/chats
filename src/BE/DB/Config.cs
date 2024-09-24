@@ -6,6 +6,7 @@ using Microsoft.EntityFrameworkCore;
 
 namespace Chats.BE.DB;
 
+[Table("Config")]
 [Index("Key", Name = "Configs_key_key", IsUnique = true)]
 public partial class Config
 {

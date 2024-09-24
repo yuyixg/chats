@@ -6,6 +6,7 @@ using Microsoft.EntityFrameworkCore;
 
 namespace Chats.BE.DB;
 
+[Table("FileService")]
 public partial class FileService
 {
     [Key]

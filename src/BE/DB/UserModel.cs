@@ -6,6 +6,7 @@ using Microsoft.EntityFrameworkCore;
 
 namespace Chats.BE.DB;
 
+[Table("UserModel")]
 [Index("UserId", Name = "IX_UserModels_UserId", IsUnique = true)]
 public partial class UserModel
 {

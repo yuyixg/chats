@@ -129,6 +129,11 @@ public partial class ChatsDB : DbContext
                 .HasConstraintName("ChatModels_modelKeysId_fkey");
         });
 
+        modelBuilder.Entity<Config>(entity =>
+        {
+            entity.HasKey(e => e.Key).HasName("PK_Configs");
+        });
+
         modelBuilder.Entity<Conversation>(entity =>
         {
             entity.HasOne(d => d.ChatModel).WithMany(p => p.Conversations)
@@ -235,6 +240,8 @@ public partial class ChatsDB : DbContext
 
         modelBuilder.Entity<Session>(entity =>
         {
+            entity.HasKey(e => e.Id).HasName("PK_Sessions");
+
             entity.Property(e => e.Id).ValueGeneratedNever();
 
             entity.HasOne(d => d.User).WithMany(p => p.Sessions)

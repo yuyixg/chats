@@ -6,6 +6,7 @@ using Microsoft.EntityFrameworkCore;
 
 namespace Chats.BE.DB;
 
+[Table("UserBalance")]
 [Index("UserId", Name = "IDX_UserBalances_userId")]
 [Index("UserId", Name = "UserBalances_userId_key", IsUnique = true)]
 public partial class UserBalance

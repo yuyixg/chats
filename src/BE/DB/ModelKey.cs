@@ -6,6 +6,7 @@ using Microsoft.EntityFrameworkCore;
 
 namespace Chats.BE.DB;
 
+[Table("ModelKey")]
 public partial class ModelKey
 {
     [Key]

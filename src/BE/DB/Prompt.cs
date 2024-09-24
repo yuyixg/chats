@@ -6,6 +6,7 @@ using Microsoft.EntityFrameworkCore;
 
 namespace Chats.BE.DB;
 
+[Table("Prompt")]
 public partial class Prompt
 {
     [Key]

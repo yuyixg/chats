@@ -6,6 +6,7 @@ using Microsoft.EntityFrameworkCore;
 
 namespace Chats.BE.DB;
 
+[Table("LoginService")]
 public partial class LoginService
 {
     [Key]

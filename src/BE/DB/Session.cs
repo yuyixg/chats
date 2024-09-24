@@ -6,6 +6,7 @@ using Microsoft.EntityFrameworkCore;
 
 namespace Chats.BE.DB;
 
+[Table("Session")]
 [Index("UserId", Name = "ID_Sessions_userId")]
 public partial class Session
 {
