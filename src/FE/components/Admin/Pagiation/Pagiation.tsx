@@ -21,7 +21,7 @@ const PaginationContainer = ({
   totalCount: number;
   onPagingChange: (page: number, pageSize: number) => void;
 }) => {
-  const { t } = useTranslation('client');
+  const { t } = useTranslation(['admin']);
   function previous() {
     onPagingChange(page - 1, pageSize);
   }

@@ -127,5 +127,9 @@
   "Use count": "可邀请次数",
   "Edit Invitation Code": "编辑邀请码",
   "Add Invitation Code": "新增邀请码",
-  "Created User": "创建者"
+  "Created User": "创建者",
+
+  "Showing {{currentCount}} - {{currentTotalCount}} total {{totalCount}}": "显示 {{currentCount}} - {{currentTotalCount}} 共 {{totalCount}} 条",
+  "Previous": "上一页",
+  "Next": "下一页"
 }
