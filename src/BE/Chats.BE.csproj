@@ -11,18 +11,18 @@
 
   <ItemGroup>
     <PackageReference Include="AI.Dev.OpenAI.GPT" Version="1.0.2" />
-    <PackageReference Include="AWSSDK.S3" Version="3.7.402.5" />
+    <PackageReference Include="AWSSDK.S3" Version="3.7.403.1" />
     <PackageReference Include="Azure.AI.OpenAI" Version="2.0.0-beta.5" />
     <PackageReference Include="BCrypt.Net-Next" Version="4.0.3" />
     <PackageReference Include="Microsoft.EntityFrameworkCore.Design" Version="8.0.8" />
     <PackageReference Include="Microsoft.EntityFrameworkCore.SqlServer" Version="8.0.8" />
     <PackageReference Include="Sdcb.DashScope" Version="1.0.3" />
     <PackageReference Include="Sdcb.WenXinQianFan" Version="1.2.0" />
-    <PackageReference Include="Swashbuckle.AspNetCore" Version="6.7.3" />
+    <PackageReference Include="Swashbuckle.AspNetCore" Version="6.8.0" />
     <PackageReference Include="System.Linq.Async" Version="6.0.1" />
     <PackageReference Include="System.Runtime.Caching" Version="8.0.0" />
-    <PackageReference Include="TencentCloudSDK.Hunyuan" Version="3.0.1082" />
-    <PackageReference Include="TencentCloudSDK.Sms" Version="3.0.1082" />
+    <PackageReference Include="TencentCloudSDK.Hunyuan" Version="3.0.1094" />
+    <PackageReference Include="TencentCloudSDK.Sms" Version="3.0.1094" />
   </ItemGroup>
 
 </Project>

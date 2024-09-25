@@ -6,24 +6,21 @@ using Microsoft.EntityFrameworkCore;
 
 namespace Chats.BE.DB;
 
+[Table("UserBalance")]
 [Index("UserId", Name = "IDX_UserBalances_userId")]
 [Index("UserId", Name = "UserBalances_userId_key", IsUnique = true)]
 public partial class UserBalance
 {
     [Key]
-    [Column("id")]
     public Guid Id { get; set; }
 
-    [Column("balance", TypeName = "decimal(32, 16)")]
+    [Column(TypeName = "decimal(32, 16)")]
     public decimal Balance { get; set; }
 
-    [Column("userId")]
     public Guid UserId { get; set; }
 
-    [Column("createdAt")]
     public DateTime CreatedAt { get; set; }
 
-    [Column("updatedAt")]
     public DateTime UpdatedAt { get; set; }
 
     [ForeignKey("UserId")]

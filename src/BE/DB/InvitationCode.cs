@@ -11,23 +11,17 @@ namespace Chats.BE.DB;
 public partial class InvitationCode
 {
     [Key]
-    [Column("id")]
     public Guid Id { get; set; }
 
-    [Column("value")]
     [StringLength(1000)]
     public string Value { get; set; } = null!;
 
-    [Column("count")]
     public short Count { get; set; }
 
-    [Column("createUserId")]
     public Guid CreateUserId { get; set; }
 
-    [Column("createdAt")]
     public DateTime CreatedAt { get; set; }
 
-    [Column("isDeleted")]
     public bool IsDeleted { get; set; }
 
     [InverseProperty("InvitationCode")]

@@ -18,7 +18,7 @@ public record MessageLiteDto
         {
             DBConversationRole.System => Content[0].ToOpenAISystemChatMessage(),
             DBConversationRole.User => new UserChatMessage(Content.Select(c => c.ToOpenAI())),
-            DBConversationRole.Assistant => Content[0].ToOpenAIAssistantChatMessage(),
+            DBConversationRole.Assistant => new AssistantChatMessage(Content.Where(x => x.ContentType != DBMessageContentType.Error).Select(x => x.ToOpenAI())),
             _ => throw new NotImplementedException()
         };
     }
@@ -43,10 +43,5 @@ public record DBMessageSegment
     public SystemChatMessage ToOpenAISystemChatMessage()
     {
         return new SystemChatMessage(Encoding.Unicode.GetString(Content));
-    }
-
-    public AssistantChatMessage ToOpenAIAssistantChatMessage()
-    {
-        return new AssistantChatMessage(Encoding.Unicode.GetString(Content));
     }
 }

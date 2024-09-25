@@ -6,6 +6,7 @@ using Microsoft.EntityFrameworkCore;
 
 namespace Chats.BE.DB;
 
+[Table("ChatModel")]
 [Index("FileServiceId", Name = "IDX_ChatModels_fileServiceId")]
 [Index("ModelKeysId", Name = "IDX_ChatModels_modelKeysId")]
 public partial class ChatModel

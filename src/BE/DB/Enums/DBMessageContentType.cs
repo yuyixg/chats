@@ -1,7 +1,22 @@
 ﻿namespace Chats.BE.DB.Enums;
 
+/// <summary>
+/// Represents the content type of a database message.
+/// </summary>
 public enum DBMessageContentType : byte
 {
-    Text = 1, 
-    ImageUrl = 2, 
+    /// <summary>
+    /// Error content type encoded in UTF-8.
+    /// </summary>
+    Error = 0,
+
+    /// <summary>
+    /// Text content type encoded in Unicode.
+    /// </summary>
+    Text = 1,
+
+    /// <summary>
+    /// Image URL content type encoded in UTF-8.
+    /// </summary>
+    ImageUrl = 2,
 }

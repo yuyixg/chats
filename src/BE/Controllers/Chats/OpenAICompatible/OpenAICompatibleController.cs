@@ -1,5 +1,4 @@
-﻿using Chats.BE.Controllers.Chats.Conversations.Dtos;
-using Chats.BE.Controllers.Chats.Conversations;
+﻿using Chats.BE.Controllers.Chats.Conversations;
 using Chats.BE.Controllers.Chats.OpenAICompatible.Dtos;
 using Chats.BE.DB;
 using Chats.BE.DB.Jsons;
@@ -15,9 +14,7 @@ using System.ClientModel;
 using System.ClientModel.Primitives;
 using System.Text.Json;
 using System.Text.Json.Nodes;
-using Azure.Core;
 using Chats.BE.Controllers.Common;
-using Chats.BE.Infrastructure;
 using Microsoft.EntityFrameworkCore;
 using Chats.BE.DB.Enums;
 using System.Diagnostics;
@@ -143,12 +140,12 @@ public class OpenAICompatibleController(ChatsDB db, CurrentApiKey apiKey, Conver
         }
         catch (InsufficientBalanceException)
         {
-            await YieldError("\n⚠Insufficient balance - 余额不足!", cancellationToken);
+            await YieldError(OpenAICompatibleErrorCode.InsufficientBalance, "⚠Insufficient balance - 余额不足!", cancellationToken);
         }
         catch (Exception e) when (e is DashScopeException || e is ClientResultException)
         {
-            logger.LogError(e, "Error in api conversation");
-            await YieldError(e.Message, cancellationToken);
+            logger.LogError(e, "Upstream error");
+            await YieldError(OpenAICompatibleErrorCode.UpstreamError, e.Message, cancellationToken);
         }
         catch (TaskCanceledException)
         {
@@ -156,9 +153,9 @@ public class OpenAICompatibleController(ChatsDB db, CurrentApiKey apiKey, Conver
         }
         catch (Exception e)
         {
-            logger.LogError(e, "Error in api conversation");
+            logger.LogError(e, "Unknown error");
             string errorTextToResponse = "\n⚠Error in conversation - 对话出错!";
-            await YieldError(errorTextToResponse, cancellationToken);
+            await YieldError(OpenAICompatibleErrorCode.Unknown, errorTextToResponse, cancellationToken);
         }
         finally
         {
@@ -215,14 +212,14 @@ public class OpenAICompatibleController(ChatsDB db, CurrentApiKey apiKey, Conver
         });
     }
 
-    private async Task YieldError(string message, CancellationToken cancellationToken)
+    private async Task YieldError(OpenAICompatibleErrorCode code, string message, CancellationToken cancellationToken)
     {
         await Response.Body.WriteAsync(dataU8, cancellationToken);
         await JsonSerializer.SerializeAsync(Response.Body, new ErrorResponse()
         {
             Error = new ErrorDetail
             {
-                Code = "",
+                Code = code.ToString(),
                 Message = message,
                 Param = "",
                 Type = ""

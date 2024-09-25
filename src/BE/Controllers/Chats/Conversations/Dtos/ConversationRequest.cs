@@ -16,7 +16,7 @@ public record ConversationRequest
     public int? MessageId { get; init; }
 
     [JsonPropertyName("userMessage")]
-    public required MessageContentDto UserMessage { get; init; }
+    public required MessageContentRequest UserMessage { get; init; }
 
     [JsonPropertyName("userModelConfig")]
     public required JsonUserModelConfig UserModelConfig { get; init; }
