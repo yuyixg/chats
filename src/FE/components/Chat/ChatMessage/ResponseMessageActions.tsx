@@ -46,7 +46,7 @@ const ResponseMessageActions = (props: Props) => {
   return (
     <>
       {!hidden ? (
-        <div className="flex gap-1 flex-wrap ml-[-8px]">
+        <div className="flex gap-1 flex-wrap ml-[-8px] mt-1">
           <PaginationAction
             hidden={assistantChildrenIds.length <= 1}
             disabledPrev={

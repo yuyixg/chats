@@ -15,7 +15,7 @@ import { getApiUrl } from '@/utils/common';
 import { throttle } from '@/utils/throttle';
 import { getUserSession } from '@/utils/user';
 
-import { ChatBody, Message, Role } from '@/types/chat';
+import { ChatBody, Content, Message, Role } from '@/types/chat';
 
 import { HomeContext } from '@/pages/home/home';
 
@@ -207,11 +207,27 @@ export const Chat = memo(({ stopConversationRef }: Props) => {
         homeDispatch({ field: 'chatError', value: true });
         return;
       }
+
       let errorChat = false;
       let text = '';
       const reader = data.getReader();
       const decoder = new TextDecoder();
       let buffer = '';
+
+      function setSelectMessages(content: Content) {
+        let lastMessages = selectMessageList[selectMessageList.length - 1];
+        lastMessages = {
+          ...lastMessages,
+          content,
+        };
+
+        selectMessageList.splice(-1, 1, lastMessages);
+
+        homeDispatch({
+          field: 'selectMessages',
+          value: [...selectMessageList],
+        });
+      }
       async function* processBuffer() {
         while (true) {
           const { done, value } = await reader.read();
@@ -246,6 +262,7 @@ export const Chat = memo(({ stopConversationRef }: Props) => {
             value: errorChat,
           });
           controller.abort();
+          setSelectMessages({ text, error: value.result });
           break;
         }
         if (stopConversationRef.current === true) {
@@ -253,19 +270,7 @@ export const Chat = memo(({ stopConversationRef }: Props) => {
           break;
         }
         text += value.result;
-
-        let lastMessages = selectMessageList[selectMessageList.length - 1];
-        lastMessages = {
-          ...lastMessages,
-          content: { text },
-        };
-
-        selectMessageList.splice(-1, 1, lastMessages);
-
-        homeDispatch({
-          field: 'selectMessages',
-          value: [...selectMessageList],
-        });
+        setSelectMessages({ text });
       }
 
       if (isChatEmpty) {
@@ -489,11 +494,7 @@ export const Chat = memo(({ stopConversationRef }: Props) => {
                   />
                 );
               })}
-
-              <div className="flex relative m-auto justify-center md:max-w-2xl lg:max-w-2xl lg:px-0 xl:max-w-5xl">
-                {chatError && <ChatError />}
-              </div>
-
+              
               <div
                 className="h-[162px] bg-white dark:bg-[#262630]"
                 ref={messagesEndRef}

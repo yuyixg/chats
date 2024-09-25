@@ -39,6 +39,7 @@ export interface Message {
 }
 
 export interface Content {
+  error?: string;
   text?: string;
   image?: string[];
 }

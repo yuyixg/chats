@@ -7,10 +7,10 @@ import { HomeContext } from '@/pages/home/home';
 
 import { IconRobot } from '@/components/Icons/index';
 
+import ChatError from '../ChatError';
 import ResponseMessage from './ResponseMessage';
 import ResponseMessageActions from './ResponseMessageActions';
 import UserMessage from './UserMessage';
-
 
 export interface Props {
   readonly?: boolean;
@@ -46,7 +46,7 @@ export const ChatMessage: FC<Props> = memo(
     onRegenerate,
   }) => {
     const {
-      state: { messageIsStreaming, currentChatMessageId },
+      state: { messageIsStreaming, currentChatMessageId, chatError },
     } = useContext(HomeContext);
 
     return (
@@ -76,6 +76,11 @@ export const ChatMessage: FC<Props> = memo(
                 currentSelectIndex={currentSelectIndex}
                 parentChildrenIds={parentChildrenIds}
               />
+            )}
+
+            {((lastMessageId === message.id && chatError) ||
+              message.content.error) && (
+              <ChatError error={message.content.error} />
             )}
 
             {message.role === 'assistant' && (
