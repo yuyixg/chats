@@ -1,8 +1,8 @@
 ﻿using Chats.BE.Controllers.Chats.Conversations.Dtos;
 using Chats.BE.DB;
 using Chats.BE.DB.Enums;
-using Chats.BE.Services;
 using Chats.BE.Services.Conversations;
+using Chats.BE.Services.IdEncryption;
 using System.Text;
 using System.Text.Json;
 using System.Text.Json.Serialization;
@@ -125,14 +125,14 @@ public record ChatMessageTemp
     public required Guid? ModelId { get; init; }
     public required string? ModelName { get; init; }
 
-    public MessageDto ToDto()
+    public MessageDto ToDto(IIdEncryptionService idEncryption)
     {
         if (ModelId == null)
         {
             return new RequestMessageDto()
             {
-                Id = Id.ToString(),
-                ParentId = ParentId?.ToString(),
+                Id = idEncryption.Encrypt(Id),
+                ParentId = ParentId != null ? idEncryption.Encrypt(ParentId.Value) : null, 
                 Role = Role.ToString().ToLowerInvariant(),
                 Content = MessageContentResponse.FromSegments(Content),
                 CreatedAt = CreatedAt
@@ -142,8 +142,8 @@ public record ChatMessageTemp
         {
             return new ResponseMessageDto()
             {
-                Id = Id.ToString(),
-                ParentId = ParentId?.ToString(),
+                Id = idEncryption.Encrypt(Id),
+                ParentId = ParentId != null ? idEncryption.Encrypt(ParentId.Value) : null, 
                 Role = Role.ToString().ToLowerInvariant(),
                 Content = MessageContentResponse.FromSegments(Content),
                 CreatedAt = CreatedAt,

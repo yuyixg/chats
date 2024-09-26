@@ -5,6 +5,7 @@ using Chats.BE.DB;
 using Chats.BE.DB.Enums;
 using Chats.BE.DB.Jsons;
 using Chats.BE.Infrastructure;
+using Chats.BE.Services.IdEncryption;
 using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Mvc;
 using Microsoft.EntityFrameworkCore;
@@ -13,13 +14,13 @@ using System.Text.Json;
 namespace Chats.BE.Controllers.Chats.Chats;
 
 [Route("api/user/chats"), Authorize]
-public class UserChatsController(ChatsDB db, CurrentUser currentUser) : ControllerBase
+public class UserChatsController(ChatsDB db, CurrentUser currentUser, IIdEncryptionService idEncryption) : ControllerBase
 {
     [HttpGet("{chatId}")]
-    public async Task<ActionResult<ChatsResponse>> GetOneChat(int chatId, CancellationToken cancellationToken)
+    public async Task<ActionResult<ChatsResponse>> GetOneChat(string chatId, CancellationToken cancellationToken)
     {
         ChatsResponseTemp? temp = await db.Conversations
-            .Where(x => x.Id == chatId && x.UserId == currentUser.Id && !x.IsDeleted)
+            .Where(x => x.Id == idEncryption.DecryptAsInt32(chatId) && x.UserId == currentUser.Id && !x.IsDeleted)
             .Select(x => new ChatsResponseTemp()
             {
                 Id = x.Id,
@@ -42,7 +43,7 @@ public class UserChatsController(ChatsDB db, CurrentUser currentUser) : Controll
             return NotFound();
         }
 
-        return Ok(temp.ToResponse());
+        return Ok(temp.ToResponse(idEncryption));
     }
 
     [HttpGet]
@@ -74,7 +75,7 @@ public class UserChatsController(ChatsDB db, CurrentUser currentUser) : Controll
                 },
             }),
             request,
-            x => x.ToResponse(), cancellationToken);
+            x => x.ToResponse(idEncryption), cancellationToken);
         return Ok(result);
     }
 
@@ -128,29 +129,29 @@ public class UserChatsController(ChatsDB db, CurrentUser currentUser) : Controll
         chat.ChatModel = await db.ChatModels
             .Where(x => x.Id == chat.ChatModelId)
             .SingleAsync(cancellationToken);
-        return Ok(ChatsResponse.FromDB(chat));
+        return Ok(ChatsResponse.FromDB(chat, idEncryption));
     }
 
     [HttpDelete("{chatId}")]
-    public async Task<IActionResult> DeleteChats(int chatId, CancellationToken cancellationToken)
+    public async Task<IActionResult> DeleteChats(string chatId, CancellationToken cancellationToken)
     {
         bool exists = await db.Conversations
-            .AnyAsync(x => x.Id == chatId && x.UserId == currentUser.Id, cancellationToken);
+            .AnyAsync(x => x.Id == idEncryption.DecryptAsInt32(chatId) && x.UserId == currentUser.Id, cancellationToken);
         if (!exists)
         {
             return NotFound();
         }
 
-        if (await db.Messages.AnyAsync(m => m.ConversationId == chatId, cancellationToken))
+        if (await db.Messages.AnyAsync(m => m.ConversationId == idEncryption.DecryptAsInt32(chatId), cancellationToken))
         {
             await db.Conversations
-                .Where(x => x.Id == chatId)
+                .Where(x => x.Id == idEncryption.DecryptAsInt32(chatId))
                 .ExecuteUpdateAsync(x => x.SetProperty(y => y.IsDeleted, true), cancellationToken);
         }
         else
         {
             await db.Conversations
-                .Where(x => x.Id == chatId)
+                .Where(x => x.Id == idEncryption.DecryptAsInt32(chatId))
                 .ExecuteDeleteAsync(cancellationToken);
         }
 
@@ -158,10 +159,10 @@ public class UserChatsController(ChatsDB db, CurrentUser currentUser) : Controll
     }
 
     [HttpPut("{chatId}")]
-    public async Task<IActionResult> UpdateChats(int chatId, [FromBody] UpdateChatsRequest request, CancellationToken cancellationToken)
+    public async Task<IActionResult> UpdateChats(string chatId, [FromBody] UpdateChatsRequest request, CancellationToken cancellationToken)
     {
         Conversation? chat = await db.Conversations
-            .Where(x => x.Id == chatId && x.UserId == currentUser.Id)
+            .Where(x => x.Id == idEncryption.DecryptAsInt32(chatId) && x.UserId == currentUser.Id)
             .FirstOrDefaultAsync(cancellationToken);
         if (chat == null)
         {

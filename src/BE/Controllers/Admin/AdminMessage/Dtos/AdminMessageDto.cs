@@ -2,6 +2,7 @@
 using Chats.BE.Controllers.Chats.Messages.Dtos;
 using Chats.BE.DB.Jsons;
 using Chats.BE.Services.Conversations;
+using Chats.BE.Services.IdEncryption;
 using System.Text.Json;
 using System.Text.Json.Serialization;
 
@@ -128,25 +129,25 @@ public record AdminMessageItemTemp
     public required decimal? OutputPrice { get; init; }
     public required int? Duration { get; init; }
 
-    public static AdminMessageBasicItem[] ToDtos(AdminMessageItemTemp[] temps)
+    public static AdminMessageBasicItem[] ToDtos(AdminMessageItemTemp[] temps, IIdEncryptionService idEncryption)
     {
         return temps
             .Select(x =>
             {
                 AdminMessageBasicItem basicItem = new()
                 {
-                    Id = x.Id.ToString(),
-                    ParentId = x.ParentId?.ToString(),
+                    Id = idEncryption.Encrypt(x.Id),
+                    ParentId = x.ParentId != null ? idEncryption.Encrypt(x.ParentId.Value) : null,
                     CreatedAt = x.CreatedAt,
                     Role = x.Role.ToString().ToLowerInvariant(),
                     Content = MessageContentResponse.FromSegments(x.Content),
                     ChildrenIds = temps
                         .Where(v => v.ParentId == x.Id && v.Role == DBConversationRole.User)
-                        .Select(v => v.Id.ToString())
+                        .Select(v => idEncryption.Encrypt(v.Id))
                         .ToList(),
                     AssistantChildrenIds = temps
                         .Where(v => v.ParentId == x.ParentId && v.Role == DBConversationRole.Assistant)
-                        .Select(v => v.Id.ToString())
+                        .Select(v => idEncryption.Encrypt(v.Id))
                         .ToList(),
                 };
 

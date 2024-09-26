@@ -7,6 +7,7 @@ using Chats.BE.Infrastructure;
 using Chats.BE.Services;
 using Chats.BE.Services.Conversations;
 using Chats.BE.Services.Conversations.Dtos;
+using Chats.BE.Services.IdEncryption;
 using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Mvc;
 using Microsoft.EntityFrameworkCore;
@@ -20,7 +21,7 @@ using OpenAIChatMessage = OpenAI.Chat.ChatMessage;
 namespace Chats.BE.Controllers.Chats.Conversations;
 
 [Route("api/chats"), Authorize]
-public class ConversationController(ChatsDB db, CurrentUser currentUser, ILogger<ConversationController> logger) : ControllerBase
+public class ConversationController(ChatsDB db, CurrentUser currentUser, ILogger<ConversationController> logger, IIdEncryptionService idEncryption) : ControllerBase
 {
     [HttpPost]
     public async Task<IActionResult> StartConversationStreamed(
@@ -29,6 +30,8 @@ public class ConversationController(ChatsDB db, CurrentUser currentUser, ILogger
         [FromServices] ConversationFactory conversationFactory,
         CancellationToken cancellationToken)
     {
+        int conversationId = idEncryption.DecryptAsInt32(request.ConversationId);
+        long? messageId = request.MessageId != null ? idEncryption.DecryptAsInt64(request.MessageId) : null;
         ChatModel? cm = await db.ChatModels
             .Where(x => x.Id == request.ModelId && x.Enabled)
             .Include(x => x.ModelKeys)
@@ -46,7 +49,7 @@ public class ConversationController(ChatsDB db, CurrentUser currentUser, ILogger
             {
                 UserModels = x.UserModel!,
                 UserBalance = x.UserBalance!,
-                ThisChat = db.Conversations.Single(x => x.Id == request.ConversationId && x.UserId == currentUser.Id)
+                ThisChat = db.Conversations.Single(x => x.Id == conversationId && x.UserId == currentUser.Id)
             })
             .SingleAsync(cancellationToken);
         List<JsonTokenBalance> tokenBalances = JsonSerializer.Deserialize<List<JsonTokenBalance>>(miscInfo.UserModels.Models)!;
@@ -70,7 +73,7 @@ public class ConversationController(ChatsDB db, CurrentUser currentUser, ILogger
         }
 
         Dictionary<long, MessageLiteDto> existingMessages = await db.Messages
-            .Where(x => x.ConversationId == request.ConversationId && x.Conversation.UserId == currentUser.Id)
+            .Where(x => x.ConversationId == conversationId && x.Conversation.UserId == currentUser.Id)
             .Select(x => new MessageLiteDto()
             {
                 Id = x.Id,
@@ -96,7 +99,7 @@ public class ConversationController(ChatsDB db, CurrentUser currentUser, ILogger
 
             Message toBeInsert = new()
             {
-                ConversationId = request.ConversationId,
+                ConversationId = conversationId,
                 ChatRoleId = (byte)DBConversationRole.System,
                 MessageContents =
                 [
@@ -132,26 +135,26 @@ public class ConversationController(ChatsDB db, CurrentUser currentUser, ILogger
         List<OpenAIChatMessage> messageToSend =
         [
             systemMessage.Content[0].ToOpenAISystemChatMessage(),
-            ..GetMessageTree(existingMessages, request.MessageId),
+            ..GetMessageTree(existingMessages, messageId),
         ];
 
         // new user message
         MessageLiteDto userMessage;
-        if (request.MessageId != null && existingMessages.TryGetValue(request.MessageId.Value, out MessageLiteDto? parentMessage) && parentMessage.Role == DBConversationRole.User)
+        if (messageId != null && existingMessages.TryGetValue(messageId.Value, out MessageLiteDto? parentMessage) && parentMessage.Role == DBConversationRole.User)
         {
             // existing user message
-            userMessage = existingMessages[request.MessageId!.Value];
+            userMessage = existingMessages[messageId!.Value];
         }
         else
         {
             // insert new user message
             Message dbUserMessage = new()
             {
-                ConversationId = request.ConversationId,
+                ConversationId = conversationId,
                 ChatRoleId = (byte)DBConversationRole.User,
                 MessageContents = request.UserMessage.ToMessageContents(),
                 CreatedAt = DateTime.UtcNow,
-                ParentId = request.MessageId,
+                ParentId = messageId,
             };
             db.Messages.Add(dbUserMessage);
             await db.SaveChangesAsync(cancellationToken);
@@ -239,7 +242,7 @@ public class ConversationController(ChatsDB db, CurrentUser currentUser, ILogger
         TransactionLog? transactionLog = CreateTransactionLog(miscInfo.UserModels, tokenBalances, tokenBalanceIndex, tokenBalance, cost);
         Message assistantMessage = new()
         {
-            ConversationId = request.ConversationId,
+            ConversationId = conversationId,
             ChatRoleId = (byte)DBConversationRole.Assistant,
             MessageContents =
             [

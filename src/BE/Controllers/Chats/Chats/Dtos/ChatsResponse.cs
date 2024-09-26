@@ -2,6 +2,7 @@
 using Chats.BE.DB;
 using Chats.BE.DB.Enums;
 using Chats.BE.DB.Jsons;
+using Chats.BE.Services.IdEncryption;
 using System.Text.Json;
 using System.Text.Json.Serialization;
 
@@ -33,11 +34,11 @@ public record ChatsResponse
     [JsonPropertyName("modelProvider")]
     public DBModelProvider ModelProvider { get; init; }
 
-    public static ChatsResponse FromDB(Conversation chat)
+    public static ChatsResponse FromDB(Conversation chat, IIdEncryptionService idEncryption)
     {
         return new ChatsResponse()
         {
-            Id = chat.Id.ToString(),
+            Id = idEncryption.Encrypt(chat.Id),
             Title = chat.Title,
             ChatModelId = chat.ChatModelId,
             ModelName = chat.ChatModel.Name,
@@ -67,11 +68,11 @@ public record ChatsResponseTemp
 
     public required DBModelProvider ModelProvider { get; init; }
 
-    public ChatsResponse ToResponse()
+    public ChatsResponse ToResponse(IIdEncryptionService idEncryption)
     {
         return new ChatsResponse()
         {
-            Id = Id.ToString(),
+            Id = idEncryption.Encrypt(Id),
             Title = Title,
             ChatModelId = ChatModelId,
             ModelName = ModelName,

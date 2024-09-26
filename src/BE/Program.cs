@@ -3,6 +3,7 @@ using Chats.BE.Infrastructure;
 using Chats.BE.Services;
 using Chats.BE.Services.Configs;
 using Chats.BE.Services.Conversations;
+using Chats.BE.Services.IdEncryption;
 using Chats.BE.Services.OpenAIApiKeySession;
 using Chats.BE.Services.Sessions;
 using Microsoft.AspNetCore.Authentication;
@@ -38,6 +39,7 @@ public class Program
         builder.Services.AddScoped<HostUrlService>();
         builder.Services.AddSingleton<ConversationFactory>();
         builder.Services.AddSingleton<BalanceService>();
+        builder.Services.AddIdEncryption();
         builder.Services.AddHttpContextAccessor();
 
         // Add authentication and configure the default scheme

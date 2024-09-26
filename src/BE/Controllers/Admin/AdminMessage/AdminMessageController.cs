@@ -7,13 +7,14 @@ using Chats.BE.DB.Enums;
 using Chats.BE.DB.Jsons;
 using Chats.BE.Infrastructure;
 using Chats.BE.Services.Conversations;
+using Chats.BE.Services.IdEncryption;
 using Microsoft.AspNetCore.Mvc;
 using Microsoft.EntityFrameworkCore;
 
 namespace Chats.BE.Controllers.Admin.AdminMessage;
 
 [Route("api/admin"), AuthorizeAdmin]
-public class AdminMessageController(ChatsDB db, CurrentUser currentUser) : ControllerBase
+public class AdminMessageController(ChatsDB db, CurrentUser currentUser, IIdEncryptionService idEncryption) : ControllerBase
 {
     [HttpGet("messages")]
     public async Task<ActionResult<PagedResult<AdminChatsDto>>> GetMessages([FromQuery] PagingRequest req, CancellationToken cancellationToken)
@@ -47,10 +48,10 @@ public class AdminMessageController(ChatsDB db, CurrentUser currentUser) : Contr
     [HttpGet("message-details")]
     public async Task<ActionResult<AdminMessageDto>> GetAdminMessage(int chatId, CancellationToken cancellationToken)
     {
-        return await GetAdminMessageInternal(db, chatId, cancellationToken);
+        return await GetAdminMessageInternal(db, chatId, idEncryption, cancellationToken);
     }
 
-    internal static async Task<ActionResult<AdminMessageDto>> GetAdminMessageInternal(ChatsDB db, int conversationId, CancellationToken cancellationToken)
+    internal static async Task<ActionResult<AdminMessageDto>> GetAdminMessageInternal(ChatsDB db, int conversationId, IIdEncryptionService idEncryption, CancellationToken cancellationToken)
     {
         AdminMessageDtoTemp? adminMessageTemp = await db.Conversations
                     .Where(x => x.Id == conversationId)
@@ -93,7 +94,7 @@ public class AdminMessageController(ChatsDB db, CurrentUser currentUser) : Contr
             .OrderBy(x => x.Id)
             .ToArrayAsync(cancellationToken);
 
-        AdminMessageBasicItem[] items = AdminMessageItemTemp.ToDtos(messagesTemp);
+        AdminMessageBasicItem[] items = AdminMessageItemTemp.ToDtos(messagesTemp, idEncryption);
         AdminMessageDto dto = adminMessageTemp.ToDto(items);
 
         return new OkObjectResult(dto);

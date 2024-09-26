@@ -10,10 +10,10 @@ public record ConversationRequest
     public required Guid ModelId { get; init; }
 
     [JsonPropertyName("chatId")]
-    public required int ConversationId { get; init; }
+    public required string ConversationId { get; init; }
 
     [JsonPropertyName("messageId")]
-    public int? MessageId { get; init; }
+    public string? MessageId { get; init; }
 
     [JsonPropertyName("userMessage")]
     public required MessageContentRequest UserMessage { get; init; }
