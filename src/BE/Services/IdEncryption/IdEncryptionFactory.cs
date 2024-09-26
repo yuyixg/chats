@@ -6,7 +6,7 @@ public class IdEncryptionFactory(ILogger<IdEncryptionFactory> logger, IConfigura
     public IIdEncryptionService Create()
     {
         string? idHasherPassword = configuration["ID_HASHER_PASSWORD"];
-        if (idHasherPassword == null)
+        if (string.IsNullOrWhiteSpace(idHasherPassword))
         {
             logger.LogWarning("ID_HASHER_PASSWORD is not set, using NoOpIdEncryptionService");
             return new NoOpIdEncryptionService();
