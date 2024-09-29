@@ -14,15 +14,15 @@ using System.ClientModel;
 using System.ClientModel.Primitives;
 using System.Text.Json;
 using System.Text.Json.Nodes;
-using Chats.BE.Controllers.Common;
 using Microsoft.EntityFrameworkCore;
 using Chats.BE.DB.Enums;
 using System.Diagnostics;
+using System.Text;
 
 namespace Chats.BE.Controllers.Chats.OpenAICompatible;
 
 [Route("api/openai-compatible"), Authorize(AuthenticationSchemes = "OpenAIApiKey")]
-public class OpenAICompatibleController(ChatsDB db, CurrentApiKey apiKey, ConversationFactory cf, UserModelManager userModelManager, ILogger<OpenAICompatibleController> logger) : ControllerBase
+public class OpenAICompatibleController(ChatsDB db, CurrentApiKey apiKey, ConversationFactory cf, UserModelManager userModelManager, ILogger<OpenAICompatibleController> logger, BalanceService balanceService) : ControllerBase
 {
     [HttpPost("chat/completions")]
     public async Task<ActionResult> ChatCompletion([FromBody] JsonObject json, CancellationToken cancellationToken)
@@ -30,7 +30,6 @@ public class OpenAICompatibleController(ChatsDB db, CurrentApiKey apiKey, Conver
         bool streamed = json["stream"]?.GetValue<bool>() ?? false;
         bool includeUsage = json["stream_options"]?["include_usage"]?.GetValue<bool>() ?? false;
         string? modelName = json["model"]?.ToString();
-        if (!streamed) return ErrorMessage("Only streamed completions are supported.");
         if (modelName == null) return ModelNotExists(modelName);
 
         ChatModel[] validModels = await userModelManager.GetValidModelsByApiKey(apiKey.ApiKey, cancellationToken);
@@ -64,24 +63,26 @@ public class OpenAICompatibleController(ChatsDB db, CurrentApiKey apiKey, Conver
         JsonTokenBalance? tokenBalance = tokenBalances[tokenBalanceIndex];
         ConversationSegment lastSegment = new() { TextSegment = "", InputTokenCount = 0, OutputTokenCount = 0 };
         Stopwatch sw = Stopwatch.StartNew();
+        StringBuilder nonStreamingResult = new();
+        BadRequestObjectResult? errorToReturn = null;
         try
         {
             JsonPriceConfig priceConfig = JsonSerializer.Deserialize<JsonPriceConfig>(cm.PriceConfig)!;
             if (tokenBalance == null)
             {
-                return this.BadRequestMessage("The Model does not exist or access is denied.");
+                return ErrorMessage(OpenAICompatibleErrorCode.InvalidModel, "The Model does not exist or access is denied.");
             }
             if (!tokenBalance.Enabled)
             {
-                return this.BadRequestMessage("The Model does not exist or access is denied.");
+                return ErrorMessage(OpenAICompatibleErrorCode.InvalidModel, "The Model does not exist or access is denied.");
             }
             if (tokenBalance.Expires != "-" && DateTime.Parse(tokenBalance.Expires) < DateTime.UtcNow)
             {
-                return this.BadRequestMessage("Subscription has expired");
+                return ErrorMessage(OpenAICompatibleErrorCode.SubscriptionExpired, "Subscription has expired");
             }
             if (tokenBalance.Counts == "0" && tokenBalance.Tokens == "0" && miscInfo.UserBalance.Balance == 0 && !priceConfig.IsFree())
             {
-                return this.BadRequestMessage("Insufficient balance");
+                return ErrorMessage(OpenAICompatibleErrorCode.InsufficientBalance, "Insufficient balance");
             }
             UserModelBalanceCalculator calculator = new(tokenBalance, miscInfo.UserBalance.Balance);
             cost = calculator.GetNewBalance(0, 0, priceConfig);
@@ -106,31 +107,38 @@ public class OpenAICompatibleController(ChatsDB db, CurrentApiKey apiKey, Conver
                 cost = currentCost;
                 if (seg.TextSegment == string.Empty) continue;
 
-                ChatCompletionChunk chunk = new()
+                if (streamed)
                 {
-                    Id = HttpContext.TraceIdentifier,
-                    Object = "chat.completion.chunk",
-                    Created = DateTimeOffset.UtcNow.ToUnixTimeSeconds(),
-                    Model = modelName,
-                    Choices =
-                    [
-                        new Choice
+                    ChatCompletionChunk chunk = new()
                     {
-                        Delta = new Delta { Content = seg.TextSegment },
-                        FinishReason = null,
-                        Index = 0,
-                        Logprobs = null,
-                    }
-                    ],
-                    SystemFingerprint = "v1",
-                    Usage = new Usage
-                    {
-                        CompletionTokens = seg.OutputTokenCount,
-                        PromptTokens = seg.InputTokenCount,
-                        TotalTokens = seg.InputTokenCount + seg.OutputTokenCount,
-                    }
-                };
-                await YieldResponse(chunk, cancellationToken);
+                        Id = HttpContext.TraceIdentifier,
+                        Object = "chat.completion.chunk",
+                        Created = DateTimeOffset.UtcNow.ToUnixTimeSeconds(),
+                        Model = modelName,
+                        Choices =
+                        [
+                            new DeltaChoice
+                            {
+                                Delta = new Delta { Content = seg.TextSegment },
+                                FinishReason = null,
+                                Index = 0,
+                                Logprobs = null,
+                            }
+                        ],
+                        SystemFingerprint = null,
+                        Usage = new Usage
+                        {
+                            CompletionTokens = seg.OutputTokenCount,
+                            PromptTokens = seg.InputTokenCount,
+                            TotalTokens = seg.InputTokenCount + seg.OutputTokenCount,
+                        }
+                    };
+                    await YieldResponse(chunk, cancellationToken);
+                }
+                else
+                {
+                    nonStreamingResult.Append(seg.TextSegment);
+                }
 
                 if (cancellationToken.IsCancellationRequested)
                 {
@@ -140,12 +148,12 @@ public class OpenAICompatibleController(ChatsDB db, CurrentApiKey apiKey, Conver
         }
         catch (InsufficientBalanceException)
         {
-            await YieldError(OpenAICompatibleErrorCode.InsufficientBalance, "⚠Insufficient balance - 余额不足!", cancellationToken);
+            errorToReturn = await YieldError(streamed, OpenAICompatibleErrorCode.InsufficientBalance, "⚠Insufficient balance - 余额不足!", cancellationToken);
         }
         catch (Exception e) when (e is DashScopeException || e is ClientResultException)
         {
             logger.LogError(e, "Upstream error");
-            await YieldError(OpenAICompatibleErrorCode.UpstreamError, e.Message, cancellationToken);
+            errorToReturn = await YieldError(streamed, OpenAICompatibleErrorCode.UpstreamError, e.Message, cancellationToken);
         }
         catch (TaskCanceledException)
         {
@@ -154,8 +162,7 @@ public class OpenAICompatibleController(ChatsDB db, CurrentApiKey apiKey, Conver
         catch (Exception e)
         {
             logger.LogError(e, "Unknown error");
-            string errorTextToResponse = "\n⚠Error in conversation - 对话出错!";
-            await YieldError(OpenAICompatibleErrorCode.Unknown, errorTextToResponse, cancellationToken);
+            errorToReturn = await YieldError(streamed, OpenAICompatibleErrorCode.Unknown, "\n⚠Error in conversation - 对话出错!", cancellationToken);
         }
         finally
         {
@@ -179,7 +186,7 @@ public class OpenAICompatibleController(ChatsDB db, CurrentApiKey apiKey, Conver
         };
         ApiUsage usage = new()
         {
-            ChatModelId = cm.Id, 
+            ChatModelId = cm.Id,
             CreatedAt = DateTime.UtcNow,
             ApiKeyId = apiKey.ApiKeyId,
             DurationMs = (int)sw.ElapsedMilliseconds,
@@ -191,42 +198,92 @@ public class OpenAICompatibleController(ChatsDB db, CurrentApiKey apiKey, Conver
         };
         db.ApiUsages.Add(usage);
         await db.SaveChangesAsync(cancellationToken);
+        if (cost.CostBalance > 0)
+        {
+            _ = balanceService.AsyncUpdateBalance(apiKey.User.Id);
+        }
 
-        return new EmptyResult();
+        if (streamed)
+        {
+            return new EmptyResult();
+        }
+        else
+        {
+            if (errorToReturn != null)
+            {
+                return errorToReturn;
+            }
+
+            // success
+            return Ok(new FullChatCompletion()
+            {
+                Id = ControllerContext.HttpContext.TraceIdentifier,
+                Choices =
+                [
+                    new MessageChoice
+                    {
+                        Index = 0,
+                        FinishReason = "stop",
+                        Logprobs = null,
+                        Message = new ResponseMessage
+                        {
+                            Role = "system",
+                            Content = nonStreamingResult.ToString(),
+                            Refusal = null,
+                        }
+                    }
+                ],
+                Object = "chat.completion",
+                Created = DateTimeOffset.UtcNow.ToUnixTimeSeconds(),
+                Model = modelName,
+                SystemFingerprint = null,
+                Usage = new Usage
+                {
+                    CompletionTokens = lastSegment.OutputTokenCount,
+                    PromptTokens = lastSegment.InputTokenCount,
+                    TotalTokens = lastSegment.InputTokenCount + lastSegment.OutputTokenCount,
+                }
+            });
+        }
     }
 
     private readonly static ReadOnlyMemory<byte> dataU8 = "data: "u8.ToArray();
     private readonly static ReadOnlyMemory<byte> lflfU8 = "\n\n"u8.ToArray();
 
-    private BadRequestObjectResult ErrorMessage(string message)
+    private BadRequestObjectResult ErrorMessage(OpenAICompatibleErrorCode code, string message)
     {
         return BadRequest(new ErrorResponse()
         {
             Error = new ErrorDetail
             {
-                Code = "",
+                Code = code.ToString(),
                 Message = message,
-                Param = "",
+                Param = null,
                 Type = ""
             }
         });
     }
 
-    private async Task YieldError(OpenAICompatibleErrorCode code, string message, CancellationToken cancellationToken)
+    private async Task<BadRequestObjectResult> YieldError(bool streamed, OpenAICompatibleErrorCode code, string message, CancellationToken cancellationToken)
     {
-        await Response.Body.WriteAsync(dataU8, cancellationToken);
-        await JsonSerializer.SerializeAsync(Response.Body, new ErrorResponse()
+        if (streamed)
         {
-            Error = new ErrorDetail
+            await Response.Body.WriteAsync(dataU8, cancellationToken);
+            await JsonSerializer.SerializeAsync(Response.Body, new ErrorResponse()
             {
-                Code = code.ToString(),
-                Message = message,
-                Param = "",
-                Type = ""
-            }
-        }, JSON.JsonSerializerOptions, cancellationToken);
-        await Response.Body.WriteAsync(lflfU8, cancellationToken);
-        await Response.Body.FlushAsync(cancellationToken);
+                Error = new ErrorDetail
+                {
+                    Code = code.ToString(),
+                    Message = message,
+                    Param = null,
+                    Type = ""
+                }
+            }, JSON.JsonSerializerOptions, cancellationToken);
+            await Response.Body.WriteAsync(lflfU8, cancellationToken);
+            await Response.Body.FlushAsync(cancellationToken);
+        }
+        
+        return ErrorMessage(code, message);
     }
 
     private async Task YieldResponse(ChatCompletionChunk chunk, CancellationToken cancellationToken)
@@ -239,7 +296,7 @@ public class OpenAICompatibleController(ChatsDB db, CurrentApiKey apiKey, Conver
 
     private BadRequestObjectResult ModelNotExists(string? modelName)
     {
-        return ErrorMessage($"The model `{modelName}` does not exist or you do not have access to it.");
+        return ErrorMessage(OpenAICompatibleErrorCode.InvalidModel, $"The model `{modelName}` does not exist or you do not have access to it.");
     }
 
     private class StubChatMessage : ChatMessage

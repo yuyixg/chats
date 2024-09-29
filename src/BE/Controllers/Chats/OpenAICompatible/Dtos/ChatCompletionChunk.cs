@@ -8,7 +8,7 @@ public record Delta
     public required string Content { get; init; }
 }
 
-public record Choice
+public record DeltaChoice
 {
     [JsonPropertyName("index")]
     public required int Index { get; init; }
@@ -21,18 +21,6 @@ public record Choice
 
     [JsonPropertyName("finish_reason")]
     public string? FinishReason { get; init; }
-}
-
-public record Usage
-{
-    [JsonPropertyName("prompt_tokens")]
-    public required int PromptTokens { get; init; }
-
-    [JsonPropertyName("completion_tokens")]
-    public required int CompletionTokens { get; init; }
-
-    [JsonPropertyName("total_tokens")]
-    public required int TotalTokens { get; init; }
 }
 
 public record ChatCompletionChunk
@@ -50,10 +38,10 @@ public record ChatCompletionChunk
     public required string Model { get; init; }
 
     [JsonPropertyName("system_fingerprint")]
-    public required string SystemFingerprint { get; init; }
+    public string? SystemFingerprint { get; init; }
 
     [JsonPropertyName("choices")]
-    public required List<Choice> Choices { get; init; }
+    public required List<DeltaChoice> Choices { get; init; }
 
     [JsonPropertyName("usage")]
     public Usage? Usage { get; init; }
