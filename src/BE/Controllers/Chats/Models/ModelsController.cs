@@ -29,10 +29,10 @@ public class ModelsController : ControllerBase
         HashSet<ModelIdentifier> modelIds = chatModels.Values
             .Select(x => x.ToIdentifier())
             .ToHashSet();
-        Dictionary<ModelIdentifier, TemperatureOptions> temperatureOptions = db.ModelSettings
+        Dictionary<ModelIdentifier, TemperatureOptions> temperatureOptions = db.ModelDefaults
             .Select(x => new
             {
-                ModelId = new ModelIdentifier(x.Provider.Name, x.Type),
+                ModelId = new ModelIdentifier(x.Provider.Name, x.ReferenceName),
                 TemperatureOptions = new TemperatureOptions(x.MinTemperature, x.MaxTemperature)
             })
             .AsEnumerable()

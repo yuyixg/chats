@@ -14,7 +14,7 @@ namespace Chats.BE.DB;
 public partial class ModelProvider
 {
     [Key]
-    public int Id { get; set; }
+    public short Id { get; set; }
 
     [StringLength(50)]
     [Unicode(false)]
@@ -32,5 +32,8 @@ public partial class ModelProvider
     public string InitialConfig { get; set; } = null!;
 
     [InverseProperty("Provider")]
-    public virtual ICollection<ModelSetting> ModelSettings { get; set; } = new List<ModelSetting>();
+    public virtual ICollection<ModelDefault> ModelDefaults { get; set; } = new List<ModelDefault>();
+
+    [InverseProperty("ModelProvider")]
+    public virtual ICollection<ModelKey2> ModelKey2s { get; set; } = new List<ModelKey2>();
 }

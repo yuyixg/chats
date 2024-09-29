@@ -41,13 +41,17 @@ public partial class ChatsDB : DbContext
 
     public virtual DbSet<MessageResponse> MessageResponses { get; set; }
 
+    public virtual DbSet<ModelDefault> ModelDefaults { get; set; }
+
     public virtual DbSet<ModelKey> ModelKeys { get; set; }
+
+    public virtual DbSet<ModelKey2> ModelKey2s { get; set; }
 
     public virtual DbSet<ModelProvider> ModelProviders { get; set; }
 
-    public virtual DbSet<ModelSetting> ModelSettings { get; set; }
-
     public virtual DbSet<Prompt> Prompts { get; set; }
+
+    public virtual DbSet<Prompt2> Prompt2s { get; set; }
 
     public virtual DbSet<Session> Sessions { get; set; }
 
@@ -208,6 +212,15 @@ public partial class ChatsDB : DbContext
             entity.HasOne(d => d.TransactionLog).WithOne(p => p.MessageResponse).HasConstraintName("FK_MessageResponse_TransactionLog");
         });
 
+        modelBuilder.Entity<ModelDefault>(entity =>
+        {
+            entity.HasKey(e => e.Id).HasName("PK_ModelSetting");
+
+            entity.HasOne(d => d.Provider).WithMany(p => p.ModelDefaults)
+                .OnDelete(DeleteBehavior.ClientSetNull)
+                .HasConstraintName("FK_ModelSetting_ModelProvider");
+        });
+
         modelBuilder.Entity<ModelKey>(entity =>
         {
             entity.HasKey(e => e.Id).HasName("ModelKeys_pkey");
@@ -215,16 +228,16 @@ public partial class ChatsDB : DbContext
             entity.Property(e => e.Id).ValueGeneratedNever();
         });
 
+        modelBuilder.Entity<ModelKey2>(entity =>
+        {
+            entity.HasOne(d => d.ModelProvider).WithMany(p => p.ModelKey2s)
+                .OnDelete(DeleteBehavior.ClientSetNull)
+                .HasConstraintName("FK_ModelKey2_ModelProvider");
+        });
+
         modelBuilder.Entity<ModelProvider>(entity =>
         {
             entity.ToTable("ModelProvider", tb => tb.HasComment("JSON"));
-        });
-
-        modelBuilder.Entity<ModelSetting>(entity =>
-        {
-            entity.HasOne(d => d.Provider).WithMany(p => p.ModelSettings)
-                .OnDelete(DeleteBehavior.ClientSetNull)
-                .HasConstraintName("FK_ModelSetting_ModelProvider");
         });
 
         modelBuilder.Entity<Prompt>(entity =>
@@ -236,6 +249,11 @@ public partial class ChatsDB : DbContext
             entity.HasOne(d => d.CreateUser).WithMany(p => p.Prompts)
                 .OnDelete(DeleteBehavior.ClientSetNull)
                 .HasConstraintName("Prompts_createUserId_fkey");
+        });
+
+        modelBuilder.Entity<Prompt2>(entity =>
+        {
+            entity.HasOne(d => d.CreateUser).WithMany(p => p.Prompt2s).HasConstraintName("FK_Prompt2_User");
         });
 
         modelBuilder.Entity<Session>(entity =>
