@@ -11,8 +11,8 @@ public partial class MessageContent
     {
         return (DBMessageContentType)ContentTypeId switch
         {
-            DBMessageContentType.Text => ChatMessageContentPart.CreateTextMessageContentPart(Encoding.Unicode.GetString(Content)),
-            DBMessageContentType.ImageUrl => ChatMessageContentPart.CreateImageMessageContentPart(new Uri(Encoding.UTF8.GetString(Content))),
+            DBMessageContentType.Text => ChatMessageContentPart.CreateTextPart(Encoding.Unicode.GetString(Content)),
+            DBMessageContentType.ImageUrl => ChatMessageContentPart.CreateImagePart(new Uri(Encoding.UTF8.GetString(Content))),
             _ => throw new NotImplementedException()
         };
     }

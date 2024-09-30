@@ -47,7 +47,7 @@ public class GLMConversationService : ConversationService
         ChatCompletionOptions chatCompletionOptions = new()
         {
             Temperature = config.Temperature,
-            MaxTokens = config.MaxLength,
+            MaxOutputTokenCount = config.MaxLength,
             EndUserId = currentUser.Id.ToString(),
         };
 
@@ -78,8 +78,8 @@ public class GLMConversationService : ConversationService
                 yield return new ConversationSegment
                 {
                     TextSegment = "",
-                    InputTokenCount = delta.Usage.InputTokens,
-                    OutputTokenCount = delta.Usage.OutputTokens,
+                    InputTokenCount = delta.Usage.InputTokenCount,
+                    OutputTokenCount = delta.Usage.OutputTokenCount,
                 };
             }
         }
@@ -91,7 +91,7 @@ public class GLMConversationService : ConversationService
         {
             UserChatMessage userChatMessage => new UserChatMessage(userChatMessage.Content.Select(c => c.Kind switch
             {
-                var x when x == ChatMessageContentPartKind.Image => ChatMessageContentPart.CreateTextMessageContentPart(c.ImageUri.ToString()),
+                var x when x == ChatMessageContentPartKind.Image => ChatMessageContentPart.CreateTextPart(c.ImageUri.ToString()),
                 _ => c,
             })),
             _ => message,

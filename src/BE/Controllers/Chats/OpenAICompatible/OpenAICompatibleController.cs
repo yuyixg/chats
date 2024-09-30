@@ -22,24 +22,26 @@ using System.Text;
 namespace Chats.BE.Controllers.Chats.OpenAICompatible;
 
 [Route("api/openai-compatible"), Authorize(AuthenticationSchemes = "OpenAIApiKey")]
-public class OpenAICompatibleController(ChatsDB db, CurrentApiKey apiKey, ConversationFactory cf, UserModelManager userModelManager, ILogger<OpenAICompatibleController> logger, BalanceService balanceService) : ControllerBase
+public partial class OpenAICompatibleController(ChatsDB db, CurrentApiKey apiKey, ConversationFactory cf, UserModelManager userModelManager, ILogger<OpenAICompatibleController> logger, BalanceService balanceService) : ControllerBase
 {
     [HttpPost("chat/completions")]
-    public async Task<ActionResult> ChatCompletion([FromBody] JsonObject json, CancellationToken cancellationToken)
+    public async Task<ActionResult> ChatCompletion([FromBody] JsonElement json, CancellationToken cancellationToken)
     {
-        bool streamed = json["stream"]?.GetValue<bool>() ?? false;
-        bool includeUsage = json["stream_options"]?["include_usage"]?.GetValue<bool>() ?? false;
-        string? modelName = json["model"]?.ToString();
+        bool streamed = json.TryGetProperty("stream", out JsonElement streamProp) && streamProp.GetBoolean();
+        bool includeUsage = json.TryGetProperty("stream_options", out JsonElement streamOptionsProp) &&
+                           streamOptionsProp.TryGetProperty("include_usage", out JsonElement includeUsageProp) &&
+                           includeUsageProp.GetBoolean();
+        string? modelName = json.TryGetProperty("model", out JsonElement modelProp) ? modelProp.GetString() : null;
         if (modelName == null) return ModelNotExists(modelName);
 
         ChatModel[] validModels = await userModelManager.GetValidModelsByApiKey(apiKey.ApiKey, cancellationToken);
         ChatModel? cm = validModels.FirstOrDefault(x => x.Id.ToString() == modelName || x.Name == modelName);
         if (cm == null) return ModelNotExists(modelName);
 
-        ChatMessage[] messages = (json["messages"]?.AsArray() ?? []).Select(x =>
+        ChatMessage[] messages = (json.TryGetProperty("messages", out JsonElement messagesProp) ? messagesProp.EnumerateArray() : [])
+            .Select(x =>
             {
-                StubChatMessage temp = new();
-                return ((IJsonModel<ChatMessage>)temp).Create(new BinaryData(x), ModelReaderWriterOptions.Json);
+                return ChatMessageHelper.DeserializeChatMessage(x, ModelReaderWriterOptions.Json);
             })
             .ToArray();
 
@@ -93,9 +95,9 @@ public class OpenAICompatibleController(ChatsDB db, CurrentApiKey apiKey, Conver
 
             await foreach (ConversationSegment seg in s.ChatStreamed(messages, new JsonUserModelConfig()
             {
-                Temperature = json["temperature"]?.GetValue<float>(),
-                EnableSearch = json["enable_search"]?.GetValue<bool>(),
-                MaxLength = json["max_length"]?.GetValue<int>(),
+                Temperature = json.TryGetProperty("temperature", out JsonElement tempProp) ? (float)tempProp.GetDouble() : null, 
+                EnableSearch = json.TryGetProperty("enable_search", out JsonElement enableSearchProp) && enableSearchProp.GetBoolean(),
+                MaxLength = json.TryGetProperty("max_tokens", out JsonElement maxTokensProp) ? maxTokensProp.GetInt32() : null,
             }, apiKey.User, cancellationToken))
             {
                 lastSegment = seg;
@@ -297,14 +299,6 @@ public class OpenAICompatibleController(ChatsDB db, CurrentApiKey apiKey, Conver
     private BadRequestObjectResult ModelNotExists(string? modelName)
     {
         return ErrorMessage(OpenAICompatibleErrorCode.InvalidModel, $"The model `{modelName}` does not exist or you do not have access to it.");
-    }
-
-    private class StubChatMessage : ChatMessage
-    {
-        protected override void WriteCore(Utf8JsonWriter writer, ModelReaderWriterOptions options)
-        {
-            throw new NotImplementedException();
-        }
     }
 
     [HttpGet("models")]

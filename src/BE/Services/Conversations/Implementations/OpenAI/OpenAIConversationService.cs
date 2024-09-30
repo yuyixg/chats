@@ -44,7 +44,7 @@ public class OpenAIConversationService : ConversationService
         ChatCompletionOptions chatCompletionOptions = new()
         {
             Temperature = userModelConfig.Temperature,
-            MaxTokens = userModelConfig.MaxLength ?? SuggestedType switch
+            MaxOutputTokenCount = userModelConfig.MaxLength ?? SuggestedType switch
             {
                 "gpt-3.5-turbo" => null,
                 "gpt-4" => null,
@@ -83,8 +83,8 @@ public class OpenAIConversationService : ConversationService
                 yield return new ConversationSegment
                 {
                     TextSegment = delta.ContentUpdate[0].Text,
-                    InputTokenCount = delta.Usage.InputTokens,
-                    OutputTokenCount = delta.Usage.OutputTokens,
+                    InputTokenCount = delta.Usage.InputTokenCount,
+                    OutputTokenCount = delta.Usage.OutputTokenCount,
                 };
             }
             else
@@ -106,7 +106,7 @@ public class OpenAIConversationService : ConversationService
         {
             UserChatMessage userChatMessage => new UserChatMessage(userChatMessage.Content.Select(c => c.Kind switch
             {
-                var x when x == ChatMessageContentPartKind.Image => ChatMessageContentPart.CreateTextMessageContentPart(c.ImageUri.ToString()),
+                var x when x == ChatMessageContentPartKind.Image => ChatMessageContentPart.CreateTextPart(c.ImageUri.ToString()),
                 _ => c,
             })),
             _ => message,
