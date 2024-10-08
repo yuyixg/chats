@@ -68,7 +68,7 @@ public class ApiKeyController(ChatsDB db, CurrentUser currentUser) : ControllerB
         {
             UserId = currentUser.Id,
             Key = $"sk-{GenerateBase62Key(keyLength)}",
-            Comment = $"New api key - {DateTime.UtcNow:yyyyMMdd}",
+            Comment = $"New key",
             IsRevoked = false, 
             IsDeleted = false, 
             AllowEnumerate = true,

@@ -41,7 +41,7 @@ public partial class OpenAICompatibleController(ChatsDB db, CurrentApiKey apiKey
         ChatMessage[] messages = (json.TryGetProperty("messages", out JsonElement messagesProp) ? messagesProp.EnumerateArray() : [])
             .Select(x =>
             {
-                return ChatMessageHelper.DeserializeChatMessage(x, ModelReaderWriterOptions.Json);
+                return ModelReaderWriter.Read<ChatMessage>(BinaryData.FromObjectAsJson(x), ModelReaderWriterOptions.Json)!;
             })
             .ToArray();
 

@@ -71,11 +71,8 @@ public class OpenAIConversationService : ConversationService
 
         await foreach (StreamingChatCompletionUpdate delta in ChatClient.CompleteChatStreamingAsync(messages, chatCompletionOptions, cancellationToken))
         {
-            // bug:
-            // {"error":{"message":"The server had an error processing your request. Sorry about that! You can retry your request, or contact us through an Azure support request at: https://go.microsoft.com/fwlink/?linkid=2213926 if you keep seeing this error.","type":"server_error","param":null,"code":null}}
-            if (delta.Id == null) yield break;
-
             if (delta.FinishReason == ChatFinishReason.Stop) yield break;
+            if (delta.FinishReason == ChatFinishReason.Length) yield break;
             if (delta.ContentUpdate.Count == 0) continue;
 
             if (delta.Usage != null)

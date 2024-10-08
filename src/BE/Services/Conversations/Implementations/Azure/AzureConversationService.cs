@@ -1,11 +1,11 @@
 ﻿using AI.Dev.OpenAI.GPT;
-using Azure;
 using Azure.AI.OpenAI;
 using Chats.BE.DB.Jsons;
 using Chats.BE.Infrastructure;
 using Chats.BE.Services.Conversations.Dtos;
 using OpenAI;
 using OpenAI.Chat;
+using System.ClientModel;
 using System.Runtime.CompilerServices;
 using System.Text.Json;
 
@@ -31,7 +31,7 @@ public class AzureConversationService : ConversationService
     {
         JsonAzureApiConfig keyConfig = JsonAzureApiConfig.Parse(keyConfigText);
         GlobalModelConfig = JsonSerializer.Deserialize<JsonAzureModelConfig>(modelConfigText)!;
-        OpenAIClient api = new AzureOpenAIClient(new Uri(keyConfig.Host), new AzureKeyCredential(keyConfig.ApiKey));
+        OpenAIClient api = new AzureOpenAIClient(new Uri(keyConfig.Host), new ApiKeyCredential(keyConfig.ApiKey));
         SuggestedType = suggestedType;
         ChatClient = api.GetChatClient(GlobalModelConfig.DeploymentName);
     }
@@ -68,11 +68,8 @@ public class AzureConversationService : ConversationService
 
         await foreach (StreamingChatCompletionUpdate delta in ChatClient.CompleteChatStreamingAsync(messages, chatCompletionOptions, cancellationToken))
         {
-            // bug:
-            // {"error":{"message":"The server had an error processing your request. Sorry about that! You can retry your request, or contact us through an Azure support request at: https://go.microsoft.com/fwlink/?linkid=2213926 if you keep seeing this error.","type":"server_error","param":null,"code":null}}
-            if (delta.Id == null) yield break;
-
             if (delta.FinishReason == ChatFinishReason.Stop) yield break;
+            if (delta.FinishReason == ChatFinishReason.Length) yield break;
             if (delta.ContentUpdate.Count == 0) continue;
 
             if (delta.Usage != null)
