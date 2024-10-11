@@ -20,4 +20,6 @@ public class CurrentUser
     public string Role { get; }
     public string? Provider { get; }
     public string? ProviderSub { get; }
+
+    public bool IsAdmin => Role == "admin";
 }

@@ -31,6 +31,14 @@ public partial class ModelProvider
     [Unicode(false)]
     public string InitialConfig { get; set; } = null!;
 
+    [StringLength(500)]
+    [Unicode(false)]
+    public string? Host { get; set; }
+
+    [StringLength(500)]
+    [Unicode(false)]
+    public string? ApiKey { get; set; }
+
     [InverseProperty("Provider")]
     public virtual ICollection<ModelDefault> ModelDefaults { get; set; } = new List<ModelDefault>();
 

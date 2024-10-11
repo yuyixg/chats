@@ -7,20 +7,21 @@ using Microsoft.EntityFrameworkCore;
 namespace Chats.BE.DB;
 
 [Table("Prompt")]
+[Index("CreateUserId", Name = "IX_Prompt2_CreateUserId")]
+[Index("Name", Name = "IX_Prompt2_Name")]
 public partial class Prompt
 {
     [Key]
-    public Guid Id { get; set; }
+    public int Id { get; set; }
 
-    [StringLength(100)]
+    [StringLength(50)]
     public string Name { get; set; } = null!;
 
-    public short Type { get; set; }
+    public string Content { get; set; } = null!;
 
-    public string? Content { get; set; }
+    public bool IsDefault { get; set; }
 
-    [StringLength(100)]
-    public string? Description { get; set; }
+    public bool IsSystem { get; set; }
 
     public Guid CreateUserId { get; set; }
 

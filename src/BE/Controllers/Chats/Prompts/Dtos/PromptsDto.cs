@@ -3,29 +3,16 @@ using System.Text.Json.Serialization;
 
 namespace Chats.BE.Controllers.Chats.Prompts.Dtos;
 
-public record PromptsDto
+public record PromptsDto : BriefPromptDto
 {
-    [JsonPropertyName("id")]
-    public required Guid Id { get; init; }
-
-    [JsonPropertyName("name")]
-    public required string Name { get; init; }
-
     [JsonPropertyName("content")]
-    public required string? Content { get; init; }
+    public required string Content { get; init; }
 
-    [JsonPropertyName("description")]
-    public required string? Description { get; init; }
-
-    public Prompt ToPrompt(Guid createUserId) => new()
+    public void ApplyTo(Prompt db, bool isAdmin)
     {
-        Id = Id,
-        Name = Name,
-        Content = Content,
-        Description = Description,
-        CreatedAt = DateTime.UtcNow,
-        CreateUserId = createUserId,
-        Type = (int)PromptType.Private,
-        UpdatedAt = DateTime.UtcNow
-    };
+        db.IsDefault = IsDefault;
+        db.IsSystem = isAdmin && IsSystem;
+        db.Name = Name;
+        db.Content = Content;
+    }
 }

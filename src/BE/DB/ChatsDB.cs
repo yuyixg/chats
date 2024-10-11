@@ -51,8 +51,6 @@ public partial class ChatsDB : DbContext
 
     public virtual DbSet<Prompt> Prompts { get; set; }
 
-    public virtual DbSet<Prompt2> Prompt2s { get; set; }
-
     public virtual DbSet<Session> Sessions { get; set; }
 
     public virtual DbSet<Sms> Sms { get; set; }
@@ -242,18 +240,9 @@ public partial class ChatsDB : DbContext
 
         modelBuilder.Entity<Prompt>(entity =>
         {
-            entity.HasKey(e => e.Id).HasName("Prompts_pkey");
+            entity.HasKey(e => e.Id).HasName("PK_Prompt2");
 
-            entity.Property(e => e.Id).ValueGeneratedNever();
-
-            entity.HasOne(d => d.CreateUser).WithMany(p => p.Prompts)
-                .OnDelete(DeleteBehavior.ClientSetNull)
-                .HasConstraintName("Prompts_createUserId_fkey");
-        });
-
-        modelBuilder.Entity<Prompt2>(entity =>
-        {
-            entity.HasOne(d => d.CreateUser).WithMany(p => p.Prompt2s).HasConstraintName("FK_Prompt2_User");
+            entity.HasOne(d => d.CreateUser).WithMany(p => p.Prompts).HasConstraintName("FK_Prompt2_User");
         });
 
         modelBuilder.Entity<Session>(entity =>

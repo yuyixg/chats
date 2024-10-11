@@ -52,9 +52,6 @@ public partial class User
     public virtual ICollection<Conversation> Conversations { get; set; } = new List<Conversation>();
 
     [InverseProperty("CreateUser")]
-    public virtual ICollection<Prompt2> Prompt2s { get; set; } = new List<Prompt2>();
-
-    [InverseProperty("CreateUser")]
     public virtual ICollection<Prompt> Prompts { get; set; } = new List<Prompt>();
 
     [InverseProperty("User")]
