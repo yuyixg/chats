@@ -6,6 +6,5 @@ public class CustomDesignTimeServices : IDesignTimeServices
 {
     public void ConfigureDesignTimeServices(IServiceCollection services)
     {
-        services.AddSingleton<IPluralizer, CustomPluralizer>();
     }
 }
