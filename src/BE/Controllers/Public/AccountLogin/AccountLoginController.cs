@@ -135,14 +135,13 @@ public class AccountLoginController(ChatsDB db, ILogger<AccountLoginController> 
             return this.BadRequestMessage("Too many attempts.");
         }
 
-        ClientInfo clientInfo = await clientInfoService.GetClientInfo(cancellationToken);
         existingSms.SmsAttempts.Add(new SmsAttempt()
         {
             SmsRecordId = existingSms.Id,
             CreatedAt = DateTime.UtcNow,
             Code = requestSmsCode,
-            ClientIp = clientInfo.ClientIP,
-            ClientUserAgent = clientInfo.ClientUserAgent,
+            ClientIp = await clientInfoService.GetDBClientIP(cancellationToken),
+            ClientUserAgent = await clientInfoService.GetDBUserAgent(cancellationToken),
         });
         await db.SaveChangesAsync(cancellationToken);
 

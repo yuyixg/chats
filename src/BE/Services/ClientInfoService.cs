@@ -5,20 +5,23 @@ namespace Chats.BE.Services;
 
 public class ClientInfoService(IHttpContextAccessor httpContextAccessor, ChatsDB db)
 {
-    public async Task<ClientInfo> GetClientInfo(CancellationToken cancellationToken)
+    private HttpContext HttpContext => httpContextAccessor.HttpContext ?? throw new InvalidOperationException("HttpContext is not available.");
+
+    public string ClientIP
     {
-        HttpContext context = httpContextAccessor.HttpContext ?? throw new InvalidOperationException("HttpContext is not available.");
-        string ip =
-            context!.Request.Headers["X-Forwarded-For"].FirstOrDefault() ??
-            context!.Connection.RemoteIpAddress!.ToString();
-        string userAgent = context!.Request.Headers.UserAgent.ToString();
-        ClientIp clientIp = await GetOrCreateClientIp(ip, cancellationToken);
-        ClientUserAgent clientUserAgent = await GetOrCreateClientUserAgent(userAgent, cancellationToken);
-        return new ClientInfo(clientIp, clientUserAgent);
+        get
+        {
+            HttpContext context = HttpContext;
+            return context!.Request.Headers["X-Forwarded-For"].FirstOrDefault() ??
+                   context!.Connection.RemoteIpAddress!.ToString();
+        }
     }
 
-    private async Task<ClientIp> GetOrCreateClientIp(string ip, CancellationToken cancellationToken)
+    public string UserAgent => HttpContext.Request.Headers.UserAgent.ToString();
+
+    public async Task<ClientIp> GetDBClientIP(CancellationToken cancellationToken)
     {
+        string ip = ClientIP;
         ClientIp? clientIp = await db.ClientIps.FirstOrDefaultAsync(x => x.Ipaddress == ip, cancellationToken);
         if (clientIp == null)
         {
@@ -29,8 +32,9 @@ public class ClientInfoService(IHttpContextAccessor httpContextAccessor, ChatsDB
         return clientIp;
     }
 
-    private async Task<ClientUserAgent> GetOrCreateClientUserAgent(string userAgent, CancellationToken cancellationToken)
+    public async Task<ClientUserAgent> GetDBUserAgent(CancellationToken cancellationToken)
     {
+        string userAgent = UserAgent;
         ClientUserAgent? clientUserAgent = await db.ClientUserAgents.FirstOrDefaultAsync(x => x.UserAgent == userAgent, cancellationToken);
         if (clientUserAgent == null)
         {
@@ -41,5 +45,3 @@ public class ClientInfoService(IHttpContextAccessor httpContextAccessor, ChatsDB
         return clientUserAgent;
     }
 }
-
-public record ClientInfo(ClientIp ClientIP, ClientUserAgent ClientUserAgent);
