@@ -3,6 +3,7 @@ using Chats.BE.Controllers.Common.Results;
 using Chats.BE.Controllers.Public.AccountLogin.Dtos;
 using Chats.BE.Controllers.Public.SMSs;
 using Chats.BE.DB;
+using Chats.BE.DB.Enums;
 using Chats.BE.DB.Jsons;
 using Chats.BE.Services;
 using Chats.BE.Services.Common;
@@ -15,7 +16,7 @@ using Microsoft.EntityFrameworkCore;
 namespace Chats.BE.Controllers.Public.AccountLogin;
 
 [Route("api/public")]
-public class AccountLoginController(ChatsDB db, ILogger<AccountLoginController> logger, SessionManager sessionManager) : ControllerBase
+public class AccountLoginController(ChatsDB db, ILogger<AccountLoginController> logger, SessionManager sessionManager, ClientInfoService clientInfoService) : ControllerBase
 {
     [HttpPost("account-login")]
     public async Task<ActionResult> Login(
@@ -91,30 +92,29 @@ public class AccountLoginController(ChatsDB db, ILogger<AccountLoginController> 
         {
             return this.BadRequestMessage("Invalid phone.");
         }
+        if (req.SmsCode.Length != SmsController.CodeLength)
+        {
+            return this.BadRequestMessage("Invalid code.");
+        }
         if (!db.LoginServices.Any(x => x.Enabled && x.Type == KnownLoginProviders.Phone))
         {
             return this.BadRequestMessage("Phone login not enabled.");
         }
 
-        Sms? existingSms = await db.Sms
-            .Where(x => x.SignName == req.Phone && x.Type == (short)SmsType.Login && x.Status == (short)SmsStatus.WaitingForVerification)
+        SmsRecord? existingSms = await db.SmsRecords
+            .Where(x => x.PhoneNumber == req.Phone && x.TypeId == (byte)DBSmsType.Login && x.StatusId == (byte)DBSmsStatus.WaitingForVerification)
             .OrderByDescending(x => x.CreatedAt)
             .FirstOrDefaultAsync(cancellationToken);
         if (existingSms == null)
         {
-            return this.BadRequestMessage("Sms not sent.");
-        }
-
-        if (existingSms.Code != req.SmsCode)
-        {
-            db.Remove(existingSms);
-            await db.SaveChangesAsync(cancellationToken);
+            logger.LogWarning("Sms not sent: {Phone}, code: {Code}", req.Phone, req.SmsCode);
             return this.BadRequestMessage("Invalid code.");
         }
 
-        if (existingSms.CreatedAt + TimeSpan.FromSeconds(SmsController.SmsExpirationSeconds) < DateTime.UtcNow)
+        BadRequestObjectResult? commonCheckError = await PushAttemptCheck(req.Phone, req.SmsCode, existingSms, cancellationToken);
+        if (commonCheckError != null)
         {
-            return this.BadRequestMessage("Sms expired.");
+            return commonCheckError;
         }
 
         User? user = await db.Users.FirstOrDefaultAsync(x => x.Phone == req.Phone && x.Enabled, cancellationToken);
@@ -126,9 +126,47 @@ public class AccountLoginController(ChatsDB db, ILogger<AccountLoginController> 
         return Ok(await sessionManager.GenerateSessionForUser(user, cancellationToken));
     }
 
+    private async Task<BadRequestObjectResult?> PushAttemptCheck(string phoneNumber, string requestSmsCode, SmsRecord existingSms, CancellationToken cancellationToken)
+    {
+        int attemps = existingSms.SmsAttempts.Count;
+        if (attemps >= SmsController.MaxAttempts)
+        {
+            logger.LogWarning("Too many attempts: {Phone}, attemp: {attemp}, code: {code}", phoneNumber, attemps, requestSmsCode);
+            return this.BadRequestMessage("Too many attempts.");
+        }
+
+        ClientInfo clientInfo = await clientInfoService.GetClientInfo(cancellationToken);
+        existingSms.SmsAttempts.Add(new SmsAttempt()
+        {
+            SmsRecordId = existingSms.Id,
+            CreatedAt = DateTime.UtcNow,
+            Code = requestSmsCode,
+            ClientIp = clientInfo.ClientIP,
+            ClientUserAgent = clientInfo.ClientUserAgent,
+        });
+        await db.SaveChangesAsync(cancellationToken);
+
+        if (existingSms.ExpectedCode != requestSmsCode)
+        {
+            return this.BadRequestMessage("Invalid code.");
+        }
+
+        if (existingSms.CreatedAt + TimeSpan.FromSeconds(SmsController.SmsExpirationSeconds) < DateTime.UtcNow)
+        {
+            return this.BadRequestMessage("Sms expired.");
+        }
+
+        return null;
+    }
+
     [HttpPost("phone-register")]
     public async Task<IActionResult> PhoneRegister([FromBody] PhoneRegisterRequest req, [FromServices] UserManager userManager, CancellationToken cancellationToken)
     {
+        if (!ModelState.IsValid)
+        {
+            return this.BadRequestMessage("Invalid phone.");
+        }
+
         InvitationCode? code = await db.InvitationCodes.FirstOrDefaultAsync(x => x.Value == req.InvitationCode && !x.IsDeleted, cancellationToken);
         if (code == null)
         {
@@ -141,8 +179,8 @@ public class AccountLoginController(ChatsDB db, ILogger<AccountLoginController> 
             return this.BadRequestMessage("Phone number already registered.");
         }
 
-        Sms? existingSms = await db.Sms
-            .Where(x => x.SignName == req.Phone && x.Type == (short)SmsType.Register && x.Status == (short)SmsStatus.WaitingForVerification)
+        SmsRecord? existingSms = await db.SmsRecords
+            .Where(x => x.PhoneNumber == req.Phone && x.TypeId == (byte)DBSmsType.Register && x.StatusId == (byte)DBSmsStatus.WaitingForVerification)
             .OrderByDescending(x => x.CreatedAt)
             .FirstOrDefaultAsync(cancellationToken);
         if (existingSms == null)
@@ -150,16 +188,10 @@ public class AccountLoginController(ChatsDB db, ILogger<AccountLoginController> 
             return this.BadRequestMessage("Sms not sent.");
         }
 
-        if (existingSms.Code != req.SmsCode)
+        BadRequestObjectResult? commonCheckError = await PushAttemptCheck(req.Phone, req.SmsCode, existingSms, cancellationToken);
+        if (commonCheckError != null)
         {
-            db.Remove(existingSms);
-            await db.SaveChangesAsync(cancellationToken);
-            return this.BadRequestMessage("Invalid code.");
-        }
-
-        if (existingSms.CreatedAt + TimeSpan.FromSeconds(SmsController.SmsExpirationSeconds) < DateTime.UtcNow)
-        {
-            return this.BadRequestMessage("Sms expired.");
+            return commonCheckError;
         }
 
         User user = new()

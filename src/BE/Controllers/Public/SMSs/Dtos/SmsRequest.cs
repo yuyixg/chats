@@ -1,6 +1,6 @@
 ﻿using System.Configuration;
 using System.Text.Json.Serialization;
-using Chats.BE.Services.Common;
+using Chats.BE.DB.Enums;
 
 namespace Chats.BE.Controllers.Public.SMSs.Dtos;
 
@@ -11,7 +11,7 @@ public record SmsRequest
     public required string Phone { get; init; }
 
     [JsonPropertyName("type")]
-    public required SmsType Type { get; init; }
+    public required DBSmsType Type { get; init; }
 
     [JsonPropertyName("invitationCode")]
     public string? InvitationCode { get; init; }

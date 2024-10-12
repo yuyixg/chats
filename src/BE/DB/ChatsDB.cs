@@ -23,6 +23,10 @@ public partial class ChatsDB : DbContext
 
     public virtual DbSet<ChatRole> ChatRoles { get; set; }
 
+    public virtual DbSet<ClientIp> ClientIps { get; set; }
+
+    public virtual DbSet<ClientUserAgent> ClientUserAgents { get; set; }
+
     public virtual DbSet<Config> Configs { get; set; }
 
     public virtual DbSet<Conversation> Conversations { get; set; }
@@ -53,7 +57,13 @@ public partial class ChatsDB : DbContext
 
     public virtual DbSet<Session> Sessions { get; set; }
 
-    public virtual DbSet<Sms> Sms { get; set; }
+    public virtual DbSet<SmsAttempt> SmsAttempts { get; set; }
+
+    public virtual DbSet<SmsRecord> SmsRecords { get; set; }
+
+    public virtual DbSet<SmsStatu> SmsStatuses { get; set; }
+
+    public virtual DbSet<SmsType> SmsTypes { get; set; }
 
     public virtual DbSet<TransactionLog> TransactionLogs { get; set; }
 
@@ -256,11 +266,30 @@ public partial class ChatsDB : DbContext
                 .HasConstraintName("FK_Sessions_userId");
         });
 
-        modelBuilder.Entity<Sms>(entity =>
+        modelBuilder.Entity<SmsAttempt>(entity =>
         {
-            entity.HasKey(e => e.Id).HasName("Sms_pkey");
+            entity.HasOne(d => d.ClientIp).WithMany(p => p.SmsAttempts)
+                .OnDelete(DeleteBehavior.ClientSetNull)
+                .HasConstraintName("FK_SmsAttempt_ClientIP");
 
-            entity.Property(e => e.Id).ValueGeneratedNever();
+            entity.HasOne(d => d.ClientUserAgent).WithMany(p => p.SmsAttempts)
+                .OnDelete(DeleteBehavior.ClientSetNull)
+                .HasConstraintName("FK_SmsAttempt_ClientUserAgent");
+
+            entity.HasOne(d => d.SmsRecord).WithMany(p => p.SmsAttempts).HasConstraintName("FK_SmsAttempt_SmsHistory");
+        });
+
+        modelBuilder.Entity<SmsRecord>(entity =>
+        {
+            entity.HasKey(e => e.Id).HasName("PK_SmsHistory");
+
+            entity.HasOne(d => d.Status).WithMany(p => p.SmsRecords)
+                .OnDelete(DeleteBehavior.ClientSetNull)
+                .HasConstraintName("FK_SmsHistory_SmsStatus");
+
+            entity.HasOne(d => d.Type).WithMany(p => p.SmsRecords)
+                .OnDelete(DeleteBehavior.ClientSetNull)
+                .HasConstraintName("FK_SmsHistory_SmsType");
         });
 
         modelBuilder.Entity<TransactionLog>(entity =>
