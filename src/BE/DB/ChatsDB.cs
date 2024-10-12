@@ -45,13 +45,13 @@ public partial class ChatsDB : DbContext
 
     public virtual DbSet<MessageResponse> MessageResponses { get; set; }
 
-    public virtual DbSet<ModelDefault> ModelDefaults { get; set; }
-
     public virtual DbSet<ModelKey> ModelKeys { get; set; }
 
     public virtual DbSet<ModelKey2> ModelKey2s { get; set; }
 
     public virtual DbSet<ModelProvider> ModelProviders { get; set; }
+
+    public virtual DbSet<ModelReference> ModelReferences { get; set; }
 
     public virtual DbSet<Prompt> Prompts { get; set; }
 
@@ -61,7 +61,7 @@ public partial class ChatsDB : DbContext
 
     public virtual DbSet<SmsRecord> SmsRecords { get; set; }
 
-    public virtual DbSet<SmsStatu> SmsStatuses { get; set; }
+    public virtual DbSet<SmsStatus> SmsStatuses { get; set; }
 
     public virtual DbSet<SmsType> SmsTypes { get; set; }
 
@@ -220,15 +220,6 @@ public partial class ChatsDB : DbContext
             entity.HasOne(d => d.TransactionLog).WithOne(p => p.MessageResponse).HasConstraintName("FK_MessageResponse_TransactionLog");
         });
 
-        modelBuilder.Entity<ModelDefault>(entity =>
-        {
-            entity.HasKey(e => e.Id).HasName("PK_ModelSetting");
-
-            entity.HasOne(d => d.Provider).WithMany(p => p.ModelDefaults)
-                .OnDelete(DeleteBehavior.ClientSetNull)
-                .HasConstraintName("FK_ModelSetting_ModelProvider");
-        });
-
         modelBuilder.Entity<ModelKey>(entity =>
         {
             entity.HasKey(e => e.Id).HasName("ModelKeys_pkey");
@@ -246,6 +237,15 @@ public partial class ChatsDB : DbContext
         modelBuilder.Entity<ModelProvider>(entity =>
         {
             entity.ToTable("ModelProvider", tb => tb.HasComment("JSON"));
+        });
+
+        modelBuilder.Entity<ModelReference>(entity =>
+        {
+            entity.HasKey(e => e.Id).HasName("PK_ModelSetting");
+
+            entity.HasOne(d => d.Provider).WithMany(p => p.ModelReferences)
+                .OnDelete(DeleteBehavior.ClientSetNull)
+                .HasConstraintName("FK_ModelSetting_ModelProvider");
         });
 
         modelBuilder.Entity<Prompt>(entity =>

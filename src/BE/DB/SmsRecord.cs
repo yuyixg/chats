@@ -35,7 +35,7 @@ public partial class SmsRecord
 
     [ForeignKey("StatusId")]
     [InverseProperty("SmsRecords")]
-    public virtual SmsStatu Status { get; set; } = null!;
+    public virtual SmsStatus Status { get; set; } = null!;
 
     [ForeignKey("TypeId")]
     [InverseProperty("SmsRecords")]

@@ -7,7 +7,7 @@ using Microsoft.EntityFrameworkCore;
 namespace Chats.BE.DB;
 
 [Table("SmsStatus")]
-public partial class SmsStatu
+public partial class SmsStatus
 {
     [Key]
     public byte Id { get; set; }

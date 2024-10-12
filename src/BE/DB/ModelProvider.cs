@@ -39,9 +39,9 @@ public partial class ModelProvider
     [Unicode(false)]
     public string? ApiKey { get; set; }
 
-    [InverseProperty("Provider")]
-    public virtual ICollection<ModelDefault> ModelDefaults { get; set; } = new List<ModelDefault>();
-
     [InverseProperty("ModelProvider")]
     public virtual ICollection<ModelKey2> ModelKey2s { get; set; } = new List<ModelKey2>();
+
+    [InverseProperty("Provider")]
+    public virtual ICollection<ModelReference> ModelReferences { get; set; } = new List<ModelReference>();
 }
