@@ -8,39 +8,26 @@ using OpenAI;
 using System.Runtime.CompilerServices;
 using System.Text.Json;
 using System.ClientModel;
+using Chats.BE.DB;
 
 namespace Chats.BE.Services.Conversations.Implementations.OpenAI;
 
 public class OpenAIConversationService : ConversationService
 {
-    /// <summary>
-    /// possible values:
-    /// <list type="bullet">
-    /// <item>gpt-3.5-turbo</item>
-    /// <item>gpt-4</item>
-    /// <item>gpt-4-vision</item>
-    /// </list>
-    /// </summary>
-    private string SuggestedType { get; }
-    private ChatClient ChatClient { get; }
-    private JsonOpenAIModelConfig GlobalModelConfig { get; }
+    private readonly OpenAIClient _api;
 
-    private bool IsVision => SuggestedType == "gpt-4-vision";
-
-    public OpenAIConversationService(string keyConfigText, string suggestedType, string modelConfigText)
+    public OpenAIConversationService(ModelKey2 modelKey)
     {
-        JsonAzureApiConfig keyConfig = JsonAzureApiConfig.Parse(keyConfigText);
-        GlobalModelConfig = JsonSerializer.Deserialize<JsonOpenAIModelConfig>(modelConfigText)!;
-        OpenAIClient api = new(new ApiKeyCredential(keyConfig.ApiKey), new OpenAIClientOptions()
+        _api = new(new ApiKeyCredential(modelKey.ApiKey), new OpenAIClientOptions()
         {
-            Endpoint = !string.IsNullOrEmpty(keyConfig.Host) ? new Uri(keyConfig.Host) : null,
+            Endpoint = !string.IsNullOrEmpty(modelKey.Host) ? new Uri(modelKey.Host) : null,
         });
-        SuggestedType = suggestedType;
-        ChatClient = api.GetChatClient(GlobalModelConfig.DeploymentName);
     }
 
-    public override async IAsyncEnumerable<ConversationSegment> ChatStreamed(IReadOnlyList<ChatMessage> messages, JsonUserModelConfig userModelConfig, CurrentUser currentUser, [EnumeratorCancellation] CancellationToken cancellationToken)
+    public override async IAsyncEnumerable<ConversationSegment> ChatStreamed(IReadOnlyList<ChatMessage> messages, ChatCompletionOptions options, CurrentUser currentUser, [EnumeratorCancellation] CancellationToken cancellationToken)
     {
+        ChatClient ChatClient = _api.GetChatClient(options);
+
         ChatCompletionOptions chatCompletionOptions = new()
         {
             Temperature = userModelConfig.Temperature,

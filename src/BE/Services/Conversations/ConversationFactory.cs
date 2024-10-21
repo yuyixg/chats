@@ -1,4 +1,5 @@
-﻿using Chats.BE.Services.Conversations.Implementations.Azure;
+﻿using Chats.BE.DB;
+using Chats.BE.Services.Conversations.Implementations.Azure;
 using Chats.BE.Services.Conversations.Implementations.DashScope;
 using Chats.BE.Services.Conversations.Implementations.GLM;
 using Chats.BE.Services.Conversations.Implementations.Hunyuan;
@@ -10,17 +11,18 @@ namespace Chats.BE.Services.Conversations;
 
 public class ConversationFactory
 {
-    public ConversationService CreateConversationService(KnownModelProvider modelProvider, string jsonKeyConfig, string jsonModelConfig, string suggestedType)
+    public ConversationService CreateConversationService(Model model)
     {
+        KnownModelProvider modelProvider = (KnownModelProvider)model.ModelKey.ModelProviderId;
         ConversationService cs = modelProvider switch
         {
-            KnownModelProvider.OpenAI => new OpenAIConversationService(jsonKeyConfig, suggestedType, jsonModelConfig),
-            KnownModelProvider.Azure => new AzureConversationService(jsonKeyConfig, suggestedType, jsonModelConfig),
-            KnownModelProvider.QianFan => new QianFanConversationService(jsonKeyConfig, jsonModelConfig),
-            KnownModelProvider.QianWen => new DashScopeConversationService(jsonKeyConfig, suggestedType, jsonModelConfig),
-            KnownModelProvider.ZhiPuAI => new GLMConversationService(jsonKeyConfig, suggestedType, jsonModelConfig),
-            KnownModelProvider.Moonshot => new KimiConversationService(jsonKeyConfig, suggestedType, jsonModelConfig),
-            KnownModelProvider.HunYuan => new HunyuanConversationService(jsonKeyConfig, suggestedType, jsonModelConfig),
+            KnownModelProvider.OpenAI => new OpenAIConversationService(model.ModelKey),
+            KnownModelProvider.Azure => new AzureConversationService(model.ModelKey),
+            KnownModelProvider.QianFan => new QianFanConversationService(model.ModelKey),
+            KnownModelProvider.QianWen => new DashScopeConversationService(model.ModelKey),
+            KnownModelProvider.ZhiPuAI => new GLMConversationService(model.ModelKey),
+            KnownModelProvider.Moonshot => new KimiConversationService(model.ModelKey),
+            KnownModelProvider.HunYuan => new HunyuanConversationService(model.ModelKey),
             _ => throw new ArgumentException("Invalid model type")
         };
         return cs;

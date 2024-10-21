@@ -9,13 +9,13 @@ namespace Chats.BE.Services.Conversations;
 
 public abstract class ConversationService : IDisposable
 {
-    public abstract IAsyncEnumerable<ConversationSegment> ChatStreamed(IReadOnlyList<ChatMessage> messages, JsonUserModelConfig config, CurrentUser currentUser, CancellationToken cancellationToken);
+    public abstract IAsyncEnumerable<ConversationSegment> ChatStreamed(IReadOnlyList<ChatMessage> messages, ChatCompletionOptions options, CurrentUser currentUser, CancellationToken cancellationToken);
 
-    internal virtual async IAsyncEnumerable<ConversationSegment> ChatNonStreamed(IReadOnlyList<ChatMessage> messages, JsonUserModelConfig config, CurrentUser currentUser, [EnumeratorCancellation] CancellationToken cancellationToken)
+    internal virtual async IAsyncEnumerable<ConversationSegment> ChatNonStreamed(IReadOnlyList<ChatMessage> messages, ChatCompletionOptions options, CurrentUser currentUser, [EnumeratorCancellation] CancellationToken cancellationToken)
     {
         StringBuilder result = new();
         ConversationSegment? lastSegment = null;
-        await foreach (ConversationSegment seg in ChatStreamed(messages, config, currentUser, cancellationToken))
+        await foreach (ConversationSegment seg in ChatStreamed(messages, options, currentUser, cancellationToken))
         {
             lastSegment = seg;
             result.Append(seg.TextSegment);
