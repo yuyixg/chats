@@ -11,7 +11,7 @@ namespace Chats.BE.DB;
 public partial class ModelKey2
 {
     [Key]
-    public int Id { get; set; }
+    public short Id { get; set; }
 
     public short ModelProviderId { get; set; }
 
@@ -33,4 +33,7 @@ public partial class ModelKey2
     [ForeignKey("ModelProviderId")]
     [InverseProperty("ModelKey2s")]
     public virtual ModelProvider ModelProvider { get; set; } = null!;
+
+    [InverseProperty("ModelKey")]
+    public virtual ICollection<Model> Models { get; set; } = new List<Model>();
 }

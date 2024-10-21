@@ -38,6 +38,9 @@ public partial class ModelReference
     [Column(TypeName = "decimal(9, 5)")]
     public decimal ResponseTokenPrice1M { get; set; }
 
+    [InverseProperty("ModelReference")]
+    public virtual ICollection<Model> Models { get; set; } = new List<Model>();
+
     [ForeignKey("ProviderId")]
     [InverseProperty("ModelReferences")]
     public virtual ModelProvider Provider { get; set; } = null!;

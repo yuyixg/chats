@@ -26,7 +26,4 @@ public partial class FileService
     public DateTime CreatedAt { get; set; }
 
     public DateTime UpdatedAt { get; set; }
-
-    [InverseProperty("FileService")]
-    public virtual ICollection<ChatModel> ChatModels { get; set; } = new List<ChatModel>();
 }

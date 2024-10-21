@@ -6,10 +6,10 @@ using Microsoft.EntityFrameworkCore;
 
 namespace Chats.BE.DB;
 
-[Table("Conversation")]
-[Index("ChatModelId", Name = "IX_Conversation_ChatModel")]
-[Index("UserId", Name = "IX_Conversation_User")]
-public partial class Conversation
+[Table("Conversation2")]
+[Index("ModelId", Name = "IX_Conversation2_Model")]
+[Index("UserId", Name = "IX_Conversation2_User")]
+public partial class Conversation2
 {
     [Key]
     public int Id { get; set; }
@@ -19,7 +19,7 @@ public partial class Conversation
 
     public Guid UserId { get; set; }
 
-    public Guid ChatModelId { get; set; }
+    public short ModelId { get; set; }
 
     public float? Temperature { get; set; }
 
@@ -31,14 +31,14 @@ public partial class Conversation
 
     public DateTime CreatedAt { get; set; }
 
-    [ForeignKey("ChatModelId")]
-    [InverseProperty("Conversations")]
-    public virtual ChatModel ChatModel { get; set; } = null!;
-
     [InverseProperty("Conversation")]
-    public virtual ICollection<Message> Messages { get; set; } = new List<Message>();
+    public virtual ICollection<Message2> Message2s { get; set; } = new List<Message2>();
+
+    [ForeignKey("ModelId")]
+    [InverseProperty("Conversation2s")]
+    public virtual Model Model { get; set; } = null!;
 
     [ForeignKey("UserId")]
-    [InverseProperty("Conversations")]
+    [InverseProperty("Conversation2s")]
     public virtual User User { get; set; } = null!;
 }

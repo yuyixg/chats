@@ -49,7 +49,7 @@ public partial class User
     public virtual ICollection<ApiKey> ApiKeys { get; set; } = new List<ApiKey>();
 
     [InverseProperty("User")]
-    public virtual ICollection<Conversation> Conversations { get; set; } = new List<Conversation>();
+    public virtual ICollection<Conversation2> Conversation2s { get; set; } = new List<Conversation2>();
 
     [InverseProperty("CreateUser")]
     public virtual ICollection<Prompt> Prompts { get; set; } = new List<Prompt>();
@@ -71,4 +71,7 @@ public partial class User
 
     [InverseProperty("User")]
     public virtual UserModel? UserModel { get; set; }
+
+    [InverseProperty("User")]
+    public virtual ICollection<UserModel2> UserModel2s { get; set; } = new List<UserModel2>();
 }

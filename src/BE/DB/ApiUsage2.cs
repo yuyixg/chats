@@ -6,18 +6,18 @@ using Microsoft.EntityFrameworkCore;
 
 namespace Chats.BE.DB;
 
-[Table("ApiUsage")]
-[Index("ApiKeyId", Name = "IX_ApiKeyUsage_ApiKey")]
-[Index("ChatModelId", Name = "IX_ApiKeyUsage_ChatModel")]
-[Index("TransactionLogId", Name = "IX_ApiKeyUsage_TransactionLog", IsUnique = true)]
-public partial class ApiUsage
+[Table("ApiUsage2")]
+[Index("ApiKeyId", Name = "IX_ApiUsage2_ApiKey")]
+[Index("ModelId", Name = "IX_ApiUsage2_Model")]
+[Index("TransactionLogId", Name = "IX_ApiUsage2_TransactionLog", IsUnique = true)]
+public partial class ApiUsage2
 {
     [Key]
     public long Id { get; set; }
 
     public int ApiKeyId { get; set; }
 
-    public Guid ChatModelId { get; set; }
+    public short ModelId { get; set; }
 
     public int InputTokenCount { get; set; }
 
@@ -36,14 +36,14 @@ public partial class ApiUsage
     public DateTime CreatedAt { get; set; }
 
     [ForeignKey("ApiKeyId")]
-    [InverseProperty("ApiUsages")]
+    [InverseProperty("ApiUsage2s")]
     public virtual ApiKey ApiKey { get; set; } = null!;
 
-    [ForeignKey("ChatModelId")]
-    [InverseProperty("ApiUsages")]
-    public virtual ChatModel ChatModel { get; set; } = null!;
+    [ForeignKey("ModelId")]
+    [InverseProperty("ApiUsage2s")]
+    public virtual Model Model { get; set; } = null!;
 
     [ForeignKey("TransactionLogId")]
-    [InverseProperty("ApiUsage")]
+    [InverseProperty("ApiUsage2")]
     public virtual TransactionLog TransactionLog { get; set; } = null!;
 }
