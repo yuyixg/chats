@@ -1,6 +1,6 @@
 ﻿namespace Chats.BE.Services.Conversations;
 
-public enum KnownModelProvider
+public enum KnownModelProvider : short
 {
     OpenAI,
     Azure,

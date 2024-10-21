@@ -1,4 +1,5 @@
-﻿using Chats.BE.DB.Jsons;
+﻿using Chats.BE.DB;
+using Chats.BE.DB.Jsons;
 
 namespace Chats.BE.Controllers.Chats.Conversations;
 
@@ -26,9 +27,9 @@ public record UserModelBalanceCost(int? Counts, int? Tokens, decimal Balance, in
 
 public record UserModelBalanceCalculator(int? Counts, int? Tokens, decimal Balance)
 {
-    public UserModelBalanceCalculator(JsonTokenBalance jsonUserModel, decimal balance) : this(
-        jsonUserModel.Counts == "-" ? null : int.Parse(jsonUserModel.Counts),
-        jsonUserModel.Tokens == "-" ? null : int.Parse(jsonUserModel.Tokens),
+    public UserModelBalanceCalculator(UserModel2 userModel, decimal balance) : this(
+        userModel.CountBalance,
+        userModel.TokenBalance,
         balance)
     {
     }

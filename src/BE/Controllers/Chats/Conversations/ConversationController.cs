@@ -32,52 +32,49 @@ public class ConversationController(ChatsDB db, CurrentUser currentUser, ILogger
     {
         int conversationId = idEncryption.DecryptAsInt32(request.ConversationId);
         long? messageId = request.MessageId != null ? idEncryption.DecryptAsInt64(request.MessageId) : null;
-        ChatModel? cm = await db.ChatModels
-            .Where(x => x.Id == request.ModelId && x.Enabled)
-            .Include(x => x.ModelKeys)
+        Model? cm = await db.Models
+            .Where(x => x.Id == request.ModelId && !x.IsDeleted)
+            .Include(x => x.ModelKey)
             .FirstOrDefaultAsync(x => x.Id == request.ModelId, cancellationToken: cancellationToken);
         if (cm == null)
         {
             return this.BadRequestMessage("The Model does not exist or access is denied.");
         }
 
-        JsonPriceConfig priceConfig = JsonSerializer.Deserialize<JsonPriceConfig>(cm.PriceConfig)!;
+        JsonPriceConfig priceConfig = cm.ToPriceConfig();
 
         var miscInfo = await db.Users
             .Where(x => x.Id == currentUser.Id)
             .Select(x => new
             {
-                UserModels = x.UserModel!,
+                UserModel = x.UserModel2s.FirstOrDefault(x => x.ModelId == request.ModelId),
                 UserBalance = x.UserBalance!,
-                ThisChat = db.Conversations.Single(x => x.Id == conversationId && x.UserId == currentUser.Id)
+                ThisChat = db.Conversation2s.Single(x => x.Id == conversationId && x.UserId == currentUser.Id)
             })
             .SingleAsync(cancellationToken);
-        List<JsonTokenBalance> tokenBalances = JsonSerializer.Deserialize<List<JsonTokenBalance>>(miscInfo.UserModels.Models)!;
-        int tokenBalanceIndex = tokenBalances.FindIndex(x => x.ModelId == request.ModelId);
-        JsonTokenBalance? tokenBalance = tokenBalances[tokenBalanceIndex];
-        if (tokenBalance == null)
+        if (miscInfo.UserModel == null)
         {
             return this.BadRequestMessage("The Model does not exist or access is denied.");
         }
-        if (!tokenBalance.Enabled)
+        if (miscInfo.UserModel.IsDeleted)
         {
             return this.BadRequestMessage("The Model does not exist or access is denied.");
         }
-        if (tokenBalance.Expires != "-" && DateTime.Parse(tokenBalance.Expires) < DateTime.UtcNow)
+        if (miscInfo.UserModel.ExpiresAt < DateTime.UtcNow)
         {
             return this.BadRequestMessage("Subscription has expired");
         }
-        if (tokenBalance.Counts == "0" && tokenBalance.Tokens == "0" && miscInfo.UserBalance.Balance == 0 && !priceConfig.IsFree())
+        if (miscInfo.UserModel.TokenBalance == 0 && miscInfo.UserModel.CountBalance == 0 && miscInfo.UserBalance.Balance == 0 && !priceConfig.IsFree())
         {
             return this.BadRequestMessage("Insufficient balance");
         }
 
-        Dictionary<long, MessageLiteDto> existingMessages = await db.Messages
+        Dictionary<long, MessageLiteDto> existingMessages = await db.Message2s
             .Where(x => x.ConversationId == conversationId && x.Conversation.UserId == currentUser.Id)
             .Select(x => new MessageLiteDto()
             {
                 Id = x.Id,
-                Content = x.MessageContents
+                Content = x.MessageContent2s
                     .OrderBy(x => x.Id)
                     .Select(x => x.ToSegment())
                     .ToArray(),
@@ -97,28 +94,28 @@ public class ConversationController(ChatsDB db, CurrentUser currentUser, ILogger
                 return this.BadRequestMessage("Prompt is required for the first message");
             }
 
-            Message toBeInsert = new()
+            Message2 toBeInsert = new()
             {
                 ConversationId = conversationId,
                 ChatRoleId = (byte)DBConversationRole.System,
-                MessageContents =
+                MessageContent2s =
                 [
-                    MessageContent.FromText(request.UserModelConfig.Prompt)
+                    MessageContent2.FromText(request.UserModelConfig.Prompt)
                 ],
                 CreatedAt = DateTime.UtcNow,
             };
-            db.Messages.Add(toBeInsert);
+            db.Message2s.Add(toBeInsert);
 
             systemMessage = new MessageLiteDto
             {
                 Id = toBeInsert.Id,
-                Content = [toBeInsert.MessageContents.First().ToSegment()],
+                Content = [toBeInsert.MessageContent2s.First().ToSegment()],
                 Role = DBConversationRole.System,
                 ParentId = null,
             };
 
             miscInfo.ThisChat.Title = request.UserMessage.Text[..Math.Min(50, request.UserMessage.Text.Length)];
-            miscInfo.ThisChat.ChatModelId = request.ModelId;
+            miscInfo.ThisChat.ModelId = request.ModelId;
         }
         else
         {
@@ -148,15 +145,15 @@ public class ConversationController(ChatsDB db, CurrentUser currentUser, ILogger
         else
         {
             // insert new user message
-            Message dbUserMessage = new()
+            Message2 dbUserMessage = new()
             {
                 ConversationId = conversationId,
                 ChatRoleId = (byte)DBConversationRole.User,
-                MessageContents = request.UserMessage.ToMessageContents(),
+                MessageContent2s = request.UserMessage.ToMessageContents(),
                 CreatedAt = DateTime.UtcNow,
                 ParentId = messageId,
             };
-            db.Messages.Add(dbUserMessage);
+            db.Message2s.Add(dbUserMessage);
             await db.SaveChangesAsync(cancellationToken);
             userMessage = new()
             {
@@ -178,7 +175,7 @@ public class ConversationController(ChatsDB db, CurrentUser currentUser, ILogger
         Stopwatch sw = Stopwatch.StartNew();
         try
         {
-            UserModelBalanceCalculator calculator = new(tokenBalance, miscInfo.UserBalance.Balance);
+            UserModelBalanceCalculator calculator = new(miscInfo.UserModel, miscInfo.UserBalance.Balance);
             cost = calculator.GetNewBalance(0, 0, priceConfig);
             if (!cost.IsSufficient)
             {
@@ -186,7 +183,7 @@ public class ConversationController(ChatsDB db, CurrentUser currentUser, ILogger
             }
 
             using ConversationService s = conversationFactory.CreateConversationService(
-                Enum.Parse<KnownModelProvider>(cm.ModelKeys.Type), 
+                (KnownModelProvider)cm.ModelKey.ModelProviderId, 
                 cm.ModelKeys.Configs, 
                 cm.ModelConfig, 
                 cm.ModelVersion);
@@ -239,54 +236,23 @@ public class ConversationController(ChatsDB db, CurrentUser currentUser, ILogger
 
         // success
         // insert new assistant message
-        TransactionLog? transactionLog = CreateTransactionLog(miscInfo.UserModels, tokenBalances, tokenBalanceIndex, tokenBalance, cost);
-        Message assistantMessage = new()
-        {
-            ConversationId = conversationId,
-            ChatRoleId = (byte)DBConversationRole.Assistant,
-            MessageContents =
-            [
-                MessageContent.FromText(responseText.ToString()),
-            ],
-            CreatedAt = DateTime.UtcNow,
-            ParentId = userMessage.Id,
-            MessageResponse = new MessageResponse()
-            {
-                DurationMs = elapsedMs,
-                InputTokenCount = lastSegment.InputTokenCount,
-                OutputTokenCount = lastSegment.OutputTokenCount,
-                InputCost = cost.InputTokenPrice,
-                OutputCost = cost.OutputTokenPrice,
-                ChatModelId = cm.Id,
-                TransactionLog = transactionLog,
-            }
-        };
-        if (errorText != null)
-        {
-            assistantMessage.MessageContents.Add(MessageContent.FromError(errorText));
-            await YieldResponse(new() { Result = errorText, Success = false });
-        }
-        db.Messages.Add(assistantMessage);
-
-        await db.SaveChangesAsync(cancellationToken);
-        if (cost.CostBalance > 0)
-        {
-            _ = balanceService.AsyncUpdateBalance(currentUser.Id);
-        }
-
-        return new EmptyResult();
-    }
-
-    private TransactionLog? CreateTransactionLog(UserModel userModel, List<JsonTokenBalance> userModelConfigs, int userModelConfigIndex, JsonTokenBalance userModelConfig, UserModelBalanceCost cost)
-    {
+        UserModelTransactionLog? userModelTransactionLog = null;
+        TransactionLog? transactionLog = null;
         if (cost.CostCount > 0 || cost.CostTokens > 0)
         {
-            userModelConfigs[userModelConfigIndex] = userModelConfig;
-            userModel.Models = JsonSerializer.Serialize(userModelConfigs);
+            userModelTransactionLog = new UserModelTransactionLog()
+            {
+                CountAmount = -cost.CostCount,
+                TokenAmount = -cost.CostTokens,
+                CreatedAt = DateTime.UtcNow,
+                TransactionTypeId = (byte)DBTransactionType.Cost,
+                UserModelId = miscInfo.UserModel.Id,
+            };
+            db.UserModelTransactionLogs.Add(userModelTransactionLog);
         }
         if (cost.CostBalance > 0)
         {
-            TransactionLog transactionLog = new()
+            transactionLog = new()
             {
                 UserId = currentUser.Id,
                 CreatedAt = DateTime.UtcNow,
@@ -295,9 +261,43 @@ public class ConversationController(ChatsDB db, CurrentUser currentUser, ILogger
                 TransactionTypeId = (byte)DBTransactionType.Cost,
             };
             db.TransactionLogs.Add(transactionLog);
-            return transactionLog;
         }
-        return null;
+        Message2 assistantMessage = new()
+        {
+            ConversationId = conversationId,
+            ChatRoleId = (byte)DBConversationRole.Assistant,
+            MessageContent2s =
+            [
+                MessageContent2.FromText(responseText.ToString()),
+            ],
+            CreatedAt = DateTime.UtcNow,
+            ParentId = userMessage.Id,
+            MessageResponse2 = new MessageResponse2()
+            {
+                DurationMs = elapsedMs,
+                InputTokenCount = lastSegment.InputTokenCount,
+                OutputTokenCount = lastSegment.OutputTokenCount,
+                InputCost = cost.InputTokenPrice,
+                OutputCost = cost.OutputTokenPrice,
+                ModelId = cm.Id,
+                TransactionLog = transactionLog,
+                UserModelTransactionLog = userModelTransactionLog,
+            }
+        };
+        if (errorText != null)
+        {
+            assistantMessage.MessageContent2s.Add(MessageContent2.FromError(errorText));
+            await YieldResponse(new() { Result = errorText, Success = false });
+        }
+        db.Message2s.Add(assistantMessage);
+
+        await db.SaveChangesAsync(cancellationToken);
+        if (cost.CostBalance > 0)
+        {
+            _ = balanceService.AsyncUpdateBalance(currentUser.Id);
+        }
+
+        return new EmptyResult();
     }
 
     private readonly static ReadOnlyMemory<byte> dataU8 = "data:"u8.ToArray();

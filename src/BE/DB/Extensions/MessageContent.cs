@@ -5,7 +5,7 @@ using System.Text;
 
 namespace Chats.BE.DB;
 
-public partial class MessageContent
+public partial class MessageContent2
 {
     public ChatMessageContentPart ToOpenAI()
     {
