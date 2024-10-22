@@ -10,36 +10,26 @@ using AssistantChatMessage = OpenAI.Chat.AssistantChatMessage;
 using ChatMessageContentPartKind = OpenAI.Chat.ChatMessageContentPartKind;
 using System.Runtime.CompilerServices;
 using Chats.BE.DB.Jsons;
+using OpenAI.Chat;
+using Chats.BE.DB;
 
 namespace Chats.BE.Services.Conversations.Implementations.DashScope;
 
 public class DashScopeConversationService : ConversationService
 {
-    private JsonDashScopeModelConfig GlobalModelConfig { get; }
     private DashScopeClient Client { get; }
     private TextGenerationClient ChatClient { get; }
-    /// <summary>
-    /// possible values:
-    /// <list type="bullet">
-    /// <item>qwen</item>
-    /// <item>qwen-vl</item>
-    /// </list>
-    /// </summary>
-    private string SuggestedType { get; }
 
-    private bool IsVision => SuggestedType == "qwen-vl";
-
-    public DashScopeConversationService(string keyConfigText, string suggestedType, string modelConfigText)
+    public DashScopeConversationService(Model model) : base(model)
     {
-        JsonDashScopeConfig keyConfig = JsonSerializer.Deserialize<JsonDashScopeConfig>(keyConfigText)!;
-        GlobalModelConfig = JsonSerializer.Deserialize<JsonDashScopeModelConfig>(modelConfigText)!;
-        Client = new DashScopeClient(keyConfig.ApiKey);
+        ArgumentException.ThrowIfNullOrWhiteSpace(model.ModelKey.ApiKey, nameof(model.ModelKey.ApiKey));
+
+        Client = new DashScopeClient(model.ModelKey.ApiKey);
         ChatClient = Client.TextGeneration;
-        SuggestedType = suggestedType;
     }
 
 
-    public override async IAsyncEnumerable<ConversationSegment> ChatStreamed(IReadOnlyList<OpenAIChatMessage> messages, JsonUserModelConfig config, CurrentUser currentUser, [EnumeratorCancellation] CancellationToken cancellationToken)
+    public override async IAsyncEnumerable<ConversationSegment> ChatStreamedInternal(IReadOnlyList<OpenAIChatMessage> messages, ChatCompletionOptions options, [EnumeratorCancellation] CancellationToken cancellationToken)
     {
         ChatParameters chatParameters = new()
         {

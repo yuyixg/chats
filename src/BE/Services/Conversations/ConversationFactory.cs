@@ -16,13 +16,13 @@ public class ConversationFactory
         KnownModelProvider modelProvider = (KnownModelProvider)model.ModelKey.ModelProviderId;
         ConversationService cs = modelProvider switch
         {
-            KnownModelProvider.OpenAI => new OpenAIConversationService(model.ModelKey),
-            KnownModelProvider.Azure => new AzureConversationService(model.ModelKey),
-            KnownModelProvider.QianFan => new QianFanConversationService(model.ModelKey),
-            KnownModelProvider.QianWen => new DashScopeConversationService(model.ModelKey),
-            KnownModelProvider.ZhiPuAI => new GLMConversationService(model.ModelKey),
-            KnownModelProvider.Moonshot => new KimiConversationService(model.ModelKey),
-            KnownModelProvider.HunYuan => new HunyuanConversationService(model.ModelKey),
+            KnownModelProvider.OpenAI => new OpenAIConversationService(model),
+            KnownModelProvider.Azure => new AzureConversationService(model),
+            KnownModelProvider.QianFan => new QianFanConversationService(model),
+            KnownModelProvider.QianWen => new DashScopeConversationService(model),
+            KnownModelProvider.ZhiPuAI => new GLMConversationService(model),
+            KnownModelProvider.Moonshot => new KimiConversationService(model),
+            KnownModelProvider.HunYuan => new HunyuanConversationService(model),
             _ => throw new ArgumentException("Invalid model type")
         };
         return cs;

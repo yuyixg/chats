@@ -11,6 +11,7 @@ using Chats.BE.Services.IdEncryption;
 using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Mvc;
 using Microsoft.EntityFrameworkCore;
+using OpenAI.Chat;
 using Sdcb.DashScope;
 using System.ClientModel;
 using System.Diagnostics;
@@ -182,12 +183,16 @@ public class ConversationController(ChatsDB db, CurrentUser currentUser, ILogger
                 throw new InsufficientBalanceException();
             }
 
-            using ConversationService s = conversationFactory.CreateConversationService(
-                (KnownModelProvider)cm.ModelKey.ModelProviderId, 
-                cm.ModelKeys.Configs, 
-                cm.ModelConfig, 
-                cm.ModelVersion);
-            await foreach (ConversationSegment seg in s.ChatStreamed(messageToSend, request.UserModelConfig, currentUser, cancellationToken))
+            using ConversationService s = conversationFactory.CreateConversationService(cm);
+            ChatCompletionOptions cco = new()
+            {
+                MaxOutputTokenCount = cm.ModelReference.MaxResponseTokens,
+                Temperature = request.UserModelConfig.Temperature != null 
+                    ? Math.Clamp(request.UserModelConfig.Temperature.Value, (float)cm.ModelReference.MinTemperature, (float)cm.ModelReference.MaxTemperature) 
+                    : null,
+                EndUserId = currentUser.Id.ToString(),
+            };
+            await foreach (ConversationSegment seg in s.ChatStreamed(messageToSend, cco, cancellationToken))
             {
                 lastSegment = seg;
                 UserModelBalanceCost currentCost = calculator.GetNewBalance(seg.InputTokenCount, seg.OutputTokenCount, priceConfig);
