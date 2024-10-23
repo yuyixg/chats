@@ -13,92 +13,79 @@ using Sdcb.DashScope;
 using System.ClientModel;
 using System.ClientModel.Primitives;
 using System.Text.Json;
-using System.Text.Json.Nodes;
 using Microsoft.EntityFrameworkCore;
 using Chats.BE.DB.Enums;
 using System.Diagnostics;
 using System.Text;
+using Chats.BE.Services.Conversations.Extensions;
 
 namespace Chats.BE.Controllers.Chats.OpenAICompatible;
 
 [Route("api/openai-compatible"), Authorize(AuthenticationSchemes = "OpenAIApiKey")]
-public partial class OpenAICompatibleController(ChatsDB db, CurrentApiKey apiKey, ConversationFactory cf, UserModelManager userModelManager, ILogger<OpenAICompatibleController> logger, BalanceService balanceService) : ControllerBase
+public partial class OpenAICompatibleController(ChatsDB db, CurrentApiKey currentApiKey, ConversationFactory cf, UserModelManager userModelManager, ILogger<OpenAICompatibleController> logger, BalanceService balanceService) : ControllerBase
 {
     [HttpPost("chat/completions")]
-    public async Task<ActionResult> ChatCompletion([FromBody] JsonElement json, CancellationToken cancellationToken)
+    public async Task<ActionResult> ChatCompletion(CancellationToken cancellationToken)
     {
-        bool streamed = json.TryGetProperty("stream", out JsonElement streamProp) && streamProp.GetBoolean();
-        bool includeUsage = json.TryGetProperty("stream_options", out JsonElement streamOptionsProp) &&
-                           streamOptionsProp.TryGetProperty("include_usage", out JsonElement includeUsageProp) &&
-                           includeUsageProp.GetBoolean();
-        string? modelName = json.TryGetProperty("model", out JsonElement modelProp) ? modelProp.GetString() : null;
-        if (modelName == null) return ModelNotExists(modelName);
+        ChatCompletionOptions cco;
+        try
+        {
+            cco = ModelReaderWriter.Read<ChatCompletionOptions>(await BinaryData.FromStreamAsync(Request.Body, cancellationToken), ModelReaderWriterOptions.Json)!;
+        }
+        catch (ArgumentException e)
+        {
+            return ErrorMessage(OpenAICompatibleErrorCode.BadParameter, e.Message);
+        }
+        
+        Model[] validModels = await userModelManager.GetValidModelsByApiKey(currentApiKey.ApiKey, cancellationToken);
+        string? modelName = cco.GetModelName().ToString();
+        if (string.IsNullOrWhiteSpace(modelName)) return InvalidModel(modelName);
 
-        ChatModel[] validModels = await userModelManager.GetValidModelsByApiKey(apiKey.ApiKey, cancellationToken);
-        ChatModel? cm = validModels.FirstOrDefault(x => x.Id.ToString() == modelName || x.Name == modelName);
-        if (cm == null) return ModelNotExists(modelName);
+        Model? cm = validModels.FirstOrDefault(x => x.Name == modelName) ?? validModels.FirstOrDefault(x => x.ModelReference.Name == modelName);
+        if (cm == null) return InvalidModel(modelName);
 
-        ChatMessage[] messages = (json.TryGetProperty("messages", out JsonElement messagesProp) ? messagesProp.EnumerateArray() : [])
-            .Select(x =>
-            {
-                return ModelReaderWriter.Read<ChatMessage>(BinaryData.FromObjectAsJson(x), ModelReaderWriterOptions.Json)!;
-            })
-            .ToArray();
-
-        using ConversationService s = cf.CreateConversationService(
-            Enum.Parse<KnownModelProvider>(cm.ModelKeys.Type),
-            cm.ModelKeys.Configs,
-            cm.ModelConfig,
-            cm.ModelVersion);
+        using ConversationService s = cf.CreateConversationService(cm);
 
         UserModelBalanceCost cost = null!;
         var miscInfo = await db.Users
-            .Where(x => x.Id == apiKey.User.Id)
+            .Where(x => x.Id == currentApiKey.User.Id)
             .Select(x => new
             {
-                UserModels = x.UserModel!,
+                UserModel = x.UserModel2s.FirstOrDefault(x => x.ModelId == cm.Id),
                 UserBalance = x.UserBalance!,
             })
             .SingleAsync(cancellationToken);
-        List<JsonTokenBalance> tokenBalances = JsonSerializer.Deserialize<List<JsonTokenBalance>>(miscInfo.UserModels.Models)!;
-        int tokenBalanceIndex = tokenBalances.FindIndex(x => x.ModelId == cm.Id);
-        JsonTokenBalance? tokenBalance = tokenBalances[tokenBalanceIndex];
         ConversationSegment lastSegment = new() { TextSegment = "", InputTokenCount = 0, OutputTokenCount = 0 };
         Stopwatch sw = Stopwatch.StartNew();
         StringBuilder nonStreamingResult = new();
         BadRequestObjectResult? errorToReturn = null;
         try
         {
-            JsonPriceConfig priceConfig = JsonSerializer.Deserialize<JsonPriceConfig>(cm.PriceConfig)!;
-            if (tokenBalance == null)
+            if (miscInfo.UserModel == null)
             {
-                return ErrorMessage(OpenAICompatibleErrorCode.InvalidModel, "The Model does not exist or access is denied.");
+                return InvalidModel(modelName);
             }
-            if (!tokenBalance.Enabled)
+            if (miscInfo.UserModel.IsDeleted)
             {
-                return ErrorMessage(OpenAICompatibleErrorCode.InvalidModel, "The Model does not exist or access is denied.");
+                return InvalidModel(modelName);
             }
-            if (tokenBalance.Expires != "-" && DateTime.Parse(tokenBalance.Expires) < DateTime.UtcNow)
+            if (miscInfo.UserModel.ExpiresAt < DateTime.UtcNow)
             {
                 return ErrorMessage(OpenAICompatibleErrorCode.SubscriptionExpired, "Subscription has expired");
             }
-            if (tokenBalance.Counts == "0" && tokenBalance.Tokens == "0" && miscInfo.UserBalance.Balance == 0 && !priceConfig.IsFree())
+            JsonPriceConfig priceConfig = cm.ToPriceConfig();
+            if (miscInfo.UserModel.TokenBalance == 0 && miscInfo.UserModel.CountBalance == 0 && miscInfo.UserBalance.Balance == 0 && !priceConfig.IsFree())
             {
                 return ErrorMessage(OpenAICompatibleErrorCode.InsufficientBalance, "Insufficient balance");
             }
-            UserModelBalanceCalculator calculator = new(tokenBalance, miscInfo.UserBalance.Balance);
+            UserModelBalanceCalculator calculator = new(miscInfo.UserModel.CountBalance, miscInfo.UserModel.TokenBalance, miscInfo.UserBalance.Balance);
             cost = calculator.GetNewBalance(0, 0, priceConfig);
             if (!cost.IsSufficient)
             {
                 throw new InsufficientBalanceException();
             }
 
-            await foreach (ConversationSegment seg in s.ChatStreamed(messages, new JsonUserModelConfig()
-            {
-                Temperature = json.TryGetProperty("temperature", out JsonElement tempProp) ? (float)tempProp.GetDouble() : null, 
-                EnableSearch = json.TryGetProperty("enable_search", out JsonElement enableSearchProp) && enableSearchProp.GetBoolean(),
-                MaxLength = json.TryGetProperty("max_tokens", out JsonElement maxTokensProp) ? maxTokensProp.GetInt32() : null,
-            }, apiKey.User, cancellationToken))
+            await foreach (ConversationSegment seg in s.ChatStreamed([.. cco.GetMessages()], cco, cancellationToken))
             {
                 lastSegment = seg;
                 UserModelBalanceCost currentCost = calculator.GetNewBalance(seg.InputTokenCount, seg.OutputTokenCount, priceConfig);
@@ -180,9 +167,9 @@ public partial class OpenAICompatibleController(ChatsDB db, CurrentApiKey apiKey
         }
         TransactionLog transactionLog = new()
         {
-            UserId = apiKey.User.Id,
+            UserId = currentApiKey.User.Id,
             CreatedAt = DateTime.UtcNow,
-            CreditUserId = apiKey.User.Id,
+            CreditUserId = currentApiKey.User.Id,
             Amount = -cost.CostBalance,
             TransactionTypeId = (byte)DBTransactionType.ApiCost,
         };
@@ -190,7 +177,7 @@ public partial class OpenAICompatibleController(ChatsDB db, CurrentApiKey apiKey
         {
             ChatModelId = cm.Id,
             CreatedAt = DateTime.UtcNow,
-            ApiKeyId = apiKey.ApiKeyId,
+            ApiKeyId = currentApiKey.ApiKeyId,
             DurationMs = (int)sw.ElapsedMilliseconds,
             InputCost = cost.InputTokenPrice,
             InputTokenCount = lastSegment.InputTokenCount,
@@ -202,7 +189,7 @@ public partial class OpenAICompatibleController(ChatsDB db, CurrentApiKey apiKey
         await db.SaveChangesAsync(cancellationToken);
         if (cost.CostBalance > 0)
         {
-            _ = balanceService.AsyncUpdateBalance(apiKey.User.Id);
+            _ = balanceService.AsyncUpdateBalance(currentApiKey.User.Id);
         }
 
         if (streamed)
@@ -296,7 +283,7 @@ public partial class OpenAICompatibleController(ChatsDB db, CurrentApiKey apiKey
         await Response.Body.FlushAsync(cancellationToken);
     }
 
-    private BadRequestObjectResult ModelNotExists(string? modelName)
+    private BadRequestObjectResult InvalidModel(string? modelName)
     {
         return ErrorMessage(OpenAICompatibleErrorCode.InvalidModel, $"The model `{modelName}` does not exist or you do not have access to it.");
     }
@@ -304,7 +291,7 @@ public partial class OpenAICompatibleController(ChatsDB db, CurrentApiKey apiKey
     [HttpGet("models")]
     public async Task<ActionResult<ModelListDto>> GetModels(CancellationToken cancellationToken)
     {
-        ChatModel[] models = await userModelManager.GetValidModelsByApiKey(apiKey.ApiKey, cancellationToken);
+        ChatModel[] models = await userModelManager.GetValidModelsByApiKey(currentApiKey.ApiKey, cancellationToken);
         return Ok(new ModelListDto
         {
             Object = "list",

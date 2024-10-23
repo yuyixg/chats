@@ -7,4 +7,5 @@ public enum OpenAICompatibleErrorCode
     UpstreamError = 4002,
     InvalidModel = 4003,
     SubscriptionExpired = 4004,
+    BadParameter = 4005,
 }

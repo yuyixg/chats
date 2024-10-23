@@ -29,4 +29,13 @@ public static class ChatCompletionOptionsExtensions
 
     [UnsafeAccessor(UnsafeAccessorKind.Method, Name = "get_SerializedAdditionalRawData")]
     private extern static Dictionary<string, BinaryData> GetSerializedAdditionalRawData(ChatCompletionOptions @this);
+
+    [UnsafeAccessor(UnsafeAccessorKind.Method, Name = "get_Model")]
+    public extern static object GetModelName(this ChatCompletionOptions @this);
+
+    [UnsafeAccessor(UnsafeAccessorKind.Method, Name = "get_Messages")]
+    public extern static IList<ChatMessage> GetMessages(this ChatCompletionOptions @this);
+
+    [UnsafeAccessor(UnsafeAccessorKind.Method, Name = "get_StreamOptions")]
+    public extern static object GetStreamOptions(this ChatCompletionOptions @this);
 }

@@ -36,6 +36,8 @@ public class ConversationController(ChatsDB db, CurrentUser currentUser, ILogger
         Model? cm = await db.Models
             .Where(x => x.Id == request.ModelId && !x.IsDeleted)
             .Include(x => x.ModelKey)
+            .Include(x => x.ModelKey.ModelProvider)
+            .Include(x => x.ModelReference)
             .FirstOrDefaultAsync(x => x.Id == request.ModelId, cancellationToken: cancellationToken);
         if (cm == null)
         {
