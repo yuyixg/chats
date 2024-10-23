@@ -13,48 +13,38 @@ using ChatMessageContentPartKind = OpenAI.Chat.ChatMessageContentPartKind;
 using TencentCloud.Hunyuan.V20230901.Models;
 using System.Runtime.CompilerServices;
 using Chats.BE.DB.Jsons;
+using Chats.BE.DB;
 
 namespace Chats.BE.Services.Conversations.Implementations.Hunyuan;
 
 public class HunyuanConversationService : ConversationService
 {
-    private JsonHunyuanModelConfig GlobalModelConfig { get; }
-    /// <summary>
-    /// possible values:
-    /// <list type="bullet">
-    /// <item>hunyuan</item>
-    /// <item>hunyuan-vision</item>
-    /// </list>
-    /// </summary>
-    private string SuggestedType { get; }
-
-    private bool IsVision => SuggestedType == "hunyuan-vision";
-
     private HunyuanClient ChatClient { get; }
 
-    public HunyuanConversationService(string keyConfigText, string suggestedType, string modelConfigText)
+    public HunyuanConversationService(Model model) : base(model)
     {
-        JsonHunyuanKeyConfig keyConfig = JsonSerializer.Deserialize<JsonHunyuanKeyConfig>(keyConfigText)!;
-        GlobalModelConfig = JsonSerializer.Deserialize<JsonHunyuanModelConfig>(modelConfigText)!;
-        SuggestedType = suggestedType;
+        ArgumentException.ThrowIfNullOrWhiteSpace(model.ModelKey.Host, nameof(model.ModelKey.Host));
+        ArgumentException.ThrowIfNullOrWhiteSpace(model.ModelKey.ApiKey, nameof(model.ModelKey.ApiKey));
+
+        JsonHunyuanKeyConfig keyConfig = JsonSerializer.Deserialize<JsonHunyuanKeyConfig>(model.ModelKey.ApiKey)!;
         ChatClient = new(new Credential
         {
             SecretId = keyConfig.Secret,
             SecretKey = keyConfig.ApiKey
-        }, "", new ClientProfile() { HttpProfile = new() { Endpoint = keyConfig.Host } });
+        }, "", new ClientProfile() { HttpProfile = new() { Endpoint = model.ModelKey.Host } });
     }
 
-    public override async IAsyncEnumerable<ConversationSegment> ChatStreamed(IReadOnlyList<ChatMessage> messages, JsonUserModelConfig config, CurrentUser currentUser, [EnumeratorCancellation] CancellationToken cancellationToken)
+    public override async IAsyncEnumerable<ConversationSegment> ChatStreamedInternal(IReadOnlyList<ChatMessage> messages, ChatCompletionOptions options, [EnumeratorCancellation] CancellationToken cancellationToken)
     {
-        Message[] msgs = IsVision ?
+        Message[] msgs = Model.ModelReference.AllowVision ?
             messages.Select(OpenAIMessageToHunyuanVLMessage).ToArray() :
             messages.Select(OpenAIMessageToHunyuanMessage).ToArray();
         ChatCompletionsRequest req = new()
         {
-            Model = GlobalModelConfig.Model, 
+            Model = Model.ApiModelId, 
             Messages = msgs, 
             Stream = true, 
-            Temperature = config.Temperature ?? GlobalModelConfig.Temperature,
+            Temperature = options.Temperature,
         };
         ChatCompletionsResponse resp = await ChatClient.ChatCompletions(req);
         foreach (AbstractSSEModel.SSE message in resp)

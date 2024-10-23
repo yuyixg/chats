@@ -75,8 +75,6 @@ public partial class ChatsDB : DbContext
 
     public virtual DbSet<UserInvitation> UserInvitations { get; set; }
 
-    public virtual DbSet<UserModel> UserModels { get; set; }
-
     public virtual DbSet<UserModel2> UserModel2s { get; set; }
 
     public virtual DbSet<UserModelTransactionLog> UserModelTransactionLogs { get; set; }
@@ -339,17 +337,6 @@ public partial class ChatsDB : DbContext
             entity.HasOne(d => d.User).WithOne(p => p.UserInvitation)
                 .OnDelete(DeleteBehavior.ClientSetNull)
                 .HasConstraintName("FK_UserInvitation_Users");
-        });
-
-        modelBuilder.Entity<UserModel>(entity =>
-        {
-            entity.HasKey(e => e.Id).HasName("UserModels_pkey");
-
-            entity.Property(e => e.Id).ValueGeneratedNever();
-
-            entity.HasOne(d => d.User).WithOne(p => p.UserModel)
-                .OnDelete(DeleteBehavior.ClientSetNull)
-                .HasConstraintName("UserModels_userId_fkey");
         });
 
         modelBuilder.Entity<UserModel2>(entity =>

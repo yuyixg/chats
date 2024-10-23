@@ -33,9 +33,9 @@ public abstract class ConversationService : IDisposable
         {
             options.MaxOutputTokenCount ??= Model.ModelReference.MaxResponseTokens;
         }
-        if (Model.ModelReference.AllowSearch)
+        if (!Model.ModelReference.AllowSearch)
         {
-
+            options.RemoveAllowSearch();
         }
         return ChatStreamedInternal(filteredMessage, options, cancellationToken);
     }

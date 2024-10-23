@@ -9,4 +9,10 @@ public record JsonFileConfig
 
     [JsonPropertyName("maxSize"), JsonIgnore(Condition = JsonIgnoreCondition.WhenWritingNull)]
     public int? MaxSize { get; init; }
+
+    public static JsonFileConfig Default => new()
+    {
+        Count = 5,
+        MaxSize = 10240
+    };
 }

@@ -1,17 +1,17 @@
-﻿using Chats.BE.Infrastructure;
-using Chats.BE.Services.Conversations.Dtos;
+﻿using Chats.BE.Services.Conversations.Dtos;
 using Sdcb.DashScope;
 using Sdcb.DashScope.TextGeneration;
-using System.Text.Json;
 using OpenAIChatMessage = OpenAI.Chat.ChatMessage;
 using UserChatMessage = OpenAI.Chat.UserChatMessage;
 using SystemChatMessage = OpenAI.Chat.SystemChatMessage;
 using AssistantChatMessage = OpenAI.Chat.AssistantChatMessage;
 using ChatMessageContentPartKind = OpenAI.Chat.ChatMessageContentPartKind;
 using System.Runtime.CompilerServices;
-using Chats.BE.DB.Jsons;
 using OpenAI.Chat;
 using Chats.BE.DB;
+using Chats.BE.Services.Conversations.Extensions;
+using ChatTokenUsage = Sdcb.DashScope.TextGeneration.ChatTokenUsage;
+using ChatMessage = Sdcb.DashScope.TextGeneration.ChatMessage;
 
 namespace Chats.BE.Services.Conversations.Implementations.DashScope;
 
@@ -33,17 +33,17 @@ public class DashScopeConversationService : ConversationService
     {
         ChatParameters chatParameters = new()
         {
-            Temperature = config.Temperature ?? GlobalModelConfig.Temperature,
-            //MaxTokens = config.MaxLength,
-            EnableSearch = GlobalModelConfig.EnableSearch != null && !IsVision ? config.EnableSearch : false,
+            Temperature = options.Temperature,
+            MaxTokens = options.MaxOutputTokenCount,
+            EnableSearch = options.IsSearchEnabled(),
             Seed = (ulong)Random.Shared.Next(),
             IncrementalOutput = true,
         };
 
-        if (IsVision)
+        if (Model.ModelReference.AllowVision)
         {
             ChatVLMessage[] msgs = messages.Select(OpenAIMessageToQwenVL).ToArray();
-            await foreach (ResponseWrapper<string, ChatTokenUsage> resp in ChatClient.ChatVLStreamed(GlobalModelConfig.ModelName, msgs, chatParameters, cancellationToken))
+            await foreach (ResponseWrapper<string, ChatTokenUsage> resp in ChatClient.ChatVLStreamed(Model.ApiModelId, msgs, chatParameters, cancellationToken))
             {
                 yield return new ConversationSegment
                 {
@@ -56,7 +56,7 @@ public class DashScopeConversationService : ConversationService
         else
         {
             ChatMessage[] msgs = messages.Select(OpenAIMessageToQwen).ToArray();
-            await foreach (ResponseWrapper<ChatOutput, ChatTokenUsage> resp in ChatClient.ChatStreamed(GlobalModelConfig.ModelName, msgs, chatParameters, cancellationToken))
+            await foreach (ResponseWrapper<ChatOutput, ChatTokenUsage> resp in ChatClient.ChatStreamed(Model.ApiModelId, msgs, chatParameters, cancellationToken))
             {
                 yield return new ConversationSegment
                 {

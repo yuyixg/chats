@@ -11,15 +11,15 @@ public class OpenAIConversationService : ConversationService
 {
     private readonly ChatClient _chatClient;
 
-    public OpenAIConversationService(Model model) : base(model)
+    public OpenAIConversationService(Model model, Uri? defaultApiHost = null) : base(model)
     {
         ArgumentException.ThrowIfNullOrWhiteSpace(model.ModelKey.ApiKey, nameof(model.ModelKey.ApiKey));
 
         OpenAIClient api = new(new ApiKeyCredential(model.ModelKey.ApiKey!), new OpenAIClientOptions()
         {
-            Endpoint = !string.IsNullOrWhiteSpace(model.ModelKey.Host) ? new Uri(model.ModelKey.Host) : null,
+            Endpoint = !string.IsNullOrWhiteSpace(model.ModelKey.Host) ? new Uri(model.ModelKey.Host) : defaultApiHost,
         });
-        _chatClient = api.GetChatClient(model.DeploymentName ?? model.ModelReference.Name);
+        _chatClient = api.GetChatClient(model.ApiModelId);
     }
 
     public override async IAsyncEnumerable<ConversationSegment> ChatStreamedInternal(IReadOnlyList<ChatMessage> messages, ChatCompletionOptions options, [EnumeratorCancellation] CancellationToken cancellationToken)

@@ -11,40 +11,38 @@ public record UpdateModelRequest
     [JsonPropertyName("name")]
     public required string Name { get; init; }
 
-    [JsonPropertyName("modelVersion")]
-    public required string ModelVersion { get; init; }
+    //[JsonPropertyName("modelVersion")]
+    //public required string ModelVersion { get; init; }
 
     [JsonPropertyName("enabled")]
     public required bool Enabled { get; init; }
 
-    [JsonPropertyName("modelConfig")]
-    public required string ModelConfig { get; init; }
+    //[JsonPropertyName("modelConfig")]
+    //public required string ModelConfig { get; init; }
 
     [JsonPropertyName("modelKeysId")]
-    public required Guid ModelKeysId { get; init; }
+    public required short ModelKeysId { get; init; }
 
     [JsonPropertyName("fileServiceId")]
     public Guid? FileServiceId { get; init; }
 
-    [JsonPropertyName("fileConfig")]
-    public string? FileConfig { get; init; }
+    //[JsonPropertyName("fileConfig")]
+    //public string? FileConfig { get; init; }
 
     [JsonPropertyName("priceConfig")]
     public required string PriceConfig { get; init; }
 
-    [JsonPropertyName("remarks")]
-    public string? Remarks { get; init; }
+    //[JsonPropertyName("remarks")]
+    //public string? Remarks { get; init; }
 
-    public void ApplyTo(ChatModel cm)
+    public void ApplyTo(Model cm)
     {
+        JsonPriceConfig1M price = JsonSerializer.Deserialize<JsonPriceConfig1M>(PriceConfig)!;
         cm.Name = Name;
-        cm.ModelVersion = ModelVersion;
-        cm.Enabled = Enabled;
-        cm.ModelConfig = ModelConfig;
-        cm.ModelKeysId = ModelKeysId;
+        cm.IsDeleted = !Enabled;
+        cm.ModelKeyId = ModelKeysId;
         cm.FileServiceId = FileServiceId;
-        cm.FileConfig = FileConfig;
-        cm.PriceConfig = JSON.Serialize(JsonSerializer.Deserialize<JsonPriceConfig1M>(PriceConfig)!.ToRaw());
-        cm.Remarks = Remarks;
+        cm.PromptTokenPrice1M = price.InputTokenPrice1M;
+        cm.ResponseTokenPrice1M = price.OutputTokenPrice1M;
     }
 }

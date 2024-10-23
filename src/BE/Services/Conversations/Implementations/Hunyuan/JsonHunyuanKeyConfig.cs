@@ -4,9 +4,6 @@ namespace Chats.BE.Services.Conversations.Implementations.Hunyuan;
 
 public record JsonHunyuanKeyConfig
 {
-    [JsonPropertyName("host")]
-    public string? Host { get; init; }
-
     [JsonPropertyName("secret")]
     public required string Secret { get; init; }
 
