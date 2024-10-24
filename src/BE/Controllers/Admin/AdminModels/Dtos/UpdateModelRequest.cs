@@ -1,6 +1,5 @@
 ﻿using Chats.BE.DB;
 using Chats.BE.DB.Jsons;
-using Chats.BE.Services;
 using System.Text.Json;
 using System.Text.Json.Serialization;
 
@@ -12,16 +11,16 @@ public record UpdateModelRequest
     public required string Name { get; init; }
 
     //[JsonPropertyName("modelVersion")]
-    //public required string ModelVersion { get; init; }
+    //public required string ModelReferenceName { get; init; }
 
     [JsonPropertyName("enabled")]
     public required bool Enabled { get; init; }
 
-    //[JsonPropertyName("modelConfig")]
-    //public required string ModelConfig { get; init; }
+    [JsonPropertyName("modelConfig")]
+    public required string ModelConfig { get; init; }
 
     [JsonPropertyName("modelKeysId")]
-    public required short ModelKeysId { get; init; }
+    public required short ModelKeyId { get; init; }
 
     [JsonPropertyName("fileServiceId")]
     public Guid? FileServiceId { get; init; }
@@ -40,9 +39,11 @@ public record UpdateModelRequest
         JsonPriceConfig1M price = JsonSerializer.Deserialize<JsonPriceConfig1M>(PriceConfig)!;
         cm.Name = Name;
         cm.IsDeleted = !Enabled;
-        cm.ModelKeyId = ModelKeysId;
+        cm.ModelKeyId = ModelKeyId;
         cm.FileServiceId = FileServiceId;
         cm.PromptTokenPrice1M = price.InputTokenPrice1M;
         cm.ResponseTokenPrice1M = price.OutputTokenPrice1M;
+        JsonModelConfig config = JsonSerializer.Deserialize<JsonModelConfig>(ModelConfig)!;
+        cm.DeploymentName = config.DeploymentName;
     }
 }

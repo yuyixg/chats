@@ -16,4 +16,11 @@ internal static class MaskedKeyUtils
     {
         return key is not null && key.Length == 11 && key[5..9] == "****";
     }
+
+    public static bool IsMaskedEquals(this string? key, string? inputKey)
+    {
+        return inputKey.SeemsMasked() 
+            ? ToMaskedNull(key) == inputKey 
+            : key == inputKey;
+    }
 }

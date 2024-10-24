@@ -30,7 +30,7 @@ public record AdminMessageDtoTemp
 {
     public required string Name { get; init; }
     public required string ModelName { get; init; }
-    public required string ModelConfigText { get; init; }
+    public required string? DeploymentName { get; init; }
     public required JsonUserModelConfig UserModelConfigText { get; init; }
 
     public JsonModelConfig JsonModelConfig => JsonSerializer.Deserialize<JsonModelConfig>(ModelConfigText)!;

@@ -6,9 +6,9 @@ namespace Chats.BE.Controllers.Admin.ModelKeys.Dtos;
 
 public record ModelKeyDtoTemp
 {
-    public required Guid Id { get; init; }
+    public required short Id { get; init; }
 
-    public required string Type { get; init; }
+    public required string ProviderName { get; init; }
 
     public required string Name { get; init; }
 
@@ -16,7 +16,9 @@ public record ModelKeyDtoTemp
 
     public required int TotalModelCount { get; init; }
 
-    public required string Configs { get; init; }
+    public required string? Host { get; init; }
+
+    public required string? Secret { get; init; }
 
     public required DateTime CreatedAt { get; init; }
 
@@ -25,7 +27,7 @@ public record ModelKeyDtoTemp
         ModelKeyDto dto = new()
         {
             Id = Id,
-            Type = Type,
+            Type = ProviderName,
             Name = Name,
             Configs = JsonSerializer.Deserialize<JsonModelKey>(Configs)!,
             CreatedAt = CreatedAt,

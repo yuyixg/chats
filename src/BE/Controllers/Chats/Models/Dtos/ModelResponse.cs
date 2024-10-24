@@ -1,5 +1,6 @@
 ﻿using Chats.BE.DB;
 using Chats.BE.DB.Jsons;
+using Chats.BE.Services.Conversations;
 using System.Text.Json;
 using System.Text.Json.Serialization;
 
@@ -34,7 +35,7 @@ public record ModelResponse
     [JsonPropertyName("fileServerConfig")]
     public required FileServerConfig? FileServerConfigs { get; init; }
 
-    public static ModelResponse FromAll(Model model, JsonTokenBalance userModel, JsonModelConfig modelConfig, FileService? fileService, TemperatureOptions temperatureOptions)
+    public static ModelResponse FromAll(Model model, JsonTokenBalance userModel, FileService? fileService, TemperatureOptions temperatureOptions)
     {
         return new ModelResponse
         {
@@ -44,7 +45,12 @@ public record ModelResponse
             ModelProvider = model.ModelKey.ModelProvider.Name,
             ModelUsage = ModelUsage.FromJson(userModel),
             ModelConfigOptions = ModelConfigOption.FromTemperature(temperatureOptions),
-            ModelConfigs = JsonUserModelConfig.FromJson(modelConfig),
+            ModelConfigs = JsonUserModelConfig.FromJson(new JsonModelConfig
+            {
+                DeploymentName = model.DeploymentName,
+                Prompt = "",
+                Temperature = ConversationService.DefaultTemperature,
+            }),
             FileConfig = JsonFileConfig.Default,
             FileServerConfigs = FileServerConfig.FromFileService(fileService)
         };

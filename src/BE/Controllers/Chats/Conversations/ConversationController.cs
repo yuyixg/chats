@@ -63,7 +63,7 @@ public class ConversationController(ChatsDB db, CurrentUser currentUser, ILogger
         {
             return this.BadRequestMessage("The Model does not exist or access is denied.");
         }
-        if (miscInfo.UserModel.ExpiresAt < DateTime.UtcNow)
+        if (miscInfo.UserModel.IsExpired)
         {
             return this.BadRequestMessage("Subscription has expired");
         }

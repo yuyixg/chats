@@ -56,12 +56,11 @@ public record ChatsResponseTemp
 
     public required string Title { get; init; }
 
-    public required Guid? ChatModelId { get; init; }
+    public required short ChatModelId { get; init; }
 
     public required string? ModelName { get; init; }
-
-    public required string? ModelConfig { get; init; }
-
+    public string? DeploymentName { get; internal set; }
+    public float? Temperature { get; internal set; }
     public required JsonUserModelConfig UserModelConfig { get; init; }
 
     public required bool IsShared { get; init; }

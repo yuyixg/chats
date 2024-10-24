@@ -1,7 +1,5 @@
 ﻿using Chats.BE.Controllers.Users.ApiKeys.Dtos;
 using Chats.BE.DB;
-using Chats.BE.DB.Enums;
-using Chats.BE.DB.Jsons;
 using Chats.BE.Infrastructure;
 using Chats.BE.Services;
 using Microsoft.AspNetCore.Authorization;
@@ -10,7 +8,6 @@ using Microsoft.EntityFrameworkCore;
 using System.Numerics;
 using System.Security.Cryptography;
 using System.Text;
-using System.Text.Json;
 
 namespace Chats.BE.Controllers.Users.ApiKeys;
 
@@ -51,7 +48,7 @@ public class ApiKeyController(ChatsDB db, CurrentUser currentUser) : ControllerB
         if (dbEntry is null) return NotFound();
         if (dbEntry.AllowAllModels)
         {
-            ChatModel[] allowedModels = await userModelManager.GetValidModelsByUserId(currentUser.Id, cancellationToken);
+            Model[] allowedModels = await userModelManager.GetValidModelsByUserId(currentUser.Id, cancellationToken);
             return Ok(allowedModels.Select(x => x.Id).ToArray());
         }
         else
@@ -136,7 +133,7 @@ public class ApiKeyController(ChatsDB db, CurrentUser currentUser) : ControllerB
             .FirstOrDefaultAsync(cancellationToken);
         if (dbEntry == null) return NotFound();
 
-        bool everUsed = await db.ApiUsages
+        bool everUsed = await db.ApiUsage2s
             .AnyAsync(x => x.ApiKeyId == apiKeyId, cancellationToken);
         if (everUsed)
         {

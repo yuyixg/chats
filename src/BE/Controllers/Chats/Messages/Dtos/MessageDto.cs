@@ -122,7 +122,7 @@ public record ChatMessageTemp
     public required decimal? OutputPrice { get; init; }
     public required DateTime CreatedAt { get; init; }
     public required int? Duration { get; init; }
-    public required Guid? ModelId { get; init; }
+    public required short? ModelId { get; init; }
     public required string? ModelName { get; init; }
 
     public MessageDto ToDto(IIdEncryptionService idEncryption)

@@ -10,6 +10,8 @@ namespace Chats.BE.Services.Conversations;
 
 public abstract class ConversationService : IDisposable
 {
+    public const float DefaultTemperature = 0.8f;
+
     protected Model Model { get; }
     protected Tokenizer Tokenizer { get; }
 

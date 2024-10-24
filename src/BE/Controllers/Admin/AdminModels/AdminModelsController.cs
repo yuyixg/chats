@@ -19,25 +19,23 @@ public class AdminModelsController(ChatsDB db) : ControllerBase
     [HttpGet("models")]
     public async Task<ActionResult<AdminModelDto[]>> GetAdminModels(bool all, CancellationToken cancellationToken)
     {
-        IQueryable<ChatModel> query = db.ChatModels;
-        if (!all) query = query.Where(x => x.Enabled);
+        IQueryable<Model> query = db.Models;
+        if (!all) query = query.Where(x => !x.IsDeleted);
 
         return await query
-            .OrderBy(x => x.Rank)
+            .OrderBy(x => x.Order)
             .Select(x => new AdminModelDtoTemp
             {
-                Enabled = x.Enabled,
-                FileConfig = x.FileConfig,
+                Enabled = !x.IsDeleted,
                 FileServiceId = x.FileServiceId,
-                ModelConfig = x.ModelConfig,
                 ModelId = x.Id,
-                ModelKeysId = x.ModelKeysId,
-                ModelProvider = x.ModelProvider,
-                ModelVersion = x.ModelVersion,
+                ModelKeysId = x.ModelKeyId,
+                ModelProvider = x.ModelKey.ModelProvider.Name,
+                ModelVersion = x.ModelReference.Name,
                 Name = x.Name,
-                PriceConfig = x.PriceConfig,
-                Rank = x.Rank,
-                Remarks = x.Remarks,
+                PromptTokenPrice1M = x.PromptTokenPrice1M,
+                ResponseTokenPrice1M = x.ResponseTokenPrice1M,
+                Rank = x.Order,
             })
             .AsAsyncEnumerable()
             .Select(x => x.ToDto())
@@ -47,26 +45,9 @@ public class AdminModelsController(ChatsDB db) : ControllerBase
     [HttpPut("models/{modelId:guid}")]
     public async Task<ActionResult> UpdateModel(Guid modelId, [FromBody] UpdateModelRequest req, CancellationToken cancellationToken)
     {
-        ChatModel? cm = await db.ChatModels.FindAsync([modelId], cancellationToken);
+        Model? cm = await db.Models.FindAsync([modelId], cancellationToken);
         if (cm == null) return NotFound();
 
-        if (cm.ModelVersion != req.ModelVersion)
-        {
-            string? modelProvider = await db.ModelKeys
-                .Where(x => x.Id == req.ModelKeysId)
-                .Select(x => x.Type)
-                .SingleOrDefaultAsync(cancellationToken);
-                if (modelProvider == null)
-                {
-                    return this.BadRequestMessage("Model version not found");
-                }
-            if (modelProvider == null)
-            {
-                return this.BadRequestMessage("Model version not found");
-            }
-
-            cm.ModelProvider = modelProvider;
-        }
         req.ApplyTo(cm);
         if (db.ChangeTracker.HasChanges())
         {
@@ -80,24 +61,13 @@ public class AdminModelsController(ChatsDB db) : ControllerBase
     [HttpPost("models")]
     public async Task<ActionResult> CreateModel([FromBody] UpdateModelRequest req, CancellationToken cancellationToken)
     {
-        string? modelProvider = await db.ModelKeys
-            .Where(x => x.Id == req.ModelKeysId)
-            .Select(x => x.Type)
-            .SingleOrDefaultAsync(cancellationToken);
-        if (modelProvider == null)
+        Model toCreate = new()
         {
-            return this.BadRequestMessage("Model version not found");
-        }
-
-        ChatModel toCreate = new()
-        {
-            Id = Guid.NewGuid(), 
             CreatedAt = DateTime.UtcNow, 
-            UpdatedAt = DateTime.UtcNow, 
-            ModelProvider = modelProvider
+            UpdatedAt = DateTime.UtcNow,
         };
         req.ApplyTo(toCreate);
-        db.ChatModels.Add(toCreate);
+        db.Models.Add(toCreate);
         await db.SaveChangesAsync(cancellationToken);
 
         return Created();
@@ -110,15 +80,15 @@ public class AdminModelsController(ChatsDB db) : ControllerBase
         [FromServices] CurrentUser currentUser,
         CancellationToken cancellationToken)
     {
-        ModelKey? modelProvider = await db.ModelKeys
-            .Where(x => x.Id == req.ModelKeysId)
+        ModelKey2? modelProvider = await db.ModelKey2s
+            .Where(x => x.Id == req.ModelKeyId)
             .SingleOrDefaultAsync(cancellationToken);
         if (modelProvider == null)
         {
             return this.BadRequestMessage("Model version not found");
         }
 
-        ConversationService s = conversationFactory.CreateConversationService(Enum.Parse<KnownModelProvider>(modelProvider.Type), modelProvider.Configs, req.ModelConfig, req.ModelVersion);
+        ConversationService s = conversationFactory.CreateConversationService(Enum.Parse<KnownModelProvider>(modelProvider.Type), modelProvider.Configs, req.ModelConfig, req.ModelReferenceName);
         try
         {
             await foreach (ConversationSegment seg in s.ChatStreamed([new UserChatMessage("1+1=?")], new JsonUserModelConfig { }, currentUser, cancellationToken))
@@ -135,7 +105,7 @@ public class AdminModelsController(ChatsDB db) : ControllerBase
     [HttpPut("user-models")]
     public async Task<ActionResult> UpdateUserModels([FromBody] UpdateUserModelRequest req, CancellationToken cancellationToken)
     {
-        UserModel? userModel = await db.UserModels
+        UserModel2? userModel = await db.UserModel2s
             .FindAsync([req.UserModelId], cancellationToken);
         if (userModel == null) return NotFound();
 

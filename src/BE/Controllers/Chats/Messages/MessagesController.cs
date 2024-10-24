@@ -17,14 +17,14 @@ public class MessagesController(ChatsDB db, CurrentUser currentUser, IIdEncrypti
     [HttpGet]
     public async Task<ActionResult<MessageDto[]>> GetMessages([FromQuery] string chatId, CancellationToken cancellationToken)
     {
-        MessageDto[] messages = await db.Messages
+        MessageDto[] messages = await db.Message2s
             .Where(m => m.ConversationId == idEncryption.DecryptAsInt32(chatId) && m.Conversation.UserId == currentUser.Id && m.ChatRoleId != (byte)DBConversationRole.System)
             .Select(x => new ChatMessageTemp()
             {
                 Id = x.Id,
                 ParentId = x.ParentId,
                 Role = (DBConversationRole)x.ChatRoleId,
-                Content = x.MessageContents
+                Content = x.MessageContent2s
                     .OrderBy(x => x.Id)
                     .Select(x => new DBMessageSegment
                     {
@@ -33,13 +33,13 @@ public class MessagesController(ChatsDB db, CurrentUser currentUser, IIdEncrypti
                     })
                     .ToArray(),
                 CreatedAt = x.CreatedAt,
-                InputTokens = x.MessageResponse!.InputTokenCount,
-                OutputTokens = x.MessageResponse.OutputTokenCount,
-                InputPrice = x.MessageResponse.InputCost,
-                OutputPrice = x.MessageResponse.OutputCost,
-                Duration = x.MessageResponse.DurationMs,
-                ModelId = x.MessageResponse.ChatModelId,
-                ModelName = x.MessageResponse.ChatModel.Name
+                InputTokens = x.MessageResponse2!.InputTokenCount,
+                OutputTokens = x.MessageResponse2.OutputTokenCount,
+                InputPrice = x.MessageResponse2.InputCost,
+                OutputPrice = x.MessageResponse2.OutputCost,
+                Duration = x.MessageResponse2.DurationMs,
+                ModelId = x.MessageResponse2.ChatModelId,
+                ModelName = x.MessageResponse2.ChatModel.Name
             })
             .OrderBy(x => x.CreatedAt)
             .AsAsyncEnumerable()
@@ -52,14 +52,14 @@ public class MessagesController(ChatsDB db, CurrentUser currentUser, IIdEncrypti
     [HttpGet("v2")]
     public async Task<ActionResult<MessageDto[]>> GetMessagesV2([FromQuery] string chatId, CancellationToken cancellationToken)
     {
-        MessageDto[] messages = await db.Messages
+        MessageDto[] messages = await db.Message2s
             .Where(m => m.ConversationId == idEncryption.DecryptAsInt32(chatId) && m.Conversation.UserId == currentUser.Id)
             .Select(x => new ChatMessageTemp()
             {
                 Id = x.Id,
                 ParentId = x.ParentId,
                 Role = (DBConversationRole)x.ChatRoleId,
-                Content = x.MessageContents
+                Content = x.MessageContent2s
                     .OrderBy(x => x.Id)
                     .Select(x => new DBMessageSegment
                     {
@@ -68,13 +68,13 @@ public class MessagesController(ChatsDB db, CurrentUser currentUser, IIdEncrypti
                     })
                     .ToArray(),
                 CreatedAt = x.CreatedAt,
-                InputTokens = x.MessageResponse!.InputTokenCount,
-                OutputTokens = x.MessageResponse.OutputTokenCount,
-                InputPrice = x.MessageResponse.InputCost,
-                OutputPrice = x.MessageResponse.OutputCost,
-                Duration = x.MessageResponse.DurationMs,
-                ModelId = x.MessageResponse.ChatModelId,
-                ModelName = x.MessageResponse.ChatModel.Name
+                InputTokens = x.MessageResponse2!.InputTokenCount,
+                OutputTokens = x.MessageResponse2.OutputTokenCount,
+                InputPrice = x.MessageResponse2.InputCost,
+                OutputPrice = x.MessageResponse2.OutputCost,
+                Duration = x.MessageResponse2.DurationMs,
+                ModelId = x.MessageResponse2.ModelId,
+                ModelName = x.MessageResponse2.Model.Name
             })
             .OrderBy(x => x.CreatedAt)
             .AsAsyncEnumerable()

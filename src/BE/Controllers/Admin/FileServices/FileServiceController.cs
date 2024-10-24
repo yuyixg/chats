@@ -83,7 +83,7 @@ public class FileServiceController(ChatsDB db) : ControllerBase
     [HttpDelete("{fileServiceId}")]
     public async Task<ActionResult> DeleteFileService(Guid fileServiceId, CancellationToken cancellationToken)
     {
-        if (await db.ChatModels
+        if (await db.Models
             .Where(x => x.FileServiceId == fileServiceId)
             .AnyAsync(cancellationToken))
         {

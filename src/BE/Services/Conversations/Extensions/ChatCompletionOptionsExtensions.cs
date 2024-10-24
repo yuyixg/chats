@@ -1,4 +1,5 @@
 ﻿using OpenAI.Chat;
+using System.Reflection;
 using System.Runtime.CompilerServices;
 
 namespace Chats.BE.Services.Conversations.Extensions;
@@ -27,6 +28,8 @@ public static class ChatCompletionOptionsExtensions
         rawData.Remove("enable_search");
     }
 
+    public static bool IsStreamed(this ChatCompletionOptions options) => IsStreamedInternal(options) ?? false;
+
     [UnsafeAccessor(UnsafeAccessorKind.Method, Name = "get_SerializedAdditionalRawData")]
     private extern static Dictionary<string, BinaryData> GetSerializedAdditionalRawData(ChatCompletionOptions @this);
 
@@ -36,6 +39,6 @@ public static class ChatCompletionOptionsExtensions
     [UnsafeAccessor(UnsafeAccessorKind.Method, Name = "get_Messages")]
     public extern static IList<ChatMessage> GetMessages(this ChatCompletionOptions @this);
 
-    [UnsafeAccessor(UnsafeAccessorKind.Method, Name = "get_StreamOptions")]
-    public extern static object GetStreamOptions(this ChatCompletionOptions @this);
+    [UnsafeAccessor(UnsafeAccessorKind.Method, Name = "get_Stream")]
+    private extern static bool? IsStreamedInternal(this ChatCompletionOptions @this);
 }

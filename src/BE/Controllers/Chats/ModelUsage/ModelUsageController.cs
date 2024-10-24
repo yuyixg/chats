@@ -13,45 +13,28 @@ namespace Chats.BE.Controllers.Chats.ModelUsage;
 public class ModelUsageController(ChatsDB db, CurrentUser currentUser) : ControllerBase
 {
     [HttpGet]
-    public async Task<ActionResult<ModelUsageResponse>> GetUserModelUsage(Guid modelId, CancellationToken cancellationToken)
+    public async Task<ActionResult<ModelUsageResponse>> GetUserModelUsage(short modelId, CancellationToken cancellationToken)
     {
-        string? userModels = await db.UserModels
-            .Where(x => x.UserId == currentUser.Id)
-            .Select(x => x.Models)
+        UserModel2? userModel = await db.UserModel2s
+            .Include(x => x.Model)
+            .Where(x => x.UserId == currentUser.Id && x.ModelId == modelId && !x.IsDeleted)
             .SingleOrDefaultAsync(cancellationToken);
-        if (userModels == null)
-        {
-            return NotFound();
-        }
-
-        JsonTokenBalance[] jsonUserModels = JsonSerializer.Deserialize<JsonTokenBalance[]>(userModels)!;
-        JsonTokenBalance? userModel = jsonUserModels.FirstOrDefault(x => x.ModelId == modelId);
         if (userModel == null)
         {
             return NotFound();
         }
-        if (!userModel.Enabled)
+
+        if (userModel.IsExpired)
         {
             return NotFound();
         }
 
-        string? priceConfig = await db.ChatModels
-            .Where(x => x.Id == userModel.ModelId && x.Enabled)
-            .Select(x => x.PriceConfig)
-            .FirstOrDefaultAsync(cancellationToken);
-        if (priceConfig == null)
-        {
-            return NotFound();
-        }
-
-        JsonPriceConfig jsonPrice = JsonSerializer.Deserialize<JsonPriceConfig>(priceConfig)!;
-        JsonPriceConfig1M jsonPriceConfig1M = jsonPrice.To1M();
         return Ok(new ModelUsageResponse
         {
-            Counts = userModel.Counts, 
-            Expires = userModel.Expires,
-            Prices = jsonPriceConfig1M.ToString(),
-            Tokens = userModel.Tokens,
+            Counts = userModel.CountBalance.ToString(), 
+            Expires = userModel.ExpiresAt.ToString(),
+            Prices = new JsonPriceConfig1M(userModel.Model.PromptTokenPrice1M, userModel.Model.ResponseTokenPrice1M).ToString(),
+            Tokens = userModel.TokenBalance.ToString(),
         });
     }
 }

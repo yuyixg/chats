@@ -69,7 +69,7 @@ public partial class OpenAICompatibleController(ChatsDB db, CurrentApiKey curren
             {
                 return InvalidModel(modelName);
             }
-            if (miscInfo.UserModel.ExpiresAt < DateTime.UtcNow)
+            if (miscInfo.UserModel.IsExpired)
             {
                 return ErrorMessage(OpenAICompatibleErrorCode.SubscriptionExpired, "Subscription has expired");
             }
@@ -96,7 +96,7 @@ public partial class OpenAICompatibleController(ChatsDB db, CurrentApiKey curren
                 cost = currentCost;
                 if (seg.TextSegment == string.Empty) continue;
 
-                if (streamed)
+                if (cco.IsStreamed())
                 {
                     ChatCompletionChunk chunk = new()
                     {
@@ -137,12 +137,12 @@ public partial class OpenAICompatibleController(ChatsDB db, CurrentApiKey curren
         }
         catch (InsufficientBalanceException)
         {
-            errorToReturn = await YieldError(streamed, OpenAICompatibleErrorCode.InsufficientBalance, "⚠Insufficient balance - 余额不足!", cancellationToken);
+            errorToReturn = await YieldError(cco.IsStreamed(), OpenAICompatibleErrorCode.InsufficientBalance, "⚠Insufficient balance - 余额不足!", cancellationToken);
         }
         catch (Exception e) when (e is DashScopeException || e is ClientResultException)
         {
             logger.LogError(e, "Upstream error");
-            errorToReturn = await YieldError(streamed, OpenAICompatibleErrorCode.UpstreamError, e.Message, cancellationToken);
+            errorToReturn = await YieldError(cco.IsStreamed(), OpenAICompatibleErrorCode.UpstreamError, e.Message, cancellationToken);
         }
         catch (TaskCanceledException)
         {
@@ -151,7 +151,7 @@ public partial class OpenAICompatibleController(ChatsDB db, CurrentApiKey curren
         catch (Exception e)
         {
             logger.LogError(e, "Unknown error");
-            errorToReturn = await YieldError(streamed, OpenAICompatibleErrorCode.Unknown, "\n⚠Error in conversation - 对话出错!", cancellationToken);
+            errorToReturn = await YieldError(cco.IsStreamed(), OpenAICompatibleErrorCode.Unknown, "\n⚠Error in conversation - 对话出错!", cancellationToken);
         }
         finally
         {
@@ -160,22 +160,33 @@ public partial class OpenAICompatibleController(ChatsDB db, CurrentApiKey curren
             sw.Stop();
         }
 
+        TransactionLog? transactionLog = null;
+        UserModelTransactionLog? userModelTransactionLog = null;
         if (cost.CostCount > 0 || cost.CostTokens > 0)
         {
-            tokenBalances[tokenBalanceIndex] = tokenBalance;
-            miscInfo.UserModels.Models = JsonSerializer.Serialize(tokenBalances);
+            userModelTransactionLog = new()
+            {
+                UserModelId = miscInfo.UserModel!.Id,
+                CreatedAt = DateTime.UtcNow,
+                CountAmount = -cost.CostCount,
+                TokenAmount = -cost.CostTokens,
+                TransactionTypeId = (byte)DBTransactionType.ApiCost,
+            };
         }
-        TransactionLog transactionLog = new()
+        if (cost.CostBalance > 0)
         {
-            UserId = currentApiKey.User.Id,
-            CreatedAt = DateTime.UtcNow,
-            CreditUserId = currentApiKey.User.Id,
-            Amount = -cost.CostBalance,
-            TransactionTypeId = (byte)DBTransactionType.ApiCost,
-        };
-        ApiUsage usage = new()
+            transactionLog = new()
+            {
+                UserId = currentApiKey.User.Id,
+                CreatedAt = DateTime.UtcNow,
+                CreditUserId = currentApiKey.User.Id,
+                Amount = -cost.CostBalance,
+                TransactionTypeId = (byte)DBTransactionType.ApiCost,
+            };
+        }
+        ApiUsage2 usage = new()
         {
-            ChatModelId = cm.Id,
+            ModelId = cm.Id,
             CreatedAt = DateTime.UtcNow,
             ApiKeyId = currentApiKey.ApiKeyId,
             DurationMs = (int)sw.ElapsedMilliseconds,
@@ -185,14 +196,14 @@ public partial class OpenAICompatibleController(ChatsDB db, CurrentApiKey curren
             OutputTokenCount = lastSegment.OutputTokenCount,
             TransactionLog = transactionLog,
         };
-        db.ApiUsages.Add(usage);
+        db.ApiUsage2s.Add(usage);
         await db.SaveChangesAsync(cancellationToken);
         if (cost.CostBalance > 0)
         {
             _ = balanceService.AsyncUpdateBalance(currentApiKey.User.Id);
         }
 
-        if (streamed)
+        if (cco.IsStreamed())
         {
             return new EmptyResult();
         }
@@ -291,7 +302,7 @@ public partial class OpenAICompatibleController(ChatsDB db, CurrentApiKey curren
     [HttpGet("models")]
     public async Task<ActionResult<ModelListDto>> GetModels(CancellationToken cancellationToken)
     {
-        ChatModel[] models = await userModelManager.GetValidModelsByApiKey(currentApiKey.ApiKey, cancellationToken);
+        Model[] models = await userModelManager.GetValidModelsByApiKey(currentApiKey.ApiKey, cancellationToken);
         return Ok(new ModelListDto
         {
             Object = "list",
@@ -300,7 +311,7 @@ public partial class OpenAICompatibleController(ChatsDB db, CurrentApiKey curren
                 Id = x.Name,
                 Created = new DateTimeOffset(x.CreatedAt, TimeSpan.Zero).ToUnixTimeSeconds(),
                 Object = "model",
-                OwnedBy = x.ModelKeys.Type
+                OwnedBy = x.ModelKey.Name
             }).ToArray()
         });
     }

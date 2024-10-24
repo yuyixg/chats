@@ -10,7 +10,7 @@ public record AdminModelDto
     public required int? Rank { get; init; }
 
     [JsonPropertyName("modelId")]
-    public required Guid ModelId { get; init; }
+    public required short ModelId { get; init; }
 
     [JsonPropertyName("modelProvider")]
     public required string ModelProvider { get; init; }
@@ -24,11 +24,8 @@ public record AdminModelDto
     [JsonPropertyName("enabled")]
     public required bool Enabled { get; init; }
 
-    [JsonPropertyName("remarks")]
-    public required string? Remarks { get; init; }
-
     [JsonPropertyName("modelKeysId")]
-    public required Guid ModelKeysId { get; init; }
+    public required short ModelKeysId { get; init; }
 
     [JsonPropertyName("fileServiceId")]
     public required Guid? FileServiceId { get; init; }
@@ -46,17 +43,15 @@ public record AdminModelDto
 public record AdminModelDtoTemp
 {
     public required int? Rank { get; init; }
-    public required Guid ModelId { get; init; }
+    public required short ModelId { get; init; }
     public required string ModelProvider { get; init; }
     public required string ModelVersion { get; init; }
     public required string Name { get; init; }
     public required bool Enabled { get; init; }
-    public required string? Remarks { get; init; }
-    public required Guid ModelKeysId { get; init; }
+    public required short ModelKeysId { get; init; }
     public required Guid? FileServiceId { get; init; }
-    public required string? FileConfig { get; init; }
-    public required string ModelConfig { get; init; }
-    public required string PriceConfig { get; init; }
+    public required decimal PromptTokenPrice1M { get; init; }
+    public required decimal ResponseTokenPrice1M { get; init; }
 
     public AdminModelDto ToDto()
     {
@@ -68,12 +63,11 @@ public record AdminModelDtoTemp
             ModelVersion = ModelVersion,
             Name = Name,
             Enabled = Enabled,
-            Remarks = Remarks,
             ModelKeysId = ModelKeysId,
             FileServiceId = FileServiceId,
-            FileConfig = FileConfig,
-            ModelConfig = ModelConfig,
-            PriceConfig = JsonSerializer.Deserialize<JsonPriceConfig>(PriceConfig)!
+            FileConfig = JsonSerializer.Serialize(JsonFileConfig.Default),
+            ModelConfig = "{}",
+            PriceConfig = new JsonPriceConfig1M(PromptTokenPrice1M, ResponseTokenPrice1M).ToRaw(),
         };
     }
 }
