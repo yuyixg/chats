@@ -37,12 +37,13 @@ public partial class OpenAICompatibleController(ChatsDB db, CurrentApiKey curren
             return ErrorMessage(OpenAICompatibleErrorCode.BadParameter, e.Message);
         }
         
-        Model[] validModels = await userModelManager.GetValidModelsByApiKey(currentApiKey.ApiKey, cancellationToken);
+        UserModel2[] validModels = await userModelManager.GetValidModelsByApiKey(currentApiKey.ApiKey, cancellationToken);
         string? modelName = cco.GetModelName().ToString();
         if (string.IsNullOrWhiteSpace(modelName)) return InvalidModel(modelName);
 
-        Model? cm = validModels.FirstOrDefault(x => x.Name == modelName) ?? validModels.FirstOrDefault(x => x.ModelReference.Name == modelName);
-        if (cm == null) return InvalidModel(modelName);
+        UserModel2? userModel = validModels.FirstOrDefault(x => x.Model.Name == modelName) ?? validModels.FirstOrDefault(x => x.Model.ModelReference.Name == modelName);
+        if (userModel == null) return InvalidModel(modelName);
+        Model? cm = userModel?.Model;
 
         using ConversationService s = cf.CreateConversationService(cm);
 
@@ -51,7 +52,6 @@ public partial class OpenAICompatibleController(ChatsDB db, CurrentApiKey curren
             .Where(x => x.Id == currentApiKey.User.Id)
             .Select(x => new
             {
-                UserModel = x.UserModel2s.FirstOrDefault(x => x.ModelId == cm.Id),
                 UserBalance = x.UserBalance!,
             })
             .SingleAsync(cancellationToken);
@@ -61,24 +61,20 @@ public partial class OpenAICompatibleController(ChatsDB db, CurrentApiKey curren
         BadRequestObjectResult? errorToReturn = null;
         try
         {
-            if (miscInfo.UserModel == null)
+            if (userModel!.IsDeleted)
             {
                 return InvalidModel(modelName);
             }
-            if (miscInfo.UserModel.IsDeleted)
-            {
-                return InvalidModel(modelName);
-            }
-            if (miscInfo.UserModel.IsExpired)
+            if (userModel.IsExpired)
             {
                 return ErrorMessage(OpenAICompatibleErrorCode.SubscriptionExpired, "Subscription has expired");
             }
             JsonPriceConfig priceConfig = cm.ToPriceConfig();
-            if (miscInfo.UserModel.TokenBalance == 0 && miscInfo.UserModel.CountBalance == 0 && miscInfo.UserBalance.Balance == 0 && !priceConfig.IsFree())
+            if (userModel.TokenBalance == 0 && userModel.CountBalance == 0 && miscInfo.UserBalance.Balance == 0 && !priceConfig.IsFree())
             {
                 return ErrorMessage(OpenAICompatibleErrorCode.InsufficientBalance, "Insufficient balance");
             }
-            UserModelBalanceCalculator calculator = new(miscInfo.UserModel.CountBalance, miscInfo.UserModel.TokenBalance, miscInfo.UserBalance.Balance);
+            UserModelBalanceCalculator calculator = new(userModel.CountBalance, userModel.TokenBalance, miscInfo.UserBalance.Balance);
             cost = calculator.GetNewBalance(0, 0, priceConfig);
             if (!cost.IsSufficient)
             {
