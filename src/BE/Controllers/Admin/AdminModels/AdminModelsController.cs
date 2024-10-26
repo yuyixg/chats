@@ -10,6 +10,7 @@ using Chats.BE.Services.Conversations.Dtos;
 using Microsoft.AspNetCore.Mvc;
 using Microsoft.EntityFrameworkCore;
 using OpenAI.Chat;
+using System.Text.Json;
 
 namespace Chats.BE.Controllers.Admin.AdminModels;
 
@@ -48,7 +49,7 @@ public class AdminModelsController(ChatsDB db) : ControllerBase
         Model? cm = await db.Models.FindAsync([modelId], cancellationToken);
         if (cm == null) return NotFound();
 
-        req.ApplyTo(cm);
+        req.ApplyTo(cm, db);
         if (db.ChangeTracker.HasChanges())
         {
             cm.UpdatedAt = DateTime.UtcNow;
@@ -63,10 +64,10 @@ public class AdminModelsController(ChatsDB db) : ControllerBase
     {
         Model toCreate = new()
         {
-            CreatedAt = DateTime.UtcNow, 
+            CreatedAt = DateTime.UtcNow,
             UpdatedAt = DateTime.UtcNow,
         };
-        req.ApplyTo(toCreate);
+        req.ApplyTo(toCreate, db);
         db.Models.Add(toCreate);
         await db.SaveChangesAsync(cancellationToken);
 
@@ -75,23 +76,36 @@ public class AdminModelsController(ChatsDB db) : ControllerBase
 
     [HttpPost("models/validate")]
     public async Task<ActionResult> ValidateModel(
-        [FromBody] UpdateModelRequest req, 
+        [FromBody] ValidateModelRequest req,
         [FromServices] ConversationFactory conversationFactory,
         [FromServices] CurrentUser currentUser,
         CancellationToken cancellationToken)
     {
-        ModelKey2? modelProvider = await db.ModelKey2s
+        ModelKey2? modelKey = await db.ModelKey2s
             .Where(x => x.Id == req.ModelKeyId)
             .SingleOrDefaultAsync(cancellationToken);
-        if (modelProvider == null)
+        if (modelKey == null)
         {
             return this.BadRequestMessage("Model version not found");
         }
 
-        ConversationService s = conversationFactory.CreateConversationService(Enum.Parse<KnownModelProvider>(modelProvider.Type), modelProvider.Configs, req.ModelConfig, req.ModelReferenceName);
+        ModelReference? modelReference = await db.ModelReferences
+            .Where(x => x.Name == req.ModelReferenceId && x.ProviderId == modelKey.Id)
+            .SingleOrDefaultAsync(cancellationToken);
+        if (modelReference == null)
+        {
+            return this.BadRequestMessage("Model version not found");
+        }
+
+        ConversationService s = conversationFactory.CreateConversationService(new Model()
+        {
+            ModelKey = modelKey,
+            ModelReference = modelReference,
+            DeploymentName = req.DeploymentName,
+        });
         try
         {
-            await foreach (ConversationSegment seg in s.ChatStreamed([new UserChatMessage("1+1=?")], new JsonUserModelConfig { }, currentUser, cancellationToken))
+            await foreach (ConversationSegment seg in s.ChatStreamed([new UserChatMessage("1+1=?")], new ChatCompletionOptions(), cancellationToken))
             {
             }
             return Ok();

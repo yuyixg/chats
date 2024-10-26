@@ -10,8 +10,8 @@ public record UpdateModelRequest
     [JsonPropertyName("name")]
     public required string Name { get; init; }
 
-    //[JsonPropertyName("modelVersion")]
-    //public required string ModelReferenceName { get; init; }
+    [JsonPropertyName("modelVersion")]
+    public required string ModelReferenceName { get; init; }
 
     [JsonPropertyName("enabled")]
     public required bool Enabled { get; init; }
@@ -34,8 +34,15 @@ public record UpdateModelRequest
     //[JsonPropertyName("remarks")]
     //public string? Remarks { get; init; }
 
-    public void ApplyTo(Model cm)
+    public void ApplyTo(Model cm, ChatsDB db)
     {
+        int? modelReferenceId = db.ModelReferences
+            .Where(x => x.Name == ModelReferenceName && x.ProviderId == db.Models.Where(x => x.Id == ModelKeyId).Select(x => x.Id).First())
+            .Select(x => x.Id)
+            .FirstOrDefault();
+        if (modelReferenceId == null) throw new ArgumentException(ModelReferenceName, $"Invalid ModelReferenceName: {ModelReferenceName}");
+
+        cm.ModelReferenceId = modelReferenceId.Value;
         JsonPriceConfig1M price = JsonSerializer.Deserialize<JsonPriceConfig1M>(PriceConfig)!;
         cm.Name = Name;
         cm.IsDeleted = !Enabled;

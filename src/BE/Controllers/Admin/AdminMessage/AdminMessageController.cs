@@ -46,12 +46,12 @@ public class AdminMessageController(ChatsDB db, CurrentUser currentUser, IIdEncr
     }
 
     [HttpGet("message-details")]
-    public async Task<ActionResult<AdminMessageDto>> GetAdminMessage(int chatId, CancellationToken cancellationToken)
+    public async Task<ActionResult<AdminMessageRoot>> GetAdminMessage(int chatId, CancellationToken cancellationToken)
     {
         return await GetAdminMessageInternal(db, chatId, idEncryption, cancellationToken);
     }
 
-    internal static async Task<ActionResult<AdminMessageDto>> GetAdminMessageInternal(ChatsDB db, int conversationId, IIdEncryptionService idEncryption, CancellationToken cancellationToken)
+    internal static async Task<ActionResult<AdminMessageRoot>> GetAdminMessageInternal(ChatsDB db, int conversationId, IIdEncryptionService idEncryption, CancellationToken cancellationToken)
     {
         AdminMessageDtoTemp? adminMessageTemp = await db.Conversation2s
                     .Where(x => x.Id == conversationId)
@@ -59,11 +59,7 @@ public class AdminMessageController(ChatsDB db, CurrentUser currentUser, IIdEncr
                     {
                         Name = x.Title,
                         ModelName = x.Model.Name,
-                        UserModelConfigText = new JsonUserModelConfig()
-                        {
-                            EnableSearch = x.EnableSearch,
-                            Temperature = x.Temperature,
-                        },
+                        Temperature = x.Temperature,
                         DeploymentName = x.Model.DeploymentName,
                     })
                     .SingleOrDefaultAsync(cancellationToken);
@@ -95,7 +91,7 @@ public class AdminMessageController(ChatsDB db, CurrentUser currentUser, IIdEncr
             .ToArrayAsync(cancellationToken);
 
         AdminMessageBasicItem[] items = AdminMessageItemTemp.ToDtos(messagesTemp, idEncryption);
-        AdminMessageDto dto = adminMessageTemp.ToDto(items);
+        AdminMessageRoot dto = adminMessageTemp.ToDto(items);
 
         return new OkObjectResult(dto);
     }
