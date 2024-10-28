@@ -117,16 +117,56 @@ public class AdminModelsController(ChatsDB db) : ControllerBase
     }
 
     [HttpPut("user-models")]
-    public async Task<ActionResult> UpdateUserModels([FromBody] UpdateUserModelRequest req, CancellationToken cancellationToken)
+    public async Task<ActionResult> UpdateUserModels([FromBody] UpdateUserModelRequest req, 
+        [FromServices] CurrentUser currentUser,
+        [FromServices] BalanceService balanceService,
+        CancellationToken cancellationToken)
     {
-        UserModel2? userModel = await db.UserModel2s
-            .FindAsync([req.UserModelId], cancellationToken);
-        if (userModel == null) return NotFound();
+        Dictionary<short, UserModel2> userModels = await db.UserModel2s
+            .Where(x => x.UserId == currentUser.Id && !x.IsDeleted)
+            .ToDictionaryAsync(k => k.ModelId, v => v, cancellationToken);
 
-        userModel.UpdatedAt = DateTime.UtcNow;
-        userModel.Models = JSON.Serialize(req.Models.Where(x => x.Enabled));
+        // create or update user models
+        foreach (JsonTokenBalance item in req.Models)
+        {
+            UserModelTransactionLog? logItem;
+            if (userModels.TryGetValue(item.ModelId, out UserModel2? existingItem))
+            {
+                logItem = item.ApplyTo(existingItem);
+            }
+            else
+            {
+                UserModel2 newItem = new()
+                {
+                    UserId = currentUser.Id,
+                    ModelId = item.ModelId,
+                    CreatedAt = DateTime.UtcNow,
+                };
+                logItem = item.ApplyTo(newItem);
+                userModels[item.ModelId] = newItem;
+                db.UserModel2s.Add(newItem);
+            }
+
+            if (logItem != null)
+            {
+                db.UserModelTransactionLogs.Add(logItem);
+            }
+        }
+
+        // delete user models
+        foreach (KeyValuePair<short, UserModel2> kvp in userModels)
+        {
+            if (!req.Models.Any(x => x.ModelId == kvp.Key))
+            {
+                kvp.Value.IsDeleted = true;
+            }
+        }
+
         await db.SaveChangesAsync(cancellationToken);
-
+        foreach (int userModelId in userModels.Keys)
+        {
+            _ = balanceService.AsyncUpdateUserModelBalance(userModelId);
+        }
         return NoContent();
     }
 }

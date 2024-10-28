@@ -43,7 +43,7 @@ public partial class OpenAICompatibleController(ChatsDB db, CurrentApiKey curren
 
         UserModel2? userModel = validModels.FirstOrDefault(x => x.Model.Name == modelName) ?? validModels.FirstOrDefault(x => x.Model.ModelReference.Name == modelName);
         if (userModel == null) return InvalidModel(modelName);
-        Model? cm = userModel?.Model;
+        Model? cm = userModel.Model;
 
         using ConversationService s = cf.CreateConversationService(cm);
 
@@ -61,7 +61,7 @@ public partial class OpenAICompatibleController(ChatsDB db, CurrentApiKey curren
         BadRequestObjectResult? errorToReturn = null;
         try
         {
-            if (userModel!.IsDeleted)
+            if (userModel.IsDeleted)
             {
                 return InvalidModel(modelName);
             }
@@ -162,7 +162,7 @@ public partial class OpenAICompatibleController(ChatsDB db, CurrentApiKey curren
         {
             userModelTransactionLog = new()
             {
-                UserModelId = miscInfo.UserModel!.Id,
+                UserModelId = userModel.Id,
                 CreatedAt = DateTime.UtcNow,
                 CountAmount = -cost.CostCount,
                 TokenAmount = -cost.CostTokens,

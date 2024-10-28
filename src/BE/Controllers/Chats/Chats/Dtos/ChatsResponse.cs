@@ -2,6 +2,7 @@
 using Chats.BE.DB;
 using Chats.BE.DB.Enums;
 using Chats.BE.DB.Jsons;
+using Chats.BE.Services.Conversations;
 using Chats.BE.Services.IdEncryption;
 using System.Text.Json;
 using System.Text.Json.Serialization;
@@ -17,13 +18,13 @@ public record ChatsResponse
     public required string Title { get; init; }
 
     [JsonPropertyName("chatModelId")]
-    public required Guid? ChatModelId { get; init; }
+    public required short? ChatModelId { get; init; }
 
     [JsonPropertyName("modelName")]
     public required string? ModelName { get; init; }
 
     [JsonPropertyName("modelConfig")]
-    public required Dictionary<string, object?> ModelConfig { get; init; }
+    public required JsonModelConfig ModelConfig { get; init; }
 
     [JsonPropertyName("userModelConfig")]
     public required JsonUserModelConfig UserModelConfig { get; init; }
@@ -40,12 +41,20 @@ public record ChatsResponse
         {
             Id = idEncryption.Encrypt(chat.Id),
             Title = chat.Title,
-            ChatModelId = chat.ChatModelId,
-            ModelName = chat.ChatModel.Name,
-            ModelConfig = JsonSerializer.Deserialize<Dictionary<string, object?>>(chat.ChatModel!.ModelConfig)!,
+            ChatModelId = chat.ModelId,
+            ModelName = chat.Model.Name,
+            ModelConfig = new JsonModelConfig
+            {
+                DeploymentName = chat.Model.DeploymentName,
+                EnableSearch = chat.Model.ModelReference.AllowSearch,
+                MaxLength = chat.Model.ModelReference.MaxResponseTokens,
+                Temperature = ConversationService.DefaultTemperature,
+                Version = chat.Model.ModelKey.ModelProvider.Name,
+                Prompt = ConversationService.DefaultPrompt,
+            },
             UserModelConfig = new JsonUserModelConfig { EnableSearch = chat.EnableSearch, Temperature = chat.Temperature },
             IsShared = chat.IsShared,
-            ModelProvider = Enum.Parse<DBModelProvider>(chat.ChatModel.ModelProvider), 
+            ModelProvider = (DBModelProvider)chat.Model.ModelKey.ModelProviderId, 
         };
     }
 }
@@ -59,8 +68,11 @@ public record ChatsResponseTemp
     public required short ChatModelId { get; init; }
 
     public required string? ModelName { get; init; }
-    public string? DeploymentName { get; internal set; }
+
+    public bool? EnableSearch { get; init; }
+
     public float? Temperature { get; internal set; }
+
     public required JsonUserModelConfig UserModelConfig { get; init; }
 
     public required bool IsShared { get; init; }
@@ -75,7 +87,11 @@ public record ChatsResponseTemp
             Title = Title,
             ChatModelId = ChatModelId,
             ModelName = ModelName,
-            ModelConfig = ModelConfig == null ? [] : JsonSerializer.Deserialize<Dictionary<string, object?>>(ModelConfig)!,
+            ModelConfig = new JsonModelConfig
+            {
+                Prompt = ConversationService.DefaultPrompt,
+                Temperature = Temperature ?? ConversationService.DefaultTemperature,
+            },
             UserModelConfig = UserModelConfig,
             IsShared = IsShared, 
             ModelProvider = ModelProvider,

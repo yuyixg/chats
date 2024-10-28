@@ -11,6 +11,7 @@ namespace Chats.BE.Services.Conversations;
 public abstract class ConversationService : IDisposable
 {
     public const float DefaultTemperature = 0.8f;
+    public const string DefaultPrompt = "You're {ModelName}, a helpful AI assistant. Current date: {CurrentDate}";
 
     protected Model Model { get; }
     protected Tokenizer Tokenizer { get; }

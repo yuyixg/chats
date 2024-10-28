@@ -11,7 +11,6 @@ using Chats.BE.Services.IdEncryption;
 using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Mvc;
 using Microsoft.EntityFrameworkCore;
-using System.Text.Json;
 
 namespace Chats.BE.Controllers.Chats.Chats;
 
@@ -27,16 +26,17 @@ public class UserChatsController(ChatsDB db, CurrentUser currentUser, IIdEncrypt
             {
                 Id = x.Id,
                 Title = x.Title,
-                ChatModelId = x.ChatModelId,
-                ModelName = x.ChatModel!.Name,
-                ModelConfig = x.ChatModel!.ModelConfig,
+                ChatModelId = x.ModelId,
+                ModelName = x.Model.Name,
+                EnableSearch = x.EnableSearch,
+                Temperature = x.Temperature,
                 IsShared = x.IsShared,
                 UserModelConfig = new JsonUserModelConfig
                 {
                     Temperature = x.Temperature, 
                     EnableSearch = x.EnableSearch, 
                 },
-                ModelProvider = Enum.Parse<DBModelProvider>(x.ChatModel.ModelProvider),
+                ModelProvider = (DBModelProvider)x.Model.ModelKey.ModelProviderId,
             })
             .FirstOrDefaultAsync(cancellationToken);
 
@@ -67,10 +67,10 @@ public class UserChatsController(ChatsDB db, CurrentUser currentUser, IIdEncrypt
                 Title = x.Title,
                 ChatModelId = x.ModelId,
                 ModelName = x.Model!.Name,
-                DeploymentName = x.Model.DeploymentName,
+                EnableSearch = x.EnableSearch,
                 Temperature = ConversationService.DefaultTemperature,
                 IsShared = x.IsShared,
-                ModelProvider = Enum.Parse<DBModelProvider>(x.Model.ModelKey.Name), 
+                ModelProvider = (DBModelProvider)x.Model.ModelKey.ModelProviderId,
                 UserModelConfig = new JsonUserModelConfig
                 {
                     EnableSearch = x.EnableSearch, 

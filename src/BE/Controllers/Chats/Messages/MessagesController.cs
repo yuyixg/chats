@@ -38,8 +38,8 @@ public class MessagesController(ChatsDB db, CurrentUser currentUser, IIdEncrypti
                 InputPrice = x.MessageResponse2.InputCost,
                 OutputPrice = x.MessageResponse2.OutputCost,
                 Duration = x.MessageResponse2.DurationMs,
-                ModelId = x.MessageResponse2.ChatModelId,
-                ModelName = x.MessageResponse2.ChatModel.Name
+                ModelId = x.MessageResponse2.ModelId,
+                ModelName = x.MessageResponse2.Model.Name
             })
             .OrderBy(x => x.CreatedAt)
             .AsAsyncEnumerable()
