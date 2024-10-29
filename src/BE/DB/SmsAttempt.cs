@@ -7,8 +7,7 @@ using Microsoft.EntityFrameworkCore;
 namespace Chats.BE.DB;
 
 [Table("SmsAttempt")]
-[Index("ClientIpid", Name = "IX_SmsAttempt_ClientIPId")]
-[Index("ClientUserAgentId", Name = "IX_SmsAttempt_ClientUserAgentId")]
+[Index("ClientInfoId", Name = "IX_SmsAttempt")]
 [Index("SmsRecordId", Name = "IX_SmsAttempt_SmsHistoryId")]
 public partial class SmsAttempt
 {
@@ -21,20 +20,13 @@ public partial class SmsAttempt
     [Unicode(false)]
     public string Code { get; set; } = null!;
 
-    [Column("ClientIPId")]
-    public int ClientIpid { get; set; }
-
-    public int ClientUserAgentId { get; set; }
+    public int ClientInfoId { get; set; }
 
     public DateTime CreatedAt { get; set; }
 
-    [ForeignKey("ClientIpid")]
+    [ForeignKey("ClientInfoId")]
     [InverseProperty("SmsAttempts")]
-    public virtual ClientIp ClientIp { get; set; } = null!;
-
-    [ForeignKey("ClientUserAgentId")]
-    [InverseProperty("SmsAttempts")]
-    public virtual ClientUserAgent ClientUserAgent { get; set; } = null!;
+    public virtual ClientInfo ClientInfo { get; set; } = null!;
 
     [ForeignKey("SmsRecordId")]
     [InverseProperty("SmsAttempts")]

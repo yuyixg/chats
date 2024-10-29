@@ -7,11 +7,11 @@ using Microsoft.EntityFrameworkCore;
 namespace Chats.BE.DB;
 
 [Table("UserApiUsage")]
-[Index("ApiKeyId", Name = "IX_ApiUsage2_ApiKey")]
-[Index("ClientIpid", Name = "IX_ApiUsage2_ClientIP")]
-[Index("ModelId", Name = "IX_ApiUsage2_Model")]
-[Index("TransactionLogId", Name = "IX_ApiUsage2_TransactionLog", IsUnique = true)]
-[Index("UserModelTransactionLogId", Name = "IX_ApiUsage2_UserModelTransactionLog", IsUnique = true)]
+[Index("ApiKeyId", Name = "IX_UserApiUsage_ApiKey")]
+[Index("ClientInfoId", Name = "IX_UserApiUsage_ClientInfo")]
+[Index("ModelId", Name = "IX_UserApiUsage_Model")]
+[Index("TransactionLogId", Name = "IX_UserApiUsage_TransactionLog", IsUnique = true)]
+[Index("UserModelTransactionLogId", Name = "IX_UserApiUsage_UserModelTransactionLog", IsUnique = true)]
 public partial class UserApiUsage
 {
     [Key]
@@ -37,8 +37,7 @@ public partial class UserApiUsage
 
     public long? UserModelTransactionLogId { get; set; }
 
-    [Column("ClientIPId")]
-    public int ClientIpid { get; set; }
+    public int ClientInfoId { get; set; }
 
     public DateTime CreatedAt { get; set; }
 
@@ -46,9 +45,9 @@ public partial class UserApiUsage
     [InverseProperty("UserApiUsages")]
     public virtual UserApiKey ApiKey { get; set; } = null!;
 
-    [ForeignKey("ClientIpid")]
+    [ForeignKey("ClientInfoId")]
     [InverseProperty("UserApiUsages")]
-    public virtual ClientIp ClientIp { get; set; } = null!;
+    public virtual ClientInfo ClientInfo { get; set; } = null!;
 
     [ForeignKey("ModelId")]
     [InverseProperty("UserApiUsages")]

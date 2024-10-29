@@ -19,4 +19,10 @@ public partial class ClientInfo
 
     [InverseProperty("ClientInfo")]
     public virtual ICollection<MessageRequest> MessageRequests { get; set; } = new List<MessageRequest>();
+
+    [InverseProperty("ClientInfo")]
+    public virtual ICollection<SmsAttempt> SmsAttempts { get; set; } = new List<SmsAttempt>();
+
+    [InverseProperty("ClientInfo")]
+    public virtual ICollection<UserApiUsage> UserApiUsages { get; set; } = new List<UserApiUsage>();
 }

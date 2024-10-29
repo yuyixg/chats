@@ -17,10 +17,4 @@ public partial class ClientIp
     [StringLength(40)]
     [Unicode(false)]
     public string Ipaddress { get; set; } = null!;
-
-    [InverseProperty("ClientIp")]
-    public virtual ICollection<SmsAttempt> SmsAttempts { get; set; } = new List<SmsAttempt>();
-
-    [InverseProperty("ClientIp")]
-    public virtual ICollection<UserApiUsage> UserApiUsages { get; set; } = new List<UserApiUsage>();
 }

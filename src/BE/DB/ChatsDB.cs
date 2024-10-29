@@ -238,13 +238,9 @@ public partial class ChatsDB : DbContext
 
         modelBuilder.Entity<SmsAttempt>(entity =>
         {
-            entity.HasOne(d => d.ClientIp).WithMany(p => p.SmsAttempts)
+            entity.HasOne(d => d.ClientInfo).WithMany(p => p.SmsAttempts)
                 .OnDelete(DeleteBehavior.ClientSetNull)
-                .HasConstraintName("FK_SmsAttempt_ClientIP");
-
-            entity.HasOne(d => d.ClientUserAgent).WithMany(p => p.SmsAttempts)
-                .OnDelete(DeleteBehavior.ClientSetNull)
-                .HasConstraintName("FK_SmsAttempt_ClientUserAgent");
+                .HasConstraintName("FK_SmsAttempt_ClientInfo");
 
             entity.HasOne(d => d.SmsRecord).WithMany(p => p.SmsAttempts).HasConstraintName("FK_SmsAttempt_SmsHistory");
         });
@@ -319,15 +315,13 @@ public partial class ChatsDB : DbContext
 
         modelBuilder.Entity<UserApiUsage>(entity =>
         {
-            entity.HasKey(e => e.Id).HasName("PK_ApiUsage2");
-
             entity.HasOne(d => d.ApiKey).WithMany(p => p.UserApiUsages)
                 .OnDelete(DeleteBehavior.ClientSetNull)
                 .HasConstraintName("FK_ApiUsage2_ApiKey");
 
-            entity.HasOne(d => d.ClientIp).WithMany(p => p.UserApiUsages)
+            entity.HasOne(d => d.ClientInfo).WithMany(p => p.UserApiUsages)
                 .OnDelete(DeleteBehavior.ClientSetNull)
-                .HasConstraintName("FK_ApiUsage2_ClientIP");
+                .HasConstraintName("FK_UserApiUsage_ClientInfo");
 
             entity.HasOne(d => d.Model).WithMany(p => p.UserApiUsages)
                 .OnDelete(DeleteBehavior.ClientSetNull)
