@@ -36,6 +36,9 @@ public partial class Message2
     public virtual ICollection<MessageContent2> MessageContent2s { get; set; } = new List<MessageContent2>();
 
     [InverseProperty("Message")]
+    public virtual MessageRequest? MessageRequest { get; set; }
+
+    [InverseProperty("Message")]
     public virtual MessageResponse2? MessageResponse2 { get; set; }
 
     [ForeignKey("ParentId")]

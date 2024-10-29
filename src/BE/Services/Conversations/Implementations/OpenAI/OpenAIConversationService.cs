@@ -13,9 +13,9 @@ public class OpenAIConversationService : ConversationService
 
     public OpenAIConversationService(Model model, Uri? defaultApiHost = null) : base(model)
     {
-        ArgumentException.ThrowIfNullOrWhiteSpace(model.ModelKey.ApiKey, nameof(model.ModelKey.ApiKey));
+        ArgumentException.ThrowIfNullOrWhiteSpace(model.ModelKey.Secret, nameof(model.ModelKey.Secret));
 
-        OpenAIClient api = new(new ApiKeyCredential(model.ModelKey.ApiKey!), new OpenAIClientOptions()
+        OpenAIClient api = new(new ApiKeyCredential(model.ModelKey.Secret!), new OpenAIClientOptions()
         {
             Endpoint = !string.IsNullOrWhiteSpace(model.ModelKey.Host) ? new Uri(model.ModelKey.Host) : defaultApiHost,
         });

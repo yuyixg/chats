@@ -36,7 +36,7 @@ public record UpdateModelRequest
 
     public void ApplyTo(Model cm, ChatsDB db)
     {
-        int? modelReferenceId = db.ModelReferences
+        short? modelReferenceId = db.ModelReferences
             .Where(x => x.Name == ModelReferenceName && x.ProviderId == db.Models.Where(x => x.Id == ModelKeyId).Select(x => x.Id).First())
             .Select(x => x.Id)
             .FirstOrDefault();

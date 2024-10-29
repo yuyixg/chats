@@ -19,7 +19,7 @@ public partial class Model
 
     public short ModelKeyId { get; set; }
 
-    public int ModelReferenceId { get; set; }
+    public short ModelReferenceId { get; set; }
 
     [StringLength(50)]
     public string Name { get; set; } = null!;
@@ -44,10 +44,11 @@ public partial class Model
     public DateTime UpdatedAt { get; set; }
 
     [InverseProperty("Model")]
-    public virtual ICollection<ApiUsage2> ApiUsage2s { get; set; } = new List<ApiUsage2>();
-
-    [InverseProperty("Model")]
     public virtual ICollection<Conversation2> Conversation2s { get; set; } = new List<Conversation2>();
+
+    [ForeignKey("FileServiceId")]
+    [InverseProperty("Models")]
+    public virtual FileService? FileService { get; set; }
 
     [InverseProperty("Model")]
     public virtual ICollection<MessageResponse2> MessageResponse2s { get; set; } = new List<MessageResponse2>();
@@ -61,9 +62,12 @@ public partial class Model
     public virtual ModelReference ModelReference { get; set; } = null!;
 
     [InverseProperty("Model")]
+    public virtual ICollection<UserApiUsage> UserApiUsages { get; set; } = new List<UserApiUsage>();
+
+    [InverseProperty("Model")]
     public virtual ICollection<UserModel2> UserModel2s { get; set; } = new List<UserModel2>();
 
     [ForeignKey("ModelId")]
     [InverseProperty("Models")]
-    public virtual ICollection<ApiKey> ApiKeys { get; set; } = new List<ApiKey>();
+    public virtual ICollection<UserApiKey> ApiKeys { get; set; } = new List<UserApiKey>();
 }

@@ -26,4 +26,7 @@ public partial class FileService
     public DateTime CreatedAt { get; set; }
 
     public DateTime UpdatedAt { get; set; }
+
+    [InverseProperty("FileService")]
+    public virtual ICollection<Model> Models { get; set; } = new List<Model>();
 }

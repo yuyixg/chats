@@ -24,7 +24,7 @@ public partial class ModelKey2
 
     [StringLength(500)]
     [Unicode(false)]
-    public string? ApiKey { get; set; }
+    public string? Secret { get; set; }
 
     public DateTime CreatedAt { get; set; }
 

@@ -180,7 +180,7 @@ public partial class OpenAICompatibleController(ChatsDB db, CurrentApiKey curren
                 TransactionTypeId = (byte)DBTransactionType.ApiCost,
             };
         }
-        ApiUsage2 usage = new()
+        UserApiUsage usage = new()
         {
             ModelId = cm.Id,
             CreatedAt = DateTime.UtcNow,
@@ -192,7 +192,7 @@ public partial class OpenAICompatibleController(ChatsDB db, CurrentApiKey curren
             OutputTokenCount = lastSegment.OutputTokenCount,
             TransactionLog = transactionLog,
         };
-        db.ApiUsage2s.Add(usage);
+        db.UserApiUsages.Add(usage);
         await db.SaveChangesAsync(cancellationToken);
         if (cost.CostBalance > 0)
         {

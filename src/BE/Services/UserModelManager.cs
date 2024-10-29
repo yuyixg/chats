@@ -21,7 +21,7 @@ public class UserModelManager(ChatsDB db)
 
     public async Task<UserModel2[]> GetValidModelsByApiKey(string apiKey, CancellationToken cancellationToken)
     {
-        ApiKey? key = await db.ApiKeys
+        UserApiKey? key = await db.UserApiKeys
             .Include(x => x.Models)
             .Where(x => x.Key == apiKey && x.Expires > DateTime.UtcNow)
             .FirstOrDefaultAsync(cancellationToken);

@@ -20,4 +20,7 @@ public partial class ClientIp
 
     [InverseProperty("ClientIp")]
     public virtual ICollection<SmsAttempt> SmsAttempts { get; set; } = new List<SmsAttempt>();
+
+    [InverseProperty("ClientIp")]
+    public virtual ICollection<UserApiUsage> UserApiUsages { get; set; } = new List<UserApiUsage>();
 }

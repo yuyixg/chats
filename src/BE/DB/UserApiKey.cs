@@ -6,10 +6,10 @@ using Microsoft.EntityFrameworkCore;
 
 namespace Chats.BE.DB;
 
-[Table("ApiKey")]
+[Table("UserApiKey")]
 [Index("Key", Name = "IX_UserApiKey_Key", IsUnique = true)]
 [Index("UserId", Name = "IX_UserApiKey_User")]
-public partial class ApiKey
+public partial class UserApiKey
 {
     [Key]
     public int Id { get; set; }
@@ -37,12 +37,12 @@ public partial class ApiKey
 
     public DateTime UpdatedAt { get; set; }
 
-    [InverseProperty("ApiKey")]
-    public virtual ICollection<ApiUsage2> ApiUsage2s { get; set; } = new List<ApiUsage2>();
-
     [ForeignKey("UserId")]
-    [InverseProperty("ApiKeys")]
+    [InverseProperty("UserApiKeys")]
     public virtual User User { get; set; } = null!;
+
+    [InverseProperty("ApiKey")]
+    public virtual ICollection<UserApiUsage> UserApiUsages { get; set; } = new List<UserApiUsage>();
 
     [ForeignKey("ApiKeyId")]
     [InverseProperty("ApiKeys")]

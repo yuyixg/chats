@@ -17,7 +17,7 @@ public class ApiKeyController(ChatsDB db, CurrentUser currentUser) : ControllerB
     [HttpGet]
     public async Task<ListApiKeyDto[]> ListMyApiKeys(CancellationToken cancellationToken)
     {
-        ListApiKeyDto[] result = await db.ApiKeys
+        ListApiKeyDto[] result = await db.UserApiKeys
             .Where(x => x.UserId == currentUser.Id && !x.IsDeleted)
             .Select(x => new ListApiKeyDto
             {
@@ -30,7 +30,7 @@ public class ApiKeyController(ChatsDB db, CurrentUser currentUser) : ControllerB
                 Expires = x.Expires,
                 CreatedAt = x.CreatedAt,
                 UpdatedAt = x.UpdatedAt,
-                LastUsedAt = x.ApiUsage2s.FirstOrDefault(v => v.Id == x.ApiUsage2s.Select(x => x.Id).Max())!.CreatedAt, 
+                LastUsedAt = x.UserApiUsages.FirstOrDefault(v => v.Id == x.UserApiUsages.Select(x => x.Id).Max())!.CreatedAt, 
                 ModelCount = x.Models.Count
             })
             .ToArrayAsync(cancellationToken);
@@ -40,7 +40,7 @@ public class ApiKeyController(ChatsDB db, CurrentUser currentUser) : ControllerB
     [HttpGet("{apiKeyId}")]
     public async Task<ActionResult<short[]>> GetApiKeySupportedModels(int apiKeyId, [FromServices] UserModelManager userModelManager, CancellationToken cancellationToken)
     {
-        ApiKey? dbEntry = await db.ApiKeys
+        UserApiKey? dbEntry = await db.UserApiKeys
             .Where(x => x.UserId == currentUser.Id && !x.IsDeleted)
             .Where(x => x.Id == apiKeyId)
             .FirstOrDefaultAsync(cancellationToken);
@@ -61,7 +61,7 @@ public class ApiKeyController(ChatsDB db, CurrentUser currentUser) : ControllerB
     public async Task<ListApiKeyDto> CreateApiKey(CancellationToken cancellationToken)
     {
         const int keyLength = 48;
-        ApiKey dbEntry = new()
+        UserApiKey dbEntry = new()
         {
             UserId = currentUser.Id,
             Key = $"sk-{GenerateBase62Key(keyLength)}",
@@ -74,7 +74,7 @@ public class ApiKeyController(ChatsDB db, CurrentUser currentUser) : ControllerB
             CreatedAt = DateTime.UtcNow,
             UpdatedAt = DateTime.UtcNow
         };
-        db.ApiKeys.Add(dbEntry);
+        db.UserApiKeys.Add(dbEntry);
         await db.SaveChangesAsync(cancellationToken);
 
         return new ListApiKeyDto()
@@ -127,13 +127,13 @@ public class ApiKeyController(ChatsDB db, CurrentUser currentUser) : ControllerB
     [HttpDelete("{apiKeyId}")]
     public async Task<ActionResult> DeleteApiKey(int apiKeyId, CancellationToken cancellationToken)
     {
-        ApiKey? dbEntry = await db.ApiKeys
+        UserApiKey? dbEntry = await db.UserApiKeys
             .Where(x => x.UserId == currentUser.Id && !x.IsDeleted)
             .Where(x => x.Id == apiKeyId)
             .FirstOrDefaultAsync(cancellationToken);
         if (dbEntry == null) return NotFound();
 
-        bool everUsed = await db.ApiUsage2s
+        bool everUsed = await db.UserApiUsages
             .AnyAsync(x => x.ApiKeyId == apiKeyId, cancellationToken);
         if (everUsed)
         {
@@ -143,7 +143,7 @@ public class ApiKeyController(ChatsDB db, CurrentUser currentUser) : ControllerB
         }
         else
         {
-            db.ApiKeys.Remove(dbEntry);
+            db.UserApiKeys.Remove(dbEntry);
             await db.SaveChangesAsync(cancellationToken);
         }
 
@@ -153,7 +153,7 @@ public class ApiKeyController(ChatsDB db, CurrentUser currentUser) : ControllerB
     [HttpPut("{apiKeyId}")]
     public async Task<ActionResult> UpdateApiKey(int apiKeyId, [FromBody] UpdateApiKeyDto dto, CancellationToken cancellationToken)
     {
-        ApiKey? dbEntry = await db.ApiKeys
+        UserApiKey? dbEntry = await db.UserApiKeys
             .Include(x => x.Models)
             .Where(x => x.UserId == currentUser.Id && !x.IsDeleted)
             .Where(x => x.Id == apiKeyId)

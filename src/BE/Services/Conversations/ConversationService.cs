@@ -1,10 +1,11 @@
 ﻿using Chats.BE.DB;
 using Chats.BE.Services.Conversations.Dtos;
 using Chats.BE.Services.Conversations.Extensions;
-using Microsoft.ML.Tokenizers;
+using Tokenizer = Microsoft.ML.Tokenizers.Tokenizer;
 using OpenAI.Chat;
 using System.Runtime.CompilerServices;
 using System.Text;
+using Microsoft.ML.Tokenizers;
 
 namespace Chats.BE.Services.Conversations;
 

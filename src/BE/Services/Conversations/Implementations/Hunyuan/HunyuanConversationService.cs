@@ -24,13 +24,13 @@ public class HunyuanConversationService : ConversationService
     public HunyuanConversationService(Model model) : base(model)
     {
         ArgumentException.ThrowIfNullOrWhiteSpace(model.ModelKey.Host, nameof(model.ModelKey.Host));
-        ArgumentException.ThrowIfNullOrWhiteSpace(model.ModelKey.ApiKey, nameof(model.ModelKey.ApiKey));
+        ArgumentException.ThrowIfNullOrWhiteSpace(model.ModelKey.Secret, nameof(model.ModelKey.Secret));
 
-        JsonHunyuanKeyConfig keyConfig = JsonSerializer.Deserialize<JsonHunyuanKeyConfig>(model.ModelKey.ApiKey)!;
+        JsonHunyuanKeyConfig keyConfig = JsonSerializer.Deserialize<JsonHunyuanKeyConfig>(model.ModelKey.Secret)!;
         ChatClient = new(new Credential
         {
             SecretId = keyConfig.Secret,
-            SecretKey = keyConfig.ApiKey
+            SecretKey = keyConfig.Secret
         }, "", new ClientProfile() { HttpProfile = new() { Endpoint = model.ModelKey.Host } });
     }
 

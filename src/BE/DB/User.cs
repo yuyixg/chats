@@ -46,9 +46,6 @@ public partial class User
     public DateTime UpdatedAt { get; set; }
 
     [InverseProperty("User")]
-    public virtual ICollection<ApiKey> ApiKeys { get; set; } = new List<ApiKey>();
-
-    [InverseProperty("User")]
     public virtual ICollection<Conversation2> Conversation2s { get; set; } = new List<Conversation2>();
 
     [InverseProperty("CreateUser")]
@@ -62,6 +59,9 @@ public partial class User
 
     [InverseProperty("User")]
     public virtual ICollection<TransactionLog> TransactionLogUsers { get; set; } = new List<TransactionLog>();
+
+    [InverseProperty("User")]
+    public virtual ICollection<UserApiKey> UserApiKeys { get; set; } = new List<UserApiKey>();
 
     [InverseProperty("User")]
     public virtual UserBalance? UserBalance { get; set; }

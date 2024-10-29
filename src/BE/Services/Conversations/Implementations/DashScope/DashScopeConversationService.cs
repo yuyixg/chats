@@ -22,9 +22,9 @@ public class DashScopeConversationService : ConversationService
 
     public DashScopeConversationService(Model model) : base(model)
     {
-        ArgumentException.ThrowIfNullOrWhiteSpace(model.ModelKey.ApiKey, nameof(model.ModelKey.ApiKey));
+        ArgumentException.ThrowIfNullOrWhiteSpace(model.ModelKey.Secret, nameof(model.ModelKey.Secret));
 
-        Client = new DashScopeClient(model.ModelKey.ApiKey);
+        Client = new DashScopeClient(model.ModelKey.Secret);
         ChatClient = Client.TextGeneration;
     }
 

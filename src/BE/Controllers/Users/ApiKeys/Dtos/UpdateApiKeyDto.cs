@@ -23,7 +23,7 @@ public record UpdateApiKeyDto
     [JsonPropertyName("isRevoked")]
     public bool? IsRevoked { get; init; }
 
-    public void ApplyTo(ApiKey apiKey)
+    public void ApplyTo(UserApiKey apiKey)
     {
         if (Comment is not null) apiKey.Comment = Comment == "" ? null : Comment;
         if (AllowEnumerate is not null) apiKey.AllowEnumerate = AllowEnumerate.Value;
