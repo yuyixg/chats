@@ -11,7 +11,7 @@ public class UpdateChatsRequest
     public string? Title { get; set; } = null!;
 
     [JsonPropertyName("modelId")]
-    public Guid? ModelId { get; set; }
+    public short? ModelId { get; set; }
 
     [JsonPropertyName("userModelConfig")]
     public string? UserModelConfig { get; set; } = null!;

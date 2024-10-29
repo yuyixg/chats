@@ -301,7 +301,7 @@ public class ConversationController(ChatsDB db, CurrentUser currentUser, ILogger
         await db.SaveChangesAsync(cancellationToken);
         if (cost.CostBalance > 0)
         {
-            _ = balanceService.AsyncUpdateBalance(currentUser.Id);
+            _ = balanceService.AsyncUpdateBalance(currentUser.Id, CancellationToken.None);
         }
 
         return new EmptyResult();

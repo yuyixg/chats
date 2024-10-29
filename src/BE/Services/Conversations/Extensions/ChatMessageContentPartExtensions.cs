@@ -9,7 +9,7 @@ public static class ChatMessageContentPartExtensions
     {
         return part.Kind switch
         {
-            ChatMessageContentPartKind.Text => Tokenizer.CountTokens(c.Text),
+            ChatMessageContentPartKind.Text => tokenizer.CountTokens(part.Text),
             // https://platform.openai.com/docs/guides/vision/calculating-costs
             // assume image is ~2048x4096 in detail: high, mosts 1105 tokens
             ChatMessageContentPartKind.Image => 1105,

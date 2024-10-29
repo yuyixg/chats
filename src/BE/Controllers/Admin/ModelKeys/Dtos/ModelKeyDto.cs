@@ -29,7 +29,7 @@ public record ModelKeyDtoTemp
             Id = Id,
             Type = ProviderName,
             Name = Name,
-            Configs = JsonSerializer.Deserialize<JsonModelKey>(Configs)!,
+            Configs = new JsonModelKey { ApiKey = Secret, Host = Host, },
             CreatedAt = CreatedAt,
             EnabledModelCount = EnabledModelCount,
             TotalModelCount = TotalModelCount
@@ -42,7 +42,7 @@ public record ModelKeyDtoTemp
 public record ModelKeyDto
 {
     [JsonPropertyName("id")]
-    public required Guid Id { get; init; }
+    public required short Id { get; init; }
 
     [JsonPropertyName("type")]
     public required string Type { get; init; }

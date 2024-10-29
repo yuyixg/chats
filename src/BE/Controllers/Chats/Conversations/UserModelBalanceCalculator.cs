@@ -3,10 +3,10 @@ using Chats.BE.DB.Jsons;
 
 namespace Chats.BE.Controllers.Chats.Conversations;
 
-public record UserModelBalanceCost(int? Counts, int? Tokens, decimal Balance, int CostCount, int CostTokens, decimal InputTokenPrice, decimal OutputTokenPrice)
+public record UserModelBalanceCost(int Counts, int Tokens, decimal Balance, int CostCount, int CostTokens, decimal InputTokenPrice, decimal OutputTokenPrice)
 {
-    public int? RemainingCounts => Counts == null ? null : Counts - CostCount;
-    public int? RemainingTokens => Tokens == null ? null : Tokens - CostTokens;
+    public int RemainingCounts => Counts - CostCount;
+    public int RemainingTokens => Tokens - CostTokens;
     public decimal CostBalance => InputTokenPrice + OutputTokenPrice;
     public decimal RemainingBalance => Balance - CostBalance;
 
@@ -14,18 +14,18 @@ public record UserModelBalanceCost(int? Counts, int? Tokens, decimal Balance, in
     {
         return existing with
         {
-            Counts = RemainingCounts?.ToString() ?? "-",
-            Tokens = RemainingTokens?.ToString() ?? "-",
+            Counts = RemainingCounts,
+            Tokens = RemainingTokens,
         };
     }
 
     public bool IsSufficient => 
-        (RemainingCounts == null || RemainingCounts >= 0) &&
-        (RemainingTokens == null || RemainingTokens >= 0) &&
+        RemainingCounts >= 0 &&
+        RemainingTokens >= 0 &&
         RemainingBalance >= 0;
 }
 
-public record UserModelBalanceCalculator(int? Counts, int? Tokens, decimal Balance)
+public record UserModelBalanceCalculator(int Counts, int Tokens, decimal Balance)
 {
     public UserModelBalanceCalculator(UserModel2 userModel, decimal balance) : this(
         userModel.CountBalance,
@@ -41,10 +41,6 @@ public record UserModelBalanceCalculator(int? Counts, int? Tokens, decimal Balan
 
     public UserModelBalanceCost GetNewBalance(int inputTokenCount, int outputTokenCount, JsonPriceConfig price)
     {
-        // unlimited counts and tokens
-        if (Counts == null) return WithCost();
-        if (Tokens == null) return WithCost();
-
         // price model is based on counts
         if (Counts > 0) return WithCost(costCount: 1);
 
@@ -61,13 +57,13 @@ public record UserModelBalanceCalculator(int? Counts, int? Tokens, decimal Balan
         // another example, if inputTokenCount = 100, outputTokenCount = 200, Tokens = 50, then:
         // toBeDeductedOutputTokens = 200-50 = 150, and then remaining tokens is 0
         // toBeDeductedInputTokens = 100-0 = 100
-        int remainingTokens = Tokens.Value;
+        int remainingTokens = Tokens;
         int toBeDeductedOutputTokens = Math.Max(0, outputTokenCount - remainingTokens);
         remainingTokens = Math.Max(0, remainingTokens - outputTokenCount);
         int toBeDeductedInputTokens = Math.Max(0, inputTokenCount - remainingTokens);
 
         decimal inputTokenPrice = price.InputTokenPrice * toBeDeductedInputTokens;
         decimal outputTokenPrice = price.OutputTokenPrice * toBeDeductedOutputTokens;
-        return WithCost(costTokens: Tokens.Value, inputTokenPrice: inputTokenPrice, outputTokenPrice: outputTokenPrice);
+        return WithCost(costTokens: Tokens, inputTokenPrice: inputTokenPrice, outputTokenPrice: outputTokenPrice);
     }
 }

@@ -5,12 +5,12 @@ namespace Chats.BE.Services;
 
 public class BalanceService(IServiceScopeFactory serviceScopeFactory)
 {
-    public Task AsyncUpdateBalance(Guid userId, CancellationToken cancellationToken = default)
+    public Task AsyncUpdateBalance(Guid userId, CancellationToken cancellationToken)
     {
         return Task.Run(async () =>
         {
             using IServiceScope scope = serviceScopeFactory.CreateScope();
-            ChatsDB db = scope.ServiceProvider.GetRequiredService<ChatsDB>();
+            using ChatsDB db = scope.ServiceProvider.GetRequiredService<ChatsDB>();
             await UpdateBalance(db, userId, cancellationToken);
         }, cancellationToken);
     }
@@ -26,12 +26,12 @@ public class BalanceService(IServiceScopeFactory serviceScopeFactory)
                 ), cancellationToken);
     }
 
-    public Task AsyncUpdateUserModelBalance(int userModelId, CancellationToken cancellationToken = default)
+    public Task AsyncUpdateUserModelBalance(int userModelId, CancellationToken cancellationToken)
     {
         return Task.Run(async () =>
         {
             using IServiceScope scope = serviceScopeFactory.CreateScope();
-            ChatsDB db = scope.ServiceProvider.GetRequiredService<ChatsDB>();
+            using ChatsDB db = scope.ServiceProvider.GetRequiredService<ChatsDB>();
             await UpdateUserModelBalance(db, userModelId, cancellationToken);
         }, cancellationToken);
     }

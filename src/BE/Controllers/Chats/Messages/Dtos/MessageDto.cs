@@ -51,7 +51,7 @@ public record ResponseMessageDto : MessageDto
     public required int Duration { get; init; }
 
     [JsonPropertyName("modelId")]
-    public required Guid ModelId { get; init; }
+    public required short ModelId { get; init; }
 
     [JsonPropertyName("modelName")]
     public required string? ModelName { get; init; }

@@ -21,7 +21,7 @@ public record ModelResponse
     public required string ModelProvider { get; init; }
 
     [JsonPropertyName("modelUsage")]
-    public required ModelUsage ModelUsage { get; init; }
+    public required ModelUsage ModelTokenBalance { get; init; }
 
     [JsonPropertyName("modelConfigOptions")]
     public required ModelConfigOption ModelConfigOptions { get; init; }
@@ -43,7 +43,7 @@ public record ModelResponse
             ModelVersion = model.ModelReference.Name,
             Name = model.Name,
             ModelProvider = model.ModelKey.ModelProvider.Name,
-            ModelUsage = ModelUsage.FromJson(userModel),
+            ModelTokenBalance = ModelUsage.FromJson(userModel),
             ModelConfigOptions = ModelConfigOption.FromTemperature(temperatureOptions),
             ModelConfigs = JsonUserModelConfig.FromJson(new JsonModelConfig
             {

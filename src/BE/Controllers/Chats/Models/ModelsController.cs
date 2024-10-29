@@ -1,13 +1,11 @@
 ﻿using Chats.BE.Controllers.Chats.Models.Dtos;
 using Chats.BE.DB;
 using Chats.BE.DB.Extensions;
-using Chats.BE.DB.Jsons;
 using Chats.BE.Infrastructure;
 using Chats.BE.Services;
 using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Mvc;
 using Microsoft.EntityFrameworkCore;
-using System.Text.Json;
 
 namespace Chats.BE.Controllers.Chats.Models;
 
@@ -45,7 +43,7 @@ public class ModelsController : ControllerBase
                     fileServices.TryGetValue(chatModel.FileServiceId!.Value, out FileService? fs) ? fs :
                     null;
                 TemperatureOptions temperatureOption = temperatureOptions[chatModel.ToIdentifier()];
-                return ModelResponse.FromAll(chatModel, userModel, fileService, temperatureOption);
+                return ModelResponse.FromAll(chatModel, userModel.ToJsonTokenBalance(), fileService, temperatureOption);
             })
             .ToArray());
     }

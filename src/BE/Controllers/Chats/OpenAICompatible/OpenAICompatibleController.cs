@@ -196,7 +196,7 @@ public partial class OpenAICompatibleController(ChatsDB db, CurrentApiKey curren
         await db.SaveChangesAsync(cancellationToken);
         if (cost.CostBalance > 0)
         {
-            _ = balanceService.AsyncUpdateBalance(currentApiKey.User.Id);
+            _ = balanceService.AsyncUpdateBalance(currentApiKey.User.Id, CancellationToken.None);
         }
 
         if (cco.IsStreamed())
@@ -298,16 +298,16 @@ public partial class OpenAICompatibleController(ChatsDB db, CurrentApiKey curren
     [HttpGet("models")]
     public async Task<ActionResult<ModelListDto>> GetModels(CancellationToken cancellationToken)
     {
-        Model[] models = await userModelManager.GetValidModelsByApiKey(currentApiKey.ApiKey, cancellationToken);
+        UserModel2[] models = await userModelManager.GetValidModelsByApiKey(currentApiKey.ApiKey, cancellationToken);
         return Ok(new ModelListDto
         {
             Object = "list",
             Data = models.Select(x => new ModelListItemDto
             {
-                Id = x.Name,
+                Id = x.Model.Name,
                 Created = new DateTimeOffset(x.CreatedAt, TimeSpan.Zero).ToUnixTimeSeconds(),
                 Object = "model",
-                OwnedBy = x.ModelKey.Name
+                OwnedBy = x.Model.ModelKey.Name
             }).ToArray()
         });
     }

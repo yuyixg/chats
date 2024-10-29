@@ -31,7 +31,7 @@ public partial class ApiUsage2
     [Column(TypeName = "decimal(14, 8)")]
     public decimal OutputCost { get; set; }
 
-    public long TransactionLogId { get; set; }
+    public long? TransactionLogId { get; set; }
 
     public DateTime CreatedAt { get; set; }
 
@@ -45,5 +45,5 @@ public partial class ApiUsage2
 
     [ForeignKey("TransactionLogId")]
     [InverseProperty("ApiUsage2")]
-    public virtual TransactionLog TransactionLog { get; set; } = null!;
+    public virtual TransactionLog? TransactionLog { get; set; } = null!;
 }

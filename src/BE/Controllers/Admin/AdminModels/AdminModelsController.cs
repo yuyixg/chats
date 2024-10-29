@@ -78,23 +78,24 @@ public class AdminModelsController(ChatsDB db) : ControllerBase
     public async Task<ActionResult> ValidateModel(
         [FromBody] ValidateModelRequest req,
         [FromServices] ConversationFactory conversationFactory,
-        [FromServices] CurrentUser currentUser,
         CancellationToken cancellationToken)
     {
         ModelKey2? modelKey = await db.ModelKey2s
+            .Include(x => x.ModelProvider)
             .Where(x => x.Id == req.ModelKeyId)
             .SingleOrDefaultAsync(cancellationToken);
         if (modelKey == null)
         {
-            return this.BadRequestMessage("Model version not found");
+            return this.BadRequestMessage($"Model key id: {req.ModelKeyId} not found");
         }
 
         ModelReference? modelReference = await db.ModelReferences
+            .Include(x => x.Provider)
             .Where(x => x.Name == req.ModelReferenceId && x.ProviderId == modelKey.Id)
             .SingleOrDefaultAsync(cancellationToken);
         if (modelReference == null)
         {
-            return this.BadRequestMessage("Model version not found");
+            return this.BadRequestMessage($"Model reference id: {req.ModelReferenceId} not found");
         }
 
         ConversationService s = conversationFactory.CreateConversationService(new Model()
@@ -129,10 +130,9 @@ public class AdminModelsController(ChatsDB db) : ControllerBase
         // create or update user models
         foreach (JsonTokenBalance item in req.Models)
         {
-            UserModelTransactionLog? logItem;
             if (userModels.TryGetValue(item.ModelId, out UserModel2? existingItem))
             {
-                logItem = item.ApplyTo(existingItem);
+                item.ApplyTo(existingItem);
             }
             else
             {
@@ -142,14 +142,9 @@ public class AdminModelsController(ChatsDB db) : ControllerBase
                     ModelId = item.ModelId,
                     CreatedAt = DateTime.UtcNow,
                 };
-                logItem = item.ApplyTo(newItem);
+                item.ApplyTo(newItem);
                 userModels[item.ModelId] = newItem;
                 db.UserModel2s.Add(newItem);
-            }
-
-            if (logItem != null)
-            {
-                db.UserModelTransactionLogs.Add(logItem);
             }
         }
 
@@ -165,7 +160,7 @@ public class AdminModelsController(ChatsDB db) : ControllerBase
         await db.SaveChangesAsync(cancellationToken);
         foreach (int userModelId in userModels.Keys)
         {
-            _ = balanceService.AsyncUpdateUserModelBalance(userModelId);
+            _ = balanceService.AsyncUpdateUserModelBalance(userModelId, CancellationToken.None);
         }
         return NoContent();
     }

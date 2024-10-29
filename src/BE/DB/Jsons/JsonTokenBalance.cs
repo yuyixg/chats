@@ -20,11 +20,11 @@ public record JsonTokenBalance
     [JsonPropertyName("enabled")]
     public required bool Enabled { get; init; }
 
-    public UserModelTransactionLog? ApplyTo(UserModel2 existingItem)
+    public void ApplyTo(UserModel2 existingItem)
     {
         existingItem.UpdatedAt = DateTime.UtcNow;
-        //existingItem.CountBalance = Counts;
-        //existingItem.TokenBalance = Tokens;
+        existingItem.CountBalance = Counts;
+        existingItem.TokenBalance = Tokens;
         existingItem.ExpiresAt = Expires;
         existingItem.IsDeleted = !Enabled;
 
@@ -37,6 +37,9 @@ public record JsonTokenBalance
                 UserModelId = existingItem.Id,
                 TransactionTypeId = (byte)DBTransactionType.Charge,
             } : null;
-        return toReturn;
+        if (toReturn != null)
+        {
+            existingItem.UserModelTransactionLogs.Add(toReturn);
+        }
     }
 }
