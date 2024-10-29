@@ -32,4 +32,8 @@ public partial class UserModelTransactionLog
 
     [InverseProperty("UserModelTransactionLog")]
     public virtual UserApiUsage? UserApiUsage { get; set; }
+
+    [ForeignKey("UserModelId")]
+    [InverseProperty("UserModelTransactionLogs")]
+    public virtual UserModel2 UserModel { get; set; } = null!;
 }

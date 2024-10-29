@@ -16,4 +16,7 @@ public partial class ClientUserAgent
     [StringLength(250)]
     [Unicode(false)]
     public string UserAgent { get; set; } = null!;
+
+    [InverseProperty("ClientUserAgent")]
+    public virtual ICollection<ClientInfo> ClientInfos { get; set; } = new List<ClientInfo>();
 }

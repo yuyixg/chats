@@ -17,6 +17,14 @@ public partial class ClientInfo
 
     public int ClientUserAgentId { get; set; }
 
+    [ForeignKey("ClientIpId")]
+    [InverseProperty("ClientInfos")]
+    public virtual ClientIp ClientIp { get; set; } = null!;
+
+    [ForeignKey("ClientUserAgentId")]
+    [InverseProperty("ClientInfos")]
+    public virtual ClientUserAgent ClientUserAgent { get; set; } = null!;
+
     [InverseProperty("ClientInfo")]
     public virtual ICollection<MessageRequest> MessageRequests { get; set; } = new List<MessageRequest>();
 

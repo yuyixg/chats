@@ -90,6 +90,17 @@ public partial class ChatsDB : DbContext
 
     protected override void OnModelCreating(ModelBuilder modelBuilder)
     {
+        modelBuilder.Entity<ClientInfo>(entity =>
+        {
+            entity.HasOne(d => d.ClientIp).WithMany(p => p.ClientInfos)
+                .OnDelete(DeleteBehavior.ClientSetNull)
+                .HasConstraintName("FK_ClientInfo_ClientIP");
+
+            entity.HasOne(d => d.ClientUserAgent).WithMany(p => p.ClientInfos)
+                .OnDelete(DeleteBehavior.ClientSetNull)
+                .HasConstraintName("FK_ClientInfo_ClientUserAgent");
+        });
+
         modelBuilder.Entity<Config>(entity =>
         {
             entity.HasKey(e => e.Key).HasName("PK_Configs");
@@ -179,7 +190,7 @@ public partial class ChatsDB : DbContext
 
             entity.HasOne(d => d.UserModelTransactionLog).WithMany(p => p.MessageResponse2s)
                 .OnDelete(DeleteBehavior.SetNull)
-                .HasConstraintName("FK_MessageResponse2_UserModelTransactionLog");
+                .HasConstraintName("FK_MessageResponse_UserModelTransactionLog");
         });
 
         modelBuilder.Entity<Model>(entity =>
@@ -329,7 +340,7 @@ public partial class ChatsDB : DbContext
 
             entity.HasOne(d => d.TransactionLog).WithOne(p => p.UserApiUsage).HasConstraintName("FK_ApiUsage2_TransactionLog");
 
-            entity.HasOne(d => d.UserModelTransactionLog).WithOne(p => p.UserApiUsage).HasConstraintName("FK_ApiUsage2_UserModelTransactionLog");
+            entity.HasOne(d => d.UserModelTransactionLog).WithOne(p => p.UserApiUsage).HasConstraintName("FK_UserApiUsage_UserModelTransactionLog");
         });
 
         modelBuilder.Entity<UserBalance>(entity =>
@@ -381,6 +392,10 @@ public partial class ChatsDB : DbContext
             entity.HasOne(d => d.TransactionType).WithMany(p => p.UserModelTransactionLogs)
                 .OnDelete(DeleteBehavior.ClientSetNull)
                 .HasConstraintName("FK_UserModelTransactionLog_TransactionType");
+
+            entity.HasOne(d => d.UserModel).WithMany(p => p.UserModelTransactionLogs)
+                .OnDelete(DeleteBehavior.ClientSetNull)
+                .HasConstraintName("FK_UserModelTransactionLog_UserModel2");
         });
 
         OnModelCreatingPartial(modelBuilder);

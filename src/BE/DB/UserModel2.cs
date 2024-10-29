@@ -38,6 +38,6 @@ public partial class UserModel2
     [InverseProperty("UserModel2s")]
     public virtual User User { get; set; } = null!;
 
-    [InverseProperty("UserModelTransactionLog")]
+    [InverseProperty("UserModel")]
     public virtual ICollection<UserModelTransactionLog> UserModelTransactionLogs { get; set; } = new List<UserModelTransactionLog>();
 }

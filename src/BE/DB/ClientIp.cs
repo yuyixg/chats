@@ -17,4 +17,7 @@ public partial class ClientIp
     [StringLength(40)]
     [Unicode(false)]
     public string Ipaddress { get; set; } = null!;
+
+    [InverseProperty("ClientIp")]
+    public virtual ICollection<ClientInfo> ClientInfos { get; set; } = new List<ClientInfo>();
 }
