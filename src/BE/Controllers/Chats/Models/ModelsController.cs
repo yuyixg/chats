@@ -1,12 +1,11 @@
 ﻿using Chats.BE.Controllers.Chats.Models.Dtos;
 using Chats.BE.DB;
 using Chats.BE.DB.Extensions;
-using Chats.BE.DB.Jsons;
 using Chats.BE.Infrastructure;
+using Chats.BE.Services;
 using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Mvc;
 using Microsoft.EntityFrameworkCore;
-using System.Text.Json;
 
 namespace Chats.BE.Controllers.Chats.Models;
 
@@ -14,14 +13,10 @@ namespace Chats.BE.Controllers.Chats.Models;
 public class ModelsController : ControllerBase
 {
     [HttpGet]
-    public async Task<ActionResult<ModelResponse[]>> Get([FromServices] ChatsDB db, [FromServices] CurrentUser user, CancellationToken cancellationToken)
+    public async Task<ActionResult<ModelResponse[]>> Get([FromServices] ChatsDB db, [FromServices] CurrentUser user, [FromServices] UserModelManager userModelManager, CancellationToken cancellationToken)
     {
-        string? userModelsString = (await db.UserModels.SingleOrDefaultAsync(x => x.UserId == user.Id, cancellationToken))?.Models;
-        JsonTokenBalance[] userModels = userModelsString == null ? [] : JsonSerializer.Deserialize<JsonTokenBalance[]>(userModelsString)!;
-        HashSet<Guid> chatModelIds = userModels.Select(x => x.ModelId).ToHashSet();
-        Dictionary<Guid, ChatModel> chatModels = await db.ChatModels
-            .Where(x => chatModelIds.Contains(x.Id) && x.Enabled)
-            .ToDictionaryAsync(x => x.Id, cancellationToken);
+        UserModel2[] userModels = await userModelManager.GetValidModelsByUserId(user.Id, cancellationToken);
+        Dictionary<short, Model> chatModels = userModels.ToDictionary(k => k.ModelId, v => v.Model);
         HashSet<Guid> fileServiceIds = chatModels.Values.Select(x => x.FileServiceId).Where(x => x != null).Select(x => x!.Value).ToHashSet();
         Dictionary<Guid, FileService> fileServices = await db.FileServices
             .Where(x => fileServiceIds.Contains(x.Id) && x.Enabled)
@@ -40,16 +35,15 @@ public class ModelsController : ControllerBase
             .ToDictionary(x => x.ModelId, x => x.TemperatureOptions);
 
         return Ok(userModels
-            .Where(x => x.Enabled && chatModels.ContainsKey(x.ModelId))
+            .Where(x => !x.IsExpired && chatModels.ContainsKey(x.ModelId))
             .Select(userModel =>
             {
-                ChatModel chatModel = chatModels[userModel.ModelId];
+                Model chatModel = chatModels[userModel.ModelId];
                 FileService? fileService = chatModel.FileServiceId == null ? null :
                     fileServices.TryGetValue(chatModel.FileServiceId!.Value, out FileService? fs) ? fs :
                     null;
-                JsonModelConfig modelConfig = JsonSerializer.Deserialize<JsonModelConfig>(chatModel.ModelConfig)!;
                 TemperatureOptions temperatureOption = temperatureOptions[chatModel.ToIdentifier()];
-                return ModelResponse.FromAll(chatModel, userModel, modelConfig, fileService, temperatureOption);
+                return ModelResponse.FromAll(chatModel, userModel.ToJsonTokenBalance(), fileService, temperatureOption);
             })
             .ToArray());
     }

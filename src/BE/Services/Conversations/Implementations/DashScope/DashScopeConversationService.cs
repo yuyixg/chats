@@ -1,59 +1,49 @@
-﻿using Chats.BE.Infrastructure;
-using Chats.BE.Services.Conversations.Dtos;
+﻿using Chats.BE.Services.Conversations.Dtos;
 using Sdcb.DashScope;
 using Sdcb.DashScope.TextGeneration;
-using System.Text.Json;
 using OpenAIChatMessage = OpenAI.Chat.ChatMessage;
 using UserChatMessage = OpenAI.Chat.UserChatMessage;
 using SystemChatMessage = OpenAI.Chat.SystemChatMessage;
 using AssistantChatMessage = OpenAI.Chat.AssistantChatMessage;
 using ChatMessageContentPartKind = OpenAI.Chat.ChatMessageContentPartKind;
 using System.Runtime.CompilerServices;
-using Chats.BE.DB.Jsons;
+using OpenAI.Chat;
+using Chats.BE.DB;
+using Chats.BE.Services.Conversations.Extensions;
+using ChatTokenUsage = Sdcb.DashScope.TextGeneration.ChatTokenUsage;
+using ChatMessage = Sdcb.DashScope.TextGeneration.ChatMessage;
 
 namespace Chats.BE.Services.Conversations.Implementations.DashScope;
 
 public class DashScopeConversationService : ConversationService
 {
-    private JsonDashScopeModelConfig GlobalModelConfig { get; }
     private DashScopeClient Client { get; }
     private TextGenerationClient ChatClient { get; }
-    /// <summary>
-    /// possible values:
-    /// <list type="bullet">
-    /// <item>qwen</item>
-    /// <item>qwen-vl</item>
-    /// </list>
-    /// </summary>
-    private string SuggestedType { get; }
 
-    private bool IsVision => SuggestedType == "qwen-vl";
-
-    public DashScopeConversationService(string keyConfigText, string suggestedType, string modelConfigText)
+    public DashScopeConversationService(Model model) : base(model)
     {
-        JsonDashScopeConfig keyConfig = JsonSerializer.Deserialize<JsonDashScopeConfig>(keyConfigText)!;
-        GlobalModelConfig = JsonSerializer.Deserialize<JsonDashScopeModelConfig>(modelConfigText)!;
-        Client = new DashScopeClient(keyConfig.ApiKey);
+        ArgumentException.ThrowIfNullOrWhiteSpace(model.ModelKey.Secret, nameof(model.ModelKey.Secret));
+
+        Client = new DashScopeClient(model.ModelKey.Secret);
         ChatClient = Client.TextGeneration;
-        SuggestedType = suggestedType;
     }
 
 
-    public override async IAsyncEnumerable<ConversationSegment> ChatStreamed(IReadOnlyList<OpenAIChatMessage> messages, JsonUserModelConfig config, CurrentUser currentUser, [EnumeratorCancellation] CancellationToken cancellationToken)
+    public override async IAsyncEnumerable<ConversationSegment> ChatStreamedInternal(IReadOnlyList<OpenAIChatMessage> messages, ChatCompletionOptions options, [EnumeratorCancellation] CancellationToken cancellationToken)
     {
         ChatParameters chatParameters = new()
         {
-            Temperature = config.Temperature ?? GlobalModelConfig.Temperature,
-            //MaxTokens = config.MaxLength,
-            EnableSearch = GlobalModelConfig.EnableSearch != null && !IsVision ? config.EnableSearch : false,
+            Temperature = options.Temperature,
+            MaxTokens = options.MaxOutputTokenCount,
+            EnableSearch = options.IsSearchEnabled(),
             Seed = (ulong)Random.Shared.Next(),
             IncrementalOutput = true,
         };
 
-        if (IsVision)
+        if (Model.ModelReference.AllowVision)
         {
             ChatVLMessage[] msgs = messages.Select(OpenAIMessageToQwenVL).ToArray();
-            await foreach (ResponseWrapper<string, ChatTokenUsage> resp in ChatClient.ChatVLStreamed(GlobalModelConfig.ModelName, msgs, chatParameters, cancellationToken))
+            await foreach (ResponseWrapper<string, ChatTokenUsage> resp in ChatClient.ChatVLStreamed(Model.ApiModelId, msgs, chatParameters, cancellationToken))
             {
                 yield return new ConversationSegment
                 {
@@ -66,7 +56,7 @@ public class DashScopeConversationService : ConversationService
         else
         {
             ChatMessage[] msgs = messages.Select(OpenAIMessageToQwen).ToArray();
-            await foreach (ResponseWrapper<ChatOutput, ChatTokenUsage> resp in ChatClient.ChatStreamed(GlobalModelConfig.ModelName, msgs, chatParameters, cancellationToken))
+            await foreach (ResponseWrapper<ChatOutput, ChatTokenUsage> resp in ChatClient.ChatStreamed(Model.ApiModelId, msgs, chatParameters, cancellationToken))
             {
                 yield return new ConversationSegment
                 {

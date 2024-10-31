@@ -1,65 +1,30 @@
-﻿using AI.Dev.OpenAI.GPT;
-using Chats.BE.DB.Jsons;
-using Chats.BE.Infrastructure;
-using Chats.BE.Services.Conversations.Dtos;
-using Chats.BE.Services.Conversations.Implementations.Azure;
+﻿using Chats.BE.Services.Conversations.Dtos;
 using OpenAI.Chat;
 using OpenAI;
 using System.Runtime.CompilerServices;
-using System.Text.Json;
 using System.ClientModel;
+using Chats.BE.DB;
 
 namespace Chats.BE.Services.Conversations.Implementations.OpenAI;
 
 public class OpenAIConversationService : ConversationService
 {
-    /// <summary>
-    /// possible values:
-    /// <list type="bullet">
-    /// <item>gpt-3.5-turbo</item>
-    /// <item>gpt-4</item>
-    /// <item>gpt-4-vision</item>
-    /// </list>
-    /// </summary>
-    private string SuggestedType { get; }
-    private ChatClient ChatClient { get; }
-    private JsonOpenAIModelConfig GlobalModelConfig { get; }
+    private readonly ChatClient _chatClient;
 
-    private bool IsVision => SuggestedType == "gpt-4-vision";
-
-    public OpenAIConversationService(string keyConfigText, string suggestedType, string modelConfigText)
+    public OpenAIConversationService(Model model, Uri? defaultApiHost = null) : base(model)
     {
-        JsonAzureApiConfig keyConfig = JsonAzureApiConfig.Parse(keyConfigText);
-        GlobalModelConfig = JsonSerializer.Deserialize<JsonOpenAIModelConfig>(modelConfigText)!;
-        OpenAIClient api = new(new ApiKeyCredential(keyConfig.ApiKey), new OpenAIClientOptions()
+        ArgumentException.ThrowIfNullOrWhiteSpace(model.ModelKey.Secret, nameof(model.ModelKey.Secret));
+
+        OpenAIClient api = new(new ApiKeyCredential(model.ModelKey.Secret!), new OpenAIClientOptions()
         {
-            Endpoint = !string.IsNullOrEmpty(keyConfig.Host) ? new Uri(keyConfig.Host) : null,
+            Endpoint = !string.IsNullOrWhiteSpace(model.ModelKey.Host) ? new Uri(model.ModelKey.Host) : defaultApiHost,
         });
-        SuggestedType = suggestedType;
-        ChatClient = api.GetChatClient(GlobalModelConfig.DeploymentName);
+        _chatClient = api.GetChatClient(model.ApiModelId);
     }
 
-    public override async IAsyncEnumerable<ConversationSegment> ChatStreamed(IReadOnlyList<ChatMessage> messages, JsonUserModelConfig userModelConfig, CurrentUser currentUser, [EnumeratorCancellation] CancellationToken cancellationToken)
+    public override async IAsyncEnumerable<ConversationSegment> ChatStreamedInternal(IReadOnlyList<ChatMessage> messages, ChatCompletionOptions options, [EnumeratorCancellation] CancellationToken cancellationToken)
     {
-        ChatCompletionOptions chatCompletionOptions = new()
-        {
-            Temperature = userModelConfig.Temperature,
-            MaxOutputTokenCount = userModelConfig.MaxLength ?? SuggestedType switch
-            {
-                "gpt-3.5-turbo" => null,
-                "gpt-4" => null,
-                "gpt-4-vision" => 4096,
-                _ => 4096,
-            },
-            EndUserId = currentUser.Id.ToString(),
-        };
-
-        if (!IsVision)
-        {
-            messages = messages.Select(RemoveImages).ToList();
-        }
-
-        int inputTokenCount = messages.Sum(GetTokenCount);
+        int inputTokenCount = GetPromptTokenCount(messages);
         int outputTokenCount = 0;
         // notify inputTokenCount first to better support price calculation
         yield return new ConversationSegment
@@ -69,7 +34,7 @@ public class OpenAIConversationService : ConversationService
             OutputTokenCount = 0,
         };
 
-        await foreach (StreamingChatCompletionUpdate delta in ChatClient.CompleteChatStreamingAsync(messages, chatCompletionOptions, cancellationToken))
+        await foreach (StreamingChatCompletionUpdate delta in _chatClient.CompleteChatStreamingAsync(messages, options, cancellationToken))
         {
             if (delta.FinishReason == ChatFinishReason.Stop) yield break;
             if (delta.FinishReason == ChatFinishReason.Length) yield break;
@@ -86,7 +51,7 @@ public class OpenAIConversationService : ConversationService
             }
             else
             {
-                outputTokenCount += GPT3Tokenizer.Encode(delta.ContentUpdate[0].Text).Count;
+                outputTokenCount += Tokenizer.CountTokens(delta.ContentUpdate[0].Text);
                 yield return new ConversationSegment
                 {
                     TextSegment = delta.ContentUpdate[0].Text,
@@ -95,35 +60,5 @@ public class OpenAIConversationService : ConversationService
                 };
             }
         }
-    }
-
-    private static ChatMessage RemoveImages(ChatMessage message)
-    {
-        return message switch
-        {
-            UserChatMessage userChatMessage => new UserChatMessage(userChatMessage.Content.Select(c => c.Kind switch
-            {
-                var x when x == ChatMessageContentPartKind.Image => ChatMessageContentPart.CreateTextPart(c.ImageUri.ToString()),
-                _ => c,
-            })),
-            _ => message,
-        };
-    }
-
-    static int GetTokenCount(ChatMessage chatMessage)
-    {
-        return chatMessage.Content.Sum(GetTokenCountForPart);
-    }
-
-    static int GetTokenCountForPart(ChatMessageContentPart part)
-    {
-        return part.Kind switch
-        {
-            var x when x == ChatMessageContentPartKind.Text => GPT3Tokenizer.Encode(part.Text).Count,
-            // https://platform.openai.com/docs/guides/vision/calculating-costs
-            // assume image is ~2048x4096 in detail: high, mosts 1105 tokens
-            var x when x == ChatMessageContentPartKind.Image => 1105,
-            _ => 0,
-        };
     }
 }

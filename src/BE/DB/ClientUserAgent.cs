@@ -18,5 +18,5 @@ public partial class ClientUserAgent
     public string UserAgent { get; set; } = null!;
 
     [InverseProperty("ClientUserAgent")]
-    public virtual ICollection<SmsAttempt> SmsAttempts { get; set; } = new List<SmsAttempt>();
+    public virtual ICollection<ClientInfo> ClientInfos { get; set; } = new List<ClientInfo>();
 }

@@ -5,7 +5,7 @@ using System.Text;
 
 namespace Chats.BE.DB;
 
-public partial class MessageContent
+public partial class MessageContent2
 {
     public ChatMessageContentPart ToOpenAI()
     {
@@ -26,18 +26,18 @@ public partial class MessageContent
         };
     }
 
-    public static MessageContent FromText(string text)
+    public static MessageContent2 FromText(string text)
     {
-        return new MessageContent { Content = Encoding.Unicode.GetBytes(text), ContentTypeId = (byte)DBMessageContentType.Text };
+        return new MessageContent2 { Content = Encoding.Unicode.GetBytes(text), ContentTypeId = (byte)DBMessageContentType.Text };
     }
 
-    public static MessageContent FromImageUrl(string imageUrl)
+    public static MessageContent2 FromImageUrl(string imageUrl)
     {
-        return new MessageContent { Content = Encoding.UTF8.GetBytes(imageUrl), ContentTypeId = (byte)DBMessageContentType.ImageUrl };
+        return new MessageContent2 { Content = Encoding.UTF8.GetBytes(imageUrl), ContentTypeId = (byte)DBMessageContentType.ImageUrl };
     }
 
-    public static MessageContent FromError(string error)
+    public static MessageContent2 FromError(string error)
     {
-        return new MessageContent { Content = Encoding.UTF8.GetBytes(error), ContentTypeId = (byte)DBMessageContentType.Error };
+        return new MessageContent2 { Content = Encoding.UTF8.GetBytes(error), ContentTypeId = (byte)DBMessageContentType.Error };
     }
 }

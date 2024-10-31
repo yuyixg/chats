@@ -6,9 +6,9 @@ using Microsoft.EntityFrameworkCore;
 
 namespace Chats.BE.DB;
 
-[Table("Message")]
-[Index("ConversationId", Name = "IX_Message_Conversation")]
-public partial class Message
+[Table("Message2")]
+[Index("ConversationId", Name = "IX_Message2_Conversation")]
+public partial class Message2
 {
     [Key]
     public long Id { get; set; }
@@ -22,23 +22,26 @@ public partial class Message
     public DateTime CreatedAt { get; set; }
 
     [ForeignKey("ChatRoleId")]
-    [InverseProperty("Messages")]
+    [InverseProperty("Message2s")]
     public virtual ChatRole ChatRole { get; set; } = null!;
 
     [ForeignKey("ConversationId")]
-    [InverseProperty("Messages")]
-    public virtual Conversation Conversation { get; set; } = null!;
+    [InverseProperty("Message2s")]
+    public virtual Conversation2 Conversation { get; set; } = null!;
 
     [InverseProperty("Parent")]
-    public virtual ICollection<Message> InverseParent { get; set; } = new List<Message>();
+    public virtual ICollection<Message2> InverseParent { get; set; } = new List<Message2>();
 
     [InverseProperty("Message")]
-    public virtual ICollection<MessageContent> MessageContents { get; set; } = new List<MessageContent>();
+    public virtual ICollection<MessageContent2> MessageContent2s { get; set; } = new List<MessageContent2>();
 
     [InverseProperty("Message")]
-    public virtual MessageResponse? MessageResponse { get; set; }
+    public virtual MessageRequest? MessageRequest { get; set; }
+
+    [InverseProperty("Message")]
+    public virtual MessageResponse2? MessageResponse2 { get; set; }
 
     [ForeignKey("ParentId")]
     [InverseProperty("InverseParent")]
-    public virtual Message? Parent { get; set; }
+    public virtual Message2? Parent { get; set; }
 }

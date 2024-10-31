@@ -19,7 +19,7 @@ public class AdminMessageController(ChatsDB db, CurrentUser currentUser, IIdEncr
     [HttpGet("messages")]
     public async Task<ActionResult<PagedResult<AdminChatsDto>>> GetMessages([FromQuery] PagingRequest req, CancellationToken cancellationToken)
     {
-        IQueryable<Conversation> chats = db.Conversations
+        IQueryable<Conversation2> chats = db.Conversation2s
             .Where(x => x.User.Role != "admin" || x.UserId == currentUser.Id);
         if (!string.IsNullOrEmpty(req.Query))
         {
@@ -34,7 +34,7 @@ public class AdminMessageController(ChatsDB db, CurrentUser currentUser, IIdEncr
                 CreatedAt = x.CreatedAt,
                 IsDeleted = x.IsDeleted,
                 IsShared = x.IsShared,
-                ModelName = x.ChatModel!.Name,
+                ModelName = x.Model.Name,
                 Title = x.Title,
                 UserName = x.User.Username,
                 JsonUserModelConfig = new JsonUserModelConfig()
@@ -46,56 +46,52 @@ public class AdminMessageController(ChatsDB db, CurrentUser currentUser, IIdEncr
     }
 
     [HttpGet("message-details")]
-    public async Task<ActionResult<AdminMessageDto>> GetAdminMessage(int chatId, CancellationToken cancellationToken)
+    public async Task<ActionResult<AdminMessageRoot>> GetAdminMessage(int chatId, CancellationToken cancellationToken)
     {
         return await GetAdminMessageInternal(db, chatId, idEncryption, cancellationToken);
     }
 
-    internal static async Task<ActionResult<AdminMessageDto>> GetAdminMessageInternal(ChatsDB db, int conversationId, IIdEncryptionService idEncryption, CancellationToken cancellationToken)
+    internal static async Task<ActionResult<AdminMessageRoot>> GetAdminMessageInternal(ChatsDB db, int conversationId, IIdEncryptionService idEncryption, CancellationToken cancellationToken)
     {
-        AdminMessageDtoTemp? adminMessageTemp = await db.Conversations
+        AdminMessageDtoTemp? adminMessageTemp = await db.Conversation2s
                     .Where(x => x.Id == conversationId)
                     .Select(x => new AdminMessageDtoTemp()
                     {
                         Name = x.Title,
-                        ModelName = x.ChatModel!.Name,
-                        UserModelConfigText = new JsonUserModelConfig()
-                        {
-                            EnableSearch = x.EnableSearch,
-                            Temperature = x.Temperature,
-                        },
-                        ModelConfigText = x.ChatModel.ModelConfig,
+                        ModelName = x.Model.Name,
+                        Temperature = x.Temperature,
+                        DeploymentName = x.Model.DeploymentName,
                     })
                     .SingleOrDefaultAsync(cancellationToken);
         if (adminMessageTemp == null) return new NotFoundResult();
 
-        AdminMessageItemTemp[] messagesTemp = await db.Messages
+        AdminMessageItemTemp[] messagesTemp = await db.Message2s
             .Where(x => x.ConversationId == conversationId)
             .Select(x => new AdminMessageItemTemp
             {
                 Id = x.Id,
                 ParentId = x.ParentId,
-                ModelName = x.MessageResponse!.ChatModel.Name,
+                ModelName = x.MessageResponse2!.Model.Name,
                 CreatedAt = x.CreatedAt,
-                InputTokens = x.MessageResponse.InputTokenCount,
-                OutputTokens = x.MessageResponse.OutputTokenCount,
-                InputPrice = x.MessageResponse.InputCost,
-                OutputPrice = x.MessageResponse.OutputCost,
+                InputTokens = x.MessageResponse2.InputTokenCount,
+                OutputTokens = x.MessageResponse2.OutputTokenCount,
+                InputPrice = x.MessageResponse2.InputCost,
+                OutputPrice = x.MessageResponse2.OutputCost,
                 Role = (DBConversationRole)x.ChatRoleId,
-                Content = x.MessageContents
+                Content = x.MessageContent2s
                     .Select(x => new DBMessageSegment 
                     { 
                         Content = x.Content, 
                         ContentType = (DBMessageContentType)x.ContentTypeId
                     })
                     .ToArray(),
-                Duration = x.MessageResponse.DurationMs,
+                Duration = x.MessageResponse2.DurationMs,
             })
             .OrderBy(x => x.Id)
             .ToArrayAsync(cancellationToken);
 
         AdminMessageBasicItem[] items = AdminMessageItemTemp.ToDtos(messagesTemp, idEncryption);
-        AdminMessageDto dto = adminMessageTemp.ToDto(items);
+        AdminMessageRoot dto = adminMessageTemp.ToDto(items);
 
         return new OkObjectResult(dto);
     }

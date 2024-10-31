@@ -28,5 +28,5 @@ public partial class FileService
     public DateTime UpdatedAt { get; set; }
 
     [InverseProperty("FileService")]
-    public virtual ICollection<ChatModel> ChatModels { get; set; } = new List<ChatModel>();
+    public virtual ICollection<Model> Models { get; set; } = new List<Model>();
 }

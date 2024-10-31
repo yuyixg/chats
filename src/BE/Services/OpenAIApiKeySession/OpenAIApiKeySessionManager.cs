@@ -7,7 +7,7 @@ public class OpenAIApiKeySessionManager(ChatsDB db, OpenAIApiKeySessionCache ses
 {
     public async Task<ApiKeyEntry?> GetUserInfoByOpenAIApiKey(string apiKey, CancellationToken cancellationToken = default)
     {
-        ApiKeyEntry? sessionEntry = await db.ApiKeys
+        ApiKeyEntry? sessionEntry = await db.UserApiKeys
             .Include(x => x.User)
             .Include(x => x.Models)
             .Where(x => x.Key == apiKey && !x.IsDeleted)

@@ -1,4 +1,5 @@
-﻿using Chats.BE.DB.Jsons;
+﻿using Chats.BE.DB;
+using Chats.BE.DB.Jsons;
 using System.Text.Json;
 using System.Text.Json.Serialization;
 
@@ -39,8 +40,11 @@ public record AdminUserDto
     [JsonPropertyName("createdAt")]
     public required DateTime CreatedAt { get; init; }
 
-    [JsonPropertyName("userModelId")]
-    public required Guid UserModelId { get; init; }
+    //[JsonPropertyName("userModelId")]
+    //public required Guid UserModelId { get; init; }
+
+    [JsonPropertyName("userModelCount")]
+    public required int UserModelCount { get; init; }
 
     [JsonPropertyName("models")]
     public required JsonTokenBalance[] Models { get; init; }
@@ -59,26 +63,25 @@ public record AdminUserDtoTemp
     public required string? Provider { get; init; }
     public required bool Enabled { get; init; }
     public required DateTime CreatedAt { get; init; }
-    public required Guid UserModelId { get; init; }
-    public required string Models { get; init; }
+    //public required Guid UserModelId { get; init; }
+    public required int UserModelCount { get; init; }
+    public required UserModel2[] Models { get; init; }
 
-    public AdminUserDto ToDto()
+    public AdminUserDto ToDto() => new()
     {
-        return new()
-        {
-            Id = Id,
-            Username = Username,
-            Account = Account,
-            Role = Role,
-            Balance = Balance,
-            Avatar = Avatar,
-            Phone = Phone,
-            Email = Email,
-            Provider = Provider,
-            Enabled = Enabled,
-            CreatedAt = CreatedAt,
-            UserModelId = UserModelId,
-            Models = JsonSerializer.Deserialize<IEnumerable<JsonTokenBalance>>(Models)!.Where(x => x.Enabled).ToArray(),
-        };
-    }
+        Id = Id,
+        Username = Username,
+        Account = Account,
+        Role = Role,
+        Balance = Balance,
+        Avatar = Avatar,
+        Phone = Phone,
+        Email = Email,
+        Provider = Provider,
+        Enabled = Enabled,
+        CreatedAt = CreatedAt,
+        //UserModelId = UserModelId,
+        UserModelCount = UserModelCount,
+        Models = Models.Select(x => x.ToJsonTokenBalance()).ToArray(),
+    };
 }

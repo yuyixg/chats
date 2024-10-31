@@ -1,4 +1,5 @@
-﻿using System.Text.Json.Serialization;
+﻿using System.Diagnostics.CodeAnalysis;
+using System.Text.Json.Serialization;
 
 namespace Chats.BE.DB.Jsons;
 
@@ -34,6 +35,15 @@ public record JsonPriceConfig1M
     public required decimal OutputTokenPrice1M { get; init; }
 
     public static decimal Unit = 1_000_000;
+
+    [SetsRequiredMembers]
+    public JsonPriceConfig1M(decimal inputTokenPrice1M, decimal outputTokenPrice1M)
+    {
+        InputTokenPrice1M = inputTokenPrice1M;
+        OutputTokenPrice1M = outputTokenPrice1M;
+    }
+
+    public JsonPriceConfig1M() { }
 
     public JsonPriceConfig ToRaw()
     {

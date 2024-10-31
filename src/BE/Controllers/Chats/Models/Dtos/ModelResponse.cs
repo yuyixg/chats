@@ -1,5 +1,6 @@
 ﻿using Chats.BE.DB;
 using Chats.BE.DB.Jsons;
+using Chats.BE.Services.Conversations;
 using System.Text.Json;
 using System.Text.Json.Serialization;
 
@@ -20,7 +21,7 @@ public record ModelResponse
     public required string ModelProvider { get; init; }
 
     [JsonPropertyName("modelUsage")]
-    public required ModelUsage ModelUsage { get; init; }
+    public required ModelUsage ModelTokenBalance { get; init; }
 
     [JsonPropertyName("modelConfigOptions")]
     public required ModelConfigOption ModelConfigOptions { get; init; }
@@ -34,18 +35,23 @@ public record ModelResponse
     [JsonPropertyName("fileServerConfig")]
     public required FileServerConfig? FileServerConfigs { get; init; }
 
-    public static ModelResponse FromAll(ChatModel model, JsonTokenBalance userModel, JsonModelConfig modelConfig, FileService? fileService, TemperatureOptions temperatureOptions)
+    public static ModelResponse FromAll(Model model, JsonTokenBalance userModel, FileService? fileService, TemperatureOptions temperatureOptions)
     {
         return new ModelResponse
         {
             Id = model.Id.ToString(),
-            ModelVersion = model.ModelVersion,
+            ModelVersion = model.ModelReference.Name,
             Name = model.Name,
-            ModelProvider = model.ModelProvider,
-            ModelUsage = ModelUsage.FromJson(userModel),
+            ModelProvider = model.ModelKey.ModelProvider.Name,
+            ModelTokenBalance = ModelUsage.FromJson(userModel),
             ModelConfigOptions = ModelConfigOption.FromTemperature(temperatureOptions),
-            ModelConfigs = JsonUserModelConfig.FromJson(modelConfig),
-            FileConfig = string.IsNullOrEmpty(model.FileConfig) ? null : JsonSerializer.Deserialize<JsonFileConfig>(model.FileConfig),
+            ModelConfigs = JsonUserModelConfig.FromJson(new JsonModelConfig
+            {
+                DeploymentName = model.DeploymentName,
+                Prompt = "",
+                Temperature = ConversationService.DefaultTemperature,
+            }),
+            FileConfig = JsonFileConfig.Default,
             FileServerConfigs = FileServerConfig.FromFileService(fileService)
         };
     }

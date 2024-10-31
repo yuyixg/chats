@@ -8,7 +8,7 @@ using System.Text.Json.Serialization;
 
 namespace Chats.BE.Controllers.Admin.AdminMessage.Dtos;
 
-public record AdminMessageDto
+public record AdminMessageRoot
 {
     [JsonPropertyName("name")]
     public required string Name { get; init; }
@@ -30,18 +30,16 @@ public record AdminMessageDtoTemp
 {
     public required string Name { get; init; }
     public required string ModelName { get; init; }
-    public required string ModelConfigText { get; init; }
-    public required JsonUserModelConfig UserModelConfigText { get; init; }
+    public required string? DeploymentName { get; init; }
+    public required float? Temperature { get; init; }
 
-    public JsonModelConfig JsonModelConfig => JsonSerializer.Deserialize<JsonModelConfig>(ModelConfigText)!;
-
-    public AdminMessageDto ToDto(AdminMessageBasicItem[] messages)
+    public AdminMessageRoot ToDto(AdminMessageBasicItem[] messages)
     {
-        return new AdminMessageDto
+        return new AdminMessageRoot
         {
             Name = Name,
             ModelName = ModelName,
-            ModelTemperature = UserModelConfigText.Temperature ?? JsonModelConfig.Temperature,
+            ModelTemperature = Temperature ?? ConversationService.DefaultTemperature,
             ModelPrompt = messages.FirstOrDefault(x => x.Role.Equals(DBConversationRole.System.ToString(), StringComparison.OrdinalIgnoreCase))?.Content.Text,
             Messages = messages.Where(x => !x.Role.Equals(DBConversationRole.System.ToString(), StringComparison.OrdinalIgnoreCase)).ToArray(),
         };

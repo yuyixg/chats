@@ -16,7 +16,7 @@ public class OpenAIApiKeyAuthenticationHandler(
 
     protected override async Task<AuthenticateResult> HandleAuthenticateAsync()
     {
-        if (!Request.Headers.TryGetValue("Authorization", out var authorizationHeader))
+        if (!Request.Headers.TryGetValue("Authorization", out Microsoft.Extensions.Primitives.StringValues authorizationHeader))
         {
             return AuthenticateResult.NoResult();
         }
@@ -31,14 +31,14 @@ public class OpenAIApiKeyAuthenticationHandler(
             return AuthenticateResult.Fail($"Invalid API Key: {apiKey}");
         }
 
-        if (userInfo.Expires < DateTime.UtcNow)
+        if (userInfo.IsExpired)
         {
             return AuthenticateResult.Fail($"API Key expired: {apiKey}");
         }
 
-        var identity = new ClaimsIdentity(userInfo.ToClaims(), Scheme.Name);
-        var principal = new ClaimsPrincipal(identity);
-        var ticket = new AuthenticationTicket(principal, Scheme.Name);
+        ClaimsIdentity identity = new(userInfo.ToClaims(), Scheme.Name);
+        ClaimsPrincipal principal = new(identity);
+        AuthenticationTicket ticket = new(principal, Scheme.Name);
 
         return AuthenticateResult.Success(ticket);
     }

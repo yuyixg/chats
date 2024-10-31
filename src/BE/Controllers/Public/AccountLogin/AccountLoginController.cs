@@ -140,8 +140,7 @@ public class AccountLoginController(ChatsDB db, ILogger<AccountLoginController> 
             SmsRecordId = existingSms.Id,
             CreatedAt = DateTime.UtcNow,
             Code = requestSmsCode,
-            ClientIp = await clientInfoService.GetDBClientIP(cancellationToken),
-            ClientUserAgent = await clientInfoService.GetDBUserAgent(cancellationToken),
+            ClientInfo = await clientInfoService.GetClientInfo(cancellationToken),
         });
         await db.SaveChangesAsync(cancellationToken);
 

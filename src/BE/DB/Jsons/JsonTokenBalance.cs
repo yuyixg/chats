@@ -1,21 +1,45 @@
-﻿using System.Text.Json.Serialization;
+﻿using Chats.BE.DB.Enums;
+using System.Text.Json.Serialization;
 
 namespace Chats.BE.DB.Jsons;
 
 public record JsonTokenBalance
 {
     [JsonPropertyName("modelId")]
-    public required Guid ModelId { get; init; }
+    public required short ModelId { get; init; }
 
-    [JsonPropertyName("tokens"), JsonConverter(typeof(NumberToStringConverter))]
-    public required string Tokens { get; init; }
+    [JsonPropertyName("tokens")]
+    public required int Tokens { get; init; }
 
-    [JsonPropertyName("counts"), JsonConverter(typeof(NumberToStringConverter))]
-    public required string Counts { get; init; }
+    [JsonPropertyName("counts")]
+    public required int Counts { get; init; }
 
     [JsonPropertyName("expires")]
-    public required string Expires { get; init; }
+    public required DateTime Expires { get; init; }
 
     [JsonPropertyName("enabled")]
     public required bool Enabled { get; init; }
+
+    public void ApplyTo(UserModel2 existingItem)
+    {
+        existingItem.UpdatedAt = DateTime.UtcNow;
+        existingItem.CountBalance = Counts;
+        existingItem.TokenBalance = Tokens;
+        existingItem.ExpiresAt = Expires;
+        existingItem.IsDeleted = !Enabled;
+
+        UserModelTransactionLog? toReturn = existingItem.CountBalance != Counts || existingItem.TokenBalance != Tokens
+            ? new UserModelTransactionLog
+            {
+                CreatedAt = DateTime.UtcNow,
+                CountAmount = Counts - existingItem.CountBalance,
+                TokenAmount = Tokens - existingItem.TokenBalance,
+                UserModelId = existingItem.Id,
+                TransactionTypeId = (byte)DBTransactionType.Charge,
+            } : null;
+        if (toReturn != null)
+        {
+            existingItem.UserModelTransactionLogs.Add(toReturn);
+        }
+    }
 }

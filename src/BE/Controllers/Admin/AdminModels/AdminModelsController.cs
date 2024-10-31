@@ -10,6 +10,7 @@ using Chats.BE.Services.Conversations.Dtos;
 using Microsoft.AspNetCore.Mvc;
 using Microsoft.EntityFrameworkCore;
 using OpenAI.Chat;
+using System.Text.Json;
 
 namespace Chats.BE.Controllers.Admin.AdminModels;
 
@@ -19,25 +20,23 @@ public class AdminModelsController(ChatsDB db) : ControllerBase
     [HttpGet("models")]
     public async Task<ActionResult<AdminModelDto[]>> GetAdminModels(bool all, CancellationToken cancellationToken)
     {
-        IQueryable<ChatModel> query = db.ChatModels;
-        if (!all) query = query.Where(x => x.Enabled);
+        IQueryable<Model> query = db.Models;
+        if (!all) query = query.Where(x => !x.IsDeleted);
 
         return await query
-            .OrderBy(x => x.Rank)
+            .OrderBy(x => x.Order)
             .Select(x => new AdminModelDtoTemp
             {
-                Enabled = x.Enabled,
-                FileConfig = x.FileConfig,
+                Enabled = !x.IsDeleted,
                 FileServiceId = x.FileServiceId,
-                ModelConfig = x.ModelConfig,
                 ModelId = x.Id,
-                ModelKeysId = x.ModelKeysId,
-                ModelProvider = x.ModelProvider,
-                ModelVersion = x.ModelVersion,
+                ModelKeysId = x.ModelKeyId,
+                ModelProvider = x.ModelKey.ModelProvider.Name,
+                ModelVersion = x.ModelReference.Name,
                 Name = x.Name,
-                PriceConfig = x.PriceConfig,
-                Rank = x.Rank,
-                Remarks = x.Remarks,
+                PromptTokenPrice1M = x.PromptTokenPrice1M,
+                ResponseTokenPrice1M = x.ResponseTokenPrice1M,
+                Rank = x.Order,
             })
             .AsAsyncEnumerable()
             .Select(x => x.ToDto())
@@ -47,27 +46,10 @@ public class AdminModelsController(ChatsDB db) : ControllerBase
     [HttpPut("models/{modelId:guid}")]
     public async Task<ActionResult> UpdateModel(Guid modelId, [FromBody] UpdateModelRequest req, CancellationToken cancellationToken)
     {
-        ChatModel? cm = await db.ChatModels.FindAsync([modelId], cancellationToken);
+        Model? cm = await db.Models.FindAsync([modelId], cancellationToken);
         if (cm == null) return NotFound();
 
-        if (cm.ModelVersion != req.ModelVersion)
-        {
-            string? modelProvider = await db.ModelKeys
-                .Where(x => x.Id == req.ModelKeysId)
-                .Select(x => x.Type)
-                .SingleOrDefaultAsync(cancellationToken);
-                if (modelProvider == null)
-                {
-                    return this.BadRequestMessage("Model version not found");
-                }
-            if (modelProvider == null)
-            {
-                return this.BadRequestMessage("Model version not found");
-            }
-
-            cm.ModelProvider = modelProvider;
-        }
-        req.ApplyTo(cm);
+        req.ApplyTo(cm, db);
         if (db.ChangeTracker.HasChanges())
         {
             cm.UpdatedAt = DateTime.UtcNow;
@@ -80,24 +62,13 @@ public class AdminModelsController(ChatsDB db) : ControllerBase
     [HttpPost("models")]
     public async Task<ActionResult> CreateModel([FromBody] UpdateModelRequest req, CancellationToken cancellationToken)
     {
-        string? modelProvider = await db.ModelKeys
-            .Where(x => x.Id == req.ModelKeysId)
-            .Select(x => x.Type)
-            .SingleOrDefaultAsync(cancellationToken);
-        if (modelProvider == null)
+        Model toCreate = new()
         {
-            return this.BadRequestMessage("Model version not found");
-        }
-
-        ChatModel toCreate = new()
-        {
-            Id = Guid.NewGuid(), 
-            CreatedAt = DateTime.UtcNow, 
-            UpdatedAt = DateTime.UtcNow, 
-            ModelProvider = modelProvider
+            CreatedAt = DateTime.UtcNow,
+            UpdatedAt = DateTime.UtcNow,
         };
-        req.ApplyTo(toCreate);
-        db.ChatModels.Add(toCreate);
+        req.ApplyTo(toCreate, db);
+        db.Models.Add(toCreate);
         await db.SaveChangesAsync(cancellationToken);
 
         return Created();
@@ -105,23 +76,37 @@ public class AdminModelsController(ChatsDB db) : ControllerBase
 
     [HttpPost("models/validate")]
     public async Task<ActionResult> ValidateModel(
-        [FromBody] UpdateModelRequest req, 
+        [FromBody] ValidateModelRequest req,
         [FromServices] ConversationFactory conversationFactory,
-        [FromServices] CurrentUser currentUser,
         CancellationToken cancellationToken)
     {
-        ModelKey? modelProvider = await db.ModelKeys
-            .Where(x => x.Id == req.ModelKeysId)
+        ModelKey2? modelKey = await db.ModelKey2s
+            .Include(x => x.ModelProvider)
+            .Where(x => x.Id == req.ModelKeyId)
             .SingleOrDefaultAsync(cancellationToken);
-        if (modelProvider == null)
+        if (modelKey == null)
         {
-            return this.BadRequestMessage("Model version not found");
+            return this.BadRequestMessage($"Model key id: {req.ModelKeyId} not found");
         }
 
-        ConversationService s = conversationFactory.CreateConversationService(Enum.Parse<KnownModelProvider>(modelProvider.Type), modelProvider.Configs, req.ModelConfig, req.ModelVersion);
+        ModelReference? modelReference = await db.ModelReferences
+            .Include(x => x.Provider)
+            .Where(x => x.Name == req.ModelReferenceId && x.ProviderId == modelKey.Id)
+            .SingleOrDefaultAsync(cancellationToken);
+        if (modelReference == null)
+        {
+            return this.BadRequestMessage($"Model reference id: {req.ModelReferenceId} not found");
+        }
+
+        ConversationService s = conversationFactory.CreateConversationService(new Model()
+        {
+            ModelKey = modelKey,
+            ModelReference = modelReference,
+            DeploymentName = req.DeploymentName,
+        });
         try
         {
-            await foreach (ConversationSegment seg in s.ChatStreamed([new UserChatMessage("1+1=?")], new JsonUserModelConfig { }, currentUser, cancellationToken))
+            await foreach (ConversationSegment seg in s.ChatStreamed([new UserChatMessage("1+1=?")], new ChatCompletionOptions(), cancellationToken))
             {
             }
             return Ok();
@@ -133,16 +118,50 @@ public class AdminModelsController(ChatsDB db) : ControllerBase
     }
 
     [HttpPut("user-models")]
-    public async Task<ActionResult> UpdateUserModels([FromBody] UpdateUserModelRequest req, CancellationToken cancellationToken)
+    public async Task<ActionResult> UpdateUserModels([FromBody] UpdateUserModelRequest req, 
+        [FromServices] CurrentUser currentUser,
+        [FromServices] BalanceService balanceService,
+        CancellationToken cancellationToken)
     {
-        UserModel? userModel = await db.UserModels
-            .FindAsync([req.UserModelId], cancellationToken);
-        if (userModel == null) return NotFound();
+        Dictionary<short, UserModel2> userModels = await db.UserModel2s
+            .Where(x => x.UserId == currentUser.Id && !x.IsDeleted)
+            .ToDictionaryAsync(k => k.ModelId, v => v, cancellationToken);
 
-        userModel.UpdatedAt = DateTime.UtcNow;
-        userModel.Models = JSON.Serialize(req.Models.Where(x => x.Enabled));
+        // create or update user models
+        foreach (JsonTokenBalance item in req.Models)
+        {
+            if (userModels.TryGetValue(item.ModelId, out UserModel2? existingItem))
+            {
+                item.ApplyTo(existingItem);
+            }
+            else
+            {
+                UserModel2 newItem = new()
+                {
+                    UserId = currentUser.Id,
+                    ModelId = item.ModelId,
+                    CreatedAt = DateTime.UtcNow,
+                };
+                item.ApplyTo(newItem);
+                userModels[item.ModelId] = newItem;
+                db.UserModel2s.Add(newItem);
+            }
+        }
+
+        // delete user models
+        foreach (KeyValuePair<short, UserModel2> kvp in userModels)
+        {
+            if (!req.Models.Any(x => x.ModelId == kvp.Key))
+            {
+                kvp.Value.IsDeleted = true;
+            }
+        }
+
         await db.SaveChangesAsync(cancellationToken);
-
+        foreach (int userModelId in userModels.Keys)
+        {
+            _ = balanceService.AsyncUpdateUserModelBalance(userModelId, CancellationToken.None);
+        }
         return NoContent();
     }
 }

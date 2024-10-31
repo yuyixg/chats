@@ -24,7 +24,7 @@ public class UserBalancesController(ChatsDB db, CurrentUser currentUser, Balance
             CreditUserId = currentUser.Id,
         });
         await db.SaveChangesAsync(cancellationToken);
-        await balanceService.InScopeUpdateBalance(db, request.UserId, cancellationToken);
+        await balanceService.UpdateBalance(db, request.UserId, cancellationToken);
 
         return await db.UserBalances
             .Where(x => x.UserId == request.UserId)

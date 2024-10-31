@@ -25,15 +25,12 @@ public partial class TransactionLog
 
     public DateTime CreatedAt { get; set; }
 
-    [InverseProperty("TransactionLog")]
-    public virtual ApiUsage? ApiUsage { get; set; }
-
     [ForeignKey("CreditUserId")]
     [InverseProperty("TransactionLogCreditUsers")]
     public virtual User? CreditUser { get; set; }
 
     [InverseProperty("TransactionLog")]
-    public virtual MessageResponse? MessageResponse { get; set; }
+    public virtual MessageResponse2? MessageResponse2 { get; set; }
 
     [ForeignKey("TransactionTypeId")]
     [InverseProperty("TransactionLogs")]
@@ -42,4 +39,7 @@ public partial class TransactionLog
     [ForeignKey("UserId")]
     [InverseProperty("TransactionLogUsers")]
     public virtual User User { get; set; } = null!;
+
+    [InverseProperty("TransactionLog")]
+    public virtual UserApiUsage? UserApiUsage { get; set; }
 }

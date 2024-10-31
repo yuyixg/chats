@@ -1,8 +1,10 @@
 ﻿using Chats.BE.DB;
 using Chats.BE.DB.Enums;
+using Chats.BE.DB.Jsons;
 using Chats.BE.Services.Common;
 using Chats.BE.Services.Keycloak;
 using Microsoft.EntityFrameworkCore;
+using System.Text.Json;
 
 namespace Chats.BE.Services;
 
@@ -50,14 +52,6 @@ public class UserManager(ChatsDB db)
             CreatedAt = DateTime.UtcNow,
             UpdatedAt = DateTime.UtcNow,
         };
-        newUser.UserModel = new()
-        {
-            Id = Guid.NewGuid(),
-            UserId = newUser.Id,
-            Models = "[]",
-            CreatedAt = DateTime.UtcNow,
-            UpdatedAt = DateTime.UtcNow,
-        };
 
         provider ??= "-";
         UserInitialConfig? config = await db.UserInitialConfigs
@@ -75,7 +69,19 @@ public class UserManager(ChatsDB db)
         if (config != null)
         {
             newUser.UserBalance.Balance = config.Price;
-            newUser.UserModel.Models = config.Models; // See JsonUserModel
+            JsonTokenBalance[] models = JsonSerializer.Deserialize<JsonTokenBalance[]>(config.Models)!;
+            newUser.UserModel2s = models
+                .Select(m =>
+                {
+                    UserModel2 toReturn = new()
+                    {
+                        ModelId = m.ModelId,
+                        CreatedAt = DateTime.UtcNow,
+                    };
+                    m.ApplyTo(toReturn);
+                    return toReturn;
+                })
+                .ToArray();
             db.TransactionLogs.Add(new TransactionLog()
             {
                 UserId = newUser.Id,

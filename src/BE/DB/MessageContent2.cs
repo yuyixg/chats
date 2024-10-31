@@ -6,9 +6,9 @@ using Microsoft.EntityFrameworkCore;
 
 namespace Chats.BE.DB;
 
-[Table("MessageContent")]
-[Index("MessageId", Name = "IX_MessageContent_Message")]
-public partial class MessageContent
+[Table("MessageContent2")]
+[Index("MessageId", Name = "IX_MessageContent2_Message")]
+public partial class MessageContent2
 {
     [Key]
     public long Id { get; set; }
@@ -20,10 +20,10 @@ public partial class MessageContent
     public byte[] Content { get; set; } = null!;
 
     [ForeignKey("ContentTypeId")]
-    [InverseProperty("MessageContents")]
+    [InverseProperty("MessageContent2s")]
     public virtual MessageContentType ContentType { get; set; } = null!;
 
     [ForeignKey("MessageId")]
-    [InverseProperty("MessageContents")]
-    public virtual Message Message { get; set; } = null!;
+    [InverseProperty("MessageContent2s")]
+    public virtual Message2 Message { get; set; } = null!;
 }

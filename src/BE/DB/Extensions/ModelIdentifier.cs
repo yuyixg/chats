@@ -1,3 +1,3 @@
 ﻿namespace Chats.BE.DB.Extensions;
 
-public record ModelIdentifier(string Name, string Type);
+public record ModelIdentifier(string ProviderName, string ReferenceName);

@@ -1,6 +1,5 @@
 ﻿using Chats.BE.DB;
 using Chats.BE.DB.Jsons;
-using Chats.BE.Services;
 using System.Text.Json;
 using System.Text.Json.Serialization;
 
@@ -12,7 +11,7 @@ public record UpdateModelRequest
     public required string Name { get; init; }
 
     [JsonPropertyName("modelVersion")]
-    public required string ModelVersion { get; init; }
+    public required string ModelReferenceName { get; init; }
 
     [JsonPropertyName("enabled")]
     public required bool Enabled { get; init; }
@@ -21,30 +20,37 @@ public record UpdateModelRequest
     public required string ModelConfig { get; init; }
 
     [JsonPropertyName("modelKeysId")]
-    public required Guid ModelKeysId { get; init; }
+    public required short ModelKeyId { get; init; }
 
     [JsonPropertyName("fileServiceId")]
     public Guid? FileServiceId { get; init; }
 
-    [JsonPropertyName("fileConfig")]
-    public string? FileConfig { get; init; }
+    //[JsonPropertyName("fileConfig")]
+    //public string? FileConfig { get; init; }
 
     [JsonPropertyName("priceConfig")]
     public required string PriceConfig { get; init; }
 
-    [JsonPropertyName("remarks")]
-    public string? Remarks { get; init; }
+    //[JsonPropertyName("remarks")]
+    //public string? Remarks { get; init; }
 
-    public void ApplyTo(ChatModel cm)
+    public void ApplyTo(Model cm, ChatsDB db)
     {
+        short? modelReferenceId = db.ModelReferences
+            .Where(x => x.Name == ModelReferenceName && x.ProviderId == db.Models.Where(x => x.Id == ModelKeyId).Select(x => x.Id).First())
+            .Select(x => x.Id)
+            .FirstOrDefault();
+        if (modelReferenceId == null) throw new ArgumentException(ModelReferenceName, $"Invalid ModelReferenceName: {ModelReferenceName}");
+
+        cm.ModelReferenceId = modelReferenceId.Value;
+        JsonPriceConfig1M price = JsonSerializer.Deserialize<JsonPriceConfig1M>(PriceConfig)!;
         cm.Name = Name;
-        cm.ModelVersion = ModelVersion;
-        cm.Enabled = Enabled;
-        cm.ModelConfig = ModelConfig;
-        cm.ModelKeysId = ModelKeysId;
+        cm.IsDeleted = !Enabled;
+        cm.ModelKeyId = ModelKeyId;
         cm.FileServiceId = FileServiceId;
-        cm.FileConfig = FileConfig;
-        cm.PriceConfig = JSON.Serialize(JsonSerializer.Deserialize<JsonPriceConfig1M>(PriceConfig)!.ToRaw());
-        cm.Remarks = Remarks;
+        cm.PromptTokenPrice1M = price.InputTokenPrice1M;
+        cm.ResponseTokenPrice1M = price.OutputTokenPrice1M;
+        JsonModelConfig config = JsonSerializer.Deserialize<JsonModelConfig>(ModelConfig)!;
+        cm.DeploymentName = config.DeploymentName;
     }
 }

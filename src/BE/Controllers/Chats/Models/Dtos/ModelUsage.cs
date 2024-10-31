@@ -18,9 +18,9 @@ public record ModelUsage
     {
         return new ModelUsage
         {
-            Tokens = userModel.Tokens,
-            Counts = userModel.Counts,
-            Expires = userModel.Expires
+            Tokens = userModel.Tokens.ToString(),
+            Counts = userModel.Counts.ToString(),
+            Expires = userModel.Expires.ToString()
         };
     }
 }

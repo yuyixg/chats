@@ -1,5 +1,4 @@
-﻿using Chats.BE.Infrastructure;
-using Chats.BE.Services.Conversations.Dtos;
+﻿using Chats.BE.Services.Conversations.Dtos;
 using Sdcb.WenXinQianFan;
 using System.Runtime.CompilerServices;
 using System.Text.Json;
@@ -8,7 +7,10 @@ using UserChatMessage = OpenAI.Chat.UserChatMessage;
 using SystemChatMessage = OpenAI.Chat.SystemChatMessage;
 using AssistantChatMessage = OpenAI.Chat.AssistantChatMessage;
 using ChatMessageContentPartKind = OpenAI.Chat.ChatMessageContentPartKind;
-using Chats.BE.DB.Jsons;
+using ChatMessage = Sdcb.WenXinQianFan.ChatMessage;
+using Chats.BE.DB;
+using OpenAI.Chat;
+using Chats.BE.Services.Conversations.Extensions;
 
 namespace Chats.BE.Services.Conversations.Implementations.QianFan;
 
@@ -16,28 +18,26 @@ public class QianFanConversationService : ConversationService
 {
     private QianFanClient ChatClient { get; }
 
-    private JsonQianFanModelConfig GlobalModelConfig { get; }
-
-    public QianFanConversationService(string keyConfigText, string modelConfigText)
+    public QianFanConversationService(Model model) : base(model)
     {
-        JsonQianFanApiConfig apiConfig = JsonSerializer.Deserialize<JsonQianFanApiConfig>(keyConfigText)!;
-        ChatClient = new QianFanClient(apiConfig.ApiKey, apiConfig.Secret);
-        GlobalModelConfig = JsonSerializer.Deserialize<JsonQianFanModelConfig>(modelConfigText)!;
+        ArgumentException.ThrowIfNullOrWhiteSpace(model.ModelKey.Secret, nameof(model.ModelKey.Secret));
+        JsonQianFanApiConfig apiConfig = JsonSerializer.Deserialize<JsonQianFanApiConfig>(model.ModelKey.Secret)!;
+        ChatClient = new QianFanClient(apiConfig.Secret, apiConfig.Secret);
     }
 
-    public override async IAsyncEnumerable<ConversationSegment> ChatStreamed(IReadOnlyList<OpenAIChatMessage> messages, JsonUserModelConfig config, CurrentUser currentUser, [EnumeratorCancellation] CancellationToken cancellationToken)
+    public override async IAsyncEnumerable<ConversationSegment> ChatStreamedInternal(IReadOnlyList<OpenAIChatMessage> messages, ChatCompletionOptions options, [EnumeratorCancellation] CancellationToken cancellationToken)
     {
-        KnownModel model = new(GlobalModelConfig.Model);
+        KnownModel model = new(Model.ApiModelId);
         ChatMessage[] qianFanMessages = messages
             .Where(x => x is UserChatMessage || x is AssistantChatMessage)
             .Select(OpenAIMessageToQianFan)
             .ToArray();
         ChatRequestParameters chatRequestParameters = new()
         {
-            Temperature = config.Temperature ?? GlobalModelConfig.Temperature,
-            MaxOutputTokens = config.MaxLength,
-            UserId = currentUser.Id.ToString(),
-            DisableSearch = !config.EnableSearch,
+            Temperature = options.Temperature,
+            MaxOutputTokens = options.MaxOutputTokenCount,
+            UserId = options.EndUserId,
+            DisableSearch = !options.IsSearchEnabled(),
             System = messages.OfType<SystemChatMessage>().Single().Content.Single(x => x.Kind == ChatMessageContentPartKind.Text).Text
         };
 

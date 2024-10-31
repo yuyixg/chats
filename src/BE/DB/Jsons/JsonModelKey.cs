@@ -9,14 +9,14 @@ public record JsonModelKey
     public string? Host { get; init; }
 
     [JsonPropertyName("apiKey")]
-    public required string ApiKey { get; init; }
+    public string? ApiKey { get; init; }
 
     [JsonPropertyName("secret"), JsonIgnore(Condition = JsonIgnoreCondition.WhenWritingNull)]
     public string? Secret { get; init; }
 
     public JsonModelKey WithMaskedKey()
     {
-        return this with { ApiKey = ApiKey.ToMasked(), Secret = Secret.ToMaskedNull() };
+        return this with { ApiKey = ApiKey.ToMaskedNull(), Secret = Secret.ToMaskedNull() };
     }
 
     public bool IsMaskedEquals(JsonModelKey inputKey)

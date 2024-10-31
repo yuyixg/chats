@@ -11,7 +11,7 @@ public class UpdateChatsRequest
     public string? Title { get; set; } = null!;
 
     [JsonPropertyName("modelId")]
-    public Guid? ModelId { get; set; }
+    public short? ModelId { get; set; }
 
     [JsonPropertyName("userModelConfig")]
     public string? UserModelConfig { get; set; } = null!;
@@ -22,7 +22,7 @@ public class UpdateChatsRequest
     [JsonPropertyName("isDeleted")]
     public bool? IsDeleted { get; set; }
 
-    public void ApplyToChats(Conversation chat)
+    public void ApplyToChats(Conversation2 chat)
     {
         if (Title != null)
         {
@@ -30,7 +30,7 @@ public class UpdateChatsRequest
         }
         if (ModelId != null)
         {
-            chat.ChatModelId = ModelId.Value;
+            chat.ModelId = ModelId.Value;
         }
         if (UserModelConfig != null)
         {

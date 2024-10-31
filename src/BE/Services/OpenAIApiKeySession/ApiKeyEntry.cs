@@ -9,6 +9,8 @@ public record ApiKeyEntry : SessionEntry
     public required string ApiKey { get; init; }
     public required DateTime Expires { get; init; }
 
+    public bool IsExpired => Expires < DateTime.UtcNow;
+
     public override List<Claim> ToClaims()
     {
         return

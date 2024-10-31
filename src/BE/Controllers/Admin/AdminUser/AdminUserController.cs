@@ -23,8 +23,8 @@ public class AdminUserController(ChatsDB db) : ControllerBase
 
         return await PagedResult.FromTempQuery(query.Select(x => new AdminUserDtoTemp()
         {
-            Id = x.Id, 
-            Username = x.Username, 
+            Id = x.Id,
+            Username = x.Username,
             Account = x.Account,
             Balance = x.UserBalance!.Balance.ToString(),
             Role = x.Role,
@@ -34,15 +34,16 @@ public class AdminUserController(ChatsDB db) : ControllerBase
             Provider = x.Provider,
             Enabled = x.Enabled,
             CreatedAt = x.CreatedAt,
-            UserModelId = x.UserModel!.Id,
-            Models = x.UserModel!.Models,
+            //UserModelId = 0, // TODO
+            UserModelCount = x.UserModel2s.Count(x => !x.IsDeleted && !x.Model.IsDeleted), 
+            Models = x.UserModel2s.ToArray(),
         }), pagingRequest, x => x.ToDto(), cancellationToken);
     }
 
     [HttpPut]
     public async Task<IActionResult> UpdateUser([FromBody] UpdateUserDto dto, [FromServices] PasswordHasher passwordHasher, CancellationToken cancellationToken)
     {
-        User? user = await db.Users.FindAsync(dto.UserId, cancellationToken);
+        User? user = await db.Users.FindAsync([dto.UserId], cancellationToken);
         if (user == null)
         {
             return NotFound();

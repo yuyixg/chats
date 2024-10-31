@@ -7,7 +7,7 @@ namespace Chats.BE.Controllers.Chats.Conversations.Dtos;
 public record ConversationRequest
 {
     [JsonPropertyName("modelId")]
-    public required Guid ModelId { get; init; }
+    public required short ModelId { get; init; }
 
     [JsonPropertyName("chatId")]
     public required string ConversationId { get; init; }

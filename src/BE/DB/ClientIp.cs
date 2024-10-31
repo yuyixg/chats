@@ -19,5 +19,5 @@ public partial class ClientIp
     public string Ipaddress { get; set; } = null!;
 
     [InverseProperty("ClientIp")]
-    public virtual ICollection<SmsAttempt> SmsAttempts { get; set; } = new List<SmsAttempt>();
+    public virtual ICollection<ClientInfo> ClientInfos { get; set; } = new List<ClientInfo>();
 }
