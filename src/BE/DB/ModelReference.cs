@@ -41,6 +41,14 @@ public partial class ModelReference
     [Column(TypeName = "decimal(9, 5)")]
     public decimal ResponseTokenPrice1M { get; set; }
 
+    [StringLength(3)]
+    [Unicode(false)]
+    public string CurrencyCode { get; set; } = null!;
+
+    [ForeignKey("CurrencyCode")]
+    [InverseProperty("ModelReferences")]
+    public virtual CurrencyRate CurrencyCodeNavigation { get; set; } = null!;
+
     [InverseProperty("ModelReference")]
     public virtual ICollection<Model> Models { get; set; } = new List<Model>();
 

@@ -27,6 +27,8 @@ public partial class ChatsDB : DbContext
 
     public virtual DbSet<Conversation2> Conversation2s { get; set; }
 
+    public virtual DbSet<CurrencyRate> CurrencyRates { get; set; }
+
     public virtual DbSet<FileService> FileServices { get; set; }
 
     public virtual DbSet<InvitationCode> InvitationCodes { get; set; }
@@ -115,6 +117,11 @@ public partial class ChatsDB : DbContext
             entity.HasOne(d => d.User).WithMany(p => p.Conversation2s)
                 .OnDelete(DeleteBehavior.ClientSetNull)
                 .HasConstraintName("FK_Conversation2_Users");
+        });
+
+        modelBuilder.Entity<CurrencyRate>(entity =>
+        {
+            entity.Property(e => e.Code).IsFixedLength();
         });
 
         modelBuilder.Entity<FileService>(entity =>
@@ -221,6 +228,13 @@ public partial class ChatsDB : DbContext
         modelBuilder.Entity<ModelReference>(entity =>
         {
             entity.HasKey(e => e.Id).HasName("PK_ModelSetting");
+
+            entity.Property(e => e.Id).ValueGeneratedNever();
+            entity.Property(e => e.CurrencyCode).IsFixedLength();
+
+            entity.HasOne(d => d.CurrencyCodeNavigation).WithMany(p => p.ModelReferences)
+                .OnDelete(DeleteBehavior.ClientSetNull)
+                .HasConstraintName("FK_ModelReference_CurrencyRate");
 
             entity.HasOne(d => d.Provider).WithMany(p => p.ModelReferences)
                 .OnDelete(DeleteBehavior.ClientSetNull)
