@@ -8,20 +8,17 @@ public record JsonModelKey
     [JsonPropertyName("host"), JsonIgnore(Condition = JsonIgnoreCondition.WhenWritingNull)]
     public string? Host { get; init; }
 
-    [JsonPropertyName("apiKey")]
-    public string? ApiKey { get; init; }
-
     [JsonPropertyName("secret"), JsonIgnore(Condition = JsonIgnoreCondition.WhenWritingNull)]
     public string? Secret { get; init; }
 
     public JsonModelKey WithMaskedKey()
     {
-        return this with { ApiKey = ApiKey.ToMaskedNull(), Secret = Secret.ToMaskedNull() };
+        return this with { Secret = Secret.ToMaskedNull() };
     }
 
     public bool IsMaskedEquals(JsonModelKey inputKey)
     {
-        if (inputKey.ApiKey.SeemsMasked())
+        if (inputKey.Secret.SeemsMasked())
         {
             return WithMaskedKey() == inputKey;
         }

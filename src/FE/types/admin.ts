@@ -2,6 +2,7 @@ import { Message } from './chat';
 import { ChatMessage } from './chatMessage';
 import { PutFileServicesParams } from './file';
 import {
+  ChatModelFileConfig,
   ChatModelPriceConfig,
   ModelConfig,
   ModelProviders,
@@ -235,3 +236,25 @@ export interface PostPromptParams {
 export interface PutPromptParams {
   id: string;
 }
+
+export interface LegacyModelProvider {
+  name: ModelProviders,
+  models: ModelVersions[],
+  apiConfig: object,
+  displayName: string,
+  icon: string
+}
+
+type TemperatureConfig = {
+  min: number;
+  max: number;
+};
+
+export type LegacyModelReference = {
+  id: number;
+  type: string;
+  config: TemperatureConfig;
+  modelConfig: ModelConfig;
+  fileConfig: ChatModelFileConfig | null;
+  priceConfig: ChatModelPriceConfig;
+};

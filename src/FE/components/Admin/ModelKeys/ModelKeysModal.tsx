@@ -8,11 +8,12 @@ import { mergeConfigs } from '@/utils/model';
 
 import {
   GetModelKeysResult,
+  LegacyModelProvider,
   PostModelKeysParams,
   PutModelKeysParams,
 } from '@/types/admin';
 import { ModelProviders } from '@/types/model';
-import { ModelProviderTemplates } from '@/types/template';
+// import { ModelProviderTemplates } from '@/types/template';
 
 import FormSelect from '@/components/ui/form/select';
 
@@ -31,6 +32,7 @@ import { FormFieldType, IFormFieldOption } from '@/components/ui/form/type';
 
 import {
   deleteModelKeys,
+  getAllLegacyModelProviders,
   postModelKeys,
   putModelKeys,
 } from '@/apis/adminApis';
@@ -45,9 +47,14 @@ interface IProps {
   saveLoading?: boolean;
 }
 
+let allProviders: LegacyModelProvider[] = null!;
+
 export const ModelKeysModal = (props: IProps) => {
   const { t } = useTranslation('admin');
   const { selected, isOpen, onClose, onSuccessful } = props;
+  if (allProviders == null) {
+    getAllLegacyModelProviders().then(data => allProviders = data);
+  }
   const formFields: IFormFieldOption[] = [
     {
       name: 'name',
@@ -66,9 +73,9 @@ export const ModelKeysModal = (props: IProps) => {
           disabled={!!selected}
           field={field}
           options={options}
-          items={Object.keys(ModelProviderTemplates).map((key) => ({
-            name: ModelProviderTemplates[key as ModelProviders].displayName,
-            value: key,
+          items={allProviders.map((provider) => ({
+            name: provider.displayName,
+            value: provider.name,
           }))}
         />
       ),
@@ -149,7 +156,7 @@ export const ModelKeysModal = (props: IProps) => {
         form.setValue(
           'configs',
           JSON.stringify(
-            ModelProviderTemplates[modelProvider].apiConfig,
+            allProviders.find((provider) => provider.name === modelProvider)!.apiConfig,
             null,
             2,
           ),
@@ -170,7 +177,7 @@ export const ModelKeysModal = (props: IProps) => {
         form.setValue(
           'configs',
           mergeConfigs(
-            ModelProviderTemplates[type as ModelProviders].apiConfig,
+            allProviders.find((provider) => provider.name === type)!.apiConfig,
             configs,
           ),
         );

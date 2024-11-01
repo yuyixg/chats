@@ -1,5 +1,4 @@
-﻿using Chats.BE.Services.Conversations;
-using System.Text.Json.Serialization;
+﻿using System.Text.Json.Serialization;
 
 namespace Chats.BE.DB.Jsons;
 

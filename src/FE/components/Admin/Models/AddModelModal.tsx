@@ -18,10 +18,11 @@ import {
 import {
   GetFileServicesResult,
   GetModelKeysResult,
+  LegacyModelProvider,
   PostModelParams,
 } from '@/types/admin';
 import { ModelProviders, ModelVersions } from '@/types/model';
-import { ModelProviderTemplates } from '@/types/template';
+// import { ModelProviderTemplates } from '@/types/template';
 
 import FormSelect from '@/components/ui/form/select';
 import {
@@ -43,7 +44,7 @@ import FormInput from '@/components/ui/form/input';
 import FormSwitch from '@/components/ui/form/switch';
 import FormTextarea from '@/components/ui/form/textarea';
 
-import { getFileServices, getModelKeys, postModels } from '@/apis/adminApis';
+import { getFileServices, getLegacyModelProviderByName, getModelKeys, postModels } from '@/apis/adminApis';
 import { zodResolver } from '@hookform/resolvers/zod';
 import { z } from 'zod';
 
@@ -139,14 +140,15 @@ export const AddModelModal = (props: IProps) => {
   useEffect(() => {
     let subscription: any = null;
     if (!loading) {
-      subscription = form.watch((value, { name, type }) => {
+      subscription = form.watch(async (value, { name, type }) => {
         if (name === 'modelKeysId' && type === 'change') {
           const modelKeysId = value.modelKeysId as string;
-          const _modelProvider = modelKeys.find(
+          const modelProviderName: ModelProviders = modelKeys.find(
             (x) => x.id === modelKeysId,
-          )?.type;
-          setModelProvider(_modelProvider);
-          setModelVersions(ModelProviderTemplates[_modelProvider!].models);
+          )!.type;
+          setModelProvider(modelProviderName);
+          const modelProvider: LegacyModelProvider = await getLegacyModelProviderByName(modelProviderName);
+          setModelVersions(modelProvider.models);
           form.setValue('modelVersion', '');
         }
         if (name === 'modelVersion' && type === 'change') {
@@ -205,10 +207,7 @@ export const AddModelModal = (props: IProps) => {
                         field={field}
                         label={t('Model Keys')!}
                         items={modelKeys.map((keys) => ({
-                          name: `${keys.name}(${
-                            ModelProviderTemplates[keys.type as ModelProviders]
-                              .displayName
-                          })`,
+                          name: keys.name,
                           value: keys.id,
                         }))}
                       />

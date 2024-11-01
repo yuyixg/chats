@@ -15,6 +15,7 @@ import {
   GetUserModelResult,
   GetUsersParams,
   GetUsersResult,
+  LegacyModelProvider as LegacyModelProvider,
   PostLoginServicesParams,
   PostModelKeysParams,
   PostModelParams,
@@ -30,6 +31,7 @@ import {
   PutUserParams,
 } from '@/types/admin';
 import { PostFileServicesParams, PutFileServicesParams } from '@/types/file';
+import { LegacyModelReference, ModelProviders } from '@/types/model';
 import { PageResult } from '@/types/page';
 import {
   GetConfigsResult,
@@ -305,3 +307,18 @@ export const deleteInvitationCode = (id: string) => {
   const fetchServer = useFetch();
   return fetchServer.delete('/api/admin/invitation-code/' + id);
 };
+
+export const getLegacyModelReference = (modelProviderName: ModelProviders, modelReferenceName: string) => {
+  const fetchServer = useFetch();
+  return fetchServer.get<LegacyModelReference>(`/api/legacy-model-reference/${modelProviderName}/${modelReferenceName}`);
+}
+
+export const getLegacyModelProviderByName = (modelProviderName: ModelProviders) => {
+  const fetchServer = useFetch();
+  return fetchServer.get<LegacyModelProvider>(`/api/legacy-model-provider/${modelProviderName}`);
+}
+
+export const getAllLegacyModelProviders = () => {
+  const fetchServer = useFetch();
+  return fetchServer.get<LegacyModelProvider[]>(`/api/legacy-model-provider`);
+}

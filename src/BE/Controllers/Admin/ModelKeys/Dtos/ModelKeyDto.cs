@@ -1,5 +1,4 @@
 ﻿using Chats.BE.DB.Jsons;
-using System.Text.Json;
 using System.Text.Json.Serialization;
 
 namespace Chats.BE.Controllers.Admin.ModelKeys.Dtos;
@@ -29,7 +28,7 @@ public record ModelKeyDtoTemp
             Id = Id,
             Type = ProviderName,
             Name = Name,
-            Configs = new JsonModelKey { ApiKey = Secret, Host = Host, },
+            Configs = new JsonModelKey { Secret = Secret, Host = Host, },
             CreatedAt = CreatedAt,
             EnabledModelCount = EnabledModelCount,
             TotalModelCount = TotalModelCount

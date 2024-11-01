@@ -57,9 +57,9 @@ public class ModelKeysController(ChatsDB db) : ControllerBase
         modelKey.ModelProviderId = modelProviderId.Value;
         modelKey.Name = request.Name;
         JsonModelKey passingInKey = JsonSerializer.Deserialize<JsonModelKey>(request.Configs)!;
-        if (!modelKey.Secret.IsMaskedEquals(passingInKey.ApiKey))
+        if (!modelKey.Secret.IsMaskedEquals(passingInKey.Secret))
         {
-            modelKey.Secret = passingInKey.ApiKey;
+            modelKey.Secret = passingInKey.Secret;
         }
         modelKey.Host = passingInKey.Host;
         if (db.ChangeTracker.HasChanges())
@@ -89,7 +89,7 @@ public class ModelKeysController(ChatsDB db) : ControllerBase
             ModelProviderId = modelProviderId.Value,
             Name = request.Name,
             Host = jsonModelKey.Host,
-            Secret = jsonModelKey.ApiKey,
+            Secret = jsonModelKey.Secret,
             CreatedAt = DateTime.UtcNow,
             UpdatedAt = DateTime.UtcNow,
         };
