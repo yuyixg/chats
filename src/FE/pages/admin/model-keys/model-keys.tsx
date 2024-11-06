@@ -5,8 +5,8 @@ import { serverSideTranslations } from 'next-i18next/serverSideTranslations';
 
 import { DEFAULT_LANGUAGE } from '@/utils/settings';
 
-import { GetModelKeysResult } from '@/types/admin';
-import { ModelProviderTemplates } from '@/types/template';
+import { GetModelKeysResult, LegacyModelProvider } from '@/types/admin';
+// import { ModelProviderTemplates } from '@/types/template';
 
 import { ModelKeysModal } from '@/components/Admin/ModelKeys/ModelKeysModal';
 import { Button } from '@/components/ui/button';
@@ -20,9 +20,9 @@ import {
   TableRow,
 } from '@/components/ui/table';
 
-import { getModelKeys } from '@/apis/adminApis';
+import { getAllLegacyModelProviders, getModelKeys } from '@/apis/adminApis';
 
-export default function ModelKeys() {
+export default function ModelKeys(props: { modelProviderTemplates: { [name: string]: LegacyModelProvider } }) {
   const { t } = useTranslation('admin');
   const [isOpen, setIsOpen] = useState(false);
   const [selected, setSelected] = useState<GetModelKeysResult | null>(null);
@@ -88,7 +88,7 @@ export default function ModelKeys() {
                   {item.name}
                 </TableCell>
                 <TableCell>
-                  {ModelProviderTemplates[item.type].displayName}
+                  {props.modelProviderTemplates[item.type].displayName}
                 </TableCell>
                 <TableCell>
                   {item.enabledModelCount === item.totalModelCount ? `${item.totalModelCount}` : `${item.enabledModelCount}/${item.totalModelCount}`}
@@ -106,14 +106,17 @@ export default function ModelKeys() {
         isOpen={isOpen}
         onClose={handleClose}
         onSuccessful={init}
+        modelProviderTemplates={props.modelProviderTemplates}
       />
     </>
   );
 }
 
 export const getServerSideProps = async ({ locale }: { locale: string }) => {
+  const modelProviderTemplates = await getAllLegacyModelProviders();
   return {
     props: {
+      modelProviderTemplates,
       ...(await serverSideTranslations(locale ?? DEFAULT_LANGUAGE, ['admin'])),
     },
   };

@@ -1,5 +1,6 @@
 ﻿using Chats.BE.DB;
 using Chats.BE.DB.Jsons;
+using Microsoft.EntityFrameworkCore;
 using System.Text.Json;
 using System.Text.Json.Serialization;
 
@@ -34,15 +35,11 @@ public record UpdateModelRequest
     //[JsonPropertyName("remarks")]
     //public string? Remarks { get; init; }
 
-    public void ApplyTo(Model cm, ChatsDB db)
+    public void ApplyTo(short modelReferenceId, Model cm)
     {
-        short? modelReferenceId = db.ModelReferences
-            .Where(x => x.Name == ModelReferenceName && x.ProviderId == db.Models.Where(x => x.Id == ModelKeyId).Select(x => x.Id).First())
-            .Select(x => x.Id)
-            .FirstOrDefault();
-        if (modelReferenceId == null) throw new ArgumentException(ModelReferenceName, $"Invalid ModelReferenceName: {ModelReferenceName}");
+        if (modelReferenceId == 0) throw new ArgumentException(ModelReferenceName, $"Invalid ModelReferenceName: {ModelReferenceName}");
 
-        cm.ModelReferenceId = modelReferenceId.Value;
+        cm.ModelReferenceId = modelReferenceId;
         JsonPriceConfig1M price = JsonSerializer.Deserialize<JsonPriceConfig1M>(PriceConfig)!;
         cm.Name = Name;
         cm.IsDeleted = !Enabled;

@@ -1,4 +1,5 @@
 ﻿using Chats.BE.DB.Jsons;
+using Chats.BE.Services.Conversations;
 using System.Text.Json;
 using System.Text.Json.Serialization;
 
@@ -52,6 +53,9 @@ public record AdminModelDtoTemp
     public required Guid? FileServiceId { get; init; }
     public required decimal PromptTokenPrice1M { get; init; }
     public required decimal ResponseTokenPrice1M { get; init; }
+    public required string? DeploymentName { get; init; }
+    public required bool EnableSearch { get; init; }
+    public required int MaxResponseTokens { get; init; }
 
     public AdminModelDto ToDto()
     {
@@ -66,7 +70,14 @@ public record AdminModelDtoTemp
             ModelKeysId = ModelKeysId,
             FileServiceId = FileServiceId,
             FileConfig = JsonSerializer.Serialize(JsonFileConfig.Default),
-            ModelConfig = "{}",
+            ModelConfig = JsonSerializer.Serialize(new JsonModelConfig()
+            {
+                Prompt = ConversationService.DefaultPrompt,
+                Temperature = ConversationService.DefaultTemperature,
+                DeploymentName = DeploymentName,
+                EnableSearch = EnableSearch ? false : null,
+                MaxLength = MaxResponseTokens,
+            }),
             PriceConfig = new JsonPriceConfig1M(PromptTokenPrice1M, ResponseTokenPrice1M).ToRaw(),
         };
     }

@@ -15,7 +15,8 @@ import {
   GetUserModelResult,
   GetUsersParams,
   GetUsersResult,
-  LegacyModelProvider as LegacyModelProvider,
+  LegacyModelProvider,
+  LegacyModelReference,
   PostLoginServicesParams,
   PostModelKeysParams,
   PostModelParams,
@@ -31,7 +32,7 @@ import {
   PutUserParams,
 } from '@/types/admin';
 import { PostFileServicesParams, PutFileServicesParams } from '@/types/file';
-import { LegacyModelReference, ModelProviders } from '@/types/model';
+import { ModelProviders } from '@/types/model';
 import { PageResult } from '@/types/page';
 import {
   GetConfigsResult,
@@ -94,8 +95,7 @@ export const getUsers = (
 ): Promise<PageResult<GetUsersResult[]>> => {
   const fetchService = useFetch();
   return fetchService.get(
-    `/api/admin/users?page=${params.page}&pageSize=${params.pageSize}&query=${
-      params?.query || ''
+    `/api/admin/users?page=${params.page}&pageSize=${params.pageSize}&query=${params?.query || ''
     }`,
   );
 };
@@ -318,7 +318,11 @@ export const getLegacyModelProviderByName = (modelProviderName: ModelProviders) 
   return fetchServer.get<LegacyModelProvider>(`/api/legacy-model-provider/${modelProviderName}`);
 }
 
-export const getAllLegacyModelProviders = () => {
+export const getAllLegacyModelProviders = async () => {
   const fetchServer = useFetch();
-  return fetchServer.get<LegacyModelProvider[]>(`/api/legacy-model-provider`);
+  const data = await fetchServer.get<LegacyModelProvider[]>(`/api/legacy-model-provider`);
+  return data.reduce((acc, provider) => {
+    acc[provider.name] = provider;
+    return acc;
+  }, {} as { [key: string]: LegacyModelProvider });
 }

@@ -6,65 +6,65 @@ import {
 } from '@/types/model';
 import { getModelDefaultTemplate } from '@/types/template';
 
-export function getModelConfigs(
-  modelVersion: ModelVersions | undefined,
-  modelProvider: ModelProviders,
-  configType: ModelConfigType,
-) {
-  if (!modelVersion) return null;
-  const template = getModelDefaultTemplate(modelVersion, modelProvider) as any;
-  return template[configType] || null;
-}
+// export function getModelConfigs(
+//   modelVersion: ModelVersions | undefined,
+//   modelProvider: ModelProviders,
+//   configType: ModelConfigType,
+// ) {
+//   if (!modelVersion) return null;
+//   const template = getModelDefaultTemplate(modelVersion, modelProvider) as any;
+//   return template[configType] || null;
+// }
 
-export function getModelModelConfig(
-  modelVersion: ModelVersions | undefined,
-  modelProvider: ModelProviders,
-) {
-  return getModelConfigs(modelVersion, modelProvider, 'modelConfig');
-}
-export function getModelFileConfig(
-  modelVersion: ModelVersions | undefined,
-  modelProvider: ModelProviders,
-) {
-  return getModelConfigs(modelVersion, modelProvider, 'fileConfig');
-}
+// export function getModelModelConfig(
+//   modelVersion: ModelVersions | undefined,
+//   modelProvider: ModelProviders,
+// ) {
+//   return getModelConfigs(modelVersion, modelProvider, 'modelConfig');
+// }
+// export function getModelFileConfig(
+//   modelVersion: ModelVersions | undefined,
+//   modelProvider: ModelProviders,
+// ) {
+//   return getModelConfigs(modelVersion, modelProvider, 'fileConfig');
+// }
 
-export function getModelPriceConfig(
-  modelVersion: ModelVersions | undefined,
-  modelProvider: ModelProviders,
-) {
-  return getModelConfigs(modelVersion, modelProvider, 'priceConfig');
-}
+// export function getModelPriceConfig(
+//   modelVersion: ModelVersions | undefined,
+//   modelProvider: ModelProviders,
+// ) {
+//   return getModelConfigs(modelVersion, modelProvider, 'priceConfig');
+// }
 
-export function getModelModelConfigJson(
-  modelVersion: ModelVersions | undefined,
-  modelProvider: ModelProviders,
-) {
-  return JSON.stringify(
-    getModelConfigs(modelVersion, modelProvider, 'modelConfig'),
-    null,
-    2,
-  );
-}
+// export function getModelModelConfigJson(
+//   modelVersion: ModelVersions | undefined,
+//   modelProvider: ModelProviders,
+// ) {
+//   return JSON.stringify(
+//     getModelConfigs(modelVersion, modelProvider, 'modelConfig'),
+//     null,
+//     2,
+//   );
+// }
 
-export function getModelFileConfigJson(
-  modelVersion: ModelVersions | undefined,
-  modelProvider: ModelProviders,
-) {
-  const config = getModelConfigs(modelVersion, modelProvider, 'fileConfig');
-  return config ? JSON.stringify(config, null, 2) : null;
-}
+// export function getModelFileConfigJson(
+//   modelVersion: ModelVersions | undefined,
+//   modelProvider: ModelProviders,
+// ) {
+//   const config = getModelConfigs(modelVersion, modelProvider, 'fileConfig');
+//   return config ? JSON.stringify(config, null, 2) : null;
+// }
 
-export function getModelPriceConfigJson(
-  modelVersion: ModelVersions | undefined,
-  modelProvider: ModelProviders,
-) {
-  return JSON.stringify(
-    getModelConfigs(modelVersion, modelProvider, 'priceConfig'),
-    null,
-    2,
-  );
-}
+// export function getModelPriceConfigJson(
+//   modelVersion: ModelVersions | undefined,
+//   modelProvider: ModelProviders,
+// ) {
+//   return JSON.stringify(
+//     getModelConfigs(modelVersion, modelProvider, 'priceConfig'),
+//     null,
+//     2,
+//   );
+// }
 
 export function mergeConfigs(obj1: any, obj2: any) {
   const config = Object.keys(obj1 || {}).reduce((result: any, key) => {
@@ -76,11 +76,12 @@ export function mergeConfigs(obj1: any, obj2: any) {
 
 export const ModelPriceUnit = 1000000;
 
-export function conversionModelPriceToCreate(priceConfig: string) {
-  const configs = JSON.parse(priceConfig) as ChatModelPriceConfig;
-  configs.input = Number((configs.input * ModelPriceUnit).toFixed(2));
-  configs.out = Number((configs.out * ModelPriceUnit).toFixed(2));
-  return JSON.stringify(configs, null, 2);
+export function conversionModelPriceToCreate(priceConfig: ChatModelPriceConfig) {
+  const newConfig = {
+    input: Number((priceConfig.input * ModelPriceUnit).toFixed(6)),
+    out: Number((priceConfig.out * ModelPriceUnit).toFixed(6))
+  };
+  return JSON.stringify(newConfig, null, 2);
 }
 
 export function conversionModelPriceToDisplay(priceConfig: string) {

@@ -45,16 +45,12 @@ interface IProps {
   onClose: () => void;
   onSuccessful: () => void;
   saveLoading?: boolean;
+  modelProviderTemplates: { [name: string]: LegacyModelProvider };
 }
-
-let allProviders: LegacyModelProvider[] = null!;
 
 export const ModelKeysModal = (props: IProps) => {
   const { t } = useTranslation('admin');
   const { selected, isOpen, onClose, onSuccessful } = props;
-  if (allProviders == null) {
-    getAllLegacyModelProviders().then(data => allProviders = data);
-  }
   const formFields: IFormFieldOption[] = [
     {
       name: 'name',
@@ -73,10 +69,13 @@ export const ModelKeysModal = (props: IProps) => {
           disabled={!!selected}
           field={field}
           options={options}
-          items={allProviders.map((provider) => ({
-            name: provider.displayName,
-            value: provider.name,
-          }))}
+          items={Object.keys(props.modelProviderTemplates).map(providerKey => {
+            const provider = props.modelProviderTemplates[providerKey];
+            return {
+              name: provider.displayName,
+              value: provider.name,
+            }
+          })}
         />
       ),
     },
@@ -156,7 +155,7 @@ export const ModelKeysModal = (props: IProps) => {
         form.setValue(
           'configs',
           JSON.stringify(
-            allProviders.find((provider) => provider.name === modelProvider)!.apiConfig,
+            props.modelProviderTemplates[modelProvider].apiConfig,
             null,
             2,
           ),
@@ -177,7 +176,7 @@ export const ModelKeysModal = (props: IProps) => {
         form.setValue(
           'configs',
           mergeConfigs(
-            allProviders.find((provider) => provider.name === type)!.apiConfig,
+            props.modelProviderTemplates[type].apiConfig,
             configs,
           ),
         );

@@ -210,7 +210,7 @@ export interface PutPayServicesParams extends PostPayServicesParams {
 }
 
 export interface GetModelKeysResult {
-  id: string;
+  id: number;
   name: string;
   type: ModelProviders;
   enabledModelCount: number;

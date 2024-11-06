@@ -37,6 +37,9 @@ public class AdminModelsController(ChatsDB db) : ControllerBase
                 PromptTokenPrice1M = x.PromptTokenPrice1M,
                 ResponseTokenPrice1M = x.ResponseTokenPrice1M,
                 Rank = x.Order,
+                DeploymentName = x.DeploymentName,
+                EnableSearch = x.ModelReference.AllowSearch,
+                MaxResponseTokens = x.ModelReference.MaxResponseTokens,
             })
             .AsAsyncEnumerable()
             .Select(x => x.ToDto())
@@ -46,10 +49,19 @@ public class AdminModelsController(ChatsDB db) : ControllerBase
     [HttpPut("models/{modelId:guid}")]
     public async Task<ActionResult> UpdateModel(Guid modelId, [FromBody] UpdateModelRequest req, CancellationToken cancellationToken)
     {
+        short modelReferenceId = await db.ModelReferences
+            .Where(x => x.Name == req.ModelReferenceName && x.ProviderId == db.ModelKey2s.Where(x => x.Id == req.ModelKeyId).Select(x => x.ModelProviderId).First())
+            .Select(x => x.Id)
+            .FirstOrDefaultAsync(cancellationToken);
+        if (modelReferenceId == 0)
+        {
+            return this.BadRequestMessage($"Invalid ModelReferenceName: {req.ModelReferenceName}");
+        }
+
         Model? cm = await db.Models.FindAsync([modelId], cancellationToken);
         if (cm == null) return NotFound();
 
-        req.ApplyTo(cm, db);
+        req.ApplyTo(modelReferenceId, cm);
         if (db.ChangeTracker.HasChanges())
         {
             cm.UpdatedAt = DateTime.UtcNow;
@@ -62,12 +74,21 @@ public class AdminModelsController(ChatsDB db) : ControllerBase
     [HttpPost("models")]
     public async Task<ActionResult> CreateModel([FromBody] UpdateModelRequest req, CancellationToken cancellationToken)
     {
+        short modelReferenceId = await db.ModelReferences
+            .Where(x => x.Name == req.ModelReferenceName && x.ProviderId == db.ModelKey2s.Where(x => x.Id == req.ModelKeyId).Select(x => x.ModelProviderId).First())
+            .Select(x => x.Id)
+            .FirstOrDefaultAsync(cancellationToken);
+        if (modelReferenceId == 0)
+        {
+            return this.BadRequestMessage($"Invalid ModelReferenceName: {req.ModelReferenceName}");
+        }
+
         Model toCreate = new()
         {
             CreatedAt = DateTime.UtcNow,
             UpdatedAt = DateTime.UtcNow,
         };
-        req.ApplyTo(toCreate, db);
+        req.ApplyTo(modelReferenceId, toCreate);
         db.Models.Add(toCreate);
         await db.SaveChangesAsync(cancellationToken);
 

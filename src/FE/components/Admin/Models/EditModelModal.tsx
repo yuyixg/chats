@@ -8,9 +8,6 @@ import { formatNumberAsMoney } from '@/utils/common';
 import {
   ModelPriceUnit,
   conversionModelPriceToDisplay,
-  getModelFileConfig,
-  getModelModelConfig,
-  getModelPriceConfig,
   mergeConfigs,
 } from '@/utils/model';
 
@@ -18,6 +15,7 @@ import {
   GetFileServicesResult,
   GetModelKeysResult,
   GetModelResult,
+  LegacyModelReference,
   PutModelParams,
 } from '@/types/admin';
 import { ModelProviders } from '@/types/model';
@@ -43,7 +41,7 @@ import FormInput from '@/components/ui/form/input';
 import FormSwitch from '@/components/ui/form/switch';
 import FormTextarea from '@/components/ui/form/textarea';
 
-import { getFileServices, getModelKeys, putModels } from '@/apis/adminApis';
+import { getFileServices, getLegacyModelReference, getModelKeys, putModels } from '@/apis/adminApis';
 import { zodResolver } from '@hookform/resolvers/zod';
 import { z } from 'zod';
 
@@ -60,6 +58,7 @@ export const EditModelModal = (props: IProps) => {
   const { isOpen, onClose, selected, onSuccessful } = props;
   const [fileServices, setFileServices] = useState<GetFileServicesResult[]>([]);
   const [modelKeys, setModelKeys] = useState<GetModelKeysResult[]>([]);
+  const [modelReference, setModelReference] = useState<LegacyModelReference>();
   const [loading, setLoading] = useState(true);
 
   const formSchema = z.object({
@@ -147,30 +146,33 @@ export const EditModelModal = (props: IProps) => {
       form.setValue('remarks', remarks);
       form.setValue('fileServiceId', fileServiceId || null);
       form.setValue('modelKeysId', modelKeysId || null);
-      fileConfig &&
+      getLegacyModelReference(modelProvider, modelVersion).then(data => {
+        setModelReference(data);
+        fileConfig &&
+          form.setValue(
+            'fileConfig',
+            mergeConfigs(
+              data.fileConfig,
+              JSON.parse(fileConfig),
+            ),
+          );
         form.setValue(
-          'fileConfig',
+          'modelConfig',
           mergeConfigs(
-            getModelFileConfig(modelVersion, modelProvider),
-            JSON.parse(fileConfig),
+            data.modelConfig,
+            JSON.parse(modelConfig),
           ),
         );
-      form.setValue(
-        'modelConfig',
-        mergeConfigs(
-          getModelModelConfig(modelVersion, modelProvider),
-          JSON.parse(modelConfig),
-        ),
-      );
-      form.setValue(
-        'priceConfig',
-        conversionModelPriceToDisplay(
-          mergeConfigs(
-            getModelPriceConfig(modelVersion, modelProvider),
-            priceConfig,
+        form.setValue(
+          'priceConfig',
+          conversionModelPriceToDisplay(
+            mergeConfigs(
+              data.priceConfig,
+              priceConfig,
+            ),
           ),
-        ),
-      );
+        );
+      });
     }
   }, [isOpen]);
 
@@ -217,14 +219,10 @@ export const EditModelModal = (props: IProps) => {
                           field={field}
                           label={t('Model Keys')!}
                           items={modelKeys
-                            .filter(
-                              (x) =>
-                                x.type ===
-                                (selected.modelProvider as ModelProviders),
-                            )
-                            .map((keys) => ({
+                            .filter(x => x.type === (selected.modelProvider as ModelProviders))
+                            .map(keys => ({
                               name: keys.name,
-                              value: keys.id,
+                              value: keys.id.toString(),
                             }))}
                         />
                       );
@@ -242,9 +240,7 @@ export const EditModelModal = (props: IProps) => {
                       </PopoverTrigger>
                       <PopoverContent className="w-full">
                         {JSON.stringify(
-                          modelKeys.find(
-                            (x) => x.id === form.getValues('modelKeysId'),
-                          )?.configs,
+                          modelKeys.find(x => x.id === parseInt(form.getValues('modelKeysId')!))?.configs,
                           null,
                           2,
                         )}
@@ -286,12 +282,7 @@ export const EditModelModal = (props: IProps) => {
                     return (
                       <FormTextarea
                         rows={7}
-                        hidden={
-                          !getModelModelConfig(
-                            selected.modelVersion,
-                            selected.modelProvider,
-                          )
-                        }
+                        hidden={!modelReference}
                         label={t('Model Configs')!}
                         field={field}
                       />
@@ -306,12 +297,7 @@ export const EditModelModal = (props: IProps) => {
                     return (
                       <FormTextarea
                         rows={7}
-                        hidden={
-                          !getModelModelConfig(
-                            selected.modelVersion,
-                            selected.modelProvider,
-                          )
-                        }
+                        hidden={!modelReference}
                         label={`${formatNumberAsMoney(ModelPriceUnit)} ${t(
                           'Token Price',
                         )}(${t('Yuan')})`}
@@ -331,12 +317,7 @@ export const EditModelModal = (props: IProps) => {
                       <FormSelect
                         field={field}
                         label={t('File Service Type')!}
-                        hidden={
-                          !getModelFileConfig(
-                            selected.modelVersion,
-                            selected.modelProvider,
-                          )
-                        }
+                        hidden={!modelReference?.fileConfig}
                         items={fileServices.map((item) => ({
                           name: item.name,
                           value: item.id,
@@ -353,12 +334,7 @@ export const EditModelModal = (props: IProps) => {
                     return (
                       <FormTextarea
                         rows={4}
-                        hidden={
-                          !getModelFileConfig(
-                            selected.modelVersion,
-                            selected.modelProvider,
-                          )
-                        }
+                        hidden={!modelReference?.fileConfig}
                         label={t('File Configs')!}
                         field={field}
                       />

@@ -7,8 +7,8 @@ import { formatNumberAsMoney } from '@/utils/common';
 import { ModelPriceUnit } from '@/utils/model';
 import { DEFAULT_LANGUAGE } from '@/utils/settings';
 
-import { GetModelResult } from '@/types/admin';
-import { ModelProviderTemplates } from '@/types/template';
+import { GetModelResult, LegacyModelProvider } from '@/types/admin';
+// import { ModelProviderTemplates } from '@/types/template';
 
 import { AddModelModal } from '@/components/Admin/Models/AddModelModal';
 import { EditModelModal } from '@/components/Admin/Models/EditModelModal';
@@ -23,9 +23,11 @@ import {
   TableRow,
 } from '@/components/ui/table';
 
-import { getModels } from '@/apis/adminApis';
+import { getAllLegacyModelProviders, getModels } from '@/apis/adminApis';
 
-export default function Models() {
+export default function Models(props: { modelProviderTemplates: {
+  [key: string]: LegacyModelProvider;
+} }) {
   const { t } = useTranslation('admin');
   const [isOpen, setIsOpen] = useState({ add: false, edit: false });
   const [selectedModel, setSelectedModel] = useState<GetModelResult | null>(
@@ -102,7 +104,7 @@ export default function Models() {
                   </div>
                 </TableCell>
                 <TableCell>
-                  {ModelProviderTemplates[item.modelProvider].displayName}
+                  {props.modelProviderTemplates[item.modelProvider].displayName}
                 </TableCell>
                 <TableCell>{item.modelVersion}</TableCell>
                 <TableCell>
@@ -139,8 +141,10 @@ export default function Models() {
 }
 
 export const getServerSideProps = async ({ locale }: { locale: string }) => {
+  const modelProviderTemplates = await getAllLegacyModelProviders();
   return {
     props: {
+      modelProviderTemplates: modelProviderTemplates,
       ...(await serverSideTranslations(locale ?? DEFAULT_LANGUAGE, ['admin'])),
     },
   };

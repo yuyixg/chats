@@ -5,10 +5,10 @@ namespace Chats.BE.DB.Jsons;
 
 public record JsonModelKey
 {
-    [JsonPropertyName("host"), JsonIgnore(Condition = JsonIgnoreCondition.WhenWritingNull)]
+    [JsonPropertyName("host")]
     public string? Host { get; init; }
 
-    [JsonPropertyName("secret"), JsonIgnore(Condition = JsonIgnoreCondition.WhenWritingNull)]
+    [JsonPropertyName("secret")]
     public string? Secret { get; init; }
 
     public JsonModelKey WithMaskedKey()

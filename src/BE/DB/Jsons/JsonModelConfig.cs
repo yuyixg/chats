@@ -10,10 +10,10 @@ public record JsonModelConfig
     [JsonPropertyName("temperature")]
     public required float Temperature { get; init; }
 
-    [JsonPropertyName("model")]
+    [JsonPropertyName("model"), JsonIgnore(Condition = JsonIgnoreCondition.WhenWritingNull)]
     public string? Model { get; init; }
 
-    [JsonPropertyName("version")]
+    [JsonPropertyName("version"), JsonIgnore(Condition = JsonIgnoreCondition.WhenWritingNull)]
     public string? Version { get; init; }
 
     [JsonPropertyName("deploymentName")]
