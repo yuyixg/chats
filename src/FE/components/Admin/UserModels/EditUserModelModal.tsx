@@ -35,8 +35,7 @@ interface IProps {
 
 export const EditUserModelModal = (props: IProps) => {
   const { t } = useTranslation('admin');
-  const { isOpen, selectedUserModel, selectedModelId, onClose, onSuccessful } =
-    props;
+  const { isOpen, selectedUserModel, selectedModelId, onClose, onSuccessful } = props;
   const [submit, setSubmit] = useState(false);
   const formFields: IFormFieldOption[] = [
     {
@@ -91,11 +90,11 @@ export const EditUserModelModal = (props: IProps) => {
 
   const formSchema = z.object({
     modelName: z.string().optional(),
-    modelId: z.string().optional(),
-    enabled: z.boolean().optional(),
-    tokens: z.string(),
-    counts: z.string(),
-    expires: z.union([z.string(), z.null(), z.date()]),
+    modelId: z.number(),
+    enabled: z.boolean(),
+    tokens: z.number(),
+    counts: z.number(),
+    expires: z.union([z.string(), z.date()]),
   });
 
   const form = useForm<z.infer<typeof formSchema>>({
@@ -111,14 +110,14 @@ export const EditUserModelModal = (props: IProps) => {
       form.reset();
       form.formState.isValid;
       const model = selectedUserModel?.models.find(
-        (x) => x.modelId === selectedModelId,
+        (x) => x.modelId.toString() === selectedModelId,
       )!;
-      form.setValue('modelId', model?.modelId);
-      form.setValue('modelName', model?.modelName);
-      form.setValue('enabled', model?.enabled);
-      form.setValue('tokens', `${model?.tokens}`);
-      form.setValue('counts', `${model?.counts}`);
-      form.setValue('expires', `${model?.expires}`);
+      form.setValue('modelId', model.modelId);
+      form.setValue('modelName', model.modelName);
+      form.setValue('enabled', model.enabled);
+      form.setValue('tokens', model?.tokens);
+      form.setValue('counts', model?.counts);
+      form.setValue('expires', model?.expires);
     }
   }, [isOpen]);
 
@@ -126,20 +125,14 @@ export const EditUserModelModal = (props: IProps) => {
     setSubmit(true);
     const models = selectedUserModel?.models.map((x) => {
       if (x.modelId === values?.modelId) {
-        x.tokens = isNaN(+values.tokens) ? '-' : values.tokens || '0';
-        x.counts = isNaN(+values.counts) ? '-' : values.counts || '0';
-        x.expires =
-          values.expires === null || values.expires === '-'
-            ? '-'
-            : new Date(values.expires).toLocaleDateString();
+        x.tokens = values.tokens;
+        x.counts = values.counts;
+        x.expires = new Date(values.expires).toISOString();
         x.enabled = values.enabled;
       }
       return x;
     });
-    putUserModel({
-      userModelId: selectedUserModel?.userModelId!,
-      models: models!,
-    })
+    putUserModel({ models: models! })
       .then(() => {
         onSuccessful();
         toast.success(t('Save successful!'));

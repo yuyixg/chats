@@ -18,6 +18,7 @@ using Chats.BE.DB.Enums;
 using System.Diagnostics;
 using System.Text;
 using Chats.BE.Services.Conversations.Extensions;
+using Chats.BE.Services.Common;
 
 namespace Chats.BE.Controllers.Chats.OpenAICompatible;
 
@@ -65,7 +66,7 @@ public partial class OpenAICompatibleController(ChatsDB db, CurrentApiKey curren
             {
                 return InvalidModel(modelName);
             }
-            if (userModel.IsExpired)
+            if (userModel.ExpiresAt.IsExpired())
             {
                 return ErrorMessage(OpenAICompatibleErrorCode.SubscriptionExpired, "Subscription has expired");
             }

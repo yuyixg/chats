@@ -5,6 +5,7 @@ using Chats.BE.DB.Enums;
 using Chats.BE.DB.Jsons;
 using Chats.BE.Infrastructure;
 using Chats.BE.Services;
+using Chats.BE.Services.Common;
 using Chats.BE.Services.Conversations;
 using Chats.BE.Services.Conversations.Dtos;
 using Chats.BE.Services.IdEncryption;
@@ -63,7 +64,7 @@ public class ConversationController(ChatsDB db, CurrentUser currentUser, ILogger
         {
             return this.BadRequestMessage("The Model does not exist or access is denied.");
         }
-        if (miscInfo.UserModel.IsExpired)
+        if (miscInfo.UserModel.ExpiresAt.IsExpired())
         {
             return this.BadRequestMessage("Subscription has expired");
         }

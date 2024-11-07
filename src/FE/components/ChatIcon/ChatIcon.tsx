@@ -1,11 +1,13 @@
 import Image from 'next/image';
 
 import { ModelProviders } from '@/types/model';
-import { ModelProviderTemplates } from '@/types/template';
 
 import { IconShare } from '@/components/Icons';
 
 import { cn } from '@/lib/utils';
+import { LegacyModelProvider } from '@/types/admin';
+import { useEffect, useState } from 'react';
+import { getLegacyModelProviderByName } from '@/apis/adminApis';
 
 interface Props {
   provider: ModelProviders;
@@ -15,11 +17,19 @@ interface Props {
 
 const ChatIcon = (props: Props) => {
   const { provider, isShard, className } = props;
-  return (
+  const [modelProviderTemplate, setModelProviderTemplates] = useState<LegacyModelProvider>();
+
+  useEffect(() => {
+    getLegacyModelProviderByName(props.provider).then((data) => {
+      setModelProviderTemplates(data);
+    });
+  })
+
+  return modelProviderTemplate && (
     <div className="flex">
       <Image
         key={`img-${provider}`}
-        src={`/logos/${ModelProviderTemplates[provider].icon}`}
+        src={`/logos/${modelProviderTemplate.icon}`}
         alt={provider}
         width={18}
         height={18}

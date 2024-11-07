@@ -6,6 +6,7 @@ using Chats.BE.DB.Enums;
 using Chats.BE.DB.Jsons;
 using Chats.BE.Infrastructure;
 using Chats.BE.Services;
+using Chats.BE.Services.Common;
 using Chats.BE.Services.Conversations;
 using Chats.BE.Services.IdEncryption;
 using Microsoft.AspNetCore.Authorization;
@@ -112,7 +113,7 @@ public class UserChatsController(ChatsDB db, CurrentUser currentUser, IIdEncrypt
         }
         else
         {
-            chat.ModelId = (validModels.FirstOrDefault(x => !x.IsExpired) ?? validModels.First()).ModelId;
+            chat.ModelId = (validModels.FirstOrDefault(x => !x.ExpiresAt.IsExpired()) ?? validModels.First()).ModelId;
         }
         db.Conversation2s.Add(chat);
         await db.SaveChangesAsync(cancellationToken);

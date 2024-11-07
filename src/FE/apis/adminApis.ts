@@ -232,14 +232,14 @@ export const postModelKeys = (params: PostModelKeysParams) => {
   });
 };
 
-export const putModelKeys = (id: string, params: PutModelKeysParams) => {
+export const putModelKeys = (id: number, params: PutModelKeysParams) => {
   const fetchService = useFetch();
   return fetchService.put(`/api/admin/model-keys/${id}`, {
     body: params,
   });
 };
 
-export const deleteModelKeys = (id: string) => {
+export const deleteModelKeys = (id: number) => {
   const fetchService = useFetch();
   return fetchService.delete(`/api/admin/model-keys/${id}`);
 };

@@ -13,7 +13,6 @@ import {
   PutModelKeysParams,
 } from '@/types/admin';
 import { ModelProviders } from '@/types/model';
-// import { ModelProviderTemplates } from '@/types/template';
 
 import FormSelect from '@/components/ui/form/select';
 

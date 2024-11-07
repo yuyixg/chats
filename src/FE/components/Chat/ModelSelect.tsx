@@ -4,11 +4,7 @@ import { useTranslation } from 'next-i18next';
 
 import { formatNumberAsMoney } from '@/utils/common';
 
-import { GetModelUsageResult } from '@/types/user';
-
 import { HomeContext } from '@/pages/home/home';
-
-import { getUserModelUsage } from '@/apis/clientApis';
 
 export const ModelSelect = () => {
   const { t } = useTranslation('client');
@@ -18,21 +14,13 @@ export const ModelSelect = () => {
     handleSelectModel,
   } = useContext(HomeContext);
 
-  const [modelUsage, setModelUsage] = useState<GetModelUsageResult | undefined>(
-    selectModel?.modelUsage,
-  );
-
-  useEffect(() => {
-    getUserModelUsage(selectModel?.id!).then((data) => {
-      setModelUsage(data);
-    });
-  }, [selectModel]);
-
   const handleChange = (e: React.ChangeEvent<HTMLSelectElement>) => {
     const model = models.find((m) => m.id == e.target.value)!;
     handleSelectModel(model);
   };
 
+  console.log(selectModel);
+  const modelUsage = selectModel?.modelUsage;
   return (
     <div className="flex flex-col">
       <label className="mb-2 text-left text-neutral-700 dark:text-neutral-400">
@@ -57,9 +45,9 @@ export const ModelSelect = () => {
         </select>
       </div>
       {modelUsage &&
-      (modelUsage.tokens === '-' || modelUsage.counts === '-') ? (
+      (modelUsage.tokens === 0 && modelUsage.counts === 0) ? (
         <span className="text-xs pt-1">
-          {t('unit-price')}: ￥{modelUsage.prices} (1M tokens)
+          {t('unit-price')}: ￥{modelUsage.promptTokenPrice1M.toFixed(4)}/{modelUsage.responseTokenPrice1M.toFixed(4)} (1M tokens)
         </span>
       ) : (
         <>
@@ -77,12 +65,12 @@ export const ModelSelect = () => {
                   </span>
                 ) : (
                   <span>
-                    {t('unit-price')}: ￥{modelUsage.prices} (1M tokens)
+                    {t('unit-price')}: ￥{modelUsage.promptTokenPrice1M.toFixed(4)}/{modelUsage.responseTokenPrice1M.toFixed(4)} (1M tokens)
                   </span>
                 )}
               </div>
               <div className="flex justify-end">
-                {modelUsage.expires === '-' ? (
+                {modelUsage.isTerm ? (
                   <></>
                 ) : (
                   <>

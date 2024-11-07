@@ -1,4 +1,5 @@
-﻿using Chats.BE.Services.OpenAIApiKeySession;
+﻿using Chats.BE.Services.Common;
+using Chats.BE.Services.OpenAIApiKeySession;
 using Microsoft.AspNetCore.Authentication;
 using Microsoft.Extensions.Options;
 using System.Security.Claims;
@@ -24,19 +25,19 @@ public class OpenAIApiKeyAuthenticationHandler(
         string authorizationHeaderString = authorizationHeader.ToString();
         string apiKey = authorizationHeaderString.Split(' ').Last();
 
-        ApiKeyEntry? userInfo = await sessionManager.GetCachedUserInfoByApiKey(apiKey);
+        ApiKeyEntry? apiKeyInfo = await sessionManager.GetCachedUserInfoByApiKey(apiKey);
 
-        if (userInfo == null)
+        if (apiKeyInfo == null)
         {
             return AuthenticateResult.Fail($"Invalid API Key: {apiKey}");
         }
 
-        if (userInfo.IsExpired)
+        if (apiKeyInfo.Expires.IsExpired())
         {
             return AuthenticateResult.Fail($"API Key expired: {apiKey}");
         }
 
-        ClaimsIdentity identity = new(userInfo.ToClaims(), Scheme.Name);
+        ClaimsIdentity identity = new(apiKeyInfo.ToClaims(), Scheme.Name);
         ClaimsPrincipal principal = new(identity);
         AuthenticationTicket ticket = new(principal, Scheme.Name);
 

@@ -8,6 +8,7 @@ using Chats.BE.Services;
 using Chats.BE.Services.Conversations;
 using Chats.BE.Services.Conversations.Dtos;
 using Microsoft.AspNetCore.Mvc;
+using Microsoft.AspNetCore.Mvc.ModelBinding;
 using Microsoft.EntityFrameworkCore;
 using OpenAI.Chat;
 using System.Text.Json;
@@ -144,8 +145,16 @@ public class AdminModelsController(ChatsDB db) : ControllerBase
         [FromServices] BalanceService balanceService,
         CancellationToken cancellationToken)
     {
+        if (!ModelState.IsValid)
+        {
+            return this.BadRequestMessage(string.Join("\n", ModelState
+                .Skip(1)
+                .Where(x => x.Value != null && x.Value.ValidationState == ModelValidationState.Invalid)
+                .Select(x => $"{x.Key}: " + string.Join(",", x.Value!.Errors.Select(x => x.ErrorMessage)))));
+        }
+
         Dictionary<short, UserModel2> userModels = await db.UserModel2s
-            .Where(x => x.UserId == currentUser.Id && !x.IsDeleted)
+            .Where(x => x.UserId == currentUser.Id)
             .ToDictionaryAsync(k => k.ModelId, v => v, cancellationToken);
 
         // create or update user models
@@ -174,6 +183,7 @@ public class AdminModelsController(ChatsDB db) : ControllerBase
         {
             if (!req.Models.Any(x => x.ModelId == kvp.Key))
             {
+                kvp.Value.UpdatedAt = DateTime.UtcNow;
                 kvp.Value.IsDeleted = true;
             }
         }

@@ -8,11 +8,6 @@ import { formatNumberAsMoney } from '@/utils/common';
 import {
   ModelPriceUnit,
   conversionModelPriceToCreate,
-  // getModelFileConfig,
-  // getModelFileConfigJson,
-  // getModelModelConfig,
-  // getModelModelConfigJson,
-  // getModelPriceConfigJson,
 } from '@/utils/model';
 
 import {
@@ -23,7 +18,6 @@ import {
   PostModelParams,
 } from '@/types/admin';
 import { ModelProviders, ModelVersions } from '@/types/model';
-// import { ModelProviderTemplates } from '@/types/template';
 
 import FormSelect from '@/components/ui/form/select';
 import {

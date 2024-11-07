@@ -12,6 +12,7 @@ public class UserModelManager(ChatsDB db)
             .Include(x => x.Model.ModelReference)
             .Include(x => x.Model.ModelKey)
             .Include(x => x.Model.ModelKey.ModelProvider)
+            .Include(x => x.Model.ModelReference.CurrencyCodeNavigation)
             .Where(x => x.UserId == userId && !x.IsDeleted && !x.Model.IsDeleted)
             .OrderBy(x => x.Model.Order)
             .ToArrayAsync(cancellationToken);

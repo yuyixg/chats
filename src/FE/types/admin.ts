@@ -23,25 +23,18 @@ export const enum UserRole {
 export interface GetUserModelResult {
   userId: string;
   role: string;
-  userModelId: string;
   userName: string;
   balance: Decimal;
   models: UserModelResult[];
 }
 
-export interface UserModelResult {
-  modelId: string;
+export interface UserModelResult extends UserInitialModel {
   modelName?: string;
   modelVersion?: string;
-  enabled?: boolean;
-  tokens: string;
-  counts: string;
-  expires: string;
 }
 
 export interface PutUserModelParams {
-  userModelId: string;
-  models: any[];
+  models: UserInitialModel[];
 }
 
 export interface PostUserModelParams {
@@ -50,7 +43,7 @@ export interface PostUserModelParams {
 }
 
 export interface GetModelResult {
-  modelId: string;
+  modelId: number;
   modelProvider: ModelProviders;
   modelVersion: ModelVersions;
   name: string;

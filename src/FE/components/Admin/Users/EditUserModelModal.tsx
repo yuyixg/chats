@@ -47,9 +47,10 @@ interface IProps {
 let ModelKeyMap = {} as any;
 export const EditUserModelModal = (props: IProps) => {
   const { t } = useTranslation('admin');
-  const { userModelId, models, isOpen, select, onClose, onSuccessful } = props;
+  const { models, isOpen, select, onClose, onSuccessful } = props;
   const [submit, setSubmit] = useState(false);
   const [editModels, setEditModels] = useState<UserInitialModel[]>([]);
+  const termDateString = new Date(new Date().getTime() + 10 * 365 * 24 * 60 * 60 * 1000).toISOString(); // 10 years
 
   useEffect(() => {
     if (isOpen) {
@@ -60,9 +61,9 @@ export const EditUserModelModal = (props: IProps) => {
         if (model) return model;
         return {
           modelId: x.modelId,
-          tokens: '0',
-          counts: '0',
-          expires: '-',
+          tokens: 0,
+          counts: 0,
+          expires: termDateString,
           enabled: false,
         };
       });
@@ -70,19 +71,21 @@ export const EditUserModelModal = (props: IProps) => {
     }
   }, [isOpen]);
 
-  const onSubmit = () => {
+  const onSubmit = async () => {
     setSubmit(true);
-    putUserModel({ userModelId, models: editModels })
+    console.log(editModels);
+    putUserModel({ models: editModels })
       .then(() => {
         toast.success(t('Save successful!'));
         onSuccessful();
       })
-      .catch(() => {
-        toast.error(
-          t(
-            'Operation failed! Please try again later, or contact technical personnel.',
-          ),
-        );
+      .catch(async (err) => {
+        try {
+          const resp = await err.json();
+          toast.error(resp.message);
+        } catch {
+          toast.error(t('Operation failed! Please try again later, or contact technical personnel.'));
+        }
       })
       .finally(() => {
         setSubmit(false);
@@ -123,18 +126,18 @@ export const EditUserModelModal = (props: IProps) => {
                   <TableCell>
                     <Input
                       className="w-30"
-                      value={model.tokens}
+                      value={model.tokens?.toString()}
                       onChange={(e) => {
-                        onChangeModel(index, 'tokens', e.target.value);
+                        onChangeModel(index, 'tokens', parseInt(e.target.value) || 0);
                       }}
                     />
                   </TableCell>
                   <TableCell>
                     <Input
                       className="w-30"
-                      value={model.counts}
+                      value={model.counts?.toString()}
                       onChange={(e) => {
-                        onChangeModel(index, 'counts', e.target.value);
+                        onChangeModel(index, 'counts', parseInt(e.target.value) || 0);
                       }}
                     />
                   </TableCell>
@@ -145,16 +148,10 @@ export const EditUserModelModal = (props: IProps) => {
                           variant={'outline'}
                           className={cn('pl-3 text-left font-normal w-[150px]')}
                         >
-                          {model.expires ? (
-                            model.expires === '-' ? null : (
-                              new Date(model.expires).toLocaleDateString()
-                            )
-                          ) : (
-                            <span></span>
-                          )}
+                          {new Date(model.expires).toLocaleDateString()}
                           <IconSquareRoundedX
                             onClick={(e) => {
-                              onChangeModel(index, 'expires', '-');
+                              onChangeModel(index, 'expires', termDateString);
                               e.preventDefault();
                             }}
                             className="z-10 ml-auto h-5 w-5 opacity-50"
@@ -165,13 +162,7 @@ export const EditUserModelModal = (props: IProps) => {
                         <Calendar
                           mode="single"
                           selected={new Date(model.expires)}
-                          onSelect={(d) => {
-                            onChangeModel(
-                              index,
-                              'expires',
-                              d?.toLocaleDateString(),
-                            );
-                          }}
+                          onSelect={d => { onChangeModel(index, 'expires', d?.toISOString()); }}
                           initialFocus
                         />
                       </PopoverContent>
@@ -180,9 +171,7 @@ export const EditUserModelModal = (props: IProps) => {
                   <TableCell>
                     <Switch
                       checked={model.enabled}
-                      onCheckedChange={(checked) => {
-                        onChangeModel(index, 'enabled', checked);
-                      }}
+                      onCheckedChange={(checked) => { onChangeModel(index, 'enabled', checked); }}
                     />
                   </TableCell>
                 </TableRow>

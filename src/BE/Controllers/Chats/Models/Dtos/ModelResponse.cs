@@ -1,7 +1,6 @@
 ﻿using Chats.BE.DB;
 using Chats.BE.DB.Jsons;
 using Chats.BE.Services.Conversations;
-using System.Text.Json;
 using System.Text.Json.Serialization;
 
 namespace Chats.BE.Controllers.Chats.Models.Dtos;
@@ -9,7 +8,7 @@ namespace Chats.BE.Controllers.Chats.Models.Dtos;
 public record ModelResponse
 {
     [JsonPropertyName("id")]
-    public required string Id { get; init; }
+    public required short Id { get; init; }
 
     [JsonPropertyName("modelVersion")]
     public required string ModelVersion { get; init; }
@@ -21,7 +20,7 @@ public record ModelResponse
     public required string ModelProvider { get; init; }
 
     [JsonPropertyName("modelUsage")]
-    public required ModelUsage ModelTokenBalance { get; init; }
+    public required ModelUsageResponse ModelUsage { get; init; }
 
     [JsonPropertyName("modelConfigOptions")]
     public required ModelConfigOption ModelConfigOptions { get; init; }
@@ -34,25 +33,4 @@ public record ModelResponse
 
     [JsonPropertyName("fileServerConfig")]
     public required FileServerConfig? FileServerConfigs { get; init; }
-
-    public static ModelResponse FromAll(Model model, JsonTokenBalance userModel, FileService? fileService, TemperatureOptions temperatureOptions)
-    {
-        return new ModelResponse
-        {
-            Id = model.Id.ToString(),
-            ModelVersion = model.ModelReference.Name,
-            Name = model.Name,
-            ModelProvider = model.ModelKey.ModelProvider.Name,
-            ModelTokenBalance = ModelUsage.FromJson(userModel),
-            ModelConfigOptions = ModelConfigOption.FromTemperature(temperatureOptions),
-            ModelConfigs = JsonUserModelConfig.FromJson(new JsonModelConfig
-            {
-                DeploymentName = model.DeploymentName,
-                Prompt = "",
-                Temperature = ConversationService.DefaultTemperature,
-            }),
-            FileConfig = JsonFileConfig.Default,
-            FileServerConfigs = FileServerConfig.FromFileService(fileService)
-        };
-    }
 }

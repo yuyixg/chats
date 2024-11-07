@@ -75,11 +75,11 @@ export interface PutUserInitialConfigParams {
 }
 
 export interface UserInitialModel {
-  modelId: string;
-  tokens: string;
-  counts: string;
+  modelId: number;
+  tokens: number;
+  counts: number;
   expires: string;
-  enabled?: boolean;
+  enabled: boolean;
 }
 
 export interface GetConfigsResult {
@@ -112,11 +112,13 @@ export interface PutInvitationCodeParams {
 }
 
 export interface GetModelUsageResult {
-  modelId: string;
-  tokens: string;
-  counts: string;
+  modelId: number;
+  tokens: number;
+  counts: number;
   expires: string;
-  prices?: string;
+  isTerm: boolean;
+  promptTokenPrice1M: number;
+  responseTokenPrice1M: number;
 }
 
 export interface GetLoginProvidersResult {

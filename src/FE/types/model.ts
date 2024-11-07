@@ -1,4 +1,5 @@
 import { FileUploadServerConfig } from './components/upload';
+import { GetModelUsageResult } from './user';
 
 export interface ModelConfig {
   prompt: string;
@@ -22,7 +23,7 @@ export interface Model {
   fileServerConfig: FileUploadServerConfig;
   fileConfig?: ChatModelFileConfig;
   enabled?: boolean;
-  modelUsage: ModelUsage;
+  modelUsage: GetModelUsageResult;
 }
 
 export enum ModelVersions {
@@ -129,11 +130,4 @@ export interface Usages {
   tokens: boolean;
   counts: boolean;
   expires: boolean;
-}
-
-export interface ModelUsage {
-  modelId: string;
-  tokens: string;
-  counts: string;
-  expires: string;
 }

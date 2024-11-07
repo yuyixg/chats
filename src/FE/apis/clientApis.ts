@@ -126,7 +126,7 @@ export const singIn = (params: SingInParams): Promise<SingInResult> => {
 
 export const getUserModels = () => {
   const fetchServer = useFetch();
-  return fetchServer.get<Model[]>('/api/models');
+  return fetchServer.get<Model[]>(`/api/models?timezoneOffset=${new Date().getTimezoneOffset()}`);
 };
 
 export const getUserBalance = () => {
@@ -222,13 +222,6 @@ export const signByPhone = (
   return fetchServer.post('/api/public/phone-login', {
     body: { phone, smsCode },
   });
-};
-
-export const getUserModelUsage = (modelId: string) => {
-  const fetchServer = useFetch();
-  return fetchServer.get<GetModelUsageResult>(
-    '/api/user/model-usage?modelId=' + modelId,
-  );
 };
 
 export const getLoginProviders = () => {

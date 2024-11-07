@@ -1,7 +1,6 @@
-import { useContext, useState } from 'react';
+import { useContext, useEffect, useState } from 'react';
 
 import { Model, ModelProviders } from '@/types/model';
-import { ModelProviderTemplates } from '@/types/template';
 
 import { HomeContext } from '@/pages/home/home';
 
@@ -22,6 +21,8 @@ import {
 } from '@/components/ui/dropdown-menu';
 
 import { cn } from '@/lib/utils';
+import { LegacyModelProvider } from '@/types/admin';
+import { getAllLegacyModelProviders, getLegacyModelProviderByName } from '@/apis/adminApis';
 
 const ChangeModel = ({
   readonly,
@@ -38,6 +39,12 @@ const ChangeModel = ({
     state: { models },
   } = useContext(HomeContext);
   const [searchTerm, setSearchTerm] = useState('');
+  const [modelProviderTemplates, setModelProviderTemplates] = useState<{ [key: string]: LegacyModelProvider }>({});
+  useEffect(() => {
+    getAllLegacyModelProviders().then(data => {
+      setModelProviderTemplates(data);
+    });
+  });
   let modelGroup = [] as { provider: ModelProviders; child: Model[] }[];
   const groupModel = () => {
     const modelList = searchTerm
@@ -95,7 +102,7 @@ const ChangeModel = ({
                   className="p-2 flex gap-2"
                 >
                   <ChatIcon provider={m.provider} />
-                  {ModelProviderTemplates[m.provider].displayName}
+                  {modelProviderTemplates[m.provider].displayName}
                 </DropdownMenuSubTrigger>
                 <DropdownMenuPortal>
                   <DropdownMenuSubContent className="max-w-[64px] md:max-w-[200px]">
