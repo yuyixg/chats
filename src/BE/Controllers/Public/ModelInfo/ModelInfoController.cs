@@ -12,6 +12,7 @@ namespace Chats.BE.Controllers.Public.ModelInfo;
 public class ModelInfoController(ChatsDB db) : ControllerBase
 {
     [HttpGet, Route("api/model-provider")]
+    [ResponseCache(CacheProfileName = "ModelInfo")]
     public async Task<ActionResult<ModelProviderDto>> List(CancellationToken cancellationToken)
     {
         ModelProviderDto[] data = await db.ModelProviders
@@ -36,6 +37,7 @@ public class ModelInfoController(ChatsDB db) : ControllerBase
     }
 
     [HttpGet, Route("api/model-reference/{modelId:int}")]
+    [ResponseCache(CacheProfileName = "ModelInfo")]
     public async Task<ActionResult<ModelReferenceDto>> GetModelReference(short modelId, CancellationToken cancellationToken)
     {
         ModelReferenceDto? data = await db.ModelReferences
@@ -63,6 +65,7 @@ public class ModelInfoController(ChatsDB db) : ControllerBase
 
     [Obsolete("for old frontend compatibility")]
     [HttpGet, Route("api/legacy-model-reference/{modelProviderName:required}/{modelReferenceName:required}")]
+    [ResponseCache(CacheProfileName = "ModelInfo")]
     public async Task<ActionResult<LegacyModelReferenceDto>> GetLegacyModelReference(string modelProviderName, string modelReferenceName, CancellationToken cancellationToken)
     {
         LegacyModelReferenceDto? data = await db.ModelReferences
@@ -98,6 +101,7 @@ public class ModelInfoController(ChatsDB db) : ControllerBase
 
     [Obsolete("for old frontend compatibility")]
     [HttpGet, Route("api/legacy-model-provider/{modelProviderName}")]
+    [ResponseCache(CacheProfileName = "ModelInfo")]
     public async Task<ActionResult<LegacyModelProviderDto>> GetLegacyModelProviderByName(string modelProviderName, CancellationToken cancellationToken)
     {
         LegacyModelProviderDto? data = await db.ModelProviders
@@ -117,6 +121,7 @@ public class ModelInfoController(ChatsDB db) : ControllerBase
 
     [Obsolete("for old frontend compatibility")]
     [HttpGet, Route("api/legacy-model-provider")]
+    [ResponseCache(CacheProfileName = "ModelInfo")]
     public async Task<ActionResult<LegacyModelProviderDto[]>> GetAllLegacyModelProviders(CancellationToken cancellationToken)
     {
         LegacyModelProviderDto[] data = await db.ModelProviders

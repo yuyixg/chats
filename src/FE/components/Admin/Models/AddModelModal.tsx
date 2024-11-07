@@ -138,7 +138,6 @@ export const AddModelModal = (props: IProps) => {
       subscription = form.watch(async (value, { name, type }) => {
         if (name === 'modelKeysId' && type === 'change') {
           const modelKeysId = parseInt(value.modelKeysId!);
-          console.log(typeof (modelKeysId), modelKeysId, modelKeys);
           const modelProviderName: ModelProviders = modelKeys.find(
             (x) => x.id === modelKeysId,
           )!.type;

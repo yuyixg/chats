@@ -23,7 +23,7 @@ const ChatIcon = (props: Props) => {
     getLegacyModelProviderByName(props.provider).then((data) => {
       setModelProviderTemplates(data);
     });
-  })
+  }, [props.provider]);
 
   return modelProviderTemplate && (
     <div className="flex">

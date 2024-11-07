@@ -102,7 +102,7 @@ const ChangeModel = ({
                   className="p-2 flex gap-2"
                 >
                   <ChatIcon provider={m.provider} />
-                  {modelProviderTemplates[m.provider].displayName}
+                  {modelProviderTemplates[m.provider]?.displayName}
                 </DropdownMenuSubTrigger>
                 <DropdownMenuPortal>
                   <DropdownMenuSubContent className="max-w-[64px] md:max-w-[200px]">

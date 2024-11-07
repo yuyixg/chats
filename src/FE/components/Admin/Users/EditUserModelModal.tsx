@@ -73,7 +73,6 @@ export const EditUserModelModal = (props: IProps) => {
 
   const onSubmit = async () => {
     setSubmit(true);
-    console.log(editModels);
     putUserModel({ models: editModels })
       .then(() => {
         toast.success(t('Save successful!'));

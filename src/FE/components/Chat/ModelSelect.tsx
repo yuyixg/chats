@@ -19,7 +19,6 @@ export const ModelSelect = () => {
     handleSelectModel(model);
   };
 
-  console.log(selectModel);
   const modelUsage = selectModel?.modelUsage;
   return (
     <div className="flex flex-col">

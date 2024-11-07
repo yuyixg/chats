@@ -7,6 +7,7 @@ using Chats.BE.Services.IdEncryption;
 using Chats.BE.Services.OpenAIApiKeySession;
 using Chats.BE.Services.Sessions;
 using Microsoft.AspNetCore.Authentication;
+using Microsoft.AspNetCore.Mvc;
 
 namespace Chats.BE;
 
@@ -18,7 +19,14 @@ public class Program
 
         // Add services to the container.
 
-        builder.Services.AddControllers();
+        builder.Services.AddControllers(options =>
+        {
+            options.CacheProfiles.Add("ModelInfo", new CacheProfile()
+            {
+                Duration = 5 * 60,
+                Location = ResponseCacheLocation.Client,
+            });
+        });
         // Learn more about configuring Swagger/OpenAPI at https://aka.ms/aspnetcore/swashbuckle
         builder.Services.AddEndpointsApiExplorer();
         builder.Services.AddSwaggerGen();
