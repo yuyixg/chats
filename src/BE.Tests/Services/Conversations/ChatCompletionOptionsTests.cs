@@ -11,10 +11,10 @@ public class ChatCompletionOptionsTests
         ChatCompletionOptions options = new();
         SetSerializedAdditionalRawData(options, data);
         return options;
-
-        [UnsafeAccessor(UnsafeAccessorKind.Method, Name = "set_SerializedAdditionalRawData")]
-        extern static Dictionary<string, BinaryData> SetSerializedAdditionalRawData(ChatCompletionOptions @this, Dictionary<string, BinaryData> data);
     }
+
+    [UnsafeAccessor(UnsafeAccessorKind.Method, Name = "set_SerializedAdditionalRawData")]
+    extern static void SetSerializedAdditionalRawData(ChatCompletionOptions @this, IDictionary<string, BinaryData> data);
 
     [Fact]
     public void IsSearchEnabled_ReturnsTrue_WhenEnableSearchIsTrue()
@@ -55,34 +55,6 @@ public class ChatCompletionOptionsTests
         var options = CreateCCOWithDictionary([]);
 
         // Act
-        bool result = options.IsSearchEnabled();
-
-        // Assert
-        Assert.False(result);
-    }
-
-    [Fact]
-    public void SetSearchEnabled_SetsEnableSearchToTrue()
-    {
-        // Arrange
-        var options = CreateCCOWithDictionary([]);
-
-        // Act
-        options.SetSearchEnabled(true);
-        bool result = options.IsSearchEnabled();
-
-        // Assert
-        Assert.True(result);
-    }
-
-    [Fact]
-    public void SetSearchEnabled_SetsEnableSearchToFalse()
-    {
-        // Arrange
-        var options = CreateCCOWithDictionary([]);
-
-        // Act
-        options.SetSearchEnabled(false);
         bool result = options.IsSearchEnabled();
 
         // Assert

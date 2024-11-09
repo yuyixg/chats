@@ -141,11 +141,12 @@ export const EditModelModal = (props: IProps) => {
       } = selected;
       form.setValue('modelVersion', modelVersion);
       form.setValue('name', name);
-      form.setValue('modelId', modelId);
+      form.setValue('modelId', modelId.toString());
       form.setValue('enabled', enabled);
       form.setValue('remarks', remarks);
       form.setValue('fileServiceId', fileServiceId || null);
-      form.setValue('modelKeysId', modelKeysId || null);
+      form.setValue('modelKeysId', modelKeysId.toString());
+      console.log('modelKeysId', modelKeysId);
       getLegacyModelReference(modelProvider, modelVersion).then(data => {
         setModelReference(data);
         fileConfig &&
@@ -158,10 +159,7 @@ export const EditModelModal = (props: IProps) => {
           );
         form.setValue(
           'modelConfig',
-          mergeConfigs(
-            data.modelConfig,
-            JSON.parse(modelConfig),
-          ),
+          JSON.stringify(JSON.parse(modelConfig), null, 2),
         );
         form.setValue(
           'priceConfig',

@@ -1,6 +1,8 @@
 ﻿using OpenAI.Chat;
+using System.ClientModel.Primitives;
 using System.Reflection;
 using System.Runtime.CompilerServices;
+using System.Text.Json;
 
 namespace Chats.BE.Services.Conversations.Extensions;
 
@@ -8,37 +10,30 @@ public static class ChatCompletionOptionsExtensions
 {
     public static bool IsSearchEnabled(this ChatCompletionOptions options)
     {
-        Dictionary<string, BinaryData> rawData = GetSerializedAdditionalRawData(options);
-        if (rawData.TryGetValue("enable_search", out BinaryData? binaryData))
+        IDictionary<string, BinaryData>? rawData = GetSerializedAdditionalRawData(options);
+        if (rawData != null && rawData.TryGetValue("enable_search", out BinaryData? binaryData))
         {
             return binaryData.ToObjectFromJson<bool>();
         }
         return false;
     }
 
-    public static void SetSearchEnabled(this ChatCompletionOptions options, bool value)
-    {
-        Dictionary<string, BinaryData> rawData = GetSerializedAdditionalRawData(options);
-        rawData["enable_search"] = BinaryData.FromObjectAsJson(value);
-    }
-
     public static void RemoveAllowSearch(this ChatCompletionOptions options)
     {
-        Dictionary<string, BinaryData> rawData = GetSerializedAdditionalRawData(options);
-        rawData.Remove("enable_search");
+        IDictionary<string, BinaryData>? rawData = GetSerializedAdditionalRawData(options);
+        rawData?.Remove("enable_search");
     }
 
-    public static bool IsStreamed(this ChatCompletionOptions options) => IsStreamedInternal(options) ?? false;
+    public static void SetModelName(this ChatCompletionOptions @this, string name)
+    {
+        Type internalCreateChatCompletionRequestModelType = typeof(ChatCompletionOptions).Assembly.GetType("OpenAI.Chat.InternalCreateChatCompletionRequestModel")
+            ?? throw new InvalidOperationException("InternalCreateChatCompletionRequestModel type not found");
+        object modelValue = Activator.CreateInstance(internalCreateChatCompletionRequestModelType, [name])
+            ?? throw new InvalidOperationException("Failed to create instance of InternalCreateChatCompletionRequestModel");
+        (typeof(ChatCompletionOptions).GetProperty("Model", BindingFlags.Instance | BindingFlags.NonPublic) ?? throw new InvalidOperationException("Model property not found"))
+            .SetValue(@this, modelValue);
+    }
 
     [UnsafeAccessor(UnsafeAccessorKind.Method, Name = "get_SerializedAdditionalRawData")]
-    private extern static Dictionary<string, BinaryData> GetSerializedAdditionalRawData(ChatCompletionOptions @this);
-
-    [UnsafeAccessor(UnsafeAccessorKind.Method, Name = "get_Model")]
-    public extern static object GetModelName(this ChatCompletionOptions @this);
-
-    [UnsafeAccessor(UnsafeAccessorKind.Method, Name = "get_Messages")]
-    public extern static IList<ChatMessage> GetMessages(this ChatCompletionOptions @this);
-
-    [UnsafeAccessor(UnsafeAccessorKind.Method, Name = "get_Stream")]
-    private extern static bool? IsStreamedInternal(this ChatCompletionOptions @this);
+    private extern static IDictionary<string, BinaryData>? GetSerializedAdditionalRawData(ChatCompletionOptions @this);
 }

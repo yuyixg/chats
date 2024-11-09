@@ -8,6 +8,7 @@ using Chats.BE.Services;
 using Chats.BE.Services.Common;
 using Chats.BE.Services.Conversations;
 using Chats.BE.Services.Conversations.Dtos;
+using Chats.BE.Services.Conversations.Extensions;
 using Chats.BE.Services.IdEncryption;
 using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Mvc;

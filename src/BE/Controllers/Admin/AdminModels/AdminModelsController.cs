@@ -47,8 +47,8 @@ public class AdminModelsController(ChatsDB db) : ControllerBase
             .ToArrayAsync(cancellationToken);
     }
 
-    [HttpPut("models/{modelId:guid}")]
-    public async Task<ActionResult> UpdateModel(Guid modelId, [FromBody] UpdateModelRequest req, CancellationToken cancellationToken)
+    [HttpPut("models/{modelId:int}")]
+    public async Task<ActionResult> UpdateModel(short modelId, [FromBody] UpdateModelRequest req, CancellationToken cancellationToken)
     {
         short modelReferenceId = await db.ModelReferences
             .Where(x => x.Name == req.ModelReferenceName && x.ProviderId == db.ModelKey2s.Where(x => x.Id == req.ModelKeyId).Select(x => x.ModelProviderId).First())

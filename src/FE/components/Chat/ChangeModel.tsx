@@ -44,7 +44,8 @@ const ChangeModel = ({
     getAllLegacyModelProviders().then(data => {
       setModelProviderTemplates(data);
     });
-  });
+  }, []);
+
   let modelGroup = [] as { provider: ModelProviders; child: Model[] }[];
   const groupModel = () => {
     const modelList = searchTerm

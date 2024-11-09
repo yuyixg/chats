@@ -31,7 +31,6 @@ import { FormFieldType, IFormFieldOption } from '@/components/ui/form/type';
 
 import {
   deleteModelKeys,
-  getAllLegacyModelProviders,
   postModelKeys,
   putModelKeys,
 } from '@/apis/adminApis';

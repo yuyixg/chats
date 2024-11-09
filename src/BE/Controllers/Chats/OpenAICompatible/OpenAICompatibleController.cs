@@ -8,17 +8,15 @@ using Chats.BE.Services.Conversations.Dtos;
 using Chats.BE.Services.OpenAIApiKeySession;
 using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Mvc;
-using OpenAI.Chat;
 using Sdcb.DashScope;
 using System.ClientModel;
-using System.ClientModel.Primitives;
 using System.Text.Json;
 using Microsoft.EntityFrameworkCore;
 using Chats.BE.DB.Enums;
 using System.Diagnostics;
 using System.Text;
-using Chats.BE.Services.Conversations.Extensions;
 using Chats.BE.Services.Common;
+using System.Text.Json.Nodes;
 
 namespace Chats.BE.Controllers.Chats.OpenAICompatible;
 
@@ -26,20 +24,16 @@ namespace Chats.BE.Controllers.Chats.OpenAICompatible;
 public partial class OpenAICompatibleController(ChatsDB db, CurrentApiKey currentApiKey, ConversationFactory cf, UserModelManager userModelManager, ILogger<OpenAICompatibleController> logger, BalanceService balanceService) : ControllerBase
 {
     [HttpPost("chat/completions")]
-    public async Task<ActionResult> ChatCompletion(CancellationToken cancellationToken)
+    public async Task<ActionResult> ChatCompletion([FromBody] JsonObject json, CancellationToken cancellationToken)
     {
-        ChatCompletionOptions cco;
-        try
+        CcoWrapper cco = new(json);
+        if (!cco.SeemsValid())
         {
-            cco = ModelReaderWriter.Read<ChatCompletionOptions>(await BinaryData.FromStreamAsync(Request.Body, cancellationToken), ModelReaderWriterOptions.Json)!;
+            return ErrorMessage(OpenAICompatibleErrorCode.BadParameter, "bad parameter.");
         }
-        catch (ArgumentException e)
-        {
-            return ErrorMessage(OpenAICompatibleErrorCode.BadParameter, e.Message);
-        }
-        
+
         UserModel2[] validModels = await userModelManager.GetValidModelsByApiKey(currentApiKey.ApiKey, cancellationToken);
-        string? modelName = cco.GetModelName().ToString();
+        string? modelName = cco.Model;
         if (string.IsNullOrWhiteSpace(modelName)) return InvalidModel(modelName);
 
         UserModel2? userModel = validModels.FirstOrDefault(x => x.Model.Name == modelName) ?? validModels.FirstOrDefault(x => x.Model.ModelReference.Name == modelName);
@@ -82,7 +76,8 @@ public partial class OpenAICompatibleController(ChatsDB db, CurrentApiKey curren
                 throw new InsufficientBalanceException();
             }
 
-            await foreach (ConversationSegment seg in s.ChatStreamed([.. cco.GetMessages()], cco, cancellationToken))
+
+            await foreach (ConversationSegment seg in s.ChatStreamed([.. cco.Messages], cco.ToCleanCco(), cancellationToken))
             {
                 lastSegment = seg;
                 UserModelBalanceCost currentCost = calculator.GetNewBalance(seg.InputTokenCount, seg.OutputTokenCount, priceConfig);
@@ -93,7 +88,7 @@ public partial class OpenAICompatibleController(ChatsDB db, CurrentApiKey curren
                 cost = currentCost;
                 if (seg.TextSegment == string.Empty) continue;
 
-                if (cco.IsStreamed())
+                if (cco.Stream)
                 {
                     ChatCompletionChunk chunk = new()
                     {
@@ -134,12 +129,12 @@ public partial class OpenAICompatibleController(ChatsDB db, CurrentApiKey curren
         }
         catch (InsufficientBalanceException)
         {
-            errorToReturn = await YieldError(cco.IsStreamed(), OpenAICompatibleErrorCode.InsufficientBalance, "⚠Insufficient balance - 余额不足!", cancellationToken);
+            errorToReturn = await YieldError(cco.Stream, OpenAICompatibleErrorCode.InsufficientBalance, "⚠Insufficient balance - 余额不足!", cancellationToken);
         }
         catch (Exception e) when (e is DashScopeException || e is ClientResultException)
         {
             logger.LogError(e, "Upstream error");
-            errorToReturn = await YieldError(cco.IsStreamed(), OpenAICompatibleErrorCode.UpstreamError, e.Message, cancellationToken);
+            errorToReturn = await YieldError(cco.Stream, OpenAICompatibleErrorCode.UpstreamError, e.Message, cancellationToken);
         }
         catch (TaskCanceledException)
         {
@@ -148,7 +143,7 @@ public partial class OpenAICompatibleController(ChatsDB db, CurrentApiKey curren
         catch (Exception e)
         {
             logger.LogError(e, "Unknown error");
-            errorToReturn = await YieldError(cco.IsStreamed(), OpenAICompatibleErrorCode.Unknown, "\n⚠Error in conversation - 对话出错!", cancellationToken);
+            errorToReturn = await YieldError(cco.Stream, OpenAICompatibleErrorCode.Unknown, "\n⚠Error in conversation - 对话出错!", cancellationToken);
         }
         finally
         {
@@ -200,7 +195,7 @@ public partial class OpenAICompatibleController(ChatsDB db, CurrentApiKey curren
             _ = balanceService.AsyncUpdateBalance(currentApiKey.User.Id, CancellationToken.None);
         }
 
-        if (cco.IsStreamed())
+        if (cco.Stream)
         {
             return new EmptyResult();
         }
@@ -279,7 +274,7 @@ public partial class OpenAICompatibleController(ChatsDB db, CurrentApiKey curren
             await Response.Body.WriteAsync(lflfU8, cancellationToken);
             await Response.Body.FlushAsync(cancellationToken);
         }
-        
+
         return ErrorMessage(code, message);
     }
 

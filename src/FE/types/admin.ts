@@ -52,7 +52,7 @@ export interface GetModelResult {
   remarks: string;
   modelConfig: string;
   fileServiceId: string;
-  modelKeysId: string;
+  modelKeysId: number;
   fileConfig: string;
   priceConfig: ChatModelPriceConfig;
 }

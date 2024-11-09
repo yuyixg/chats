@@ -18,7 +18,7 @@ public class AzureConversationService : ConversationService
         ArgumentException.ThrowIfNullOrWhiteSpace(model.ModelKey.Secret, nameof(model.ModelKey.Secret));
 
         OpenAIClient api = new AzureOpenAIClient(new Uri(model.ModelKey.Host), new ApiKeyCredential(model.ModelKey.Secret));
-        ChatClient = api.GetChatClient(model.DeploymentName);
+        ChatClient = api.GetChatClient(model.ApiModelId);
     }
 
     public override async IAsyncEnumerable<ConversationSegment> ChatStreamedInternal(IReadOnlyList<ChatMessage> messages, ChatCompletionOptions options, [EnumeratorCancellation] CancellationToken cancellationToken)
