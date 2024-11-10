@@ -59,8 +59,8 @@ export default function UserModels() {
     setIsOpen({ add: true, edit: false, recharge: false });
   };
 
-  const handleEditModal = (item: GetUserModelResult, modelId: string) => {
-    setSelectedModelId(modelId);
+  const handleEditModal = (item: GetUserModelResult, modelId: number) => {
+    setSelectedModelId(modelId.toString());
     setSelectedUserModel(item);
     setIsOpen({ add: false, edit: true, recharge: false });
   };
@@ -101,7 +101,7 @@ export default function UserModels() {
 
   const ModelCell = (
     user: GetUserModelResult,
-    modelId: string,
+    modelId: number,
     value: any,
     hover: boolean = false,
   ) => {
@@ -115,7 +115,7 @@ export default function UserModels() {
     );
   };
 
-  const EditModelCell = (user: GetUserModelResult, modelId: string) => {
+  const EditModelCell = (user: GetUserModelResult, modelId: number) => {
     return (
       <TableCell
         className="text-primary hover:underline underline-offset-4 cursor-pointer"
@@ -232,7 +232,6 @@ export default function UserModels() {
         </Table>
       </Card>
       <AddUserModelModal
-        userModelIds={userModels.map((x: GetUserModelResult) => x.userModelId)}
         selectedModel={selectedUserModel}
         onSuccessful={init}
         onClose={handleClose}

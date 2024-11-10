@@ -22,11 +22,11 @@ import {
 } from '@/components/ui/select';
 
 import { getModels, postUserModel, putUserModel } from '@/apis/adminApis';
+import { termDateString } from '@/utils/common';
 
 interface IProps {
   isOpen: boolean;
   selectedModel: GetUserModelResult | null;
-  userModelIds: string[];
   onClose: () => void;
   onSuccessful: () => void;
   saveLoading?: boolean;
@@ -34,7 +34,7 @@ interface IProps {
 
 export const AddUserModelModal = (props: IProps) => {
   const { t } = useTranslation('admin');
-  const { isOpen, selectedModel, userModelIds, onClose, onSuccessful } = props;
+  const { isOpen, selectedModel, onClose, onSuccessful } = props;
   const [select, setSelect] = useState<GetModelResult>();
   const [models, setModel] = useState<GetModelResult[]>([]);
   const [submit, setSubmit] = useState(false);
@@ -56,7 +56,7 @@ export const AddUserModelModal = (props: IProps) => {
 
   const handleSave = () => {
     setSubmit(true);
-    let p = null;
+    let p: Promise<any> = null!;
     if (selectedModel) {
       let models = selectedModel!.models || [];
       const foundModel = models.find((m) => m.modelId === select?.modelId);
@@ -64,9 +64,9 @@ export const AddUserModelModal = (props: IProps) => {
         models.push({
           modelId: select?.modelId!,
           enabled: true,
-          tokens: '0',
-          counts: '0',
-          expires: '-',
+          tokens: 0,
+          counts: 0,
+          expires: termDateString(),
         });
       } else {
         models = models.map((x) => {
@@ -74,7 +74,6 @@ export const AddUserModelModal = (props: IProps) => {
         });
       }
       p = putUserModel({
-        userModelId: selectedModel!.userModelId,
         models,
       });
     } else {

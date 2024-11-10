@@ -11,7 +11,6 @@ using Microsoft.AspNetCore.Mvc;
 using Microsoft.AspNetCore.Mvc.ModelBinding;
 using Microsoft.EntityFrameworkCore;
 using OpenAI.Chat;
-using System.Text.Json;
 
 namespace Chats.BE.Controllers.Admin.AdminModels;
 

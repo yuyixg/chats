@@ -35,6 +35,7 @@ import {
 
 import { putUserModel } from '@/apis/adminApis';
 import { cn } from '@/lib/utils';
+import { termDateString } from '@/utils/common';
 
 interface IProps {
   userModelId: string;
@@ -50,7 +51,6 @@ export const EditUserModelModal = (props: IProps) => {
   const { models, isOpen, select, onClose, onSuccessful } = props;
   const [submit, setSubmit] = useState(false);
   const [editModels, setEditModels] = useState<UserInitialModel[]>([]);
-  const termDateString = new Date(new Date().getTime() + 10 * 365 * 24 * 60 * 60 * 1000).toISOString(); // 10 years
 
   useEffect(() => {
     if (isOpen) {
@@ -63,7 +63,7 @@ export const EditUserModelModal = (props: IProps) => {
           modelId: x.modelId,
           tokens: 0,
           counts: 0,
-          expires: termDateString,
+          expires: termDateString(),
           enabled: false,
         };
       });
@@ -150,7 +150,7 @@ export const EditUserModelModal = (props: IProps) => {
                           {new Date(model.expires).toLocaleDateString()}
                           <IconSquareRoundedX
                             onClick={(e) => {
-                              onChangeModel(index, 'expires', termDateString);
+                              onChangeModel(index, 'expires', termDateString());
                               e.preventDefault();
                             }}
                             className="z-10 ml-auto h-5 w-5 opacity-50"

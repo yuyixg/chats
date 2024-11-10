@@ -20,6 +20,10 @@ export function formatNumberAsMoney(amount: number, maximumFractionDigits = 4) {
   );
 }
 
+export function termDateString() {
+  return new Date(new Date().getTime() + 10 * 365 * 24 * 60 * 60 * 1000).toISOString(); // 10 years
+}
+
 export const PhoneRegExp = /^[1][3,4,5,6,7,8,9][0-9]{9}$/;
 export const SmsExpirationSeconds = 300;
 
