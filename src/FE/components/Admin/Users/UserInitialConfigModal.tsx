@@ -51,6 +51,7 @@ import { cn } from '@/lib/utils';
 import { zodResolver } from '@hookform/resolvers/zod';
 import Decimal from 'decimal.js';
 import { z } from 'zod';
+import { termDateString } from '@/utils/common';
 
 interface IProps {
   models: GetModelResult[];
@@ -116,9 +117,9 @@ export const UserInitialConfigModal = (props: IProps) => {
         if (model) return model;
         return {
           modelId: x.modelId,
-          tokens: '0',
-          counts: '0',
-          expires: '-',
+          tokens: 0,
+          counts: 0,
+          expires: termDateString(),
           enabled: false,
         };
       });
