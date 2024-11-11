@@ -16,7 +16,7 @@ using Microsoft.EntityFrameworkCore;
 namespace Chats.BE.Controllers.Public.AccountLogin;
 
 [Route("api/public")]
-public class AccountLoginController(ChatsDB db, ILogger<AccountLoginController> logger, SessionManager sessionManager, ClientInfoService clientInfoService) : ControllerBase
+public class AccountLoginController(ChatsDB db, ILogger<AccountLoginController> logger, SessionManager sessionManager, ClientInfoManager clientInfoService) : ControllerBase
 {
     [HttpPost("account-login")]
     public async Task<ActionResult> Login(

@@ -71,12 +71,12 @@ public class AdminMessageController(ChatsDB db, CurrentUser currentUser, IIdEncr
             {
                 Id = x.Id,
                 ParentId = x.ParentId,
-                ModelName = x.MessageResponse2!.Model.Name,
+                ModelName = x.Usage.UserModel.Model.Name,
                 CreatedAt = x.CreatedAt,
-                InputTokens = x.MessageResponse2.InputTokenCount,
-                OutputTokens = x.MessageResponse2.OutputTokenCount,
-                InputPrice = x.MessageResponse2.InputCost,
-                OutputPrice = x.MessageResponse2.OutputCost,
+                InputTokens = x.Usage.InputTokenCount,
+                OutputTokens = x.Usage.OutputTokenCount,
+                InputPrice = x.Usage.InputCost,
+                OutputPrice = x.Usage.OutputCost,
                 Role = (DBConversationRole)x.ChatRoleId,
                 Content = x.MessageContent2s
                     .Select(x => new DBMessageSegment 
@@ -85,7 +85,7 @@ public class AdminMessageController(ChatsDB db, CurrentUser currentUser, IIdEncr
                         ContentType = (DBMessageContentType)x.ContentTypeId
                     })
                     .ToArray(),
-                Duration = x.MessageResponse2.DurationMs,
+                Duration = x.Usage.DurationMs,
             })
             .OrderBy(x => x.Id)
             .ToArrayAsync(cancellationToken);

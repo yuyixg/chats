@@ -41,7 +41,7 @@ public class BalanceService(IServiceScopeFactory serviceScopeFactory)
         await db.UserModel2s
             .Where(x => x.Id == userModelId)
             .ExecuteUpdateAsync(userModel => userModel
-                .SetProperty(p => p.TokenBalance, v => db.UserModelTransactionLogs.Where(x => x.UserModelId == userModelId).Sum(x => x.TokenAmount))
-                .SetProperty(p => p.CountBalance, v => db.UserModelTransactionLogs.Where(x => x.UserModelId == userModelId).Sum(x => x.CountAmount)), cancellationToken);
+                .SetProperty(p => p.TokenBalance, v => db.UsageTransactionLogs.Where(x => x.UserModelId == userModelId).Sum(x => x.TokenAmount))
+                .SetProperty(p => p.CountBalance, v => db.UsageTransactionLogs.Where(x => x.UserModelId == userModelId).Sum(x => x.CountAmount)), cancellationToken);
     }
 }

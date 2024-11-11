@@ -31,45 +31,36 @@ public class ConversationController(ChatsDB db, CurrentUser currentUser, ILogger
         [FromBody] ConversationRequest request,
         [FromServices] BalanceService balanceService,
         [FromServices] ConversationFactory conversationFactory,
+        [FromServices] UserModelManager userModelManager,
+        [FromServices] ClientInfoManager clientInfoManager,
         CancellationToken cancellationToken)
     {
         int conversationId = idEncryption.DecryptAsInt32(request.ConversationId);
         long? messageId = request.MessageId != null ? idEncryption.DecryptAsInt64(request.MessageId) : null;
-        Model? cm = await db.Models
-            .Where(x => x.Id == request.ModelId && !x.IsDeleted)
-            .Include(x => x.ModelKey)
-            .Include(x => x.ModelKey.ModelProvider)
-            .Include(x => x.ModelReference)
-            .FirstOrDefaultAsync(x => x.Id == request.ModelId, cancellationToken: cancellationToken);
-        if (cm == null)
+        DateTime messageReceiveTime = DateTime.UtcNow;
+
+        UserModel2? userModel = await userModelManager.GetUserModel(currentUser.Id, request.ModelId, cancellationToken);
+        if (userModel == null)
         {
             return this.BadRequestMessage("The Model does not exist or access is denied.");
         }
 
-        JsonPriceConfig priceConfig = cm.ToPriceConfig();
+        JsonPriceConfig priceConfig = userModel.Model.ToPriceConfig();
 
         var miscInfo = await db.Users
             .Where(x => x.Id == currentUser.Id)
             .Select(x => new
             {
-                UserModel = x.UserModel2s.FirstOrDefault(x => x.ModelId == request.ModelId),
                 UserBalance = x.UserBalance!,
                 ThisChat = db.Conversation2s.Single(x => x.Id == conversationId && x.UserId == currentUser.Id)
             })
             .SingleAsync(cancellationToken);
-        if (miscInfo.UserModel == null)
-        {
-            return this.BadRequestMessage("The Model does not exist or access is denied.");
-        }
-        if (miscInfo.UserModel.IsDeleted)
-        {
-            return this.BadRequestMessage("The Model does not exist or access is denied.");
-        }
-        if (miscInfo.UserModel.ExpiresAt.IsExpired())
+
+        if (userModel.ExpiresAt.IsExpired())
         {
             return this.BadRequestMessage("Subscription has expired");
         }
-        if (miscInfo.UserModel.TokenBalance == 0 && miscInfo.UserModel.CountBalance == 0 && miscInfo.UserBalance.Balance == 0 && !priceConfig.IsFree())
+        if (userModel.TokenBalance == 0 && userModel.CountBalance == 0 && miscInfo.UserBalance.Balance == 0 && !priceConfig.IsFree())
         {
             return this.BadRequestMessage("Insufficient balance");
         }
@@ -180,19 +171,19 @@ public class ConversationController(ChatsDB db, CurrentUser currentUser, ILogger
         Stopwatch sw = Stopwatch.StartNew();
         try
         {
-            UserModelBalanceCalculator calculator = new(miscInfo.UserModel, miscInfo.UserBalance.Balance);
+            UserModelBalanceCalculator calculator = new(userModel, miscInfo.UserBalance.Balance);
             cost = calculator.GetNewBalance(0, 0, priceConfig);
             if (!cost.IsSufficient)
             {
                 throw new InsufficientBalanceException();
             }
 
-            using ConversationService s = conversationFactory.CreateConversationService(cm);
+            using ConversationService s = conversationFactory.CreateConversationService(userModel.Model);
             ChatCompletionOptions cco = new()
             {
-                MaxOutputTokenCount = cm.ModelReference.MaxResponseTokens,
+                MaxOutputTokenCount = userModel.Model.ModelReference.MaxResponseTokens,
                 Temperature = request.UserModelConfig.Temperature != null 
-                    ? Math.Clamp(request.UserModelConfig.Temperature.Value, (float)cm.ModelReference.MinTemperature, (float)cm.ModelReference.MaxTemperature) 
+                    ? Math.Clamp(request.UserModelConfig.Temperature.Value, (float)userModel.Model.ModelReference.MinTemperature, (float)userModel.Model.ModelReference.MaxTemperature) 
                     : null,
                 EndUserId = currentUser.Id.ToString(),
             };
@@ -245,32 +236,6 @@ public class ConversationController(ChatsDB db, CurrentUser currentUser, ILogger
 
         // success
         // insert new assistant message
-        UserModelTransactionLog? userModelTransactionLog = null;
-        TransactionLog? transactionLog = null;
-        if (cost.CostCount > 0 || cost.CostTokens > 0)
-        {
-            userModelTransactionLog = new UserModelTransactionLog()
-            {
-                CountAmount = -cost.CostCount,
-                TokenAmount = -cost.CostTokens,
-                CreatedAt = DateTime.UtcNow,
-                TransactionTypeId = (byte)DBTransactionType.Cost,
-                UserModelId = miscInfo.UserModel.Id,
-            };
-            db.UserModelTransactionLogs.Add(userModelTransactionLog);
-        }
-        if (cost.CostBalance > 0)
-        {
-            transactionLog = new()
-            {
-                UserId = currentUser.Id,
-                CreatedAt = DateTime.UtcNow,
-                CreditUserId = currentUser.Id,
-                Amount = -cost.CostBalance,
-                TransactionTypeId = (byte)DBTransactionType.Cost,
-            };
-            db.TransactionLogs.Add(transactionLog);
-        }
         Message2 assistantMessage = new()
         {
             ConversationId = conversationId,
@@ -281,18 +246,41 @@ public class ConversationController(ChatsDB db, CurrentUser currentUser, ILogger
             ],
             CreatedAt = DateTime.UtcNow,
             ParentId = userMessage.Id,
-            MessageResponse2 = new MessageResponse2()
+            Usage = new UserModelUsage()
             {
                 DurationMs = elapsedMs,
                 InputTokenCount = lastSegment.InputTokenCount,
                 OutputTokenCount = lastSegment.OutputTokenCount,
                 InputCost = cost.InputTokenPrice,
                 OutputCost = cost.OutputTokenPrice,
-                ModelId = cm.Id,
-                TransactionLog = transactionLog,
-                UserModelTransactionLog = userModelTransactionLog,
+                UserModelId = userModel.Id,
+                CreatedAt = DateTime.UtcNow,
+                ClientInfo = await clientInfoManager.GetClientInfo(CancellationToken.None),
             }
         };
+        if (cost.CostCount > 0 || cost.CostTokens > 0)
+        {
+            assistantMessage.Usage.UsageTransaction = new UsageTransactionLog()
+            {
+                CountAmount = -cost.CostCount,
+                TokenAmount = -cost.CostTokens,
+                CreatedAt = assistantMessage.Usage.CreatedAt,
+                TransactionTypeId = (byte)DBTransactionType.Cost,
+                UserModelId = userModel.Id,
+            };
+        }
+        if (cost.CostBalance > 0)
+        {
+            assistantMessage.Usage.BalanceTransaction = new TransactionLog()
+            {
+                UserId = currentUser.Id,
+                CreatedAt = assistantMessage.Usage.CreatedAt,
+                CreditUserId = currentUser.Id,
+                Amount = -cost.CostBalance,
+                TransactionTypeId = (byte)DBTransactionType.Cost,
+            };
+        }
+
         if (errorText != null)
         {
             assistantMessage.MessageContent2s.Add(MessageContent2.FromError(errorText));

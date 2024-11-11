@@ -3,7 +3,7 @@ using Microsoft.EntityFrameworkCore;
 
 namespace Chats.BE.Services;
 
-public class ClientInfoService(IHttpContextAccessor httpContextAccessor, ChatsDB db)
+public class ClientInfoManager(IHttpContextAccessor httpContextAccessor, ChatsDB db)
 {
     private HttpContext HttpContext => httpContextAccessor.HttpContext ?? throw new InvalidOperationException("HttpContext is not available.");
 

@@ -33,13 +33,13 @@ public class MessagesController(ChatsDB db, CurrentUser currentUser, IIdEncrypti
                     })
                     .ToArray(),
                 CreatedAt = x.CreatedAt,
-                InputTokens = x.MessageResponse2!.InputTokenCount,
-                OutputTokens = x.MessageResponse2.OutputTokenCount,
-                InputPrice = x.MessageResponse2.InputCost,
-                OutputPrice = x.MessageResponse2.OutputCost,
-                Duration = x.MessageResponse2.DurationMs,
-                ModelId = x.MessageResponse2.ModelId,
-                ModelName = x.MessageResponse2.Model.Name
+                InputTokens = x.Usage.InputTokenCount,
+                OutputTokens = x.Usage.OutputTokenCount,
+                InputPrice = x.Usage.InputCost,
+                OutputPrice = x.Usage.OutputCost,
+                Duration = x.Usage.DurationMs,
+                ModelId = x.Usage.UserModel.ModelId,
+                ModelName = x.Usage.UserModel.Model.Name
             })
             .OrderBy(x => x.CreatedAt)
             .AsAsyncEnumerable()
@@ -68,13 +68,13 @@ public class MessagesController(ChatsDB db, CurrentUser currentUser, IIdEncrypti
                     })
                     .ToArray(),
                 CreatedAt = x.CreatedAt,
-                InputTokens = x.MessageResponse2!.InputTokenCount,
-                OutputTokens = x.MessageResponse2.OutputTokenCount,
-                InputPrice = x.MessageResponse2.InputCost,
-                OutputPrice = x.MessageResponse2.OutputCost,
-                Duration = x.MessageResponse2.DurationMs,
-                ModelId = x.MessageResponse2.ModelId,
-                ModelName = x.MessageResponse2.Model.Name
+                InputTokens = x.Usage.InputTokenCount,
+                OutputTokens = x.Usage.OutputTokenCount,
+                InputPrice = x.Usage.InputCost,
+                OutputPrice = x.Usage.OutputCost,
+                Duration = x.Usage.DurationMs,
+                ModelId = x.Usage.UserModel.ModelId,
+                ModelName = x.Usage.UserModel.Model.Name
             })
             .OrderBy(x => x.CreatedAt)
             .AsAsyncEnumerable()

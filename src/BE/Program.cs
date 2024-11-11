@@ -47,7 +47,7 @@ public class Program
         builder.Services.AddScoped<HostUrlService>();
         builder.Services.AddSingleton<ConversationFactory>();
         builder.Services.AddSingleton<BalanceService>();
-        builder.Services.AddScoped<ClientInfoService>();
+        builder.Services.AddScoped<ClientInfoManager>();
         builder.Services.AddIdEncryption();
         builder.Services.AddHttpContextAccessor();
 

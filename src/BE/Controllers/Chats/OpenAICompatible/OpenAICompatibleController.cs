@@ -24,22 +24,20 @@ namespace Chats.BE.Controllers.Chats.OpenAICompatible;
 public partial class OpenAICompatibleController(ChatsDB db, CurrentApiKey currentApiKey, ConversationFactory cf, UserModelManager userModelManager, ILogger<OpenAICompatibleController> logger, BalanceService balanceService) : ControllerBase
 {
     [HttpPost("chat/completions")]
-    public async Task<ActionResult> ChatCompletion([FromBody] JsonObject json, CancellationToken cancellationToken)
+    public async Task<ActionResult> ChatCompletion([FromBody] JsonObject json, [FromServices] ClientInfoManager clientInfoManager, CancellationToken cancellationToken)
     {
         CcoWrapper cco = new(json);
         if (!cco.SeemsValid())
         {
             return ErrorMessage(OpenAICompatibleErrorCode.BadParameter, "bad parameter.");
         }
-
-        UserModel2[] validModels = await userModelManager.GetValidModelsByApiKey(currentApiKey.ApiKey, cancellationToken);
         string? modelName = cco.Model;
         if (string.IsNullOrWhiteSpace(modelName)) return InvalidModel(modelName);
 
-        UserModel2? userModel = validModels.FirstOrDefault(x => x.Model.Name == modelName) ?? validModels.FirstOrDefault(x => x.Model.ModelReference.Name == modelName);
+        UserModel2? userModel = await userModelManager.GetUserModel(currentApiKey.ApiKey, modelName, cancellationToken);
         if (userModel == null) return InvalidModel(modelName);
-        Model? cm = userModel.Model;
 
+        Model cm = userModel.Model;
         using ConversationService s = cf.CreateConversationService(cm);
 
         UserModelBalanceCost cost = null!;
@@ -151,43 +149,44 @@ public partial class OpenAICompatibleController(ChatsDB db, CurrentApiKey curren
             cancellationToken = CancellationToken.None;
             sw.Stop();
         }
-
-        TransactionLog? transactionLog = null;
-        UserModelTransactionLog? userModelTransactionLog = null;
-        if (cost.CostCount > 0 || cost.CostTokens > 0)
+        
+        UserApiUsage usage = new()
         {
-            userModelTransactionLog = new()
+            ApiKeyId = currentApiKey.ApiKeyId,
+            Usage = new UserModelUsage()
             {
                 UserModelId = userModel.Id,
                 CreatedAt = DateTime.UtcNow,
-                CountAmount = -cost.CostCount,
-                TokenAmount = -cost.CostTokens,
-                TransactionTypeId = (byte)DBTransactionType.ApiCost,
-            };
-        }
+                DurationMs = (int)sw.ElapsedMilliseconds,
+                InputCost = cost.InputTokenPrice,
+                InputTokenCount = lastSegment.InputTokenCount,
+                OutputCost = cost.OutputTokenPrice,
+                OutputTokenCount = lastSegment.OutputTokenCount,
+                ClientInfo = await clientInfoManager.GetClientInfo(CancellationToken.None),
+            }
+        };
         if (cost.CostBalance > 0)
         {
-            transactionLog = new()
+            usage.Usage.BalanceTransaction = new()
             {
                 UserId = currentApiKey.User.Id,
-                CreatedAt = DateTime.UtcNow,
+                CreatedAt = usage.Usage.CreatedAt,
                 CreditUserId = currentApiKey.User.Id,
                 Amount = -cost.CostBalance,
                 TransactionTypeId = (byte)DBTransactionType.ApiCost,
             };
         }
-        UserApiUsage usage = new()
+        if (cost.CostCount > 0 || cost.CostTokens > 0)
         {
-            ModelId = cm.Id,
-            CreatedAt = DateTime.UtcNow,
-            ApiKeyId = currentApiKey.ApiKeyId,
-            DurationMs = (int)sw.ElapsedMilliseconds,
-            InputCost = cost.InputTokenPrice,
-            InputTokenCount = lastSegment.InputTokenCount,
-            OutputCost = cost.OutputTokenPrice,
-            OutputTokenCount = lastSegment.OutputTokenCount,
-            TransactionLog = transactionLog,
-        };
+            usage.Usage.UsageTransaction = new()
+            {
+                UserModelId = userModel.Id,
+                CreatedAt = usage.Usage.CreatedAt,
+                CountAmount = -cost.CostCount,
+                TokenAmount = -cost.CostTokens,
+                TransactionTypeId = (byte)DBTransactionType.ApiCost,
+            };
+        }
         db.UserApiUsages.Add(usage);
         await db.SaveChangesAsync(cancellationToken);
         if (cost.CostBalance > 0)

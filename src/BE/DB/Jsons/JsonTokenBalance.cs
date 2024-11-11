@@ -23,8 +23,8 @@ public record JsonTokenBalance
 
     public void ApplyTo(UserModel2 existingItem)
     {
-        UserModelTransactionLog? toReturn = existingItem.CountBalance != Counts || existingItem.TokenBalance != Tokens
-            ? new UserModelTransactionLog
+        UsageTransactionLog? toReturn = existingItem.CountBalance != Counts || existingItem.TokenBalance != Tokens
+            ? new UsageTransactionLog
             {
                 CreatedAt = DateTime.UtcNow,
                 CountAmount = Counts - existingItem.CountBalance,
@@ -41,7 +41,7 @@ public record JsonTokenBalance
 
         if (toReturn != null)
         {
-            existingItem.UserModelTransactionLogs.Add(toReturn);
+            existingItem.UsageTransactionLogs.Add(toReturn);
         }
     }
 }
