@@ -14,7 +14,7 @@ jobs:
     runs-on: ubuntu-latest
     steps:
       - name: Login container
-        run: echo ${{ secrets.DOCKER_PASSWORD }} | docker login -u ${{ secrets.DOCKER_USERNAME }} ${{ secrets.DOCKER_REGISTRY }} --password-stdin
+        run: echo ${{ secrets.DOCKER_PASSWORD }} | docker login -u ${{ vars.DOCKER_USERNAME }} ${{ vars.DOCKER_REGISTRY }} --password-stdin
 
       - name: Checkout code
         uses: actions/checkout@v4
@@ -25,18 +25,18 @@ jobs:
 
       - name: Tag container with 'latest' & run number
         run: |
-          docker tag chats ${{ secrets.DOCKER_REGISTRY }}/${{ secrets.DOCKER_NAMESPACE }}/chats-be:r-${{ github.run_number }}
-          docker tag chats ${{ secrets.DOCKER_REGISTRY }}/${{ secrets.DOCKER_NAMESPACE }}/chats-be:latest
+          docker tag chats ${{ vars.DOCKER_REGISTRY }}/${{ vars.DOCKER_NAMESPACE }}/chats-be:r-${{ github.run_number }}
+          docker tag chats ${{ vars.DOCKER_REGISTRY }}/${{ vars.DOCKER_NAMESPACE }}/chats-be:latest
           
       - name: Push container
         run: |
-          docker push ${{ secrets.DOCKER_REGISTRY }}/${{ secrets.DOCKER_NAMESPACE }}/chats-be:r-${{ github.run_number }}
-          docker push ${{ secrets.DOCKER_REGISTRY }}/${{ secrets.DOCKER_NAMESPACE }}/chats-be:latest
+          docker push ${{ vars.DOCKER_REGISTRY }}/${{ vars.DOCKER_NAMESPACE }}/chats-be:r-${{ github.run_number }}
+          docker push ${{ vars.DOCKER_REGISTRY }}/${{ vars.DOCKER_NAMESPACE }}/chats-be:latest
 
   deploy-dev-stg:
     needs: build-container
     uses: ./.github/workflows/deploy.yml
     secrets:
       SSH_PRIVATE_KEY: ${{ secrets.SSH_PRIVATE_KEY }}
-      DOCKER_REGISTRY: ${{ secrets.DOCKER_REGISTRY }}
-      DOCKER_NAMESPACE: ${{ secrets.DOCKER_NAMESPACE }}
+      DOCKER_REGISTRY: ${{ vars.DOCKER_REGISTRY }}
+      DOCKER_NAMESPACE: ${{ vars.DOCKER_NAMESPACE }}
