@@ -39,5 +39,6 @@ jobs:
     with:
       DOCKER_REGISTRY: ${{ vars.DOCKER_REGISTRY }}
       DOCKER_NAMESPACE: ${{ vars.DOCKER_NAMESPACE }}
+      FE_TAG: r-${{ github.run_number }}
     secrets:
       SSH_PRIVATE_KEY: ${{ secrets.SSH_PRIVATE_KEY }}
