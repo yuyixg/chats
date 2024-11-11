@@ -22,7 +22,7 @@ public partial class Message2
 
     public DateTime CreatedAt { get; set; }
 
-    public long UsageId { get; set; }
+    public long? UsageId { get; set; }
 
     [ForeignKey("ChatRoleId")]
     [InverseProperty("Message2s")]
@@ -44,5 +44,5 @@ public partial class Message2
 
     [ForeignKey("UsageId")]
     [InverseProperty("Message2")]
-    public virtual UserModelUsage Usage { get; set; } = null!;
+    public virtual UserModelUsage? Usage { get; set; }
 }
