@@ -29,9 +29,6 @@ public partial class TransactionLog
     [InverseProperty("TransactionLogCreditUsers")]
     public virtual User? CreditUser { get; set; }
 
-    [InverseProperty("TransactionLog")]
-    public virtual MessageResponse2? MessageResponse2 { get; set; }
-
     [ForeignKey("TransactionTypeId")]
     [InverseProperty("TransactionLogs")]
     public virtual TransactionType TransactionType { get; set; } = null!;
@@ -40,6 +37,6 @@ public partial class TransactionLog
     [InverseProperty("TransactionLogUsers")]
     public virtual User User { get; set; } = null!;
 
-    [InverseProperty("TransactionLog")]
-    public virtual UserApiUsage? UserApiUsage { get; set; }
+    [InverseProperty("BalanceTransaction")]
+    public virtual UserModelUsage? UserModelUsage { get; set; }
 }

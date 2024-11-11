@@ -26,11 +26,8 @@ public partial class ClientInfo
     public virtual ClientUserAgent ClientUserAgent { get; set; } = null!;
 
     [InverseProperty("ClientInfo")]
-    public virtual ICollection<MessageRequest> MessageRequests { get; set; } = new List<MessageRequest>();
-
-    [InverseProperty("ClientInfo")]
     public virtual ICollection<SmsAttempt> SmsAttempts { get; set; } = new List<SmsAttempt>();
 
     [InverseProperty("ClientInfo")]
-    public virtual ICollection<UserApiUsage> UserApiUsages { get; set; } = new List<UserApiUsage>();
+    public virtual ICollection<UserModelUsage> UserModelUsages { get; set; } = new List<UserModelUsage>();
 }

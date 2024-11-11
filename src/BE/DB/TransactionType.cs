@@ -20,5 +20,5 @@ public partial class TransactionType
     public virtual ICollection<TransactionLog> TransactionLogs { get; set; } = new List<TransactionLog>();
 
     [InverseProperty("TransactionType")]
-    public virtual ICollection<UserModelTransactionLog> UserModelTransactionLogs { get; set; } = new List<UserModelTransactionLog>();
+    public virtual ICollection<UsageTransactionLog> UsageTransactionLogs { get; set; } = new List<UsageTransactionLog>();
 }

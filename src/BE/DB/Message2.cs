@@ -8,6 +8,7 @@ namespace Chats.BE.DB;
 
 [Table("Message2")]
 [Index("ConversationId", Name = "IX_Message2_Conversation")]
+[Index("UsageId", Name = "IX_Message2_Usage", IsUnique = true)]
 public partial class Message2
 {
     [Key]
@@ -20,6 +21,8 @@ public partial class Message2
     public byte ChatRoleId { get; set; }
 
     public DateTime CreatedAt { get; set; }
+
+    public long UsageId { get; set; }
 
     [ForeignKey("ChatRoleId")]
     [InverseProperty("Message2s")]
@@ -35,13 +38,11 @@ public partial class Message2
     [InverseProperty("Message")]
     public virtual ICollection<MessageContent2> MessageContent2s { get; set; } = new List<MessageContent2>();
 
-    [InverseProperty("Message")]
-    public virtual MessageRequest? MessageRequest { get; set; }
-
-    [InverseProperty("Message")]
-    public virtual MessageResponse2? MessageResponse2 { get; set; }
-
     [ForeignKey("ParentId")]
     [InverseProperty("InverseParent")]
     public virtual Message2? Parent { get; set; }
+
+    [ForeignKey("UsageId")]
+    [InverseProperty("Message2")]
+    public virtual UserModelUsage Usage { get; set; } = null!;
 }

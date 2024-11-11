@@ -34,10 +34,13 @@ public partial class UserModel2
     [InverseProperty("UserModel2s")]
     public virtual Model Model { get; set; } = null!;
 
+    [InverseProperty("UserModel")]
+    public virtual ICollection<UsageTransactionLog> UsageTransactionLogs { get; set; } = new List<UsageTransactionLog>();
+
     [ForeignKey("UserId")]
     [InverseProperty("UserModel2s")]
     public virtual User User { get; set; } = null!;
 
     [InverseProperty("UserModel")]
-    public virtual ICollection<UserModelTransactionLog> UserModelTransactionLogs { get; set; } = new List<UserModelTransactionLog>();
+    public virtual ICollection<UserModelUsage> UserModelUsages { get; set; } = new List<UserModelUsage>();
 }

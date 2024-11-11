@@ -41,11 +41,9 @@ public partial class ChatsDB : DbContext
 
     public virtual DbSet<MessageContentType> MessageContentTypes { get; set; }
 
-    public virtual DbSet<MessageRequest> MessageRequests { get; set; }
-
-    public virtual DbSet<MessageResponse2> MessageResponse2s { get; set; }
-
     public virtual DbSet<Model> Models { get; set; }
+
+    public virtual DbSet<ModelKey> ModelKeys { get; set; }
 
     public virtual DbSet<ModelKey2> ModelKey2s { get; set; }
 
@@ -71,6 +69,8 @@ public partial class ChatsDB : DbContext
 
     public virtual DbSet<TransactionType> TransactionTypes { get; set; }
 
+    public virtual DbSet<UsageTransactionLog> UsageTransactionLogs { get; set; }
+
     public virtual DbSet<User> Users { get; set; }
 
     public virtual DbSet<UserApiKey> UserApiKeys { get; set; }
@@ -85,7 +85,7 @@ public partial class ChatsDB : DbContext
 
     public virtual DbSet<UserModel2> UserModel2s { get; set; }
 
-    public virtual DbSet<UserModelTransactionLog> UserModelTransactionLogs { get; set; }
+    public virtual DbSet<UserModelUsage> UserModelUsages { get; set; }
 
     protected override void OnConfiguring(DbContextOptionsBuilder optionsBuilder)
         => optionsBuilder.UseSqlServer("Name=ConnectionStrings:ChatsDB");
@@ -154,6 +154,10 @@ public partial class ChatsDB : DbContext
             entity.HasOne(d => d.Conversation).WithMany(p => p.Message2s).HasConstraintName("FK_Message2_Conversation");
 
             entity.HasOne(d => d.Parent).WithMany(p => p.InverseParent).HasConstraintName("FK_Message2_ParentMessage");
+
+            entity.HasOne(d => d.Usage).WithOne(p => p.Message2)
+                .OnDelete(DeleteBehavior.ClientSetNull)
+                .HasConstraintName("FK_Message2_UserModelUsage");
         });
 
         modelBuilder.Entity<MessageContent2>(entity =>
@@ -170,36 +174,6 @@ public partial class ChatsDB : DbContext
             entity.HasKey(e => e.Id).HasName("PK__MessageC__3214EC07D7BA864A");
         });
 
-        modelBuilder.Entity<MessageRequest>(entity =>
-        {
-            entity.Property(e => e.MessageId).ValueGeneratedNever();
-
-            entity.HasOne(d => d.ClientInfo).WithMany(p => p.MessageRequests)
-                .OnDelete(DeleteBehavior.ClientSetNull)
-                .HasConstraintName("FK_MessageRequest_ClientInfo");
-
-            entity.HasOne(d => d.Message).WithOne(p => p.MessageRequest)
-                .OnDelete(DeleteBehavior.ClientSetNull)
-                .HasConstraintName("FK_MessageRequest_MessageRequest");
-        });
-
-        modelBuilder.Entity<MessageResponse2>(entity =>
-        {
-            entity.Property(e => e.MessageId).ValueGeneratedNever();
-
-            entity.HasOne(d => d.Message).WithOne(p => p.MessageResponse2).HasConstraintName("FK_MessageResponse2_Message");
-
-            entity.HasOne(d => d.Model).WithMany(p => p.MessageResponse2s)
-                .OnDelete(DeleteBehavior.ClientSetNull)
-                .HasConstraintName("FK_MessageResponse2_Model");
-
-            entity.HasOne(d => d.TransactionLog).WithOne(p => p.MessageResponse2).HasConstraintName("FK_MessageResponse2_TransactionLog");
-
-            entity.HasOne(d => d.UserModelTransactionLog).WithMany(p => p.MessageResponse2s)
-                .OnDelete(DeleteBehavior.SetNull)
-                .HasConstraintName("FK_MessageResponse_UserModelTransactionLog");
-        });
-
         modelBuilder.Entity<Model>(entity =>
         {
             entity.HasOne(d => d.FileService).WithMany(p => p.Models).HasConstraintName("FK_Model_FileService");
@@ -211,6 +185,13 @@ public partial class ChatsDB : DbContext
             entity.HasOne(d => d.ModelReference).WithMany(p => p.Models)
                 .OnDelete(DeleteBehavior.ClientSetNull)
                 .HasConstraintName("FK_Model_ModelReference");
+        });
+
+        modelBuilder.Entity<ModelKey>(entity =>
+        {
+            entity.HasKey(e => e.Id).HasName("ModelKeys_pkey");
+
+            entity.Property(e => e.Id).ValueGeneratedNever();
         });
 
         modelBuilder.Entity<ModelKey2>(entity =>
@@ -308,6 +289,19 @@ public partial class ChatsDB : DbContext
             entity.HasKey(e => e.Id).HasName("PK_BalanceLogType");
         });
 
+        modelBuilder.Entity<UsageTransactionLog>(entity =>
+        {
+            entity.HasKey(e => e.Id).HasName("PK_UserModelTransactionLog");
+
+            entity.HasOne(d => d.TransactionType).WithMany(p => p.UsageTransactionLogs)
+                .OnDelete(DeleteBehavior.ClientSetNull)
+                .HasConstraintName("FK_UserModelTransactionLog_TransactionType");
+
+            entity.HasOne(d => d.UserModel).WithMany(p => p.UsageTransactionLogs)
+                .OnDelete(DeleteBehavior.ClientSetNull)
+                .HasConstraintName("FK_UserModelTransactionLog_UserModel2");
+        });
+
         modelBuilder.Entity<User>(entity =>
         {
             entity.HasKey(e => e.Id).HasName("Users_pkey");
@@ -344,17 +338,9 @@ public partial class ChatsDB : DbContext
                 .OnDelete(DeleteBehavior.ClientSetNull)
                 .HasConstraintName("FK_ApiUsage2_ApiKey");
 
-            entity.HasOne(d => d.ClientInfo).WithMany(p => p.UserApiUsages)
+            entity.HasOne(d => d.Usage).WithOne(p => p.UserApiUsage)
                 .OnDelete(DeleteBehavior.ClientSetNull)
-                .HasConstraintName("FK_UserApiUsage_ClientInfo");
-
-            entity.HasOne(d => d.Model).WithMany(p => p.UserApiUsages)
-                .OnDelete(DeleteBehavior.ClientSetNull)
-                .HasConstraintName("FK_ApiUsage2_Model");
-
-            entity.HasOne(d => d.TransactionLog).WithOne(p => p.UserApiUsage).HasConstraintName("FK_ApiUsage2_TransactionLog");
-
-            entity.HasOne(d => d.UserModelTransactionLog).WithOne(p => p.UserApiUsage).HasConstraintName("FK_UserApiUsage_UserModelTransactionLog");
+                .HasConstraintName("FK_UserApiUsage_UserModelUsage");
         });
 
         modelBuilder.Entity<UserBalance>(entity =>
@@ -401,15 +387,21 @@ public partial class ChatsDB : DbContext
                 .HasConstraintName("FK_UserModel2_User");
         });
 
-        modelBuilder.Entity<UserModelTransactionLog>(entity =>
+        modelBuilder.Entity<UserModelUsage>(entity =>
         {
-            entity.HasOne(d => d.TransactionType).WithMany(p => p.UserModelTransactionLogs)
-                .OnDelete(DeleteBehavior.ClientSetNull)
-                .HasConstraintName("FK_UserModelTransactionLog_TransactionType");
+            entity.HasKey(e => e.Id).HasName("PK_ModelUsage");
 
-            entity.HasOne(d => d.UserModel).WithMany(p => p.UserModelTransactionLogs)
+            entity.HasOne(d => d.BalanceTransaction).WithOne(p => p.UserModelUsage).HasConstraintName("FK_ModelUsage_TransactionLog");
+
+            entity.HasOne(d => d.ClientInfo).WithMany(p => p.UserModelUsages)
                 .OnDelete(DeleteBehavior.ClientSetNull)
-                .HasConstraintName("FK_UserModelTransactionLog_UserModel2");
+                .HasConstraintName("FK_ModelUsage_ClientInfo");
+
+            entity.HasOne(d => d.UsageTransaction).WithOne(p => p.UserModelUsage).HasConstraintName("FK_ModelUsage_UsageTransactionLog");
+
+            entity.HasOne(d => d.UserModel).WithMany(p => p.UserModelUsages)
+                .OnDelete(DeleteBehavior.ClientSetNull)
+                .HasConstraintName("FK_ModelUsage_UserModel2");
         });
 
         OnModelCreatingPartial(modelBuilder);

@@ -50,9 +50,6 @@ public partial class Model
     [InverseProperty("Models")]
     public virtual FileService? FileService { get; set; }
 
-    [InverseProperty("Model")]
-    public virtual ICollection<MessageResponse2> MessageResponse2s { get; set; } = new List<MessageResponse2>();
-
     [ForeignKey("ModelKeyId")]
     [InverseProperty("Models")]
     public virtual ModelKey2 ModelKey { get; set; } = null!;
@@ -60,9 +57,6 @@ public partial class Model
     [ForeignKey("ModelReferenceId")]
     [InverseProperty("Models")]
     public virtual ModelReference ModelReference { get; set; } = null!;
-
-    [InverseProperty("Model")]
-    public virtual ICollection<UserApiUsage> UserApiUsages { get; set; } = new List<UserApiUsage>();
 
     [InverseProperty("Model")]
     public virtual ICollection<UserModel2> UserModel2s { get; set; } = new List<UserModel2>();
