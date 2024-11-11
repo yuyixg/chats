@@ -6,9 +6,12 @@ on:
     secrets:
       SSH_PRIVATE_KEY:
         required: true
+    inputs:
       DOCKER_REGISTRY:
+        type: string
         required: true
       DOCKER_NAMESPACE:
+        type: string
         required: true
 
 jobs:
@@ -22,8 +25,8 @@ jobs:
       - name: deploy dev/stg
         run: |
           ssh -o StrictHostKeyChecking=no -p 22 zhoujie@home.starworks.cc << 'EOF'
-            docker pull ${{ secrets.DOCKER_REGISTRY }}/${{ secrets.DOCKER_NAMESPACE }}/chats:latest
-            docker pull ${{ secrets.DOCKER_REGISTRY }}/${{ secrets.DOCKER_NAMESPACE }}/chats-be:latest
+            docker pull ${{ inputs.DOCKER_REGISTRY }}/${{ inputs.DOCKER_NAMESPACE }}/chats:latest
+            docker pull ${{ inputs.DOCKER_REGISTRY }}/${{ inputs.DOCKER_NAMESPACE }}/chats-be:latest
             cd chats
             sed -i "s/^FRONTEND_VERSION=.*/FRONTEND_VERSION=latest/" ~/chats/dev.env
             sed -i "s/^BACKEND_VERSION=.*/BACKEND_VERSION=latest/" ~/chats/dev.env

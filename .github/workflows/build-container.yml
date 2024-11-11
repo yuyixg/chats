@@ -21,8 +21,7 @@ jobs:
 
       - name: Build container
         run: |
-          cd src/FE
-          docker build -t chats .
+          cd src/FE && docker build -t chats .
 
       - name: Tag container with latest and run number
         run: |
@@ -31,14 +30,14 @@ jobs:
           
       - name: Push container
         run: |
-          DATE=$(date +'%Y%m%d')
           docker push ${{ vars.DOCKER_REGISTRY }}/${{ vars.DOCKER_NAMESPACE }}/chats:r-${{ github.run_number }}
           docker push ${{ vars.DOCKER_REGISTRY }}/${{ vars.DOCKER_NAMESPACE }}/chats:latest
           
   deploy-dev-stg:
     needs: build-container
     uses: ./.github/workflows/deploy.yml
-    secrets:
-      SSH_PRIVATE_KEY: ${{ secrets.SSH_PRIVATE_KEY }}
+    with:
       DOCKER_REGISTRY: ${{ vars.DOCKER_REGISTRY }}
       DOCKER_NAMESPACE: ${{ vars.DOCKER_NAMESPACE }}
+    secrets:
+      SSH_PRIVATE_KEY: ${{ secrets.SSH_PRIVATE_KEY }}

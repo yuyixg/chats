@@ -36,7 +36,8 @@ jobs:
   deploy-dev-stg:
     needs: build-container
     uses: ./.github/workflows/deploy.yml
-    secrets:
-      SSH_PRIVATE_KEY: ${{ secrets.SSH_PRIVATE_KEY }}
+    with:
       DOCKER_REGISTRY: ${{ vars.DOCKER_REGISTRY }}
       DOCKER_NAMESPACE: ${{ vars.DOCKER_NAMESPACE }}
+    secrets:
+      SSH_PRIVATE_KEY: ${{ secrets.SSH_PRIVATE_KEY }}
