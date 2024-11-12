@@ -33,7 +33,7 @@ public class MessagesController(ChatsDB db, CurrentUser currentUser, IIdEncrypti
                     })
                     .ToArray(),
                 CreatedAt = x.CreatedAt,
-                InputTokens = x.Usage.InputTokenCount,
+                InputTokens = x.Usage!.InputTokenCount,
                 OutputTokens = x.Usage.OutputTokenCount,
                 InputPrice = x.Usage.InputCost,
                 OutputPrice = x.Usage.OutputCost,
@@ -68,7 +68,7 @@ public class MessagesController(ChatsDB db, CurrentUser currentUser, IIdEncrypti
                     })
                     .ToArray(),
                 CreatedAt = x.CreatedAt,
-                InputTokens = x.Usage.InputTokenCount,
+                InputTokens = x.Usage!.InputTokenCount,
                 OutputTokens = x.Usage.OutputTokenCount,
                 InputPrice = x.Usage.InputCost,
                 OutputPrice = x.Usage.OutputCost,
