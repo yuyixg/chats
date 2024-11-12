@@ -23,7 +23,9 @@ public class ConversationFactory
             KnownModelProvider.ZhiPuAI => new GLMConversationService(model),
             KnownModelProvider.Moonshot => new KimiConversationService(model),
             KnownModelProvider.HunYuan => new HunyuanConversationService(model),
-            _ => throw new ArgumentException("Invalid model type")
+            KnownModelProvider.Spark => throw new NotImplementedException("Spark model is not implemented"),
+            KnownModelProvider.LingYi => throw new NotImplementedException("LingYi model is not implemented"),
+            _ => throw new NotSupportedException($"Unknown model provider: {modelProvider}")
         };
         return cs;
     }
