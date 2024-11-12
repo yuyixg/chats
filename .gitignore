@@ -53,3 +53,4 @@ logs.txt
 *.user
 /src/**/obj
 /src/**/bin
+/src/BE/wwwroot
