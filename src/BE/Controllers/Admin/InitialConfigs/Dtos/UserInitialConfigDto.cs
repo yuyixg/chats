@@ -1,5 +1,6 @@
 ﻿using Chats.BE.DB.Jsons;
 using System.Text.Json;
+using System.Text.Json.Nodes;
 using System.Text.Json.Serialization;
 
 namespace Chats.BE.Controllers.Admin.InitialConfigs.Dtos;
@@ -16,7 +17,7 @@ public class UserInitialConfigDto
     public required string LoginType { get; init; }
 
     [JsonPropertyName("models")]
-    public required JsonTokenBalance[] Models { get; init; }
+    public required JsonNode[] Models { get; init; }
 
     [JsonPropertyName("price")]
     public required string Price { get; init; }
@@ -51,11 +52,12 @@ public class UserInitialConfigDtoTemp
             Id = Id,
             Name = Name,
             LoginType = LoginType,
-            Models = [.. JsonSerializer.Deserialize<JsonTokenBalance[]>(Models)!
-                .OrderByDescending(x => x.Enabled)
-                .ThenByDescending(x => x.Tokens)
-                .ThenByDescending(x => x.Counts)
-                .ThenByDescending(x => x.Expires)],
+            Models = [.. JsonSerializer.Deserialize<JsonArray>(Models)!
+                .Select(x => x!)
+                .OrderByDescending(x => (bool)x["enabled"]!)
+                .ThenByDescending(x => x["tokens"]!.ToString())
+                .ThenByDescending(x => x["counts"]!.ToString())
+                .ThenByDescending(x => x["expires"]!.ToString())],
             Price = Price.ToString(),
             InvitationCodeId = InvitationCodeId?.ToString() ?? "-",
             InvitationCode = InvitationCode
