@@ -71,7 +71,7 @@ public class AdminMessageController(ChatsDB db, CurrentUser currentUser, IIdEncr
             {
                 Id = x.Id,
                 ParentId = x.ParentId,
-                ModelName = x.Usage.UserModel.Model.Name,
+                ModelName = x.Usage!.UserModel.Model.Name,
                 CreatedAt = x.CreatedAt,
                 InputTokens = x.Usage.InputTokenCount,
                 OutputTokens = x.Usage.OutputTokenCount,
