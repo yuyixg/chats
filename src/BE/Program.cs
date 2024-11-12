@@ -27,6 +27,7 @@ public class Program
                 Location = ResponseCacheLocation.Client,
             });
         });
+        builder.Services.AddSpaStaticFiles(c => c.RootPath = "ClientApp");
         // Learn more about configuring Swagger/OpenAPI at https://aka.ms/aspnetcore/swashbuckle
         builder.Services.AddEndpointsApiExplorer();
         builder.Services.AddSwaggerGen();
