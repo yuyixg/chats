@@ -31,8 +31,4 @@
     <PackageReference Include="TencentCloudSDK.Sms" Version="3.0.1112" />
   </ItemGroup>
 
-  <ItemGroup>
-    <Folder Include="DB\seed\" />
-  </ItemGroup>
-
 </Project>

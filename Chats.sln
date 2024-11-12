@@ -16,7 +16,8 @@ Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "Chats.BE.Tests", "src\BE.Te
 EndProject
 Project("{2150E333-8FDC-42A3-9474-1A3956D46DE8}") = "scripts", "scripts", "{04AEF080-BF5C-4CD7-BB7E-3D509A0FD3F6}"
 	ProjectSection(SolutionItems) = preProject
-		src\scripts\db-migration-0902.linq = src\scripts\db-migration-0902.linq
+		src\scripts\20240902-db-migration.linq = src\scripts\20240902-db-migration.linq
+		src\scripts\20241101-model-reference-sql.linq = src\scripts\20241101-model-reference-sql.linq
 	EndProjectSection
 EndProject
 Project("{2150E333-8FDC-42A3-9474-1A3956D46DE8}") = "github-actions", "github-actions", "{29CC0F58-0B4E-4F4F-A084-7C461F7A4E60}"

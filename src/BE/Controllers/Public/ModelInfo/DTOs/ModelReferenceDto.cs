@@ -20,9 +20,27 @@ public record ModelReferenceDto : SimpleModelReferenceDto
     [JsonPropertyName("allowSearch")]
     public required bool AllowSearch { get; init; }
 
+    [JsonPropertyName("contextWindow")]
+    public required int ContextWindow { get; init; }
+
+    [JsonPropertyName("maxResponseTokens")]
+    public required int MaxResponseTokens { get; init; }
+
     [JsonPropertyName("promptTokenPrice1M")]
     public required decimal PromptTokenPrice1M { get; init; }
 
     [JsonPropertyName("responseTokenPrice1M")]
     public required decimal ResponseTokenPrice1M { get; init; }
+
+    [JsonPropertyName("rawPromptTokenPrice1M")]
+    public required decimal RawPromptTokenPrice1M { get; init; }
+
+    [JsonPropertyName("rawResponseTokenPrice1M")]
+    public required decimal RawResponseTokenPrice1M { get; init; }
+
+    [JsonPropertyName("currencyCode")]
+    public required string CurrencyCode { get; init; }
+
+    [JsonPropertyName("exchangeRate")]
+    public required decimal ExchangeRate { get; init; }
 }

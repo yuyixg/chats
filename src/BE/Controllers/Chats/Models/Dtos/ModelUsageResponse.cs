@@ -30,8 +30,8 @@ public record ModelUsageResponse
             Counts = userModel.CountBalance,
             Expires = userModel.ExpiresAt,
             IsTerm = userModel.ExpiresAt - DateTime.UtcNow > TimeSpan.FromDays(365 * 2),
-            PromptTokenPrice1M = userModel.Model.PromptTokenPrice1M * userModel.Model.ModelReference.CurrencyCodeNavigation.ExchangeRate,
-            ResponseTokenPrice1M = userModel.Model.ResponseTokenPrice1M * userModel.Model.ModelReference.CurrencyCodeNavigation.ExchangeRate,
+            PromptTokenPrice1M = userModel.Model.PromptTokenPrice1M,
+            ResponseTokenPrice1M = userModel.Model.ResponseTokenPrice1M,
             Tokens = userModel.TokenBalance,
         };
     }

@@ -52,7 +52,13 @@ public class ModelInfoController(ChatsDB db) : ControllerBase
                 MinTemperature = x.MinTemperature,
                 ModelProviderId = (DBModelProvider)x.ProviderId,
                 PromptTokenPrice1M = x.PromptTokenPrice1M * x.CurrencyCodeNavigation.ExchangeRate,
-                ResponseTokenPrice1M = x.ResponseTokenPrice1M * x.CurrencyCodeNavigation.ExchangeRate
+                ResponseTokenPrice1M = x.ResponseTokenPrice1M * x.CurrencyCodeNavigation.ExchangeRate,
+                ContextWindow = x.ContextWindow,
+                MaxResponseTokens = x.MaxResponseTokens,
+                RawPromptTokenPrice1M = x.PromptTokenPrice1M,
+                RawResponseTokenPrice1M = x.ResponseTokenPrice1M,
+                CurrencyCode = x.CurrencyCode,
+                ExchangeRate = x.CurrencyCodeNavigation.ExchangeRate,
             })
             .FirstOrDefaultAsync(cancellationToken);
         if (data == null)

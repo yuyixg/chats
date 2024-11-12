@@ -53,4 +53,14 @@ public class ModelsController : ControllerBase
             .ToArray();
         return Ok(responses);
     }
+
+    [HttpGet("{modelId}/usage")]
+    public async Task<ActionResult<ModelUsageResponse>> GetUsage(short modelId, [FromServices] CurrentUser currentUser, [FromServices] UserModelManager userModelManager, CancellationToken cancellationToken)
+    {
+        UserModel2? model = await userModelManager.GetUserModel(currentUser.Id, modelId, cancellationToken);
+        if (model == null) return NotFound();
+
+        ModelUsageResponse response = ModelUsageResponse.FromDB(model);
+        return Ok(response);
+    }
 }
