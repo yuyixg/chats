@@ -1,7 +1,7 @@
 import { FC, KeyboardEvent, useEffect, useRef, useState } from 'react';
 import toast from 'react-hot-toast';
 
-import { useTranslation } from 'next-i18next';
+import useTranslation from '@/hooks/useTranslation';
 
 import { Prompt } from '@/types/prompt';
 
@@ -28,7 +28,7 @@ export const VariableModal: FC<Props> = ({
   onSubmit,
   onClose,
 }) => {
-  const { t } = useTranslation('client');
+  const { t } = useTranslation();
   const [updatedVariables, setUpdatedVariables] = useState<
     { key: string; value: string }[]
   >(

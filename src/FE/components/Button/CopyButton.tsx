@@ -1,7 +1,7 @@
 import { useState } from 'react';
 import toast from 'react-hot-toast';
 
-import { useTranslation } from 'next-i18next';
+import useTranslation from '@/hooks/useTranslation';
 
 import { IconCheck, IconClipboard } from '@/components/Icons';
 import { Button } from '@/components/ui/button';
@@ -12,7 +12,7 @@ interface Props {
 }
 
 export default function CopyButton(props: Props) {
-  const { t } = useTranslation('client');
+  const { t } = useTranslation();
   const { value, onCopy } = props;
   const [isCopied, setIsCopied] = useState<Boolean>(false);
 

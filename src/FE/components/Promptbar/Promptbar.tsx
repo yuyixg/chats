@@ -1,7 +1,7 @@
 import { useContext, useEffect } from 'react';
 import toast from 'react-hot-toast';
 
-import { useTranslation } from 'next-i18next';
+import useTranslation from '@/hooks/useTranslation';
 
 import { useCreateReducer } from '@/hooks/useCreateReducer';
 
@@ -23,7 +23,7 @@ import {
 import { v4 as uuidv4 } from 'uuid';
 
 const PromptBar = () => {
-  const { t } = useTranslation('client');
+  const { t } = useTranslation();
 
   const promptBarContextValue = useCreateReducer<PromptbarInitialState>({
     initialState,

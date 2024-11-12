@@ -1,1 +1,1 @@
-export { default, getServerSideProps } from './request-logs';
+export { default } from './request-logs';

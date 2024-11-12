@@ -1,4 +1,4 @@
-import { useTranslation } from 'next-i18next';
+import useTranslation from '@/hooks/useTranslation';
 
 import { IconRefresh } from '@/components/Icons';
 import Tips from '@/components/Tips/Tips';
@@ -10,7 +10,7 @@ interface Props {
 }
 
 export const RegenerateAction = (props: Props) => {
-  const { t } = useTranslation('client');
+  const { t } = useTranslation();
   const { onRegenerate, hidden } = props;
 
   const Render = () => {

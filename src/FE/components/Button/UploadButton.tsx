@@ -1,6 +1,6 @@
 import { useEffect, useRef } from 'react';
 
-import { useTranslation } from 'next-i18next';
+import useTranslation from '@/hooks/useTranslation';
 
 import { checkFileSizeCanUpload, uploadFile } from '@/utils/uploadFile';
 
@@ -28,7 +28,7 @@ const UploadButton: React.FunctionComponent<Props> = ({
   fileServerConfig,
   children,
 }: Props) => {
-  const { t } = useTranslation('client');
+  const { t } = useTranslation();
   const uploadRef = useRef<HTMLInputElement>(null);
   const { maxSize } = fileConfig || { maxSize: 0 };
   const changeFile = async (event: any) => {

@@ -1,6 +1,6 @@
 import { useEffect, useState } from 'react';
 
-import { useTranslation } from 'next-i18next';
+import useTranslation from '@/hooks/useTranslation';
 
 import {
   Dialog,
@@ -30,7 +30,7 @@ interface Props {
 export const UserBalanceModal = (props: Props) => {
   const { isOpen, onClose } = props;
 
-  const { t } = useTranslation('client');
+  const { t } = useTranslation();
   const [balanceLogs, setBalanceLogs] = useState<GetBalance7DaysUsageResult[]>(
     [],
   );

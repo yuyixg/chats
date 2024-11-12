@@ -1,6 +1,6 @@
 import { useContext, useState } from 'react';
 
-import { useTranslation } from 'next-i18next';
+import useTranslation from '@/hooks/useTranslation';
 import { useRouter } from 'next/router';
 
 import { clearUserInfo, clearUserSession, getLoginUrl } from '@/utils/user';
@@ -33,7 +33,7 @@ import { getUserBalanceOnly } from '@/apis/clientApis';
 
 export const ChatBarSettings = () => {
   const router = useRouter();
-  const { t } = useTranslation('client');
+  const { t } = useTranslation();
   const [changePwdModalOpen, setChangePwdModalOpen] = useState<boolean>(false);
   const [userBalanceModalOpen, setUserBalanceModalOpen] =
     useState<boolean>(false);

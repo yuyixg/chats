@@ -1,9 +1,7 @@
 import React, { useEffect, useState } from 'react';
 
-import { useTranslation } from 'next-i18next';
-import { serverSideTranslations } from 'next-i18next/serverSideTranslations';
-
 import { useThrottle } from '@/hooks/useThrottle';
+import useTranslation from '@/hooks/useTranslation';
 
 import { DEFAULT_LANGUAGE } from '@/utils/settings';
 
@@ -30,7 +28,7 @@ import {
 import { getModels, getUsers } from '@/apis/adminApis';
 
 export default function Users() {
-  const { t } = useTranslation('admin');
+  const { t } = useTranslation();
   const [models, setModels] = useState<GetModelResult[]>([]);
   const [isOpenModal, setIsOpenModal] = useState({
     edit: false,
@@ -242,11 +240,3 @@ export default function Users() {
     </>
   );
 }
-
-export const getServerSideProps = async ({ locale }: { locale: string }) => {
-  return {
-    props: {
-      ...(await serverSideTranslations(locale ?? DEFAULT_LANGUAGE, ['admin'])),
-    },
-  };
-};

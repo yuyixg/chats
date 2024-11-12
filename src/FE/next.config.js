@@ -1,9 +1,7 @@
 const isDev = process.env?.NODE_ENV === 'development';
-console.log("-------------------");
 console.log("NODE_ENV", process.env?.NODE_ENV);
 console.log("-------------------");
 
-const { i18n } = require('./next-i18next.config');
 const withPWA = require('next-pwa')({
   dest: 'public',
   register: !isDev,
@@ -13,7 +11,7 @@ const withPWA = require('next-pwa')({
 
 /** @type {import('next').NextConfig} */
 const nextConfig = {
-  i18n,
+  output: 'export',
   webpack(config) {
     config.experiments = {
       asyncWebAssembly: true,

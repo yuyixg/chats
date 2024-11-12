@@ -1,1 +1,1 @@
-export { default, getServerSideProps } from './dashboard';
+export { default } from './dashboard';

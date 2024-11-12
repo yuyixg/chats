@@ -3,19 +3,12 @@
   "version": "0.1.0",
   "private": true,
   "scripts": {
+    "export": "next export",
     "dev": "next dev",
-    "build:dev": "set NODE_ENV=development && next build",
-    "start:dev": "set NODE_ENV=development && next start",
     "build": "next build",
     "start": "next start",
     "lint": "next lint",
-    "format": "prettier --write .",
-    "db:init": "ts-node -O \"{\\\"module\\\":\\\"commonjs\\\"}\" prisma/init.ts",
-    "db:pg": "export $(cat .env.local | xargs) && env && npm run init",
-    "db-win:pg": "set DB_DIALECT=postgres && (for /F \"tokens=*\" %i in (.env.local) do set %i) && npm run init"
-  },
-  "prisma": {
-    "schema": "./prisma/sqlserver/schema.prisma"
+    "format": "prettier --write ."
   },
   "dependencies": {
     "@fidm/x509": "^1.2.1",
@@ -40,10 +33,8 @@
     "class-variance-authority": "^0.7.0",
     "clsx": "^2.1.0",
     "decimal.js": "^10.4.3",
-    "i18next": "^22.4.13",
     "lucide-react": "^0.359.0",
     "next": "^14.2.5",
-    "next-i18next": "^13.2.2",
     "next-pwa": "^5.6.0",
     "next-themes": "^0.3.0",
     "qrcode": "^1.5.3",
@@ -85,5 +76,8 @@
     "prettier-plugin-tailwindcss": "^0.2.5",
     "ts-node-dev": "^2.0.0",
     "typescript": "5.2.2"
+  },
+  "volta": {
+    "node": "20.16.0"
   }
 }

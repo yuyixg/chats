@@ -1,13 +1,12 @@
 import React, { useEffect, useState } from 'react';
 
-import { useTranslation } from 'next-i18next';
-import { serverSideTranslations } from 'next-i18next/serverSideTranslations';
+import useTranslation from '@/hooks/useTranslation';
 
 import { DEFAULT_LANGUAGE } from '@/utils/settings';
 import { getUserInfo } from '@/utils/user';
 
 const Dashboard = () => {
-  const { t } = useTranslation('admin');
+  const { t } = useTranslation();
   const [name, setName] = useState('');
   useEffect(() => {
     setName(getUserInfo()?.username || '');
@@ -22,11 +21,3 @@ const Dashboard = () => {
 };
 
 export default Dashboard;
-
-export const getServerSideProps = async ({ locale }: any) => {
-  return {
-    props: {
-      ...(await serverSideTranslations(locale ?? DEFAULT_LANGUAGE, ['admin'])),
-    },
-  };
-};

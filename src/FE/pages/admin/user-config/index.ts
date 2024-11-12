@@ -1,1 +1,1 @@
-export { default, getServerSideProps } from './user-config';
+export { default } from './user-config';

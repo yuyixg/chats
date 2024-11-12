@@ -2,7 +2,7 @@ import React, { useEffect, useState } from 'react';
 import { useForm } from 'react-hook-form';
 import toast from 'react-hot-toast';
 
-import { useTranslation } from 'next-i18next';
+import useTranslation from '@/hooks/useTranslation';
 
 import { formatNumberAsMoney } from '@/utils/common';
 import {
@@ -54,7 +54,7 @@ interface IProps {
 }
 
 export const EditModelModal = (props: IProps) => {
-  const { t } = useTranslation('admin');
+  const { t } = useTranslation();
   const { isOpen, onClose, selected, onSuccessful } = props;
   const [fileServices, setFileServices] = useState<GetFileServicesResult[]>([]);
   const [modelKeys, setModelKeys] = useState<GetModelKeysResult[]>([]);

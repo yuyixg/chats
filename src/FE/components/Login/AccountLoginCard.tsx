@@ -2,7 +2,7 @@ import { useEffect, useState } from 'react';
 import { useForm } from 'react-hook-form';
 import toast from 'react-hot-toast';
 
-import { useTranslation } from 'next-i18next';
+import useTranslation from '@/hooks/useTranslation';
 import { useRouter } from 'next/router';
 
 import { saveUserInfo, setUserSession } from '@/utils/user';
@@ -32,7 +32,7 @@ const AccountLoginCard = (props: {
   closeLoading: Function;
 }) => {
   const { loginLoading, openLoading, closeLoading } = props;
-  const { t } = useTranslation('client');
+  const { t } = useTranslation();
   const router = useRouter();
   const [showPassword, setShowPassword] = useState(false);
 

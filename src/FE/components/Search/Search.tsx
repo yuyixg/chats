@@ -1,6 +1,6 @@
 import { FC, useContext, useRef, useState } from 'react';
 
-import { useTranslation } from 'next-i18next';
+import useTranslation from '@/hooks/useTranslation';
 
 import { HomeContext } from '@/pages/home/home';
 
@@ -22,7 +22,7 @@ const Search: FC<Props> = ({
   containerClassName,
   onSearch,
 }) => {
-  const { t } = useTranslation('client');
+  const { t } = useTranslation();
   const [query, setQuery] = useState<string>('');
   const timeoutRef = useRef<number | undefined>(undefined);
   const {

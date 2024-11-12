@@ -1,4 +1,4 @@
-import { useTranslation } from 'next-i18next';
+import useTranslation from '@/hooks/useTranslation';
 
 import {
   Pagination,
@@ -21,7 +21,7 @@ const PaginationContainer = ({
   totalCount: number;
   onPagingChange: (page: number, pageSize: number) => void;
 }) => {
-  const { t } = useTranslation(['admin']);
+  const { t } = useTranslation();
   function previous() {
     onPagingChange(page - 1, pageSize);
   }

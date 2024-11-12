@@ -1,1 +1,1 @@
-export { default, getServerSideProps } from './login-service';
+export { default } from './login-service';

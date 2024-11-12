@@ -1,7 +1,6 @@
 import React, { useEffect, useState } from 'react';
 
-import { useTranslation } from 'next-i18next';
-import { serverSideTranslations } from 'next-i18next/serverSideTranslations';
+import useTranslation from '@/hooks/useTranslation';
 
 import { DEFAULT_LANGUAGE } from '@/utils/settings';
 
@@ -22,7 +21,7 @@ import {
 import { getLoginServices } from '@/apis/adminApis';
 
 export default function LoginService() {
-  const { t } = useTranslation('admin');
+  const { t } = useTranslation();
   const [isOpen, setIsOpen] = useState(false);
   const [selected, setSelected] = useState<GetLoginServicesResult | null>(null);
   const [services, setServices] = useState<GetLoginServicesResult[]>([]);
@@ -107,11 +106,3 @@ export default function LoginService() {
     </>
   );
 }
-
-export const getServerSideProps = async ({ locale }: { locale: string }) => {
-  return {
-    props: {
-      ...(await serverSideTranslations(locale ?? DEFAULT_LANGUAGE, ['admin'])),
-    },
-  };
-};

@@ -1,6 +1,6 @@
 import { useContext, useEffect, useRef, useState } from 'react';
 
-import { useTranslation } from 'next-i18next';
+import useTranslation from '@/hooks/useTranslation';
 
 import { Message } from '@/types/chat';
 import { PropsMessage } from '@/types/components/chat';
@@ -27,7 +27,7 @@ const UserMessage = (props: Props) => {
   const {
     state: { selectChat, messageIsStreaming },
   } = useContext(HomeContext);
-  const { t } = useTranslation('client');
+  const { t } = useTranslation();
 
   const {
     message,

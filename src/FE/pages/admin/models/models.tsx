@@ -1,14 +1,11 @@
 import React, { useEffect, useState } from 'react';
 
-import { useTranslation } from 'next-i18next';
-import { serverSideTranslations } from 'next-i18next/serverSideTranslations';
+import useTranslation from '@/hooks/useTranslation';
 
 import { formatNumberAsMoney } from '@/utils/common';
 import { ModelPriceUnit } from '@/utils/model';
-import { DEFAULT_LANGUAGE } from '@/utils/settings';
 
 import { GetModelResult, LegacyModelProvider } from '@/types/admin';
-// import { ModelProviderTemplates } from '@/types/template';
 
 import { AddModelModal } from '@/components/Admin/Models/AddModelModal';
 import { EditModelModal } from '@/components/Admin/Models/EditModelModal';
@@ -25,17 +22,22 @@ import {
 
 import { getAllLegacyModelProviders, getModels } from '@/apis/adminApis';
 
-export default function Models(props: { modelProviderTemplates: {
-  [key: string]: LegacyModelProvider;
-} }) {
-  const { t } = useTranslation('admin');
+export default function Models() {
+  const { t } = useTranslation();
   const [isOpen, setIsOpen] = useState({ add: false, edit: false });
   const [selectedModel, setSelectedModel] = useState<GetModelResult | null>(
     null,
   );
   const [models, setModels] = useState<GetModelResult[]>([]);
   const [loading, setLoading] = useState(true);
+  const [modelProviderTemplates, setModelProviderTemplates] = useState<{
+    [key: string]: LegacyModelProvider;
+  }>();
+  
   useEffect(() => {
+    getAllLegacyModelProviders().then((data) => {
+      setModelProviderTemplates(data);
+    });
     init();
   }, []);
 
@@ -104,7 +106,8 @@ export default function Models(props: { modelProviderTemplates: {
                   </div>
                 </TableCell>
                 <TableCell>
-                  {props.modelProviderTemplates[item.modelProvider].displayName}
+                  {modelProviderTemplates &&
+                    modelProviderTemplates[item.modelProvider].displayName}
                 </TableCell>
                 <TableCell>{item.modelVersion}</TableCell>
                 <TableCell>
@@ -139,13 +142,3 @@ export default function Models(props: { modelProviderTemplates: {
     </>
   );
 }
-
-export const getServerSideProps = async ({ locale }: { locale: string }) => {
-  const modelProviderTemplates = await getAllLegacyModelProviders();
-  return {
-    props: {
-      modelProviderTemplates: modelProviderTemplates,
-      ...(await serverSideTranslations(locale ?? DEFAULT_LANGUAGE, ['admin'])),
-    },
-  };
-};

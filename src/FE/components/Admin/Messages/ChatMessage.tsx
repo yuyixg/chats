@@ -1,6 +1,6 @@
 import { FC, memo, useEffect, useRef, useState } from 'react';
 
-import { useTranslation } from 'next-i18next';
+import useTranslation from '@/hooks/useTranslation';
 
 import { preprocessLaTeX } from '@/utils/chats';
 import { formatNumberAsMoney } from '@/utils/common';
@@ -67,7 +67,7 @@ export const ChatMessage: FC<Props> = memo(
     onChangeMessage,
   }) => {
     const [messagedCopied, setMessageCopied] = useState(false);
-    const { t } = useTranslation('client');
+    const { t } = useTranslation();
 
     const copyOnClick = () => {
       if (!navigator.clipboard) return;

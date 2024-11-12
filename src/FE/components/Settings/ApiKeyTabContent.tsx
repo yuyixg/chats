@@ -1,7 +1,7 @@
 import React, { useEffect, useState } from 'react';
 import toast from 'react-hot-toast';
 
-import { useTranslation } from 'next-i18next';
+import useTranslation from '@/hooks/useTranslation';
 import Link from 'next/link';
 
 import { getApiUrl } from '@/utils/common';
@@ -31,7 +31,7 @@ import {
 
 let timer: NodeJS.Timeout;
 export const ApiKeyTab = () => {
-  const { t } = useTranslation('client');
+  const { t } = useTranslation();
   const [loading, setLoading] = useState(false);
   const [apiKeys, setApiKeys] = useState<GetUserApiKeyResult[]>([]);
   type GetUserApiKeyType = keyof GetUserApiKeyResult;

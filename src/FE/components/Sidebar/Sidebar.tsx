@@ -1,6 +1,6 @@
 import { ReactNode } from 'react';
 
-import { useTranslation } from 'next-i18next';
+import useTranslation from '@/hooks/useTranslation';
 
 import {
   IconLayoutSidebar,
@@ -45,7 +45,7 @@ const Sidebar = <T,>({
   handleCreateItem,
   hasModel,
 }: Props<T>) => {
-  const { t } = useTranslation('client');
+  const { t } = useTranslation();
   return (
     <>
       <div

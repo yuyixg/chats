@@ -1,13 +1,12 @@
 import { useEffect, useState } from 'react';
 
-import { useTranslation } from 'next-i18next';
-import Image from 'next/image';
 import { useRouter } from 'next/router';
+
+import useTranslation from '@/hooks/useTranslation';
 
 import { Nav } from '@/components/Admin/Nav/Nav';
 import {
   IconChartPie,
-  IconCreditCard,
   IconFiles,
   IconIdBadge,
   IconKey,
@@ -29,7 +28,7 @@ const AdminLayout = ({
   className?: string;
 }) => {
   const router = useRouter();
-  const { t } = useTranslation('admin');
+  const { t } = useTranslation();
   const [isCollapsed, setIsCollapsed] = useState(false);
 
   const menus = [
@@ -143,7 +142,7 @@ const AdminLayout = ({
               isCollapsed && 'justify-center',
             )}
           >
-            <Image
+            <img
               className="h-8 w-8 rounded-sm"
               alt="Chats Logo"
               src="/icons/logo.png"

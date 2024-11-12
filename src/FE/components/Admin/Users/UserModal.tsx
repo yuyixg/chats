@@ -2,7 +2,7 @@ import React, { useEffect, useState } from 'react';
 import { useForm } from 'react-hook-form';
 import toast from 'react-hot-toast';
 
-import { useTranslation } from 'next-i18next';
+import useTranslation from '@/hooks/useTranslation';
 
 import { GetUsersResult } from '@/types/admin';
 
@@ -44,7 +44,7 @@ const ROLES = [
 ];
 
 export const UserModal = (props: IProps) => {
-  const { t } = useTranslation('admin');
+  const { t } = useTranslation();
   const { user, isOpen, onClose, onSuccessful } = props;
   const [submit, setSubmit] = useState(false);
   const formFields: IFormFieldOption[] = [

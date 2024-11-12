@@ -1,6 +1,6 @@
 import React, { useEffect, useState } from 'react';
 
-import { useTranslation } from 'next-i18next';
+import useTranslation from '@/hooks/useTranslation';
 
 import { GetRequestLogsDetailsResult } from '@/types/admin';
 
@@ -20,7 +20,7 @@ interface IProps {
 }
 
 export const RequestLogDetailsModal = (props: IProps) => {
-  const { t } = useTranslation('admin');
+  const { t } = useTranslation();
   const { isOpen, onClose } = props;
   const [log, setLog] = useState<GetRequestLogsDetailsResult>();
 

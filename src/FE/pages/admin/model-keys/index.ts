@@ -1,1 +1,1 @@
-export { default, getServerSideProps } from './model-keys';
+export { default } from './model-keys';

@@ -1,9 +1,6 @@
 import React, { useEffect, useState } from 'react';
 
-import { useTranslation } from 'next-i18next';
-import { serverSideTranslations } from 'next-i18next/serverSideTranslations';
-
-import { DEFAULT_LANGUAGE } from '@/utils/settings';
+import useTranslation from '@/hooks/useTranslation';
 
 import { GetRequestLogsListResult } from '@/types/admin';
 import { PageResult, Paging } from '@/types/page';
@@ -25,7 +22,7 @@ import {
 import { getRequestLogs } from '@/apis/adminApis';
 
 export default function RequestLogs() {
-  const { t } = useTranslation('admin');
+  const { t } = useTranslation();
   const [loading, setLoading] = useState(true);
   const [logDetail, setLogDetail] = useState<GetRequestLogsListResult | null>(
     null,
@@ -129,11 +126,3 @@ export default function RequestLogs() {
     </>
   );
 }
-
-export const getServerSideProps = async ({ locale }: { locale: string }) => {
-  return {
-    props: {
-      ...(await serverSideTranslations(locale ?? DEFAULT_LANGUAGE, ['admin'])),
-    },
-  };
-};

@@ -7,11 +7,9 @@ import {
   useState,
 } from 'react';
 
-import { useTranslation } from 'next-i18next';
+import useTranslation from '@/hooks/useTranslation';
 
 import { Prompt } from '@/types/prompt';
-
-import { HomeContext } from '@/pages/home/home';
 
 import { PromptList } from './PromptList';
 import { VariableModal } from './VariableModal';
@@ -29,7 +27,7 @@ export const SystemPrompt: FC<Props> = ({
   prompts,
   onChangePrompt,
 }) => {
-  const { t } = useTranslation('client');
+  const { t } = useTranslation();
 
   const [value, setValue] = useState<string>('');
   const [activePromptIndex, setActivePromptIndex] = useState(0);

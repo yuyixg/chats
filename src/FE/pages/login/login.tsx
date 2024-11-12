@@ -1,11 +1,8 @@
 import { useEffect, useState } from 'react';
 
-import { useTranslation } from 'next-i18next';
-import { serverSideTranslations } from 'next-i18next/serverSideTranslations';
-import Image from 'next/image';
+import useTranslation from '@/hooks/useTranslation';
 
-import { DEFAULT_LANGUAGE } from '@/utils/settings';
-import { hasContact } from '@/utils/website';
+import { hasContact, setSiteInfo } from '@/utils/website';
 
 import { SiteInfoConfig } from '@/types/config';
 import { LoginConfigsResult, LoginType } from '@/types/user';
@@ -31,16 +28,11 @@ type LoginHeader = {
   [key in TabKeys]: { title: string; description: string };
 };
 
-export default function LoginPage({
-  siteInfo,
-  loginConfigs,
-}: {
-  siteInfo: SiteInfoConfig;
-  loginConfigs: LoginConfigsResult[];
-}) {
-  const { t } = useTranslation('client');
+export default function LoginPage() {
+  const { t } = useTranslation();
   const [contactOpenModal, setContactOpenModal] = useState(false);
   const [isClient, setIsClient] = useState(false);
+  const [webSiteInfo, setWebSiteInfo] = useState<SiteInfoConfig>();
   const LoginHeaders: LoginHeader = {
     phone: {
       title: t('Sign in to Chats'),
@@ -61,23 +53,44 @@ export default function LoginPage({
       ),
     },
   };
-  const [loginTypes] = useState<LoginType[]>(loginConfigs.map((x) => x.type));
+  const [loginConfigs, setLoginConfigs] = useState<LoginConfigsResult[]>([]);
   const [loginLoading, setLoginLoading] = useState(false);
   const [currentTab, setCurrentTab] = useState<TabKeys>(
-    loginTypes.includes(LoginType.Phone) ? TabKeys.PHONE : TabKeys.ACCOUNT,
+    loginConfigs.find((x) => x.type === LoginType.Phone)
+      ? TabKeys.PHONE
+      : TabKeys.ACCOUNT,
   );
+  const [loading, setLoading] = useState(false);
 
   useEffect(() => {
     setIsClient(true);
+    setLoading(true);
+    getLoginProviders().then((data) => {
+      const configs = data.map((x) => {
+        const configs = x?.config;
+        return {
+          type: x.key,
+          configs: {
+            appId: configs?.appId || '',
+          },
+        };
+      });
+      setLoginConfigs(configs);
+      setLoading(false);
+    });
+    getSiteInfo().then((data) => {
+      setSiteInfo(data);
+      setWebSiteInfo(data);
+    });
   }, []);
 
   const openLoading = () => setLoginLoading(true);
   const closeLoading = () => setLoginLoading(false);
 
   const TabsListRender = () => {
-    return loginTypes.includes(LoginType.Phone) ? (
+    return loginConfigs.find((x) => x.type === LoginType.Phone) ? (
       <TabsList className="flex w-full flex-row justify-around">
-        {loginTypes.includes(LoginType.Phone) && (
+        {loginConfigs.find((x) => x.type === LoginType.Phone) && (
           <TabsTrigger
             value={TabKeys.PHONE}
             className="flex justify-center w-full"
@@ -85,7 +98,7 @@ export default function LoginPage({
             {t('Mobile Login')}
           </TabsTrigger>
         )}
-        {loginTypes.includes(LoginType.Phone) && (
+        {loginConfigs.find((x) => x.type === LoginType.Phone) && (
           <TabsTrigger
             value={TabKeys.REGISTER}
             className="flex justify-center w-full"
@@ -107,12 +120,12 @@ export default function LoginPage({
 
   return (
     <>
-      {isClient && (
+      {!loading && isClient && (
         <div className="container relative h-screen flex-col items-center justify-center md:grid lg:max-w-none lg:grid-cols-2 lg:px-0">
           <div className="relative hidden h-full flex-col bg-muted p-10 text-white lg:flex dark:border-r">
             <div className="absolute inset-0 bg-zinc-900" />
             <div className="relative z-20 flex items-center text-lg font-medium">
-              <Image
+              <img
                 src="/icons/logo.png"
                 width={32}
                 height={32}
@@ -157,7 +170,7 @@ export default function LoginPage({
                         className="flex-col"
                       >
                         <TabsListRender />
-                        <TabsContent className="m-0 mt-2" value={TabKeys.PHONE}>
+                        <TabsContent className="m-0 mt-4" value={TabKeys.PHONE}>
                           <PhoneLoginCard
                             openLoading={openLoading}
                             closeLoading={closeLoading}
@@ -165,18 +178,18 @@ export default function LoginPage({
                           />
                         </TabsContent>
                         <TabsContent
-                          className="m-0 mt-2"
+                          className="m-0 mt-4"
                           value={TabKeys.REGISTER}
                         >
                           <PhoneRegisterCard
                             openLoading={openLoading}
                             closeLoading={closeLoading}
                             loginLoading={loginLoading}
-                            showContact={hasContact(siteInfo)}
+                            showContact={hasContact(webSiteInfo)}
                           />
                         </TabsContent>
                         <TabsContent
-                          className="m-0 mt-2"
+                          className="m-0 mt-4"
                           value={TabKeys.ACCOUNT}
                         >
                           <AccountLoginCard
@@ -187,8 +200,8 @@ export default function LoginPage({
                         </TabsContent>
                       </Tabs>
 
-                      {loginTypes.length > 0 && (
-                        <div className="relative mt-2">
+                      {loginConfigs.length > 0 && (
+                        <div className="relative mt-5">
                           <div className="absolute inset-0 flex items-center">
                             <span className="w-full border-t" />
                           </div>
@@ -201,7 +214,9 @@ export default function LoginPage({
                       )}
 
                       <div className="flex justify-center gap-2">
-                        {loginTypes.includes(LoginType.WeChat) && (
+                        {loginConfigs.find(
+                          (x) => x.type === LoginType.WeChat,
+                        ) && (
                           <WeChatLogin
                             configs={
                               loginConfigs.find(
@@ -211,9 +226,9 @@ export default function LoginPage({
                             loading={loginLoading}
                           />
                         )}
-                        {loginTypes.includes(LoginType.Keycloak) && (
-                          <KeyCloakLogin loading={loginLoading} />
-                        )}
+                        {loginConfigs.find(
+                          (x) => x.type === LoginType.Keycloak,
+                        ) && <KeyCloakLogin loading={loginLoading} />}
                       </div>
                     </div>
                   </div>
@@ -221,7 +236,7 @@ export default function LoginPage({
               </>
               <p className="px-8 text-center text-sm text-muted-foreground">
                 <span className="flex text-sm justify-center py-1">
-                  {siteInfo?.filingNumber}
+                  {webSiteInfo?.filingNumber}
                 </span>
                 © 2024 Chats™ . All Rights Reserved.
                 {hasContact() && (
@@ -248,26 +263,3 @@ export default function LoginPage({
     </>
   );
 }
-
-export const getServerSideProps = async ({ locale }: { locale: string }) => {
-  const siteInfo = await getSiteInfo();
-
-  const loginConfigList = await getLoginProviders();
-  const loginConfigs = loginConfigList.map((x) => {
-    const configs = x?.config;
-    return {
-      type: x.key,
-      configs: {
-        appId: configs?.appId || null,
-      },
-    };
-  });
-
-  return {
-    props: {
-      ...(await serverSideTranslations(locale ?? DEFAULT_LANGUAGE, ['client'])),
-      siteInfo,
-      loginConfigs,
-    },
-  };
-};

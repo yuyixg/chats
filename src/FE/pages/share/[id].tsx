@@ -1,12 +1,11 @@
 import { useEffect, useState } from 'react';
 
-import { useTranslation } from 'next-i18next';
-import { serverSideTranslations } from 'next-i18next/serverSideTranslations';
 import Link from 'next/link';
 import { useRouter } from 'next/router';
 
+import useTranslation from '@/hooks/useTranslation';
+
 import { getSelectMessages } from '@/utils/message';
-import { DEFAULT_LANGUAGE } from '@/utils/settings';
 
 import { GetMessageDetailsResult } from '@/types/admin';
 import { ChatMessage } from '@/types/chatMessage';
@@ -19,7 +18,7 @@ import { getShareMessage } from '@/apis/adminApis';
 import Decimal from 'decimal.js';
 
 export default function ShareMessage() {
-  const { t } = useTranslation('client');
+  const { t } = useTranslation();
   const router = useRouter();
   const { id } = router.query as { id: string };
   const [chat, setChat] = useState<GetMessageDetailsResult | null>(null);
@@ -124,12 +123,3 @@ export default function ShareMessage() {
 
   return loading ? <></> : showChat();
 }
-
-export const getServerSideProps = async ({ locale }: { locale: string }) => {
-  return {
-    props: {
-      locale,
-      ...(await serverSideTranslations(locale ?? DEFAULT_LANGUAGE, ['client'])),
-    },
-  };
-};

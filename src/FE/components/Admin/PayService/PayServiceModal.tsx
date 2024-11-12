@@ -2,7 +2,7 @@ import React, { useEffect } from 'react';
 import { useForm } from 'react-hook-form';
 import toast from 'react-hot-toast';
 
-import { useTranslation } from 'next-i18next';
+import useTranslation from '@/hooks/useTranslation';
 
 import { mergeConfigs } from '@/utils/model';
 import { getPayConfigs } from '@/utils/pay';
@@ -43,7 +43,7 @@ interface IProps {
 }
 
 export const PayServiceModal = (props: IProps) => {
-  const { t } = useTranslation('admin');
+  const { t } = useTranslation();
   const { selected, types, isOpen, onClose, onSuccessful } = props;
   const formFields: IFormFieldOption[] = [
     {

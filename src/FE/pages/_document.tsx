@@ -13,7 +13,7 @@ type Props = DocumentProps & {
 
 function ChatsDocument(props: Props) {
   return (
-    <Html lang="zh">
+    <Html>
       <Head>
         <meta name="apple-mobile-web-app-capable" content="yes" />
         <meta name="apple-mobile-web-app-title" content="Chats"></meta>

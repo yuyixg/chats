@@ -1,6 +1,6 @@
 import { useContext, useEffect, useState } from 'react';
 
-import { useTranslation } from 'next-i18next';
+import useTranslation from '@/hooks/useTranslation';
 
 import { HomeContext } from '@/pages/home/home';
 
@@ -15,7 +15,7 @@ interface Props {
 }
 
 export const Conversations = ({ chats }: Props) => {
-  const { t } = useTranslation('client');
+  const { t } = useTranslation();
   const {
     state: { chatsPaging },
     getChats,

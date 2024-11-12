@@ -1,6 +1,6 @@
 import { useContext, useEffect } from 'react';
 
-import { useTranslation } from 'next-i18next';
+import useTranslation from '@/hooks/useTranslation';
 
 import { useCreateReducer } from '@/hooks/useCreateReducer';
 
@@ -18,7 +18,7 @@ import { Conversations } from './Conversations';
 import { ChatResult } from '@/apis/clientApis';
 
 export const Chatbar = () => {
-  const { t } = useTranslation('client');
+  const { t } = useTranslation();
 
   const chatBarContextValue = useCreateReducer<ChatbarInitialState>({
     initialState,

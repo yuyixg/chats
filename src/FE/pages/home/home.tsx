@@ -1,13 +1,12 @@
 import { useEffect, useRef } from 'react';
 import { Dispatch, createContext } from 'react';
 
-import { useTranslation } from 'next-i18next';
-import { serverSideTranslations } from 'next-i18next/serverSideTranslations';
 import Head from 'next/head';
 import { useRouter } from 'next/router';
 
 import { useCreateReducer } from '@/hooks/useCreateReducer';
 import { ActionType } from '@/hooks/useCreateReducer';
+import useTranslation from '@/hooks/useTranslation';
 
 import {
   getPathChatId,
@@ -23,18 +22,17 @@ import {
   getSettingsLanguage,
   saveSettings,
 } from '@/utils/settings';
-import { DEFAULT_LANGUAGE, Settings } from '@/utils/settings';
+import { Settings } from '@/utils/settings';
 import { getLoginUrl, getUserInfo, getUserSession } from '@/utils/user';
 import { UserSession } from '@/utils/user';
-import { setSiteInfo } from '@/utils/website';
 
 import { IChat, Role } from '@/types/chat';
 import { ChatMessage } from '@/types/chatMessage';
-import { SiteInfoConfig } from '@/types/config';
 import { Model, UserModelConfig } from '@/types/model';
 import { Prompt } from '@/types/prompt';
 
 import { Chat } from '@/components/Chat/Chat';
+import ChatSettingsBar from '@/components/ChatSettings/ChatSettingsBar';
 import { Chatbar } from '@/components/Chatbar/Chatbar';
 import PromptBar from '@/components/Promptbar';
 import Spinner from '@/components/Spinner';
@@ -43,7 +41,6 @@ import {
   ChatResult,
   GetChatsParams,
   getChatsByPaging,
-  getSiteInfo,
   getUserMessages,
   getUserModels,
   getUserPromptBrief,
@@ -127,9 +124,9 @@ const HomeContext = createContext<HomeContextProps>(undefined!);
 
 export { initialState, HomeContext };
 
-const Home = ({ siteInfo }: { siteInfo: SiteInfoConfig }) => {
+const Home = () => {
   const router = useRouter();
-  const { t } = useTranslation('client');
+  const { t } = useTranslation();
   const contextValue = useCreateReducer<HomeInitialState>({
     initialState,
   });
@@ -383,7 +380,6 @@ const Home = ({ siteInfo }: { siteInfo: SiteInfoConfig }) => {
   };
 
   useEffect(() => {
-    setSiteInfo(siteInfo);
     const settings = getSettings();
 
     dispatch({
@@ -482,6 +478,7 @@ const Home = ({ siteInfo }: { siteInfo: SiteInfoConfig }) => {
               <Chat stopConversationRef={stopConversationRef} />
             </div>
             <PromptBar />
+            <ChatSettingsBar />
           </div>
         </div>
       </main>
@@ -490,14 +487,3 @@ const Home = ({ siteInfo }: { siteInfo: SiteInfoConfig }) => {
 };
 
 export default Home;
-
-export const getServerSideProps = async ({ locale }: { locale: string }) => {
-  const siteInfo = await getSiteInfo();
-  return {
-    props: {
-      siteInfo: siteInfo || {},
-      locale,
-      ...(await serverSideTranslations(locale ?? DEFAULT_LANGUAGE, ['client'])),
-    },
-  };
-};

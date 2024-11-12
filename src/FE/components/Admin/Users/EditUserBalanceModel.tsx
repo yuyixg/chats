@@ -2,7 +2,7 @@ import React, { useEffect, useState } from 'react';
 import { useForm } from 'react-hook-form';
 import toast from 'react-hot-toast';
 
-import { useTranslation } from 'next-i18next';
+import useTranslation from '@/hooks/useTranslation';
 
 import { Button } from '@/components/ui/button';
 import {
@@ -30,7 +30,7 @@ interface IProps {
 }
 
 export const EditUserBalanceModal = (props: IProps) => {
-  const { t } = useTranslation('admin');
+  const { t } = useTranslation();
   const { userId, userBalance, isOpen, onClose, onSuccessful } = props;
   const [loading, setLoading] = useState(false);
   const formFields: IFormFieldOption[] = [

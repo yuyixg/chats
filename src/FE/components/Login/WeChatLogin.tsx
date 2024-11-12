@@ -1,7 +1,6 @@
 import { useEffect, useState } from 'react';
 
-import { useTranslation } from 'next-i18next';
-import Image from 'next/image';
+import useTranslation from '@/hooks/useTranslation';
 
 import { Button } from '@/components/ui/button';
 import {
@@ -17,7 +16,7 @@ const WeChatLogin = (props: {
   configs: { appId: string };
   loading?: boolean;
 }) => {
-  const { t } = useTranslation('client');
+  const { t } = useTranslation();
   const { loading, configs } = props;
   const [weChatModal, setWeChatModal] = useState(false);
   useEffect(() => {}, []);
@@ -35,7 +34,7 @@ const WeChatLogin = (props: {
               disabled={loading}
               variant="link"
             >
-              <Image
+              <img
                 src="/logos/wechat.svg"
                 alt="WeChat"
                 width={0}

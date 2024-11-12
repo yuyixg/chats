@@ -1,1 +1,1 @@
-export { default, getServerSideProps } from './authorizing';
+export { default } from './authorizing';

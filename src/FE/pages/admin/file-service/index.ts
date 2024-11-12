@@ -1,1 +1,1 @@
-export { default, getServerSideProps } from './file-service';
+export { default } from './file-service';

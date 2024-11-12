@@ -133,5 +133,6 @@ export interface GetSiteInfoResult {
   filingNumber: string;
   contact: {
     qqGroupNumber: string;
+    qqGroupQrCodeLink: string;
   };
 }

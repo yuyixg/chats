@@ -1,4 +1,4 @@
-import { useTranslation } from 'next-i18next';
+import useTranslation from '@/hooks/useTranslation';
 
 import { IconEdit } from '@/components/Icons';
 import Tips from '@/components/Tips/Tips';
@@ -11,7 +11,7 @@ interface Props {
 
 const EditAction = (props: Props) => {
   const { onToggleEditing, disabled } = props;
-  const { t } = useTranslation('client');
+  const { t } = useTranslation();
 
   return (
     <Tips

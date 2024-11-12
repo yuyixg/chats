@@ -1,1 +1,1 @@
-export { default, getServerSideProps } from './pay-service';
+export { default } from './pay-service';

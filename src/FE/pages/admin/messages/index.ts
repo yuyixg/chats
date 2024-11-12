@@ -1,1 +1,1 @@
-export { default, getServerSideProps } from './messages';
+export { default } from './messages';

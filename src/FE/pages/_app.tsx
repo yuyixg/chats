@@ -1,7 +1,6 @@
 import { Toaster } from 'react-hot-toast';
 import { QueryClient, QueryClientProvider } from 'react-query';
 
-import { appWithTranslation } from 'next-i18next';
 import type { AppProps } from 'next/app';
 import { useRouter } from 'next/router';
 
@@ -38,4 +37,4 @@ function App({ Component, pageProps }: AppProps<{}> | any) {
   );
 }
 
-export default appWithTranslation(App);
+export default App;

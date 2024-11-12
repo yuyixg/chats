@@ -1,6 +1,6 @@
 import { useEffect, useState } from 'react';
 
-import { useTranslation } from 'next-i18next';
+import useTranslation from '@/hooks/useTranslation';
 
 import { Checkbox } from '@/components/ui/checkbox';
 
@@ -9,7 +9,7 @@ const EnableNetworkSearch = (props: {
   enable: boolean;
   onChange: (checked: boolean) => void;
 }) => {
-  const { t } = useTranslation('client');
+  const { t } = useTranslation();
   const { label, enable, onChange } = props;
   const [check, setCheck] = useState(enable);
 

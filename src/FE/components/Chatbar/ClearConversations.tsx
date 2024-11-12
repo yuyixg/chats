@@ -1,6 +1,6 @@
 import { FC, useState } from 'react';
 
-import { useTranslation } from 'next-i18next';
+import useTranslation from '@/hooks/useTranslation';
 
 import { IconCheck, IconTrash, IconX } from '@/components/Icons/index';
 import { SidebarButton } from '@/components/Sidebar/SidebarButton';
@@ -12,7 +12,7 @@ interface Props {
 export const ClearConversations: FC<Props> = ({ onClearConversations }) => {
   const [isConfirming, setIsConfirming] = useState<boolean>(false);
 
-  const { t } = useTranslation('client');
+  const { t } = useTranslation();
 
   const handleClearConversations = () => {
     onClearConversations();

@@ -1,9 +1,6 @@
 import React, { useEffect, useState } from 'react';
 
-import { useTranslation } from 'next-i18next';
-import { serverSideTranslations } from 'next-i18next/serverSideTranslations';
-
-import { DEFAULT_LANGUAGE } from '@/utils/settings';
+import useTranslation from '@/hooks/useTranslation';
 
 import { GetPayServicesResult } from '@/types/admin';
 
@@ -22,7 +19,7 @@ import {
 import { getPayServices } from '@/apis/adminApis';
 
 export default function PayService() {
-  const { t } = useTranslation('admin');
+  const { t } = useTranslation();
   const [isOpen, setIsOpen] = useState(false);
   const [selected, setSelected] = useState<GetPayServicesResult | null>(null);
   const [services, setServices] = useState<GetPayServicesResult[]>([]);
@@ -107,11 +104,3 @@ export default function PayService() {
     </>
   );
 }
-
-export const getServerSideProps = async ({ locale }: { locale: string }) => {
-  return {
-    props: {
-      ...(await serverSideTranslations(locale ?? DEFAULT_LANGUAGE, ['admin'])),
-    },
-  };
-};

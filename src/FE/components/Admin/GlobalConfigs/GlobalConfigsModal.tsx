@@ -2,7 +2,7 @@ import React, { useEffect } from 'react';
 import { useForm } from 'react-hook-form';
 import toast from 'react-hot-toast';
 
-import { useTranslation } from 'next-i18next';
+import useTranslation from '@/hooks/useTranslation';
 
 import { GlobalConfigKeys, GlobalDefaultConfigs } from '@/types/config';
 import { GetConfigsResult, PostAndPutConfigParams } from '@/types/user';
@@ -35,7 +35,7 @@ interface IProps {
 }
 
 export const GlobalConfigsModal = (props: IProps) => {
-  const { t } = useTranslation('admin');
+  const { t } = useTranslation();
   const { configKeys = [], selected, isOpen, onClose, onSuccessful } = props;
   const formFields: IFormFieldOption[] = [
     {

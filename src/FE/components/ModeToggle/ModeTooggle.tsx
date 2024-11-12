@@ -2,7 +2,7 @@
 
 import * as React from 'react';
 
-import { useTranslation } from 'next-i18next';
+import useTranslation from '@/hooks/useTranslation';
 import { useTheme } from 'next-themes';
 
 import { IconMoon, IconSun } from '@/components/Icons';
@@ -15,7 +15,7 @@ import {
 } from '@/components/ui/dropdown-menu';
 
 export function ModeToggle() {
-  const { t } = useTranslation('client');
+  const { t } = useTranslation();
   const { setTheme } = useTheme();
 
   return (

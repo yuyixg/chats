@@ -1,4 +1,4 @@
-import { useTranslation } from 'next-i18next';
+import useTranslation from '@/hooks/useTranslation';
 
 import { getSiteInfo } from '@/utils/website';
 
@@ -15,7 +15,7 @@ interface IProps {
 }
 
 const ContactModal = (props: IProps) => {
-  const { t } = useTranslation('client');
+  const { t } = useTranslation();
   const { isOpen, onClose } = props;
   const contact = getSiteInfo().contact;
 

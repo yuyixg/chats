@@ -2,7 +2,7 @@ import { useEffect, useState } from 'react';
 import { useForm } from 'react-hook-form';
 import toast from 'react-hot-toast';
 
-import { useTranslation } from 'next-i18next';
+import useTranslation from '@/hooks/useTranslation';
 import { useRouter } from 'next/router';
 
 import { PhoneRegExp, SmsExpirationSeconds } from '@/utils/common';
@@ -31,7 +31,7 @@ const PhoneLoginCard = (props: {
   closeLoading: Function;
 }) => {
   const { loginLoading, openLoading, closeLoading } = props;
-  const { t } = useTranslation('client');
+  const { t } = useTranslation();
   const router = useRouter();
   const [seconds, setSeconds] = useState(SmsExpirationSeconds - 1);
   const [isSendCode, setIsSendCode] = useState(false);

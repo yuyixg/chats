@@ -1,10 +1,10 @@
-import { useTranslation } from 'next-i18next';
+import useTranslation from '@/hooks/useTranslation';
 import Link from 'next/link';
 
 import { Button } from '@/components/ui/button';
 
 const PageNotFound = () => {
-  const { t } = useTranslation('client');
+  const { t } = useTranslation();
   return (
     <main className="grid min-h-full place-items-center dark:bg-[#262630] bg-white py-24 sm:py-32">
       <div className="text-center">

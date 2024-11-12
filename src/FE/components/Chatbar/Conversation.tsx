@@ -7,7 +7,7 @@ import {
 } from 'react';
 import toast from 'react-hot-toast';
 
-import { useTranslation } from 'next-i18next';
+import useTranslation from '@/hooks/useTranslation';
 
 import { DBModelProvider, ModelProviders } from '@/types/model';
 
@@ -40,7 +40,7 @@ interface Props {
 }
 
 export const ConversationComponent = ({ chat }: Props) => {
-  const { t } = useTranslation('client');
+  const { t } = useTranslation();
   const {
     state: {
       selectChat: { id: selectChatId } = { id: undefined },

@@ -1,6 +1,6 @@
 import { useEffect, useState } from 'react';
 
-import Image from 'next/image';
+import { getApiUrl } from '@/utils/common';
 
 import { Button } from '@/components/ui/button';
 import {
@@ -11,7 +11,6 @@ import {
 } from '@/components/ui/tooltip';
 
 import { getCsrfToken } from '@/apis/clientApis';
-import { getApiUrl } from '@/utils/common';
 
 const KeyCloakLogin = (props: { loading?: boolean }) => {
   const { loading } = props;
@@ -39,7 +38,7 @@ const KeyCloakLogin = (props: { loading?: boolean }) => {
               variant="link"
               type="submit"
             >
-              <Image
+              <img
                 src="/logos/keycloak.svg"
                 alt="Keycloak"
                 width={32}

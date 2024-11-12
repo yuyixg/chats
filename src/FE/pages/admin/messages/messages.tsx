@@ -1,7 +1,6 @@
 import React, { useEffect, useState } from 'react';
 
-import { useTranslation } from 'next-i18next';
-import { serverSideTranslations } from 'next-i18next/serverSideTranslations';
+import useTranslation from '@/hooks/useTranslation';
 
 import { DEFAULT_LANGUAGE } from '@/utils/settings';
 
@@ -24,7 +23,7 @@ import {
 import { getMessages } from '@/apis/adminApis';
 
 export default function Messages() {
-  const { t } = useTranslation('admin');
+  const { t } = useTranslation();
   const [loading, setLoading] = useState(true);
   const [pagination, setPagination] = useState<Paging>({
     page: 1,
@@ -111,11 +110,3 @@ export default function Messages() {
     </>
   );
 }
-
-export const getServerSideProps = async ({ locale }: { locale: string }) => {
-  return {
-    props: {
-      ...(await serverSideTranslations(locale ?? DEFAULT_LANGUAGE, ['admin'])),
-    },
-  };
-};

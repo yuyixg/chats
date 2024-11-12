@@ -1,7 +1,7 @@
 import React, { useState } from 'react';
 import toast from 'react-hot-toast';
 
-import { useTranslation } from 'next-i18next';
+import useTranslation from '@/hooks/useTranslation';
 
 import { Button } from '@/components/ui/button';
 import { Dialog, DialogContent, DialogHeader, DialogTitle } from '@/components/ui/dialog';
@@ -17,7 +17,7 @@ interface IProps {
 }
 
 export const SharedMessageModal = (props: IProps) => {
-  const { t } = useTranslation('client');
+  const { t } = useTranslation();
   const { chat, isOpen, onClose, onShareChange } = props;
   const [loading, setLoading] = useState(false);
   const shareUrl = `${location.origin}/share/${chat.id}`;

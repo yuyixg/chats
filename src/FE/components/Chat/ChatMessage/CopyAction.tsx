@@ -1,6 +1,6 @@
 import { useState } from 'react';
 
-import { useTranslation } from 'next-i18next';
+import useTranslation from '@/hooks/useTranslation';
 
 import { IconCheck, IconCopy } from '@/components/Icons';
 import Tips from '@/components/Tips/Tips';
@@ -15,7 +15,7 @@ interface Props {
 }
 const CopyAction = (props: Props) => {
   const { text, triggerClassName, hidden = false } = props;
-  const { t } = useTranslation('client');
+  const { t } = useTranslation();
   const [messagedCopied, setMessageCopied] = useState(false);
 
   const copyOnClick = (content?: string) => {

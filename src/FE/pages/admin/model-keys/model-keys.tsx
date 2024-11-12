@@ -1,13 +1,12 @@
 import React, { useEffect, useState } from 'react';
 
-import { useTranslation } from 'next-i18next';
-import { serverSideTranslations } from 'next-i18next/serverSideTranslations';
+import useTranslation from '@/hooks/useTranslation';
 
 import { DEFAULT_LANGUAGE } from '@/utils/settings';
 
 import { GetModelKeysResult, LegacyModelProvider } from '@/types/admin';
-// import { ModelProviderTemplates } from '@/types/template';
 
+// import { ModelProviderTemplates } from '@/types/template';
 import { ModelKeysModal } from '@/components/Admin/ModelKeys/ModelKeysModal';
 import { Button } from '@/components/ui/button';
 import { Card } from '@/components/ui/card';
@@ -22,13 +21,20 @@ import {
 
 import { getAllLegacyModelProviders, getModelKeys } from '@/apis/adminApis';
 
-export default function ModelKeys(props: { modelProviderTemplates: { [name: string]: LegacyModelProvider } }) {
-  const { t } = useTranslation('admin');
+export default function ModelKeys() {
+  const { t } = useTranslation();
   const [isOpen, setIsOpen] = useState(false);
   const [selected, setSelected] = useState<GetModelKeysResult | null>(null);
   const [services, setServices] = useState<GetModelKeysResult[]>([]);
   const [loading, setLoading] = useState(true);
+  const [modelProviderTemplates, setModelProviderTemplates] = useState<{
+    [key: string]: LegacyModelProvider;
+  }>();
+
   useEffect(() => {
+    getAllLegacyModelProviders().then((data) => {
+      setModelProviderTemplates(data);
+    });
     init();
   }, []);
 
@@ -88,10 +94,13 @@ export default function ModelKeys(props: { modelProviderTemplates: { [name: stri
                   {item.name}
                 </TableCell>
                 <TableCell>
-                  {props.modelProviderTemplates[item.type].displayName}
+                  {modelProviderTemplates &&
+                    modelProviderTemplates[item.type].displayName}
                 </TableCell>
                 <TableCell>
-                  {item.enabledModelCount === item.totalModelCount ? `${item.totalModelCount}` : `${item.enabledModelCount}/${item.totalModelCount}`}
+                  {item.enabledModelCount === item.totalModelCount
+                    ? `${item.totalModelCount}`
+                    : `${item.enabledModelCount}/${item.totalModelCount}`}
                 </TableCell>
                 <TableCell>
                   {new Date(item.createdAt).toLocaleString()}
@@ -101,23 +110,15 @@ export default function ModelKeys(props: { modelProviderTemplates: { [name: stri
           </TableBody>
         </Table>
       </Card>
-      <ModelKeysModal
-        selected={selected}
-        isOpen={isOpen}
-        onClose={handleClose}
-        onSuccessful={init}
-        modelProviderTemplates={props.modelProviderTemplates}
-      />
+      {modelProviderTemplates && (
+        <ModelKeysModal
+          selected={selected}
+          isOpen={isOpen}
+          onClose={handleClose}
+          onSuccessful={init}
+          modelProviderTemplates={modelProviderTemplates}
+        />
+      )}
     </>
   );
 }
-
-export const getServerSideProps = async ({ locale }: { locale: string }) => {
-  const modelProviderTemplates = await getAllLegacyModelProviders();
-  return {
-    props: {
-      modelProviderTemplates,
-      ...(await serverSideTranslations(locale ?? DEFAULT_LANGUAGE, ['admin'])),
-    },
-  };
-};

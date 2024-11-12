@@ -1,4 +1,4 @@
-import { useTranslation } from 'next-i18next';
+import useTranslation from '@/hooks/useTranslation';
 
 import { formatNumberAsMoney } from '@/utils/common';
 
@@ -15,7 +15,7 @@ interface Props {
 }
 
 export const GenerateInformationAction = (props: Props) => {
-  const { t } = useTranslation('client');
+  const { t } = useTranslation();
   const { message, hidden } = props;
 
   const GenerateInformation = (props: { name: string; value: string }) => {

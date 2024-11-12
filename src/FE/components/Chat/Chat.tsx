@@ -9,7 +9,7 @@ import {
 } from 'react';
 import toast from 'react-hot-toast';
 
-import { useTranslation } from 'next-i18next';
+import useTranslation from '@/hooks/useTranslation';
 
 import { getApiUrl } from '@/utils/common';
 import { throttle } from '@/utils/throttle';
@@ -21,8 +21,9 @@ import { HomeContext } from '@/pages/home/home';
 
 import { ModeToggle } from '@/components/ModeToggle/ModeTooggle';
 
+import ChatSettingsBar from '../ChatSettings/ChatSettingsBar';
+import { Button } from '../ui/button';
 import ChangeModel from './ChangeModel';
-import ChatError from './ChatError';
 import { ChatInput } from './ChatInput';
 import EnableNetworkSearch from './EnableNetworkSearch';
 import { MemoizedChatMessage } from './MemoizedChatMessage';
@@ -40,7 +41,7 @@ interface Props {
 }
 
 export const Chat = memo(({ stopConversationRef }: Props) => {
-  const { t } = useTranslation('client');
+  const { t } = useTranslation();
 
   const {
     state: {
@@ -58,6 +59,7 @@ export const Chat = memo(({ stopConversationRef }: Props) => {
     handleUpdateSelectMessage,
     handleUpdateCurrentMessage,
     handleUpdateUserModelConfig,
+    handleUpdateSettings,
     hasModel,
     dispatch: homeDispatch,
   } = useContext(HomeContext);
@@ -400,6 +402,13 @@ export const Chat = memo(({ stopConversationRef }: Props) => {
                         }}
                       />
                     )}
+                    {/* <Button
+                      onClick={() => {
+                        handleUpdateSettings('showChatSettingBar', true);
+                      }}
+                    >
+                      Settings
+                    </Button> */}
                   </div>
                 )}
               </div>
@@ -494,7 +503,7 @@ export const Chat = memo(({ stopConversationRef }: Props) => {
                   />
                 );
               })}
-              
+
               <div
                 className="h-[162px] bg-white dark:bg-[#262630]"
                 ref={messagesEndRef}

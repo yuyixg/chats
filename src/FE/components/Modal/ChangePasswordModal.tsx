@@ -2,7 +2,7 @@ import React, { useEffect, useState } from 'react';
 import { useForm } from 'react-hook-form';
 import toast from 'react-hot-toast';
 
-import { useTranslation } from 'next-i18next';
+import useTranslation from '@/hooks/useTranslation';
 import { useRouter } from 'next/router';
 
 import { clearUserInfo, clearUserSession, getLoginUrl } from '@/utils/user';
@@ -30,7 +30,7 @@ interface Props {
 
 export const ChangePasswordModal = (props: Props) => {
   const { isOpen, onClose } = props;
-  const { t } = useTranslation('client');
+  const { t } = useTranslation();
   const router = useRouter();
   const [loading, setLoading] = useState(false);
 

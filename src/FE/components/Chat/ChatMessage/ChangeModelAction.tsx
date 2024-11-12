@@ -1,4 +1,4 @@
-import { useTranslation } from 'next-i18next';
+import useTranslation from '@/hooks/useTranslation';
 
 import ChangeModel from '@/components/Chat/ChangeModel';
 import Tips from '@/components/Tips/Tips';
@@ -11,7 +11,7 @@ interface Props {
 }
 
 export const ChangeModelAction = (props: Props) => {
-  const { t } = useTranslation('client');
+  const { t } = useTranslation();
   const { modelName, readonly, onChangeModel, hidden } = props;
 
   const Render = () => {

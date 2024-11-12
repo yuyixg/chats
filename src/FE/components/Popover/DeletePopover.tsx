@@ -1,6 +1,6 @@
 import { useState } from 'react';
 
-import { useTranslation } from 'next-i18next';
+import useTranslation from '@/hooks/useTranslation';
 
 import { Button } from '@/components/ui/button';
 import { Popover, PopoverContent, PopoverTrigger } from '@/components/ui/popover';
@@ -10,7 +10,7 @@ interface Props {
   onCancel?: () => void;
 }
 export default function DeletePopover(props: Props) {
-  const { t } = useTranslation('client');
+  const { t } = useTranslation();
   const { onDelete, onCancel } = props;
   const [isOpen, setIsOpen] = useState(false);
 

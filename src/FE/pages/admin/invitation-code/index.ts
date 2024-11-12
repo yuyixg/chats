@@ -1,1 +1,1 @@
-export { default, getServerSideProps } from './invitation';
+export { default } from './invitation';

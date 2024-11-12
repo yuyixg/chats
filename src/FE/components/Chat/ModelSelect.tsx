@@ -1,13 +1,13 @@
 import { useContext, useEffect, useState } from 'react';
 
-import { useTranslation } from 'next-i18next';
+import useTranslation from '@/hooks/useTranslation';
 
 import { formatNumberAsMoney } from '@/utils/common';
 
 import { HomeContext } from '@/pages/home/home';
 
 export const ModelSelect = () => {
-  const { t } = useTranslation('client');
+  const { t } = useTranslation();
 
   const {
     state: { selectModel, models },

@@ -2,7 +2,7 @@ import React, { useEffect } from 'react';
 import { useForm } from 'react-hook-form';
 import toast from 'react-hot-toast';
 
-import { useTranslation } from 'next-i18next';
+import useTranslation from '@/hooks/useTranslation';
 
 import { GetInvitationCodeResult } from '@/types/user';
 
@@ -35,7 +35,7 @@ interface IProps {
 }
 
 export const InvitationCodeModal = (props: IProps) => {
-  const { t } = useTranslation('admin');
+  const { t } = useTranslation();
   const { selected, isOpen, onClose, onSuccessful } = props;
   const formFields: IFormFieldOption[] = [
     {

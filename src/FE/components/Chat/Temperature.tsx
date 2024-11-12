@@ -1,6 +1,6 @@
 import { FC, useContext, useEffect, useState } from 'react';
 
-import { useTranslation } from 'next-i18next';
+import useTranslation from '@/hooks/useTranslation';
 
 import { HomeContext } from '@/pages/home/home';
 
@@ -25,7 +25,7 @@ export const TemperatureSlider: FC<Props> = ({
     state: {},
   } = useContext(HomeContext);
   const [temperature, setTemperature] = useState(defaultTemperature);
-  const { t } = useTranslation('client');
+  const { t } = useTranslation();
   const handleChange = (value: number[]) => {
     const newValue = value[0];
     setTemperature(newValue);

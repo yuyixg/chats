@@ -1,6 +1,6 @@
 import { useContext, useEffect, useState } from 'react';
 
-import { useTranslation } from 'next-i18next';
+import useTranslation from '@/hooks/useTranslation';
 
 import { formatRMB } from '@/utils/common';
 
@@ -9,7 +9,7 @@ import { HomeContext } from '@/pages/home/home';
 import { getUserBalanceOnly } from '@/apis/clientApis';
 
 export const AccountBalance = () => {
-  const { t } = useTranslation('client');
+  const { t } = useTranslation();
   const [balance, setBalance] = useState(0);
   const {
     state: {},

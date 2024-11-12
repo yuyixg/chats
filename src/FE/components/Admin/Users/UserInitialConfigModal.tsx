@@ -2,7 +2,7 @@ import React, { useEffect, useState } from 'react';
 import { useForm } from 'react-hook-form';
 import toast from 'react-hot-toast';
 
-import { useTranslation } from 'next-i18next';
+import useTranslation from '@/hooks/useTranslation';
 
 import { GetModelResult } from '@/types/admin';
 import {
@@ -62,7 +62,7 @@ interface IProps {
 }
 let ModelKeyMap = {} as any;
 export const UserInitialConfigModal = (props: IProps) => {
-  const { t } = useTranslation('admin');
+  const { t } = useTranslation();
   const { models, isOpen, select, onClose, onSuccessful } = props;
   const [submit, setSubmit] = useState(false);
   const [editModels, setEditModels] = useState<UserInitialModel[]>([]);

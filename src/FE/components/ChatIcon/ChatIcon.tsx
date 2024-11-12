@@ -1,4 +1,3 @@
-import Image from 'next/image';
 
 import { ModelProviders } from '@/types/model';
 
@@ -27,7 +26,7 @@ const ChatIcon = (props: Props) => {
 
   return modelProviderTemplate && (
     <div className="flex">
-      <Image
+      <img
         key={`img-${provider}`}
         src={`/logos/${modelProviderTemplate.icon}`}
         alt={provider}
