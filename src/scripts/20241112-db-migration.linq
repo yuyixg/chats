@@ -25,16 +25,86 @@
   <Namespace>System.Text.Json.Nodes</Namespace>
 </Query>
 
+Dictionary<string, string> TableMapping = new()
+{
+	/* 01 */
+	["ApiKeyModel"] = "UserApiModel",
+	/* 02 */
+	["ModelKey"] = "ModelKey2",
+	/* 03 */
+	["ChatModel"] = "Model",
+	/* 04 */
+	["UserModel"] = "UserModel2",
+	/* 05 */
+	["ApiUsage"] = "UserModelUsage",
+	/* 06 */
+	["Conversation"] = "Conversation2",
+	/* 07 */
+	["Message"] = "Message2",
+	/* 08 */
+	["MessageContent"] = "MessageContent2",
+	/* 09 */
+	["MessageResponse"] = "UserModelUsage",
+	/* 10 */
+	["UserApiUsage"] = "UserModelUsage",
+};
+
 void Main()
 {
 	ResetTablesAndIdentity();
 	Dictionary<string, short> modelProviderNameIdMapping = ModelProviders.ToDictionary(k => k.Name, v => v.Id);
 	_01_ApiKeyModels();
 	GuidInt16Mapping modelKeyMapping = _02_ModelKey(modelProviderNameIdMapping);
-	GuidInt16Mapping modelMapping = _03_Model(modelProviderNameIdMapping, modelKeyMapping);
+	GuidInt16Mapping modelMapping = _03_ChatModel(modelProviderNameIdMapping, modelKeyMapping);
+	_04_UserModel(modelMapping);
 }
 
-GuidInt16Mapping _03_Model(Dictionary<string, short> modelProviderNameIdMapping, GuidInt16Mapping modelKeyMapping)
+UserModelMapping _04_UserModel(GuidInt16Mapping modelMapping)
+{
+	UserModelMapping userModelMapping = new();
+	foreach (UserModel olds in UserModels)
+	{
+		JsonArray oldUserModels = JsonSerializer.Deserialize<JsonArray>(olds.Models)!;
+		foreach (JsonObject old in oldUserModels.Select(x => (JsonObject)x!))
+		{
+			Guid modelGuid = (Guid)old!["modelId"]!;
+			short modelId = modelMapping[modelGuid];
+			int tokens = int.Parse(old["tokens"]!.ToString());
+			int counts = int.Parse(old["counts"]!.ToString());
+			DateTime expires = (string)old["expires"]! switch 
+			{
+				"-" => new DateTime(2029, 12, 31), 
+				var x => DateTime.Parse(x), 
+			};
+			UserModel2s.Add(new UserModel2()
+			{
+				ModelId = modelId,
+			});
+		}
+	}
+}
+
+//void _05_ApiUsage()
+//{
+//	foreach (ApiUsage old in ApiUsages)
+//	{
+//		UserModelUsages.Add(new UserModelUsage()
+//		{
+//			BalanceTransactionId = old.TransactionLogId,
+//			ClientInfoId = 1,
+//			CreatedAt = old.CreatedAt,
+//			DurationMs = old.DurationMs,
+//			InputCost = old.InputCost,
+//			OutputCost = old.OutputCost,
+//			InputTokenCount = old.InputTokenCount,
+//			OutputTokenCount = old.OutputTokenCount,
+//			UsageTransactionId = null,
+//			UserModelId = old.ChatModelId,
+//		});
+//	}
+//}
+
+GuidInt16Mapping _03_ChatModel(Dictionary<string, short> modelProviderNameIdMapping, GuidInt16Mapping modelKeyMapping)
 {
 	Dictionary<ModelIdentifier, short> modelReferenceIdMapping = ModelReferences.ToDictionary(k => new ModelIdentifier(k.ProviderId, k.Name), v => v.Id);
 	GuidInt16Mapping modelMapping = new();
@@ -99,24 +169,7 @@ GuidInt16Mapping _02_ModelKey(Dictionary<string, short> modelProviderNameIdMappi
 	return modelKeyMapping;
 }
 
-void _01_ApiKeyModels()
-{
-	// No Data, Skip
-}
-
-Dictionary<string, string> TableMapping = new()
-{
-	["ApiKeyModel"] = "UserApiModel",
-	["ModelKey"] = "ModelKey2",
-	["ChatModel"] = "Model",
-	["ApiUsage"] = "UserModelUsage",
-	["Conversation"] = "Conversation2",
-	["Message"] = "Message2",
-	["MessageContent"] = "MessageContent2",
-	["MessageResponse"] = "UserModelUsage",
-	["UserApiUsage"] = "UserModelUsage",
-	["UserModel"] = "UserModel2"
-};
+void _01_ApiKeyModels() { /* No Data, Skip */ }
 
 // 清空表数据并重置自增 ID
 void ResetTablesAndIdentity()
@@ -125,13 +178,13 @@ void ResetTablesAndIdentity()
 	{
 		string resetTablesSql = """
 				DELETE FROM [dbo].[UserApiModel];
-				DELETE FROM [dbo].[UserModelUsage];DBCC CHECKIDENT ('[dbo].[UserModelUsage]', RESEED, 0);
-				DELETE FROM [dbo].[Model];DBCC CHECKIDENT ('[dbo].[Model]', RESEED, 0);
-				DELETE FROM [dbo].[Conversation2];DBCC CHECKIDENT ('[dbo].[Conversation2]', RESEED, 0);
 				DELETE FROM [dbo].[Message2];DBCC CHECKIDENT ('[dbo].[Message2]', RESEED, 0);
+				DELETE FROM [dbo].[UserModelUsage];DBCC CHECKIDENT ('[dbo].[UserModelUsage]', RESEED, 0);
 				DELETE FROM [dbo].[MessageContent2];DBCC CHECKIDENT ('[dbo].[MessageContent2]', RESEED, 0);
-				DELETE FROM [dbo].[ModelKey2];DBCC CHECKIDENT ('[dbo].[ModelKey2]', RESEED, 0);
+				DELETE FROM [dbo].[Conversation2];DBCC CHECKIDENT ('[dbo].[Conversation2]', RESEED, 0);
 				DELETE FROM [dbo].[UserModel2];DBCC CHECKIDENT ('[dbo].[UserModel2]', RESEED, 0);
+				DELETE FROM [dbo].[Model];DBCC CHECKIDENT ('[dbo].[Model]', RESEED, 0);
+				DELETE FROM [dbo].[ModelKey2];DBCC CHECKIDENT ('[dbo].[ModelKey2]', RESEED, 0);
 			""";
 		Database.ExecuteSqlRaw(resetTablesSql);
 		tran.Commit();
@@ -181,5 +234,15 @@ public class GuidInt16Mapping
 	public Int16 Add(Guid guid) { _mapping.Add(guid, _nextId); return _nextId++; }
 	public Int16 this[Guid guid] => _mapping[guid];
 }
+
+public class UserModelMapping
+{
+	int _nextId = 1;
+	public Dictionary<UserAndModelId, int> _mapping = new();
+	public int Add(UserAndModelId guid) { _mapping.Add(guid, _nextId); return _nextId++; }
+	public int this[UserAndModelId guid] => _mapping[guid];
+}
+
+public record UserAndModelId(Guid UserId, short ModelId);
 
 public record ModelIdentifier(short ProviderId, string Name);
