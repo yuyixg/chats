@@ -13,7 +13,7 @@ src/FE/.next
 src/FE/public/sw.js
 src/FE/public/workbox-*.js
 
-/out/
+src/FE/out
 
 # production
 /build
