@@ -43,10 +43,120 @@ void Main()
 {
 	ResetTablesAndIdentity();
 	Dictionary<string, short> modelProviderNameIdMapping = ModelProviders.ToDictionary(k => k.Name, v => v.Id);
+	_00_BasicData();
 	_01_ApiKeyModels();
 	GuidInt16Mapping modelKeyMapping = _02_ModelKey(modelProviderNameIdMapping);
 	GuidInt16Mapping modelMapping = _03_ChatModel(modelProviderNameIdMapping, modelKeyMapping);
-	_04_UserModel(modelMapping);
+	UserModelMapping userModelMapping = _04_UserModel(modelMapping);
+	_05_ApiUsage(modelMapping, userModelMapping);
+	_06_Conversation(modelMapping);
+	_07_Message(modelMapping, userModelMapping);
+	_08_MessageContent();
+	Final();
+}
+
+void Final()
+{
+	UserBalances.ExecuteUpdate(ub => ub.SetProperty(v => v.Balance, 
+		v => TransactionLogs.Where(x => x.UserId == v.UserId).Select(x => x.Amount).Sum()));
+	UserModel2s.ExecuteUpdate(um => um.SetProperty(v => v.CountBalance,
+		v => UsageTransactionLogs.Where(x => x.UserModel.UserId == v.UserId).Select(x => x.CountAmount).Sum()));
+	UserModel2s.ExecuteUpdate(um => um.SetProperty(v => v.TokenBalance,
+		v => UsageTransactionLogs.Where(x => x.UserModel.UserId == v.UserId).Select(x => x.TokenAmount).Sum()));
+}
+
+void _08_MessageContent()
+{
+	foreach (MessageContent old in MessageContents)
+	{
+		MessageContent2s.Add(new MessageContent2()
+		{
+			Content = old.Content,
+			ContentTypeId = old.ContentTypeId,
+			MessageId = old.MessageId,
+		});
+	}
+	SaveChanges();
+}
+
+void _07_Message(GuidInt16Mapping modelMapping, UserModelMapping userModelMapping)
+{
+	foreach (Message old in Messages.Include(x => x.MessageResponse))
+	{
+		Message2 message = new Message2()
+		{
+			Id = old.Id,
+			ChatRoleId = old.ChatRoleId,
+			ConversationId = old.ConversationId,
+			CreatedAt = old.CreatedAt,
+			ParentId = old.ParentId,
+		};
+		if (old.MessageResponse != null)
+		{
+			message.Usage = new UserModelUsage()
+			{
+				BalanceTransactionId = old.MessageResponse.TransactionLogId,
+				UsageTransactionId = null,
+				ClientInfoId = 1,
+				CreatedAt = old.CreatedAt,
+				DurationMs = old.MessageResponse.DurationMs,
+				InputCost = old.MessageResponse.InputCost,
+				OutputCost = old.MessageResponse.OutputCost,
+				InputTokenCount = old.MessageResponse.InputTokenCount,
+				OutputTokenCount = old.MessageResponse.OutputTokenCount,
+				UserModelId = userModelMapping[new(old.Conversation.UserId, modelMapping[old.MessageResponse.ChatModelId])],
+			};
+		}
+		Message2s.Add(message);
+	}
+	using (IdentityInsertScope idInsert = new(this, "Message2"))
+	{
+		SaveChanges();
+	}
+}
+
+void _06_Conversation(GuidInt16Mapping modelMapping)
+{
+	foreach (Conversation old in Conversations)
+	{
+		Conversation2s.Add(new Conversation2()
+		{
+			Id = old.Id, 
+			Title = old.Title,
+			CreatedAt = old.CreatedAt,
+			EnableSearch = old.EnableSearch, 
+			IsDeleted = old.IsDeleted,
+			IsShared = old.IsShared,
+			ModelId = modelMapping[old.ChatModelId], 
+			Temperature = old.Temperature,
+			UserId = old.UserId,
+		});
+	}
+	using (IdentityInsertScope idInsert = new(this, "Conversation2"))
+	{
+		SaveChanges();
+	}
+}
+
+void _05_ApiUsage(GuidInt16Mapping modelMapping, UserModelMapping userModelMapping)
+{
+	foreach (ApiUsage old in ApiUsages.Include(x => x.ApiKey))
+	{
+		UserModelUsages.Add(new UserModelUsage()
+		{
+			BalanceTransactionId = old.TransactionLogId,
+			ClientInfoId = 1,
+			CreatedAt = old.CreatedAt,
+			DurationMs = old.DurationMs,
+			InputCost = old.InputCost,
+			OutputCost = old.OutputCost,
+			InputTokenCount = old.InputTokenCount,
+			OutputTokenCount = old.OutputTokenCount,
+			UsageTransactionId = null,
+			UserModelId = userModelMapping[new(old.ApiKey.UserId, modelMapping[old.ChatModelId])],
+		});
+	}
+	SaveChanges();
 }
 
 UserModelMapping _04_UserModel(GuidInt16Mapping modelMapping)
@@ -99,26 +209,6 @@ UserModelMapping _04_UserModel(GuidInt16Mapping modelMapping)
 	}
 	return userModelMapping;
 }
-
-//void _05_ApiUsage()
-//{
-//	foreach (ApiUsage old in ApiUsages)
-//	{
-//		UserModelUsages.Add(new UserModelUsage()
-//		{
-//			BalanceTransactionId = old.TransactionLogId,
-//			ClientInfoId = 1,
-//			CreatedAt = old.CreatedAt,
-//			DurationMs = old.DurationMs,
-//			InputCost = old.InputCost,
-//			OutputCost = old.OutputCost,
-//			InputTokenCount = old.InputTokenCount,
-//			OutputTokenCount = old.OutputTokenCount,
-//			UsageTransactionId = null,
-//			UserModelId = old.ChatModelId,
-//		});
-//	}
-//}
 
 GuidInt16Mapping _03_ChatModel(Dictionary<string, short> modelProviderNameIdMapping, GuidInt16Mapping modelKeyMapping)
 {
@@ -187,12 +277,26 @@ GuidInt16Mapping _02_ModelKey(Dictionary<string, short> modelProviderNameIdMappi
 
 void _01_ApiKeyModels() { /* No Data, Skip */ }
 
+void _00_BasicData()
+{
+	if (!ClientInfo.Any(x => x.Id == 1))
+	{
+		ClientInfo.Add(new ClientInfo()
+		{
+			ClientIpId = 0, 
+			ClientUserAgentId = 1, 
+		});
+		SaveChanges();
+	}
+}
+
 // 清空表数据并重置自增 ID
 void ResetTablesAndIdentity()
 {
 	using (IDbContextTransaction tran = Database.BeginTransaction())
 	{
 		string resetTablesSql = """
+				DELETE FROM [dbo].[UsageTransactionLog];DBCC CHECKIDENT ('[dbo].[UsageTransactionLog]', RESEED, 0);
 				DELETE FROM [dbo].[UserApiModel];
 				DELETE FROM [dbo].[Message2];DBCC CHECKIDENT ('[dbo].[Message2]', RESEED, 0);
 				DELETE FROM [dbo].[UserModelUsage];DBCC CHECKIDENT ('[dbo].[UserModelUsage]', RESEED, 0);
@@ -256,7 +360,21 @@ public class UserModelMapping
 	int _nextId = 1;
 	public Dictionary<UserAndModelId, int> _mapping = new();
 	public int Add(UserAndModelId guid) { _mapping.Add(guid, _nextId); return _nextId++; }
-	public int this[UserAndModelId guid] => _mapping[guid];
+	public int this[UserAndModelId guid]
+	{
+		get
+		{
+			if (_mapping.TryGetValue(guid, out int val))
+			{
+				return val;
+			}
+			else
+			{
+				guid.Dump();
+				return default;
+			}
+		}
+	}
 }
 
 public record UserAndModelId(Guid UserId, short ModelId);
