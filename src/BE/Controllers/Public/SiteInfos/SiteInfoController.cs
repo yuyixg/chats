@@ -34,7 +34,6 @@ public class SiteInfoController() : ControllerBase
             {
                 Id = p.Id,
                 Key = p.Type,
-                Configs = p.Configs, 
             })
             .ToArrayAsync(cancellationToken);
 
