@@ -27,26 +27,16 @@
 
 Dictionary<string, string> TableMapping = new()
 {
-	/* 01 */
-	["ApiKeyModel"] = "UserApiModel",
-	/* 02 */
-	["ModelKey"] = "ModelKey2",
-	/* 03 */
-	["ChatModel"] = "Model",
-	/* 04 */
-	["UserModel"] = "UserModel2",
-	/* 05 */
-	["ApiUsage"] = "UserModelUsage",
-	/* 06 */
-	["Conversation"] = "Conversation2",
-	/* 07 */
-	["Message"] = "Message2",
-	/* 08 */
-	["MessageContent"] = "MessageContent2",
-	/* 09 */
-	["MessageResponse"] = "UserModelUsage",
-	/* 10 */
-	["UserApiUsage"] = "UserModelUsage",
+	["ApiKeyModel"] = "UserApiModel",       /* 01 */
+	["ModelKey"] = "ModelKey2",             /* 02 */
+	["ChatModel"] = "Model",                /* 03 */
+	["UserModel"] = "UserModel2",           /* 04 */
+	["ApiUsage"] = "UserModelUsage",        /* 05 */
+	["Conversation"] = "Conversation2",     /* 06 */
+	["Message"] = "Message2",               /* 07 */
+	["MessageContent"] = "MessageContent2", /* 08 */
+	["MessageResponse"] = "UserModelUsage", /* 09 */
+	["UserApiUsage"] = "UserModelUsage",    /* 10 */
 };
 
 void Main()
@@ -64,24 +54,50 @@ UserModelMapping _04_UserModel(GuidInt16Mapping modelMapping)
 	UserModelMapping userModelMapping = new();
 	foreach (UserModel olds in UserModels)
 	{
-		JsonArray oldUserModels = JsonSerializer.Deserialize<JsonArray>(olds.Models)!;
+		JsonArray oldUserModels = JsonSerializer.Deserialize<JsonArray>(olds.Models)!;		
 		foreach (JsonObject old in oldUserModels.Select(x => (JsonObject)x!))
 		{
 			Guid modelGuid = (Guid)old!["modelId"]!;
 			short modelId = modelMapping[modelGuid];
 			int tokens = int.Parse(old["tokens"]!.ToString());
 			int counts = int.Parse(old["counts"]!.ToString());
-			DateTime expires = (string)old["expires"]! switch 
+			bool enabled = (bool)old["enabled"]!;
+			DateTime expires = (string)old["expires"]! switch
 			{
-				"-" => new DateTime(2029, 12, 31), 
-				var x => DateTime.Parse(x), 
+				"-" => new DateTime(2029, 12, 31),
+				var x => DateTime.Parse(x),
 			};
-			UserModel2s.Add(new UserModel2()
+			int userModelId = userModelMapping.Add(new UserAndModelId(olds.UserId, modelMapping[modelGuid]));
+			UserModel2 toBeInserted = new UserModel2()
 			{
+				Id = userModelId,
 				ModelId = modelId,
-			});
+				CountBalance = counts,
+				TokenBalance = tokens,
+				ExpiresAt = expires,
+				IsDeleted = !enabled,
+				CreatedAt = olds.CreatedAt,
+				UpdatedAt = olds.UpdatedAt,
+				UserId = olds.UserId,
+			};
+			if (counts > 0 || tokens > 0)
+			{
+				toBeInserted.UserModelUsageTransactionLogs.Add(new UsageTransactionLog()
+				{
+					CreatedAt = olds.UpdatedAt,
+					TokenAmount = tokens,
+					CountAmount = counts,
+					TransactionTypeId = 1, // charge
+				});
+			}
+			UserModel2s.Add(toBeInserted);
 		}
 	}
+	using (IdentityInsertScope idInsert = new(this, "UserModel2"))
+	{
+		SaveChanges();
+	}
+	return userModelMapping;
 }
 
 //void _05_ApiUsage()

@@ -22,7 +22,7 @@ public class QianFanConversationService : ConversationService
     {
         ArgumentException.ThrowIfNullOrWhiteSpace(model.ModelKey.Secret, nameof(model.ModelKey.Secret));
         JsonQianFanApiConfig apiConfig = JsonSerializer.Deserialize<JsonQianFanApiConfig>(model.ModelKey.Secret)!;
-        ChatClient = new QianFanClient(apiConfig.Secret, apiConfig.Secret);
+        ChatClient = new QianFanClient(apiConfig.ApiKey, apiConfig.Secret);
     }
 
     public override async IAsyncEnumerable<ConversationSegment> ChatStreamedInternal(IReadOnlyList<OpenAIChatMessage> messages, ChatCompletionOptions options, [EnumeratorCancellation] CancellationToken cancellationToken)
