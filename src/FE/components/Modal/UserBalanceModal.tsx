@@ -2,6 +2,8 @@ import { useEffect, useState } from 'react';
 
 import useTranslation from '@/hooks/useTranslation';
 
+import { GetBalance7DaysUsageResult } from '@/types/clientApis';
+
 import {
   Dialog,
   DialogContent,
@@ -17,10 +19,7 @@ import {
   TableRow,
 } from '@/components/ui/table';
 
-import {
-  GetBalance7DaysUsageResult,
-  getBalance7DaysUsage,
-} from '@/apis/clientApis';
+import { getBalance7DaysUsage } from '@/apis/clientApis';
 
 interface Props {
   isOpen: boolean;

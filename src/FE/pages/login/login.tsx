@@ -4,8 +4,9 @@ import useTranslation from '@/hooks/useTranslation';
 
 import { hasContact, setSiteInfo } from '@/utils/website';
 
+import { LoginConfigsResult } from '@/types/clientApis';
 import { SiteInfoConfig } from '@/types/config';
-import { LoginConfigsResult, LoginType } from '@/types/user';
+import { LoginType } from '@/types/user';
 
 import AccountLoginCard from '@/components/Login/AccountLoginCard';
 import KeyCloakLogin from '@/components/Login/KeyCloakLogin';
@@ -55,27 +56,26 @@ export default function LoginPage() {
   };
   const [loginConfigs, setLoginConfigs] = useState<LoginConfigsResult[]>([]);
   const [loginLoading, setLoginLoading] = useState(false);
-  const [currentTab, setCurrentTab] = useState<TabKeys>(
-    loginConfigs.find((x) => x.type === LoginType.Phone)
-      ? TabKeys.PHONE
-      : TabKeys.ACCOUNT,
-  );
+  const [currentTab, setCurrentTab] = useState<TabKeys>(TabKeys.ACCOUNT);
   const [loading, setLoading] = useState(false);
 
   useEffect(() => {
     setIsClient(true);
     setLoading(true);
     getLoginProviders().then((data) => {
-      const configs = data.map((x) => {
-        const configs = x?.config;
-        return {
-          type: x.key,
-          configs: {
-            appId: configs?.appId || '',
-          },
-        };
-      });
-      setLoginConfigs(configs);
+      let hasPhoneType = false;
+      setLoginConfigs(
+        data.map((x) => {
+          if (x.key === LoginType.Phone) {
+            hasPhoneType = true;
+          }
+          return {
+            type: x.key,
+            configs: x.config,
+          };
+        }),
+      );
+      setCurrentTab(hasPhoneType ? TabKeys.PHONE : TabKeys.ACCOUNT);
       setLoading(false);
     });
     getSiteInfo().then((data) => {
@@ -87,10 +87,13 @@ export default function LoginPage() {
   const openLoading = () => setLoginLoading(true);
   const closeLoading = () => setLoginLoading(false);
 
+  const hasLoginType = (type: LoginType) =>
+    !!loginConfigs.find((x) => x.type === type);
+
   const TabsListRender = () => {
-    return loginConfigs.find((x) => x.type === LoginType.Phone) ? (
+    return hasLoginType(LoginType.Phone) ? (
       <TabsList className="flex w-full flex-row justify-around">
-        {loginConfigs.find((x) => x.type === LoginType.Phone) && (
+        {hasLoginType(LoginType.Phone) && (
           <TabsTrigger
             value={TabKeys.PHONE}
             className="flex justify-center w-full"
@@ -98,7 +101,7 @@ export default function LoginPage() {
             {t('Mobile Login')}
           </TabsTrigger>
         )}
-        {loginConfigs.find((x) => x.type === LoginType.Phone) && (
+        {hasLoginType(LoginType.Phone) && (
           <TabsTrigger
             value={TabKeys.REGISTER}
             className="flex justify-center w-full"
@@ -133,16 +136,6 @@ export default function LoginPage() {
                 alt="logo"
               />
               Chats
-            </div>
-            <div className="relative z-20 mt-auto">
-              <blockquote className="space-y-2">
-                {/* <p className='text-lg'>
-                  &ldquo;This library has saved me countless hours of work and
-                  helped me deliver stunning designs to my clients faster than
-                  ever before.&rdquo;
-                </p>
-                <footer className='text-sm'>Sofia Davis</footer> */}
-              </blockquote>
             </div>
           </div>
           <div className="lg:p-8">
@@ -214,21 +207,19 @@ export default function LoginPage() {
                       )}
 
                       <div className="flex justify-center gap-2">
-                        {loginConfigs.find(
-                          (x) => x.type === LoginType.WeChat,
-                        ) && (
+                        {hasLoginType(LoginType.WeChat) && (
                           <WeChatLogin
                             configs={
                               loginConfigs.find(
                                 (x) => x.type === LoginType.WeChat,
-                              )!.configs
+                              )?.configs
                             }
                             loading={loginLoading}
                           />
                         )}
-                        {loginConfigs.find(
-                          (x) => x.type === LoginType.Keycloak,
-                        ) && <KeyCloakLogin loading={loginLoading} />}
+                        {hasLoginType(LoginType.Keycloak) && (
+                          <KeyCloakLogin loading={loginLoading} />
+                        )}
                       </div>
                     </div>
                   </div>

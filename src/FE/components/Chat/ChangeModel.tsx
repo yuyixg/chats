@@ -21,7 +21,7 @@ import {
 } from '@/components/ui/dropdown-menu';
 
 import { cn } from '@/lib/utils';
-import { LegacyModelProvider } from '@/types/admin';
+import { LegacyModelProvider } from '@/types/adminApis';
 import { getAllLegacyModelProviders, getLegacyModelProviderByName } from '@/apis/adminApis';
 
 const ChangeModel = ({

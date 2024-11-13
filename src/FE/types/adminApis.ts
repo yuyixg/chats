@@ -1,18 +1,16 @@
-import { Message } from './chat';
 import { ChatMessage } from './chatMessage';
-import { PutFileServicesParams } from './file';
+import { FileServicesType } from './file';
 import {
   ChatModelFileConfig,
   ChatModelPriceConfig,
   ModelConfig,
   ModelProviders,
-  ModelType,
   ModelVersions,
 } from './model';
 import { Paging } from './page';
 import { PayServiceType } from './pay';
 import { StatusCode } from './statusCode';
-import { LoginType, UserInitialModel } from './user';
+import { LoginType } from './user';
 
 import Decimal from 'decimal.js';
 
@@ -136,6 +134,15 @@ export interface GetMessageDetailsResult {
   messages: ChatMessage[];
 }
 
+export interface PostFileServicesParams {
+  type: FileServicesType;
+  name: string;
+  enabled: boolean;
+  configs: string;
+}
+
+export interface PutFileServicesParams extends PostFileServicesParams {}
+
 export interface GetFileServicesResult extends PutFileServicesParams {
   id: string;
   createdAt: string;
@@ -217,8 +224,7 @@ export interface PostModelKeysParams {
   configs: string;
 }
 
-export interface PutModelKeysParams extends PostModelKeysParams {
-}
+export interface PutModelKeysParams extends PostModelKeysParams {}
 
 export interface PostPromptParams {
   name: string;
@@ -231,11 +237,11 @@ export interface PutPromptParams {
 }
 
 export interface LegacyModelProvider {
-  name: ModelProviders,
-  models: ModelVersions[],
-  apiConfig: object,
-  displayName: string,
-  icon: string
+  name: ModelProviders;
+  models: ModelVersions[];
+  apiConfig: object;
+  displayName: string;
+  icon: string;
 }
 
 type TemperatureConfig = {
@@ -251,3 +257,67 @@ export type LegacyModelReference = {
   fileConfig: ChatModelFileConfig | null;
   priceConfig: ChatModelPriceConfig;
 };
+
+export interface GetConfigsResult {
+  key: string;
+  value: string;
+  description: string;
+}
+
+export interface PostAndPutConfigParams {
+  key: string;
+  value: string;
+  description: string;
+}
+
+export interface GetInvitationCodeResult {
+  id: string;
+  value: string;
+  count: number;
+  username: string;
+}
+
+export interface PostInvitationCodeParams {
+  value: string;
+  count: number;
+}
+
+export interface PutInvitationCodeParams {
+  id: string;
+  count: number;
+}
+
+export interface GetUserInitialConfigResult {
+  id: string;
+  name: string;
+  loginType: string;
+  price: Decimal;
+  invitationCodeId: string;
+  invitationCode: string;
+  models: UserInitialModel[];
+}
+
+export interface PostUserInitialConfigParams {
+  name: string;
+  price: Decimal;
+  loginType: string;
+  invitationCodeId: string | null;
+  models: UserInitialModel[];
+}
+
+export interface PutUserInitialConfigParams {
+  id: string;
+  name: string;
+  price: Decimal;
+  loginType: string;
+  invitationCodeId: string | null;
+  models: UserInitialModel[];
+}
+
+export interface UserInitialModel {
+  modelId: number;
+  tokens: number;
+  counts: number;
+  expires: string;
+  enabled: boolean;
+}

@@ -2,7 +2,7 @@ import React, { useEffect, useState } from 'react';
 
 import useTranslation from '@/hooks/useTranslation';
 
-import { GetRequestLogsDetailsResult } from '@/types/admin';
+import { GetRequestLogsDetailsResult } from '@/types/adminApis';
 
 import {
   Dialog,

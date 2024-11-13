@@ -11,7 +11,7 @@ import {
   GetPayServicesResult,
   PostPayServicesParams,
   PutPayServicesParams,
-} from '@/types/admin';
+} from '@/types/adminApis';
 import { PayServiceType } from '@/types/pay';
 
 import FormSelect from '@/components/ui/form/select';

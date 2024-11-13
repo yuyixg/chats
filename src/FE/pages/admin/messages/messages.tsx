@@ -4,7 +4,7 @@ import useTranslation from '@/hooks/useTranslation';
 
 import { DEFAULT_LANGUAGE } from '@/utils/settings';
 
-import { GetUserMessageResult } from '@/types/admin';
+import { GetUserMessageResult } from '@/types/adminApis';
 import { PageResult, Paging } from '@/types/page';
 
 import PaginationContainer from '@/components/Admin/Pagiation/Pagiation';

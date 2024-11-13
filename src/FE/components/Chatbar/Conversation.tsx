@@ -9,6 +9,7 @@ import toast from 'react-hot-toast';
 
 import useTranslation from '@/hooks/useTranslation';
 
+import { ChatResult } from '@/types/clientApis';
 import { DBModelProvider, ModelProviders } from '@/types/model';
 
 import { HomeContext } from '@/pages/home/home';
@@ -33,7 +34,7 @@ import {
   DropdownMenuTrigger,
 } from '@/components/ui/dropdown-menu';
 
-import { ChatResult, deleteChats, putChats } from '@/apis/clientApis';
+import { deleteChats, putChats } from '@/apis/clientApis';
 
 interface Props {
   chat: ChatResult;

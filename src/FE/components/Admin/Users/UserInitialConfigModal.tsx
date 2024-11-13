@@ -4,13 +4,15 @@ import toast from 'react-hot-toast';
 
 import useTranslation from '@/hooks/useTranslation';
 
-import { GetModelResult } from '@/types/admin';
+import { termDateString } from '@/utils/common';
+
 import {
   GetInvitationCodeResult,
+  GetModelResult,
   GetUserInitialConfigResult,
-  LoginType,
   UserInitialModel,
-} from '@/types/user';
+} from '@/types/adminApis';
+import { LoginType } from '@/types/user';
 
 import { IconSquareRoundedX } from '@/components/Icons';
 import { Button } from '@/components/ui/button';
@@ -51,7 +53,6 @@ import { cn } from '@/lib/utils';
 import { zodResolver } from '@hookform/resolvers/zod';
 import Decimal from 'decimal.js';
 import { z } from 'zod';
-import { termDateString } from '@/utils/common';
 
 interface IProps {
   models: GetModelResult[];

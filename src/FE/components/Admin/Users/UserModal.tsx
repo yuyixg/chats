@@ -4,7 +4,7 @@ import toast from 'react-hot-toast';
 
 import useTranslation from '@/hooks/useTranslation';
 
-import { GetUsersResult } from '@/types/admin';
+import { GetUsersResult } from '@/types/adminApis';
 
 import FormSwitch from '@/components/ui/form/switch';
 

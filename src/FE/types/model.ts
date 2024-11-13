@@ -1,5 +1,6 @@
 import { FileUploadServerConfig } from './components/upload';
-import { GetModelUsageResult } from './user';
+
+import { GetModelUsageResult } from './clientApis';
 
 export interface ModelConfig {
   prompt: string;
@@ -45,18 +46,6 @@ export enum ModelVersions {
   HunYuan = 'hunyuan',
 }
 
-export enum ModelType {
-  OpenAI = 'OpenAI',
-  Azure = 'Azure',
-  QianWen = 'QianWen',
-  QianFan = 'QianFan',
-  Spark = 'Spark',
-  LingYi = 'LingYi',
-  Moonshot = 'Moonshot',
-  ZhiPuAI = 'ZhiPuAI',
-  HunYuan = 'HunYuan',
-}
-
 export enum ModelProviders {
   OpenAI = 'OpenAI',
   Azure = 'Azure',
@@ -87,47 +76,9 @@ export interface ChatModelFileConfig {
   count: number;
 }
 
-export interface ChatModelApiConfig {
-  host: string;
-  apiKey: string;
-  secret: string;
-}
-
-export interface ChatModelConfig {
-  prompt: string;
-  temperature: number;
-  maxLength?: number;
-  tokenLimit?: number;
-  version?: string;
-  organization?: string;
-  deploymentName?: string;
-  enableSearch?: boolean;
-  model?: string;
-}
-
 export interface ChatModelPriceConfig {
   input: number;
   out: number;
 }
 
-export type ModelConfigType =
-  | 'fileConfig'
-  | 'apiConfig'
-  | 'modelConfig'
-  | 'priceConfig';
-
-export interface ModelApiConfig {
-  temperature: {
-    min: number;
-    max: number;
-  };
-}
-
 export interface UserModelConfig extends ModelConfig {}
-
-export interface Usages {
-  balance: boolean;
-  tokens: boolean;
-  counts: boolean;
-  expires: boolean;
-}

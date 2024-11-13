@@ -2,7 +2,7 @@ import React, { useEffect, useState } from 'react';
 
 import useTranslation from '@/hooks/useTranslation';
 
-import { GetPayServicesResult } from '@/types/admin';
+import { GetPayServicesResult } from '@/types/adminApis';
 
 import { PayServiceModal } from '@/components/Admin/PayService/PayServiceModal';
 import { Button } from '@/components/ui/button';

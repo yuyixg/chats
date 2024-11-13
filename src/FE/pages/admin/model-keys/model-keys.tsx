@@ -4,7 +4,7 @@ import useTranslation from '@/hooks/useTranslation';
 
 import { DEFAULT_LANGUAGE } from '@/utils/settings';
 
-import { GetModelKeysResult, LegacyModelProvider } from '@/types/admin';
+import { GetModelKeysResult, LegacyModelProvider } from '@/types/adminApis';
 
 // import { ModelProviderTemplates } from '@/types/template';
 import { ModelKeysModal } from '@/components/Admin/ModelKeys/ModelKeysModal';

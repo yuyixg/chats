@@ -13,13 +13,12 @@ import {
 import WeChatLoginModal from './WeChatLoginModal';
 
 const WeChatLogin = (props: {
-  configs: { appId: string };
+  configs?: { appId: string };
   loading?: boolean;
 }) => {
   const { t } = useTranslation();
   const { loading, configs } = props;
   const [weChatModal, setWeChatModal] = useState(false);
-  useEffect(() => {}, []);
 
   return (
     <>
@@ -48,7 +47,7 @@ const WeChatLogin = (props: {
       </TooltipProvider>
       {weChatModal && (
         <WeChatLoginModal
-          appId={configs.appId}
+          appId={configs!.appId}
           isOpen={weChatModal}
           onClose={() => {
             setWeChatModal(false);

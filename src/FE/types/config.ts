@@ -5,27 +5,12 @@ export enum GlobalConfigKeys {
   logs = 'logs',
 }
 
-export interface TencentSmsConfig {
-  secretId: string;
-  secretKey: string;
-  sdkAppId: string;
-  signName: string;
-  templateId: string;
-}
-
-export interface SessionConfig {}
-
 export interface SiteInfoConfig {
   filingNumber: string;
   contact: {
     qqGroupNumber: string;
     qqGroupQrCodeLink: string;
   };
-}
-
-export interface LogsConfig {
-  error: boolean;
-  success: boolean;
 }
 
 export const GlobalDefaultConfigs = {

@@ -2,13 +2,13 @@ import { useContext, useEffect, useState } from 'react';
 
 import useTranslation from '@/hooks/useTranslation';
 
+import { ChatResult } from '@/types/clientApis';
+
 import { HomeContext } from '@/pages/home/home';
 
 import { Button } from '@/components/ui/button';
 
 import { ConversationComponent } from './Conversation';
-
-import { ChatResult } from '@/apis/clientApis';
 
 interface Props {
   chats: ChatResult[];

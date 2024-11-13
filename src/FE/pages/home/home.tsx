@@ -28,6 +28,7 @@ import { UserSession } from '@/utils/user';
 
 import { IChat, Role } from '@/types/chat';
 import { ChatMessage } from '@/types/chatMessage';
+import { ChatResult, GetChatsParams } from '@/types/clientApis';
 import { Model, UserModelConfig } from '@/types/model';
 import { Prompt } from '@/types/prompt';
 
@@ -38,8 +39,6 @@ import PromptBar from '@/components/Promptbar';
 import Spinner from '@/components/Spinner';
 
 import {
-  ChatResult,
-  GetChatsParams,
   getChatsByPaging,
   getUserMessages,
   getUserModels,
