@@ -9,7 +9,7 @@
     <SqlSecurity>true</SqlSecurity>
     <UserName>sa</UserName>
     <Password>AQAAANCMnd8BFdERjHoAwE/Cl+sBAAAAVbvrs6Jk5ESNEegA7jfNnwAAAAACAAAAAAAQZgAAAAEAACAAAABBe4Cv13ASn/ipSipWlPY2mowD6zfbngQJ+Z3+KTcGVAAAAAAOgAAAAAIAACAAAABMtXPZtcXWRzq2o3sHXx1+BVuNY62ubQdNn8IrSrXSxiAAAADcCHwb5SZfaPyiOsqcpFEU4/Lnue6fZBOLd4rAOBXt0UAAAADS65U3H6M+54aUZec9Yj/zdoSeT/Jb3S4gVVhk51Sje3lBRb4jCfUa42pVHALQoRPrtMP5lJSaJ/hB6XoT2mV6</Password>
-    <Database>ChatsSTG</Database>
+    <Database>ChatsDEV</Database>
     <DriverData>
       <EncryptSqlTraffic>False</EncryptSqlTraffic>
       <PreserveNumeric1>True</PreserveNumeric1>
@@ -52,6 +52,7 @@ void Main()
 	_06_Conversation(modelMapping);
 	_07_Message(modelMapping, userModelMapping);
 	_08_MessageContent();
+	_09_NewInitialConfig(modelMapping);
 	Final();
 }
 
@@ -63,6 +64,37 @@ void Final()
 		v => UsageTransactionLogs.Where(x => x.UserModel.UserId == v.UserId).Select(x => x.CountAmount).Sum()));
 	UserModel2s.ExecuteUpdate(um => um.SetProperty(v => v.TokenBalance,
 		v => UsageTransactionLogs.Where(x => x.UserModel.UserId == v.UserId).Select(x => x.TokenAmount).Sum()));
+}
+
+void _09_NewInitialConfig(GuidInt16Mapping modelMapping)
+{
+	foreach (UserInitialConfig oldCode in UserInitialConfigs)
+	{
+		JsonArray arr = JsonSerializer.Deserialize<JsonArray>(oldCode.Models)!;
+		var newVal = arr.OfType<JsonObject>().Select(old =>
+		{
+			Guid modelGuid = (Guid)old["modelId"]!;
+			short modelId = modelMapping[modelGuid];
+			int tokens = int.Parse(old["tokens"]!.ToString());
+			int counts = int.Parse(old["counts"]!.ToString());
+			DateTime expires = (string)old["expires"]! switch
+			{
+				"-" => new DateTime(2029, 12, 31),
+				var x => DateTime.Parse(x),
+			};
+			bool enabled = (bool)old["enabled"]!;
+			return new
+			{
+				modelId, 
+				tokens, 
+				counts, 
+				expires, 
+				enabled
+			};
+		});
+		oldCode.Models = JsonSerializer.Serialize(newVal);
+	}
+	SaveChanges();
 }
 
 void _08_MessageContent()

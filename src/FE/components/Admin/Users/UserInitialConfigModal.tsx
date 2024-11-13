@@ -341,7 +341,7 @@ export const UserInitialConfigModal = (props: IProps) => {
                                     onChangeModel(
                                       index,
                                       'expires',
-                                      d?.toLocaleDateString(),
+                                      d?.toISOString(),
                                     );
                                   }}
                                   initialFocus
