@@ -24,7 +24,7 @@ jobs:
           cd ./src/FE
           npm i
           npm run build
-          cp -r ./out ../BE/wwwroot
+          mv ./out/* ../BE/wwwroot
 
       - name: Build container
         run: |
