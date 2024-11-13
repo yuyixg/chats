@@ -71,22 +71,7 @@ public class Program
         app.UseAuthentication();
         app.UseAuthorization();
         app.MapControllers();
-        app.Use(async (ctx, next) =>
-        {
-            if ((ctx.Request.Method.Equals("GET", StringComparison.OrdinalIgnoreCase) || ctx.Request.Method.Equals("HEAD", StringComparison.OrdinalIgnoreCase)) && ctx.Request.Path.HasValue)
-            {
-                string path = ctx.Request.Path.Value;
-                if (path.EndsWith('/'))
-                {
-                    ctx.Request.Path = new PathString(path + "index.html");
-                }
-                else if (!path.EndsWith(".html", StringComparison.OrdinalIgnoreCase))
-                {
-                    ctx.Request.Path = new PathString(path + ".html");
-                }
-            }
-            await next();
-        });
+        app.UseMiddleware<FrontendMiddleware>();
         app.UseStaticFiles();
         app.Run();
     }
