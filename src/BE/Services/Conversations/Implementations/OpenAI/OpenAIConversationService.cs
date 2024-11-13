@@ -11,13 +11,13 @@ public class OpenAIConversationService : ConversationService
 {
     private readonly ChatClient _chatClient;
 
-    public OpenAIConversationService(Model model, Uri? defaultApiHost = null) : base(model)
+    public OpenAIConversationService(Model model, Uri? enforcedApiHost = null) : base(model)
     {
         ArgumentException.ThrowIfNullOrWhiteSpace(model.ModelKey.Secret, nameof(model.ModelKey.Secret));
 
         OpenAIClient api = new(new ApiKeyCredential(model.ModelKey.Secret!), new OpenAIClientOptions()
         {
-            Endpoint = !string.IsNullOrWhiteSpace(model.ModelKey.Host) ? new Uri(model.ModelKey.Host) : defaultApiHost,
+            Endpoint = enforcedApiHost ?? (!string.IsNullOrWhiteSpace(model.ModelKey.Host) ? new Uri(model.ModelKey.Host) : null),
         });
         _chatClient = api.GetChatClient(model.ApiModelId);
     }
