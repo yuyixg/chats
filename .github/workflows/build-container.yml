@@ -4,6 +4,7 @@ on:
     branches:
       - main
     paths:
+      - 'src/BE/**'
       - 'src/FE/**'
       - '.github/workflows/build-container.yml'
       - '.github/workflows/deploy.yml'
@@ -19,11 +20,18 @@ jobs:
       - name: Checkout code
         uses: actions/checkout@v4
 
+      - name: Build frontend
+        run: |
+          cd ./src/FE
+          npm i
+          npm run build
+          mv ./out/* ../BE/wwwroot
+
       - name: Build container
         run: |
-          cd src/FE && docker build -t chats .
+          dotnet publish ./src/BE/Chats.BE.csproj -c Release --os linux --arch x64 /t:PublishContainer /p:ContainerRepository=chats
 
-      - name: Tag container with latest and run number
+      - name: Tag container with 'latest' & run number
         run: |
           docker tag chats ${{ vars.DOCKER_REGISTRY }}/${{ vars.DOCKER_NAMESPACE }}/chats:r-${{ github.run_number }}
           docker tag chats ${{ vars.DOCKER_REGISTRY }}/${{ vars.DOCKER_NAMESPACE }}/chats:latest
@@ -32,13 +40,13 @@ jobs:
         run: |
           docker push ${{ vars.DOCKER_REGISTRY }}/${{ vars.DOCKER_NAMESPACE }}/chats:r-${{ github.run_number }}
           docker push ${{ vars.DOCKER_REGISTRY }}/${{ vars.DOCKER_NAMESPACE }}/chats:latest
-          
+
   deploy-dev-stg:
     needs: build-container
     uses: ./.github/workflows/deploy.yml
     with:
       DOCKER_REGISTRY: ${{ vars.DOCKER_REGISTRY }}
       DOCKER_NAMESPACE: ${{ vars.DOCKER_NAMESPACE }}
-      FE_TAG: r-${{ github.run_number }}
+      TAG: r-${{ github.run_number }}
     secrets:
       SSH_PRIVATE_KEY: ${{ secrets.SSH_PRIVATE_KEY }}

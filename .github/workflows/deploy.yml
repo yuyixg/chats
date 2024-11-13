@@ -13,13 +13,9 @@ on:
       DOCKER_NAMESPACE:
         type: string
         required: true
-      FE_TAG:
+      TAG:
         type: string
-        required: false
-        default: latest
-      BE_TAG:
-        type: string
-        required: false
+        required: true
         default: latest
 
 jobs:
@@ -33,12 +29,9 @@ jobs:
       - name: deploy dev/stg
         run: |
           ssh -o StrictHostKeyChecking=no -p 22 zhoujie@home.starworks.cc << 'EOF'
-            docker pull ${{ inputs.DOCKER_REGISTRY }}/${{ inputs.DOCKER_NAMESPACE }}/chats:${{ inputs.FE_TAG }}
-            docker pull ${{ inputs.DOCKER_REGISTRY }}/${{ inputs.DOCKER_NAMESPACE }}/chats-be:${{ inputs.BE_TAG }}
+            docker pull ${{ inputs.DOCKER_REGISTRY }}/${{ inputs.DOCKER_NAMESPACE }}/chats:${{ inputs.TAG }}
             cd chats
-            sed -i "s/^FRONTEND_VERSION=.*/FRONTEND_VERSION=${{ inputs.FE_TAG }}/" ~/chats/dev.env
-            sed -i "s/^BACKEND_VERSION=.*/BACKEND_VERSION=${{ inputs.BE_TAG }}/" ~/chats/dev.env
-            sed -i "s/^FRONTEND_VERSION=.*/FRONTEND_VERSION=${{ inputs.FE_TAG }}/" ~/chats/stg.env
-            sed -i "s/^BACKEND_VERSION=.*/BACKEND_VERSION=${{ inputs.BE_TAG }}/" ~/chats/stg.env
+            sed -i "s/^BACKEND_VERSION=.*/BACKEND_VERSION=${{ inputs.TAG }}/" ~/chats/dev.env
+            sed -i "s/^BACKEND_VERSION=.*/BACKEND_VERSION=${{ inputs.TAG }}/" ~/chats/stg.env
             ./dev.sh && ./stg.sh
             
