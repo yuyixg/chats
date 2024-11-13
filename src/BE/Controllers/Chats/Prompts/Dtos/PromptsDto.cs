@@ -8,6 +8,9 @@ public record PromptsDto : BriefPromptDto
     [JsonPropertyName("content")]
     public required string Content { get; init; }
 
+    [JsonPropertyName("isSystem")]
+    public bool IsSystem { get; init; }
+
     public void ApplyTo(Prompt db, bool isAdmin)
     {
         db.IsDefault = IsDefault;

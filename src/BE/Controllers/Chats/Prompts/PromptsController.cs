@@ -14,7 +14,7 @@ public class PromptsController(ChatsDB db, CurrentUser currentUser) : Controller
     public async Task<ActionResult<PromptsDto[]>> GetPrompts(CancellationToken cancellationToken)
     {
         PromptsDto[] prompts = await db.Prompts
-            .Where(x => x.CreateUserId == currentUser.Id)
+            .Where(x => x.CreateUserId == currentUser.Id && !x.IsSystem)
             .OrderBy(x => x.UpdatedAt)
             .Select(x => new PromptsDto()
             {
@@ -22,7 +22,6 @@ public class PromptsController(ChatsDB db, CurrentUser currentUser) : Controller
                 Id = x.Id, 
                 Name = x.Name,
                 IsDefault = x.IsDefault,
-                IsSystem = x.IsSystem,
                 UpdatedAt = x.UpdatedAt
             })
             .ToArrayAsync(cancellationToken);
@@ -33,14 +32,13 @@ public class PromptsController(ChatsDB db, CurrentUser currentUser) : Controller
     public async Task<ActionResult<BriefPromptDto[]>> GetBriefPrompts(CancellationToken cancellationToken)
     {
         BriefPromptDto[] prompts = await db.Prompts
-            .Where(x => x.CreateUserId == currentUser.Id)
+            .Where(x => x.CreateUserId == currentUser.Id && !x.IsSystem)
             .OrderBy(x => x.UpdatedAt)
             .Select(x => new BriefPromptDto()
             {
                 Id = x.Id,
                 Name = x.Name,
                 IsDefault = x.IsDefault,
-                IsSystem = x.IsSystem,
                 UpdatedAt = x.UpdatedAt
             })
             .ToArrayAsync(cancellationToken);
@@ -50,7 +48,7 @@ public class PromptsController(ChatsDB db, CurrentUser currentUser) : Controller
     [HttpGet("{promptId}")]
     public async Task<ActionResult<PromptsDto>> GetSinglePrompt(int promptId, CancellationToken cancellationToken)
     {
-        Prompt? prompt = await db.Prompts.FirstOrDefaultAsync(x => x.Id == promptId && x.CreateUserId == currentUser.Id, cancellationToken);
+        Prompt? prompt = await db.Prompts.FirstOrDefaultAsync(x => x.Id == promptId && (x.IsSystem || x.CreateUserId == currentUser.Id), cancellationToken);
         if (prompt == null)
         {
             return NotFound();
@@ -61,7 +59,6 @@ public class PromptsController(ChatsDB db, CurrentUser currentUser) : Controller
             Id = prompt.Id,
             Name = prompt.Name,
             IsDefault = prompt.IsDefault,
-            IsSystem = prompt.IsSystem,
             UpdatedAt = prompt.UpdatedAt
         });
     }
@@ -77,7 +74,6 @@ public class PromptsController(ChatsDB db, CurrentUser currentUser) : Controller
         {
             Id = prompt.Id,
             IsDefault = prompt.IsDefault,
-            IsSystem = prompt.IsSystem,
             Name = prompt.Name,
             UpdatedAt = prompt.UpdatedAt
         });
