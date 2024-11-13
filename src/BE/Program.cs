@@ -18,7 +18,6 @@ public class Program
         WebApplicationBuilder builder = WebApplication.CreateBuilder(args);
 
         // Add services to the container.
-
         builder.Services.AddControllers(options =>
         {
             options.CacheProfiles.Add("ModelInfo", new CacheProfile()
@@ -72,7 +71,8 @@ public class Program
         app.UseAuthentication();
         app.UseAuthorization();
         app.MapControllers();
-
+        app.UseMiddleware<FrontendMiddleware>();
+        app.UseStaticFiles();
         app.Run();
     }
 }

@@ -9,7 +9,4 @@ public record LoginProviderDto
 
     [JsonPropertyName("key")]
     public required string Key { get; init; }
-
-    [JsonPropertyName("config")]
-    public required string Configs { get; init; }
 }

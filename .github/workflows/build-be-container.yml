@@ -19,6 +19,13 @@ jobs:
       - name: Checkout code
         uses: actions/checkout@v4
 
+      - name: Build frontend
+        run: |
+          cd ./src/FE
+          npm i
+          npm run build
+          mv ./out/* ../BE/wwwroot
+
       - name: Build container
         run: |
           dotnet publish ./src/BE/Chats.BE.csproj -c Release --os linux --arch x64 /t:PublishContainer /p:ContainerRepository=chats
