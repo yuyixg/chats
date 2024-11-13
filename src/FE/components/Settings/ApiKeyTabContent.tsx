@@ -1,10 +1,13 @@
 import React, { useEffect, useState } from 'react';
 import toast from 'react-hot-toast';
 
-import useTranslation from '@/hooks/useTranslation';
 import Link from 'next/link';
 
+import useTranslation from '@/hooks/useTranslation';
+
 import { getApiUrl } from '@/utils/common';
+
+import { GetUserApiKeyResult } from '@/types/clientApis';
 
 import CopyButton from '@/components/Button/CopyButton';
 import DateTimePopover from '@/components/Popover/DateTimePopover';
@@ -22,7 +25,6 @@ import {
 } from '@/components/ui/table';
 
 import {
-  GetUserApiKeyResult,
   deleteUserApiKey,
   getUserApiKey,
   postUserApiKey,

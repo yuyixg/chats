@@ -2,9 +2,7 @@ import React, { useEffect, useState } from 'react';
 
 import useTranslation from '@/hooks/useTranslation';
 
-import { DEFAULT_LANGUAGE } from '@/utils/settings';
-
-import { GetInvitationCodeResult } from '@/types/user';
+import { GetInvitationCodeResult } from '@/types/adminApis';
 
 import { InvitationCodeModal } from '@/components/Admin/InvitationCode/InvitationCodeModal';
 import { Button } from '@/components/ui/button';

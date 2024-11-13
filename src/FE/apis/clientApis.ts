@@ -2,71 +2,27 @@ import { useFetch } from '@/hooks/useFetch';
 
 import { calculateMessages } from '@/utils/message';
 
-import { PostPromptParams, PutPromptParams } from '@/types/admin';
+import { PostPromptParams, PutPromptParams } from '@/types/adminApis';
 import { ChatMessage } from '@/types/chatMessage';
-import { DBModelProvider, Model } from '@/types/model';
-import { PageResult, Paging } from '@/types/page';
-import { IdName, Prompt } from '@/types/prompt';
 import {
+  ChatResult,
+  GetBalance7DaysUsageResult,
+  GetChatsParams,
   GetLoginProvidersResult,
-  GetModelUsageResult,
   GetSiteInfoResult,
+  GetUserApiKeyResult,
   GetUserBalanceResult,
   LoginConfigsResult,
+  PostChatParams,
+  PostUserPassword,
+  PutChatParams,
   SingInParams,
   SingInResult,
-  SmsType,
-} from '@/types/user';
-
-export interface GetChatsParams extends Paging {
-  query?: string;
-}
-
-export interface ChatResult {
-  id: string;
-  title: string;
-  chatModelId?: string;
-  modelName: string;
-  modelConfig: any;
-  userModelConfig: any;
-  isShared: boolean;
-  modelProvider: DBModelProvider;
-}
-
-export interface PostChatParams {
-  title: string;
-  chatModelId?: string;
-}
-
-export interface PutChatParams {
-  title?: string;
-  isShared?: boolean;
-}
-
-export interface PostUserPassword {
-  oldPassword: string;
-  newPassword: string;
-  confirmPassword: string;
-}
-
-export interface GetBalance7DaysUsageResult {
-  date: string;
-  costAmount: number;
-}
-
-export interface GetUserApiKeyResult {
-  id: number;
-  key: string;
-  isRevoked: boolean;
-  comment: string;
-  allowEnumerate: boolean;
-  allowAllModels: boolean;
-  expires: string;
-  createdAt: string;
-  updatedAt: string;
-  lastUsedAt: string;
-  modelCount: number;
-}
+} from '@/types/clientApis';
+import { Model } from '@/types/model';
+import { PageResult } from '@/types/page';
+import { IdName, Prompt } from '@/types/prompt';
+import { SmsType } from '@/types/user';
 
 export const changeUserPassword = (params: PostUserPassword) => {
   const fetchService = useFetch();
@@ -126,7 +82,9 @@ export const singIn = (params: SingInParams): Promise<SingInResult> => {
 
 export const getUserModels = () => {
   const fetchServer = useFetch();
-  return fetchServer.get<Model[]>(`/api/models?timezoneOffset=${new Date().getTimezoneOffset()}`);
+  return fetchServer.get<Model[]>(
+    `/api/models?timezoneOffset=${new Date().getTimezoneOffset()}`,
+  );
 };
 
 export const getUserBalance = () => {

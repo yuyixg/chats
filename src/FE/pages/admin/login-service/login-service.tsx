@@ -4,7 +4,7 @@ import useTranslation from '@/hooks/useTranslation';
 
 import { DEFAULT_LANGUAGE } from '@/utils/settings';
 
-import { GetLoginServicesResult } from '@/types/admin';
+import { GetLoginServicesResult } from '@/types/adminApis';
 
 import { LoginServiceModal } from '@/components/Admin/LoginService/LoginServiceModal';
 import { Button } from '@/components/ui/button';

@@ -5,7 +5,7 @@ import useTranslation from '@/hooks/useTranslation';
 
 import { DEFAULT_LANGUAGE } from '@/utils/settings';
 
-import { GetModelResult, GetUsersResult } from '@/types/admin';
+import { GetModelResult, GetUsersResult } from '@/types/adminApis';
 import { PageResult, Paging } from '@/types/page';
 
 import PaginationContainer from '@/components/Admin/Pagiation/Pagiation';

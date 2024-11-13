@@ -5,7 +5,7 @@ import { useRouter } from 'next/router';
 
 import { clearUserInfo, clearUserSession, getLoginUrl } from '@/utils/user';
 
-import { UserRole } from '@/types/admin';
+import { UserRole } from '@/types/adminApis';
 
 import { HomeContext } from '@/pages/home/home';
 

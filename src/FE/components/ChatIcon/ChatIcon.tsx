@@ -4,7 +4,7 @@ import { ModelProviders } from '@/types/model';
 import { IconShare } from '@/components/Icons';
 
 import { cn } from '@/lib/utils';
-import { LegacyModelProvider } from '@/types/admin';
+import { LegacyModelProvider } from '@/types/adminApis';
 import { useEffect, useState } from 'react';
 import { getLegacyModelProviderByName } from '@/apis/adminApis';
 

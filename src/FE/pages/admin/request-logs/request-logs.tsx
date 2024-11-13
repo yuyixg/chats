@@ -2,7 +2,7 @@ import React, { useEffect, useState } from 'react';
 
 import useTranslation from '@/hooks/useTranslation';
 
-import { GetRequestLogsListResult } from '@/types/admin';
+import { GetRequestLogsListResult } from '@/types/adminApis';
 import { PageResult, Paging } from '@/types/page';
 import { StatusCodeColor } from '@/types/statusCode';
 

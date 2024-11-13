@@ -7,7 +7,7 @@ import useTranslation from '@/hooks/useTranslation';
 
 import { getSelectMessages } from '@/utils/message';
 
-import { GetMessageDetailsResult } from '@/types/admin';
+import { GetMessageDetailsResult } from '@/types/adminApis';
 import { ChatMessage } from '@/types/chatMessage';
 
 import { ChatMessage as ChatMessageComponent } from '@/components/Admin/Messages/ChatMessage';

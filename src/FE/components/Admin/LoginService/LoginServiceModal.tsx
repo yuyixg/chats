@@ -11,7 +11,7 @@ import {
   GetLoginServicesResult,
   PostLoginServicesParams,
   PutLoginServicesParams,
-} from '@/types/admin';
+} from '@/types/adminApis';
 import { LoginType } from '@/types/user';
 
 import FormSelect from '@/components/ui/form/select';

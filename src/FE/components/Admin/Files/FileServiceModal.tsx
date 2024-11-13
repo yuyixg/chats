@@ -7,14 +7,8 @@ import useTranslation from '@/hooks/useTranslation';
 import { getFileConfigs } from '@/utils/file';
 import { mergeConfigs } from '@/utils/model';
 
-import { GetFileServicesResult } from '@/types/admin';
-import {
-  FileServicesType,
-  PostFileServicesParams,
-  PutFileServicesParams,
-} from '@/types/file';
-
-import FormSelect from '@/components/ui/form/select';
+import { GetFileServicesResult, PostFileServicesParams, PutFileServicesParams } from '@/types/adminApis';
+import { FileServicesType } from '@/types/file';
 
 import { Button } from '@/components/ui/button';
 import {
@@ -26,6 +20,7 @@ import {
 } from '@/components/ui/dialog';
 import { Form, FormField } from '@/components/ui/form';
 import FormInput from '@/components/ui/form/input';
+import FormSelect from '@/components/ui/form/select';
 import FormSwitch from '@/components/ui/form/switch';
 import FormTextarea from '@/components/ui/form/textarea';
 import { FormFieldType, IFormFieldOption } from '@/components/ui/form/type';

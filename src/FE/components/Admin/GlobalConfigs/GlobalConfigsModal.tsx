@@ -4,10 +4,8 @@ import toast from 'react-hot-toast';
 
 import useTranslation from '@/hooks/useTranslation';
 
+import { GetConfigsResult, PostAndPutConfigParams } from '@/types/adminApis';
 import { GlobalConfigKeys, GlobalDefaultConfigs } from '@/types/config';
-import { GetConfigsResult, PostAndPutConfigParams } from '@/types/user';
-
-import FormSelect from '@/components/ui/form/select';
 
 import { Button } from '@/components/ui/button';
 import {
@@ -18,6 +16,7 @@ import {
   DialogTitle,
 } from '@/components/ui/dialog';
 import { Form, FormField } from '@/components/ui/form';
+import FormSelect from '@/components/ui/form/select';
 import FormTextarea from '@/components/ui/form/textarea';
 import { FormFieldType, IFormFieldOption } from '@/components/ui/form/type';
 
@@ -129,7 +128,10 @@ export const GlobalConfigsModal = (props: IProps) => {
     const subscription = form.watch((value, { name, type }) => {
       if (name === 'key' && type === 'change') {
         const key = value.key as GlobalConfigKeys;
-        form.setValue('value', JSON.stringify(GlobalDefaultConfigs[key], null, 2));
+        form.setValue(
+          'value',
+          JSON.stringify(GlobalDefaultConfigs[key], null, 2),
+        );
       }
     });
     return () => subscription.unsubscribe();

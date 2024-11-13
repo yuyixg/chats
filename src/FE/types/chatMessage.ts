@@ -1,4 +1,4 @@
-import { Content, Message, Role } from './chat';
+import { Content, Role } from './chat';
 
 import Decimal from 'decimal.js';
 
@@ -30,13 +30,4 @@ export interface MessageNode {
   outputTokens: number;
   inputPrice: Decimal;
   outputPrice: Decimal;
-}
-
-export interface ChatErrorMessage {
-  id: string;
-  parentId: string | null;
-  childrenIds: string[];
-  assistantChildrenIds: string[];
-  role: Role;
-  content: Content;
 }

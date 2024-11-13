@@ -11,7 +11,7 @@ import {
   LegacyModelProvider,
   PostModelKeysParams,
   PutModelKeysParams,
-} from '@/types/admin';
+} from '@/types/adminApis';
 import { ModelProviders } from '@/types/model';
 
 import FormSelect from '@/components/ui/form/select';

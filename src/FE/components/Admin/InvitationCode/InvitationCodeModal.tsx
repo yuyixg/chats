@@ -4,7 +4,7 @@ import toast from 'react-hot-toast';
 
 import useTranslation from '@/hooks/useTranslation';
 
-import { GetInvitationCodeResult } from '@/types/user';
+import { GetInvitationCodeResult } from '@/types/adminApis';
 
 import { Button } from '@/components/ui/button';
 import {

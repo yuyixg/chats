@@ -2,8 +2,7 @@ import React, { useEffect, useState } from 'react';
 
 import useTranslation from '@/hooks/useTranslation';
 
-import { GetModelResult } from '@/types/admin';
-import { GetUserInitialConfigResult } from '@/types/user';
+import { GetModelResult, GetUserInitialConfigResult } from '@/types/adminApis';
 
 import { UserInitialConfigModal } from '@/components/Admin/Users/UserInitialConfigModal';
 import { Button } from '@/components/ui/button';

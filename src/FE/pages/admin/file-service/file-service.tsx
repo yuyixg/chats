@@ -2,7 +2,7 @@ import React, { useEffect, useState } from 'react';
 
 import useTranslation from '@/hooks/useTranslation';
 
-import { GetFileServicesResult } from '@/types/admin';
+import { GetFileServicesResult } from '@/types/adminApis';
 
 import { FileServiceModal } from '@/components/Admin/Files/FileServiceModal';
 import { Button } from '@/components/ui/button';

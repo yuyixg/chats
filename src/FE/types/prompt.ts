@@ -7,8 +7,3 @@ export interface IdName {
   id: string;
   name: string;
 }
-
-export enum PromptType {
-  Public = 1,
-  Private = 2,
-}

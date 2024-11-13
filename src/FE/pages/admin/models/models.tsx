@@ -5,7 +5,7 @@ import useTranslation from '@/hooks/useTranslation';
 import { formatNumberAsMoney } from '@/utils/common';
 import { ModelPriceUnit } from '@/utils/model';
 
-import { GetModelResult, LegacyModelProvider } from '@/types/admin';
+import { GetModelResult, LegacyModelProvider } from '@/types/adminApis';
 
 import { AddModelModal } from '@/components/Admin/Models/AddModelModal';
 import { EditModelModal } from '@/components/Admin/Models/EditModelModal';

@@ -2,13 +2,12 @@ import { useEffect, useState } from 'react';
 import { useForm } from 'react-hook-form';
 import toast from 'react-hot-toast';
 
-import useTranslation from '@/hooks/useTranslation';
 import { useRouter } from 'next/router';
+
+import useTranslation from '@/hooks/useTranslation';
 
 import { PhoneRegExp, SmsExpirationSeconds } from '@/utils/common';
 import { saveUserInfo, setUserSession } from '@/utils/user';
-
-import { SmsType } from '@/types/user';
 
 import { Button } from '@/components/ui/button';
 import { Card, CardContent } from '@/components/ui/card';

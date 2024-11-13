@@ -3,11 +3,20 @@ import toast from 'react-hot-toast';
 
 import useTranslation from '@/hooks/useTranslation';
 
-import { GetModelResult } from '@/types/admin';
-import { UserInitialModel } from '@/types/user';
+import { termDateString } from '@/utils/common';
+
+import { GetModelResult, UserInitialModel } from '@/types/adminApis';
 
 import { IconSquareRoundedX } from '@/components/Icons';
+import { Button } from '@/components/ui/button';
 import { Calendar } from '@/components/ui/calendar';
+import {
+  Dialog,
+  DialogContent,
+  DialogFooter,
+  DialogHeader,
+  DialogTitle,
+} from '@/components/ui/dialog';
 import { Input } from '@/components/ui/input';
 import {
   Popover,
@@ -24,18 +33,8 @@ import {
   TableRow,
 } from '@/components/ui/table';
 
-import { Button } from '@/components/ui/button';
-import {
-  Dialog,
-  DialogContent,
-  DialogFooter,
-  DialogHeader,
-  DialogTitle,
-} from '@/components/ui/dialog';
-
 import { putUserModel } from '@/apis/adminApis';
 import { cn } from '@/lib/utils';
-import { termDateString } from '@/utils/common';
 
 interface IProps {
   userModelId: string;
@@ -83,7 +82,11 @@ export const EditUserModelModal = (props: IProps) => {
           const resp = await err.json();
           toast.error(resp.message);
         } catch {
-          toast.error(t('Operation failed! Please try again later, or contact technical personnel.'));
+          toast.error(
+            t(
+              'Operation failed! Please try again later, or contact technical personnel.',
+            ),
+          );
         }
       })
       .finally(() => {
@@ -127,7 +130,11 @@ export const EditUserModelModal = (props: IProps) => {
                       className="w-30"
                       value={model.tokens?.toString()}
                       onChange={(e) => {
-                        onChangeModel(index, 'tokens', parseInt(e.target.value) || 0);
+                        onChangeModel(
+                          index,
+                          'tokens',
+                          parseInt(e.target.value) || 0,
+                        );
                       }}
                     />
                   </TableCell>
@@ -136,7 +143,11 @@ export const EditUserModelModal = (props: IProps) => {
                       className="w-30"
                       value={model.counts?.toString()}
                       onChange={(e) => {
-                        onChangeModel(index, 'counts', parseInt(e.target.value) || 0);
+                        onChangeModel(
+                          index,
+                          'counts',
+                          parseInt(e.target.value) || 0,
+                        );
                       }}
                     />
                   </TableCell>
@@ -161,7 +172,9 @@ export const EditUserModelModal = (props: IProps) => {
                         <Calendar
                           mode="single"
                           selected={new Date(model.expires)}
-                          onSelect={d => { onChangeModel(index, 'expires', d?.toISOString()); }}
+                          onSelect={(d) => {
+                            onChangeModel(index, 'expires', d?.toISOString());
+                          }}
                           initialFocus
                         />
                       </PopoverContent>
@@ -170,7 +183,9 @@ export const EditUserModelModal = (props: IProps) => {
                   <TableCell>
                     <Switch
                       checked={model.enabled}
-                      onCheckedChange={(checked) => { onChangeModel(index, 'enabled', checked); }}
+                      onCheckedChange={(checked) => {
+                        onChangeModel(index, 'enabled', checked);
+                      }}
                     />
                   </TableCell>
                 </TableRow>
