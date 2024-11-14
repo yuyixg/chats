@@ -45,9 +45,6 @@ public record AdminUserDto
 
     [JsonPropertyName("userModelCount")]
     public required int UserModelCount { get; init; }
-
-    [JsonPropertyName("models")]
-    public required JsonTokenBalance[] Models { get; init; }
 }
 
 public record AdminUserDtoTemp
@@ -64,7 +61,6 @@ public record AdminUserDtoTemp
     public required bool Enabled { get; init; }
     public required DateTime CreatedAt { get; init; }
     public required int UserModelCount { get; init; }
-    public required UserModel[] Models { get; init; }
 
     public AdminUserDto ToDto() => new()
     {
@@ -80,6 +76,5 @@ public record AdminUserDtoTemp
         Enabled = Enabled,
         CreatedAt = CreatedAt,
         UserModelCount = UserModelCount,
-        Models = Models.Select(x => x.ToJsonTokenBalance()).ToArray(),
     };
 }

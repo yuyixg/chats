@@ -5,7 +5,7 @@ import useTranslation from '@/hooks/useTranslation';
 
 import { termDateString } from '@/utils/common';
 
-import { GetModelResult, UserInitialModel } from '@/types/adminApis';
+import { UserModelDisplayDto } from '@/types/adminApis';
 
 import { IconSquareRoundedX } from '@/components/Icons';
 import { Button } from '@/components/ui/button';
@@ -33,46 +33,32 @@ import {
   TableRow,
 } from '@/components/ui/table';
 
-import { putUserModel } from '@/apis/adminApis';
+import { getModelsByUserId, putUserModel } from '@/apis/adminApis';
 import { cn } from '@/lib/utils';
 
 interface IProps {
-  userModelId: string;
-  models: GetModelResult[];
-  select: UserInitialModel[];
+  userId: string;
   isOpen: boolean;
   onClose: () => void;
   onSuccessful: () => void;
 }
-let ModelKeyMap = {} as any;
 export const EditUserModelModal = (props: IProps) => {
   const { t } = useTranslation();
-  const { models, isOpen, select, onClose, onSuccessful } = props;
+  const { isOpen, onClose, onSuccessful } = props;
   const [submit, setSubmit] = useState(false);
-  const [editModels, setEditModels] = useState<UserInitialModel[]>([]);
+  const [models, setModels] = useState<UserModelDisplayDto[]>([]);
 
   useEffect(() => {
     if (isOpen) {
-      setEditModels([]);
-      const model = models.map((x) => {
-        ModelKeyMap[x.modelId] = x.name;
-        const model = select.find((model) => model.modelId === x.modelId);
-        if (model) return model;
-        return {
-          modelId: x.modelId,
-          tokens: 0,
-          counts: 0,
-          expires: termDateString(),
-          enabled: false,
-        };
+      getModelsByUserId(props.userId).then((data) => {
+        setModels(data);
       });
-      setEditModels(model);
     }
   }, [isOpen]);
 
   const onSubmit = async () => {
     setSubmit(true);
-    putUserModel({ models: editModels })
+    putUserModel({ userId: props.userId, models: models })
       .then(() => {
         toast.success(t('Save successful!'));
         onSuccessful();
@@ -99,9 +85,9 @@ export const EditUserModelModal = (props: IProps) => {
     type: 'tokens' | 'counts' | 'expires' | 'enabled',
     value: any,
   ) => {
-    const _models = editModels as any;
+    const _models = models as any;
     _models[index][type] = value;
-    setEditModels([..._models]);
+    setModels([..._models]);
   };
 
   return (
@@ -122,9 +108,9 @@ export const EditUserModelModal = (props: IProps) => {
               </TableRow>
             </TableHeader>
             <TableBody>
-              {editModels.map((model, index) => (
-                <TableRow key={model.modelId}>
-                  <TableCell>{ModelKeyMap[model.modelId]}</TableCell>
+              {models.map((model, index) => (
+                <TableRow key={model.id}>
+                  <TableCell>{model.displayName}</TableCell>
                   <TableCell>
                     <Input
                       className="w-30"

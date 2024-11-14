@@ -3,8 +3,6 @@ import React, { useEffect, useState } from 'react';
 import { useThrottle } from '@/hooks/useThrottle';
 import useTranslation from '@/hooks/useTranslation';
 
-import { DEFAULT_LANGUAGE } from '@/utils/settings';
-
 import { GetModelResult, GetUsersResult } from '@/types/adminApis';
 import { PageResult, Paging } from '@/types/page';
 
@@ -25,11 +23,10 @@ import {
   TableRow,
 } from '@/components/ui/table';
 
-import { getModels, getUsers } from '@/apis/adminApis';
+import { getUsers } from '@/apis/adminApis';
 
 export default function Users() {
   const { t } = useTranslation();
-  const [models, setModels] = useState<GetModelResult[]>([]);
   const [isOpenModal, setIsOpenModal] = useState({
     edit: false,
     create: false,
@@ -49,12 +46,6 @@ export default function Users() {
   const [loading, setLoading] = useState(true);
   const [query, setQuery] = useState<string>('');
   const throttledValue = useThrottle(query, 1000);
-
-  useEffect(() => {
-    getModels().then((data) => {
-      setModels(data.filter((x) => x.enabled === true));
-    });
-  }, []);
 
   useEffect(() => {
     init();
@@ -194,7 +185,7 @@ export default function Users() {
                       e.stopPropagation();
                     }}
                   >
-                    {item.models.filter((x) => x.enabled).length}
+                    {item.userModelCount}
                   </Button>
                 </TableCell>
                 <TableCell>
@@ -229,14 +220,13 @@ export default function Users() {
         userBalance={selectedUser?.balance}
         isOpen={isOpenModal.recharge}
       />
-      <EditUserModelModal
-        onSuccessful={init}
-        onClose={handleClose}
-        isOpen={isOpenModal.changeModel}
-        models={models}
-        userModelId={selectedUser?.userModelId || ''}
-        select={selectedUser?.models || []}
-      />
+      { selectedUser && <EditUserModelModal
+          onSuccessful={init}
+          onClose={handleClose}
+          isOpen={isOpenModal.changeModel}
+          userId={selectedUser.id}
+        />
+      }
     </>
   );
 }

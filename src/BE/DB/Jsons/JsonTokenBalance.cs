@@ -21,27 +21,35 @@ public record JsonTokenBalance
     [JsonPropertyName("enabled")]
     public required bool Enabled { get; init; }
 
-    public void ApplyTo(UserModel existingItem)
+    public bool ApplyTo(UserModel existingItem)
     {
-        UsageTransaction? toReturn = existingItem.CountBalance != Counts || existingItem.TokenBalance != Tokens
-            ? new UsageTransaction
+        bool needsTransaction = existingItem.CountBalance != Counts || existingItem.TokenBalance != Tokens;
+        bool hasDifference =
+            needsTransaction ||
+            existingItem.IsDeleted != !Enabled ||
+            (Enabled && existingItem.ExpiresAt != Expires);
+
+        if (needsTransaction)
+        {
+            existingItem.UsageTransactions.Add(new UsageTransaction
             {
                 CreatedAt = DateTime.UtcNow,
                 CountAmount = Counts - existingItem.CountBalance,
                 TokenAmount = Tokens - existingItem.TokenBalance,
                 UserModelId = existingItem.Id,
                 TransactionTypeId = (byte)DBTransactionType.Charge,
-            } : null;
-
-        existingItem.UpdatedAt = DateTime.UtcNow;
-        existingItem.CountBalance = Counts;
-        existingItem.TokenBalance = Tokens;
-        existingItem.ExpiresAt = Expires;
-        existingItem.IsDeleted = !Enabled;
-
-        if (toReturn != null)
-        {
-            existingItem.UsageTransactions.Add(toReturn);
+            });
         }
+
+        if (hasDifference)
+        {
+            existingItem.CountBalance = Counts;
+            existingItem.TokenBalance = Tokens;
+            existingItem.ExpiresAt = Expires;
+            existingItem.IsDeleted = !Enabled;
+            existingItem.UpdatedAt = DateTime.UtcNow;
+        }
+
+        return hasDifference;
     }
 }

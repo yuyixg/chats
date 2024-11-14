@@ -5,6 +5,21 @@ namespace Chats.BE.Controllers.Admin.AdminModels.Dtos;
 
 public record UpdateUserModelRequest
 {
+    [JsonPropertyName("userId")]
+    public required Guid UserId { get; init; }
+
     [JsonPropertyName("models")]
-    public required JsonTokenBalance[] Models { get; init; }
+    public required UserModelUpdateDto[] Models { get; init; }
+}
+
+public record UserModelUpdateDto : JsonTokenBalance
+{
+    [JsonPropertyName("id")]
+    public required int Id { get; init; }
+}
+
+public record UserModelDto : UserModelUpdateDto
+{
+    [JsonPropertyName("displayName")]
+    public required string DisplayName { get; init; }
 }

@@ -3,10 +3,8 @@ using Chats.BE.Controllers.Admin.Common;
 using Chats.BE.Controllers.Common;
 using Chats.BE.DB;
 using Chats.BE.DB.Jsons;
-using Chats.BE.Infrastructure;
 using Chats.BE.Services;
 using Chats.BE.Services.Conversations;
-using Chats.BE.Services.Conversations.Dtos;
 using Microsoft.AspNetCore.Mvc;
 using Microsoft.AspNetCore.Mvc.ModelBinding;
 using Microsoft.EntityFrameworkCore;
@@ -137,9 +135,45 @@ public class AdminModelsController(ChatsDB db) : ControllerBase
         }
     }
 
+    [HttpGet("user-models/{userId:guid}")]
+    public async Task<ActionResult<IEnumerable<UserModelDto>>> GetUserModels(Guid userId, CancellationToken cancellationToken)
+    {
+        UserModelDto[] userModels = await db.Models
+            .Where(x => !x.IsDeleted)
+            .OrderBy(x => x.Order)
+            .Select(x => new 
+            { 
+                ModelId = x.Id,
+                DisplayName = x.Name, 
+                UserModel = x.UserModels.Where(x => x.UserId == userId).FirstOrDefault() 
+            })
+            .Select(x => x.UserModel == null ? 
+                new UserModelDto()
+                {
+                    Id = -1,
+                    ModelId = x.ModelId,
+                    DisplayName = x.DisplayName,
+                    Enabled = false, 
+                    Expires = DateTime.UtcNow,
+                    Counts = 0,
+                    Tokens = 0,
+                } : new UserModelDto()
+                {
+                    Id = x.UserModel.Id,
+                    DisplayName = x.DisplayName,
+                    ModelId = x.ModelId,
+                    Counts = x.UserModel.CountBalance,
+                    Expires = x.UserModel.ExpiresAt,
+                    Enabled = !x.UserModel.IsDeleted,
+                    Tokens = x.UserModel.TokenBalance,
+                })
+            .ToArrayAsync(cancellationToken);
+            
+        return Ok(userModels);
+    }
+
     [HttpPut("user-models")]
-    public async Task<ActionResult> UpdateUserModels([FromBody] UpdateUserModelRequest req, 
-        [FromServices] CurrentUser currentUser,
+    public async Task<ActionResult> UpdateUserModels([FromBody] UpdateUserModelRequest updateReq, 
         [FromServices] BalanceService balanceService,
         CancellationToken cancellationToken)
     {
@@ -151,46 +185,50 @@ public class AdminModelsController(ChatsDB db) : ControllerBase
                 .Select(x => $"{x.Key}: " + string.Join(",", x.Value!.Errors.Select(x => x.ErrorMessage)))));
         }
 
+        HashSet<int> userModelIds = updateReq.Models
+            .Where(x => x.Id != -1)
+            .Select(x => x.Id)
+            .ToHashSet();
         Dictionary<short, UserModel> userModels = await db.UserModels
-            .Where(x => x.UserId == currentUser.Id)
+            .Where(x => x.UserId == updateReq.UserId && userModelIds.Contains(x.Id))
             .ToDictionaryAsync(k => k.ModelId, v => v, cancellationToken);
 
-        // create or update user models
-        foreach (JsonTokenBalance item in req.Models)
+        // apply changes
+        HashSet<UserModel> effectedUserModels = [];
+        foreach (JsonTokenBalance req in updateReq.Models)
         {
-            if (userModels.TryGetValue(item.ModelId, out UserModel? existingItem))
+            if (userModels.TryGetValue(req.ModelId, out UserModel? existingItem))
             {
-                item.ApplyTo(existingItem);
+                bool hasDifference = req.ApplyTo(existingItem);
+                if (hasDifference)
+                {
+                    effectedUserModels.Add(existingItem);
+                }
             }
-            else
+            else if (req.Enabled) // not exists in database but enabled in frontend request
             {
                 UserModel newItem = new()
                 {
-                    UserId = currentUser.Id,
-                    ModelId = item.ModelId,
+                    UserId = updateReq.UserId,
+                    ModelId = req.ModelId,
                     CreatedAt = DateTime.UtcNow,
                 };
-                item.ApplyTo(newItem);
-                userModels[item.ModelId] = newItem;
+                req.ApplyTo(newItem);
+                userModels[req.ModelId] = newItem;
                 db.UserModels.Add(newItem);
+                effectedUserModels.Add(newItem);
             }
         }
 
-        // delete user models
-        foreach (KeyValuePair<short, UserModel> kvp in userModels)
+        if (effectedUserModels.Count != 0)
         {
-            if (!req.Models.Any(x => x.ModelId == kvp.Key))
-            {
-                kvp.Value.UpdatedAt = DateTime.UtcNow;
-                kvp.Value.IsDeleted = true;
-            }
+            await db.SaveChangesAsync(cancellationToken);
+            await balanceService.AsyncUpdateUserModelBalances(effectedUserModels.Select(x => x.Id), CancellationToken.None);
+            await db.Users
+                .Where(x => x.Id == updateReq.UserId)
+                .ExecuteUpdateAsync(u => u.SetProperty(p => p.UpdatedAt, _ => DateTime.UtcNow), CancellationToken.None);
         }
-
-        await db.SaveChangesAsync(cancellationToken);
-        foreach (int userModelId in userModels.Keys)
-        {
-            _ = balanceService.AsyncUpdateUserModelBalance(userModelId, CancellationToken.None);
-        }
+        
         return NoContent();
     }
 }

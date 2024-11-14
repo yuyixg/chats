@@ -15,7 +15,6 @@ import {
   GetUserInitialConfigResult,
   GetUserMessageParams,
   GetUserMessageResult,
-  GetUserModelResult,
   GetUsersParams,
   GetUsersResult,
   LegacyModelProvider,
@@ -28,7 +27,6 @@ import {
   PostModelParams,
   PostPayServicesParams,
   PostUserInitialConfigParams,
-  PostUserModelParams,
   PostUserParams,
   PutFileServicesParams,
   PutInvitationCodeParams,
@@ -40,27 +38,19 @@ import {
   PutUserInitialConfigParams,
   PutUserModelParams,
   PutUserParams,
+  UserModelDisplayDto,
 } from '@/types/adminApis';
 import { ModelProviders } from '@/types/model';
 import { PageResult } from '@/types/page';
 
-export const getUserModels = (
-  query?: string,
-): Promise<GetUserModelResult[]> => {
+export const getModelsByUserId = (userId: string): Promise<UserModelDisplayDto[]> => {
   const fetchService = useFetch();
-  return fetchService.get('/api/admin/user-models?query=' + query);
-};
+  return fetchService.get(`/api/admin/user-models/${userId}`);
+}
 
 export const putUserModel = (params: PutUserModelParams): Promise<any> => {
   const fetchService = useFetch();
   return fetchService.put('/api/admin/user-models', {
-    body: params,
-  });
-};
-
-export const postUserModel = (params: PostUserModelParams): Promise<any> => {
-  const fetchService = useFetch();
-  return fetchService.post('/api/admin/user-models', {
     body: params,
   });
 };

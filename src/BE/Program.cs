@@ -29,7 +29,10 @@ public class Program
         // Learn more about configuring Swagger/OpenAPI at https://aka.ms/aspnetcore/swashbuckle
         builder.Services.AddEndpointsApiExplorer();
         builder.Services.AddSwaggerGen();
-        builder.Services.AddDbContext<ChatsDB>();
+        builder.Services.AddDbContext<ChatsDB>(o =>
+        {
+            if (builder.Environment.IsDevelopment()) { o.EnableSensitiveDataLogging(); }
+        });
         builder.Services.AddHttpClient();
         builder.Services.AddSingleton<AppConfigService>();
         builder.Services.AddSingleton<PasswordHasher>();

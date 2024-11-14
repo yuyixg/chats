@@ -18,26 +18,14 @@ export const enum UserRole {
   'admin' = 'admin',
 }
 
-export interface GetUserModelResult {
-  userId: string;
-  role: string;
-  userName: string;
-  balance: Decimal;
-  models: UserModelResult[];
-}
-
 export interface UserModelResult extends UserInitialModel {
   modelName?: string;
   modelVersion?: string;
 }
 
 export interface PutUserModelParams {
-  models: UserInitialModel[];
-}
-
-export interface PostUserModelParams {
-  userModelIds: string[];
-  modelId: string;
+  userId: string;
+  models: UserModelUpdateDto[];
 }
 
 export interface GetModelResult {
@@ -108,8 +96,7 @@ export interface GetUsersResult {
   createdAt: string;
   updatedAt: string;
   enabled: boolean;
-  userModelId: string;
-  models: UserInitialModel[];
+  userModelCount: number;
 }
 
 export interface GetUserMessageParams extends Paging {
@@ -320,4 +307,12 @@ export interface UserInitialModel {
   counts: number;
   expires: string;
   enabled: boolean;
+}
+
+export interface UserModelUpdateDto extends UserInitialModel {
+  id: number;
+}
+
+export interface UserModelDisplayDto extends UserModelUpdateDto {
+  displayName: string;
 }
