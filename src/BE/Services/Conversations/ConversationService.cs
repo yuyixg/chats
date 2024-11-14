@@ -1,11 +1,10 @@
 ﻿using Chats.BE.DB;
 using Chats.BE.Services.Conversations.Dtos;
-using Chats.BE.Services.Conversations.Extensions;
 using Tokenizer = Microsoft.ML.Tokenizers.Tokenizer;
 using OpenAI.Chat;
-using System.Runtime.CompilerServices;
 using System.Text;
 using Microsoft.ML.Tokenizers;
+using Chats.BE.Services.Conversations.Extensions;
 
 namespace Chats.BE.Services.Conversations;
 
@@ -14,15 +13,22 @@ public abstract class ConversationService : IDisposable
     public const float DefaultTemperature = 0.8f;
     public const string DefaultPrompt = "你是{{MODEL_NAME}}，请仔细遵循用户指令并认真回复，当前日期: {{CURRENT_DATE}}";
 
-    protected Model Model { get; }
-    protected Tokenizer Tokenizer { get; }
+    internal protected Model Model { get; }
+    internal protected Tokenizer Tokenizer { get; }
 
     public ConversationService(Model model)
     {
         Model = model;
         try
         {
-            Tokenizer = TiktokenTokenizer.CreateForModel(Model.ModelReference.Name);
+            if (model.ModelReference.Tokenizer is not null)
+            {
+                Tokenizer = TiktokenTokenizer.CreateForEncoding(model.ModelReference.Tokenizer.Name);
+            }
+            else
+            {
+                Tokenizer = TiktokenTokenizer.CreateForModel(Model.ModelReference.Name);
+            }
         }
         catch (NotSupportedException)
         {
@@ -30,23 +36,9 @@ public abstract class ConversationService : IDisposable
         }
     }
 
-    public IAsyncEnumerable<ConversationSegment> ChatStreamed(IReadOnlyList<ChatMessage> messages, ChatCompletionOptions options, CancellationToken cancellationToken)
-    {
-        ChatMessage[] filteredMessage = messages.Select(m => PreProcessMessage(Model, m)).ToArray();
-        if (Model.ModelReference.AllowVision)
-        {
-            options.MaxOutputTokenCount ??= Model.ModelReference.MaxResponseTokens;
-        }
-        if (!Model.ModelReference.AllowSearch)
-        {
-            options.RemoveAllowSearch();
-        }
-        return ChatStreamedInternal(filteredMessage, options, cancellationToken);
-    }
+    public abstract IAsyncEnumerable<ConversationSegment> ChatStreamed(IReadOnlyList<ChatMessage> messages, ChatCompletionOptions options, CancellationToken cancellationToken);
 
-    public abstract IAsyncEnumerable<ConversationSegment> ChatStreamedInternal(IReadOnlyList<ChatMessage> messages, ChatCompletionOptions options, CancellationToken cancellationToken);
-
-    internal virtual async IAsyncEnumerable<ConversationSegment> ChatNonStreamed(IReadOnlyList<ChatMessage> messages, ChatCompletionOptions options, [EnumeratorCancellation] CancellationToken cancellationToken)
+    public virtual async Task<ConversationSegment> Chat(IReadOnlyList<ChatMessage> messages, ChatCompletionOptions options, CancellationToken cancellationToken)
     {
         StringBuilder result = new();
         ConversationSegment? lastSegment = null;
@@ -56,37 +48,12 @@ public abstract class ConversationService : IDisposable
             result.Append(seg.TextSegment);
         }
 
-        yield return new ConversationSegment()
+        return new ConversationSegment()
         {
-            InputTokenCount = lastSegment?.InputTokenCount ?? 0, 
-            OutputTokenCount = lastSegment?.OutputTokenCount ?? 0,
+            InputTokenCountAccumulated = lastSegment?.InputTokenCountAccumulated ?? 0, 
+            OutputTokenCountAccumulated = lastSegment?.OutputTokenCountAccumulated ?? 0,
             TextSegment = result.ToString(),
         };
-    }
-
-    protected static ChatMessage PreProcessMessage(Model model, ChatMessage message)
-    {
-        if (!model.ModelReference.AllowVision)
-        {
-            return ReplaceUserMessageImageIntoLinkText(message);
-        }
-        else
-        {
-            return message;
-        }
-
-        static ChatMessage ReplaceUserMessageImageIntoLinkText(ChatMessage message)
-        {
-            return message switch
-            {
-                UserChatMessage userChatMessage => new UserChatMessage(userChatMessage.Content.Select(c => c.Kind switch
-                {
-                    var x when x == ChatMessageContentPartKind.Image => ChatMessageContentPart.CreateTextPart(c.ImageUri.ToString()),
-                    _ => c,
-                })),
-                _ => message,
-            };
-        }
     }
 
     protected int GetPromptTokenCount(IReadOnlyList<ChatMessage> messages)

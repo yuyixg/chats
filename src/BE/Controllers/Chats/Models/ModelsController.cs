@@ -42,7 +42,7 @@ public class ModelsController : ControllerBase
                     Prompt = defaultPrompt
                         .Replace("{{MODEL_NAME}}", x.Model.ModelReference.Name)
                         .Replace("{{CURRENT_DATE}}", DateTime.UtcNow.AddMinutes(-timezoneOffset).ToString("yyyy-MM-dd")),
-                    Temperature = ConversationService.DefaultTemperature,
+                    Temperature = new TemperatureOptions(x.Model.ModelReference.MinTemperature, x.Model.ModelReference.MaxTemperature).Clamp(ConversationService.DefaultTemperature),
                     EnableSearch = x.Model.ModelReference.AllowSearch ? false : null,
                 }),
                 ModelProvider = x.Model.ModelKey.ModelProvider.Name,

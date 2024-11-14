@@ -112,6 +112,7 @@ public class AdminModelsController(ChatsDB db) : ControllerBase
 
         ModelReference? modelReference = await db.ModelReferences
             .Include(x => x.Provider)
+            .Include(x => x.Tokenizer)
             .Where(x => x.Name == req.ModelReferenceId && x.ProviderId == modelKey.Id)
             .SingleOrDefaultAsync(cancellationToken);
         if (modelReference == null)
@@ -127,9 +128,7 @@ public class AdminModelsController(ChatsDB db) : ControllerBase
         });
         try
         {
-            await foreach (ConversationSegment seg in s.ChatStreamed([new UserChatMessage("1+1=?")], new ChatCompletionOptions(), cancellationToken))
-            {
-            }
+            await s.Chat([new UserChatMessage("1+1=?")], new ChatCompletionOptions(), cancellationToken);
             return Ok();
         }
         catch (Exception e)

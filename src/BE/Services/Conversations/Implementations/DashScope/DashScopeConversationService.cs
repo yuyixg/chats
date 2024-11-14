@@ -29,7 +29,7 @@ public class DashScopeConversationService : ConversationService
     }
 
 
-    public override async IAsyncEnumerable<ConversationSegment> ChatStreamedInternal(IReadOnlyList<OpenAIChatMessage> messages, ChatCompletionOptions options, [EnumeratorCancellation] CancellationToken cancellationToken)
+    public override async IAsyncEnumerable<ConversationSegment> ChatStreamed(IReadOnlyList<OpenAIChatMessage> messages, ChatCompletionOptions options, [EnumeratorCancellation] CancellationToken cancellationToken)
     {
         ChatParameters chatParameters = new()
         {
@@ -48,8 +48,8 @@ public class DashScopeConversationService : ConversationService
                 yield return new ConversationSegment
                 {
                     TextSegment = resp.Output,
-                    InputTokenCount = resp.Usage?.InputTokens ?? 0,
-                    OutputTokenCount = resp.Usage?.OutputTokens ?? 0,
+                    InputTokenCountAccumulated = resp.Usage?.InputTokens ?? 0,
+                    OutputTokenCountAccumulated = resp.Usage?.OutputTokens ?? 0,
                 };
             }
         }
@@ -61,8 +61,8 @@ public class DashScopeConversationService : ConversationService
                 yield return new ConversationSegment
                 {
                     TextSegment = resp.Output.Text,
-                    InputTokenCount = resp.Usage?.InputTokens ?? 0,
-                    OutputTokenCount = resp.Usage?.OutputTokens ?? 0,
+                    InputTokenCountAccumulated = resp.Usage?.InputTokens ?? 0,
+                    OutputTokenCountAccumulated = resp.Usage?.OutputTokens ?? 0,
                 };
             }
         }

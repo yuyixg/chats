@@ -1,5 +1,4 @@
 ﻿using Chats.BE.Controllers.Chats.Conversations;
-using Chats.BE.Controllers.Chats.OpenAICompatible.Dtos;
 using Chats.BE.DB;
 using Chats.BE.DB.Jsons;
 using Chats.BE.Services;
@@ -17,8 +16,9 @@ using System.Diagnostics;
 using System.Text;
 using Chats.BE.Services.Common;
 using System.Text.Json.Nodes;
+using Chats.BE.Controllers.OpenAICompatible.Dtos;
 
-namespace Chats.BE.Controllers.Chats.OpenAICompatible;
+namespace Chats.BE.Controllers.OpenAICompatible;
 
 [Route("api/openai-compatible"), Authorize(AuthenticationSchemes = "OpenAIApiKey")]
 public partial class OpenAICompatibleController(ChatsDB db, CurrentApiKey currentApiKey, ConversationFactory cf, UserModelManager userModelManager, ILogger<OpenAICompatibleController> logger, BalanceService balanceService) : ControllerBase
@@ -48,7 +48,7 @@ public partial class OpenAICompatibleController(ChatsDB db, CurrentApiKey curren
                 UserBalance = x.UserBalance!,
             })
             .SingleAsync(cancellationToken);
-        ConversationSegment lastSegment = new() { TextSegment = "", InputTokenCount = 0, OutputTokenCount = 0 };
+        ConversationSegment lastSegment = new() { TextSegment = "", InputTokenCountAccumulated = 0, OutputTokenCountAccumulated = 0 };
         Stopwatch sw = Stopwatch.StartNew();
         StringBuilder nonStreamingResult = new();
         BadRequestObjectResult? errorToReturn = null;
@@ -75,10 +75,10 @@ public partial class OpenAICompatibleController(ChatsDB db, CurrentApiKey curren
             }
 
 
-            await foreach (ConversationSegment seg in s.ChatStreamed([.. cco.Messages], cco.ToCleanCco(), cancellationToken))
+            await foreach (ConversationSegment seg in s.ChatStreamedSimulated([.. cco.Messages], cco.ToCleanCco(), cancellationToken))
             {
                 lastSegment = seg;
-                UserModelBalanceCost currentCost = calculator.GetNewBalance(seg.InputTokenCount, seg.OutputTokenCount, priceConfig);
+                UserModelBalanceCost currentCost = calculator.GetNewBalance(seg.InputTokenCountAccumulated, seg.OutputTokenCountAccumulated, priceConfig);
                 if (!currentCost.IsSufficient)
                 {
                     throw new InsufficientBalanceException();
@@ -107,10 +107,10 @@ public partial class OpenAICompatibleController(ChatsDB db, CurrentApiKey curren
                         SystemFingerprint = null,
                         Usage = new Usage
                         {
-                            CompletionTokens = seg.OutputTokenCount,
-                            PromptTokens = seg.InputTokenCount,
-                            TotalTokens = seg.InputTokenCount + seg.OutputTokenCount,
-                        }
+                            CompletionTokens = seg.OutputTokenCountAccumulated,
+                            PromptTokens = seg.InputTokenCountAccumulated,
+                            TotalTokens = seg.InputTokenCountAccumulated + seg.OutputTokenCountAccumulated,
+                        },
                     };
                     await YieldResponse(chunk, cancellationToken);
                 }
@@ -149,7 +149,7 @@ public partial class OpenAICompatibleController(ChatsDB db, CurrentApiKey curren
             cancellationToken = CancellationToken.None;
             sw.Stop();
         }
-        
+
         UserApiUsage usage = new()
         {
             ApiKeyId = currentApiKey.ApiKeyId,
@@ -159,9 +159,9 @@ public partial class OpenAICompatibleController(ChatsDB db, CurrentApiKey curren
                 CreatedAt = DateTime.UtcNow,
                 DurationMs = (int)sw.ElapsedMilliseconds,
                 InputCost = cost.InputTokenPrice,
-                InputTokenCount = lastSegment.InputTokenCount,
+                InputTokenCount = lastSegment.InputTokenCountAccumulated,
                 OutputCost = cost.OutputTokenPrice,
-                OutputTokenCount = lastSegment.OutputTokenCount,
+                OutputTokenCount = lastSegment.OutputTokenCountAccumulated,
                 ClientInfo = await clientInfoManager.GetClientInfo(CancellationToken.None),
             }
         };
@@ -230,9 +230,9 @@ public partial class OpenAICompatibleController(ChatsDB db, CurrentApiKey curren
                 SystemFingerprint = null,
                 Usage = new Usage
                 {
-                    CompletionTokens = lastSegment.OutputTokenCount,
-                    PromptTokens = lastSegment.InputTokenCount,
-                    TotalTokens = lastSegment.InputTokenCount + lastSegment.OutputTokenCount,
+                    CompletionTokens = lastSegment.OutputTokenCountAccumulated,
+                    PromptTokens = lastSegment.InputTokenCountAccumulated,
+                    TotalTokens = lastSegment.InputTokenCountAccumulated + lastSegment.OutputTokenCountAccumulated,
                 }
             });
         }

@@ -35,7 +35,7 @@ public class HunyuanConversationService : ConversationService
         }, "", new ClientProfile() { HttpProfile = new() { Endpoint = model.ModelKey.Host } });
     }
 
-    public override async IAsyncEnumerable<ConversationSegment> ChatStreamedInternal(IReadOnlyList<ChatMessage> messages, ChatCompletionOptions options, [EnumeratorCancellation] CancellationToken cancellationToken)
+    public override async IAsyncEnumerable<ConversationSegment> ChatStreamed(IReadOnlyList<ChatMessage> messages, ChatCompletionOptions options, [EnumeratorCancellation] CancellationToken cancellationToken)
     {
         Message[] msgs = Model.ModelReference.AllowVision ?
             messages.Select(OpenAIMessageToHunyuanVLMessage).ToArray() :
@@ -54,8 +54,8 @@ public class HunyuanConversationService : ConversationService
             yield return new ConversationSegment
             {
                 TextSegment = seg.Choices[0].Delta.Content,
-                InputTokenCount = seg.Usage.PromptTokens,
-                OutputTokenCount = seg.Usage.CompletionTokens,
+                InputTokenCountAccumulated = seg.Usage.PromptTokens,
+                OutputTokenCountAccumulated = seg.Usage.CompletionTokens,
             };
         }
     }

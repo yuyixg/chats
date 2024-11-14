@@ -161,7 +161,7 @@ public class ConversationController(ChatsDB db, CurrentUser currentUser, ILogger
             messageToSend.Add(userMessage.ToOpenAI());
         }
 
-        ConversationSegment lastSegment = new() { TextSegment = "", InputTokenCount = 0, OutputTokenCount = 0 };
+        ConversationSegment lastSegment = new() { TextSegment = "", InputTokenCountAccumulated = 0, OutputTokenCountAccumulated = 0 };
         Response.Headers.ContentType = "text/event-stream";
         Response.Headers.CacheControl = "no-cache";
         Response.Headers.Connection = "keep-alive";
@@ -181,16 +181,15 @@ public class ConversationController(ChatsDB db, CurrentUser currentUser, ILogger
             using ConversationService s = conversationFactory.CreateConversationService(userModel.Model);
             ChatCompletionOptions cco = new()
             {
-                MaxOutputTokenCount = userModel.Model.ModelReference.MaxResponseTokens,
                 Temperature = request.UserModelConfig.Temperature != null 
                     ? Math.Clamp(request.UserModelConfig.Temperature.Value, (float)userModel.Model.ModelReference.MinTemperature, (float)userModel.Model.ModelReference.MaxTemperature) 
                     : null,
                 EndUserId = currentUser.Id.ToString(),
             };
-            await foreach (ConversationSegment seg in s.ChatStreamed(messageToSend, cco, cancellationToken))
+            await foreach (ConversationSegment seg in s.ChatStreamedFEProcessed(messageToSend, cco, cancellationToken))
             {
                 lastSegment = seg;
-                UserModelBalanceCost currentCost = calculator.GetNewBalance(seg.InputTokenCount, seg.OutputTokenCount, priceConfig);
+                UserModelBalanceCost currentCost = calculator.GetNewBalance(seg.InputTokenCountAccumulated, seg.OutputTokenCountAccumulated, priceConfig);
                 if (!currentCost.IsSufficient)
                 {
                     throw new InsufficientBalanceException();
@@ -249,8 +248,8 @@ public class ConversationController(ChatsDB db, CurrentUser currentUser, ILogger
             Usage = new UserModelUsage()
             {
                 DurationMs = elapsedMs,
-                InputTokenCount = lastSegment.InputTokenCount,
-                OutputTokenCount = lastSegment.OutputTokenCount,
+                InputTokenCount = lastSegment.InputTokenCountAccumulated,
+                OutputTokenCount = lastSegment.OutputTokenCountAccumulated,
                 InputCost = cost.InputTokenPrice,
                 OutputCost = cost.OutputTokenPrice,
                 UserModelId = userModel.Id,

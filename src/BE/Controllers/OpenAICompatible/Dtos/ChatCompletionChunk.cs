@@ -1,6 +1,6 @@
 ﻿using System.Text.Json.Serialization;
 
-namespace Chats.BE.Controllers.Chats.OpenAICompatible.Dtos;
+namespace Chats.BE.Controllers.OpenAICompatible.Dtos;
 
 public record Delta
 {

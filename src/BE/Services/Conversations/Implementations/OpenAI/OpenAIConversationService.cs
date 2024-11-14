@@ -22,7 +22,12 @@ public class OpenAIConversationService : ConversationService
         _chatClient = api.GetChatClient(model.ApiModelId);
     }
 
-    public override async IAsyncEnumerable<ConversationSegment> ChatStreamedInternal(IReadOnlyList<ChatMessage> messages, ChatCompletionOptions options, [EnumeratorCancellation] CancellationToken cancellationToken)
+    public OpenAIConversationService(Model model, ChatClient chatClient) : base(model)
+    {
+        _chatClient = chatClient;
+    }
+
+    public override async IAsyncEnumerable<ConversationSegment> ChatStreamed(IReadOnlyList<ChatMessage> messages, ChatCompletionOptions options, [EnumeratorCancellation] CancellationToken cancellationToken)
     {
         int inputTokenCount = GetPromptTokenCount(messages);
         int outputTokenCount = 0;
@@ -30,8 +35,8 @@ public class OpenAIConversationService : ConversationService
         yield return new ConversationSegment
         {
             TextSegment = "",
-            InputTokenCount = inputTokenCount,
-            OutputTokenCount = 0,
+            InputTokenCountAccumulated = inputTokenCount,
+            OutputTokenCountAccumulated = 0,
         };
 
         await foreach (StreamingChatCompletionUpdate delta in _chatClient.CompleteChatStreamingAsync(messages, options, cancellationToken))
@@ -45,8 +50,8 @@ public class OpenAIConversationService : ConversationService
                 yield return new ConversationSegment
                 {
                     TextSegment = delta.ContentUpdate[0].Text,
-                    InputTokenCount = delta.Usage.InputTokenCount,
-                    OutputTokenCount = delta.Usage.OutputTokenCount,
+                    InputTokenCountAccumulated = delta.Usage.InputTokenCount,
+                    OutputTokenCountAccumulated = delta.Usage.OutputTokenCount,
                 };
             }
             else
@@ -55,10 +60,21 @@ public class OpenAIConversationService : ConversationService
                 yield return new ConversationSegment
                 {
                     TextSegment = delta.ContentUpdate[0].Text,
-                    InputTokenCount = inputTokenCount,
-                    OutputTokenCount = outputTokenCount,
+                    InputTokenCountAccumulated = inputTokenCount,
+                    OutputTokenCountAccumulated = outputTokenCount,
                 };
             }
         }
+    }
+
+    public override async Task<ConversationSegment> Chat(IReadOnlyList<ChatMessage> messages, ChatCompletionOptions options, CancellationToken cancellationToken)
+    {
+        ClientResult<ChatCompletion> cc = await _chatClient.CompleteChatAsync(messages, options, cancellationToken);
+        return new ConversationSegment
+        {
+            TextSegment = cc.Value.Content[0].Text,
+            InputTokenCountAccumulated = cc.Value.Usage.InputTokenCount, // token is reliable for non streamed completion
+            OutputTokenCountAccumulated = cc.Value.Usage.OutputTokenCount, // token is reliable for non streamed completion
+        };
     }
 }

@@ -25,7 +25,7 @@ public class QianFanConversationService : ConversationService
         ChatClient = new QianFanClient(apiConfig.ApiKey, apiConfig.Secret);
     }
 
-    public override async IAsyncEnumerable<ConversationSegment> ChatStreamedInternal(IReadOnlyList<OpenAIChatMessage> messages, ChatCompletionOptions options, [EnumeratorCancellation] CancellationToken cancellationToken)
+    public override async IAsyncEnumerable<ConversationSegment> ChatStreamed(IReadOnlyList<OpenAIChatMessage> messages, ChatCompletionOptions options, [EnumeratorCancellation] CancellationToken cancellationToken)
     {
         KnownModel model = new(Model.ApiModelId);
         ChatMessage[] qianFanMessages = messages
@@ -46,8 +46,8 @@ public class QianFanConversationService : ConversationService
             yield return new ConversationSegment
             {
                 TextSegment = chatResponse.Result,
-                InputTokenCount = chatResponse.Usage.PromptTokens,
-                OutputTokenCount = chatResponse.Usage.CompletionTokens
+                InputTokenCountAccumulated = chatResponse.Usage.PromptTokens,
+                OutputTokenCountAccumulated = chatResponse.Usage.CompletionTokens
             };
         }
     }
