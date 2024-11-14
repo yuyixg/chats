@@ -22,4 +22,7 @@ public record UserModelDto : UserModelUpdateDto
 {
     [JsonPropertyName("displayName")]
     public required string DisplayName { get; init; }
+
+    [JsonPropertyName("modelKeyName")]
+    public required string ModelKeyName { get; init; }
 }

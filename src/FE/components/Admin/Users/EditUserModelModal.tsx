@@ -5,7 +5,7 @@ import useTranslation from '@/hooks/useTranslation';
 
 import { termDateString } from '@/utils/common';
 
-import { UserModelDisplayDto } from '@/types/adminApis';
+import { UserModelDisplay, UserModelDisplayDto } from '@/types/adminApis';
 
 import { IconSquareRoundedX } from '@/components/Icons';
 import { Button } from '@/components/ui/button';
@@ -46,7 +46,7 @@ export const EditUserModelModal = (props: IProps) => {
   const { t } = useTranslation();
   const { isOpen, onClose, onSuccessful } = props;
   const [submit, setSubmit] = useState(false);
-  const [models, setModels] = useState<UserModelDisplayDto[]>([]);
+  const [models, setModels] = useState<UserModelDisplay[]>([]);
 
   useEffect(() => {
     if (isOpen) {
@@ -58,7 +58,7 @@ export const EditUserModelModal = (props: IProps) => {
 
   const onSubmit = async () => {
     setSubmit(true);
-    putUserModel({ userId: props.userId, models: models })
+    putUserModel({ userId: props.userId, models: models.map(x => x.toUpdateDto()) })
       .then(() => {
         toast.success(t('Save successful!'));
         onSuccessful();
@@ -101,6 +101,7 @@ export const EditUserModelModal = (props: IProps) => {
             <TableHeader>
               <TableRow className="pointer-events-none">
                 <TableHead>{t('Model Display Name')}</TableHead>
+                <TableHead>{t('Model Key')}</TableHead>
                 <TableHead>{t('Tokens')}</TableHead>
                 <TableHead>{t('Chat Counts')}</TableHead>
                 <TableHead>{t('Expiration Time')}</TableHead>
@@ -111,6 +112,7 @@ export const EditUserModelModal = (props: IProps) => {
               {models.map((model, index) => (
                 <TableRow key={model.id}>
                   <TableCell>{model.displayName}</TableCell>
+                  <TableCell>{model.modelKeyName}</TableCell>
                   <TableCell>
                     <Input
                       className="w-30"

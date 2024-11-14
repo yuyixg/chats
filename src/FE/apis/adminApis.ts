@@ -38,14 +38,16 @@ import {
   PutUserInitialConfigParams,
   PutUserModelParams,
   PutUserParams,
+  UserModelDisplay,
   UserModelDisplayDto,
 } from '@/types/adminApis';
 import { ModelProviders } from '@/types/model';
 import { PageResult } from '@/types/page';
 
-export const getModelsByUserId = (userId: string): Promise<UserModelDisplayDto[]> => {
+export const getModelsByUserId = async (userId: string): Promise<UserModelDisplay[]> => {
   const fetchService = useFetch();
-  return fetchService.get(`/api/admin/user-models/${userId}`);
+  const data = await fetchService.get<UserModelDisplayDto[]>(`/api/admin/user-models/${userId}`);
+  return data.map(x => new UserModelDisplay(x));
 }
 
 export const putUserModel = (params: PutUserModelParams): Promise<any> => {

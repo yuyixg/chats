@@ -128,7 +128,7 @@ export interface PostFileServicesParams {
   configs: string;
 }
 
-export interface PutFileServicesParams extends PostFileServicesParams {}
+export interface PutFileServicesParams extends PostFileServicesParams { }
 
 export interface GetFileServicesResult extends PutFileServicesParams {
   id: string;
@@ -211,7 +211,7 @@ export interface PostModelKeysParams {
   configs: string;
 }
 
-export interface PutModelKeysParams extends PostModelKeysParams {}
+export interface PutModelKeysParams extends PostModelKeysParams { }
 
 export interface PostPromptParams {
   name: string;
@@ -315,4 +315,38 @@ export interface UserModelUpdateDto extends UserInitialModel {
 
 export interface UserModelDisplayDto extends UserModelUpdateDto {
   displayName: string;
+  modelKeyName: string;
+}
+
+export class UserModelDisplay implements UserModelDisplayDto {
+  id: number;
+  modelId: number;
+  tokens: number;
+  counts: number;
+  expires: string;
+  enabled: boolean;
+  displayName: string;
+  modelKeyName: string;
+
+  constructor(dto: UserModelDisplayDto) {
+    this.id = dto.id;
+    this.modelId = dto.modelId;
+    this.tokens = dto.tokens;
+    this.counts = dto.counts;
+    this.expires = dto.expires;
+    this.enabled = dto.enabled;
+    this.displayName = dto.displayName;
+    this.modelKeyName = dto.modelKeyName;
+  }
+
+  toUpdateDto(): UserModelUpdateDto {
+    return {
+      id: this.id,
+      modelId: this.modelId,
+      tokens: this.tokens,
+      counts: this.counts,
+      expires: this.expires,
+      enabled: this.enabled,
+    };
+  }
 }

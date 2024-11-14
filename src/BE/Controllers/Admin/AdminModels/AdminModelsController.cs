@@ -143,16 +143,16 @@ public class AdminModelsController(ChatsDB db) : ControllerBase
             .OrderBy(x => x.Order)
             .Select(x => new 
             { 
-                ModelId = x.Id,
-                DisplayName = x.Name, 
+                Model = x, 
                 UserModel = x.UserModels.Where(x => x.UserId == userId).FirstOrDefault() 
             })
             .Select(x => x.UserModel == null ? 
                 new UserModelDto()
                 {
                     Id = -1,
-                    ModelId = x.ModelId,
-                    DisplayName = x.DisplayName,
+                    ModelId = x.Model.Id,
+                    DisplayName = x.Model.Name,
+                    ModelKeyName = x.Model.ModelKey.Name,
                     Enabled = false, 
                     Expires = DateTime.UtcNow,
                     Counts = 0,
@@ -160,8 +160,9 @@ public class AdminModelsController(ChatsDB db) : ControllerBase
                 } : new UserModelDto()
                 {
                     Id = x.UserModel.Id,
-                    DisplayName = x.DisplayName,
-                    ModelId = x.ModelId,
+                    ModelId = x.Model.Id,
+                    DisplayName = x.Model.Name,
+                    ModelKeyName = x.Model.ModelKey.Name,
                     Counts = x.UserModel.CountBalance,
                     Expires = x.UserModel.ExpiresAt,
                     Enabled = !x.UserModel.IsDeleted,
