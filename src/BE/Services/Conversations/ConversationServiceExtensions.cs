@@ -41,7 +41,7 @@ internal static class ConversationServiceExtensions
             }
             else
             {
-                messages = [new UserChatMessage([ChatMessageContentPart.CreateTextPart(systemPrompt)]), .. messages.Where(x => x is not SystemChatMessage)];
+                messages = [new UserChatMessage([ChatMessageContentPart.CreateTextPart(systemPrompt + "\n")]), .. messages.Where(x => x is not SystemChatMessage)];
             }
         }
 
