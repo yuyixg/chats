@@ -22,7 +22,7 @@ public class UpdateChatsRequest
     [JsonPropertyName("isDeleted")]
     public bool? IsDeleted { get; set; }
 
-    public void ApplyToChats(Conversation2 chat)
+    public void ApplyToChats(Chat chat)
     {
         if (Title != null)
         {

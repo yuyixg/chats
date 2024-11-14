@@ -63,9 +63,8 @@ public record AdminUserDtoTemp
     public required string? Provider { get; init; }
     public required bool Enabled { get; init; }
     public required DateTime CreatedAt { get; init; }
-    //public required Guid UserModelId { get; init; }
     public required int UserModelCount { get; init; }
-    public required UserModel2[] Models { get; init; }
+    public required UserModel[] Models { get; init; }
 
     public AdminUserDto ToDto() => new()
     {
@@ -80,7 +79,6 @@ public record AdminUserDtoTemp
         Provider = Provider,
         Enabled = Enabled,
         CreatedAt = CreatedAt,
-        //UserModelId = UserModelId,
         UserModelCount = UserModelCount,
         Models = Models.Select(x => x.ToJsonTokenBalance()).ToArray(),
     };

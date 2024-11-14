@@ -40,7 +40,7 @@ public partial class ModelProvider
     public string? ApiKey { get; set; }
 
     [InverseProperty("ModelProvider")]
-    public virtual ICollection<ModelKey2> ModelKey2s { get; set; } = new List<ModelKey2>();
+    public virtual ICollection<ModelKey> ModelKeys { get; set; } = new List<ModelKey>();
 
     [InverseProperty("Provider")]
     public virtual ICollection<ModelReference> ModelReferences { get; set; } = new List<ModelReference>();

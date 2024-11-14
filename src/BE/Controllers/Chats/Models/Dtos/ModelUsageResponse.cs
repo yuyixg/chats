@@ -23,7 +23,7 @@ public record ModelUsageResponse
     [JsonPropertyName("responseTokenPrice1M")]
     public required decimal ResponseTokenPrice1M { get; init; }
 
-    public static ModelUsageResponse FromDB(UserModel2 userModel)
+    public static ModelUsageResponse FromDB(UserModel userModel)
     {
         return new ModelUsageResponse
         {

@@ -50,7 +50,7 @@ public class AdminModelsController(ChatsDB db) : ControllerBase
     public async Task<ActionResult> UpdateModel(short modelId, [FromBody] UpdateModelRequest req, CancellationToken cancellationToken)
     {
         short modelReferenceId = await db.ModelReferences
-            .Where(x => x.Name == req.ModelReferenceName && x.ProviderId == db.ModelKey2s.Where(x => x.Id == req.ModelKeyId).Select(x => x.ModelProviderId).First())
+            .Where(x => x.Name == req.ModelReferenceName && x.ProviderId == db.ModelKeys.Where(x => x.Id == req.ModelKeyId).Select(x => x.ModelProviderId).First())
             .Select(x => x.Id)
             .FirstOrDefaultAsync(cancellationToken);
         if (modelReferenceId == 0)
@@ -75,7 +75,7 @@ public class AdminModelsController(ChatsDB db) : ControllerBase
     public async Task<ActionResult> CreateModel([FromBody] UpdateModelRequest req, CancellationToken cancellationToken)
     {
         short modelReferenceId = await db.ModelReferences
-            .Where(x => x.Name == req.ModelReferenceName && x.ProviderId == db.ModelKey2s.Where(x => x.Id == req.ModelKeyId).Select(x => x.ModelProviderId).First())
+            .Where(x => x.Name == req.ModelReferenceName && x.ProviderId == db.ModelKeys.Where(x => x.Id == req.ModelKeyId).Select(x => x.ModelProviderId).First())
             .Select(x => x.Id)
             .FirstOrDefaultAsync(cancellationToken);
         if (modelReferenceId == 0)
@@ -101,7 +101,7 @@ public class AdminModelsController(ChatsDB db) : ControllerBase
         [FromServices] ConversationFactory conversationFactory,
         CancellationToken cancellationToken)
     {
-        ModelKey2? modelKey = await db.ModelKey2s
+        ModelKey? modelKey = await db.ModelKeys
             .Include(x => x.ModelProvider)
             .Where(x => x.Id == req.ModelKeyId)
             .SingleOrDefaultAsync(cancellationToken);
@@ -152,20 +152,20 @@ public class AdminModelsController(ChatsDB db) : ControllerBase
                 .Select(x => $"{x.Key}: " + string.Join(",", x.Value!.Errors.Select(x => x.ErrorMessage)))));
         }
 
-        Dictionary<short, UserModel2> userModels = await db.UserModel2s
+        Dictionary<short, UserModel> userModels = await db.UserModels
             .Where(x => x.UserId == currentUser.Id)
             .ToDictionaryAsync(k => k.ModelId, v => v, cancellationToken);
 
         // create or update user models
         foreach (JsonTokenBalance item in req.Models)
         {
-            if (userModels.TryGetValue(item.ModelId, out UserModel2? existingItem))
+            if (userModels.TryGetValue(item.ModelId, out UserModel? existingItem))
             {
                 item.ApplyTo(existingItem);
             }
             else
             {
-                UserModel2 newItem = new()
+                UserModel newItem = new()
                 {
                     UserId = currentUser.Id,
                     ModelId = item.ModelId,
@@ -173,12 +173,12 @@ public class AdminModelsController(ChatsDB db) : ControllerBase
                 };
                 item.ApplyTo(newItem);
                 userModels[item.ModelId] = newItem;
-                db.UserModel2s.Add(newItem);
+                db.UserModels.Add(newItem);
             }
         }
 
         // delete user models
-        foreach (KeyValuePair<short, UserModel2> kvp in userModels)
+        foreach (KeyValuePair<short, UserModel> kvp in userModels)
         {
             if (!req.Models.Any(x => x.ModelId == kvp.Key))
             {

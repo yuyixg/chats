@@ -17,5 +17,5 @@ public partial class MessageContentType
     public string ContentType { get; set; } = null!;
 
     [InverseProperty("ContentType")]
-    public virtual ICollection<MessageContent2> MessageContent2s { get; set; } = new List<MessageContent2>();
+    public virtual ICollection<MessageContent> MessageContents { get; set; } = new List<MessageContent>();
 }

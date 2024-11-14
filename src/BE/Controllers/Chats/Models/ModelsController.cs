@@ -25,7 +25,7 @@ public class ModelsController : ControllerBase
             .FirstOrDefaultAsync(cancellationToken);
         defaultPrompt ??= ConversationService.DefaultPrompt;
 
-        UserModel2[] models = await userModelManager.GetValidModelsByUserId(user.Id, cancellationToken);
+        UserModel[] models = await userModelManager.GetValidModelsByUserId(user.Id, cancellationToken);
         ModelResponse[] responses = models
             .Select(x => new ModelResponse()
             {
@@ -57,7 +57,7 @@ public class ModelsController : ControllerBase
     [HttpGet("{modelId}/usage")]
     public async Task<ActionResult<ModelUsageResponse>> GetUsage(short modelId, [FromServices] CurrentUser currentUser, [FromServices] UserModelManager userModelManager, CancellationToken cancellationToken)
     {
-        UserModel2? model = await userModelManager.GetUserModel(currentUser.Id, modelId, cancellationToken);
+        UserModel? model = await userModelManager.GetUserModel(currentUser.Id, modelId, cancellationToken);
         if (model == null) return NotFound();
 
         ModelUsageResponse response = ModelUsageResponse.FromDB(model);

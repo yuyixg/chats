@@ -6,10 +6,10 @@ using Microsoft.EntityFrameworkCore;
 
 namespace Chats.BE.DB;
 
-[Table("Message2")]
+[Table("Message")]
 [Index("ConversationId", Name = "IX_Message2_Conversation")]
 [Index("UsageId", Name = "IX_Message2_Usage", IsUnique = true)]
-public partial class Message2
+public partial class Message
 {
     [Key]
     public long Id { get; set; }
@@ -25,24 +25,24 @@ public partial class Message2
     public long? UsageId { get; set; }
 
     [ForeignKey("ChatRoleId")]
-    [InverseProperty("Message2s")]
+    [InverseProperty("Messages")]
     public virtual ChatRole ChatRole { get; set; } = null!;
 
     [ForeignKey("ConversationId")]
-    [InverseProperty("Message2s")]
-    public virtual Conversation2 Conversation { get; set; } = null!;
+    [InverseProperty("Messages")]
+    public virtual Chat Conversation { get; set; } = null!;
 
     [InverseProperty("Parent")]
-    public virtual ICollection<Message2> InverseParent { get; set; } = new List<Message2>();
+    public virtual ICollection<Message> InverseParent { get; set; } = new List<Message>();
 
     [InverseProperty("Message")]
-    public virtual ICollection<MessageContent2> MessageContent2s { get; set; } = new List<MessageContent2>();
+    public virtual ICollection<MessageContent> MessageContents { get; set; } = new List<MessageContent>();
 
     [ForeignKey("ParentId")]
     [InverseProperty("InverseParent")]
-    public virtual Message2? Parent { get; set; }
+    public virtual Message? Parent { get; set; }
 
     [ForeignKey("UsageId")]
-    [InverseProperty("Message2")]
+    [InverseProperty("Message")]
     public virtual UserModelUsage? Usage { get; set; }
 }

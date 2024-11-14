@@ -6,9 +6,9 @@ using Microsoft.EntityFrameworkCore;
 
 namespace Chats.BE.DB;
 
-[Table("UsageTransactionLog")]
+[Table("UsageTransaction")]
 [Index("UserModelId", Name = "IX_UserModelTransactionLog_UserModelId")]
-public partial class UsageTransactionLog
+public partial class UsageTransaction
 {
     [Key]
     public long Id { get; set; }
@@ -24,12 +24,12 @@ public partial class UsageTransactionLog
     public DateTime CreatedAt { get; set; }
 
     [ForeignKey("TransactionTypeId")]
-    [InverseProperty("UsageTransactionLogs")]
+    [InverseProperty("UsageTransactions")]
     public virtual TransactionType TransactionType { get; set; } = null!;
 
     [ForeignKey("UserModelId")]
-    [InverseProperty("UsageTransactionLogs")]
-    public virtual UserModel2 UserModel { get; set; } = null!;
+    [InverseProperty("UsageTransactions")]
+    public virtual UserModel UserModel { get; set; } = null!;
 
     [InverseProperty("UsageTransaction")]
     public virtual UserModelUsage? UserModelUsage { get; set; }

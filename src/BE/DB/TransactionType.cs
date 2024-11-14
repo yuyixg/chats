@@ -17,8 +17,8 @@ public partial class TransactionType
     public string Name { get; set; } = null!;
 
     [InverseProperty("TransactionType")]
-    public virtual ICollection<TransactionLog> TransactionLogs { get; set; } = new List<TransactionLog>();
+    public virtual ICollection<BalanceTransaction> BalanceTransactions { get; set; } = new List<BalanceTransaction>();
 
     [InverseProperty("TransactionType")]
-    public virtual ICollection<UsageTransactionLog> UsageTransactionLogs { get; set; } = new List<UsageTransactionLog>();
+    public virtual ICollection<UsageTransaction> UsageTransactions { get; set; } = new List<UsageTransaction>();
 }

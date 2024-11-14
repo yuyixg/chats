@@ -21,10 +21,10 @@ public record JsonTokenBalance
     [JsonPropertyName("enabled")]
     public required bool Enabled { get; init; }
 
-    public void ApplyTo(UserModel2 existingItem)
+    public void ApplyTo(UserModel existingItem)
     {
-        UsageTransactionLog? toReturn = existingItem.CountBalance != Counts || existingItem.TokenBalance != Tokens
-            ? new UsageTransactionLog
+        UsageTransaction? toReturn = existingItem.CountBalance != Counts || existingItem.TokenBalance != Tokens
+            ? new UsageTransaction
             {
                 CreatedAt = DateTime.UtcNow,
                 CountAmount = Counts - existingItem.CountBalance,
@@ -41,7 +41,7 @@ public record JsonTokenBalance
 
         if (toReturn != null)
         {
-            existingItem.UsageTransactionLogs.Add(toReturn);
+            existingItem.UsageTransactions.Add(toReturn);
         }
     }
 }

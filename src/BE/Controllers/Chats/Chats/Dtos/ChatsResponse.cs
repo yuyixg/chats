@@ -35,7 +35,7 @@ public record ChatsResponse
     [JsonPropertyName("modelProvider")]
     public DBModelProvider ModelProvider { get; init; }
 
-    public static ChatsResponse FromDB(Conversation2 chat, IIdEncryptionService idEncryption)
+    public static ChatsResponse FromDB(Chat chat, IIdEncryptionService idEncryption)
     {
         return new ChatsResponse()
         {

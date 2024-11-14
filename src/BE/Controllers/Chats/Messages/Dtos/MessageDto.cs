@@ -65,12 +65,12 @@ public record MessageContentRequest
     [JsonPropertyName("image")]
     public List<string>? Image { get; init; }
 
-    public MessageContent2[] ToMessageContents()
+    public MessageContent[] ToMessageContents()
     {
         return
         [
-            MessageContent2.FromText(Text),
-            ..(Image ?? []).Select(MessageContent2.FromImageUrl),
+            MessageContent.FromText(Text),
+            ..(Image ?? []).Select(MessageContent.FromImageUrl),
         ];
     }
 

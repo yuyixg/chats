@@ -10,7 +10,7 @@ namespace Chats.BE.DB;
 [Index("FileServiceId", Name = "IX_Model_FileServiceId")]
 [Index("ModelKeyId", Name = "IX_Model_ModelKeyId")]
 [Index("ModelReferenceId", Name = "IX_Model_ModelReferenceId")]
-[Index("Name", Name = "IX_Model_Name", IsUnique = true)]
+[Index("Name", Name = "IX_Model_Name")]
 [Index("Order", Name = "IX_Model_Order")]
 public partial class Model
 {
@@ -44,7 +44,7 @@ public partial class Model
     public DateTime UpdatedAt { get; set; }
 
     [InverseProperty("Model")]
-    public virtual ICollection<Conversation2> Conversation2s { get; set; } = new List<Conversation2>();
+    public virtual ICollection<Chat> Chats { get; set; } = new List<Chat>();
 
     [ForeignKey("FileServiceId")]
     [InverseProperty("Models")]
@@ -52,14 +52,14 @@ public partial class Model
 
     [ForeignKey("ModelKeyId")]
     [InverseProperty("Models")]
-    public virtual ModelKey2 ModelKey { get; set; } = null!;
+    public virtual ModelKey ModelKey { get; set; } = null!;
 
     [ForeignKey("ModelReferenceId")]
     [InverseProperty("Models")]
     public virtual ModelReference ModelReference { get; set; } = null!;
 
     [InverseProperty("Model")]
-    public virtual ICollection<UserModel2> UserModel2s { get; set; } = new List<UserModel2>();
+    public virtual ICollection<UserModel> UserModels { get; set; } = new List<UserModel>();
 
     [ForeignKey("ModelId")]
     [InverseProperty("Models")]

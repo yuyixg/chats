@@ -20,7 +20,7 @@ public class BalanceService(IServiceScopeFactory serviceScopeFactory)
         await db.UserBalances
             .Where(x => x.UserId == userId)
             .ExecuteUpdateAsync(userBalance => userBalance.SetProperty(p => p.Balance, v =>
-                db.TransactionLogs
+                db.BalanceTransactions
                     .Where(x => x.UserId == userId)
                     .Sum(x => x.Amount)
                 ), cancellationToken);
@@ -38,10 +38,10 @@ public class BalanceService(IServiceScopeFactory serviceScopeFactory)
 
     public async Task UpdateUserModelBalance(ChatsDB db, int userModelId, CancellationToken cancellationToken)
     {
-        await db.UserModel2s
+        await db.UserModels
             .Where(x => x.Id == userModelId)
             .ExecuteUpdateAsync(userModel => userModel
-                .SetProperty(p => p.TokenBalance, v => db.UsageTransactionLogs.Where(x => x.UserModelId == userModelId).Sum(x => x.TokenAmount))
-                .SetProperty(p => p.CountBalance, v => db.UsageTransactionLogs.Where(x => x.UserModelId == userModelId).Sum(x => x.CountAmount)), cancellationToken);
+                .SetProperty(p => p.TokenBalance, v => db.UsageTransactions.Where(x => x.UserModelId == userModelId).Sum(x => x.TokenAmount))
+                .SetProperty(p => p.CountBalance, v => db.UsageTransactions.Where(x => x.UserModelId == userModelId).Sum(x => x.CountAmount)), cancellationToken);
     }
 }

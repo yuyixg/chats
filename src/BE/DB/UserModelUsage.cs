@@ -40,23 +40,23 @@ public partial class UserModelUsage
 
     [ForeignKey("BalanceTransactionId")]
     [InverseProperty("UserModelUsage")]
-    public virtual TransactionLog? BalanceTransaction { get; set; }
+    public virtual BalanceTransaction? BalanceTransaction { get; set; }
 
     [ForeignKey("ClientInfoId")]
     [InverseProperty("UserModelUsages")]
     public virtual ClientInfo ClientInfo { get; set; } = null!;
 
     [InverseProperty("Usage")]
-    public virtual Message2? Message2 { get; set; }
+    public virtual Message? Message { get; set; }
 
     [ForeignKey("UsageTransactionId")]
     [InverseProperty("UserModelUsage")]
-    public virtual UsageTransactionLog? UsageTransaction { get; set; }
+    public virtual UsageTransaction? UsageTransaction { get; set; }
 
     [InverseProperty("Usage")]
     public virtual UserApiUsage? UserApiUsage { get; set; }
 
     [ForeignKey("UserModelId")]
     [InverseProperty("UserModelUsages")]
-    public virtual UserModel2 UserModel { get; set; } = null!;
+    public virtual UserModel UserModel { get; set; } = null!;
 }

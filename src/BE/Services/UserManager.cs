@@ -70,10 +70,10 @@ public class UserManager(ChatsDB db)
         {
             newUser.UserBalance.Balance = config.Price;
             JsonTokenBalance[] models = JsonSerializer.Deserialize<JsonTokenBalance[]>(config.Models)!;
-            newUser.UserModel2s = models
+            newUser.UserModels = models
                 .Select(m =>
                 {
-                    UserModel2 toReturn = new()
+                    UserModel toReturn = new()
                     {
                         ModelId = m.ModelId,
                         CreatedAt = DateTime.UtcNow,
@@ -82,7 +82,7 @@ public class UserManager(ChatsDB db)
                     return toReturn;
                 })
                 .ToArray();
-            db.TransactionLogs.Add(new TransactionLog()
+            db.BalanceTransactions.Add(new BalanceTransaction()
             {
                 UserId = newUser.Id,
                 CreditUserId = newUser.Id,

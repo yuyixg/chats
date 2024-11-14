@@ -17,7 +17,7 @@ public class ModelKeysController(ChatsDB db) : ControllerBase
     [HttpGet]
     public ActionResult<ModelKeyDto[]> GetAllModelKeys()
     {
-        ModelKeyDto[] result = db.ModelKey2s
+        ModelKeyDto[] result = db.ModelKeys
             .OrderByDescending(x => x.UpdatedAt)
             .Select(x => new ModelKeyDtoTemp
             {
@@ -40,7 +40,7 @@ public class ModelKeysController(ChatsDB db) : ControllerBase
     [HttpPut("{modelKeyId}")]
     public async Task<ActionResult> UpdateModelKey(short modelKeyId, [FromBody] UpdateModelKeyRequest request, CancellationToken cancellationToken)
     {
-        ModelKey2? modelKey = await db.ModelKey2s
+        ModelKey? modelKey = await db.ModelKeys
             .FirstOrDefaultAsync(x => x.Id == modelKeyId, cancellationToken);
         if (modelKey == null)
         {
@@ -84,7 +84,7 @@ public class ModelKeysController(ChatsDB db) : ControllerBase
             return this.BadRequestMessage("Invalid model provider");
         }
 
-        ModelKey2 newModelKey = new()
+        ModelKey newModelKey = new()
         {
             ModelProviderId = modelProviderId.Value,
             Name = request.Name,
@@ -93,7 +93,7 @@ public class ModelKeysController(ChatsDB db) : ControllerBase
             CreatedAt = DateTime.UtcNow,
             UpdatedAt = DateTime.UtcNow,
         };
-        db.ModelKey2s.Add(newModelKey);
+        db.ModelKeys.Add(newModelKey);
         await db.SaveChangesAsync(cancellationToken);
 
         return Created();
@@ -107,14 +107,14 @@ public class ModelKeysController(ChatsDB db) : ControllerBase
             return this.BadRequestMessage("Model key is in use");
         }
 
-        ModelKey2? modelKey = await db.ModelKey2s
+        ModelKey? modelKey = await db.ModelKeys
             .FirstOrDefaultAsync(x => x.Id == modelKeyId, cancellationToken);
         if (modelKey == null)
         {
             return NotFound();
         }
 
-        db.ModelKey2s.Remove(modelKey);
+        db.ModelKeys.Remove(modelKey);
         await db.SaveChangesAsync(cancellationToken);
 
         return NoContent();

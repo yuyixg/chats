@@ -34,9 +34,8 @@ public class AdminUserController(ChatsDB db) : ControllerBase
             Provider = x.Provider,
             Enabled = x.Enabled,
             CreatedAt = x.CreatedAt,
-            //UserModelId = 0, // TODO
-            UserModelCount = x.UserModel2s.Count(x => !x.IsDeleted && !x.Model.IsDeleted), 
-            Models = x.UserModel2s.ToArray(),
+            UserModelCount = x.UserModels.Count(x => !x.IsDeleted && !x.Model.IsDeleted), 
+            Models = x.UserModels.ToArray(),
         }), pagingRequest, x => x.ToDto(), cancellationToken);
     }
 

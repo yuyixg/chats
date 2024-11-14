@@ -31,7 +31,7 @@ public class BalanceController(ChatsDB db, CurrentUser currentUser) : Controller
         DateTime[] dates = Enumerable.Range(0, days)
             .Select(day => now.AddMinutes(-timezoneOffset).AddDays(-day).Date)
             .ToArray();
-        Dictionary<DateTime, decimal> history = (await db.TransactionLogs
+        Dictionary<DateTime, decimal> history = (await db.BalanceTransactions
             .Where(x => x.UserId == currentUser.Id && x.CreatedAt >= start && x.CreatedAt <= now && 
                 (x.TransactionTypeId == (byte)DBTransactionType.Cost || x.TransactionTypeId == (byte)DBTransactionType.ApiCost))
             .Select(x => new

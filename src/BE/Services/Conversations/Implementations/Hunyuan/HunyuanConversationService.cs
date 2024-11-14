@@ -14,6 +14,7 @@ using TencentCloud.Hunyuan.V20230901.Models;
 using System.Runtime.CompilerServices;
 using Chats.BE.DB.Jsons;
 using Chats.BE.DB;
+using Message = TencentCloud.Hunyuan.V20230901.Models.Message;
 
 namespace Chats.BE.Services.Conversations.Implementations.Hunyuan;
 

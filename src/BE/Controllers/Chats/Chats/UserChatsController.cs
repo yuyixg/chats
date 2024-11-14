@@ -21,7 +21,7 @@ public class UserChatsController(ChatsDB db, CurrentUser currentUser, IIdEncrypt
     [HttpGet("{chatId}")]
     public async Task<ActionResult<ChatsResponse>> GetOneChat(string chatId, CancellationToken cancellationToken)
     {
-        ChatsResponseTemp? temp = await db.Conversation2s
+        ChatsResponseTemp? temp = await db.Chats
             .Where(x => x.Id == idEncryption.DecryptAsInt32(chatId) && x.UserId == currentUser.Id && !x.IsDeleted)
             .Select(x => new ChatsResponseTemp()
             {
@@ -52,7 +52,7 @@ public class UserChatsController(ChatsDB db, CurrentUser currentUser, IIdEncrypt
     [HttpGet]
     public async Task<ActionResult<PagedResult<ChatsResponse>>> GetChats([FromQuery] PagingRequest request, CancellationToken cancellationToken)
     {
-        IQueryable<Conversation2> query = db.Conversation2s
+        IQueryable<Chat> query = db.Chats
             .Include(x => x.Model)
             .Where(x => x.UserId == currentUser.Id && !x.IsDeleted)
             .OrderByDescending(x => x.CreatedAt);
@@ -86,13 +86,13 @@ public class UserChatsController(ChatsDB db, CurrentUser currentUser, IIdEncrypt
     [HttpPost]
     public async Task<ActionResult<ChatsResponse>> CreateChats([FromBody] CreateChatsRequest request, [FromServices] UserModelManager userModelManager, CancellationToken cancellationToken)
     {
-        UserModel2[] validModels = await userModelManager.GetValidModelsByUserId(currentUser.Id, cancellationToken);
+        UserModel[] validModels = await userModelManager.GetValidModelsByUserId(currentUser.Id, cancellationToken);
         if (validModels.Length == 0)
         {
             return this.BadRequestMessage("No model available.");
         }
 
-        Conversation2 chat = new()
+        Chat chat = new()
         {
             UserId = currentUser.Id,
             Title = request.Title,
@@ -103,7 +103,7 @@ public class UserChatsController(ChatsDB db, CurrentUser currentUser, IIdEncrypt
             EnableSearch = null, 
         };
 
-        Conversation2? lastChat = await db.Conversation2s
+        Chat? lastChat = await db.Chats
             .Where(x => x.UserId == currentUser.Id && !x.IsDeleted)
             .OrderByDescending(x => x.CreatedAt)
             .FirstOrDefaultAsync(cancellationToken);
@@ -115,7 +115,7 @@ public class UserChatsController(ChatsDB db, CurrentUser currentUser, IIdEncrypt
         {
             chat.ModelId = (validModels.FirstOrDefault(x => !x.ExpiresAt.IsExpired()) ?? validModels.First()).ModelId;
         }
-        db.Conversation2s.Add(chat);
+        db.Chats.Add(chat);
         await db.SaveChangesAsync(cancellationToken);
 
         // load ChatModel Provider here
@@ -128,22 +128,22 @@ public class UserChatsController(ChatsDB db, CurrentUser currentUser, IIdEncrypt
     [HttpDelete("{chatId}")]
     public async Task<IActionResult> DeleteChats(string chatId, CancellationToken cancellationToken)
     {
-        bool exists = await db.Conversation2s
+        bool exists = await db.Chats
             .AnyAsync(x => x.Id == idEncryption.DecryptAsInt32(chatId) && x.UserId == currentUser.Id, cancellationToken);
         if (!exists)
         {
             return NotFound();
         }
 
-        if (await db.Message2s.AnyAsync(m => m.ConversationId == idEncryption.DecryptAsInt32(chatId), cancellationToken))
+        if (await db.Messages.AnyAsync(m => m.ConversationId == idEncryption.DecryptAsInt32(chatId), cancellationToken))
         {
-            await db.Conversation2s
+            await db.Chats
                 .Where(x => x.Id == idEncryption.DecryptAsInt32(chatId))
                 .ExecuteUpdateAsync(x => x.SetProperty(y => y.IsDeleted, true), cancellationToken);
         }
         else
         {
-            await db.Conversation2s
+            await db.Chats
                 .Where(x => x.Id == idEncryption.DecryptAsInt32(chatId))
                 .ExecuteDeleteAsync(cancellationToken);
         }
@@ -154,7 +154,7 @@ public class UserChatsController(ChatsDB db, CurrentUser currentUser, IIdEncrypt
     [HttpPut("{chatId}")]
     public async Task<IActionResult> UpdateChats(string chatId, [FromBody] UpdateChatsRequest request, CancellationToken cancellationToken)
     {
-        Conversation2? chat = await db.Conversation2s
+        Chat? chat = await db.Chats
             .Where(x => x.Id == idEncryption.DecryptAsInt32(chatId) && x.UserId == currentUser.Id)
             .FirstOrDefaultAsync(cancellationToken);
         if (chat == null)

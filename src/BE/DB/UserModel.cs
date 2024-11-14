@@ -6,10 +6,10 @@ using Microsoft.EntityFrameworkCore;
 
 namespace Chats.BE.DB;
 
-[Table("UserModel2")]
+[Table("UserModel")]
 [Index("ModelId", Name = "IX_UserModel2_ModelId")]
 [Index("UserId", Name = "IX_UserModel2_UserId")]
-public partial class UserModel2
+public partial class UserModel
 {
     [Key]
     public int Id { get; set; }
@@ -31,14 +31,14 @@ public partial class UserModel2
     public DateTime UpdatedAt { get; set; }
 
     [ForeignKey("ModelId")]
-    [InverseProperty("UserModel2s")]
+    [InverseProperty("UserModels")]
     public virtual Model Model { get; set; } = null!;
 
     [InverseProperty("UserModel")]
-    public virtual ICollection<UsageTransactionLog> UsageTransactionLogs { get; set; } = new List<UsageTransactionLog>();
+    public virtual ICollection<UsageTransaction> UsageTransactions { get; set; } = new List<UsageTransaction>();
 
     [ForeignKey("UserId")]
-    [InverseProperty("UserModel2s")]
+    [InverseProperty("UserModels")]
     public virtual User User { get; set; } = null!;
 
     [InverseProperty("UserModel")]

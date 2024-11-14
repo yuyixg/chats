@@ -6,10 +6,10 @@ using Microsoft.EntityFrameworkCore;
 
 namespace Chats.BE.DB;
 
-[Table("TransactionLog")]
+[Table("BalanceTransaction")]
 [Index("CreditUserId", Name = "IX_BalanceLog2_CreditUser")]
 [Index("UserId", Name = "IX_BalanceLog2_User")]
-public partial class TransactionLog
+public partial class BalanceTransaction
 {
     [Key]
     public long Id { get; set; }
@@ -26,15 +26,15 @@ public partial class TransactionLog
     public DateTime CreatedAt { get; set; }
 
     [ForeignKey("CreditUserId")]
-    [InverseProperty("TransactionLogCreditUsers")]
+    [InverseProperty("BalanceTransactionCreditUsers")]
     public virtual User? CreditUser { get; set; }
 
     [ForeignKey("TransactionTypeId")]
-    [InverseProperty("TransactionLogs")]
+    [InverseProperty("BalanceTransactions")]
     public virtual TransactionType TransactionType { get; set; } = null!;
 
     [ForeignKey("UserId")]
-    [InverseProperty("TransactionLogUsers")]
+    [InverseProperty("BalanceTransactionUsers")]
     public virtual User User { get; set; } = null!;
 
     [InverseProperty("BalanceTransaction")]

@@ -27,7 +27,7 @@ public record UserModelBalanceCost(int Counts, int Tokens, decimal Balance, int 
 
 public record UserModelBalanceCalculator(int Counts, int Tokens, decimal Balance)
 {
-    public UserModelBalanceCalculator(UserModel2 userModel, decimal balance) : this(
+    public UserModelBalanceCalculator(UserModel userModel, decimal balance) : this(
         userModel.CountBalance,
         userModel.TokenBalance,
         balance)

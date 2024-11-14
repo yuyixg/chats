@@ -45,20 +45,20 @@ public partial class User
 
     public DateTime UpdatedAt { get; set; }
 
+    [InverseProperty("CreditUser")]
+    public virtual ICollection<BalanceTransaction> BalanceTransactionCreditUsers { get; set; } = new List<BalanceTransaction>();
+
     [InverseProperty("User")]
-    public virtual ICollection<Conversation2> Conversation2s { get; set; } = new List<Conversation2>();
+    public virtual ICollection<BalanceTransaction> BalanceTransactionUsers { get; set; } = new List<BalanceTransaction>();
+
+    [InverseProperty("User")]
+    public virtual ICollection<Chat> Chats { get; set; } = new List<Chat>();
 
     [InverseProperty("CreateUser")]
     public virtual ICollection<Prompt> Prompts { get; set; } = new List<Prompt>();
 
     [InverseProperty("User")]
     public virtual ICollection<Session> Sessions { get; set; } = new List<Session>();
-
-    [InverseProperty("CreditUser")]
-    public virtual ICollection<TransactionLog> TransactionLogCreditUsers { get; set; } = new List<TransactionLog>();
-
-    [InverseProperty("User")]
-    public virtual ICollection<TransactionLog> TransactionLogUsers { get; set; } = new List<TransactionLog>();
 
     [InverseProperty("User")]
     public virtual ICollection<UserApiKey> UserApiKeys { get; set; } = new List<UserApiKey>();
@@ -70,5 +70,5 @@ public partial class User
     public virtual UserInvitation? UserInvitation { get; set; }
 
     [InverseProperty("User")]
-    public virtual ICollection<UserModel2> UserModel2s { get; set; } = new List<UserModel2>();
+    public virtual ICollection<UserModel> UserModels { get; set; } = new List<UserModel>();
 }

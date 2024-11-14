@@ -39,7 +39,7 @@ public class ConversationController(ChatsDB db, CurrentUser currentUser, ILogger
         long? messageId = request.MessageId != null ? idEncryption.DecryptAsInt64(request.MessageId) : null;
         DateTime messageReceiveTime = DateTime.UtcNow;
 
-        UserModel2? userModel = await userModelManager.GetUserModel(currentUser.Id, request.ModelId, cancellationToken);
+        UserModel? userModel = await userModelManager.GetUserModel(currentUser.Id, request.ModelId, cancellationToken);
         if (userModel == null)
         {
             return this.BadRequestMessage("The Model does not exist or access is denied.");
@@ -52,7 +52,7 @@ public class ConversationController(ChatsDB db, CurrentUser currentUser, ILogger
             .Select(x => new
             {
                 UserBalance = x.UserBalance!,
-                ThisChat = db.Conversation2s.Single(x => x.Id == conversationId && x.UserId == currentUser.Id)
+                ThisChat = db.Chats.Single(x => x.Id == conversationId && x.UserId == currentUser.Id)
             })
             .SingleAsync(cancellationToken);
 
@@ -65,12 +65,12 @@ public class ConversationController(ChatsDB db, CurrentUser currentUser, ILogger
             return this.BadRequestMessage("Insufficient balance");
         }
 
-        Dictionary<long, MessageLiteDto> existingMessages = await db.Message2s
+        Dictionary<long, MessageLiteDto> existingMessages = await db.Messages
             .Where(x => x.ConversationId == conversationId && x.Conversation.UserId == currentUser.Id)
             .Select(x => new MessageLiteDto()
             {
                 Id = x.Id,
-                Content = x.MessageContent2s
+                Content = x.MessageContents
                     .OrderBy(x => x.Id)
                     .Select(x => x.ToSegment())
                     .ToArray(),
@@ -90,22 +90,22 @@ public class ConversationController(ChatsDB db, CurrentUser currentUser, ILogger
                 return this.BadRequestMessage("Prompt is required for the first message");
             }
 
-            Message2 toBeInsert = new()
+            Message toBeInsert = new()
             {
                 ConversationId = conversationId,
                 ChatRoleId = (byte)DBConversationRole.System,
-                MessageContent2s =
+                MessageContents =
                 [
-                    MessageContent2.FromText(request.UserModelConfig.Prompt)
+                    MessageContent.FromText(request.UserModelConfig.Prompt)
                 ],
                 CreatedAt = DateTime.UtcNow,
             };
-            db.Message2s.Add(toBeInsert);
+            db.Messages.Add(toBeInsert);
 
             systemMessage = new MessageLiteDto
             {
                 Id = toBeInsert.Id,
-                Content = [toBeInsert.MessageContent2s.First().ToSegment()],
+                Content = [toBeInsert.MessageContents.First().ToSegment()],
                 Role = DBConversationRole.System,
                 ParentId = null,
             };
@@ -141,15 +141,15 @@ public class ConversationController(ChatsDB db, CurrentUser currentUser, ILogger
         else
         {
             // insert new user message
-            Message2 dbUserMessage = new()
+            Message dbUserMessage = new()
             {
                 ConversationId = conversationId,
                 ChatRoleId = (byte)DBConversationRole.User,
-                MessageContent2s = request.UserMessage.ToMessageContents(),
+                MessageContents = request.UserMessage.ToMessageContents(),
                 CreatedAt = DateTime.UtcNow,
                 ParentId = messageId,
             };
-            db.Message2s.Add(dbUserMessage);
+            db.Messages.Add(dbUserMessage);
             await db.SaveChangesAsync(cancellationToken);
             userMessage = new()
             {
@@ -236,13 +236,13 @@ public class ConversationController(ChatsDB db, CurrentUser currentUser, ILogger
 
         // success
         // insert new assistant message
-        Message2 assistantMessage = new()
+        Message assistantMessage = new()
         {
             ConversationId = conversationId,
             ChatRoleId = (byte)DBConversationRole.Assistant,
-            MessageContent2s =
+            MessageContents =
             [
-                MessageContent2.FromText(responseText.ToString()),
+                MessageContent.FromText(responseText.ToString()),
             ],
             CreatedAt = DateTime.UtcNow,
             ParentId = userMessage.Id,
@@ -260,7 +260,7 @@ public class ConversationController(ChatsDB db, CurrentUser currentUser, ILogger
         };
         if (cost.CostCount > 0 || cost.CostTokens > 0)
         {
-            assistantMessage.Usage.UsageTransaction = new UsageTransactionLog()
+            assistantMessage.Usage.UsageTransaction = new UsageTransaction()
             {
                 CountAmount = -cost.CostCount,
                 TokenAmount = -cost.CostTokens,
@@ -271,7 +271,7 @@ public class ConversationController(ChatsDB db, CurrentUser currentUser, ILogger
         }
         if (cost.CostBalance > 0)
         {
-            assistantMessage.Usage.BalanceTransaction = new TransactionLog()
+            assistantMessage.Usage.BalanceTransaction = new BalanceTransaction()
             {
                 UserId = currentUser.Id,
                 CreatedAt = assistantMessage.Usage.CreatedAt,
@@ -283,10 +283,10 @@ public class ConversationController(ChatsDB db, CurrentUser currentUser, ILogger
 
         if (errorText != null)
         {
-            assistantMessage.MessageContent2s.Add(MessageContent2.FromError(errorText));
+            assistantMessage.MessageContents.Add(MessageContent.FromError(errorText));
             await YieldResponse(new() { Result = errorText, Success = false });
         }
-        db.Message2s.Add(assistantMessage);
+        db.Messages.Add(assistantMessage);
 
         await db.SaveChangesAsync(cancellationToken);
         if (cost.CostBalance > 0)

@@ -34,7 +34,7 @@ public partial class OpenAICompatibleController(ChatsDB db, CurrentApiKey curren
         string? modelName = cco.Model;
         if (string.IsNullOrWhiteSpace(modelName)) return InvalidModel(modelName);
 
-        UserModel2? userModel = await userModelManager.GetUserModel(currentApiKey.ApiKey, modelName, cancellationToken);
+        UserModel? userModel = await userModelManager.GetUserModel(currentApiKey.ApiKey, modelName, cancellationToken);
         if (userModel == null) return InvalidModel(modelName);
 
         Model cm = userModel.Model;
@@ -293,7 +293,7 @@ public partial class OpenAICompatibleController(ChatsDB db, CurrentApiKey curren
     [HttpGet("models")]
     public async Task<ActionResult<ModelListDto>> GetModels(CancellationToken cancellationToken)
     {
-        UserModel2[] models = await userModelManager.GetValidModelsByApiKey(currentApiKey.ApiKey, cancellationToken);
+        UserModel[] models = await userModelManager.GetValidModelsByApiKey(currentApiKey.ApiKey, cancellationToken);
         return Ok(new ModelListDto
         {
             Object = "list",

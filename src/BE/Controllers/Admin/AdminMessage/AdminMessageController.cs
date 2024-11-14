@@ -19,7 +19,7 @@ public class AdminMessageController(ChatsDB db, CurrentUser currentUser, IIdEncr
     [HttpGet("messages")]
     public async Task<ActionResult<PagedResult<AdminChatsDto>>> GetMessages([FromQuery] PagingRequest req, CancellationToken cancellationToken)
     {
-        IQueryable<Conversation2> chats = db.Conversation2s
+        IQueryable<Chat> chats = db.Chats
             .Where(x => x.User.Role != "admin" || x.UserId == currentUser.Id);
         if (!string.IsNullOrEmpty(req.Query))
         {
@@ -53,7 +53,7 @@ public class AdminMessageController(ChatsDB db, CurrentUser currentUser, IIdEncr
 
     internal static async Task<ActionResult<AdminMessageRoot>> GetAdminMessageInternal(ChatsDB db, int conversationId, IIdEncryptionService idEncryption, CancellationToken cancellationToken)
     {
-        AdminMessageDtoTemp? adminMessageTemp = await db.Conversation2s
+        AdminMessageDtoTemp? adminMessageTemp = await db.Chats
                     .Where(x => x.Id == conversationId)
                     .Select(x => new AdminMessageDtoTemp()
                     {
@@ -65,7 +65,7 @@ public class AdminMessageController(ChatsDB db, CurrentUser currentUser, IIdEncr
                     .SingleOrDefaultAsync(cancellationToken);
         if (adminMessageTemp == null) return new NotFoundResult();
 
-        AdminMessageItemTemp[] messagesTemp = await db.Message2s
+        AdminMessageItemTemp[] messagesTemp = await db.Messages
             .Where(x => x.ConversationId == conversationId)
             .Select(x => new AdminMessageItemTemp
             {
@@ -78,7 +78,7 @@ public class AdminMessageController(ChatsDB db, CurrentUser currentUser, IIdEncr
                 InputPrice = x.Usage.InputCost,
                 OutputPrice = x.Usage.OutputCost,
                 Role = (DBConversationRole)x.ChatRoleId,
-                Content = x.MessageContent2s
+                Content = x.MessageContents
                     .Select(x => new DBMessageSegment 
                     { 
                         Content = x.Content, 

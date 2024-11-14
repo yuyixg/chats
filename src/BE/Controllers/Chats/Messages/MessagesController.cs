@@ -17,14 +17,14 @@ public class MessagesController(ChatsDB db, CurrentUser currentUser, IIdEncrypti
     [HttpGet]
     public async Task<ActionResult<MessageDto[]>> GetMessages([FromQuery] string chatId, CancellationToken cancellationToken)
     {
-        MessageDto[] messages = await db.Message2s
+        MessageDto[] messages = await db.Messages
             .Where(m => m.ConversationId == idEncryption.DecryptAsInt32(chatId) && m.Conversation.UserId == currentUser.Id && m.ChatRoleId != (byte)DBConversationRole.System)
             .Select(x => new ChatMessageTemp()
             {
                 Id = x.Id,
                 ParentId = x.ParentId,
                 Role = (DBConversationRole)x.ChatRoleId,
-                Content = x.MessageContent2s
+                Content = x.MessageContents
                     .OrderBy(x => x.Id)
                     .Select(x => new DBMessageSegment
                     {
@@ -52,14 +52,14 @@ public class MessagesController(ChatsDB db, CurrentUser currentUser, IIdEncrypti
     [HttpGet("v2")]
     public async Task<ActionResult<MessageDto[]>> GetMessagesV2([FromQuery] string chatId, CancellationToken cancellationToken)
     {
-        MessageDto[] messages = await db.Message2s
+        MessageDto[] messages = await db.Messages
             .Where(m => m.ConversationId == idEncryption.DecryptAsInt32(chatId) && m.Conversation.UserId == currentUser.Id)
             .Select(x => new ChatMessageTemp()
             {
                 Id = x.Id,
                 ParentId = x.ParentId,
                 Role = (DBConversationRole)x.ChatRoleId,
-                Content = x.MessageContent2s
+                Content = x.MessageContents
                     .OrderBy(x => x.Id)
                     .Select(x => new DBMessageSegment
                     {

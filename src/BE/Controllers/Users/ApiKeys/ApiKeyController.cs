@@ -48,7 +48,7 @@ public class ApiKeyController(ChatsDB db, CurrentUser currentUser) : ControllerB
         if (dbEntry is null) return NotFound();
         if (dbEntry.AllowAllModels)
         {
-            UserModel2[] allowedModels = await userModelManager.GetValidModelsByUserId(currentUser.Id, cancellationToken);
+            UserModel[] allowedModels = await userModelManager.GetValidModelsByUserId(currentUser.Id, cancellationToken);
             return Ok(allowedModels.Select(x => x.Model.Id).ToArray());
         }
         else

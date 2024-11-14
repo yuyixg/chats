@@ -5,9 +5,9 @@ namespace Chats.BE.Services;
 
 public class UserModelManager(ChatsDB db)
 {
-    public async Task<UserModel2?> GetUserModel(Guid userId, short modelId, CancellationToken cancellationToken)
+    public async Task<UserModel?> GetUserModel(Guid userId, short modelId, CancellationToken cancellationToken)
     {
-        UserModel2? balances = await db.UserModel2s
+        UserModel? balances = await db.UserModels
             .Include(x => x.Model)
             .Include(x => x.Model.ModelReference)
             .Include(x => x.Model.ModelKey)
@@ -19,9 +19,9 @@ public class UserModelManager(ChatsDB db)
         return balances;
     }
 
-    private async Task<UserModel2?> GetUserModel(Guid userId, string modelName, CancellationToken cancellationToken)
+    private async Task<UserModel?> GetUserModel(Guid userId, string modelName, CancellationToken cancellationToken)
     {
-        UserModel2? balances = await db.UserModel2s
+        UserModel? balances = await db.UserModels
             .Include(x => x.Model)
             .Include(x => x.Model.ModelReference)
             .Include(x => x.Model.ModelKey)
@@ -33,7 +33,7 @@ public class UserModelManager(ChatsDB db)
         return balances;
     }
 
-    public async Task<UserModel2?> GetUserModel(string apiKey, string modelName, CancellationToken cancellationToken)
+    public async Task<UserModel?> GetUserModel(string apiKey, string modelName, CancellationToken cancellationToken)
     {
         UserApiKey? key = await db.UserApiKeys
             .Include(x => x.Models)
@@ -41,7 +41,7 @@ public class UserModelManager(ChatsDB db)
             .FirstOrDefaultAsync(cancellationToken);
         if (key == null) return null;
 
-        UserModel2? userModel = await GetUserModel(key.UserId, modelName, cancellationToken);
+        UserModel? userModel = await GetUserModel(key.UserId, modelName, cancellationToken);
         if (key.AllowAllModels || userModel != null && key.Models.Select(x => x.Id).Contains(userModel.ModelId))
         {
             return userModel;
@@ -52,9 +52,9 @@ public class UserModelManager(ChatsDB db)
         }
     }
 
-    public async Task<UserModel2[]> GetValidModelsByUserId(Guid userId, CancellationToken cancellationToken)
+    public async Task<UserModel[]> GetValidModelsByUserId(Guid userId, CancellationToken cancellationToken)
     {
-        UserModel2[] balances = await db.UserModel2s
+        UserModel[] balances = await db.UserModels
             .Include(x => x.Model)
             .Include(x => x.Model.ModelReference)
             .Include(x => x.Model.ModelKey)
@@ -67,7 +67,7 @@ public class UserModelManager(ChatsDB db)
         return balances;
     }
 
-    public async Task<UserModel2[]> GetValidModelsByApiKey(string apiKey, CancellationToken cancellationToken)
+    public async Task<UserModel[]> GetValidModelsByApiKey(string apiKey, CancellationToken cancellationToken)
     {
         UserApiKey? key = await db.UserApiKeys
             .Include(x => x.Models)
@@ -75,7 +75,7 @@ public class UserModelManager(ChatsDB db)
             .FirstOrDefaultAsync(cancellationToken);
         if (key == null) return [];
 
-        UserModel2[] allPossibleModels = await GetValidModelsByUserId(key.UserId, cancellationToken);
+        UserModel[] allPossibleModels = await GetValidModelsByUserId(key.UserId, cancellationToken);
         if (key.AllowAllModels)
         {
             return allPossibleModels;

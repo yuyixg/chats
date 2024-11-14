@@ -15,7 +15,7 @@ public class UserBalancesController(ChatsDB db, CurrentUser currentUser, Balance
     [HttpPut]
     public async Task<ActionResult<decimal>> ChargeBalance([FromBody] ChargeBalanceRequest request, CancellationToken cancellationToken)
     {
-        db.TransactionLogs.Add(new TransactionLog()
+        db.BalanceTransactions.Add(new BalanceTransaction()
         {
             UserId = request.UserId,
             Amount = request.Amount,

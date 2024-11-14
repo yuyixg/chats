@@ -29,6 +29,10 @@ public partial class ModelReference
 
     public bool AllowVision { get; set; }
 
+    public bool AllowSystemPrompt { get; set; }
+
+    public bool AllowStreaming { get; set; }
+
     public int ContextWindow { get; set; }
 
     public int MaxResponseTokens { get; set; }
