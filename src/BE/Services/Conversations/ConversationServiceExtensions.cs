@@ -36,12 +36,12 @@ internal static class ConversationServiceExtensions
             UserChatMessage? firstUserMessage = messages.OfType<UserChatMessage>().FirstOrDefault();
             if (firstUserMessage != null)
             {
-                firstUserMessage.Content.Insert(0, ChatMessageContentPart.CreateTextPart(systemPrompt));
+                firstUserMessage.Content.Insert(0, ChatMessageContentPart.CreateTextPart(systemPrompt + "\n\n"));
                 messages = messages.Where(x => x is not SystemChatMessage).ToArray();
             }
             else
             {
-                messages = [new UserChatMessage([ChatMessageContentPart.CreateTextPart(systemPrompt + "\n")]), .. messages.Where(x => x is not SystemChatMessage)];
+                messages = [new UserChatMessage([ChatMessageContentPart.CreateTextPart(systemPrompt)]), .. messages.Where(x => x is not SystemChatMessage)];
             }
         }
 
