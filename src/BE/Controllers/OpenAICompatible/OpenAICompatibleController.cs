@@ -48,7 +48,7 @@ public partial class OpenAICompatibleController(ChatsDB db, CurrentApiKey curren
                 UserBalance = x.UserBalance!,
             })
             .SingleAsync(cancellationToken);
-        ConversationSegment lastSegment = new() { TextSegment = "", InputTokenCountAccumulated = 0, OutputTokenCountAccumulated = 0 };
+        InternalChatSegment lastSegment = InternalChatSegment.Empty;
         Stopwatch sw = Stopwatch.StartNew();
         StringBuilder nonStreamingResult = new();
         BadRequestObjectResult? errorToReturn = null;
@@ -75,10 +75,10 @@ public partial class OpenAICompatibleController(ChatsDB db, CurrentApiKey curren
                 throw new InsufficientBalanceException();
             }
 
-            await foreach (ConversationSegment seg in s.ChatStreamedSimulated([.. cco.Messages], cco.ToCleanCco(), cancellationToken))
+            await foreach (InternalChatSegment seg in s.ChatStreamedSimulated([.. cco.Messages], cco.ToCleanCco(), cancellationToken))
             {
                 lastSegment = seg;
-                UserModelBalanceCost currentCost = calculator.GetNewBalance(seg.InputTokenCountAccumulated, seg.OutputTokenCountAccumulated, priceConfig);
+                UserModelBalanceCost currentCost = calculator.GetNewBalance(seg.Usage.InputTokens, seg.Usage.OutputTokens, priceConfig);
                 if (!currentCost.IsSufficient)
                 {
                     throw new InsufficientBalanceException();
@@ -88,30 +88,7 @@ public partial class OpenAICompatibleController(ChatsDB db, CurrentApiKey curren
 
                 if (cco.Stream)
                 {
-                    ChatCompletionChunk chunk = new()
-                    {
-                        Id = HttpContext.TraceIdentifier,
-                        Object = "chat.completion.chunk",
-                        Created = DateTimeOffset.UtcNow.ToUnixTimeSeconds(),
-                        Model = modelName,
-                        Choices =
-                        [
-                            new DeltaChoice
-                            {
-                                Delta = new Delta { Content = seg.TextSegment },
-                                FinishReason = null,
-                                Index = 0,
-                                Logprobs = null,
-                            }
-                        ],
-                        SystemFingerprint = null,
-                        Usage = new Usage
-                        {
-                            CompletionTokens = seg.OutputTokenCountAccumulated,
-                            PromptTokens = seg.InputTokenCountAccumulated,
-                            TotalTokens = seg.InputTokenCountAccumulated + seg.OutputTokenCountAccumulated,
-                        },
-                    };
+                    ChatCompletionChunk chunk = seg.ToOpenAIChunk(modelName, HttpContext.TraceIdentifier);
                     await YieldResponse(chunk, cancellationToken);
                     hasYield = true;
                 }
@@ -160,9 +137,9 @@ public partial class OpenAICompatibleController(ChatsDB db, CurrentApiKey curren
                 CreatedAt = DateTime.UtcNow,
                 DurationMs = (int)sw.ElapsedMilliseconds,
                 InputCost = cost.InputTokenPrice,
-                InputTokenCount = lastSegment.InputTokenCountAccumulated,
+                InputTokenCount = lastSegment.Usage.InputTokens,
                 OutputCost = cost.OutputTokenPrice,
-                OutputTokenCount = lastSegment.OutputTokenCountAccumulated,
+                OutputTokenCount = lastSegment.Usage.OutputTokens,
                 ClientInfo = await clientInfoManager.GetClientInfo(CancellationToken.None),
             }
         };
@@ -206,35 +183,9 @@ public partial class OpenAICompatibleController(ChatsDB db, CurrentApiKey curren
         else
         {
             // non-streamed success
-            return Ok(new FullChatCompletion()
-            {
-                Id = ControllerContext.HttpContext.TraceIdentifier,
-                Choices =
-                [
-                    new MessageChoice
-                    {
-                        Index = 0,
-                        FinishReason = "stop",
-                        Logprobs = null,
-                        Message = new ResponseMessage
-                        {
-                            Role = "system",
-                            Content = nonStreamingResult.ToString(),
-                            Refusal = null,
-                        }
-                    }
-                ],
-                Object = "chat.completion",
-                Created = DateTimeOffset.UtcNow.ToUnixTimeSeconds(),
-                Model = modelName,
-                SystemFingerprint = null,
-                Usage = new Usage
-                {
-                    CompletionTokens = lastSegment.OutputTokenCountAccumulated,
-                    PromptTokens = lastSegment.InputTokenCountAccumulated,
-                    TotalTokens = lastSegment.InputTokenCountAccumulated + lastSegment.OutputTokenCountAccumulated,
-                }
-            });
+            InternalChatSegment seg = lastSegment with { TextSegment = nonStreamingResult.ToString() };
+            FullChatCompletion fullChatCompletion = seg.ToOpenAIFullChat(modelName, HttpContext.TraceIdentifier);
+            return Ok(fullChatCompletion);
         }
     }
 

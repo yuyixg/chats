@@ -5,32 +5,52 @@ using System.Runtime.CompilerServices;
 
 namespace Chats.BE.Services.Conversations;
 
-internal static class ConversationServiceExtensions
+public abstract partial class ConversationService
 {
-    public static IAsyncEnumerable<ConversationSegment> ChatStreamedFEProcessed(this ConversationService cs, IReadOnlyList<ChatMessage> messages, ChatCompletionOptions options, CancellationToken cancellationToken)
+    public async IAsyncEnumerable<InternalChatSegment> ChatStreamedFEProcessed(IReadOnlyList<ChatMessage> messages, ChatCompletionOptions options, [EnumeratorCancellation] CancellationToken cancellationToken)
     {
-        ChatMessage[] filteredMessage = FEProcessMessages(cs, messages, options);
-        return ChatStreamedSimulated(cs, filteredMessage, options, cancellationToken);
+        ChatMessage[] filteredMessage = FEProcessMessages(messages, options);
+
+        await foreach (InternalChatSegment seg in ChatStreamedSimulated(filteredMessage, options, cancellationToken))
+        {
+            yield return seg;
+        }
     }
 
-    public static async IAsyncEnumerable<ConversationSegment> ChatStreamedSimulated(this ConversationService cs, IReadOnlyList<ChatMessage> messages, ChatCompletionOptions options, [EnumeratorCancellation] CancellationToken cancellationToken)
+    public async IAsyncEnumerable<InternalChatSegment> ChatStreamedSimulated(IReadOnlyList<ChatMessage> messages, ChatCompletionOptions options, [EnumeratorCancellation] CancellationToken cancellationToken)
     {
-        if (cs.Model.ModelReference.AllowStreaming)
+        // notify inputTokenCount first to better support price calculation
+        int inputTokens = GetPromptTokenCount(messages);
+        int outputTokens = 0;
+        yield return InternalChatSegment.InputOnly(inputTokens);
+
+        if (Model.ModelReference.AllowStreaming)
         {
-            await foreach (ConversationSegment seg in cs.ChatStreamed(messages, options, cancellationToken))
+            await foreach (ChatSegment seg in ChatStreamed(messages, options, cancellationToken))
             {
-                yield return seg;
+                yield return seg.ToInternal(() => new Dtos.ChatTokenUsage
+                {
+                    InputTokens = inputTokens,
+                    OutputTokens = outputTokens += Tokenizer.CountTokens(seg.TextSegment),
+                    ReasoningTokens = 0
+                });
             }
         }
         else
         {
-            yield return await cs.Chat(messages, options, cancellationToken);
+            ChatSegment seg = await Chat(messages, options, cancellationToken);
+            yield return seg.ToInternal(() => new Dtos.ChatTokenUsage()
+            {
+                InputTokens = inputTokens,
+                OutputTokens = outputTokens += Tokenizer.CountTokens(seg.TextSegment),
+                ReasoningTokens = 0
+            });
         }
     }
 
-    private static ChatMessage[] FEProcessMessages(ConversationService cs, IReadOnlyList<ChatMessage> messages, ChatCompletionOptions options)
+    private ChatMessage[] FEProcessMessages(IReadOnlyList<ChatMessage> messages, ChatCompletionOptions options)
     {
-        if (!cs.Model.ModelReference.AllowSystemPrompt)
+        if (!Model.ModelReference.AllowSystemPrompt)
         {
             string systemPrompt = string.Join("\n", messages.OfType<SystemChatMessage>().Select(x => string.Join("\n", x.Content.Where(v => v.Kind == ChatMessageContentPartKind.Text).Select(x => x.Text))));
             UserChatMessage? firstUserMessage = messages.OfType<UserChatMessage>().FirstOrDefault();
@@ -45,12 +65,12 @@ internal static class ConversationServiceExtensions
             }
         }
 
-        ChatMessage[] filteredMessage = messages.Select(m => FilterVision(cs.Model.ModelReference.AllowVision, m)).ToArray();
-        if (cs.Model.ModelReference.AllowVision)
+        ChatMessage[] filteredMessage = messages.Select(m => FilterVision(Model.ModelReference.AllowVision, m)).ToArray();
+        if (Model.ModelReference.AllowVision)
         {
-            options.MaxOutputTokenCount ??= cs.Model.ModelReference.MaxResponseTokens;
+            options.MaxOutputTokenCount ??= Model.ModelReference.MaxResponseTokens;
         }
-        if (!cs.Model.ModelReference.AllowSearch)
+        if (!Model.ModelReference.AllowSearch)
         {
             options.RemoveAllowSearch();
         }

@@ -1,5 +1,4 @@
-﻿using Chats.BE.Infrastructure;
-using Chats.BE.Services.Conversations.Dtos;
+﻿using Chats.BE.Services.Conversations.Dtos;
 using OpenAI.Chat;
 using System.Text.Json;
 using TencentCloud.Common;
@@ -12,7 +11,6 @@ using AssistantChatMessage = OpenAI.Chat.AssistantChatMessage;
 using ChatMessageContentPartKind = OpenAI.Chat.ChatMessageContentPartKind;
 using TencentCloud.Hunyuan.V20230901.Models;
 using System.Runtime.CompilerServices;
-using Chats.BE.DB.Jsons;
 using Chats.BE.DB;
 using Message = TencentCloud.Hunyuan.V20230901.Models.Message;
 
@@ -35,7 +33,7 @@ public class HunyuanConversationService : ConversationService
         }, "", new ClientProfile() { HttpProfile = new() { Endpoint = model.ModelKey.Host } });
     }
 
-    public override async IAsyncEnumerable<ConversationSegment> ChatStreamed(IReadOnlyList<ChatMessage> messages, ChatCompletionOptions options, [EnumeratorCancellation] CancellationToken cancellationToken)
+    public override async IAsyncEnumerable<ChatSegment> ChatStreamed(IReadOnlyList<ChatMessage> messages, ChatCompletionOptions options, [EnumeratorCancellation] CancellationToken cancellationToken)
     {
         Message[] msgs = Model.ModelReference.AllowVision ?
             messages.Select(OpenAIMessageToHunyuanVLMessage).ToArray() :
@@ -51,13 +49,30 @@ public class HunyuanConversationService : ConversationService
         foreach (AbstractSSEModel.SSE message in resp)
         {
             HuyuanChatSegment seg = JsonSerializer.Deserialize<HuyuanChatSegment>(message.Data)!;
-            yield return new ConversationSegment
+
+            yield return new ChatSegment
             {
                 TextSegment = seg.Choices[0].Delta.Content,
-                InputTokenCountAccumulated = seg.Usage.PromptTokens,
-                OutputTokenCountAccumulated = seg.Usage.CompletionTokens,
+                FinishReason = ToFinishReason(seg.Choices[0].FinishReason),
+                Usage = new Dtos.ChatTokenUsage
+                { 
+                    InputTokens = seg.Usage.PromptTokens, 
+                    OutputTokens = seg.Usage.CompletionTokens 
+                },
             };
         }
+    }
+
+    static ChatFinishReason? ToFinishReason(string reason)
+    {
+        return reason switch
+        {
+            "" => null,
+            "stop" => ChatFinishReason.Stop,
+            "sensitive" => ChatFinishReason.ContentFilter,
+            "tool_calls" => ChatFinishReason.ToolCalls,
+            _ => null,
+        };
     }
 
     static Message OpenAIMessageToHunyuanMessage(OpenAIChatMessage message)

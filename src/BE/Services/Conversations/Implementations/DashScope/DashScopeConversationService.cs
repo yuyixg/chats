@@ -29,14 +29,14 @@ public class DashScopeConversationService : ConversationService
     }
 
 
-    public override async IAsyncEnumerable<ConversationSegment> ChatStreamed(IReadOnlyList<OpenAIChatMessage> messages, ChatCompletionOptions options, [EnumeratorCancellation] CancellationToken cancellationToken)
+    public override async IAsyncEnumerable<ChatSegment> ChatStreamed(IReadOnlyList<OpenAIChatMessage> messages, ChatCompletionOptions options, [EnumeratorCancellation] CancellationToken cancellationToken)
     {
         ChatParameters chatParameters = new()
         {
             Temperature = options.Temperature,
             MaxTokens = options.MaxOutputTokenCount,
             EnableSearch = options.IsSearchEnabled(),
-            Seed = (ulong)Random.Shared.Next(),
+            Seed = options.GetDashScopeSeed(),
             IncrementalOutput = true,
         };
 
@@ -45,27 +45,49 @@ public class DashScopeConversationService : ConversationService
             ChatVLMessage[] msgs = messages.Select(OpenAIMessageToQwenVL).ToArray();
             await foreach (ResponseWrapper<string, ChatTokenUsage> resp in ChatClient.ChatVLStreamed(Model.ApiModelId, msgs, chatParameters, cancellationToken))
             {
-                yield return new ConversationSegment
+                yield return new ChatSegment
                 {
                     TextSegment = resp.Output,
-                    InputTokenCountAccumulated = resp.Usage?.InputTokens ?? 0,
-                    OutputTokenCountAccumulated = resp.Usage?.OutputTokens ?? 0,
+                    FinishReason = null,
+                    Usage = resp.Usage != null ? new Dtos.ChatTokenUsage
+                    {
+                        InputTokens = resp.Usage.InputTokens,
+                        OutputTokens = resp.Usage.OutputTokens,
+                        ReasoningTokens = 0,
+                    } : null,
                 };
             }
         }
         else
         {
             ChatMessage[] msgs = messages.Select(OpenAIMessageToQwen).ToArray();
-            await foreach (ResponseWrapper<ChatOutput, ChatTokenUsage> resp in ChatClient.ChatStreamed(Model.ApiModelId, msgs, chatParameters, cancellationToken))
+            await foreach (ResponseWrapper<ChatResponse, ChatTokenUsage> resp in ChatClient.ChatStreamed(Model.ApiModelId, msgs, chatParameters, cancellationToken))
             {
-                yield return new ConversationSegment
+                yield return new ChatSegment
                 {
-                    TextSegment = resp.Output.Text,
-                    InputTokenCountAccumulated = resp.Usage?.InputTokens ?? 0,
-                    OutputTokenCountAccumulated = resp.Usage?.OutputTokens ?? 0,
+                    TextSegment = resp.Output.Choices[0].Message.Content,
+                    FinishReason = ToFinishReason(resp.Output.Choices[0].FinishReason),
+                    Usage = resp.Usage != null ? new Dtos.ChatTokenUsage
+                    {
+                        InputTokens = resp.Usage.InputTokens,
+                        OutputTokens = resp.Usage.OutputTokens,
+                        ReasoningTokens = 0,
+                    } : null,
                 };
             }
         }
+    }
+
+    static ChatFinishReason? ToFinishReason(string reason)
+    {
+        return reason switch
+        {
+            "" => null,
+            "stop" => ChatFinishReason.Stop,
+            "length" => ChatFinishReason.Length,
+            "tool_calls" => ChatFinishReason.ToolCalls,
+            _ => null,
+        };
     }
 
     static ChatMessage OpenAIMessageToQwen(OpenAIChatMessage message)

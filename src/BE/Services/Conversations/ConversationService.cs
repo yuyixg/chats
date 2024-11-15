@@ -8,7 +8,7 @@ using Chats.BE.Services.Conversations.Extensions;
 
 namespace Chats.BE.Services.Conversations;
 
-public abstract class ConversationService : IDisposable
+public abstract partial class ConversationService : IDisposable
 {
     public const float DefaultTemperature = 0.8f;
     public const string DefaultPrompt = "你是{{MODEL_NAME}}，请仔细遵循用户指令并认真回复，当前日期: {{CURRENT_DATE}}";
@@ -36,27 +36,27 @@ public abstract class ConversationService : IDisposable
         }
     }
 
-    public abstract IAsyncEnumerable<ConversationSegment> ChatStreamed(IReadOnlyList<ChatMessage> messages, ChatCompletionOptions options, CancellationToken cancellationToken);
+    public abstract IAsyncEnumerable<ChatSegment> ChatStreamed(IReadOnlyList<ChatMessage> messages, ChatCompletionOptions options, CancellationToken cancellationToken);
 
-    public virtual async Task<ConversationSegment> Chat(IReadOnlyList<ChatMessage> messages, ChatCompletionOptions options, CancellationToken cancellationToken)
+    public virtual async Task<ChatSegment> Chat(IReadOnlyList<ChatMessage> messages, ChatCompletionOptions options, CancellationToken cancellationToken)
     {
         StringBuilder result = new();
-        ConversationSegment? lastSegment = null;
-        await foreach (ConversationSegment seg in ChatStreamed(messages, options, cancellationToken))
+        ChatSegment? lastSegment = null;
+        await foreach (ChatSegment seg in ChatStreamed(messages, options, cancellationToken))
         {
             lastSegment = seg;
             result.Append(seg.TextSegment);
         }
 
-        return new ConversationSegment()
+        return new ChatSegment()
         {
-            InputTokenCountAccumulated = lastSegment?.InputTokenCountAccumulated ?? 0, 
-            OutputTokenCountAccumulated = lastSegment?.OutputTokenCountAccumulated ?? 0,
+            Usage = lastSegment?.Usage,
+            FinishReason = lastSegment?.FinishReason,
             TextSegment = result.ToString(),
         };
     }
 
-    protected int GetPromptTokenCount(IReadOnlyList<ChatMessage> messages)
+    internal protected int GetPromptTokenCount(IReadOnlyList<ChatMessage> messages)
     {
         const int TokenPerConversation = 3;
         int messageTokens = messages.Sum(m => m.CountTokens(Tokenizer));

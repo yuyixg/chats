@@ -34,6 +34,16 @@ public static class ChatCompletionOptionsExtensions
             .SetValue(@this, modelValue);
     }
 
+    public static ulong? GetDashScopeSeed(this ChatCompletionOptions options)
+    {
+        IDictionary<string, BinaryData>? rawData = GetSerializedAdditionalRawData(options);
+        if (rawData != null && rawData.TryGetValue("seed", out BinaryData? binaryData))
+        {
+            return binaryData.ToObjectFromJson<ulong>();
+        }
+        return null;
+    }
+
     [UnsafeAccessor(UnsafeAccessorKind.Method, Name = "get_SerializedAdditionalRawData")]
     private extern static IDictionary<string, BinaryData>? GetSerializedAdditionalRawData(ChatCompletionOptions @this);
 }

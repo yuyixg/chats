@@ -161,7 +161,7 @@ public class ConversationController(ChatsDB db, CurrentUser currentUser, ILogger
             messageToSend.Add(userMessage.ToOpenAI());
         }
 
-        ConversationSegment lastSegment = new() { TextSegment = "", InputTokenCountAccumulated = 0, OutputTokenCountAccumulated = 0 };
+        InternalChatSegment lastSegment = InternalChatSegment.Empty;
         Response.Headers.ContentType = "text/event-stream";
         Response.Headers.CacheControl = "no-cache";
         Response.Headers.Connection = "keep-alive";
@@ -186,10 +186,10 @@ public class ConversationController(ChatsDB db, CurrentUser currentUser, ILogger
                     : null,
                 EndUserId = currentUser.Id.ToString(),
             };
-            await foreach (ConversationSegment seg in s.ChatStreamedFEProcessed(messageToSend, cco, cancellationToken))
+            await foreach (InternalChatSegment seg in s.ChatStreamedFEProcessed(messageToSend, cco, cancellationToken))
             {
                 lastSegment = seg;
-                UserModelBalanceCost currentCost = calculator.GetNewBalance(seg.InputTokenCountAccumulated, seg.OutputTokenCountAccumulated, priceConfig);
+                UserModelBalanceCost currentCost = calculator.GetNewBalance(seg.Usage.InputTokens, seg.Usage.OutputTokens, priceConfig);
                 if (!currentCost.IsSufficient)
                 {
                     throw new InsufficientBalanceException();
@@ -248,8 +248,8 @@ public class ConversationController(ChatsDB db, CurrentUser currentUser, ILogger
             Usage = new UserModelUsage()
             {
                 DurationMs = elapsedMs,
-                InputTokenCount = lastSegment.InputTokenCountAccumulated,
-                OutputTokenCount = lastSegment.OutputTokenCountAccumulated,
+                InputTokenCount = lastSegment.Usage.InputTokens,
+                OutputTokenCount = lastSegment.Usage.OutputTokens,
                 InputCost = cost.InputTokenPrice,
                 OutputCost = cost.OutputTokenPrice,
                 UserModelId = userModel.Id,

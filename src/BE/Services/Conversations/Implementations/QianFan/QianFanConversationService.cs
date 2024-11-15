@@ -25,7 +25,7 @@ public class QianFanConversationService : ConversationService
         ChatClient = new QianFanClient(apiConfig.ApiKey, apiConfig.Secret);
     }
 
-    public override async IAsyncEnumerable<ConversationSegment> ChatStreamed(IReadOnlyList<OpenAIChatMessage> messages, ChatCompletionOptions options, [EnumeratorCancellation] CancellationToken cancellationToken)
+    public override async IAsyncEnumerable<ChatSegment> ChatStreamed(IReadOnlyList<OpenAIChatMessage> messages, ChatCompletionOptions options, [EnumeratorCancellation] CancellationToken cancellationToken)
     {
         KnownModel model = new(Model.ApiModelId);
         ChatMessage[] qianFanMessages = messages
@@ -43,13 +43,30 @@ public class QianFanConversationService : ConversationService
 
         await foreach (ChatResponse chatResponse in ChatClient.ChatAsStreamAsync(model, qianFanMessages, chatRequestParameters, cancellationToken))
         {
-            yield return new ConversationSegment
+            yield return new ChatSegment
             {
                 TextSegment = chatResponse.Result,
-                InputTokenCountAccumulated = chatResponse.Usage.PromptTokens,
-                OutputTokenCountAccumulated = chatResponse.Usage.CompletionTokens
+                FinishReason = ToFinishReason(chatResponse.FinishReason),
+                Usage = new Dtos.ChatTokenUsage
+                {
+                    InputTokens = chatResponse.Usage.PromptTokens,
+                    OutputTokens = chatResponse.Usage.CompletionTokens,
+                }
             };
         }
+    }
+
+    static ChatFinishReason? ToFinishReason(string? reason)
+    {
+        return reason switch
+        {
+            null => null,
+            "normal" => null,
+            "stop" => ChatFinishReason.Stop,
+            "length" => ChatFinishReason.Length,
+            "content_filter" => ChatFinishReason.ContentFilter,
+            _ => null,
+        };
     }
 
     static ChatMessage OpenAIMessageToQianFan(OpenAIChatMessage message)
