@@ -116,7 +116,7 @@ export const ApiKeyTab = () => {
         <CardContent className="p-4">
           <div className="flex text-sm items-center overflow-hidden text-ellipsis whitespace-nowrap">
             API URL：
-            {getApiUrl() + '/api/openai-compatible'}
+            {(getApiUrl() || location.origin) + '/api/openai-compatible'}
           </div>
           <div className="flex text-sm items-center overflow-hidden text-ellipsis whitespace-nowrap">
             {t('Refer to the documentation:')}
