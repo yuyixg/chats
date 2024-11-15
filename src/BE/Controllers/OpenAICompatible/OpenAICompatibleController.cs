@@ -56,7 +56,7 @@ public partial class OpenAICompatibleController(ChatsDB db, CurrentApiKey curren
         Stopwatch sw = Stopwatch.StartNew();
         StringBuilder nonStreamingResult = new();
         BadRequestObjectResult? errorToReturn = null;
-        bool hasYield = false;
+        bool hasSuccessYield = false;
         try
         {
             if (userModel.IsDeleted)
@@ -84,8 +84,8 @@ public partial class OpenAICompatibleController(ChatsDB db, CurrentApiKey curren
             {
                 if (seg.IsFromUpstream)
                 {
-                    firstResponseDurationMs = (int)sw.ElapsedMilliseconds - preprocessDurationMs;
                     segmentCount++;
+                    firstResponseDurationMs = (int)sw.ElapsedMilliseconds - preprocessDurationMs;
                 }
                 lastSegment = seg;
                 UserModelBalanceCost currentCost = calculator.GetNewBalance(seg.Usage.InputTokens, seg.Usage.OutputTokens, priceConfig);
@@ -100,7 +100,7 @@ public partial class OpenAICompatibleController(ChatsDB db, CurrentApiKey curren
                 {
                     ChatCompletionChunk chunk = seg.ToOpenAIChunk(modelName, HttpContext.TraceIdentifier);
                     await YieldResponse(chunk, cancellationToken);
-                    hasYield = true;
+                    hasSuccessYield = true;
                 }
                 else
                 {
@@ -115,12 +115,12 @@ public partial class OpenAICompatibleController(ChatsDB db, CurrentApiKey curren
         }
         catch (InsufficientBalanceException)
         {
-            errorToReturn = await YieldError(hasYield && cco.Stream, OpenAICompatibleErrorCode.InsufficientBalance, "⚠Insufficient balance - 余额不足!", cancellationToken);
+            errorToReturn = await YieldError(hasSuccessYield && cco.Stream, OpenAICompatibleErrorCode.InsufficientBalance, "⚠Insufficient balance - 余额不足!", cancellationToken);
         }
         catch (Exception e) when (e is DashScopeException || e is ClientResultException)
         {
             logger.LogError(e, "Upstream error");
-            errorToReturn = await YieldError(hasYield && cco.Stream, OpenAICompatibleErrorCode.UpstreamError, e.Message, cancellationToken);
+            errorToReturn = await YieldError(hasSuccessYield && cco.Stream, OpenAICompatibleErrorCode.UpstreamError, e.Message, cancellationToken);
         }
         catch (TaskCanceledException)
         {
@@ -129,7 +129,7 @@ public partial class OpenAICompatibleController(ChatsDB db, CurrentApiKey curren
         catch (Exception e)
         {
             logger.LogError(e, "Unknown error");
-            errorToReturn = await YieldError(hasYield && cco.Stream, OpenAICompatibleErrorCode.Unknown, "\n⚠Error in conversation - 对话出错!", cancellationToken);
+            errorToReturn = await YieldError(hasSuccessYield && cco.Stream, OpenAICompatibleErrorCode.Unknown, "\n⚠Error in conversation - 对话出错!", cancellationToken);
         }
         finally
         {
@@ -187,7 +187,7 @@ public partial class OpenAICompatibleController(ChatsDB db, CurrentApiKey curren
             _ = balanceService.AsyncUpdateBalance(currentApiKey.User.Id, CancellationToken.None);
         }
 
-        if (hasYield && cco.Stream)
+        if (hasSuccessYield && cco.Stream)
         {
             return new EmptyResult();
         }
