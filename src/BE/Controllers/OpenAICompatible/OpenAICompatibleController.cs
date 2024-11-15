@@ -20,7 +20,7 @@ using Chats.BE.Controllers.OpenAICompatible.Dtos;
 
 namespace Chats.BE.Controllers.OpenAICompatible;
 
-[Route("api/openai-compatible"), Authorize(AuthenticationSchemes = "OpenAIApiKey")]
+[Route("v1"), Authorize(AuthenticationSchemes = "OpenAIApiKey")]
 public partial class OpenAICompatibleController(ChatsDB db, CurrentApiKey currentApiKey, ConversationFactory cf, UserModelManager userModelManager, ILogger<OpenAICompatibleController> logger, BalanceService balanceService) : ControllerBase
 {
     [HttpPost("chat/completions")]
@@ -52,6 +52,7 @@ public partial class OpenAICompatibleController(ChatsDB db, CurrentApiKey curren
         Stopwatch sw = Stopwatch.StartNew();
         StringBuilder nonStreamingResult = new();
         BadRequestObjectResult? errorToReturn = null;
+        bool hasYield = false;
         try
         {
             if (userModel.IsDeleted)
@@ -73,7 +74,6 @@ public partial class OpenAICompatibleController(ChatsDB db, CurrentApiKey curren
             {
                 throw new InsufficientBalanceException();
             }
-
 
             await foreach (ConversationSegment seg in s.ChatStreamedSimulated([.. cco.Messages], cco.ToCleanCco(), cancellationToken))
             {
@@ -113,6 +113,7 @@ public partial class OpenAICompatibleController(ChatsDB db, CurrentApiKey curren
                         },
                     };
                     await YieldResponse(chunk, cancellationToken);
+                    hasYield = true;
                 }
                 else
                 {
@@ -127,12 +128,12 @@ public partial class OpenAICompatibleController(ChatsDB db, CurrentApiKey curren
         }
         catch (InsufficientBalanceException)
         {
-            errorToReturn = await YieldError(cco.Stream, OpenAICompatibleErrorCode.InsufficientBalance, "⚠Insufficient balance - 余额不足!", cancellationToken);
+            errorToReturn = await YieldError(hasYield && cco.Stream, OpenAICompatibleErrorCode.InsufficientBalance, "⚠Insufficient balance - 余额不足!", cancellationToken);
         }
         catch (Exception e) when (e is DashScopeException || e is ClientResultException)
         {
             logger.LogError(e, "Upstream error");
-            errorToReturn = await YieldError(cco.Stream, OpenAICompatibleErrorCode.UpstreamError, e.Message, cancellationToken);
+            errorToReturn = await YieldError(hasYield && cco.Stream, OpenAICompatibleErrorCode.UpstreamError, e.Message, cancellationToken);
         }
         catch (TaskCanceledException)
         {
@@ -141,7 +142,7 @@ public partial class OpenAICompatibleController(ChatsDB db, CurrentApiKey curren
         catch (Exception e)
         {
             logger.LogError(e, "Unknown error");
-            errorToReturn = await YieldError(cco.Stream, OpenAICompatibleErrorCode.Unknown, "\n⚠Error in conversation - 对话出错!", cancellationToken);
+            errorToReturn = await YieldError(hasYield && cco.Stream, OpenAICompatibleErrorCode.Unknown, "\n⚠Error in conversation - 对话出错!", cancellationToken);
         }
         finally
         {
@@ -194,18 +195,17 @@ public partial class OpenAICompatibleController(ChatsDB db, CurrentApiKey curren
             _ = balanceService.AsyncUpdateBalance(currentApiKey.User.Id, CancellationToken.None);
         }
 
-        if (cco.Stream)
+        if (hasYield && cco.Stream)
         {
             return new EmptyResult();
         }
+        else if (errorToReturn != null)
+        {
+            return errorToReturn;
+        }
         else
         {
-            if (errorToReturn != null)
-            {
-                return errorToReturn;
-            }
-
-            // success
+            // non-streamed success
             return Ok(new FullChatCompletion()
             {
                 Id = ControllerContext.HttpContext.TraceIdentifier,
@@ -255,9 +255,9 @@ public partial class OpenAICompatibleController(ChatsDB db, CurrentApiKey curren
         });
     }
 
-    private async Task<BadRequestObjectResult> YieldError(bool streamed, OpenAICompatibleErrorCode code, string message, CancellationToken cancellationToken)
+    private async Task<BadRequestObjectResult> YieldError(bool shouldStreamed, OpenAICompatibleErrorCode code, string message, CancellationToken cancellationToken)
     {
-        if (streamed)
+        if (shouldStreamed)
         {
             await Response.Body.WriteAsync(dataU8, cancellationToken);
             await JsonSerializer.SerializeAsync(Response.Body, new ErrorResponse()

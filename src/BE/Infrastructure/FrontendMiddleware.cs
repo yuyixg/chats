@@ -43,6 +43,7 @@ public class FrontendMiddleware(RequestDelegate next, IWebHostEnvironment webHos
         return context.Request.Path.Value == null ||
             context.Request.Path.StartsWithSegments("/api") ||
             context.Request.Path.StartsWithSegments("/swagger") ||
+            context.Request.Path.StartsWithSegments("/v1") ||
             !IsGetOrHeadMethod(context.Request.Method) ||
             fileProvider.GetFileInfo(context.Request.Path).Exists;
     }

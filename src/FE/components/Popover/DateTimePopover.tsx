@@ -18,7 +18,7 @@ export default function DateTimePopover(props: Props) {
       <PopoverTrigger asChild>
         <Button
           variant={'outline'}
-          className={cn('pl-3 text-left font-normal w-[150px] border-none')}
+          className={cn('pl-3 text-left font-normal w-[128px] border-none')}
         >
           {value ? (
             value === '-' ? null : (

@@ -105,6 +105,8 @@ export const ApiKeyTab = () => {
       });
   };
 
+  const apiUrl = (getApiUrl() || location.origin) + '/v1';
+  const docUrl = 'https://platform.openai.com/docs/guides/chat-completions';
   return (
     <div className="w-full overflow-auto">
       <div className="flex justify-end">
@@ -115,18 +117,19 @@ export const ApiKeyTab = () => {
       <Card className="mt-2 bg-muted">
         <CardContent className="p-4">
           <div className="flex text-sm items-center overflow-hidden text-ellipsis whitespace-nowrap">
-            API URL：
-            {(getApiUrl() || location.origin) + '/api/openai-compatible'}
+            API URL: {apiUrl}
+            <CopyButton value={apiUrl} />
           </div>
           <div className="flex text-sm items-center overflow-hidden text-ellipsis whitespace-nowrap">
-            {t('Refer to the documentation:')}
+            {t('API documentation URL')}:&nbsp;
             <Link
               target="_blank"
               className="text-blue-600 dark:text-blue-500 hover:underline"
-              href="https://platform.openai.com/docs/guides/chat-completions"
+              href={docUrl}
             >
-              https://platform.openai.com/docs/guides/chat-completions
+              {docUrl}
             </Link>
+            <CopyButton value={docUrl} />
           </div>
         </CardContent>
       </Card>
@@ -136,7 +139,7 @@ export const ApiKeyTab = () => {
             <TableRow className="pointer-events-none">
               <TableHead>{t('Key')}</TableHead>
               <TableHead>{t('Comment')}</TableHead>
-              <TableHead>{t('Expires')}</TableHead>
+              <TableHead className="text-center">{t('Expires')}</TableHead>
               <TableHead>{t('LastUsedAt')}</TableHead>
               <TableHead>{t('Actions')}</TableHead>
             </TableRow>
@@ -145,9 +148,9 @@ export const ApiKeyTab = () => {
             {apiKeys.map((x, index) => {
               return (
                 <TableRow key={x.id}>
-                  <TableCell className="min-w-[128px] max-w-[128px]">
+                  <TableCell>
                     <div className="flex items-center">
-                      <div className="w-[128px] overflow-hidden text-ellipsis whitespace-nowrap">
+                      <div className="overflow-hidden text-ellipsis whitespace-nowrap">
                         {x.key}
                       </div>
                       <CopyButton value={x.key} />
@@ -162,7 +165,7 @@ export const ApiKeyTab = () => {
                       }}
                     />
                   </TableCell>
-                  <TableCell className="min-w-[172px] max-w-[172px]">
+                  <TableCell className="min-w-[128px] max-w-[128px]">
                     <DateTimePopover
                       value={x.expires}
                       onSelect={(date: Date) => {

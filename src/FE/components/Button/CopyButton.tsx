@@ -33,13 +33,13 @@ export default function CopyButton(props: Props) {
       variant="ghost"
       className="items-center rounded bg-none p-1 h-auto w-auto"
       onClick={handleCopy}
+      title={t('Copy')}
     >
       {isCopied ? (
         <IconCheck stroke={'#7d7d7d'} size={18} />
       ) : (
         <IconClipboard stroke={'#7d7d7d'} size={18} />
       )}
-      {/* {isCopied ? t('Copied!') : t('Click Copy')} */}
     </Button>
   );
 }
