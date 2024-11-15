@@ -1,6 +1,6 @@
 import { useContext, useEffect, useState } from 'react';
 
-import { Model, ModelProviders } from '@/types/model';
+import { Model } from '@/types/model';
 
 import { HomeContext } from '@/pages/home/home';
 
@@ -46,7 +46,7 @@ const ChangeModel = ({
     });
   }, []);
 
-  let modelGroup = [] as { provider: ModelProviders; child: Model[] }[];
+  let modelGroup = [] as { provider: string; child: Model[] }[];
   const groupModel = () => {
     const modelList = searchTerm
       ? models.filter((model) => model.name.toLowerCase().includes(searchTerm))

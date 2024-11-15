@@ -12,7 +12,6 @@ import {
   PostModelKeysParams,
   PutModelKeysParams,
 } from '@/types/adminApis';
-import { ModelProviders } from '@/types/model';
 
 import FormSelect from '@/components/ui/form/select';
 
@@ -149,7 +148,7 @@ export const ModelKeysModal = (props: IProps) => {
   useEffect(() => {
     const subscription = form.watch((value, { name, type }) => {
       if (name === 'type' && type === 'change') {
-        const modelProvider = value.type as ModelProviders;
+        const modelProvider = value.type!;
         form.setValue(
           'configs',
           JSON.stringify(

@@ -10,7 +10,7 @@ import toast from 'react-hot-toast';
 import useTranslation from '@/hooks/useTranslation';
 
 import { ChatResult } from '@/types/clientApis';
-import { DBModelProvider, ModelProviders } from '@/types/model';
+import { DBModelProvider } from '@/types/model';
 
 import { HomeContext } from '@/pages/home/home';
 
@@ -129,7 +129,7 @@ export const ConversationComponent = ({ chat }: Props) => {
         <div className="flex w-full items-center gap-2 rounded-lg text-black dark:text-white dark:bg-[#262630]/90 p-3">
           <ChatIcon
             isShard={chat.isShared}
-            provider={DBModelProvider[chat.modelProvider] as ModelProviders}
+            provider={DBModelProvider[chat.modelProvider]}
           />
           <input
             className="mr-12 flex-1 overflow-hidden overflow-ellipsis border-neutral-400 bg-transparent text-left text-[12.5px] leading-3 outline-none text-black dark:text-white"
@@ -152,7 +152,7 @@ export const ConversationComponent = ({ chat }: Props) => {
         >
           <ChatIcon
             isShard={chat.isShared}
-            provider={DBModelProvider[chat.modelProvider] as ModelProviders}
+            provider={DBModelProvider[chat.modelProvider]}
           />
           <div
             className={`relative max-h-5 flex-1 overflow-hidden text-ellipsis whitespace-nowrap break-all text-left text-[12.5px] leading-4 ${

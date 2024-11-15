@@ -1,6 +1,4 @@
 
-import { ModelProviders } from '@/types/model';
-
 import { IconShare } from '@/components/Icons';
 
 import { cn } from '@/lib/utils';
@@ -9,7 +7,7 @@ import { useEffect, useState } from 'react';
 import { getLegacyModelProviderByName } from '@/apis/adminApis';
 
 interface Props {
-  provider: ModelProviders;
+  provider: string;
   className?: string;
   isShard?: boolean;
 }

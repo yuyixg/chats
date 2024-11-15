@@ -41,7 +41,6 @@ import {
   UserModelDisplay,
   UserModelDisplayDto,
 } from '@/types/adminApis';
-import { ModelProviders } from '@/types/model';
 import { PageResult } from '@/types/page';
 
 export const getModelsByUserId = async (userId: string): Promise<UserModelDisplay[]> => {
@@ -304,7 +303,7 @@ export const deleteInvitationCode = (id: string) => {
 };
 
 export const getLegacyModelReference = (
-  modelProviderName: ModelProviders,
+  modelProviderName: string,
   modelReferenceName: string,
 ) => {
   const fetchServer = useFetch();
@@ -314,7 +313,7 @@ export const getLegacyModelReference = (
 };
 
 export const getLegacyModelProviderByName = (
-  modelProviderName: ModelProviders,
+  modelProviderName: string,
 ) => {
   const fetchServer = useFetch();
   return fetchServer.get<LegacyModelProvider>(

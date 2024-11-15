@@ -4,8 +4,6 @@ import {
   ChatModelFileConfig,
   ChatModelPriceConfig,
   ModelConfig,
-  ModelProviders,
-  ModelVersions,
 } from './model';
 import { Paging } from './page';
 import { PayServiceType } from './pay';
@@ -30,8 +28,8 @@ export interface PutUserModelParams {
 
 export interface GetModelResult {
   modelId: number;
-  modelProvider: ModelProviders;
-  modelVersion: ModelVersions;
+  modelProvider: string;
+  modelVersion: string;
   name: string;
   rank: number;
   enabled: boolean;
@@ -54,8 +52,8 @@ export interface PutModelParams {
 }
 
 export interface PostModelParams {
-  modelProvider: ModelProviders;
-  modelVersion: ModelVersions;
+  modelProvider: string;
+  modelVersion: string;
   name: string;
   enabled: boolean;
   modelConfig: string;
@@ -199,7 +197,7 @@ export interface PutPayServicesParams extends PostPayServicesParams {
 export interface GetModelKeysResult {
   id: number;
   name: string;
-  type: ModelProviders;
+  type: string;
   enabledModelCount: number;
   totalModelCount: number;
   configs: string;
@@ -224,8 +222,8 @@ export interface PutPromptParams {
 }
 
 export interface LegacyModelProvider {
-  name: ModelProviders;
-  models: ModelVersions[];
+  name: string;
+  models: string[];
   apiConfig: object;
   displayName: string;
   icon: string;

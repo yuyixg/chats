@@ -18,7 +18,6 @@ import {
   LegacyModelReference,
   PutModelParams,
 } from '@/types/adminApis';
-import { ModelProviders } from '@/types/model';
 
 import FormSelect from '@/components/ui/form/select';
 import {
@@ -217,7 +216,7 @@ export const EditModelModal = (props: IProps) => {
                           field={field}
                           label={t('Model Keys')!}
                           items={modelKeys
-                            .filter(x => x.type === (selected.modelProvider as ModelProviders))
+                            .filter(x => x.type === selected.modelProvider)
                             .map(keys => ({
                               name: keys.name,
                               value: keys.id.toString(),

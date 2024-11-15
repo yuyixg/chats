@@ -11,9 +11,9 @@ export interface ModelConfig {
 
 export interface Model {
   id: string;
-  modelVersion: ModelVersions;
+  modelVersion: string;
   name: string;
-  modelProvider: ModelProviders;
+  modelProvider: string;
   modelConfigOptions: {
     temperature: {
       min: number;
@@ -25,37 +25,6 @@ export interface Model {
   fileConfig?: ChatModelFileConfig;
   enabled?: boolean;
   modelUsage: GetModelUsageResult;
-}
-
-export enum ModelVersions {
-  GPT_3_5 = 'gpt-3.5-turbo',
-  GPT_4 = 'gpt-4',
-  GPT_4_Vision = 'gpt-4-vision',
-  ERNIE = 'ERNIE',
-  QWen = 'qwen',
-  QWen_Vl = 'qwen-vl',
-  yi_34b_chat_0205 = 'yi-34b-chat-0205',
-  yi_34b_chat_200k = 'yi-34b-chat-200k',
-  yi_vl_plus = 'yi-vl-plus',
-  moonshot_v1_8k = 'moonshot-v1-8k',
-  moonshot_v1_32k = 'moonshot-v1-32k',
-  moonshot_v1_128k = 'moonshot-v1-128k',
-  GLM_4 = 'glm-4',
-  GLM_4V = 'glm-4v',
-  GLM_3_turbo = 'glm-3-turbo',
-  HunYuan = 'hunyuan',
-}
-
-export enum ModelProviders {
-  OpenAI = 'OpenAI',
-  Azure = 'Azure',
-  QianWen = 'QianWen',
-  QianFan = 'QianFan',
-  Spark = 'Spark',
-  LingYi = 'LingYi',
-  Moonshot = 'Moonshot',
-  ZhiPuAI = 'ZhiPuAI',
-  HunYuan = 'HunYuan',
 }
 
 export enum DBModelProvider {

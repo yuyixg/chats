@@ -17,7 +17,6 @@ import {
   LegacyModelReference,
   PostModelParams,
 } from '@/types/adminApis';
-import { ModelProviders, ModelVersions } from '@/types/model';
 
 import FormSelect from '@/components/ui/form/select';
 import {
@@ -54,7 +53,7 @@ export const AddModelModal = (props: IProps) => {
   const { t } = useTranslation();
   const [fileServices, setFileServices] = useState<GetFileServicesResult[]>([]);
   const [modelKeys, setModelKeys] = useState<GetModelKeysResult[]>([]);
-  const [modelVersions, setModelVersions] = useState<ModelVersions[]>([]);
+  const [modelVersions, setModelVersions] = useState<string[]>([]);
   const [modelReference, setModelReference] = useState<LegacyModelReference>();
   const { isOpen, onClose, onSuccessful } = props;
   const [loading, setLoading] = useState(true);
@@ -138,7 +137,7 @@ export const AddModelModal = (props: IProps) => {
       subscription = form.watch(async (value, { name, type }) => {
         if (name === 'modelKeysId' && type === 'change') {
           const modelKeysId = parseInt(value.modelKeysId!);
-          const modelProviderName: ModelProviders = modelKeys.find(
+          const modelProviderName = modelKeys.find(
             (x) => x.id === modelKeysId,
           )!.type;
           const modelProvider: LegacyModelProvider = await getLegacyModelProviderByName(modelProviderName);
@@ -146,7 +145,7 @@ export const AddModelModal = (props: IProps) => {
           form.setValue('modelVersion', '');
         }
         if (name === 'modelVersion' && type === 'change') {
-          const modelVersion = value.modelVersion as ModelVersions;
+          const modelVersion = value.modelVersion!;
           const modelKeysId = parseInt(value.modelKeysId!);
           const _modelProvider = modelKeys.find((x) => x.id === modelKeysId)
             ?.type!;
