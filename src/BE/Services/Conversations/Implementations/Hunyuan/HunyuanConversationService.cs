@@ -28,8 +28,8 @@ public class HunyuanConversationService : ConversationService
         JsonHunyuanKeyConfig keyConfig = JsonSerializer.Deserialize<JsonHunyuanKeyConfig>(model.ModelKey.Secret)!;
         ChatClient = new(new Credential
         {
-            SecretId = keyConfig.ApiKey,
-            SecretKey = keyConfig.Secret
+            SecretId = keyConfig.SecretId,
+            SecretKey = keyConfig.SecretKey
         }, "", new ClientProfile() { HttpProfile = new() { Endpoint = model.ModelKey.Host } });
     }
 

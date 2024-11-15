@@ -33,11 +33,11 @@ public class MessagesController(ChatsDB db, CurrentUser currentUser, IIdEncrypti
                     })
                     .ToArray(),
                 CreatedAt = x.CreatedAt,
-                InputTokens = x.Usage!.InputTokenCount,
-                OutputTokens = x.Usage.OutputTokenCount,
+                InputTokens = x.Usage!.InputTokens,
+                OutputTokens = x.Usage.OutputTokens,
                 InputPrice = x.Usage.InputCost,
                 OutputPrice = x.Usage.OutputCost,
-                Duration = x.Usage.DurationMs,
+                Duration = x.Usage.TotalDurationMs,
                 ModelId = x.Usage.UserModel.ModelId,
                 ModelName = x.Usage.UserModel.Model.Name
             })
@@ -68,11 +68,11 @@ public class MessagesController(ChatsDB db, CurrentUser currentUser, IIdEncrypti
                     })
                     .ToArray(),
                 CreatedAt = x.CreatedAt,
-                InputTokens = x.Usage!.InputTokenCount,
-                OutputTokens = x.Usage.OutputTokenCount,
+                InputTokens = x.Usage!.InputTokens,
+                OutputTokens = x.Usage.OutputTokens,
                 InputPrice = x.Usage.InputCost,
                 OutputPrice = x.Usage.OutputCost,
-                Duration = x.Usage.DurationMs,
+                Duration = x.Usage.TotalDurationMs,
                 ModelId = x.Usage.UserModel.ModelId,
                 ModelName = x.Usage.UserModel.Model.Name
             })

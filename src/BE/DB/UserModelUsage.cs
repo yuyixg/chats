@@ -18,11 +18,21 @@ public partial class UserModelUsage
 
     public int UserModelId { get; set; }
 
-    public int InputTokenCount { get; set; }
+    public short SegmentCount { get; set; }
 
-    public int OutputTokenCount { get; set; }
+    public int InputTokens { get; set; }
 
-    public int DurationMs { get; set; }
+    public int OutputTokens { get; set; }
+
+    public int ReasoningTokens { get; set; }
+
+    public bool IsUsageReliable { get; set; }
+
+    public int PreprocessDurationMs { get; set; }
+
+    public int FirstResponseDurationMs { get; set; }
+
+    public int TotalDurationMs { get; set; }
 
     [Column(TypeName = "decimal(14, 8)")]
     public decimal InputCost { get; set; }

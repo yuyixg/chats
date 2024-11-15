@@ -20,6 +20,7 @@ public record ChatSegment
                 FinishReason = FinishReason,
                 TextSegment = TextSegment,
                 IsUsageReliable = true,
+                IsFromUpstream = true, 
             };
         }
         else
@@ -30,6 +31,7 @@ public record ChatSegment
                 FinishReason = FinishReason,
                 TextSegment = TextSegment,
                 IsUsageReliable = false,
+                IsFromUpstream = true,
             };
         }
     }

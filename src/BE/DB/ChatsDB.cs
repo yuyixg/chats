@@ -216,6 +216,8 @@ public partial class ChatsDB : DbContext
         modelBuilder.Entity<ModelProvider>(entity =>
         {
             entity.ToTable("ModelProvider", tb => tb.HasComment("JSON"));
+
+            entity.Property(e => e.Id).ValueGeneratedNever();
         });
 
         modelBuilder.Entity<ModelReference>(entity =>

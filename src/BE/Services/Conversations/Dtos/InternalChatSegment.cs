@@ -1,9 +1,5 @@
 ﻿using Chats.BE.Controllers.OpenAICompatible.Dtos;
-using Google.Protobuf.WellKnownTypes;
-using Microsoft.AspNetCore.Mvc;
-using Newtonsoft.Json.Linq;
 using OpenAI.Chat;
-using System.Text;
 
 namespace Chats.BE.Services.Conversations.Dtos;
 
@@ -17,12 +13,15 @@ public record InternalChatSegment
 
     public required bool IsUsageReliable { get; init; }
 
+    public required bool IsFromUpstream { get; init; }
+
     public static InternalChatSegment Empty { get; } = new InternalChatSegment
     {
         Usage = ChatTokenUsage.Zero,
         FinishReason = null,
         TextSegment = string.Empty,
         IsUsageReliable = false, 
+        IsFromUpstream = false,
     };
 
     public static InternalChatSegment InputOnly(int inputTokens) => Empty with { Usage = ChatTokenUsage.Zero with { InputTokens = inputTokens } };

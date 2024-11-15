@@ -8,7 +8,6 @@ using Chats.BE.Services;
 using Chats.BE.Services.Common;
 using Chats.BE.Services.Conversations;
 using Chats.BE.Services.Conversations.Dtos;
-using Chats.BE.Services.Conversations.Extensions;
 using Chats.BE.Services.IdEncryption;
 using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Mvc;
@@ -35,9 +34,11 @@ public class ConversationController(ChatsDB db, CurrentUser currentUser, ILogger
         [FromServices] ClientInfoManager clientInfoManager,
         CancellationToken cancellationToken)
     {
+        Stopwatch allSw = Stopwatch.StartNew();
+        int preprocessDurationMs = 0;
+        int firstResponseDurationMs = 0;
         int conversationId = idEncryption.DecryptAsInt32(request.ConversationId);
         long? messageId = request.MessageId != null ? idEncryption.DecryptAsInt64(request.MessageId) : null;
-        DateTime messageReceiveTime = DateTime.UtcNow;
 
         UserModel? userModel = await userModelManager.GetUserModel(currentUser.Id, request.ModelId, cancellationToken);
         if (userModel == null)
@@ -168,7 +169,7 @@ public class ConversationController(ChatsDB db, CurrentUser currentUser, ILogger
         StringBuilder responseText = new();
         string? errorText = null;
         UserModelBalanceCost cost = null!;
-        Stopwatch sw = Stopwatch.StartNew();
+        short segmentCount = 0;
         try
         {
             UserModelBalanceCalculator calculator = new(userModel, miscInfo.UserBalance.Balance);
@@ -186,8 +187,15 @@ public class ConversationController(ChatsDB db, CurrentUser currentUser, ILogger
                     : null,
                 EndUserId = currentUser.Id.ToString(),
             };
+            preprocessDurationMs = (int)allSw.ElapsedMilliseconds;
             await foreach (InternalChatSegment seg in s.ChatStreamedFEProcessed(messageToSend, cco, cancellationToken))
             {
+                if (seg.IsFromUpstream)
+                {
+                    segmentCount++;
+                    firstResponseDurationMs = (int)allSw.ElapsedMilliseconds - preprocessDurationMs;
+                }
+
                 lastSegment = seg;
                 UserModelBalanceCost currentCost = calculator.GetNewBalance(seg.Usage.InputTokens, seg.Usage.OutputTokens, priceConfig);
                 if (!currentCost.IsSufficient)
@@ -231,8 +239,6 @@ public class ConversationController(ChatsDB db, CurrentUser currentUser, ILogger
             cancellationToken = CancellationToken.None;
         }
 
-        int elapsedMs = (int)sw.ElapsedMilliseconds;
-
         // success
         // insert new assistant message
         Message assistantMessage = new()
@@ -247,9 +253,14 @@ public class ConversationController(ChatsDB db, CurrentUser currentUser, ILogger
             ParentId = userMessage.Id,
             Usage = new UserModelUsage()
             {
-                DurationMs = elapsedMs,
-                InputTokenCount = lastSegment.Usage.InputTokens,
-                OutputTokenCount = lastSegment.Usage.OutputTokens,
+                PreprocessDurationMs = preprocessDurationMs,
+                FirstResponseDurationMs = firstResponseDurationMs,
+                SegmentCount = segmentCount,
+                TotalDurationMs = (int)allSw.ElapsedMilliseconds,
+                InputTokens = lastSegment.Usage.InputTokens,
+                OutputTokens = lastSegment.Usage.OutputTokens,
+                ReasoningTokens = lastSegment.Usage.ReasoningTokens,
+                IsUsageReliable = lastSegment.IsUsageReliable,
                 InputCost = cost.InputTokenPrice,
                 OutputCost = cost.OutputTokenPrice,
                 UserModelId = userModel.Id,

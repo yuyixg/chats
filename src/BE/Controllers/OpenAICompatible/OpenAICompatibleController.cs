@@ -26,6 +26,10 @@ public partial class OpenAICompatibleController(ChatsDB db, CurrentApiKey curren
     [HttpPost("chat/completions")]
     public async Task<ActionResult> ChatCompletion([FromBody] JsonObject json, [FromServices] ClientInfoManager clientInfoManager, CancellationToken cancellationToken)
     {
+        Stopwatch allSw = Stopwatch.StartNew();
+        int preprocessDurationMs = 0;
+        int firstResponseDurationMs = 0;
+        short segmentCount = 0;
         CcoWrapper cco = new(json);
         if (!cco.SeemsValid())
         {
@@ -75,8 +79,14 @@ public partial class OpenAICompatibleController(ChatsDB db, CurrentApiKey curren
                 throw new InsufficientBalanceException();
             }
 
+            preprocessDurationMs = (int)sw.ElapsedMilliseconds;
             await foreach (InternalChatSegment seg in s.ChatStreamedSimulated([.. cco.Messages], cco.ToCleanCco(), cancellationToken))
             {
+                if (seg.IsFromUpstream)
+                {
+                    firstResponseDurationMs = (int)sw.ElapsedMilliseconds - preprocessDurationMs;
+                    segmentCount++;
+                }
                 lastSegment = seg;
                 UserModelBalanceCost currentCost = calculator.GetNewBalance(seg.Usage.InputTokens, seg.Usage.OutputTokens, priceConfig);
                 if (!currentCost.IsSufficient)
@@ -135,11 +145,16 @@ public partial class OpenAICompatibleController(ChatsDB db, CurrentApiKey curren
             {
                 UserModelId = userModel.Id,
                 CreatedAt = DateTime.UtcNow,
-                DurationMs = (int)sw.ElapsedMilliseconds,
+                SegmentCount = segmentCount,
+                PreprocessDurationMs = preprocessDurationMs,
+                FirstResponseDurationMs = firstResponseDurationMs,
+                TotalDurationMs = (int)sw.ElapsedMilliseconds,
+                InputTokens = lastSegment.Usage.InputTokens,
+                OutputTokens = lastSegment.Usage.OutputTokens,
+                ReasoningTokens = lastSegment.Usage.ReasoningTokens,
+                IsUsageReliable = lastSegment.IsUsageReliable,
                 InputCost = cost.InputTokenPrice,
-                InputTokenCount = lastSegment.Usage.InputTokens,
                 OutputCost = cost.OutputTokenPrice,
-                OutputTokenCount = lastSegment.Usage.OutputTokens,
                 ClientInfo = await clientInfoManager.GetClientInfo(CancellationToken.None),
             }
         };

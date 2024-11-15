@@ -20,24 +20,13 @@ public partial class ModelProvider
     [Unicode(false)]
     public string Name { get; set; } = null!;
 
-    [StringLength(50)]
-    public string DisplayName { get; set; } = null!;
-
-    [StringLength(50)]
+    [StringLength(500)]
     [Unicode(false)]
-    public string Icon { get; set; } = null!;
-
-    [StringLength(2000)]
-    [Unicode(false)]
-    public string InitialConfig { get; set; } = null!;
+    public string? InitialHost { get; set; }
 
     [StringLength(500)]
     [Unicode(false)]
-    public string? Host { get; set; }
-
-    [StringLength(500)]
-    [Unicode(false)]
-    public string? ApiKey { get; set; }
+    public string? InitialSecret { get; set; }
 
     [InverseProperty("ModelProvider")]
     public virtual ICollection<ModelKey> ModelKeys { get; set; } = new List<ModelKey>();
