@@ -1,6 +1,5 @@
 ﻿using Chats.BE.Controllers.Chats.Conversations;
 using Chats.BE.DB;
-using Chats.BE.DB.Jsons;
 using Chats.BE.Services;
 using Chats.BE.Services.Conversations;
 using Chats.BE.Services.Conversations.Dtos;
@@ -10,11 +9,7 @@ using Microsoft.AspNetCore.Mvc;
 using Sdcb.DashScope;
 using System.ClientModel;
 using System.Text.Json;
-using Microsoft.EntityFrameworkCore;
-using Chats.BE.DB.Enums;
 using System.Diagnostics;
-using System.Text;
-using Chats.BE.Services.Common;
 using System.Text.Json.Nodes;
 using Chats.BE.Controllers.OpenAICompatible.Dtos;
 
@@ -26,10 +21,7 @@ public partial class OpenAICompatibleController(ChatsDB db, CurrentApiKey curren
     [HttpPost("chat/completions")]
     public async Task<ActionResult> ChatCompletion([FromBody] JsonObject json, [FromServices] ClientInfoManager clientInfoManager, CancellationToken cancellationToken)
     {
-        Stopwatch allSw = Stopwatch.StartNew();
-        int preprocessDurationMs = 0;
-        int firstResponseDurationMs = 0;
-        short segmentCount = 0;
+        InChatContext icc = new();
         CcoWrapper cco = new(json);
         if (!cco.SeemsValid())
         {
@@ -44,56 +36,15 @@ public partial class OpenAICompatibleController(ChatsDB db, CurrentApiKey curren
         Model cm = userModel.Model;
         using ConversationService s = cf.CreateConversationService(cm);
 
-        UserModelBalanceCost cost = null!;
-        var miscInfo = await db.Users
-            .Where(x => x.Id == currentApiKey.User.Id)
-            .Select(x => new
-            {
-                UserBalance = x.UserBalance!,
-            })
-            .SingleAsync(cancellationToken);
+        UserBalance userBalance = await db.UserBalances.FindAsync([currentApiKey.User.Id], cancellationToken) ?? throw new InvalidOperationException("User balance not found.");
         InternalChatSegment lastSegment = InternalChatSegment.Empty;
         Stopwatch sw = Stopwatch.StartNew();
-        StringBuilder nonStreamingResult = new();
         BadRequestObjectResult? errorToReturn = null;
         bool hasSuccessYield = false;
         try
         {
-            if (userModel.IsDeleted)
+            await foreach (InternalChatSegment seg in icc.Run(modelName, userBalance.Balance, userModel, s.ChatStreamedSimulated([.. cco.Messages], cco.ToCleanCco(), cancellationToken)))
             {
-                return InvalidModel(modelName);
-            }
-            if (userModel.ExpiresAt.IsExpired())
-            {
-                return ErrorMessage(OpenAICompatibleErrorCode.SubscriptionExpired, "Subscription has expired");
-            }
-            JsonPriceConfig priceConfig = cm.ToPriceConfig();
-            if (userModel.TokenBalance == 0 && userModel.CountBalance == 0 && miscInfo.UserBalance.Balance == 0 && !priceConfig.IsFree())
-            {
-                return ErrorMessage(OpenAICompatibleErrorCode.InsufficientBalance, "Insufficient balance");
-            }
-            UserModelBalanceCalculator calculator = new(userModel.CountBalance, userModel.TokenBalance, miscInfo.UserBalance.Balance);
-            cost = calculator.GetNewBalance(0, 0, priceConfig);
-            if (!cost.IsSufficient)
-            {
-                throw new InsufficientBalanceException();
-            }
-
-            preprocessDurationMs = (int)sw.ElapsedMilliseconds;
-            await foreach (InternalChatSegment seg in s.ChatStreamedSimulated([.. cco.Messages], cco.ToCleanCco(), cancellationToken))
-            {
-                if (seg.IsFromUpstream)
-                {
-                    segmentCount++;
-                    firstResponseDurationMs = (int)sw.ElapsedMilliseconds - preprocessDurationMs;
-                }
-                lastSegment = seg;
-                UserModelBalanceCost currentCost = calculator.GetNewBalance(seg.Usage.InputTokens, seg.Usage.OutputTokens, priceConfig);
-                if (!currentCost.IsSufficient)
-                {
-                    throw new InsufficientBalanceException();
-                }
-                cost = currentCost;
                 if (seg.TextSegment == string.Empty) continue;
 
                 if (cco.Stream)
@@ -102,10 +53,6 @@ public partial class OpenAICompatibleController(ChatsDB db, CurrentApiKey curren
                     await YieldResponse(chunk, cancellationToken);
                     hasSuccessYield = true;
                 }
-                else
-                {
-                    nonStreamingResult.Append(seg.TextSegment);
-                }
 
                 if (cancellationToken.IsCancellationRequested)
                 {
@@ -113,9 +60,9 @@ public partial class OpenAICompatibleController(ChatsDB db, CurrentApiKey curren
                 }
             }
         }
-        catch (InsufficientBalanceException)
+        catch (ChatServiceException cse)
         {
-            errorToReturn = await YieldError(hasSuccessYield && cco.Stream, OpenAICompatibleErrorCode.InsufficientBalance, "⚠Insufficient balance - 余额不足!", cancellationToken);
+            errorToReturn = await YieldError(hasSuccessYield && cco.Stream, cse.ErrorCode, cse.Message, cancellationToken);
         }
         catch (Exception e) when (e is DashScopeException || e is ClientResultException)
         {
@@ -141,48 +88,11 @@ public partial class OpenAICompatibleController(ChatsDB db, CurrentApiKey curren
         UserApiUsage usage = new()
         {
             ApiKeyId = currentApiKey.ApiKeyId,
-            Usage = new UserModelUsage()
-            {
-                UserModelId = userModel.Id,
-                CreatedAt = DateTime.UtcNow,
-                SegmentCount = segmentCount,
-                PreprocessDurationMs = preprocessDurationMs,
-                FirstResponseDurationMs = firstResponseDurationMs,
-                TotalDurationMs = (int)sw.ElapsedMilliseconds,
-                InputTokens = lastSegment.Usage.InputTokens,
-                OutputTokens = lastSegment.Usage.OutputTokens,
-                ReasoningTokens = lastSegment.Usage.ReasoningTokens,
-                IsUsageReliable = lastSegment.IsUsageReliable,
-                InputCost = cost.InputTokenPrice,
-                OutputCost = cost.OutputTokenPrice,
-                ClientInfo = await clientInfoManager.GetClientInfo(CancellationToken.None),
-            }
+            Usage = icc.ToUserModelUsage(currentApiKey.User.Id, await clientInfoManager.GetClientInfo(cancellationToken), true),
         };
-        if (cost.CostBalance > 0)
-        {
-            usage.Usage.BalanceTransaction = new()
-            {
-                UserId = currentApiKey.User.Id,
-                CreatedAt = usage.Usage.CreatedAt,
-                CreditUserId = currentApiKey.User.Id,
-                Amount = -cost.CostBalance,
-                TransactionTypeId = (byte)DBTransactionType.ApiCost,
-            };
-        }
-        if (cost.CostCount > 0 || cost.CostTokens > 0)
-        {
-            usage.Usage.UsageTransaction = new()
-            {
-                UserModelId = userModel.Id,
-                CreatedAt = usage.Usage.CreatedAt,
-                CountAmount = -cost.CostCount,
-                TokenAmount = -cost.CostTokens,
-                TransactionTypeId = (byte)DBTransactionType.ApiCost,
-            };
-        }
         db.UserApiUsages.Add(usage);
         await db.SaveChangesAsync(cancellationToken);
-        if (cost.CostBalance > 0)
+        if (icc.Cost.CostBalance > 0)
         {
             _ = balanceService.AsyncUpdateBalance(currentApiKey.User.Id, CancellationToken.None);
         }
@@ -198,7 +108,7 @@ public partial class OpenAICompatibleController(ChatsDB db, CurrentApiKey curren
         else
         {
             // non-streamed success
-            InternalChatSegment seg = lastSegment with { TextSegment = nonStreamingResult.ToString() };
+            InternalChatSegment seg = lastSegment with { TextSegment = icc.FullResult };
             FullChatCompletion fullChatCompletion = seg.ToOpenAIFullChat(modelName, HttpContext.TraceIdentifier);
             return Ok(fullChatCompletion);
         }
