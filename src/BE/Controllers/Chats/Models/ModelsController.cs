@@ -1,10 +1,8 @@
 ﻿using Chats.BE.Controllers.Chats.Models.Dtos;
 using Chats.BE.DB;
-using Chats.BE.DB.Extensions;
 using Chats.BE.DB.Jsons;
 using Chats.BE.Infrastructure;
 using Chats.BE.Services;
-using Chats.BE.Services.Common;
 using Chats.BE.Services.Conversations;
 using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Mvc;
@@ -29,7 +27,7 @@ public class ModelsController : ControllerBase
         ModelResponse[] responses = models
             .Select(x => new ModelResponse()
             {
-                FileConfig = x.Model.ModelReference.AllowSearch ? JsonFileConfig.Default : null,
+                FileConfig = x.Model.ModelReference.AllowVision ? JsonFileConfig.Default : null,
                 FileServerConfigs = FileServerConfig.FromFileService(x.Model.FileService),
                 Id = x.ModelId,
                 ModelConfigOptions = new ModelConfigOption()

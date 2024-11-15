@@ -14,6 +14,7 @@ public class UserModelManager(ChatsDB db)
             .Include(x => x.Model.ModelKey)
             .Include(x => x.Model.ModelKey.ModelProvider)
             .Include(x => x.Model.ModelReference.CurrencyCodeNavigation)
+            .Include(x => x.Model.FileService)
             .Where(x => x.UserId == userId && !x.IsDeleted && !x.Model.IsDeleted && x.ModelId == modelId)
             .FirstOrDefaultAsync(cancellationToken);
 
@@ -29,6 +30,7 @@ public class UserModelManager(ChatsDB db)
             .Include(x => x.Model.ModelKey)
             .Include(x => x.Model.ModelKey.ModelProvider)
             .Include(x => x.Model.ModelReference.CurrencyCodeNavigation)
+            .Include(x => x.Model.FileService)
             .Where(x => x.UserId == userId && !x.IsDeleted && !x.Model.IsDeleted && x.Model.Name == modelName)
             .FirstOrDefaultAsync(cancellationToken);
 
@@ -63,6 +65,7 @@ public class UserModelManager(ChatsDB db)
             .Include(x => x.Model.ModelKey)
             .Include(x => x.Model.ModelKey.ModelProvider)
             .Include(x => x.Model.ModelReference.CurrencyCodeNavigation)
+            .Include(x => x.Model.FileService)
             .Where(x => x.UserId == userId && !x.IsDeleted && !x.Model.IsDeleted)
             .OrderBy(x => x.Model.Order)
             .ToArrayAsync(cancellationToken);
