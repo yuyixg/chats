@@ -39,6 +39,25 @@ export enum DBModelProvider {
   ZhiPuAI = 9,
 }
 
+export type FEModelProvider = {
+  id: number;
+  name: string;
+  icon: string;
+};
+
+export const feModelProviders: FEModelProvider[] = [
+  { id: 0, name: 'Test', icon: '../icons/logo.png' },
+  { id: 1, name: 'Azure', icon: 'azure.svg' },
+  { id: 2, name: 'HunYuan', icon: 'hunyuan.svg' },
+  { id: 3, name: 'LingYi', icon: 'lingyi.svg' },
+  { id: 4, name: 'Moonshot', icon: 'moonshot.svg' },
+  { id: 5, name: 'OpenAI', icon: 'openai.svg' },
+  { id: 6, name: 'QianFan', icon: 'qianfan.svg' },
+  { id: 7, name: 'QianWen', icon: 'qianwen.svg' },
+  { id: 8, name: 'Spark', icon: 'spark.svg' },
+  { id: 9, name: 'ZhiPuAI', icon: 'zhipuai.svg' },
+];
+
 export interface ChatModelFileConfig {
   type: string;
   maxSize: number;

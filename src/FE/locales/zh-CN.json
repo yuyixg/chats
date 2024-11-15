@@ -16,8 +16,6 @@
   "AI": "AI",
   "You": "你",
   "Send": "发送",
-  "Make sure your OpenAI API key is set in the bottom left of the sidebar.": "请确保您的 OpenAI API 密钥已在侧边栏左下角设置。",
-  "If you completed this step, OpenAI may be experiencing issues.": "如果您已完成此步骤，OpenAI 可能遇到了问题。",
   "click if using a .env.local file": "click if using a .env.local file",
   "Message limit is {{maxLength}} characters. You have entered {{valueLength}} characters.": "消息字数限制为 {{maxLength}} 个字符。您已输入 {{valueLength}} 个字符。",
   "Please enter a message": "请输入一条消息",
@@ -300,5 +298,16 @@
 
   "Showing {{currentCount}} - {{currentTotalCount}} total {{totalCount}}": "显示 {{currentCount}} - {{currentTotalCount}} 共 {{totalCount}} 条",
   "Previous": "上一页",
-  "Next": "下一页"
+  "Next": "下一页",
+
+  "Test": "测试",
+  "Azure": "Azure",
+  "HunYuan": "腾讯混元",
+  "LingYi": "零一万物",
+  "Moonshot": "月之暗面",
+  "OpenAI": "OpenAI",
+  "QianFan": "文心一言",
+  "QianWen": "通义千问",
+  "Spark": "讯飞星火",
+  "ZhiPuAI": "智谱AI"
 }
