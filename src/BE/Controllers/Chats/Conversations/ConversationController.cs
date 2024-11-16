@@ -11,6 +11,7 @@ using Chats.BE.Services.Conversations.Dtos;
 using Chats.BE.Services.IdEncryption;
 using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Mvc;
+using Microsoft.AspNetCore.Mvc.ModelBinding;
 using Microsoft.EntityFrameworkCore;
 using OpenAI.Chat;
 using Sdcb.DashScope;
@@ -34,19 +35,11 @@ public class ConversationController(ChatsDB db, CurrentUser currentUser, ILogger
         [FromServices] ClientInfoManager clientInfoManager,
         CancellationToken cancellationToken)
     {
-        Stopwatch allSw = Stopwatch.StartNew();
-        int preprocessDurationMs = 0;
-        int firstResponseDurationMs = 0;
+        InChatContext icc = new();
         int conversationId = idEncryption.DecryptAsInt32(request.ConversationId);
         long? messageId = request.MessageId != null ? idEncryption.DecryptAsInt64(request.MessageId) : null;
 
         UserModel? userModel = await userModelManager.GetUserModel(currentUser.Id, request.ModelId, cancellationToken);
-        if (userModel == null)
-        {
-            return this.BadRequestMessage("The Model does not exist or access is denied.");
-        }
-
-        JsonPriceConfig priceConfig = userModel.Model.ToPriceConfig();
 
         var miscInfo = await db.Users
             .Where(x => x.Id == currentUser.Id)
@@ -56,15 +49,6 @@ public class ConversationController(ChatsDB db, CurrentUser currentUser, ILogger
                 ThisChat = db.Chats.Single(x => x.Id == conversationId && x.UserId == currentUser.Id)
             })
             .SingleAsync(cancellationToken);
-
-        if (userModel.ExpiresAt.IsExpired())
-        {
-            return this.BadRequestMessage("Subscription has expired");
-        }
-        if (userModel.TokenBalance == 0 && userModel.CountBalance == 0 && miscInfo.UserBalance.Balance == 0 && !priceConfig.IsFree())
-        {
-            return this.BadRequestMessage("Insufficient balance");
-        }
 
         Dictionary<long, MessageLiteDto> existingMessages = await db.Messages
             .Where(x => x.ConversationId == conversationId && x.Conversation.UserId == currentUser.Id)
@@ -162,21 +146,15 @@ public class ConversationController(ChatsDB db, CurrentUser currentUser, ILogger
             messageToSend.Add(userMessage.ToOpenAI());
         }
 
-        InternalChatSegment lastSegment = InternalChatSegment.Empty;
         Response.Headers.ContentType = "text/event-stream";
         Response.Headers.CacheControl = "no-cache";
         Response.Headers.Connection = "keep-alive";
-        StringBuilder responseText = new();
         string? errorText = null;
-        UserModelBalanceCost cost = null!;
-        short segmentCount = 0;
         try
         {
-            UserModelBalanceCalculator calculator = new(userModel, miscInfo.UserBalance.Balance);
-            cost = calculator.GetNewBalance(0, 0, priceConfig);
-            if (!cost.IsSufficient)
+            if (userModel == null)
             {
-                throw new InsufficientBalanceException();
+                throw new InvalidModelException(request.ModelId.ToString());
             }
 
             using ConversationService s = conversationFactory.CreateConversationService(userModel.Model);
@@ -187,26 +165,10 @@ public class ConversationController(ChatsDB db, CurrentUser currentUser, ILogger
                     : null,
                 EndUserId = currentUser.Id.ToString(),
             };
-            preprocessDurationMs = (int)allSw.ElapsedMilliseconds;
-            await foreach (InternalChatSegment seg in s.ChatStreamedFEProcessed(messageToSend, cco, cancellationToken))
+            await foreach (InternalChatSegment seg in icc.Run(request.ModelId.ToString(), miscInfo.UserBalance.Balance, userModel, s.ChatStreamedFEProcessed(messageToSend, cco, cancellationToken)))
             {
-                if (seg.IsFromUpstream)
-                {
-                    segmentCount++;
-                    firstResponseDurationMs = (int)allSw.ElapsedMilliseconds - preprocessDurationMs;
-                }
-
-                lastSegment = seg;
-                UserModelBalanceCost currentCost = calculator.GetNewBalance(seg.Usage.InputTokens, seg.Usage.OutputTokens, priceConfig);
-                if (!currentCost.IsSufficient)
-                {
-                    throw new InsufficientBalanceException();
-                }
-                cost = currentCost;
-
                 if (seg.TextSegment == string.Empty) continue;
                 await YieldResponse(new() { Result = seg.TextSegment, Success = true });
-                responseText.Append(seg.TextSegment);
 
                 if (cancellationToken.IsCancellationRequested)
                 {
@@ -214,9 +176,9 @@ public class ConversationController(ChatsDB db, CurrentUser currentUser, ILogger
                 }
             }
         }
-        catch (InsufficientBalanceException)
+        catch (ChatServiceException cse)
         {
-            errorText = "Insufficient balance";
+            return this.BadRequestMessage(cse.Message);
         }
         catch (Exception e) when (e is DashScopeException || e is ClientResultException)
         {
@@ -241,55 +203,19 @@ public class ConversationController(ChatsDB db, CurrentUser currentUser, ILogger
 
         // success
         // insert new assistant message
+        InternalChatSegment fullResponse = icc.FullResponse;
         Message assistantMessage = new()
         {
             ConversationId = conversationId,
             ChatRoleId = (byte)DBConversationRole.Assistant,
             MessageContents =
             [
-                MessageContent.FromText(responseText.ToString()),
+                MessageContent.FromText(fullResponse.TextSegment),
             ],
             CreatedAt = DateTime.UtcNow,
             ParentId = userMessage.Id,
-            Usage = new UserModelUsage()
-            {
-                PreprocessDurationMs = preprocessDurationMs,
-                FirstResponseDurationMs = firstResponseDurationMs,
-                SegmentCount = segmentCount,
-                TotalDurationMs = (int)allSw.ElapsedMilliseconds,
-                InputTokens = lastSegment.Usage.InputTokens,
-                OutputTokens = lastSegment.Usage.OutputTokens,
-                ReasoningTokens = lastSegment.Usage.ReasoningTokens,
-                IsUsageReliable = lastSegment.IsUsageReliable,
-                InputCost = cost.InputTokenPrice,
-                OutputCost = cost.OutputTokenPrice,
-                UserModelId = userModel.Id,
-                CreatedAt = DateTime.UtcNow,
-                ClientInfo = await clientInfoManager.GetClientInfo(CancellationToken.None),
-            }
+            Usage = icc.ToUserModelUsage(currentUser.Id, await clientInfoManager.GetClientInfo(cancellationToken), isApi: false),
         };
-        if (cost.CostCount > 0 || cost.CostTokens > 0)
-        {
-            assistantMessage.Usage.UsageTransaction = new UsageTransaction()
-            {
-                CountAmount = -cost.CostCount,
-                TokenAmount = -cost.CostTokens,
-                CreatedAt = assistantMessage.Usage.CreatedAt,
-                TransactionTypeId = (byte)DBTransactionType.Cost,
-                UserModelId = userModel.Id,
-            };
-        }
-        if (cost.CostBalance > 0)
-        {
-            assistantMessage.Usage.BalanceTransaction = new BalanceTransaction()
-            {
-                UserId = currentUser.Id,
-                CreatedAt = assistantMessage.Usage.CreatedAt,
-                CreditUserId = currentUser.Id,
-                Amount = -cost.CostBalance,
-                TransactionTypeId = (byte)DBTransactionType.Cost,
-            };
-        }
 
         if (errorText != null)
         {
@@ -299,7 +225,7 @@ public class ConversationController(ChatsDB db, CurrentUser currentUser, ILogger
         db.Messages.Add(assistantMessage);
 
         await db.SaveChangesAsync(cancellationToken);
-        if (cost.CostBalance > 0)
+        if (icc.Cost.CostBalance > 0)
         {
             _ = balanceService.AsyncUpdateBalance(currentUser.Id, CancellationToken.None);
         }

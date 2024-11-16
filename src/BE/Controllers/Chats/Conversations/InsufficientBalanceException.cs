@@ -2,25 +2,28 @@
 
 namespace Chats.BE.Controllers.Chats.Conversations;
 
-public class ChatServiceException(OpenAICompatibleErrorCode errorCode) : Exception
+public abstract class ChatServiceException(OpenAICompatibleErrorCode errorCode) : Exception
 {
     public OpenAICompatibleErrorCode ErrorCode => errorCode;
 
     public override string Message => $"code: {ErrorCode}";
 }
 
-public class InsufficientBalanceException() : ChatServiceException(OpenAICompatibleErrorCode.InsufficientBalance);
+public class InsufficientBalanceException() : ChatServiceException(OpenAICompatibleErrorCode.InsufficientBalance)
+{
+    public override string Message => "Insufficient balance";
+}
 
 public class InvalidModelException(string modelName) : ChatServiceException(OpenAICompatibleErrorCode.InvalidModel)
 {
     public string ModelName => modelName;
 
-    public override string Message => $"code: {ErrorCode}, model: {ModelName}";
+    public override string Message => "The Model does not exist or access is denied.";
 }
 
 public class SubscriptionExpiredException(DateTime expiresAt) : ChatServiceException(OpenAICompatibleErrorCode.SubscriptionExpired)
 {
     public DateTime ExpiresAt => expiresAt;
 
-    public override string Message => $"code: {ErrorCode}, expiresAt: {ExpiresAt:O}";
+    public override string Message => "Subscription has expired";
 }

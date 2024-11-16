@@ -9,9 +9,9 @@ using Microsoft.AspNetCore.Mvc;
 using Sdcb.DashScope;
 using System.ClientModel;
 using System.Text.Json;
-using System.Diagnostics;
 using System.Text.Json.Nodes;
 using Chats.BE.Controllers.OpenAICompatible.Dtos;
+using Microsoft.EntityFrameworkCore;
 
 namespace Chats.BE.Controllers.OpenAICompatible;
 
@@ -27,29 +27,28 @@ public partial class OpenAICompatibleController(ChatsDB db, CurrentApiKey curren
         {
             return ErrorMessage(OpenAICompatibleErrorCode.BadParameter, "bad parameter.");
         }
-        string? modelName = cco.Model;
-        if (string.IsNullOrWhiteSpace(modelName)) return InvalidModel(modelName);
+        if (string.IsNullOrWhiteSpace(cco.Model)) return InvalidModel(cco.Model);
 
-        UserModel? userModel = await userModelManager.GetUserModel(currentApiKey.ApiKey, modelName, cancellationToken);
-        if (userModel == null) return InvalidModel(modelName);
+        UserModel? userModel = await userModelManager.GetUserModel(currentApiKey.ApiKey, cco.Model, cancellationToken);
+        if (userModel == null) return InvalidModel(cco.Model);
 
         Model cm = userModel.Model;
         using ConversationService s = cf.CreateConversationService(cm);
 
-        UserBalance userBalance = await db.UserBalances.FindAsync([currentApiKey.User.Id], cancellationToken) ?? throw new InvalidOperationException("User balance not found.");
-        InternalChatSegment lastSegment = InternalChatSegment.Empty;
-        Stopwatch sw = Stopwatch.StartNew();
+        UserBalance userBalance = await db.UserBalances
+            .Where(x => x.UserId == currentApiKey.User.Id)
+            .FirstOrDefaultAsync(cancellationToken) ?? throw new InvalidOperationException("User balance not found.");
         BadRequestObjectResult? errorToReturn = null;
         bool hasSuccessYield = false;
         try
         {
-            await foreach (InternalChatSegment seg in icc.Run(modelName, userBalance.Balance, userModel, s.ChatStreamedSimulated([.. cco.Messages], cco.ToCleanCco(), cancellationToken)))
+            await foreach (InternalChatSegment seg in icc.Run(cco.Model, userBalance.Balance, userModel, s.ChatStreamedSimulated([.. cco.Messages], cco.ToCleanCco(), cancellationToken)))
             {
                 if (seg.TextSegment == string.Empty) continue;
 
                 if (cco.Stream)
                 {
-                    ChatCompletionChunk chunk = seg.ToOpenAIChunk(modelName, HttpContext.TraceIdentifier);
+                    ChatCompletionChunk chunk = seg.ToOpenAIChunk(cco.Model, HttpContext.TraceIdentifier);
                     await YieldResponse(chunk, cancellationToken);
                     hasSuccessYield = true;
                 }
@@ -80,9 +79,8 @@ public partial class OpenAICompatibleController(ChatsDB db, CurrentApiKey curren
         }
         finally
         {
-            // cancel the conversation because following code is credit deduction related
+            // disable the cancellationToken because following code is credit deduction related
             cancellationToken = CancellationToken.None;
-            sw.Stop();
         }
 
         UserApiUsage usage = new()
@@ -108,8 +106,7 @@ public partial class OpenAICompatibleController(ChatsDB db, CurrentApiKey curren
         else
         {
             // non-streamed success
-            InternalChatSegment seg = lastSegment with { TextSegment = icc.FullResult };
-            FullChatCompletion fullChatCompletion = seg.ToOpenAIFullChat(modelName, HttpContext.TraceIdentifier);
+            FullChatCompletion fullChatCompletion = icc.FullResponse.ToOpenAIFullChat(cco.Model, HttpContext.TraceIdentifier);
             return Ok(fullChatCompletion);
         }
     }

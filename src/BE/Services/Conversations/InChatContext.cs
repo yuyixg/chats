@@ -23,10 +23,6 @@ public class InChatContext()
     public async IAsyncEnumerable<InternalChatSegment> Run(string modelName, decimal userBalance, UserModel userModel, IAsyncEnumerable<InternalChatSegment> segments)
     {
         _userModel = userModel;
-        if (userModel.IsDeleted)
-        {
-            throw new InvalidModelException(modelName);
-        }
         if (userModel.ExpiresAt.IsExpired())
         {
             throw new SubscriptionExpiredException(userModel.ExpiresAt);
@@ -65,7 +61,7 @@ public class InChatContext()
         }
     }
 
-    public string FullResult => _fullResult.ToString();
+    public InternalChatSegment FullResponse => _lastSegment with { TextSegment = _fullResult.ToString() };
 
     public UserModelUsage ToUserModelUsage(Guid userId, ClientInfo clientInfo, bool isApi)
     {
