@@ -18,30 +18,35 @@ public class ModelInfoController(ChatsDB db) : ControllerBase
         return Ok(data);
     }
 
-    [HttpGet, Route("api/model-provider/{modelProviderId:int}")]
-    public async Task<ActionResult<ModelProviderDto>> GetModelProvider(short modelProviderId, CancellationToken cancellationToken)
+    [HttpGet, Route("api/model-provider/{modelProviderId:int}/initial-config")]
+    public async Task<ActionResult<InitialModelKeyConfigDto>> GetInitialConfig(short modelProviderId, CancellationToken cancellationToken)
     {
-        ModelProviderDto? data = await db.ModelProviders
+        InitialModelKeyConfigDto? data = await db.ModelProviders
             .Where(x => x.Id == modelProviderId)
-            .Select(x => new ModelProviderDto
+            .Select(x => new InitialModelKeyConfigDto
             {
-                Id = x.Id,
                 InitialHost = x.InitialHost,
                 InitialSecret = x.InitialSecret,
-                ModelReferences = x.ModelReferences
-                    .Select(y => new SimpleModelReferenceDto
-                    {
-                        Id = y.Id,
-                        Name = y.Name,
-                    })
-                    .ToArray()
             })
-            .AsSplitQuery()
             .FirstOrDefaultAsync(cancellationToken);
         if (data == null)
         {
             return NotFound();
         }
+        return Ok(data);
+    }
+
+    [HttpGet, Route("api/model-provider/{modelProviderId:int}/models")]
+    public async Task<ActionResult<SimpleModelReferenceDto[]>> GetModelProviderModels(short modelProviderId, CancellationToken cancellationToken)
+    {
+        SimpleModelReferenceDto[] data = await db.ModelReferences
+            .Where(x => x.ProviderId == modelProviderId)
+            .Select(x => new SimpleModelReferenceDto
+            {
+                Id = x.Id,
+                Name = x.Name,
+            })
+            .ToArrayAsync(cancellationToken);
 
         return Ok(data);
     }

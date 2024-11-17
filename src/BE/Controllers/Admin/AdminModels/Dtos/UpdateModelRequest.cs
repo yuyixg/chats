@@ -1,7 +1,4 @@
 ﻿using Chats.BE.DB;
-using Chats.BE.DB.Jsons;
-using Microsoft.EntityFrameworkCore;
-using System.Text.Json;
 using System.Text.Json.Serialization;
 
 namespace Chats.BE.Controllers.Admin.AdminModels.Dtos;
@@ -11,14 +8,14 @@ public record UpdateModelRequest
     [JsonPropertyName("name")]
     public required string Name { get; init; }
 
-    [JsonPropertyName("modelVersion")]
-    public required string ModelReferenceName { get; init; }
+    [JsonPropertyName("modelReferenceId")]
+    public required short ModelReferenceId { get; init; }
 
     [JsonPropertyName("enabled")]
     public required bool Enabled { get; init; }
 
-    [JsonPropertyName("modelConfig")]
-    public required string ModelConfig { get; init; }
+    [JsonPropertyName("deploymentName")]
+    public string? DeploymentName { get; init; }
 
     [JsonPropertyName("modelKeysId")]
     public required short ModelKeyId { get; init; }
@@ -26,28 +23,21 @@ public record UpdateModelRequest
     [JsonPropertyName("fileServiceId")]
     public Guid? FileServiceId { get; init; }
 
-    //[JsonPropertyName("fileConfig")]
-    //public string? FileConfig { get; init; }
+    [JsonPropertyName("inputTokenPrice1M")]
+    public required decimal InputTokenPrice1M { get; init; }
 
-    [JsonPropertyName("priceConfig")]
-    public required string PriceConfig { get; init; }
+    [JsonPropertyName("outputTokenPrice1M")]
+    public required decimal OutputTokenPrice1M { get; init; }
 
-    //[JsonPropertyName("remarks")]
-    //public string? Remarks { get; init; }
-
-    public void ApplyTo(short modelReferenceId, Model cm)
+    public void ApplyTo(Model cm)
     {
-        if (modelReferenceId == 0) throw new ArgumentException(ModelReferenceName, $"Invalid ModelReferenceName: {ModelReferenceName}");
-
-        cm.ModelReferenceId = modelReferenceId;
-        JsonPriceConfig1M price = JsonSerializer.Deserialize<JsonPriceConfig1M>(PriceConfig)!;
+        cm.ModelReferenceId = ModelReferenceId;
         cm.Name = Name;
         cm.IsDeleted = !Enabled;
         cm.ModelKeyId = ModelKeyId;
         cm.FileServiceId = FileServiceId;
-        cm.PromptTokenPrice1M = price.InputTokenPrice1M;
-        cm.ResponseTokenPrice1M = price.OutputTokenPrice1M;
-        JsonModelConfig config = JsonSerializer.Deserialize<JsonModelConfig>(ModelConfig)!;
-        cm.DeploymentName = config.DeploymentName;
+        cm.PromptTokenPrice1M = InputTokenPrice1M;
+        cm.ResponseTokenPrice1M = OutputTokenPrice1M;
+        cm.DeploymentName = DeploymentName;
     }
 }

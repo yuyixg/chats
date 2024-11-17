@@ -21,45 +21,38 @@ public class AdminModelsController(ChatsDB db) : ControllerBase
         IQueryable<Model> query = db.Models;
         if (!all) query = query.Where(x => !x.IsDeleted);
 
-        return await query
+        AdminModelDto[] data = await query
             .OrderBy(x => x.Order)
-            .Select(x => new AdminModelDtoTemp
+            .Select(x => new AdminModelDto
             {
+                ModelId = x.Id,
+                Name = x.Name,
                 Enabled = !x.IsDeleted,
                 FileServiceId = x.FileServiceId,
-                ModelId = x.Id,
-                ModelKeysId = x.ModelKeyId,
-                ModelProvider = x.ModelKey.ModelProvider.Name,
-                ModelVersion = x.ModelReference.Name,
-                Name = x.Name,
-                PromptTokenPrice1M = x.PromptTokenPrice1M,
-                ResponseTokenPrice1M = x.ResponseTokenPrice1M,
+                ModelKeyId = x.ModelKeyId,
+                ModelProviderId = x.ModelKey.ModelProviderId,
+                ModelReferenceId = x.ModelReferenceId,
+                InputTokenPrice1M = x.PromptTokenPrice1M,
+                OutputTokenPrice1M = x.ResponseTokenPrice1M,
                 Rank = x.Order,
                 DeploymentName = x.DeploymentName,
-                EnableSearch = x.ModelReference.AllowSearch,
-                MaxResponseTokens = x.ModelReference.MaxResponseTokens,
             })
-            .AsAsyncEnumerable()
-            .Select(x => x.ToDto())
             .ToArrayAsync(cancellationToken);
+        return data;
     }
 
     [HttpPut("models/{modelId:int}")]
     public async Task<ActionResult> UpdateModel(short modelId, [FromBody] UpdateModelRequest req, CancellationToken cancellationToken)
     {
-        short modelReferenceId = await db.ModelReferences
-            .Where(x => x.Name == req.ModelReferenceName && x.ProviderId == db.ModelKeys.Where(x => x.Id == req.ModelKeyId).Select(x => x.ModelProviderId).First())
-            .Select(x => x.Id)
-            .FirstOrDefaultAsync(cancellationToken);
-        if (modelReferenceId == 0)
+        if (!await db.ModelReferences.AnyAsync(r => r.Id == req.ModelReferenceId, cancellationToken))
         {
-            return this.BadRequestMessage($"Invalid ModelReferenceName: {req.ModelReferenceName}");
+            return this.BadRequestMessage($"Invalid ModelReferenceId: {req.ModelReferenceId}");
         }
 
         Model? cm = await db.Models.FindAsync([modelId], cancellationToken);
         if (cm == null) return NotFound();
 
-        req.ApplyTo(modelReferenceId, cm);
+        req.ApplyTo(cm);
         if (db.ChangeTracker.HasChanges())
         {
             cm.UpdatedAt = DateTime.UtcNow;
@@ -72,13 +65,9 @@ public class AdminModelsController(ChatsDB db) : ControllerBase
     [HttpPost("models")]
     public async Task<ActionResult> CreateModel([FromBody] UpdateModelRequest req, CancellationToken cancellationToken)
     {
-        short modelReferenceId = await db.ModelReferences
-            .Where(x => x.Name == req.ModelReferenceName && x.ProviderId == db.ModelKeys.Where(x => x.Id == req.ModelKeyId).Select(x => x.ModelProviderId).First())
-            .Select(x => x.Id)
-            .FirstOrDefaultAsync(cancellationToken);
-        if (modelReferenceId == 0)
+        if (!await db.ModelReferences.AnyAsync(r => r.Id == req.ModelReferenceId, cancellationToken))
         {
-            return this.BadRequestMessage($"Invalid ModelReferenceName: {req.ModelReferenceName}");
+            return this.BadRequestMessage($"Invalid ModelReferenceId: {req.ModelReferenceId}");
         }
 
         Model toCreate = new()
@@ -86,7 +75,7 @@ public class AdminModelsController(ChatsDB db) : ControllerBase
             CreatedAt = DateTime.UtcNow,
             UpdatedAt = DateTime.UtcNow,
         };
-        req.ApplyTo(modelReferenceId, toCreate);
+        req.ApplyTo(toCreate);
         db.Models.Add(toCreate);
         await db.SaveChangesAsync(cancellationToken);
 
@@ -142,7 +131,7 @@ public class AdminModelsController(ChatsDB db) : ControllerBase
             .Where(x => !x.IsDeleted)
             .OrderBy(x => x.Order)
             .Select(x => new 
-            { 
+            {
                 Model = x, 
                 UserModel = x.UserModels.Where(x => x.UserId == userId).FirstOrDefault() 
             })

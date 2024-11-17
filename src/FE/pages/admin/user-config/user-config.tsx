@@ -2,7 +2,7 @@ import React, { useEffect, useState } from 'react';
 
 import useTranslation from '@/hooks/useTranslation';
 
-import { GetModelResult, GetUserInitialConfigResult } from '@/types/adminApis';
+import { AdminModelDto, GetUserInitialConfigResult } from '@/types/adminApis';
 
 import { UserInitialConfigModal } from '@/components/Admin/Users/UserInitialConfigModal';
 import { Button } from '@/components/ui/button';
@@ -24,7 +24,7 @@ export default function UserInitialConfig() {
   const [configList, setConfigList] = useState<GetUserInitialConfigResult[]>(
     [],
   );
-  const [models, setModels] = useState<GetModelResult[]>([]);
+  const [models, setModels] = useState<AdminModelDto[]>([]);
   const [selectConfig, setSelectConfig] =
     useState<GetUserInitialConfigResult | null>(null);
 

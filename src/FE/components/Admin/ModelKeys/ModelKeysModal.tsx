@@ -27,7 +27,7 @@ import { FormFieldType, IFormFieldOption } from '@/components/ui/form/type';
 
 import {
   deleteModelKeys,
-  getModelProvider,
+  getModelProviderInitialConfig,
   postModelKeys,
   putModelKeys,
 } from '@/apis/adminApis';
@@ -127,28 +127,21 @@ export const ModelKeysModal = (props: IProps) => {
 
   function onSubmit(values: z.infer<typeof formSchema>) {
     if (!form.formState.isValid) return;
-    let parsed: HostAndSecret;
+    let parsedConfig: HostAndSecret;
     try {
-      parsed = new HostAndSecret(values.configs);
-    } catch {
-      toast.error(t('Invalid JSON format'));
+      parsedConfig = new HostAndSecret(values.configs);
+    } catch (error: any) {
+      toast.error(t(error.message));
       return;
     }
-
-    const dto = {
+    const modelKeyDto = {
       modelProviderId: values.modelProviderId,
       name: values.name!,
-      host: parsed.host,
-      secret: parsed.secret,
+      host: parsedConfig.host,
+      secret: parsedConfig.secret,
     };
 
-    let p = null;
-    if (selected) {
-      p = putModelKeys(selected.id, dto);
-    } else {
-      p = postModelKeys(dto);
-    }
-    p.then(() => {
+    handleModelKeyRequest().then(() => {
       onSuccessful();
       toast.success(t('Save successful!'));
     }).catch(() => {
@@ -158,6 +151,14 @@ export const ModelKeysModal = (props: IProps) => {
         ),
       );
     });
+
+    function handleModelKeyRequest() {
+      if (selected) {
+        return putModelKeys(selected.id, modelKeyDto);
+      } else {
+        return postModelKeys(modelKeyDto);
+      }
+    }
   }
 
   async function onDelete() {
@@ -180,7 +181,7 @@ export const ModelKeysModal = (props: IProps) => {
     const subscription = form.watch((value, { name, type }) => {
       if (name === 'modelProviderId' && type === 'change') {
         const modelProviderId = value.modelProviderId!;
-        getModelProvider(modelProviderId).then((modelProvider) => {
+        getModelProviderInitialConfig(modelProviderId).then((modelProvider) => {
           form.setValue(
             'configs',
             JSON.stringify({

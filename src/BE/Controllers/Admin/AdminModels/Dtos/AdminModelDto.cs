@@ -1,84 +1,39 @@
-﻿using Chats.BE.DB.Jsons;
-using Chats.BE.Services.Conversations;
-using System.Text.Json;
-using System.Text.Json.Serialization;
+﻿using System.Text.Json.Serialization;
 
 namespace Chats.BE.Controllers.Admin.AdminModels.Dtos;
 
 public record AdminModelDto
 {
-    [JsonPropertyName("rank")]
-    public required int? Rank { get; init; }
-
     [JsonPropertyName("modelId")]
     public required short ModelId { get; init; }
 
-    [JsonPropertyName("modelProvider")]
-    public required string ModelProvider { get; init; }
+    [JsonPropertyName("modelProviderId")]
+    public required short ModelProviderId { get; init; }
 
-    [JsonPropertyName("modelVersion")]
-    public required string ModelVersion { get; init; }
+    [JsonPropertyName("modelReferenceId")]
+    public required short ModelReferenceId { get; init; }
 
     [JsonPropertyName("name")]
     public required string Name { get; init; }
 
+    [JsonPropertyName("rank")]
+    public required short? Rank { get; init; }
+
     [JsonPropertyName("enabled")]
     public required bool Enabled { get; init; }
 
-    [JsonPropertyName("modelKeysId")]
-    public required short ModelKeysId { get; init; }
+    [JsonPropertyName("modelKeyId")]
+    public required short ModelKeyId { get; init; }
 
     [JsonPropertyName("fileServiceId")]
     public required Guid? FileServiceId { get; init; }
 
-    [JsonPropertyName("fileConfig")]
-    public required string? FileConfig { get; init; }
-
-    [JsonPropertyName("modelConfig")]
-    public required string ModelConfig { get; init; }
-
-    [JsonPropertyName("priceConfig")]
-    public required JsonPriceConfig PriceConfig { get; init; }
-}
-
-public record AdminModelDtoTemp
-{
-    public required int? Rank { get; init; }
-    public required short ModelId { get; init; }
-    public required string ModelProvider { get; init; }
-    public required string ModelVersion { get; init; }
-    public required string Name { get; init; }
-    public required bool Enabled { get; init; }
-    public required short ModelKeysId { get; init; }
-    public required Guid? FileServiceId { get; init; }
-    public required decimal PromptTokenPrice1M { get; init; }
-    public required decimal ResponseTokenPrice1M { get; init; }
+    [JsonPropertyName("deploymentName")]
     public required string? DeploymentName { get; init; }
-    public required bool EnableSearch { get; init; }
-    public required int MaxResponseTokens { get; init; }
 
-    public AdminModelDto ToDto()
-    {
-        return new()
-        {
-            Rank = Rank,
-            ModelId = ModelId,
-            ModelProvider = ModelProvider,
-            ModelVersion = ModelVersion,
-            Name = Name,
-            Enabled = Enabled,
-            ModelKeysId = ModelKeysId,
-            FileServiceId = FileServiceId,
-            FileConfig = JsonSerializer.Serialize(JsonFileConfig.Default),
-            ModelConfig = JsonSerializer.Serialize(new JsonModelConfig()
-            {
-                Prompt = ConversationService.DefaultPrompt,
-                Temperature = ConversationService.DefaultTemperature,
-                DeploymentName = DeploymentName,
-                EnableSearch = EnableSearch ? false : null,
-                MaxLength = MaxResponseTokens,
-            }),
-            PriceConfig = new JsonPriceConfig1M(PromptTokenPrice1M, ResponseTokenPrice1M).ToRaw(),
-        };
-    }
+    [JsonPropertyName("inputTokenPrice1M")]
+    public required decimal InputTokenPrice1M { get; init; }
+
+    [JsonPropertyName("outputTokenPrice1M")]
+    public required decimal OutputTokenPrice1M { get; init; }
 }

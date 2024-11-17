@@ -21,8 +21,6 @@ import {
 } from '@/components/ui/dropdown-menu';
 
 import { cn } from '@/lib/utils';
-import { LegacyModelProvider } from '@/types/adminApis';
-import { getAllLegacyModelProviders, getLegacyModelProviderByName } from '@/apis/adminApis';
 
 const ChangeModel = ({
   readonly,
@@ -39,12 +37,6 @@ const ChangeModel = ({
     state: { models },
   } = useContext(HomeContext);
   const [searchTerm, setSearchTerm] = useState('');
-  const [modelProviderTemplates, setModelProviderTemplates] = useState<{ [key: string]: LegacyModelProvider }>({});
-  useEffect(() => {
-    getAllLegacyModelProviders().then(data => {
-      setModelProviderTemplates(data);
-    });
-  }, []);
 
   let modelGroup = [] as { provider: string; child: Model[] }[];
   const groupModel = () => {

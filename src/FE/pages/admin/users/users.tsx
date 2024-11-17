@@ -3,7 +3,7 @@ import React, { useEffect, useState } from 'react';
 import { useThrottle } from '@/hooks/useThrottle';
 import useTranslation from '@/hooks/useTranslation';
 
-import { GetModelResult, GetUsersResult } from '@/types/adminApis';
+import { AdminModelDto, GetUsersResult } from '@/types/adminApis';
 import { PageResult, Paging } from '@/types/page';
 
 import PaginationContainer from '@/components/Admin/Pagiation/Pagiation';

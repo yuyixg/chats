@@ -8,14 +8,15 @@ import { formatNumberAsMoney } from '@/utils/common';
 import {
   ModelPriceUnit,
   conversionModelPriceToCreate,
+  convertModelPriceToDisplay,
 } from '@/utils/model';
 
 import {
   GetFileServicesResult,
   GetModelKeysResult,
-  LegacyModelProvider,
-  LegacyModelReference,
-  PostModelParams,
+  ModelReferenceDto,
+  SimpleModelReferenceDto,
+  UpdateModelDto,
 } from '@/types/adminApis';
 
 import FormSelect from '@/components/ui/form/select';
@@ -38,7 +39,7 @@ import FormInput from '@/components/ui/form/input';
 import FormSwitch from '@/components/ui/form/switch';
 import FormTextarea from '@/components/ui/form/textarea';
 
-import { getFileServices, getLegacyModelProviderByName, getLegacyModelReference, getModelKeys, postModels } from '@/apis/adminApis';
+import { getFileServices, getModelKeys, getModelProviderModels, getModelReference, postModels } from '@/apis/adminApis';
 import { zodResolver } from '@hookform/resolvers/zod';
 import { z } from 'zod';
 
@@ -53,13 +54,13 @@ export const AddModelModal = (props: IProps) => {
   const { t } = useTranslation();
   const [fileServices, setFileServices] = useState<GetFileServicesResult[]>([]);
   const [modelKeys, setModelKeys] = useState<GetModelKeysResult[]>([]);
-  const [modelVersions, setModelVersions] = useState<string[]>([]);
-  const [modelReference, setModelReference] = useState<LegacyModelReference>();
+  const [modelVersions, setModelVersions] = useState<SimpleModelReferenceDto[]>([]);
+  const [modelReference, setModelReference] = useState<ModelReferenceDto>();
   const { isOpen, onClose, onSuccessful } = props;
   const [loading, setLoading] = useState(true);
 
   const formSchema = z.object({
-    modelVersion: z
+    modelReferenceId: z
       .string()
       .min(1, `${t('This field is require')}`)
       .optional(),
@@ -68,13 +69,12 @@ export const AddModelModal = (props: IProps) => {
       .min(1, `${t('This field is require')}`)
       .optional(),
     enabled: z.boolean().optional(),
-    modelConfig: z
+    deploymentName: z
       .string()
       .min(1, `${t('This field is require')}`)
       .optional(),
-    modelKeysId: z.string().nullable().default(null),
+    modelKeyId: z.string().nullable().default(null),
     fileServiceId: z.string().nullable().default(null),
-    fileConfig: z.string().nullable().default(null),
     priceConfig: z
       .string()
       .min(1, `${t('This field is require')}`)
@@ -85,13 +85,12 @@ export const AddModelModal = (props: IProps) => {
   const form = useForm<z.infer<typeof formSchema>>({
     resolver: zodResolver(formSchema),
     defaultValues: {
-      modelVersion: '',
+      modelReferenceId: '',
       name: '',
       enabled: true,
-      modelConfig: '',
-      modelKeysId: '',
+      deploymentName: '',
+      modelKeyId: '',
       fileServiceId: null,
-      fileConfig: '',
       priceConfig: '',
       remarks: '',
     },
@@ -99,10 +98,17 @@ export const AddModelModal = (props: IProps) => {
 
   const onSubmit = (values: z.infer<typeof formSchema>) => {
     if (!form.formState.isValid) return;
-    const modelProvider = modelKeys.find(
-      (x) => x.id === parseInt(form.getValues('modelKeysId')!),
-    )?.type;
-    postModels({ ...values, modelProvider } as PostModelParams)
+    const dto: UpdateModelDto = {
+      name: values.name!,
+      modelReferenceId: parseInt(values.modelReferenceId!),
+      enabled: !!values.enabled,
+      deploymentName: values.deploymentName || null,
+      modelKeyId: parseInt(values.modelKeyId!),
+      fileServiceId: values.fileServiceId,
+      inputTokenPrice1M: JSON.parse(values.priceConfig!).input,
+      outputTokenPrice1M: JSON.parse(values.priceConfig!).out,
+    };
+    postModels(dto)
       .then(() => {
         onSuccessful();
         toast.success(t('Save successful!'));
@@ -135,34 +141,19 @@ export const AddModelModal = (props: IProps) => {
     let subscription: any = null;
     if (!loading) {
       subscription = form.watch(async (value, { name, type }) => {
-        if (name === 'modelKeysId' && type === 'change') {
-          const modelKeysId = parseInt(value.modelKeysId!);
-          const modelProviderName = modelKeys.find(
-            (x) => x.id === modelKeysId,
-          )!.type;
-          const modelProvider: LegacyModelProvider = await getLegacyModelProviderByName(modelProviderName);
-          setModelVersions(modelProvider.models);
-          form.setValue('modelVersion', '');
+        if (name === 'modelKeyId' && type === 'change') {
+          const modelKeyId = parseInt(value.modelKeyId!);
+          const modelProviderId = modelKeys.find((x) => x.id === modelKeyId)?.modelProviderId!;
+          const possibleModels = await getModelProviderModels(modelProviderId);
+          setModelVersions(possibleModels);
+          form.setValue('modelReferenceId', possibleModels[0]?.id?.toString());
         }
-        if (name === 'modelVersion' && type === 'change') {
-          const modelVersion = value.modelVersion!;
-          const modelKeysId = parseInt(value.modelKeysId!);
-          const _modelProvider = modelKeys.find((x) => x.id === modelKeysId)
-            ?.type!;
-          getLegacyModelReference(_modelProvider, modelVersion).then(data => {
+        if (name === 'modelReferenceId' && type === 'change') {
+          const modelReferenceId = parseInt(value.modelReferenceId!);
+          const modelKeyId = parseInt(value.modelKeyId!);
+          getModelReference(modelReferenceId).then(data => {
             setModelReference(data);
-            form.setValue(
-              'modelConfig',
-              JSON.stringify(data.modelConfig),
-            );
-            form.setValue(
-              'fileConfig',
-              JSON.stringify(data.fileConfig),
-            );
-            form.setValue(
-              'priceConfig',
-              conversionModelPriceToCreate(data.priceConfig),
-            );
+            form.setValue('priceConfig', convertModelPriceToDisplay(data.promptTokenPrice1M, data.responseTokenPrice1M));
           });
         }
       });
@@ -191,9 +182,9 @@ export const AddModelModal = (props: IProps) => {
               ></FormField>
               <div className="flex justify-between">
                 <FormField
-                  key="modelKeysId"
+                  key="modelKeyId"
                   control={form.control}
-                  name="modelKeysId"
+                  name="modelKeyId"
                   render={({ field }) => {
                     return (
                       <FormSelect
@@ -209,7 +200,7 @@ export const AddModelModal = (props: IProps) => {
                   }}
                 ></FormField>
                 <div
-                  hidden={!form.getValues('modelKeysId')}
+                  hidden={!form.getValues('modelKeyId')}
                   className="text-sm w-36 mt-12 text-right"
                 >
                   <Popover>
@@ -221,8 +212,8 @@ export const AddModelModal = (props: IProps) => {
                     <PopoverContent className="w-full">
                       {JSON.stringify(
                         modelKeys.find(
-                          (x) => x.id === parseInt(form.getValues('modelKeysId')!),
-                        )?.configs,
+                          (x) => x.id === parseInt(form.getValues('modelKeyId')!),
+                        )?.toConfigs(),
                         null,
                         2,
                       )}
@@ -233,20 +224,20 @@ export const AddModelModal = (props: IProps) => {
             </div>
             <div
               className="grid grid-cols-2 gap-4"
-              key={form.getValues('modelKeysId')! || 'modelVersionKey'}
+              key={form.getValues('modelKeyId')! || 'modelVersionKey'}
             >
               <FormField
-                key="modelVersion"
+                key="modelReferenceId"
                 control={form.control}
-                name="modelVersion"
+                name="modelReferenceId"
                 render={({ field }) => {
                   return (
                     <FormSelect
                       field={field}
                       label={t('Model Version')!}
                       items={modelVersions.map((key) => ({
-                        name: key,
-                        value: key,
+                        name: key.name,
+                        value: key.id.toString(),
                       }))}
                     />
                   );
@@ -263,15 +254,14 @@ export const AddModelModal = (props: IProps) => {
             </div>
             <div className="grid grid-cols-2 gap-4">
               <FormField
-                key="modelConfig"
+                key="deploymentName"
                 control={form.control}
-                name="modelConfig"
+                name="deploymentName"
                 render={({ field }) => {
                   return (
-                    <FormTextarea
-                      rows={7}
+                    <FormInput
                       hidden={!modelReference}
-                      label={t('Model Configs')!}
+                      label={t('Deployment Name')!}
                       field={field}
                     />
                   );
@@ -305,26 +295,11 @@ export const AddModelModal = (props: IProps) => {
                     <FormSelect
                       field={field}
                       label={t('File Service Type')!}
-                      hidden={!modelReference?.fileConfig}
+                      hidden={!modelReference?.allowVision}
                       items={fileServices.map((item) => ({
                         name: item.name,
                         value: item.id,
                       }))}
-                    />
-                  );
-                }}
-              ></FormField>
-              <FormField
-                key="fileConfig"
-                control={form.control}
-                name="fileConfig"
-                render={({ field }) => {
-                  return (
-                    <FormTextarea
-                      rows={4}
-                      hidden={!modelReference?.fileConfig}
-                      label={t('File Configs')!}
-                      field={field}
                     />
                   );
                 }}

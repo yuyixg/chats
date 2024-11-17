@@ -5,7 +5,7 @@ import useTranslation from '@/hooks/useTranslation';
 import { formatNumberAsMoney } from '@/utils/common';
 import { ModelPriceUnit } from '@/utils/model';
 
-import { GetModelResult, LegacyModelProvider } from '@/types/adminApis';
+import { AdminModelDto } from '@/types/adminApis';
 
 import { AddModelModal } from '@/components/Admin/Models/AddModelModal';
 import { EditModelModal } from '@/components/Admin/Models/EditModelModal';
@@ -20,24 +20,19 @@ import {
   TableRow,
 } from '@/components/ui/table';
 
-import { getAllLegacyModelProviders, getModels } from '@/apis/adminApis';
+import { getModels } from '@/apis/adminApis';
+import { feModelProviders } from '@/types/model';
 
 export default function Models() {
   const { t } = useTranslation();
   const [isOpen, setIsOpen] = useState({ add: false, edit: false });
-  const [selectedModel, setSelectedModel] = useState<GetModelResult | null>(
+  const [selectedModel, setSelectedModel] = useState<AdminModelDto | null>(
     null,
   );
-  const [models, setModels] = useState<GetModelResult[]>([]);
+  const [models, setModels] = useState<AdminModelDto[]>([]);
   const [loading, setLoading] = useState(true);
-  const [modelProviderTemplates, setModelProviderTemplates] = useState<{
-    [key: string]: LegacyModelProvider;
-  }>();
   
   useEffect(() => {
-    getAllLegacyModelProviders().then((data) => {
-      setModelProviderTemplates(data);
-    });
     init();
   }, []);
 
@@ -50,7 +45,7 @@ export default function Models() {
     });
   };
 
-  const handleShow = (item: GetModelResult) => {
+  const handleShow = (item: AdminModelDto) => {
     setSelectedModel(item);
     setIsOpen({ ...isOpen, edit: true });
   };
@@ -106,8 +101,7 @@ export default function Models() {
                   </div>
                 </TableCell>
                 <TableCell>
-                  {modelProviderTemplates &&
-                    modelProviderTemplates[item.modelProvider].displayName}
+                  {t(feModelProviders[item.modelProviderId].name)}
                 </TableCell>
                 <TableCell>{item.modelVersion}</TableCell>
                 <TableCell>

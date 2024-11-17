@@ -25,40 +25,29 @@ export interface PutUserModelParams {
   models: UserModelUpdateDto[];
 }
 
-export interface GetModelResult {
+export interface AdminModelDto {
   modelId: number;
-  modelProvider: string;
-  modelVersion: string;
+  modelProviderId: number;
+  modelReferenceId: number;
   name: string;
-  rank: number;
+  rank: number | null;
   enabled: boolean;
-  remarks: string;
-  modelConfig: string;
   fileServiceId: string;
-  modelKeysId: number;
-  fileConfig: string;
-  priceConfig: ChatModelPriceConfig;
+  modelKeyId: number;
+  deploymentName: string | null;
+  inputTokenPrice1M: number;
+  outputTokenPrice1M: number;
 }
 
-export interface PutModelParams {
+export interface UpdateModelDto {
   name: string;
-  enabled?: boolean;
-  modelConfig: string;
-  fileServiceId?: string;
-  modelKeysId: string;
-  fileConfig?: string;
-  priceConfig: string;
-}
-
-export interface PostModelParams {
-  modelProvider: string;
-  modelVersion: string;
-  name: string;
+  modelReferenceId: number;
   enabled: boolean;
-  modelConfig: string;
-  modelKeysId: string;
-  fileServiceId?: string;
-  fileConfig?: string;
+  deploymentName: string | null;
+  modelKeyId: number;
+  fileServiceId: string | null;
+  inputTokenPrice1M: number;
+  outputTokenPrice1M: number;
 }
 
 export interface PostUserParams {
@@ -193,7 +182,7 @@ export interface PutPayServicesParams extends PostPayServicesParams {
   id: string;
 }
 
-export interface GetModelKeysResult {
+export class GetModelKeysResult {
   id: number;
   modelProviderId: number;
   name: string;
@@ -202,6 +191,24 @@ export interface GetModelKeysResult {
   host: string | null;
   secret: string | null;
   createdAt: string;
+
+  constructor(dto: any) {
+    this.id = dto.id;
+    this.modelProviderId = dto.modelProviderId;
+    this.name = dto.name;
+    this.enabledModelCount = dto.enabledModelCount;
+    this.totalModelCount = dto.totalModelCount;
+    this.host = dto.host;
+    this.secret = dto.secret;
+    this.createdAt = dto.createdAt;
+  }
+
+  toConfigs() {
+    return {
+      host: this.host,
+      secret: this.secret,
+    };
+  }
 }
 
 export interface PostModelKeysParams {
@@ -334,9 +341,7 @@ export interface SimpleModelReferenceDto {
   name: string;
 }
 
-export interface ModelProviderDto {
-  id: number;
-  modelReferences: SimpleModelReferenceDto[];
+export interface ModelProviderInitialConfig {
   initialHost: string | null;
   initialSecret: string | null;
 }

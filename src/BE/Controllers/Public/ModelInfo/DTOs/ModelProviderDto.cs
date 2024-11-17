@@ -9,7 +9,10 @@ public record ModelProviderDto
 
     [JsonPropertyName("modelReferences")]
     public required SimpleModelReferenceDto[] ModelReferences { get; init; }
+}
 
+public record InitialModelKeyConfigDto
+{
     [JsonPropertyName("initialHost")]
     public required string? InitialHost { get; init; }
 

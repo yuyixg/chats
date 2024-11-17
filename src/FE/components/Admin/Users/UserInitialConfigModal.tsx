@@ -8,7 +8,7 @@ import { termDateString } from '@/utils/common';
 
 import {
   GetInvitationCodeResult,
-  GetModelResult,
+  AdminModelDto,
   GetUserInitialConfigResult,
   UserInitialModel,
 } from '@/types/adminApis';
@@ -55,7 +55,7 @@ import Decimal from 'decimal.js';
 import { z } from 'zod';
 
 interface IProps {
-  models: GetModelResult[];
+  models: AdminModelDto[];
   select?: GetUserInitialConfigResult;
   isOpen: boolean;
   onClose: () => void;

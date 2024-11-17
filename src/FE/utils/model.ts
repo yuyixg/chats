@@ -20,11 +20,11 @@ export function conversionModelPriceToCreate(priceConfig: ChatModelPriceConfig) 
   return JSON.stringify(newConfig, null, 2);
 }
 
-export function conversionModelPriceToDisplay(priceConfig: string) {
-  const configs = JSON.parse(priceConfig) as ChatModelPriceConfig;
-  configs.input = configs.input * ModelPriceUnit;
-  configs.out = configs.out * ModelPriceUnit;
-  return JSON.stringify(configs, null, 2);
+export function convertModelPriceToDisplay(inputTokenPrice1M: number, outputTokenPrice1M: number) {
+  return JSON.stringify({
+    input: inputTokenPrice1M,
+    out: outputTokenPrice1M
+  }, null, 2);
 }
 
 export function getStorageModelId() {

@@ -7,7 +7,7 @@ import {
   GetLoginServicesResult,
   GetMessageDetailsResult,
   GetModelKeysResult,
-  GetModelResult,
+  AdminModelDto,
   GetPayServicesResult,
   GetRequestLogsDetailsResult,
   GetRequestLogsListResult,
@@ -17,14 +17,12 @@ import {
   GetUserMessageResult,
   GetUsersParams,
   GetUsersResult,
-  ModelProviderDto,
   ModelReferenceDto,
   PostAndPutConfigParams,
   PostFileServicesParams,
   PostInvitationCodeParams,
   PostLoginServicesParams,
   PostModelKeysParams,
-  PostModelParams,
   PostPayServicesParams,
   PostUserInitialConfigParams,
   PostUserParams,
@@ -32,7 +30,7 @@ import {
   PutInvitationCodeParams,
   PutLoginServicesParams,
   PutModelKeysParams,
-  PutModelParams,
+  UpdateModelDto,
   PutPayServicesParams,
   PutUserBalanceParams,
   PutUserInitialConfigParams,
@@ -40,6 +38,8 @@ import {
   PutUserParams,
   UserModelDisplay,
   UserModelDisplayDto,
+  SimpleModelReferenceDto,
+  ModelProviderInitialConfig,
 } from '@/types/adminApis';
 import { DBModelProvider } from '@/types/model';
 import { PageResult } from '@/types/page';
@@ -57,14 +57,14 @@ export const putUserModel = (params: PutUserModelParams): Promise<any> => {
   });
 };
 
-export const getModels = (all: boolean = true): Promise<GetModelResult[]> => {
+export const getModels = (all: boolean = true): Promise<AdminModelDto[]> => {
   const fetchService = useFetch();
   return fetchService.get('/api/admin/models?all=' + all);
 };
 
 export const putModels = (
   modelId: string,
-  params: PutModelParams,
+  params: UpdateModelDto,
 ): Promise<any> => {
   const fetchService = useFetch();
   return fetchService.put(`/api/admin/models/${modelId}`, {
@@ -77,7 +77,7 @@ export const deleteModels = (id: string): Promise<any> => {
   return fetchService.delete('/api/admin/models?id=' + id);
 };
 
-export const postModels = (params: PostModelParams): Promise<any> => {
+export const postModels = (params: UpdateModelDto): Promise<any> => {
   const fetchService = useFetch();
   return fetchService.post('/api/admin/models', {
     body: params,
@@ -89,8 +89,7 @@ export const getUsers = (
 ): Promise<PageResult<GetUsersResult[]>> => {
   const fetchService = useFetch();
   return fetchService.get(
-    `/api/admin/users?page=${params.page}&pageSize=${params.pageSize}&query=${
-      params?.query || ''
+    `/api/admin/users?page=${params.page}&pageSize=${params.pageSize}&query=${params?.query || ''
     }`,
   );
 };
@@ -215,9 +214,10 @@ export const putPayService = (params: PutPayServicesParams) => {
   });
 };
 
-export const getModelKeys = (): Promise<GetModelKeysResult[]> => {
+export const getModelKeys = async (): Promise<GetModelKeysResult[]> => {
   const fetchService = useFetch();
-  return fetchService.get('/api/admin/model-keys');
+  const data = await fetchService.get<Object[]>('/api/admin/model-keys');
+  return data.map(x => new GetModelKeysResult(x));
 };
 
 export const postModelKeys = (params: PostModelKeysParams) => {
@@ -308,16 +308,31 @@ export const getAllModelProviderIds = () => {
   return fetchServer.get<DBModelProvider[]>('/api/model-provider');
 }
 
-export const getModelProvider = (modelProviderId: DBModelProvider) => {
+export const getModelProviderInitialConfig = (modelProviderId: DBModelProvider) => {
   const fetchServer = useFetch();
-  return fetchServer.get<ModelProviderDto>(
-    `/api/model-provider/${modelProviderId}`,
+  return fetchServer.get<ModelProviderInitialConfig>(
+    `/api/model-provider/${modelProviderId}/initial-config`,
   );
 }
 
-export const getModelReference = (modelId: number) => {
+export const getModelProviderModels = (modelProviderId: DBModelProvider) => {
+  const fetchServer = useFetch();
+  return fetchServer.get<SimpleModelReferenceDto[]>(
+    `/api/model-provider/${modelProviderId}/models`,
+  );
+}
+
+export const getModelReference = (modelReferenceId: number) => {
   const fetchServer = useFetch();
   return fetchServer.get<ModelReferenceDto>(
-    `/api/model-reference/${modelId}`,
+    `/api/model-reference/${modelReferenceId}`,
   );
+}
+
+export const getFileConfig = (fileServiceId?: string) => {
+  if (!fileServiceId) return null;
+  return {
+    count: 5,
+    maxSize: 10240
+  };
 }
