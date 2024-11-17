@@ -17,8 +17,8 @@ import {
   GetUserMessageResult,
   GetUsersParams,
   GetUsersResult,
-  LegacyModelProvider,
-  LegacyModelReference,
+  ModelProviderDto,
+  ModelReferenceDto,
   PostAndPutConfigParams,
   PostFileServicesParams,
   PostInvitationCodeParams,
@@ -41,6 +41,7 @@ import {
   UserModelDisplay,
   UserModelDisplayDto,
 } from '@/types/adminApis';
+import { DBModelProvider } from '@/types/model';
 import { PageResult } from '@/types/page';
 
 export const getModelsByUserId = async (userId: string): Promise<UserModelDisplay[]> => {
@@ -302,32 +303,21 @@ export const deleteInvitationCode = (id: string) => {
   return fetchServer.delete('/api/admin/invitation-code/' + id);
 };
 
-export const getLegacyModelReference = (
-  modelProviderName: string,
-  modelReferenceName: string,
-) => {
+export const getAllModelProviderIds = () => {
   const fetchServer = useFetch();
-  return fetchServer.get<LegacyModelReference>(
-    `/api/legacy-model-reference/${modelProviderName}/${modelReferenceName}`,
-  );
-};
+  return fetchServer.get<DBModelProvider[]>('/api/model-provider');
+}
 
-export const getLegacyModelProviderByName = (
-  modelProviderName: string,
-) => {
+export const getModelProvider = (modelProviderId: DBModelProvider) => {
   const fetchServer = useFetch();
-  return fetchServer.get<LegacyModelProvider>(
-    `/api/legacy-model-provider/${modelProviderName}`,
+  return fetchServer.get<ModelProviderDto>(
+    `/api/model-provider/${modelProviderId}`,
   );
-};
+}
 
-export const getAllLegacyModelProviders = async () => {
+export const getModelReference = (modelId: number) => {
   const fetchServer = useFetch();
-  const data = await fetchServer.get<LegacyModelProvider[]>(
-    `/api/legacy-model-provider`,
+  return fetchServer.get<ModelReferenceDto>(
+    `/api/model-reference/${modelId}`,
   );
-  return data.reduce((acc, provider) => {
-    acc[provider.name] = provider;
-    return acc;
-  }, {} as { [key: string]: LegacyModelProvider });
-};
+}

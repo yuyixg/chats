@@ -15,14 +15,15 @@ namespace Chats.BE.Controllers.Admin.ModelKeys;
 public class ModelKeysController(ChatsDB db) : ControllerBase
 {
     [HttpGet]
-    public ActionResult<ModelKeyDto[]> GetAllModelKeys()
+    public async Task<ActionResult<ModelKeyDto[]>> GetAllModelKeys(CancellationToken cancellationToken)
     {
-        ModelKeyDto[] result = db.ModelKeys
-            .OrderByDescending(x => x.UpdatedAt)
-            .Select(x => new ModelKeyDtoTemp
+        ModelKeyDto[] result = await db.ModelKeys
+            .OrderBy(x => x.ModelProviderId)
+            .ThenBy(x => x.Id)
+            .Select(x => new ModelKeyDto
             {
                 Id = x.Id,
-                ProviderName = x.ModelProvider.Name,
+                ModelProviderId = x.ModelProviderId,
                 Name = x.Name,
                 Host = x.Host,
                 Secret = x.Secret,
@@ -30,9 +31,13 @@ public class ModelKeysController(ChatsDB db) : ControllerBase
                 EnabledModelCount = x.Models.Count(x => !x.IsDeleted),
                 TotalModelCount = x.Models.Count
             })
-            .AsEnumerable()
-            .Select(x => x.ToDto())
-            .ToArray();
+            .ToArrayAsync(cancellationToken);
+
+        for (int i = 0; i < result.Length; i++)
+        {
+            ModelKeyDto modelKey = result[i];
+            result[i] = modelKey.WithMaskedKeys();
+        }
 
         return Ok(result);
     }
@@ -47,21 +52,17 @@ public class ModelKeysController(ChatsDB db) : ControllerBase
             return NotFound();
         }
 
-        short? modelProviderId = db.ModelProviders
-            .First(x => x.Name == request.Type)
-            .Id;
-        if (modelProviderId == null)
+        if (!await db.ModelProviders.AnyAsync(x => x.Id == request.ModelProviderId, cancellationToken))
         {
             return this.BadRequestMessage("Invalid model provider");
         }
-        modelKey.ModelProviderId = modelProviderId.Value;
+        modelKey.ModelProviderId = request.ModelProviderId;
         modelKey.Name = request.Name;
-        JsonModelKey passingInKey = JsonSerializer.Deserialize<JsonModelKey>(request.Configs)!;
-        if (!modelKey.Secret.IsMaskedEquals(passingInKey.Secret))
+        if (!modelKey.Secret.IsMaskedEquals(request.Secret))
         {
-            modelKey.Secret = passingInKey.Secret;
+            modelKey.Secret = request.Secret;
         }
-        modelKey.Host = passingInKey.Host;
+        modelKey.Host = request.Host;
         if (db.ChangeTracker.HasChanges())
         {
             modelKey.UpdatedAt = DateTime.UtcNow;
@@ -74,22 +75,17 @@ public class ModelKeysController(ChatsDB db) : ControllerBase
     [HttpPost]
     public async Task<ActionResult> CreateModelKey([FromBody] UpdateModelKeyRequest request, CancellationToken cancellationToken)
     {
-        JsonModelKey jsonModelKey = JsonSerializer.Deserialize<JsonModelKey>(request.Configs)!;
-
-        short? modelProviderId = db.ModelProviders
-            .First(x => x.Name == request.Type)
-            .Id;
-        if (modelProviderId == null)
+        if (!await db.ModelProviders.AnyAsync(x => x.Id == request.ModelProviderId, cancellationToken))
         {
             return this.BadRequestMessage("Invalid model provider");
         }
 
         ModelKey newModelKey = new()
         {
-            ModelProviderId = modelProviderId.Value,
+            ModelProviderId = request.ModelProviderId,
             Name = request.Name,
-            Host = jsonModelKey.Host,
-            Secret = jsonModelKey.Secret,
+            Host = request.Host,
+            Secret = request.Secret,
             CreatedAt = DateTime.UtcNow,
             UpdatedAt = DateTime.UtcNow,
         };

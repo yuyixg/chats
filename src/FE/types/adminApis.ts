@@ -1,9 +1,8 @@
 import { ChatMessage } from './chatMessage';
 import { FileServicesType } from './file';
 import {
-  ChatModelFileConfig,
   ChatModelPriceConfig,
-  ModelConfig,
+  DBModelProvider,
 } from './model';
 import { Paging } from './page';
 import { PayServiceType } from './pay';
@@ -196,17 +195,20 @@ export interface PutPayServicesParams extends PostPayServicesParams {
 
 export interface GetModelKeysResult {
   id: number;
+  modelProviderId: number;
   name: string;
-  type: string;
   enabledModelCount: number;
   totalModelCount: number;
-  configs: string;
+  host: string | null;
+  secret: string | null;
   createdAt: string;
 }
 
 export interface PostModelKeysParams {
+  modelProviderId: number;
   name: string;
-  configs: string;
+  host: string | null;
+  secret: string | null;
 }
 
 export interface PutModelKeysParams extends PostModelKeysParams { }
@@ -220,28 +222,6 @@ export interface PostPromptParams {
 export interface PutPromptParams {
   id: string;
 }
-
-export interface LegacyModelProvider {
-  name: string;
-  models: string[];
-  apiConfig: object;
-  displayName: string;
-  icon: string;
-}
-
-type TemperatureConfig = {
-  min: number;
-  max: number;
-};
-
-export type LegacyModelReference = {
-  id: number;
-  type: string;
-  config: TemperatureConfig;
-  modelConfig: ModelConfig;
-  fileConfig: ChatModelFileConfig | null;
-  priceConfig: ChatModelPriceConfig;
-};
 
 export interface GetConfigsResult {
   key: string;
@@ -347,4 +327,32 @@ export class UserModelDisplay implements UserModelDisplayDto {
       enabled: this.enabled,
     };
   }
+}
+
+export interface SimpleModelReferenceDto {
+  id: number;
+  name: string;
+}
+
+export interface ModelProviderDto {
+  id: number;
+  modelReferences: SimpleModelReferenceDto[];
+  initialHost: string | null;
+  initialSecret: string | null;
+}
+
+export interface ModelReferenceDto extends SimpleModelReferenceDto {
+  modelProviderId: DBModelProvider;
+  minTemperature: number;
+  maxTemperature: number;
+  allowVision: boolean;
+  allowSearch: boolean;
+  contextWindow: number;
+  maxResponseTokens: number;
+  promptTokenPrice1M: number;
+  responseTokenPrice1M: number;
+  rawPromptTokenPrice1M: number;
+  rawResponseTokenPrice1M: number;
+  currencyCode: string;
+  exchangeRate: number;
 }

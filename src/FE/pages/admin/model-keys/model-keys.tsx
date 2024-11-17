@@ -2,11 +2,8 @@ import React, { useEffect, useState } from 'react';
 
 import useTranslation from '@/hooks/useTranslation';
 
-import { DEFAULT_LANGUAGE } from '@/utils/settings';
+import { GetModelKeysResult } from '@/types/adminApis';
 
-import { GetModelKeysResult, LegacyModelProvider } from '@/types/adminApis';
-
-// import { ModelProviderTemplates } from '@/types/template';
 import { ModelKeysModal } from '@/components/Admin/ModelKeys/ModelKeysModal';
 import { Button } from '@/components/ui/button';
 import { Card } from '@/components/ui/card';
@@ -19,7 +16,8 @@ import {
   TableRow,
 } from '@/components/ui/table';
 
-import { getAllLegacyModelProviders, getModelKeys } from '@/apis/adminApis';
+import { getModelKeys } from '@/apis/adminApis';
+import { feModelProviders } from '@/types/model';
 
 export default function ModelKeys() {
   const { t } = useTranslation();
@@ -27,14 +25,8 @@ export default function ModelKeys() {
   const [selected, setSelected] = useState<GetModelKeysResult | null>(null);
   const [services, setServices] = useState<GetModelKeysResult[]>([]);
   const [loading, setLoading] = useState(true);
-  const [modelProviderTemplates, setModelProviderTemplates] = useState<{
-    [key: string]: LegacyModelProvider;
-  }>();
 
   useEffect(() => {
-    getAllLegacyModelProviders().then((data) => {
-      setModelProviderTemplates(data);
-    });
     init();
   }, []);
 
@@ -94,8 +86,7 @@ export default function ModelKeys() {
                   {item.name}
                 </TableCell>
                 <TableCell>
-                  {modelProviderTemplates &&
-                    modelProviderTemplates[item.type].displayName}
+                  {t(feModelProviders[item.modelProviderId].name)}
                 </TableCell>
                 <TableCell>
                   {item.enabledModelCount === item.totalModelCount
@@ -110,15 +101,13 @@ export default function ModelKeys() {
           </TableBody>
         </Table>
       </Card>
-      {modelProviderTemplates && (
-        <ModelKeysModal
-          selected={selected}
-          isOpen={isOpen}
-          onClose={handleClose}
-          onSuccessful={init}
-          modelProviderTemplates={modelProviderTemplates}
-        />
-      )}
+      {<ModelKeysModal
+        selected={selected}
+        isOpen={isOpen}
+        onClose={handleClose}
+        onSuccessful={init}
+      />
+      }
     </>
   );
 }

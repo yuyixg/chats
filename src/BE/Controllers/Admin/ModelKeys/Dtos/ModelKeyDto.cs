@@ -1,50 +1,15 @@
-﻿using Chats.BE.DB.Jsons;
+﻿using Chats.BE.Services.Common;
 using System.Text.Json.Serialization;
 
 namespace Chats.BE.Controllers.Admin.ModelKeys.Dtos;
-
-public record ModelKeyDtoTemp
-{
-    public required short Id { get; init; }
-
-    public required string ProviderName { get; init; }
-
-    public required string Name { get; init; }
-
-    public required int EnabledModelCount { get; init; }
-
-    public required int TotalModelCount { get; init; }
-
-    public required string? Host { get; init; }
-
-    public required string? Secret { get; init; }
-
-    public required DateTime CreatedAt { get; init; }
-
-    public ModelKeyDto ToDto(bool maskFields = true)
-    {
-        ModelKeyDto dto = new()
-        {
-            Id = Id,
-            Type = ProviderName,
-            Name = Name,
-            Configs = new JsonModelKey { Secret = Secret, Host = Host, },
-            CreatedAt = CreatedAt,
-            EnabledModelCount = EnabledModelCount,
-            TotalModelCount = TotalModelCount
-        };
-
-        return maskFields ? dto.WithMaskedKeys() : dto;
-    }
-}
 
 public record ModelKeyDto
 {
     [JsonPropertyName("id")]
     public required short Id { get; init; }
 
-    [JsonPropertyName("type")]
-    public required string Type { get; init; }
+    [JsonPropertyName("modelProviderId")]
+    public required short ModelProviderId { get; init; }
 
     [JsonPropertyName("name")]
     public required string Name { get; init; }
@@ -55,14 +20,17 @@ public record ModelKeyDto
     [JsonPropertyName("totalModelCount")]
     public required int TotalModelCount { get; init; }
 
-    [JsonPropertyName("configs")]
-    public required JsonModelKey Configs { get; init; }
+    [JsonPropertyName("host")]
+    public required string? Host { get; init; }
+
+    [JsonPropertyName("secret")]
+    public required string? Secret { get; init; }
 
     [JsonPropertyName("createdAt")]
     public required DateTime CreatedAt { get; init; }
 
     public ModelKeyDto WithMaskedKeys()
     {
-        return this with { Configs = Configs.WithMaskedKey() };
+        return this with { Secret = Secret.ToMaskedNull() };
     }
 }

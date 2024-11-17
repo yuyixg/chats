@@ -4,11 +4,8 @@ import toast from 'react-hot-toast';
 
 import useTranslation from '@/hooks/useTranslation';
 
-import { mergeConfigs } from '@/utils/model';
-
 import {
   GetModelKeysResult,
-  LegacyModelProvider,
   PostModelKeysParams,
   PutModelKeysParams,
 } from '@/types/adminApis';
@@ -30,11 +27,13 @@ import { FormFieldType, IFormFieldOption } from '@/components/ui/form/type';
 
 import {
   deleteModelKeys,
+  getModelProvider,
   postModelKeys,
   putModelKeys,
 } from '@/apis/adminApis';
 import { zodResolver } from '@hookform/resolvers/zod';
 import { z } from 'zod';
+import { feModelProviders } from '@/types/model';
 
 interface IProps {
   selected: GetModelKeysResult | null;
@@ -42,7 +41,26 @@ interface IProps {
   onClose: () => void;
   onSuccessful: () => void;
   saveLoading?: boolean;
-  modelProviderTemplates: { [name: string]: LegacyModelProvider };
+}
+
+class HostAndSecret {
+  host: string | null;
+  secret: string | null;
+
+  constructor(jsonConfig: string | undefined) {
+    if (!jsonConfig) throw new Error('Invalid JSON config');
+    const config = JSON.parse(jsonConfig);
+    this.host = config.host;
+    this.secret = config.secret;
+
+    // only allows null or string for host and secret
+    if (this.host !== null && typeof this.host !== 'string') {
+      throw new Error('Invalid host');
+    }
+    if (this.secret !== null && typeof this.secret !== 'string') {
+      throw new Error('Invalid secret');
+    }
+  }
 }
 
 export const ModelKeysModal = (props: IProps) => {
@@ -58,7 +76,7 @@ export const ModelKeysModal = (props: IProps) => {
       ),
     },
     {
-      name: 'type',
+      name: 'modelProviderId',
       label: t('Model Provider'),
       defaultValue: '',
       render: (options: IFormFieldOption, field: FormFieldType) => (
@@ -66,11 +84,10 @@ export const ModelKeysModal = (props: IProps) => {
           disabled={!!selected}
           field={field}
           options={options}
-          items={Object.keys(props.modelProviderTemplates).map(providerKey => {
-            const provider = props.modelProviderTemplates[providerKey];
+          items={feModelProviders.map(p => {
             return {
-              name: provider.displayName,
-              value: provider.name,
+              name: t(p.name),
+              value: p.id.toString(),
             }
           })}
         />
@@ -87,10 +104,9 @@ export const ModelKeysModal = (props: IProps) => {
   ];
 
   const formSchema = z.object({
-    type: z
-      .string()
-      .min(1, `${t('This field is require')}`)
-      .optional(),
+    modelProviderId: z
+      .number()
+      .default(0),
     name: z
       .string()
       .min(1, `${t('This field is require')}`)
@@ -111,11 +127,26 @@ export const ModelKeysModal = (props: IProps) => {
 
   function onSubmit(values: z.infer<typeof formSchema>) {
     if (!form.formState.isValid) return;
+    let parsed: HostAndSecret;
+    try {
+      parsed = new HostAndSecret(values.configs);
+    } catch {
+      toast.error(t('Invalid JSON format'));
+      return;
+    }
+
+    const dto = {
+      modelProviderId: values.modelProviderId,
+      name: values.name!,
+      host: parsed.host,
+      secret: parsed.secret,
+    };
+
     let p = null;
     if (selected) {
-      p = putModelKeys(selected.id, values as PutModelKeysParams);
+      p = putModelKeys(selected.id, dto);
     } else {
-      p = postModelKeys(values as PostModelKeysParams);
+      p = postModelKeys(dto);
     }
     p.then(() => {
       onSuccessful();
@@ -147,16 +178,20 @@ export const ModelKeysModal = (props: IProps) => {
 
   useEffect(() => {
     const subscription = form.watch((value, { name, type }) => {
-      if (name === 'type' && type === 'change') {
-        const modelProvider = value.type!;
-        form.setValue(
-          'configs',
-          JSON.stringify(
-            props.modelProviderTemplates[modelProvider].apiConfig,
-            null,
-            2,
-          ),
-        );
+      if (name === 'modelProviderId' && type === 'change') {
+        const modelProviderId = value.modelProviderId!;
+        getModelProvider(modelProviderId).then((modelProvider) => {
+          form.setValue(
+            'configs',
+            JSON.stringify({
+              host: modelProvider.initialHost,
+              secret: modelProvider.initialSecret,
+            },
+              null,
+              2,
+            ),
+          );
+        });
       }
     });
     return () => subscription.unsubscribe();
@@ -167,15 +202,15 @@ export const ModelKeysModal = (props: IProps) => {
       form.reset();
       form.formState.isValid;
       if (selected) {
-        const { name, type, configs } = selected;
+        const { name, modelProviderId, host, secret } = selected;
         form.setValue('name', name);
-        form.setValue('type', type);
+        form.setValue('modelProviderId', modelProviderId);
         form.setValue(
           'configs',
-          mergeConfigs(
-            props.modelProviderTemplates[type].apiConfig,
-            configs,
-          ),
+          JSON.stringify({
+            host,
+            secret,
+          }),
         );
       }
     }
