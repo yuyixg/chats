@@ -21,12 +21,12 @@ export interface Props {
   assistantCurrentSelectIndex: number;
   parentChildrenIds: string[];
   modelName?: string;
-  modelId?: string;
+  modelId?: number;
   lastMessageId: string;
   message: PropsMessage;
   onChangeMessage?: (messageId: string) => void;
   onEdit?: (editedMessage: Message, parentId: string | null) => void;
-  onRegenerate?: (modelId?: string) => void;
+  onRegenerate?: (modelId?: number) => void;
 }
 
 export const ChatMessage: FC<Props> = memo(

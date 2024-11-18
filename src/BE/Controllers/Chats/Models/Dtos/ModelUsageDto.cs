@@ -3,7 +3,7 @@ using System.Text.Json.Serialization;
 
 namespace Chats.BE.Controllers.Chats.Models.Dtos;
 
-public record ModelUsageResponse
+public record ModelUsageDto
 {
     [JsonPropertyName("counts")]
     public required int Counts { get; init; }
@@ -17,21 +17,21 @@ public record ModelUsageResponse
     [JsonPropertyName("isTerm")]
     public required bool IsTerm { get; init; }
 
-    [JsonPropertyName("promptTokenPrice1M")]
-    public required decimal PromptTokenPrice1M { get; init; }
+    [JsonPropertyName("inputTokenPrice1M")]
+    public required decimal InputTokenPrice1M { get; init; }
 
-    [JsonPropertyName("responseTokenPrice1M")]
-    public required decimal ResponseTokenPrice1M { get; init; }
+    [JsonPropertyName("outputTokenPrice1M")]
+    public required decimal OutputTokenPrice1M { get; init; }
 
-    public static ModelUsageResponse FromDB(UserModel userModel)
+    public static ModelUsageDto FromDB(UserModel userModel)
     {
-        return new ModelUsageResponse
+        return new ModelUsageDto
         {
             Counts = userModel.CountBalance,
             Expires = userModel.ExpiresAt,
             IsTerm = userModel.ExpiresAt - DateTime.UtcNow > TimeSpan.FromDays(365 * 2),
-            PromptTokenPrice1M = userModel.Model.PromptTokenPrice1M,
-            ResponseTokenPrice1M = userModel.Model.ResponseTokenPrice1M,
+            InputTokenPrice1M = userModel.Model.PromptTokenPrice1M,
+            OutputTokenPrice1M = userModel.Model.ResponseTokenPrice1M,
             Tokens = userModel.TokenBalance,
         };
     }

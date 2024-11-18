@@ -2,7 +2,7 @@ import { useFetch } from '@/hooks/useFetch';
 
 import { calculateMessages } from '@/utils/message';
 
-import { PostPromptParams, PutPromptParams } from '@/types/adminApis';
+import { AdminModelDto, PostPromptParams, PutPromptParams } from '@/types/adminApis';
 import { ChatMessage } from '@/types/chatMessage';
 import {
   ChatResult,
@@ -13,13 +13,13 @@ import {
   GetUserApiKeyResult,
   GetUserBalanceResult,
   LoginConfigsResult,
+  ModelUsageDto,
   PostChatParams,
   PostUserPassword,
   PutChatParams,
   SingInParams,
   SingInResult,
 } from '@/types/clientApis';
-import { Model } from '@/types/model';
 import { PageResult } from '@/types/page';
 import { IdName, Prompt } from '@/types/prompt';
 import { SmsType } from '@/types/user';
@@ -82,9 +82,7 @@ export const singIn = (params: SingInParams): Promise<SingInResult> => {
 
 export const getUserModels = () => {
   const fetchServer = useFetch();
-  return fetchServer.get<Model[]>(
-    `/api/models?timezoneOffset=${new Date().getTimezoneOffset()}`,
-  );
+  return fetchServer.get<AdminModelDto[]>(`/api/models`);
 };
 
 export const getUserBalance = () => {
@@ -122,6 +120,11 @@ export const getUserPromptBrief = () => {
 export const getUserPromptDetail = (id: string) => {
   const fetchServer = useFetch();
   return fetchServer.get<Prompt>('/api/prompts/' + id);
+};
+
+export const getDefaultPrompt = () => {
+  const fetchServer = useFetch();
+  return fetchServer.get<Prompt>('/api/prompts/default');
 };
 
 export const postUserPrompts = (params: PostPromptParams) => {
@@ -194,7 +197,7 @@ export const getSiteInfo = () => {
   return fetchServer.get<GetSiteInfoResult>('/api/public/siteInfo');
 };
 
-export const putUserChatModel = (chatId: string, modelId: string) => {
+export const putUserChatModel = (chatId: string, modelId: number) => {
   const fetchServer = useFetch();
   return fetchServer.put('/api/user/chats/' + chatId, {
     body: { modelId },
@@ -220,3 +223,8 @@ export const deleteUserApiKey = (id: number) => {
   const fetchServer = useFetch();
   return fetchServer.delete('/api/user/api-key/' + id);
 };
+
+export const getModelUsage = (modelId: number) => {
+  const fetchServer = useFetch();
+  return fetchServer.get<ModelUsageDto>('/api/models/' + modelId + '/usage');
+}

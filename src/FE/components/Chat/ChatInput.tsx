@@ -33,6 +33,7 @@ import { PromptList } from './PromptList';
 import { VariableModal } from './VariableModal';
 
 import { getUserPromptDetail } from '@/apis/clientApis';
+import { defaultFileConfig } from '@/apis/adminApis';
 
 interface Props {
   onSend: (message: Message) => void;
@@ -54,8 +55,6 @@ export const ChatInput = ({
   const {
     state: { selectModel, messageIsStreaming, prompts, selectChat, chatError },
   } = useContext(HomeContext);
-
-  const { fileConfig, fileServerConfig, modelConfig } = selectModel || {};
 
   const [content, setContent] = useState<Content>({
     text: '',
@@ -86,11 +85,11 @@ export const ChatInput = ({
 
   const handleChange = (e: React.ChangeEvent<HTMLTextAreaElement>) => {
     const value = e.target.value;
-    if (modelConfig && value.length > modelConfig.maxLength) {
+    if (selectModel && value.length > selectModel.contextWindow * 2) {
       toast.error(
         t(
           `Message limit is {{maxLength}} characters. You have entered {{valueLength}} characters.`,
-          { maxLength: modelConfig.maxLength, valueLength: value.length },
+          { maxLength: selectModel.contextWindow * 2, valueLength: value.length },
         ),
       );
       return;
@@ -211,9 +210,9 @@ export const ChatInput = ({
 
   const canUploadFile = () => {
     return (
-      fileServerConfig &&
+      selectModel && selectModel.allowVision && selectModel.fileServiceId && 
       !uploading &&
-      content?.image?.length !== fileConfig?.count
+      (content?.image?.length ?? 0) <= defaultFileConfig.count
     );
   };
 
@@ -222,7 +221,7 @@ export const ChatInput = ({
     if (type === UploadFailType.size) {
       toast.error(
         t(`The file size limit is {{fileSize}}`, {
-          fileSize: fileConfig!.maxSize / 1024 + 'MB',
+          fileSize: defaultFileConfig!.maxSize / 1024 + 'MB',
         }),
       );
     } else {
@@ -336,8 +335,8 @@ export const ChatInput = ({
               </button>
               {canUploadFile() && (
                 <UploadButton
-                  fileServerConfig={fileServerConfig}
-                  fileConfig={fileConfig!}
+                  fileServerId={selectModel?.fileServiceId!}
+                  fileConfig={defaultFileConfig}
                   onUploading={handleUploading}
                   onFailed={handleUploadFailed}
                   onSuccessful={handleUploadSuccessful}
@@ -347,8 +346,8 @@ export const ChatInput = ({
               )}
               {canUploadFile() && (
                 <PasteUpload
-                  fileServerConfig={fileServerConfig!}
-                  fileConfig={fileConfig!}
+                  fileServiceId={selectModel?.fileServiceId!}
+                  fileConfig={defaultFileConfig}
                   onUploading={handleUploading}
                   onFailed={handleUploadFailed}
                   onSuccessful={handleUploadSuccessful}

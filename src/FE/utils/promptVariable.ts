@@ -1,13 +1,13 @@
-import { Model } from '@/types/model';
+import { AdminModelDto } from "@/types/adminApis";
 
 interface PromptParams {
-  model: Model;
+  model: AdminModelDto;
 }
 
 export const PromptVariables = {
   '{{CURRENT_DATE}}': () => new Date().toLocaleDateString(),
   '{{CURRENT_TIME}}': () => new Date().toLocaleString(),
-  '{{MODEL_NAME}}': (params?: PromptParams) => params?.model?.name || '',
+  '{{MODEL_NAME}}': (params?: PromptParams) => params?.model?.modelReferenceName || '',
 };
 
 export function formatPrompt(prompt: string, params?: PromptParams) {

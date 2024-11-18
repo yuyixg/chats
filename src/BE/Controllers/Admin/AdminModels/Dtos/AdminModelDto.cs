@@ -13,6 +13,9 @@ public record AdminModelDto
     [JsonPropertyName("modelReferenceId")]
     public required short ModelReferenceId { get; init; }
 
+    [JsonPropertyName("modelReferenceName")]
+    public required string ModelReferenceName { get; init; }
+
     [JsonPropertyName("name")]
     public required string Name { get; init; }
 
@@ -31,9 +34,24 @@ public record AdminModelDto
     [JsonPropertyName("deploymentName")]
     public required string? DeploymentName { get; init; }
 
+    [JsonPropertyName("allowSearch")]
+    public required bool AllowSearch { get; init; }
+
+    [JsonPropertyName("allowVision")]
+    public required bool AllowVision { get; init; }
+
+    [JsonPropertyName("minTemperature")]
+    public required decimal MinTemperature { get; init; }
+
+    [JsonPropertyName("maxTemperature")]
+    public required decimal MaxTemperature { get; init; }
+
     [JsonPropertyName("inputTokenPrice1M")]
     public required decimal InputTokenPrice1M { get; init; }
 
     [JsonPropertyName("outputTokenPrice1M")]
     public required decimal OutputTokenPrice1M { get; init; }
+
+    [JsonPropertyName("contextWindow")]
+    public required int ContextWindow { get; init; }
 }

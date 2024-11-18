@@ -1,33 +1,26 @@
 
 import { IconShare } from '@/components/Icons';
+import useTranslation from '@/hooks/useTranslation';
 
 import { cn } from '@/lib/utils';
-import { LegacyModelProvider } from '@/types/adminApis';
-import { useEffect, useState } from 'react';
-import { getLegacyModelProviderByName } from '@/apis/adminApis';
+import { feModelProviders } from '@/types/model';
 
 interface Props {
-  provider: string;
+  providerId: number;
   className?: string;
   isShard?: boolean;
 }
 
 const ChatIcon = (props: Props) => {
-  const { provider, isShard, className } = props;
-  const [modelProviderTemplate, setModelProviderTemplates] = useState<LegacyModelProvider>();
+  const { providerId, isShard, className } = props;
+  const { t } = useTranslation();
 
-  useEffect(() => {
-    getLegacyModelProviderByName(props.provider).then((data) => {
-      setModelProviderTemplates(data);
-    });
-  }, [props.provider]);
-
-  return modelProviderTemplate && (
+  return (
     <div className="flex">
       <img
-        key={`img-${provider}`}
-        src={`/logos/${modelProviderTemplate.icon}`}
-        alt={provider}
+        key={`img-${providerId}`}
+        src={feModelProviders[providerId].icon}
+        alt={t(feModelProviders[providerId].name)}
         width={18}
         height={18}
         style={{ background: 'transparent' }}

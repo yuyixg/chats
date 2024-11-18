@@ -1,32 +1,35 @@
 ﻿using Amazon.S3;
 using Amazon.S3.Model;
 using Chats.BE.Controllers.Chats.Files.Dtos;
+using Chats.BE.Controllers.Common;
 using Chats.BE.DB;
 using Chats.BE.DB.Jsons;
 using Microsoft.AspNetCore.Mvc;
-using Microsoft.EntityFrameworkCore;
 
 namespace Chats.BE.Controllers.Chats.Files;
 
 [Route("api/files")]
 public class FileController(ChatsDB db) : ControllerBase
 {
-    [Route("minio"), HttpPost]
-    public async Task<ActionResult<MinioAddressResponse>> GetMinioAddress(
-        [FromQuery] Guid id, 
-        [FromBody] GetMinioAddressRequest fileInfo, 
+    [Route("{fileServiceId:int}"), HttpPost]
+    public async Task<ActionResult<FileUrlsDto>> GetFileUrls(
+        Guid fileServiceId, 
+        [FromBody] GetFileUrlsRequest fileInfo, 
         CancellationToken cancellationToken)
     {
-        string? minioConfigText = await db.FileServices
-            .Where(x => x.Id == id && x.Type == FileServiceTypes.Minio.ToString())
-            .Select(x => x.Configs)
-            .SingleOrDefaultAsync(cancellationToken);
-        if (minioConfigText == null)
+        FileService? fileService = await db.FileServices
+            .FindAsync([fileServiceId], cancellationToken);
+        if (fileService == null)
         {
             return NotFound("File server config not found.");
         }
 
-        JsonMinioConfig config = JsonMinioConfig.Parse(minioConfigText);
+        if (fileService.Type != FileServiceTypes.Minio.ToString())
+        {
+            return this.BadRequestMessage("Unsupported file service type: " + fileService.Type);
+        }
+
+        JsonMinioConfig config = JsonMinioConfig.Parse(fileService.Configs);
         using AmazonS3Client s3 = new(config.AccessKey, config.AccessSecret, new AmazonS3Config
         {
             ForcePathStyle = true, 
@@ -49,7 +52,7 @@ public class FileController(ChatsDB db) : ControllerBase
             Verb = HttpVerb.GET
         });
 
-        return Ok(new MinioAddressResponse
+        return Ok(new FileUrlsDto
         { 
             GetUrl = getUrl,
             PutUrl = putUrl,

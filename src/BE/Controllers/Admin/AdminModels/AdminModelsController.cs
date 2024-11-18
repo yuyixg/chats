@@ -32,10 +32,16 @@ public class AdminModelsController(ChatsDB db) : ControllerBase
                 ModelKeyId = x.ModelKeyId,
                 ModelProviderId = x.ModelKey.ModelProviderId,
                 ModelReferenceId = x.ModelReferenceId,
+                ModelReferenceName = x.ModelReference.Name,
                 InputTokenPrice1M = x.PromptTokenPrice1M,
                 OutputTokenPrice1M = x.ResponseTokenPrice1M,
                 Rank = x.Order,
                 DeploymentName = x.DeploymentName,
+                AllowSearch = x.ModelReference.AllowSearch,
+                AllowVision = x.ModelReference.AllowVision,
+                MinTemperature = x.ModelReference.MinTemperature,
+                MaxTemperature = x.ModelReference.MaxTemperature,
+                ContextWindow = x.ModelReference.ContextWindow,
             })
             .ToArrayAsync(cancellationToken);
         return data;

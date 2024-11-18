@@ -29,6 +29,7 @@ export interface AdminModelDto {
   modelId: number;
   modelProviderId: number;
   modelReferenceId: number;
+  modelReferenceName: string;
   name: string;
   rank: number | null;
   enabled: boolean;
@@ -37,6 +38,11 @@ export interface AdminModelDto {
   deploymentName: string | null;
   inputTokenPrice1M: number;
   outputTokenPrice1M: number;
+  allowSearch: boolean;
+  allowVision: boolean;
+  minTemperature: number;
+  maxTemperature: number;
+  contextWindow: number;
 }
 
 export interface UpdateModelDto {

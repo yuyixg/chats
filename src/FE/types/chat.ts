@@ -12,7 +12,7 @@ export interface Content {
 }
 
 export interface ChatBody {
-  modelId: string;
+  modelId: number;
   userMessage: Content;
   messageId: string | null;
   chatId: string;

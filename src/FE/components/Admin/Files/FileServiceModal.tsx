@@ -3,8 +3,6 @@ import { useForm } from 'react-hook-form';
 import toast from 'react-hot-toast';
 
 import useTranslation from '@/hooks/useTranslation';
-
-import { getFileConfigs } from '@/utils/file';
 import { mergeConfigs } from '@/utils/model';
 
 import { GetFileServicesResult, PostFileServicesParams, PutFileServicesParams } from '@/types/adminApis';
@@ -25,7 +23,7 @@ import FormSwitch from '@/components/ui/form/switch';
 import FormTextarea from '@/components/ui/form/textarea';
 import { FormFieldType, IFormFieldOption } from '@/components/ui/form/type';
 
-import { postFileService, putFileService } from '@/apis/adminApis';
+import { defaultFileConfig, postFileService, putFileService } from '@/apis/adminApis';
 import { zodResolver } from '@hookform/resolvers/zod';
 import { z } from 'zod';
 
@@ -136,7 +134,7 @@ export const FileServiceModal = (props: IProps) => {
         form.setValue('enabled', selected.enabled);
         form.setValue(
           'configs',
-          mergeConfigs(getFileConfigs(selected.type), selected.configs),
+          mergeConfigs(defaultFileConfig, selected.configs),
         );
       }
     }
@@ -148,7 +146,7 @@ export const FileServiceModal = (props: IProps) => {
         const type = value.type as FileServicesType;
         form.setValue(
           'configs',
-          JSON.stringify(getFileConfigs(type) || {}, null, 2),
+          JSON.stringify(defaultFileConfig, null, 2),
         );
       }
     });

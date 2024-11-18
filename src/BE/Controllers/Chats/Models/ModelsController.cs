@@ -1,4 +1,5 @@
-﻿using Chats.BE.Controllers.Chats.Models.Dtos;
+﻿using Chats.BE.Controllers.Admin.AdminModels.Dtos;
+using Chats.BE.Controllers.Chats.Models.Dtos;
 using Chats.BE.DB;
 using Chats.BE.DB.Jsons;
 using Chats.BE.Infrastructure;
@@ -14,51 +15,43 @@ namespace Chats.BE.Controllers.Chats.Models;
 public class ModelsController : ControllerBase
 {
     [HttpGet]
-    public async Task<ActionResult<ModelResponse[]>> Get(int timezoneOffset, [FromServices] ChatsDB db, [FromServices] CurrentUser user, [FromServices] UserModelManager userModelManager, CancellationToken cancellationToken)
+    public async Task<ActionResult<AdminModelDto[]>> Get([FromServices] ChatsDB db, [FromServices] CurrentUser currentUser, CancellationToken cancellationToken)
     {
-        string? defaultPrompt = await db.Prompts
-            .Where(x => x.IsDefault && x.IsSystem)
-            .OrderByDescending(x => x.Id)
-            .Select(x => x.Content)
-            .FirstOrDefaultAsync(cancellationToken);
-        defaultPrompt ??= ConversationService.DefaultPrompt;
-
-        UserModel[] models = await userModelManager.GetValidModelsByUserId(user.Id, cancellationToken);
-        ModelResponse[] responses = models
-            .Select(x => new ModelResponse()
+        AdminModelDto[] data = await db.UserModels
+            .Where(x => x.UserId == currentUser.Id && !x.IsDeleted && !x.Model.IsDeleted)
+            .OrderBy(x => x.Model.Order)
+            .Select(x => x.Model)
+            .Select(x => new AdminModelDto
             {
-                FileConfig = x.Model.ModelReference.AllowVision ? JsonFileConfig.Default : null,
-                FileServerConfigs = FileServerConfig.FromFileService(x.Model.FileService),
-                Id = x.ModelId,
-                ModelConfigOptions = new ModelConfigOption()
-                { 
-                    Temperature = new TemperatureOptions(x.Model.ModelReference.MinTemperature, x.Model.ModelReference.MaxTemperature),
-                },
-                ModelConfigs = JsonUserModelConfig.FromJson(new JsonModelConfig()
-                {
-                    DeploymentName = x.Model.DeploymentName,
-                    Prompt = defaultPrompt
-                        .Replace("{{MODEL_NAME}}", x.Model.ModelReference.Name)
-                        .Replace("{{CURRENT_DATE}}", DateTime.UtcNow.AddMinutes(-timezoneOffset).ToString("yyyy-MM-dd")),
-                    Temperature = new TemperatureOptions(x.Model.ModelReference.MinTemperature, x.Model.ModelReference.MaxTemperature).Clamp(ConversationService.DefaultTemperature),
-                    EnableSearch = x.Model.ModelReference.AllowSearch ? false : null,
-                }),
-                ModelProvider = x.Model.ModelKey.ModelProvider.Name,
-                ModelUsage = ModelUsageResponse.FromDB(x),
-                ModelVersion = x.Model.ModelReference.Name,
-                Name = x.Model.Name,
+                ModelId = x.Id,
+                Name = x.Name,
+                Enabled = !x.IsDeleted,
+                FileServiceId = x.FileServiceId,
+                ModelKeyId = x.ModelKeyId,
+                ModelProviderId = x.ModelKey.ModelProviderId,
+                ModelReferenceId = x.ModelReferenceId,
+                ModelReferenceName = x.ModelReference.Name,
+                InputTokenPrice1M = x.PromptTokenPrice1M,
+                OutputTokenPrice1M = x.ResponseTokenPrice1M,
+                Rank = x.Order,
+                DeploymentName = x.DeploymentName,
+                AllowSearch = x.ModelReference.AllowSearch,
+                AllowVision = x.ModelReference.AllowVision,
+                MinTemperature = x.ModelReference.MinTemperature,
+                MaxTemperature = x.ModelReference.MaxTemperature,
+                ContextWindow = x.ModelReference.ContextWindow,
             })
-            .ToArray();
-        return Ok(responses);
+            .ToArrayAsync(cancellationToken);
+        return data;
     }
 
     [HttpGet("{modelId}/usage")]
-    public async Task<ActionResult<ModelUsageResponse>> GetUsage(short modelId, [FromServices] CurrentUser currentUser, [FromServices] UserModelManager userModelManager, CancellationToken cancellationToken)
+    public async Task<ActionResult<ModelUsageDto>> GetUsage(short modelId, [FromServices] CurrentUser currentUser, [FromServices] UserModelManager userModelManager, CancellationToken cancellationToken)
     {
         UserModel? model = await userModelManager.GetUserModel(currentUser.Id, modelId, cancellationToken);
         if (model == null) return NotFound();
 
-        ModelUsageResponse response = ModelUsageResponse.FromDB(model);
+        ModelUsageDto response = ModelUsageDto.FromDB(model);
         return Ok(response);
     }
 }

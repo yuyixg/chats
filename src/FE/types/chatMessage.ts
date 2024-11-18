@@ -10,7 +10,7 @@ export interface ChatMessage {
   role: Role;
   content: Content;
   modelName?: string;
-  modelId?: string;
+  modelId?: number;
   inputPrice?: Decimal;
   outputPrice?: Decimal;
   inputTokens?: number;

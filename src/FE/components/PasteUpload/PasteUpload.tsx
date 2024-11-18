@@ -3,13 +3,12 @@ import React, { useEffect, useRef } from 'react';
 import { checkFileSizeCanUpload, uploadFile } from '@/utils/uploadFile';
 
 import {
-  FileUploadServerConfig,
   UploadFailType,
 } from '@/types/components/upload';
 import { ChatModelFileConfig } from '@/types/model';
 
 interface IPasteUploadProps {
-  fileServerConfig: FileUploadServerConfig;
+  fileServiceId: string;
   fileConfig: ChatModelFileConfig;
   onUploading?: () => void;
   onSuccessful?: (url: string) => void;
@@ -17,7 +16,7 @@ interface IPasteUploadProps {
 }
 
 const PasteUpload = (props: IPasteUploadProps) => {
-  const { fileServerConfig, fileConfig, onUploading, onSuccessful, onFailed } =
+  const { fileServiceId, fileConfig, onUploading, onSuccessful, onFailed } =
     props;
   const uploadRef = useRef<HTMLDivElement>(null);
 
@@ -50,7 +49,7 @@ const PasteUpload = (props: IPasteUploadProps) => {
       onFailed && onFailed(UploadFailType.size);
       return;
     }
-    uploadFile(file, fileServerConfig, onUploading, onSuccessful, onFailed);
+    uploadFile(file, fileServiceId, onUploading, onSuccessful, onFailed);
   };
 
   return <div ref={uploadRef} hidden></div>;

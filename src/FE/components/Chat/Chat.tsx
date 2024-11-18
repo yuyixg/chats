@@ -21,8 +21,6 @@ import { HomeContext } from '@/pages/home/home';
 
 import { ModeToggle } from '@/components/ModeToggle/ModeTooggle';
 
-import ChatSettingsBar from '../ChatSettings/ChatSettingsBar';
-import { Button } from '../ui/button';
 import ChangeModel from './ChangeModel';
 import { ChatInput } from './ChatInput';
 import EnableNetworkSearch from './EnableNetworkSearch';
@@ -59,7 +57,6 @@ export const Chat = memo(({ stopConversationRef }: Props) => {
     handleUpdateSelectMessage,
     handleUpdateCurrentMessage,
     handleUpdateUserModelConfig,
-    handleUpdateSettings,
     hasModel,
     dispatch: homeDispatch,
   } = useContext(HomeContext);
@@ -82,7 +79,7 @@ export const Chat = memo(({ stopConversationRef }: Props) => {
       message: Message,
       messageId: string,
       isRegenerate: boolean,
-      modelId: string = '',
+      modelId?: number,
     ) => {
       const isChatEmpty = selectMessages.length === 0;
       homeDispatch({ field: 'chatError', value: false });
@@ -175,7 +172,7 @@ export const Chat = memo(({ stopConversationRef }: Props) => {
       homeDispatch({ field: 'messageIsStreaming', value: true });
       const messageContent = message.content;
       const chatBody: ChatBody = {
-        modelId: modelId || selectModel?.id!,
+        modelId: modelId || selectModel?.modelId!,
         chatId: selectChatId,
         messageId: messageId || null,
         userMessage: messageContent,
@@ -381,8 +378,8 @@ export const Chat = memo(({ stopConversationRef }: Props) => {
                     {userModelConfig?.temperature !== undefined && (
                       <TemperatureSlider
                         label={t('Temperature')}
-                        min={selectModel?.modelConfigOptions.temperature.min!}
-                        max={selectModel?.modelConfigOptions.temperature.max!}
+                        min={selectModel?.minTemperature!}
+                        max={selectModel?.maxTemperature!}
                         defaultTemperature={userModelConfig.temperature}
                         onChangeTemperature={(temperature) =>
                           handleUpdateUserModelConfig({
@@ -432,7 +429,7 @@ export const Chat = memo(({ stopConversationRef }: Props) => {
                             field: 'selectModel',
                             value: model,
                           });
-                          putUserChatModel(selectChat.id, model.id);
+                          putUserChatModel(selectChat.id, model.modelId);
                         }}
                       />
                     )}
@@ -485,7 +482,7 @@ export const Chat = memo(({ stopConversationRef }: Props) => {
                     onChangeMessage={(messageId) => {
                       handleUpdateSelectMessage(messageId);
                     }}
-                    onRegenerate={(modelId?: string) => {
+                    onRegenerate={(modelId?: number) => {
                       const message = currentMessages.find(
                         (x) => x.id === current.parentId,
                       );

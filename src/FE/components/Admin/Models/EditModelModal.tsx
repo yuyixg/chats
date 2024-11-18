@@ -40,7 +40,7 @@ import FormInput from '@/components/ui/form/input';
 import FormSwitch from '@/components/ui/form/switch';
 import FormTextarea from '@/components/ui/form/textarea';
 
-import { getFileConfig, getFileServices, getModelKeys, getModelReference, putModels } from '@/apis/adminApis';
+import { getFileServices, getModelKeys, getModelReference, putModels } from '@/apis/adminApis';
 import { zodResolver } from '@hookform/resolvers/zod';
 import { z } from 'zod';
 

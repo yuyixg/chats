@@ -3,7 +3,6 @@ import React, { useEffect, useState } from 'react';
 import useTranslation from '@/hooks/useTranslation';
 
 import { formatNumberAsMoney } from '@/utils/common';
-import { ModelPriceUnit } from '@/utils/model';
 
 import { AdminModelDto } from '@/types/adminApis';
 
@@ -26,9 +25,7 @@ import { feModelProviders } from '@/types/model';
 export default function Models() {
   const { t } = useTranslation();
   const [isOpen, setIsOpen] = useState({ add: false, edit: false });
-  const [selectedModel, setSelectedModel] = useState<AdminModelDto | null>(
-    null,
-  );
+  const [selectedModel, setSelectedModel] = useState<AdminModelDto>();
   const [models, setModels] = useState<AdminModelDto[]>([]);
   const [loading, setLoading] = useState(true);
   
@@ -40,7 +37,7 @@ export default function Models() {
     getModels().then((data) => {
       setModels(data);
       setIsOpen({ add: false, edit: false });
-      setSelectedModel(null);
+      setSelectedModel(undefined);
       setLoading(false);
     });
   };
@@ -52,7 +49,7 @@ export default function Models() {
 
   const handleClose = () => {
     setIsOpen({ add: false, edit: false });
-    setSelectedModel(null);
+    setSelectedModel(undefined);
   };
 
   return (
@@ -103,16 +100,13 @@ export default function Models() {
                 <TableCell>
                   {t(feModelProviders[item.modelProviderId].name)}
                 </TableCell>
-                <TableCell>{item.modelVersion}</TableCell>
+                <TableCell>{item.modelReferenceName}</TableCell>
                 <TableCell>
                   {'￥' +
-                    formatNumberAsMoney(
-                      item.priceConfig.input * ModelPriceUnit,
-                    ) +
+                    formatNumberAsMoney(item.inputTokenPrice1M) +
                     '/' +
-                    formatNumberAsMoney(item.priceConfig.out * ModelPriceUnit)}
+                    formatNumberAsMoney(item.outputTokenPrice1M)}
                 </TableCell>
-                <TableCell>{item.remarks}</TableCell>
               </TableRow>
             ))}
           </TableBody>

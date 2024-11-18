@@ -6,7 +6,7 @@ import Tips from '@/components/Tips/Tips';
 interface Props {
   hidden?: boolean;
   readonly?: boolean;
-  onChangeModel: (modelId: string) => void;
+  onChangeModel: (modelId: number) => void;
   modelName: string;
 }
 
@@ -21,7 +21,7 @@ export const ChangeModelAction = (props: Props) => {
           <ChangeModel
             readonly={readonly}
             onChangeModel={(model) => {
-              onChangeModel && onChangeModel(model.id);
+              onChangeModel && onChangeModel(model.modelId);
             }}
             content={modelName}
           />

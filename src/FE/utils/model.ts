@@ -31,6 +31,6 @@ export function getStorageModelId() {
   return localStorage.getItem('selectModelId');
 }
 
-export function setStorageModelId(modelId: string) {
-  return localStorage.setItem('selectModelId', modelId);
+export function setStorageModelId(modelId: number) {
+  return localStorage.setItem('selectModelId', modelId.toString());
 }

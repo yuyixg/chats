@@ -29,7 +29,7 @@ import { UserSession } from '@/utils/user';
 import { IChat, Role } from '@/types/chat';
 import { ChatMessage } from '@/types/chatMessage';
 import { ChatResult, GetChatsParams } from '@/types/clientApis';
-import { Model, UserModelConfig } from '@/types/model';
+import { UserModelConfig } from '@/types/model';
 import { Prompt } from '@/types/prompt';
 
 import { Chat } from '@/components/Chat/Chat';
@@ -40,6 +40,7 @@ import Spinner from '@/components/Spinner';
 
 import {
   getChatsByPaging,
+  getDefaultPrompt,
   getUserMessages,
   getUserModels,
   getUserPromptBrief,
@@ -47,6 +48,7 @@ import {
 } from '@/apis/clientApis';
 import Decimal from 'decimal.js';
 import { v4 as uuidv4 } from 'uuid';
+import { AdminModelDto } from '@/types/adminApis';
 
 interface HandleUpdateChatParams {
   isShared?: boolean;
@@ -58,12 +60,12 @@ interface HomeInitialState {
   user: UserSession | null;
   loading: boolean;
   messageIsStreaming: boolean;
-  models: Model[];
+  models: AdminModelDto[];
   chats: ChatResult[];
   chatsPaging: { count: number; page: number; pageSize: number };
   selectChat: IChat;
-  selectModel: Model | undefined;
-  selectModels: Model[];
+  selectModel: AdminModelDto | undefined;
+  selectModels: AdminModelDto[];
   currentMessages: ChatMessage[];
   selectMessages: ChatMessage[];
   selectMessageLastId: string;
@@ -109,14 +111,14 @@ interface HomeContextProps {
   handleUpdateSelectMessage: (lastLeafId: string) => void;
   handleUpdateCurrentMessage: (chatId: string) => void;
   handleDeleteChat: (id: string) => void;
-  handleSelectModel: (model: Model) => void;
+  handleSelectModel: (model: AdminModelDto) => void;
   handleUpdateUserModelConfig: (value: any) => void;
   handleUpdateSettings: <K extends keyof Settings>(
     key: K,
     value: Settings[K],
   ) => void;
   hasModel: () => boolean;
-  getChats: (params: GetChatsParams, models?: Model[]) => void;
+  getChats: (params: GetChatsParams, models?: AdminModelDto[]) => void;
 }
 
 const HomeContext = createContext<HomeContextProps>(undefined!);
@@ -136,8 +138,8 @@ const Home = () => {
   } = contextValue;
   const stopConversationRef = useRef<boolean>(false);
 
-  const calcSelectModel = (chats: ChatResult[], models: Model[]) => {
-    const model = models.find((x) => x.id === chats[0]?.chatModelId);
+  const calcSelectModel = (chats: ChatResult[], models: AdminModelDto[]) => {
+    const model = models.find((x) => x.modelId === chats[0]?.modelId);
     if (model) return model;
     else return models.length > 0 ? models[0] : undefined;
   };
@@ -145,14 +147,14 @@ const Home = () => {
   const getChatModel = (
     chats: ChatResult[],
     chatId: string,
-    models: Model[],
+    models: AdminModelDto[],
   ) => {
-    const chatModelId = chats.find((x) => x.id === chatId)?.chatModelId;
-    const model = models.find((x) => x.id === chatModelId);
+    const chatModelId = chats.find((x) => x.id === chatId)?.modelId;
+    const model = models.find((x) => x.modelId === chatModelId);
     return model;
   };
 
-  const chatErrorMessage = (messageId: string) => {
+  const chatErrorMessage = (messageId: string) : ChatMessage => {
     return {
       id: uuidv4(),
       parentId: messageId,
@@ -167,15 +169,24 @@ const Home = () => {
     };
   };
 
-  const handleSelectModel = (model: Model) => {
+  const clamp = (value: number, min: number, max: number) => {
+    return Math.min(Math.max(value, min), max);
+  }
+
+  const handleSelectModel = (model: AdminModelDto) => {
     if (!model) return;
-    const { modelConfig } = model;
     dispatch({ field: 'selectModel', value: model });
-    handleUpdateUserModelConfig({
-      ...modelConfig,
-      temperature: modelConfig?.temperature,
-      prompt: formatPrompt(modelConfig?.prompt, { model }),
-      enableSearch: modelConfig?.enableSearch,
+    const initialConfig = {
+      temperature: clamp(0.85, model.minTemperature, model.maxTemperature),
+      enableSearch: model.allowSearch ? false : null,
+    };
+    handleUpdateUserModelConfig(initialConfig);
+
+    getDefaultPrompt().then((data) => {
+      handleUpdateUserModelConfig({
+        ...initialConfig,
+        prompt: formatPrompt(data.content, { model }),
+      });
     });
   };
 
@@ -222,7 +233,7 @@ const Home = () => {
     dispatch({ field: 'selectChat', value: chat });
     const selectModel =
       getChatModel(chats, chat.id, models) || calcSelectModel(chats, models);
-    selectModel && setStorageModelId(selectModel.id);
+    selectModel && setStorageModelId(selectModel.modelId);
     getUserMessages(chat.id).then((data) => {
       if (data.length > 0) {
         dispatch({ field: 'currentMessages', value: data });
@@ -320,7 +331,7 @@ const Home = () => {
   const selectChat = (
     chatList: ChatResult[],
     chatId: string | null,
-    models: Model[],
+    models: AdminModelDto[],
   ) => {
     const chat = chatList.find((x) => x.id === chatId);
     if (chat) {
@@ -358,7 +369,7 @@ const Home = () => {
     }
   };
 
-  const getChats = (params: GetChatsParams, modelList?: Model[]) => {
+  const getChats = (params: GetChatsParams, modelList?: AdminModelDto[]) => {
     const { page, pageSize } = params;
     getChatsByPaging(params).then((data) => {
       const { rows, count } = data;
@@ -402,10 +413,9 @@ const Home = () => {
         dispatch({ field: 'models', value: modelData });
         if (modelData && modelData.length > 0) {
           const selectModelId = getStorageModelId();
-          const model =
-            modelData.find((x) => x.id === selectModelId) ?? modelData[0];
+          const model = modelData.find((x) => x.modelId.toString() === selectModelId) ?? modelData[0];
           if (model) {
-            setStorageModelId(model.id);
+            setStorageModelId(model.modelId);
             handleSelectModel(model);
           }
         }

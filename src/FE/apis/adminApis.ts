@@ -41,7 +41,7 @@ import {
   SimpleModelReferenceDto,
   ModelProviderInitialConfig,
 } from '@/types/adminApis';
-import { DBModelProvider } from '@/types/model';
+import { ChatModelFileConfig, DBModelProvider } from '@/types/model';
 import { PageResult } from '@/types/page';
 
 export const getModelsByUserId = async (userId: string): Promise<UserModelDisplay[]> => {
@@ -329,10 +329,7 @@ export const getModelReference = (modelReferenceId: number) => {
   );
 }
 
-export const getFileConfig = (fileServiceId?: string) => {
-  if (!fileServiceId) return null;
-  return {
-    count: 5,
-    maxSize: 10240
-  };
+export const defaultFileConfig : ChatModelFileConfig = {
+  count: 5,
+  maxSize: 10240
 }

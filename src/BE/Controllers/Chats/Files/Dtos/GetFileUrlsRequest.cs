@@ -2,7 +2,7 @@
 
 namespace Chats.BE.Controllers.Chats.Files.Dtos;
 
-public record GetMinioAddressRequest
+public record GetFileUrlsRequest
 {
     [JsonPropertyName("fileName")]
     public required string FileName { get; init; }

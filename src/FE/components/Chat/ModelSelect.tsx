@@ -5,6 +5,8 @@ import useTranslation from '@/hooks/useTranslation';
 import { formatNumberAsMoney } from '@/utils/common';
 
 import { HomeContext } from '@/pages/home/home';
+import { ModelUsageDto } from '@/types/clientApis';
+import { getModelUsage } from '@/apis/clientApis';
 
 export const ModelSelect = () => {
   const { t } = useTranslation();
@@ -13,13 +15,18 @@ export const ModelSelect = () => {
     state: { selectModel, models },
     handleSelectModel,
   } = useContext(HomeContext);
+  const [modelUsage, setModelUsage] = useState<ModelUsageDto>();
 
   const handleChange = (e: React.ChangeEvent<HTMLSelectElement>) => {
-    const model = models.find((m) => m.id == e.target.value)!;
+    const model = models.find((m) => m.modelId.toString() == e.target.value);
+    if (!model) return;
+
     handleSelectModel(model);
+    getModelUsage(model.modelId).then((res) => {
+      setModelUsage(res);
+    });
   };
 
-  const modelUsage = selectModel?.modelUsage;
   return (
     <div className="flex flex-col">
       <label className="mb-2 text-left text-neutral-700 dark:text-neutral-400">
@@ -29,13 +36,13 @@ export const ModelSelect = () => {
         <select
           className="w-full bg-transparent p-2"
           placeholder={t('Select a model') || ''}
-          value={selectModel?.id}
+          value={selectModel?.modelId}
           onChange={handleChange}
         >
           {models.map((model) => (
             <option
-              key={model.id}
-              value={model.id}
+              key={model.modelId}
+              value={model.modelId}
               className="dark:bg-[#262630] dark:text-white"
             >
               {model.name}
@@ -44,9 +51,9 @@ export const ModelSelect = () => {
         </select>
       </div>
       {modelUsage &&
-      (modelUsage.tokens === 0 && modelUsage.counts === 0) ? (
+        (modelUsage.tokens === 0 && modelUsage.counts === 0) ? (
         <span className="text-xs pt-1">
-          {t('unit-price')}: ￥{modelUsage.promptTokenPrice1M.toFixed(4)}/{modelUsage.responseTokenPrice1M.toFixed(4)} (1M tokens)
+          {t('unit-price')}: ￥{modelUsage.inputTokenPrice1M.toFixed(4)}/{modelUsage.outputTokenPrice1M.toFixed(4)} (1M tokens)
         </span>
       ) : (
         <>
@@ -64,7 +71,7 @@ export const ModelSelect = () => {
                   </span>
                 ) : (
                   <span>
-                    {t('unit-price')}: ￥{modelUsage.promptTokenPrice1M.toFixed(4)}/{modelUsage.responseTokenPrice1M.toFixed(4)} (1M tokens)
+                    {t('unit-price')}: ￥{modelUsage.inputTokenPrice1M.toFixed(4)}/{modelUsage.outputTokenPrice1M.toFixed(4)} (1M tokens)
                   </span>
                 )}
               </div>

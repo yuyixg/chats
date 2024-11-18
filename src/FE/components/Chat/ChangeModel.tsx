@@ -1,6 +1,4 @@
-import { useContext, useEffect, useState } from 'react';
-
-import { Model } from '@/types/model';
+import { useContext, useState } from 'react';
 
 import { HomeContext } from '@/pages/home/home';
 
@@ -21,6 +19,9 @@ import {
 } from '@/components/ui/dropdown-menu';
 
 import { cn } from '@/lib/utils';
+import { AdminModelDto } from '@/types/adminApis';
+import { feModelProviders } from '@/types/model';
+import useTranslation from '@/hooks/useTranslation';
 
 const ChangeModel = ({
   readonly,
@@ -31,25 +32,26 @@ const ChangeModel = ({
   readonly?: boolean;
   content?: string | React.JSX.Element;
   className?: string;
-  onChangeModel: (model: Model) => void;
+  onChangeModel: (model: AdminModelDto) => void;
 }) => {
+  const { t } = useTranslation();
   const {
     state: { models },
   } = useContext(HomeContext);
   const [searchTerm, setSearchTerm] = useState('');
 
-  let modelGroup = [] as { provider: string; child: Model[] }[];
+  let modelGroup = [] as { providerId: number; child: AdminModelDto[] }[];
   const groupModel = () => {
     const modelList = searchTerm
       ? models.filter((model) => model.name.toLowerCase().includes(searchTerm))
       : models;
     modelList.forEach((m) => {
-      const model = modelGroup.find((x) => x.provider === m.modelProvider);
+      const model = modelGroup.find((x) => x.providerId === m.modelProviderId);
       if (model) {
         model.child.push(m);
       } else {
         modelGroup.push({
-          provider: m.modelProvider,
+          providerId: m.modelProviderId,
           child: [m],
         });
       }
@@ -89,19 +91,19 @@ const ChangeModel = ({
         <DropdownMenuGroup>
           {modelGroup.map((m) => {
             return (
-              <DropdownMenuSub key={m.provider}>
+              <DropdownMenuSub key={m.providerId}>
                 <DropdownMenuSubTrigger
-                  key={`trigger-${m.provider}`}
+                  key={`trigger-${m.providerId}`}
                   className="p-2 flex gap-2"
                 >
-                  <ChatIcon provider={m.provider} />
-                  {modelProviderTemplates[m.provider]?.displayName}
+                  <ChatIcon providerId={m.providerId} />
+                  {t(feModelProviders[m.providerId].name)}
                 </DropdownMenuSubTrigger>
                 <DropdownMenuPortal>
                   <DropdownMenuSubContent className="max-w-[64px] md:max-w-[200px]">
                     {m.child.map((x) => (
                       <DropdownMenuItem
-                        key={x.id}
+                        key={x.modelId}
                         onClick={() => onChangeModel(x)}
                       >
                         {x.name}

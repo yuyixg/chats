@@ -3,7 +3,7 @@ using System.Text.Json.Serialization;
 
 namespace Chats.BE.Controllers.Chats.Prompts.Dtos;
 
-public record PromptsDto : BriefPromptDto
+public record PromptDto : BriefPromptDto
 {
     [JsonPropertyName("content")]
     public required string Content { get; init; }

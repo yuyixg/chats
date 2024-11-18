@@ -1,10 +1,8 @@
-﻿using Chats.BE.Controllers.Chats.Models.Dtos;
-using Chats.BE.DB;
+﻿using Chats.BE.DB;
 using Chats.BE.DB.Enums;
 using Chats.BE.DB.Jsons;
 using Chats.BE.Services.Conversations;
 using Chats.BE.Services.IdEncryption;
-using System.Text.Json;
 using System.Text.Json.Serialization;
 
 namespace Chats.BE.Controllers.Chats.Chats.Dtos;
@@ -17,11 +15,11 @@ public record ChatsResponse
     [JsonPropertyName("title")]
     public required string Title { get; init; }
 
-    [JsonPropertyName("chatModelId")]
-    public required short? ChatModelId { get; init; }
+    [JsonPropertyName("modelId")]
+    public required short ModelId { get; init; }
 
     [JsonPropertyName("modelName")]
-    public required string? ModelName { get; init; }
+    public required string ModelName { get; init; }
 
     [JsonPropertyName("modelConfig")]
     public required JsonModelConfig ModelConfig { get; init; }
@@ -32,8 +30,8 @@ public record ChatsResponse
     [JsonPropertyName("isShared")]
     public required bool IsShared { get; init; }
 
-    [JsonPropertyName("modelProvider")]
-    public DBModelProvider ModelProvider { get; init; }
+    [JsonPropertyName("modelProviderId")]
+    public DBModelProvider ModelProviderId { get; init; }
 
     public static ChatsResponse FromDB(Chat chat, IIdEncryptionService idEncryption)
     {
@@ -41,7 +39,7 @@ public record ChatsResponse
         {
             Id = idEncryption.Encrypt(chat.Id),
             Title = chat.Title,
-            ChatModelId = chat.ModelId,
+            ModelId = chat.ModelId,
             ModelName = chat.Model.Name,
             ModelConfig = new JsonModelConfig
             {
@@ -54,7 +52,7 @@ public record ChatsResponse
             },
             UserModelConfig = new JsonUserModelConfig { EnableSearch = chat.EnableSearch, Temperature = chat.Temperature },
             IsShared = chat.IsShared,
-            ModelProvider = (DBModelProvider)chat.Model.ModelKey.ModelProviderId, 
+            ModelProviderId = (DBModelProvider)chat.Model.ModelKey.ModelProviderId, 
         };
     }
 }
@@ -67,7 +65,7 @@ public record ChatsResponseTemp
 
     public required short ChatModelId { get; init; }
 
-    public required string? ModelName { get; init; }
+    public required string ModelName { get; init; }
 
     public bool? EnableSearch { get; init; }
 
@@ -85,7 +83,7 @@ public record ChatsResponseTemp
         {
             Id = idEncryption.Encrypt(Id),
             Title = Title,
-            ChatModelId = ChatModelId,
+            ModelId = ChatModelId,
             ModelName = ModelName,
             ModelConfig = new JsonModelConfig
             {
@@ -94,7 +92,7 @@ public record ChatsResponseTemp
             },
             UserModelConfig = UserModelConfig,
             IsShared = IsShared, 
-            ModelProvider = ModelProvider,
+            ModelProviderId = ModelProvider,
         };
     }
 }

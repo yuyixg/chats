@@ -17,12 +17,12 @@ interface Props {
   readonly?: boolean;
   message: PropsMessage;
   modelName?: string;
-  modelId?: string;
+  modelId?: number;
   lastMessageId: string | null;
   assistantCurrentSelectIndex: number;
   assistantChildrenIds: string[];
   onChangeMessage?: (messageId: string) => void;
-  onRegenerate?: (modelId?: string) => void;
+  onRegenerate?: (modelId?: number) => void;
 }
 
 const ResponseMessageActions = (props: Props) => {
@@ -75,7 +75,7 @@ const ResponseMessageActions = (props: Props) => {
             />
             <ChangeModelAction
               readonly={readonly}
-              onChangeModel={(modelId: string) => {
+              onChangeModel={(modelId: number) => {
                 onRegenerate && onRegenerate(modelId);
               }}
               modelName={modelName!}

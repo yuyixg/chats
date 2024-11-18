@@ -1,6 +1,7 @@
 ﻿using Chats.BE.Controllers.Chats.Prompts.Dtos;
 using Chats.BE.DB;
 using Chats.BE.Infrastructure;
+using Chats.BE.Services.Conversations;
 using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Mvc;
 using Microsoft.EntityFrameworkCore;
@@ -11,15 +12,15 @@ namespace Chats.BE.Controllers.Chats.Prompts;
 public class PromptsController(ChatsDB db, CurrentUser currentUser) : ControllerBase
 {
     [HttpGet]
-    public async Task<ActionResult<PromptsDto[]>> GetPrompts(CancellationToken cancellationToken)
+    public async Task<ActionResult<PromptDto[]>> GetPrompts(CancellationToken cancellationToken)
     {
-        PromptsDto[] prompts = await db.Prompts
+        PromptDto[] prompts = await db.Prompts
             .Where(x => x.CreateUserId == currentUser.Id && !x.IsSystem)
             .OrderBy(x => x.UpdatedAt)
-            .Select(x => new PromptsDto()
+            .Select(x => new PromptDto()
             {
                 Content = x.Content,
-                Id = x.Id, 
+                Id = x.Id,
                 Name = x.Name,
                 IsDefault = x.IsDefault,
                 UpdatedAt = x.UpdatedAt
@@ -45,15 +46,15 @@ public class PromptsController(ChatsDB db, CurrentUser currentUser) : Controller
         return Ok(prompts);
     }
 
-    [HttpGet("{promptId}")]
-    public async Task<ActionResult<PromptsDto>> GetSinglePrompt(int promptId, CancellationToken cancellationToken)
+    [HttpGet("{promptId:int}")]
+    public async Task<ActionResult<PromptDto>> GetSinglePrompt(int promptId, CancellationToken cancellationToken)
     {
         Prompt? prompt = await db.Prompts.FirstOrDefaultAsync(x => x.Id == promptId && (x.IsSystem || x.CreateUserId == currentUser.Id), cancellationToken);
         if (prompt == null)
         {
             return NotFound();
         }
-        return Ok(new PromptsDto()
+        return Ok(new PromptDto()
         {
             Content = prompt.Content,
             Id = prompt.Id,
@@ -61,6 +62,40 @@ public class PromptsController(ChatsDB db, CurrentUser currentUser) : Controller
             IsDefault = prompt.IsDefault,
             UpdatedAt = prompt.UpdatedAt
         });
+    }
+
+    [HttpGet("default")]
+    public async Task<ActionResult<PromptDto>> GetDefaultPrompt(CancellationToken cancellationToken)
+    {
+        Prompt? userDefault = await db.Prompts
+                .OrderByDescending(x => x.UpdatedAt)
+                .Where(x => x.IsDefault && x.CreateUserId == currentUser.Id)
+                .FirstOrDefaultAsync(cancellationToken)
+                ??
+            await db.Prompts
+                .OrderByDescending(x => x.UpdatedAt)
+                .Where(x => x.IsDefault && x.IsSystem)
+                .FirstOrDefaultAsync(cancellationToken);
+
+        PromptDto dto = userDefault != null ? new PromptDto()
+        {
+            Content = userDefault.Content,
+            Id = userDefault.Id,
+            Name = userDefault.Name,
+            IsDefault = userDefault.IsDefault,
+            UpdatedAt = userDefault.UpdatedAt,
+            IsSystem = true,
+        } : new PromptDto()
+        {
+            Content = ConversationService.DefaultPrompt,
+            Id = -1,
+            IsDefault = true,
+            Name = "Default",
+            UpdatedAt = DateTime.UtcNow,
+            IsSystem = true
+        };
+
+        return Ok(userDefault);
     }
 
     [HttpPost]
@@ -93,7 +128,7 @@ public class PromptsController(ChatsDB db, CurrentUser currentUser) : Controller
     }
 
     [HttpPut]
-    public async Task<ActionResult<PromptsDto>> UpdatePrompt([FromBody] PromptsDto request, CancellationToken cancellationToken)
+    public async Task<ActionResult<PromptDto>> UpdatePrompt([FromBody] PromptDto request, CancellationToken cancellationToken)
     {
         Prompt? prompt = await db.Prompts.FirstOrDefaultAsync(x => x.Id == request.Id && x.CreateUserId == currentUser.Id, cancellationToken);
         if (prompt == null)

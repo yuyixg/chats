@@ -33,14 +33,14 @@ export interface GetUserBalanceResult {
   logs: GetUserBalanceLogsResult[];
 }
 
-export interface GetModelUsageResult {
+export interface ModelUsageDto {
   modelId: number;
   tokens: number;
   counts: number;
   expires: string;
   isTerm: boolean;
-  promptTokenPrice1M: number;
-  responseTokenPrice1M: number;
+  inputTokenPrice1M: number;
+  outputTokenPrice1M: number;
 }
 
 export interface GetLoginProvidersResult {
@@ -66,12 +66,12 @@ export interface GetChatsParams extends Paging {
 export interface ChatResult {
   id: string;
   title: string;
-  chatModelId?: string;
+  modelId: number;
   modelName: string;
   modelConfig: any;
   userModelConfig: any;
   isShared: boolean;
-  modelProvider: DBModelProvider;
+  modelProviderId: DBModelProvider;
 }
 
 export interface PostChatParams {
