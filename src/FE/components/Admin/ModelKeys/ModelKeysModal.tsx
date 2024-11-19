@@ -6,8 +6,7 @@ import useTranslation from '@/hooks/useTranslation';
 
 import {
   GetModelKeysResult,
-  PostModelKeysParams,
-  PutModelKeysParams,
+  PostModelKeysParams
 } from '@/types/adminApis';
 
 import FormSelect from '@/components/ui/form/select';
@@ -43,26 +42,6 @@ interface IProps {
   saveLoading?: boolean;
 }
 
-class HostAndSecret {
-  host: string | null;
-  secret: string | null;
-
-  constructor(jsonConfig: string | undefined) {
-    if (!jsonConfig) throw new Error('Invalid JSON config');
-    const config = JSON.parse(jsonConfig);
-    this.host = config.host;
-    this.secret = config.secret;
-
-    // only allows null or string for host and secret
-    if (this.host !== null && typeof this.host !== 'string') {
-      throw new Error('Invalid host');
-    }
-    if (this.secret !== null && typeof this.secret !== 'string') {
-      throw new Error('Invalid secret');
-    }
-  }
-}
-
 export const ModelKeysModal = (props: IProps) => {
   const { t } = useTranslation();
   const { selected, isOpen, onClose, onSuccessful } = props;
@@ -94,26 +73,36 @@ export const ModelKeysModal = (props: IProps) => {
       ),
     },
     {
-      name: 'configs',
-      label: t('Configs'),
+      name: 'host',
+      label: t('Host'),
       defaultValue: '',
       render: (options: IFormFieldOption, field: FormFieldType) => (
-        <FormTextarea rows={6} options={options} field={field} />
+        <FormInput options={options} field={field} />
+      ),
+    },
+    {
+      name: 'secret',
+      label: t('Secret'),
+      defaultValue: '',
+      render: (options: IFormFieldOption, field: FormFieldType) => (
+        <FormTextarea rows={2} options={options} field={field} />
       ),
     },
   ];
 
   const formSchema = z.object({
     modelProviderId: z
-      .number()
-      .default(0),
+      .string()
+      .min(1, `${t('This field is require')}`)
+      .default("0"),
     name: z
       .string()
-      .min(1, `${t('This field is require')}`)
-      .optional(),
-    configs: z
+      .min(1, `${t('This field is require')}`),
+    host: z
       .string()
-      .min(1, `${t('This field is require')}`)
+      .optional(),
+    secret: z
+      .string()
       .optional(),
   });
 
@@ -127,18 +116,12 @@ export const ModelKeysModal = (props: IProps) => {
 
   function onSubmit(values: z.infer<typeof formSchema>) {
     if (!form.formState.isValid) return;
-    let parsedConfig: HostAndSecret;
-    try {
-      parsedConfig = new HostAndSecret(values.configs);
-    } catch (error: any) {
-      toast.error(t(error.message));
-      return;
-    }
-    const modelKeyDto = {
-      modelProviderId: values.modelProviderId,
-      name: values.name!,
-      host: parsedConfig.host,
-      secret: parsedConfig.secret,
+
+    const modelKeyDto: PostModelKeysParams = {
+      modelProviderId: parseInt(values.modelProviderId),
+      name: values.name,
+      host: values.host || null,
+      secret: values.secret || null,
     };
 
     handleModelKeyRequest().then(() => {
@@ -180,18 +163,10 @@ export const ModelKeysModal = (props: IProps) => {
   useEffect(() => {
     const subscription = form.watch((value, { name, type }) => {
       if (name === 'modelProviderId' && type === 'change') {
-        const modelProviderId = value.modelProviderId!;
+        const modelProviderId = parseInt(value.modelProviderId || "0");
         getModelProviderInitialConfig(modelProviderId).then((modelProvider) => {
-          form.setValue(
-            'configs',
-            JSON.stringify({
-              host: modelProvider.initialHost,
-              secret: modelProvider.initialSecret,
-            },
-              null,
-              2,
-            ),
-          );
+          form.setValue('host', modelProvider.initialHost || undefined);
+          form.setValue('secret', modelProvider.initialSecret || undefined);
         });
       }
     });
@@ -205,14 +180,9 @@ export const ModelKeysModal = (props: IProps) => {
       if (selected) {
         const { name, modelProviderId, host, secret } = selected;
         form.setValue('name', name);
-        form.setValue('modelProviderId', modelProviderId);
-        form.setValue(
-          'configs',
-          JSON.stringify({
-            host,
-            secret,
-          }),
-        );
+        form.setValue('modelProviderId', modelProviderId.toString());
+        form.setValue('host', host || undefined);
+        form.setValue('secret', secret || undefined);
       }
     }
   }, [isOpen]);

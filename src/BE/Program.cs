@@ -8,6 +8,9 @@ using Chats.BE.Services.OpenAIApiKeySession;
 using Chats.BE.Services.Sessions;
 using Microsoft.AspNetCore.Authentication;
 using Microsoft.AspNetCore.Mvc;
+using System.Runtime.CompilerServices;
+
+[assembly: InternalsVisibleTo("Chats.BE.Tests")]
 
 namespace Chats.BE;
 

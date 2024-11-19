@@ -13,7 +13,7 @@ public record JsonModelKey
 
     public JsonModelKey WithMaskedKey()
     {
-        return this with { Secret = Secret.ToMaskedNull() };
+        return this with { Secret = Secret.JsonToMaskedNull() };
     }
 
     public bool IsMaskedEquals(JsonModelKey inputKey)

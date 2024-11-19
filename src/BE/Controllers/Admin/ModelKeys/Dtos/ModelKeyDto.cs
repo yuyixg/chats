@@ -31,6 +31,6 @@ public record ModelKeyDto
 
     public ModelKeyDto WithMaskedKeys()
     {
-        return this with { Secret = Secret.ToMaskedNull() };
+        return this with { Secret = Secret.JsonToMaskedNull() };
     }
 }

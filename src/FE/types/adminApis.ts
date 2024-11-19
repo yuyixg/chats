@@ -224,8 +224,6 @@ export interface PostModelKeysParams {
   secret: string | null;
 }
 
-export interface PutModelKeysParams extends PostModelKeysParams { }
-
 export interface PostPromptParams {
   name: string;
   content: string;

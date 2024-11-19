@@ -1,4 +1,7 @@
-﻿namespace Chats.BE.Services.Common;
+﻿using System.Text.Json;
+using System.Text.Json.Nodes;
+
+namespace Chats.BE.Services.Common;
 
 internal static class MaskedKeyUtils
 {
@@ -12,15 +15,67 @@ internal static class MaskedKeyUtils
         return key is not null && key.Length > 7 ? key[..5] + "****" + key[^2..] : key;
     }
 
+    public static string? JsonToMaskedNull(this string? jsonKey)
+    {
+        if (jsonKey is null)
+        {
+            return null;
+        }
+
+        try
+        {
+            using JsonDocument document = JsonDocument.Parse(jsonKey);
+            JsonElement root = document.RootElement;
+
+            if (root.ValueKind != JsonValueKind.Object)
+            {
+                // 根元素不是对象，直接对整个字符串进行处理
+                return ToMaskedNull(jsonKey);
+            }
+
+            // 创建一个字典来存储修改后的键值对
+            var modifiedDict = new Dictionary<string, object?>();
+
+            foreach (JsonProperty property in root.EnumerateObject())
+            {
+                JsonElement value = property.Value;
+
+                // 检查是否存在嵌套对象或数组
+                if (value.ValueKind == JsonValueKind.Object || value.ValueKind == JsonValueKind.Array)
+                {
+                    // 发现嵌套对象或数组，抛出异常
+                    throw new InvalidOperationException("Nested objects are not supported.");
+                }
+
+                // 获取值的字符串表示
+                string? valueString = value.GetString();
+
+                // 对值进行处理
+                var maskedValue = ToMaskedNull(valueString);
+
+                modifiedDict[property.Name] = maskedValue;
+            }
+
+            // 序列化修改后的字典为 JSON 字符串
+            string result = JsonSerializer.Serialize(modifiedDict);
+            return result;
+        }
+        catch (JsonException)
+        {
+            // 解析失败，可能是无效的 JSON，直接对整个字符串进行处理
+            return ToMaskedNull(jsonKey);
+        }
+    }
+
     public static bool SeemsMasked(this string? key)
     {
-        return key is not null && key.Length == 11 && key[5..9] == "****";
+        return key is not null && key.Contains("****");
     }
 
     public static bool IsMaskedEquals(this string? key, string? inputKey)
     {
         return inputKey.SeemsMasked() 
-            ? ToMaskedNull(key) == inputKey 
+            ? JsonToMaskedNull(key) == inputKey 
             : key == inputKey;
     }
 }

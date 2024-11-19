@@ -20,7 +20,6 @@ import Decimal from 'decimal.js';
 export default function ShareMessage() {
   const { t } = useTranslation();
   const router = useRouter();
-  const { id } = router.query as { id: string };
   const [chat, setChat] = useState<GetMessageDetailsResult | null>(null);
   const [selectMessages, setSelectMessages] = useState<ChatMessage[]>([]);
   const [loading, setLoading] = useState(true);
@@ -28,6 +27,8 @@ export default function ShareMessage() {
 
   useEffect(() => {
     setLoading(true);
+    if (!router.isReady) return;
+    const { id } = router.query as { id: string };
     getShareMessage(id!)
       .then((data) => {
         document.title = data.name;
@@ -45,7 +46,7 @@ export default function ShareMessage() {
       .finally(() => {
         setLoading(false);
       });
-  }, []);
+  }, [router.isReady]);
 
   const onMessageChange = (messageId: string) => {
     const _selectMessages = getSelectMessages(currentMessages, messageId);

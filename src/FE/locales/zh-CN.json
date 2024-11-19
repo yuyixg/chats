@@ -188,6 +188,7 @@
   "Dashboard": "仪表盘",
   "User Models": "用户模型",
   "Model Keys": "模型密钥",
+  "Model Configs": "模型配置",
   "Deployment Name": "部署名称",
   "User Messages": "用户消息",
   "User Management": "用户管理",
@@ -313,5 +314,6 @@
 
   "Invalid JSON config": "无效的JSON配置",
   "Invalid host": "无效的host",
-  "Invalid secret": "无效的secret"
+  "Invalid secret": "无效的secret",
+  "Secret": "密钥"
 }

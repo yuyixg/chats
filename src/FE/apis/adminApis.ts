@@ -29,7 +29,6 @@ import {
   PutFileServicesParams,
   PutInvitationCodeParams,
   PutLoginServicesParams,
-  PutModelKeysParams,
   UpdateModelDto,
   PutPayServicesParams,
   PutUserBalanceParams,
@@ -227,7 +226,7 @@ export const postModelKeys = (params: PostModelKeysParams) => {
   });
 };
 
-export const putModelKeys = (id: number, params: PutModelKeysParams) => {
+export const putModelKeys = (id: number, params: PostModelKeysParams) => {
   const fetchService = useFetch();
   return fetchService.put(`/api/admin/model-keys/${id}`, {
     body: params,
