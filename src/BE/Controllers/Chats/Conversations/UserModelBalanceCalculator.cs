@@ -9,6 +9,7 @@ public record UserModelBalanceCost(int Counts, int Tokens, decimal Balance, int 
     public int RemainingTokens => Tokens - CostTokens;
     public decimal CostBalance => InputTokenPrice + OutputTokenPrice;
     public decimal RemainingBalance => Balance - CostBalance;
+    public bool CostUsage => CostCount > 0 || CostTokens > 0;
 
     public JsonTokenBalance ToJsonUserModel(JsonTokenBalance existing)
     {
@@ -23,6 +24,7 @@ public record UserModelBalanceCost(int Counts, int Tokens, decimal Balance, int 
         RemainingCounts >= 0 &&
         RemainingTokens >= 0 &&
         RemainingBalance >= 0;
+
 }
 
 public record UserModelBalanceCalculator(int Counts, int Tokens, decimal Balance)

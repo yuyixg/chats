@@ -375,7 +375,7 @@ export const Chat = memo(({ stopConversationRef }: Props) => {
                         }}
                       />
                     )}
-                    {userModelConfig?.temperature !== undefined && (
+                    {userModelConfig?.temperature !== undefined && (selectModel?.minTemperature !== selectModel?.maxTemperature) && (
                       <TemperatureSlider
                         label={t('Temperature')}
                         min={selectModel?.minTemperature!}

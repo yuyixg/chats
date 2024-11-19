@@ -26,7 +26,7 @@ public class BalanceService(IServiceScopeFactory serviceScopeFactory)
                 ), cancellationToken);
     }
 
-    public Task AsyncUpdateUserModelBalances(IEnumerable<int> userModelIds, CancellationToken cancellationToken)
+    public Task AsyncUpdateUsage(IEnumerable<int> userModelIds, CancellationToken cancellationToken)
     {
         return Task.Run(async () =>
         {
@@ -34,12 +34,12 @@ public class BalanceService(IServiceScopeFactory serviceScopeFactory)
             using ChatsDB db = scope.ServiceProvider.GetRequiredService<ChatsDB>();
             foreach (int userModelId in userModelIds)
             {
-                await UpdateUserModelBalance(db, userModelId, cancellationToken);
+                await UpdateUserModelUsage(db, userModelId, cancellationToken);
             }
         }, cancellationToken);
     }
 
-    public async Task UpdateUserModelBalance(ChatsDB db, int userModelId, CancellationToken cancellationToken)
+    public async Task UpdateUserModelUsage(ChatsDB db, int userModelId, CancellationToken cancellationToken)
     {
         await db.UserModels
             .Where(x => x.Id == userModelId)

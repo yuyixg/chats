@@ -229,7 +229,7 @@ public class AdminModelsController(ChatsDB db) : ControllerBase
         if (effectedUserModels.Count != 0)
         {
             await db.SaveChangesAsync(cancellationToken);
-            await balanceService.AsyncUpdateUserModelBalances(effectedUserModels.Select(x => x.Id), CancellationToken.None);
+            await balanceService.AsyncUpdateUsage(effectedUserModels.Select(x => x.Id), CancellationToken.None);
             await db.Users
                 .Where(x => x.Id == updateReq.UserId)
                 .ExecuteUpdateAsync(u => u.SetProperty(p => p.UpdatedAt, _ => DateTime.UtcNow), CancellationToken.None);

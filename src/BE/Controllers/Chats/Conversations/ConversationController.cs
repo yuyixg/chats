@@ -1,23 +1,18 @@
 ﻿using Chats.BE.Controllers.Chats.Conversations.Dtos;
 using Chats.BE.Controllers.Common;
 using Chats.BE.DB;
-using Chats.BE.DB.Enums;
 using Chats.BE.DB.Jsons;
 using Chats.BE.Infrastructure;
 using Chats.BE.Services;
-using Chats.BE.Services.Common;
 using Chats.BE.Services.Conversations;
 using Chats.BE.Services.Conversations.Dtos;
 using Chats.BE.Services.IdEncryption;
 using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Mvc;
-using Microsoft.AspNetCore.Mvc.ModelBinding;
 using Microsoft.EntityFrameworkCore;
 using OpenAI.Chat;
 using Sdcb.DashScope;
 using System.ClientModel;
-using System.Diagnostics;
-using System.Text;
 using System.Text.Json;
 using OpenAIChatMessage = OpenAI.Chat.ChatMessage;
 
@@ -228,6 +223,10 @@ public class ConversationController(ChatsDB db, CurrentUser currentUser, ILogger
         if (icc.Cost.CostBalance > 0)
         {
             _ = balanceService.AsyncUpdateBalance(currentUser.Id, CancellationToken.None);
+        }
+        if (icc.Cost.CostUsage)
+        {
+            _ = balanceService.AsyncUpdateUsage([userModel!.Id], CancellationToken.None);
         }
 
         return new EmptyResult();

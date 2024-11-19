@@ -37,6 +37,7 @@ public class AdminMessageController(ChatsDB db, CurrentUser currentUser, IIdEncr
                 ModelName = x.Model.Name,
                 Title = x.Title,
                 UserName = x.User.Username,
+                //Cost = x.Messages.Select(x => x.Usage).Sum(x => x.InputCost + x.OutputCost)
                 JsonUserModelConfig = new JsonUserModelConfig()
                 {
                     Temperature = x.Temperature, 
