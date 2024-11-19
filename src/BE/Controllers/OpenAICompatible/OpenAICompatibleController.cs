@@ -94,6 +94,10 @@ public partial class OpenAICompatibleController(ChatsDB db, CurrentApiKey curren
         {
             _ = balanceService.AsyncUpdateBalance(currentApiKey.User.Id, CancellationToken.None);
         }
+        if (icc.Cost.CostUsage)
+        {
+            _ = balanceService.AsyncUpdateUsage([userModel!.Id], CancellationToken.None);
+        }
 
         if (hasSuccessYield && cco.Stream)
         {
