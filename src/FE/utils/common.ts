@@ -14,7 +14,7 @@ export function formatRMB(number: number) {
   return formatted.replace(/￥(\d)/, '￥ $1');
 }
 
-export function formatNumberAsMoney(amount: number, maximumFractionDigits = 4) {
+export function formatNumberAsMoney(amount: number, maximumFractionDigits = 5) {
   return new Intl.NumberFormat('zh-CN', { maximumFractionDigits }).format(
     amount,
   );

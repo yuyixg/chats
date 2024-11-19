@@ -4,19 +4,11 @@ import toast from 'react-hot-toast';
 
 import useTranslation from '@/hooks/useTranslation';
 
-import { formatNumberAsMoney } from '@/utils/common';
-import {
-  ModelPriceUnit,
-  convertModelPriceToDisplay,
-  mergeConfigs,
-} from '@/utils/model';
-
 import {
   GetFileServicesResult,
   GetModelKeysResult,
   AdminModelDto,
   UpdateModelDto,
-  ModelReferenceDto,
 } from '@/types/adminApis';
 
 import FormSelect from '@/components/ui/form/select';
@@ -38,15 +30,15 @@ import {
 import { Form, FormField } from '@/components/ui/form';
 import FormInput from '@/components/ui/form/input';
 import FormSwitch from '@/components/ui/form/switch';
-import FormTextarea from '@/components/ui/form/textarea';
 
-import { getFileServices, getModelKeys, getModelReference, putModels } from '@/apis/adminApis';
+import { getFileServices, putModels } from '@/apis/adminApis';
 import { zodResolver } from '@hookform/resolvers/zod';
 import { z } from 'zod';
 
 interface IProps {
   isOpen: boolean;
   selected: AdminModelDto;
+  modelKeys: GetModelKeysResult[];
   onClose: () => void;
   onSuccessful: () => void;
   saveLoading?: boolean;
@@ -54,11 +46,9 @@ interface IProps {
 
 export const EditModelModal = (props: IProps) => {
   const { t } = useTranslation();
-  const { isOpen, onClose, selected, onSuccessful } = props;
+  const { isOpen, onClose, selected, onSuccessful, modelKeys } = props;
   const [fileServices, setFileServices] = useState<GetFileServicesResult[]>([]);
-  const [modelKeys, setModelKeys] = useState<GetModelKeysResult[]>([]);
-  const [modelReference, setModelReference] = useState<ModelReferenceDto>();
-  const [loading, setLoading] = useState(true);
+  const [loading, setLoading] = useState(false);
 
   const formSchema = z.object({
     modelReferenceName: z.string(),
@@ -70,15 +60,11 @@ export const EditModelModal = (props: IProps) => {
     enabled: z.boolean().optional(),
     deploymentName: z
       .string()
-      .min(1, `${t('This field is require')}`)
       .optional(),
     modelKeyId: z.string().nullable().default(null),
     fileServiceId: z.string().nullable().default(null),
-    priceConfig: z
-      .string()
-      .min(1, `${t('This field is require')}`)
-      .optional(),
-    remarks: z.string(),
+    inputPrice1M: z.coerce.number(),
+    outputPrice1M: z.coerce.number(),
   });
 
   const form = useForm<z.infer<typeof formSchema>>({
@@ -91,8 +77,8 @@ export const EditModelModal = (props: IProps) => {
       deploymentName: '',
       modelKeyId: '',
       fileServiceId: null,
-      priceConfig: '',
-      remarks: '',
+      inputPrice1M: 0,
+      outputPrice1M: 0
     },
   });
 
@@ -102,10 +88,10 @@ export const EditModelModal = (props: IProps) => {
       deploymentName: values.deploymentName || null,
       enabled: values.enabled!,
       fileServiceId: values.fileServiceId,
-      inputTokenPrice1M: JSON.parse(values.priceConfig!).input,
-      outputTokenPrice1M: JSON.parse(values.priceConfig!).out,
+      inputTokenPrice1M: values.inputPrice1M,
+      outputTokenPrice1M: values.outputPrice1M,
       modelKeyId: parseInt(values.modelKeyId!),
-      modelReferenceId: modelReference!.id,
+      modelReferenceId: selected.modelReferenceId,
       name: values.name!,
     };
     putModels(values.modelId!, dto)
@@ -113,13 +99,18 @@ export const EditModelModal = (props: IProps) => {
         onSuccessful();
         toast.success(t('Save successful!'));
       })
-      .catch(() => {
-        toast.error(
-          t(
-            'Operation failed! Please try again later, or contact technical personnel.',
-          ),
-        );
-      });
+      .catch(async (err) => {
+        try {
+          const resp = await err.json();
+          toast.error(resp.message);
+        } catch {
+          toast.error(
+            t(
+              'Operation failed! Please try again later, or contact technical personnel.',
+            ),
+          );
+        }
+      })
   }
 
   useEffect(() => {
@@ -127,16 +118,12 @@ export const EditModelModal = (props: IProps) => {
       getFileServices(true).then((data) => {
         setFileServices(data);
       });
-      getModelKeys().then((data) => {
-        setModelKeys(data);
-        setLoading(false);
-      });
       form.reset();
       form.formState.isValid;
       const {
         name,
         modelId,
-        modelReferenceId,
+        modelReferenceName,
         enabled,
         modelKeyId,
         fileServiceId,
@@ -147,18 +134,12 @@ export const EditModelModal = (props: IProps) => {
       form.setValue('name', name);
       form.setValue('modelId', modelId.toString());
       form.setValue('enabled', enabled);
-      form.setValue('remarks', ''); // TODO: remarks is not used, to be removed
       form.setValue('fileServiceId', fileServiceId || null);
       form.setValue('modelKeyId', modelKeyId.toString());
       form.setValue('deploymentName', deploymentName || '');
-      form.setValue(
-        'priceConfig',
-        convertModelPriceToDisplay(inputTokenPrice1M, outputTokenPrice1M),
-      );
-      getModelReference(modelReferenceId).then(data => {
-        setModelReference(data);
-        form.setValue('modelReferenceName', data.name);
-      });
+      form.setValue('inputPrice1M', inputTokenPrice1M);
+      form.setValue('outputPrice1M', outputTokenPrice1M);
+      form.setValue('modelReferenceName', modelReferenceName);
     }
   }, [isOpen]);
 
@@ -251,40 +232,46 @@ export const EditModelModal = (props: IProps) => {
                   }}
                 ></FormField>
                 <FormField
-                  key="remarks"
-                  control={form.control}
-                  name="remarks"
-                  render={({ field }) => {
-                    return <FormInput field={field} label={t('Remarks')!} />;
-                  }}
-                ></FormField>
-              </div>
-              <div className="grid grid-cols-2 gap-4">
-                <FormField
                   key="deploymentName"
                   control={form.control}
                   name="deploymentName"
                   render={({ field }) => {
                     return (
                       <FormInput
-                        hidden={!modelReference}
                         label={t('Deployment Name')!}
                         field={field}
                       />
                     );
                   }}
                 ></FormField>
+              </div>
+              <div className="grid grid-cols-2 gap-4">
                 <FormField
-                  key="priceConfig"
+                  key="inputPrice1M"
                   control={form.control}
-                  name="priceConfig"
+                  name="inputPrice1M"
                   render={({ field }) => {
                     return (
-                      <FormTextarea
-                        rows={7}
-                        hidden={!modelReference}
-                        label={`${formatNumberAsMoney(ModelPriceUnit)} ${t(
-                          'Token Price',
+                      <FormInput
+                        type="number"
+                        label={`${t(
+                          '1M input tokens price',
+                        )}(${t('Yuan')})`}
+                        field={field}
+                      />
+                    );
+                  }}
+                ></FormField>
+                <FormField
+                  key="outputPrice1M"
+                  control={form.control}
+                  name="outputPrice1M"
+                  render={({ field }) => {
+                    return (
+                      <FormInput
+                        type="number"
+                        label={`1M ${t(
+                          '1M output tokens price',
                         )}(${t('Yuan')})`}
                         field={field}
                       />
@@ -302,7 +289,7 @@ export const EditModelModal = (props: IProps) => {
                       <FormSelect
                         field={field}
                         label={t('File Service Type')!}
-                        hidden={!modelReference?.allowVision}
+                        hidden={!selected.allowVision}
                         items={fileServices.map((item) => ({
                           name: item.name,
                           value: item.id,

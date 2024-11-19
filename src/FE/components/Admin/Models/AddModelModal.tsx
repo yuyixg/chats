@@ -4,13 +4,6 @@ import toast from 'react-hot-toast';
 
 import useTranslation from '@/hooks/useTranslation';
 
-import { formatNumberAsMoney } from '@/utils/common';
-import {
-  ModelPriceUnit,
-  conversionModelPriceToCreate,
-  convertModelPriceToDisplay,
-} from '@/utils/model';
-
 import {
   GetFileServicesResult,
   GetModelKeysResult,
@@ -37,14 +30,14 @@ import {
 import { Form, FormField } from '@/components/ui/form';
 import FormInput from '@/components/ui/form/input';
 import FormSwitch from '@/components/ui/form/switch';
-import FormTextarea from '@/components/ui/form/textarea';
 
-import { getFileServices, getModelKeys, getModelProviderModels, getModelReference, postModels } from '@/apis/adminApis';
+import { getFileServices, getModelProviderModels, getModelReference, postModels } from '@/apis/adminApis';
 import { zodResolver } from '@hookform/resolvers/zod';
 import { z } from 'zod';
 
 interface IProps {
   isOpen: boolean;
+  modelKeys: GetModelKeysResult[];
   onClose: () => void;
   onSuccessful: () => void;
   saveLoading?: boolean;
@@ -53,60 +46,55 @@ interface IProps {
 export const AddModelModal = (props: IProps) => {
   const { t } = useTranslation();
   const [fileServices, setFileServices] = useState<GetFileServicesResult[]>([]);
-  const [modelKeys, setModelKeys] = useState<GetModelKeysResult[]>([]);
   const [modelVersions, setModelVersions] = useState<SimpleModelReferenceDto[]>([]);
   const [modelReference, setModelReference] = useState<ModelReferenceDto>();
-  const { isOpen, onClose, onSuccessful } = props;
+  const { isOpen, onClose, onSuccessful, modelKeys } = props;
   const [loading, setLoading] = useState(true);
 
   const formSchema = z.object({
-    modelReferenceId: z
-      .string()
-      .min(1, `${t('This field is require')}`)
-      .optional(),
+    modelReferenceId: z.string().default('0'),
     name: z
       .string()
       .min(1, `${t('This field is require')}`)
       .optional(),
-    enabled: z.boolean().optional(),
+    enabled: z.boolean(),
     deploymentName: z
       .string()
-      .min(1, `${t('This field is require')}`)
       .optional(),
-    modelKeyId: z.string().nullable().default(null),
-    fileServiceId: z.string().nullable().default(null),
-    priceConfig: z
+    modelKeyId: z
       .string()
       .min(1, `${t('This field is require')}`)
-      .optional(),
-    remarks: z.string(),
+      .default('0'),
+    fileServiceId: z.string().nullable().default(null),
+    inputPrice1M: z.coerce.number(),
+    outputPrice1M: z.coerce.number(),
   });
 
   const form = useForm<z.infer<typeof formSchema>>({
     resolver: zodResolver(formSchema),
     defaultValues: {
-      modelReferenceId: '',
+      modelReferenceId: '0',
       name: '',
       enabled: true,
       deploymentName: '',
       modelKeyId: '',
       fileServiceId: null,
-      priceConfig: '',
-      remarks: '',
+      inputPrice1M: 0,
+      outputPrice1M: 0
     },
   });
 
   const onSubmit = (values: z.infer<typeof formSchema>) => {
     if (!form.formState.isValid) return;
     const dto: UpdateModelDto = {
-      name: values.name!,
-      modelReferenceId: parseInt(values.modelReferenceId!),
-      enabled: !!values.enabled,
       deploymentName: values.deploymentName || null,
-      modelKeyId: parseInt(values.modelKeyId!),
+      enabled: values.enabled!,
       fileServiceId: values.fileServiceId,
-      inputTokenPrice1M: JSON.parse(values.priceConfig!).input,
-      outputTokenPrice1M: JSON.parse(values.priceConfig!).out,
+      inputTokenPrice1M: values.inputPrice1M,
+      outputTokenPrice1M: values.outputPrice1M,
+      modelKeyId: parseInt(values.modelKeyId!),
+      name: values.name!,
+      modelReferenceId: +values.modelReferenceId!,
     };
     postModels(dto)
       .then(() => {
@@ -123,43 +111,38 @@ export const AddModelModal = (props: IProps) => {
   }
 
   useEffect(() => {
-    setLoading(true);
     if (isOpen) {
       getFileServices(true).then((data) => {
         setFileServices(data);
-      });
-      getModelKeys().then((data) => {
-        setModelKeys(data);
-        setLoading(false);
       });
       form.reset();
       form.formState.isValid;
     }
   }, [isOpen]);
 
+  const onModelReferenceChanged = async (modelReferenceId: number) => {
+    getModelReference(modelReferenceId).then(data => {
+      setModelReference(data);
+      form.setValue('inputPrice1M', data.promptTokenPrice1M);
+      form.setValue('outputPrice1M', data.responseTokenPrice1M);
+    });
+  }
+
   useEffect(() => {
-    let subscription: any = null;
-    if (!loading) {
-      subscription = form.watch(async (value, { name, type }) => {
-        if (name === 'modelKeyId' && type === 'change') {
-          const modelKeyId = parseInt(value.modelKeyId!);
-          const modelProviderId = modelKeys.find((x) => x.id === modelKeyId)?.modelProviderId!;
-          const possibleModels = await getModelProviderModels(modelProviderId);
-          setModelVersions(possibleModels);
-          form.setValue('modelReferenceId', possibleModels[0]?.id?.toString());
-        }
-        if (name === 'modelReferenceId' && type === 'change') {
-          const modelReferenceId = parseInt(value.modelReferenceId!);
-          const modelKeyId = parseInt(value.modelKeyId!);
-          getModelReference(modelReferenceId).then(data => {
-            setModelReference(data);
-            form.setValue('priceConfig', convertModelPriceToDisplay(data.promptTokenPrice1M, data.responseTokenPrice1M));
-          });
-        }
-      });
-    }
+    const subscription = form.watch(async (value, { name, type }) => {
+      if (name === 'modelKeyId' && type === 'change') {
+        const modelKeyId = value.modelKeyId;        
+        const modelProviderId = modelKeys.find((x) => x.id === +modelKeyId!)?.modelProviderId!;
+        const possibleModels = await getModelProviderModels(modelProviderId);
+        setModelVersions(possibleModels);
+      }
+      if (name === 'modelReferenceId' && type === 'change') {
+        const modelReferenceId = +value.modelReferenceId!;
+        onModelReferenceChanged(modelReferenceId);
+      }
+    });
     return () => subscription?.unsubscribe();
-  }, [form.watch, loading]);
+  }, [form.watch]);
 
   return (
     <Dialog open={isOpen} onOpenChange={onClose}>
@@ -212,7 +195,7 @@ export const AddModelModal = (props: IProps) => {
                     <PopoverContent className="w-full">
                       {JSON.stringify(
                         modelKeys.find(
-                          (x) => x.id === parseInt(form.getValues('modelKeyId')!),
+                          (x) => x.id === +form.getValues('modelKeyId')!,
                         )?.toConfigs(),
                         null,
                         2,
@@ -244,40 +227,46 @@ export const AddModelModal = (props: IProps) => {
                 }}
               ></FormField>
               <FormField
-                key="remarks"
-                control={form.control}
-                name="remarks"
-                render={({ field }) => {
-                  return <FormInput field={field} label={t('Remarks')!} />;
-                }}
-              ></FormField>
-            </div>
-            <div className="grid grid-cols-2 gap-4">
-              <FormField
                 key="deploymentName"
                 control={form.control}
                 name="deploymentName"
                 render={({ field }) => {
                   return (
                     <FormInput
-                      hidden={!modelReference}
                       label={t('Deployment Name')!}
                       field={field}
                     />
                   );
                 }}
               ></FormField>
+            </div>
+            <div className="grid grid-cols-2 gap-4">
               <FormField
-                key="priceConfig"
+                key="inputPrice1M"
                 control={form.control}
-                name="priceConfig"
+                name="inputPrice1M"
                 render={({ field }) => {
                   return (
-                    <FormTextarea
-                      rows={7}
-                      hidden={!modelReference}
-                      label={`${formatNumberAsMoney(ModelPriceUnit)} ${t(
-                        'Token Price',
+                    <FormInput
+                      type="number"
+                      label={`${t(
+                        '1M input tokens price',
+                      )}(${t('Yuan')})`}
+                      field={field}
+                    />
+                  );
+                }}
+              ></FormField>
+              <FormField
+                key="outputPrice1M"
+                control={form.control}
+                name="outputPrice1M"
+                render={({ field }) => {
+                  return (
+                    <FormInput
+                      type="number"
+                      label={`1M ${t(
+                        '1M output tokens price',
                       )}(${t('Yuan')})`}
                       field={field}
                     />

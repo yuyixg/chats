@@ -17,7 +17,7 @@ public record UpdateModelRequest
     [JsonPropertyName("deploymentName")]
     public string? DeploymentName { get; init; }
 
-    [JsonPropertyName("modelKeysId")]
+    [JsonPropertyName("modelKeyId")]
     public required short ModelKeyId { get; init; }
 
     [JsonPropertyName("fileServiceId")]

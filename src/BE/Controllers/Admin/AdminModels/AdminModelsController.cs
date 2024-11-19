@@ -50,6 +50,11 @@ public class AdminModelsController(ChatsDB db) : ControllerBase
     [HttpPut("models/{modelId:int}")]
     public async Task<ActionResult> UpdateModel(short modelId, [FromBody] UpdateModelRequest req, CancellationToken cancellationToken)
     {
+        if (!ModelState.IsValid)
+        {
+            return BadRequest(ModelState);
+        }
+
         if (!await db.ModelReferences.AnyAsync(r => r.Id == req.ModelReferenceId, cancellationToken))
         {
             return this.BadRequestMessage($"Invalid ModelReferenceId: {req.ModelReferenceId}");
@@ -71,6 +76,11 @@ public class AdminModelsController(ChatsDB db) : ControllerBase
     [HttpPost("models")]
     public async Task<ActionResult> CreateModel([FromBody] UpdateModelRequest req, CancellationToken cancellationToken)
     {
+        if (!ModelState.IsValid)
+        {
+            return BadRequest(ModelState);
+        }
+
         if (!await db.ModelReferences.AnyAsync(r => r.Id == req.ModelReferenceId, cancellationToken))
         {
             return this.BadRequestMessage($"Invalid ModelReferenceId: {req.ModelReferenceId}");
@@ -136,19 +146,19 @@ public class AdminModelsController(ChatsDB db) : ControllerBase
         UserModelDto[] userModels = await db.Models
             .Where(x => !x.IsDeleted)
             .OrderBy(x => x.Order)
-            .Select(x => new 
+            .Select(x => new
             {
-                Model = x, 
-                UserModel = x.UserModels.Where(x => x.UserId == userId).FirstOrDefault() 
+                Model = x,
+                UserModel = x.UserModels.Where(x => x.UserId == userId).FirstOrDefault()
             })
-            .Select(x => x.UserModel == null ? 
+            .Select(x => x.UserModel == null ?
                 new UserModelDto()
                 {
                     Id = -1,
                     ModelId = x.Model.Id,
                     DisplayName = x.Model.Name,
                     ModelKeyName = x.Model.ModelKey.Name,
-                    Enabled = false, 
+                    Enabled = false,
                     Expires = DateTime.UtcNow,
                     Counts = 0,
                     Tokens = 0,
@@ -164,12 +174,12 @@ public class AdminModelsController(ChatsDB db) : ControllerBase
                     Tokens = x.UserModel.TokenBalance,
                 })
             .ToArrayAsync(cancellationToken);
-            
+
         return Ok(userModels);
     }
 
     [HttpPut("user-models")]
-    public async Task<ActionResult> UpdateUserModels([FromBody] UpdateUserModelRequest updateReq, 
+    public async Task<ActionResult> UpdateUserModels([FromBody] UpdateUserModelRequest updateReq,
         [FromServices] BalanceService balanceService,
         CancellationToken cancellationToken)
     {
@@ -224,7 +234,7 @@ public class AdminModelsController(ChatsDB db) : ControllerBase
                 .Where(x => x.Id == updateReq.UserId)
                 .ExecuteUpdateAsync(u => u.SetProperty(p => p.UpdatedAt, _ => DateTime.UtcNow), CancellationToken.None);
         }
-        
+
         return NoContent();
     }
 }

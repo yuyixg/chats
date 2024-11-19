@@ -4,7 +4,7 @@ import useTranslation from '@/hooks/useTranslation';
 
 import { formatNumberAsMoney } from '@/utils/common';
 
-import { AdminModelDto } from '@/types/adminApis';
+import { AdminModelDto, GetModelKeysResult } from '@/types/adminApis';
 
 import { AddModelModal } from '@/components/Admin/Models/AddModelModal';
 import { EditModelModal } from '@/components/Admin/Models/EditModelModal';
@@ -19,7 +19,7 @@ import {
   TableRow,
 } from '@/components/ui/table';
 
-import { getModels } from '@/apis/adminApis';
+import { getModelKeys, getModels } from '@/apis/adminApis';
 import { feModelProviders } from '@/types/model';
 
 export default function Models() {
@@ -28,7 +28,8 @@ export default function Models() {
   const [selectedModel, setSelectedModel] = useState<AdminModelDto>();
   const [models, setModels] = useState<AdminModelDto[]>([]);
   const [loading, setLoading] = useState(true);
-  
+  const [modelKeys, setModelKeys] = useState<GetModelKeysResult[]>([]);
+
   useEffect(() => {
     init();
   }, []);
@@ -40,11 +41,18 @@ export default function Models() {
       setSelectedModel(undefined);
       setLoading(false);
     });
+    getModelKeys().then((data) => {
+      setModelKeys(data);
+    });
   };
 
-  const handleShow = (item: AdminModelDto) => {
+  const showEditDialog = (item: AdminModelDto) => {
     setSelectedModel(item);
     setIsOpen({ ...isOpen, edit: true });
+  };
+
+  const showCreateDialog = () => {
+    setIsOpen({ ...isOpen, add: true });
   };
 
   const handleClose = () => {
@@ -57,9 +65,7 @@ export default function Models() {
       <div className="flex flex-col gap-4 mb-4">
         <div className="flex justify-end gap-3 items-center">
           <Button
-            onClick={() => {
-              setIsOpen({ ...isOpen, add: true });
-            }}
+            onClick={() => { showCreateDialog(); }}
             color="primary"
           >
             {t('Add Model')}
@@ -75,8 +81,6 @@ export default function Models() {
               <TableHead>{t('Model Provider')}</TableHead>
               <TableHead>{t('Model Version')}</TableHead>
               <TableHead>{t('Token Price')}</TableHead>
-              <TableHead>{t('Remarks')}</TableHead>
-              <TableHead className="w-16"></TableHead>
             </TableRow>
           </TableHeader>
           <TableBody isLoading={loading} isEmpty={models.length === 0}>
@@ -84,15 +88,14 @@ export default function Models() {
               <TableRow
                 className="cursor-pointer"
                 key={item.modelId}
-                onClick={() => handleShow(item)}
+                onClick={() => showEditDialog(item)}
               >
                 <TableCell>{item.rank}</TableCell>
                 <TableCell>
                   <div className="flex items-center gap-1 ">
                     <div
-                      className={`w-2 h-2 rounded-full ${
-                        item.enabled ? 'bg-green-400' : 'bg-gray-400'
-                      }`}
+                      className={`w-2 h-2 rounded-full ${item.enabled ? 'bg-green-400' : 'bg-gray-400'
+                        }`}
                     ></div>
                     {item.name}
                   </div>
@@ -115,6 +118,7 @@ export default function Models() {
       {isOpen.edit && (
         <EditModelModal
           selected={selectedModel!}
+          modelKeys={modelKeys}
           isOpen={isOpen.edit}
           onClose={handleClose}
           onSuccessful={init}
@@ -122,6 +126,7 @@ export default function Models() {
       )}
       {isOpen.add && (
         <AddModelModal
+          modelKeys={modelKeys}
           isOpen={isOpen.add}
           onClose={handleClose}
           onSuccessful={init}
