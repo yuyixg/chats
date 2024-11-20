@@ -45,17 +45,6 @@ export const SystemPrompt: FC<Props> = ({
 
   const handleChange = (e: React.ChangeEvent<HTMLTextAreaElement>) => {
     const value = e.target.value;
-    /// const maxLength = conversation.model.maxLength!;
-
-    // if (value.length > maxLength) {
-    //   toast.error(
-    //     t(
-    //       `Prompt limit is {{maxLength}} characters. You have entered {{valueLength}} characters.`,
-    //       { maxLength, valueLength: value.length }
-    //     )
-    //   );
-    //   return;
-    // }
 
     setValue(value);
     updatePromptListVisibility(value);

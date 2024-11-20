@@ -17,6 +17,14 @@ export const ModelSelect = () => {
   } = useContext(HomeContext);
   const [modelUsage, setModelUsage] = useState<ModelUsageDto>();
 
+  useEffect(() => {
+    if (selectModel) {
+      getModelUsage(selectModel.modelId).then((res) => {
+        setModelUsage(res);
+      });
+    }
+  }, [selectModel]);
+
   const handleChange = (e: React.ChangeEvent<HTMLSelectElement>) => {
     const model = models.find((m) => m.modelId.toString() == e.target.value);
     if (!model) return;
