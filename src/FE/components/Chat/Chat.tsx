@@ -477,6 +477,7 @@ export const Chat = memo(({ stopConversationRef }: Props) => {
                       role: current.role,
                       content: current.content,
                       duration: current.duration || 0,
+                      firstTokenLatency: current.firstTokenLatency || 0,
                       inputTokens: current.inputTokens || 0,
                       outputTokens: current.outputTokens || 0,
                       reasoningTokens: current.reasoningTokens || 0,

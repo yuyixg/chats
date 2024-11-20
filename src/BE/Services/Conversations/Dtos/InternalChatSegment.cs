@@ -24,6 +24,24 @@ public record InternalChatSegment
         IsFromUpstream = false,
     };
 
+    public DBFinishReason? ToDBFinishReason()
+    {
+        if (FinishReason is null)
+        {
+            return null;
+        }
+
+        return FinishReason switch
+        {
+            ChatFinishReason.Stop => DBFinishReason.Stop,
+            ChatFinishReason.Length => DBFinishReason.Length,
+            ChatFinishReason.ToolCalls => DBFinishReason.ToolCalls,
+            ChatFinishReason.ContentFilter => DBFinishReason.ContentFilter,
+            ChatFinishReason.FunctionCall => DBFinishReason.FunctionCall,
+            _ => throw new ArgumentOutOfRangeException(nameof(FinishReason), FinishReason, "Unknown ChatFinishReason value.")
+        };
+    }
+
     public static InternalChatSegment InputOnly(int inputTokens) => Empty with { Usage = ChatTokenUsage.Zero with { InputTokens = inputTokens } };
 
     private string? GetFinishReasonText()
@@ -87,7 +105,7 @@ public record InternalChatSegment
                 new MessageChoice
                 {
                     Index = 0,
-                    FinishReason = "stop",
+                    FinishReason = GetFinishReasonText(),
                     Logprobs = null,
                     Message = new ResponseMessage
                     {

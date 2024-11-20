@@ -11,20 +11,20 @@ public abstract partial class ConversationService
     {
         ChatMessage[] filteredMessage = FEProcessMessages(messages, options);
 
-        await foreach (InternalChatSegment seg in ChatStreamedSimulated(filteredMessage, options, cancellationToken))
+        await foreach (InternalChatSegment seg in ChatStreamedSimulated(suggestedStreaming: true, filteredMessage, options, cancellationToken))
         {
             yield return seg;
         }
     }
 
-    public async IAsyncEnumerable<InternalChatSegment> ChatStreamedSimulated(IReadOnlyList<ChatMessage> messages, ChatCompletionOptions options, [EnumeratorCancellation] CancellationToken cancellationToken)
+    public async IAsyncEnumerable<InternalChatSegment> ChatStreamedSimulated(bool suggestedStreaming, IReadOnlyList<ChatMessage> messages, ChatCompletionOptions options, [EnumeratorCancellation] CancellationToken cancellationToken)
     {
         // notify inputTokenCount first to better support price calculation
         int inputTokens = GetPromptTokenCount(messages);
         int outputTokens = 0;
         yield return InternalChatSegment.InputOnly(inputTokens);
 
-        if (Model.ModelReference.AllowStreaming)
+        if (suggestedStreaming && Model.ModelReference.AllowStreaming)
         {
             await foreach (ChatSegment seg in ChatStreamed(messages, options, cancellationToken))
             {

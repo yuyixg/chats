@@ -33,6 +33,8 @@ public partial class ChatsDB : DbContext
 
     public virtual DbSet<FileService> FileServices { get; set; }
 
+    public virtual DbSet<FinishReason> FinishReasons { get; set; }
+
     public virtual DbSet<InvitationCode> InvitationCodes { get; set; }
 
     public virtual DbSet<LoginService> LoginServices { get; set; }
@@ -397,6 +399,10 @@ public partial class ChatsDB : DbContext
             entity.HasOne(d => d.ClientInfo).WithMany(p => p.UserModelUsages)
                 .OnDelete(DeleteBehavior.ClientSetNull)
                 .HasConstraintName("FK_ModelUsage_ClientInfo");
+
+            entity.HasOne(d => d.FinishReason).WithMany(p => p.UserModelUsages)
+                .OnDelete(DeleteBehavior.ClientSetNull)
+                .HasConstraintName("FK_UserModelUsage_FinishReason");
 
             entity.HasOne(d => d.UsageTransaction).WithOne(p => p.UserModelUsage).HasConstraintName("FK_ModelUsage_UsageTransactionLog");
 

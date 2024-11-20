@@ -147,6 +147,7 @@ public class ConversationController(ChatsDB db, CurrentUser currentUser, ILogger
         {
             if (userModel == null)
             {
+                icc.FinishReason = DBFinishReason.InvalidModel;
                 throw new InvalidModelException(request.ModelId.ToString());
             }
 
@@ -165,26 +166,30 @@ public class ConversationController(ChatsDB db, CurrentUser currentUser, ILogger
 
                 if (cancellationToken.IsCancellationRequested)
                 {
-                    break;
+                    throw new TaskCanceledException();
                 }
             }
         }
         catch (ChatServiceException cse)
         {
+            icc.FinishReason = cse.ErrorCode;
             return this.BadRequestMessage(cse.Message);
         }
         catch (Exception e) when (e is DashScopeException || e is ClientResultException)
         {
+            icc.FinishReason = DBFinishReason.UpstreamError;
             errorText = e.Message;
             logger.LogError(e, "Upstream error: {userMessageId}", userMessage.Id);
         }
         catch (TaskCanceledException)
         {
             // do nothing if cancelled
+            icc.FinishReason = DBFinishReason.Cancelled;
             errorText = "Conversation cancelled";
         }
         catch (Exception e)
         {
+            icc.FinishReason = DBFinishReason.UnknownError;
             errorText = "Unknown Error";
             logger.LogError(e, "Error in conversation for message: {userMessageId}", userMessage.Id);
         }
@@ -207,7 +212,6 @@ public class ConversationController(ChatsDB db, CurrentUser currentUser, ILogger
             ],
             CreatedAt = DateTime.UtcNow,
             ParentId = userMessage.Id,
-            Usage = icc.ToUserModelUsage(currentUser.Id, await clientInfoManager.GetClientInfo(cancellationToken), isApi: false),
         };
 
         if (errorText != null)
@@ -215,6 +219,7 @@ public class ConversationController(ChatsDB db, CurrentUser currentUser, ILogger
             assistantMessage.MessageContents.Add(MessageContent.FromError(errorText));
             await YieldResponse(new() { Result = errorText, Success = false });
         }
+        assistantMessage.Usage = icc.ToUserModelUsage(currentUser.Id, await clientInfoManager.GetClientInfo(cancellationToken), isApi: false);
         db.Messages.Add(assistantMessage);
 
         await db.SaveChangesAsync(cancellationToken);

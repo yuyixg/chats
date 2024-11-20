@@ -25,9 +25,12 @@ public partial class OpenAICompatibleController(ChatsDB db, CurrentApiKey curren
         CcoWrapper cco = new(json);
         if (!cco.SeemsValid())
         {
-            return ErrorMessage(OpenAICompatibleErrorCode.BadParameter, "bad parameter.");
+            return ErrorMessage(icc.FinishReason, "bad parameter.");
         }
-        if (string.IsNullOrWhiteSpace(cco.Model)) return InvalidModel(cco.Model);
+        if (string.IsNullOrWhiteSpace(cco.Model))
+        {
+            return InvalidModel(cco.Model);
+        }
 
         UserModel? userModel = await userModelManager.GetUserModel(currentApiKey.ApiKey, cco.Model, cancellationToken);
         if (userModel == null) return InvalidModel(cco.Model);
@@ -42,7 +45,7 @@ public partial class OpenAICompatibleController(ChatsDB db, CurrentApiKey curren
         bool hasSuccessYield = false;
         try
         {
-            await foreach (InternalChatSegment seg in icc.Run(userBalance.Balance, userModel, s.ChatStreamedSimulated([.. cco.Messages], cco.ToCleanCco(), cancellationToken)))
+            await foreach (InternalChatSegment seg in icc.Run(userBalance.Balance, userModel, s.ChatStreamedSimulated(cco.Stream, [.. cco.Messages], cco.ToCleanCco(), cancellationToken)))
             {
                 if (seg.TextSegment == string.Empty) continue;
 
@@ -55,27 +58,30 @@ public partial class OpenAICompatibleController(ChatsDB db, CurrentApiKey curren
 
                 if (cancellationToken.IsCancellationRequested)
                 {
-                    break;
+                    throw new TaskCanceledException();
                 }
             }
         }
         catch (ChatServiceException cse)
         {
+            icc.FinishReason = cse.ErrorCode;
             errorToReturn = await YieldError(hasSuccessYield && cco.Stream, cse.ErrorCode, cse.Message, cancellationToken);
         }
         catch (Exception e) when (e is DashScopeException || e is ClientResultException)
         {
+            icc.FinishReason = DBFinishReason.UpstreamError;
             logger.LogError(e, "Upstream error");
-            errorToReturn = await YieldError(hasSuccessYield && cco.Stream, OpenAICompatibleErrorCode.UpstreamError, e.Message, cancellationToken);
+            errorToReturn = await YieldError(hasSuccessYield && cco.Stream, icc.FinishReason, e.Message, cancellationToken);
         }
         catch (TaskCanceledException)
         {
-            // do nothing if cancelled
+            icc.FinishReason = DBFinishReason.Cancelled;
         }
         catch (Exception e)
         {
+            icc.FinishReason = DBFinishReason.UnknownError;
             logger.LogError(e, "Unknown error");
-            errorToReturn = await YieldError(hasSuccessYield && cco.Stream, OpenAICompatibleErrorCode.Unknown, "\n⚠Error in conversation - 对话出错!", cancellationToken);
+            errorToReturn = await YieldError(hasSuccessYield && cco.Stream, icc.FinishReason, "", cancellationToken);
         }
         finally
         {
@@ -86,7 +92,7 @@ public partial class OpenAICompatibleController(ChatsDB db, CurrentApiKey curren
         UserApiUsage usage = new()
         {
             ApiKeyId = currentApiKey.ApiKeyId,
-            Usage = icc.ToUserModelUsage(currentApiKey.User.Id, await clientInfoManager.GetClientInfo(cancellationToken), true),
+            Usage = icc.ToUserModelUsage(currentApiKey.User.Id, await clientInfoManager.GetClientInfo(cancellationToken), isApi: true),
         };
         db.UserApiUsages.Add(usage);
         await db.SaveChangesAsync(cancellationToken);
@@ -118,7 +124,7 @@ public partial class OpenAICompatibleController(ChatsDB db, CurrentApiKey curren
     private readonly static ReadOnlyMemory<byte> dataU8 = "data: "u8.ToArray();
     private readonly static ReadOnlyMemory<byte> lflfU8 = "\n\n"u8.ToArray();
 
-    private BadRequestObjectResult ErrorMessage(OpenAICompatibleErrorCode code, string message)
+    private BadRequestObjectResult ErrorMessage(DBFinishReason code, string message)
     {
         return BadRequest(new ErrorResponse()
         {
@@ -132,7 +138,7 @@ public partial class OpenAICompatibleController(ChatsDB db, CurrentApiKey curren
         });
     }
 
-    private async Task<BadRequestObjectResult> YieldError(bool shouldStreamed, OpenAICompatibleErrorCode code, string message, CancellationToken cancellationToken)
+    private async Task<BadRequestObjectResult> YieldError(bool shouldStreamed, DBFinishReason code, string message, CancellationToken cancellationToken)
     {
         if (shouldStreamed)
         {
@@ -164,7 +170,7 @@ public partial class OpenAICompatibleController(ChatsDB db, CurrentApiKey curren
 
     private BadRequestObjectResult InvalidModel(string? modelName)
     {
-        return ErrorMessage(OpenAICompatibleErrorCode.InvalidModel, $"The model `{modelName}` does not exist or you do not have access to it.");
+        return ErrorMessage(DBFinishReason.InvalidModel, $"The model `{modelName}` does not exist or you do not have access to it.");
     }
 
     [HttpGet("models")]

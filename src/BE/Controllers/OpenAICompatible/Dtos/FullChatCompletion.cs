@@ -38,7 +38,7 @@ public record MessageChoice
     public object? Logprobs { get; init; }
 
     [JsonPropertyName("finish_reason")]
-    public required string FinishReason { get; init; }
+    public required string? FinishReason { get; init; }
 }
 
 public record ResponseMessage

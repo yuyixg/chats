@@ -18,6 +18,8 @@ public partial class UserModelUsage
 
     public int UserModelId { get; set; }
 
+    public byte FinishReasonId { get; set; }
+
     public short SegmentCount { get; set; }
 
     public int InputTokens { get; set; }
@@ -31,6 +33,8 @@ public partial class UserModelUsage
     public int PreprocessDurationMs { get; set; }
 
     public int FirstResponseDurationMs { get; set; }
+
+    public int PostprocessDurationMs { get; set; }
 
     public int TotalDurationMs { get; set; }
 
@@ -55,6 +59,10 @@ public partial class UserModelUsage
     [ForeignKey("ClientInfoId")]
     [InverseProperty("UserModelUsages")]
     public virtual ClientInfo ClientInfo { get; set; } = null!;
+
+    [ForeignKey("FinishReasonId")]
+    [InverseProperty("UserModelUsages")]
+    public virtual FinishReason FinishReason { get; set; } = null!;
 
     [InverseProperty("Usage")]
     public virtual Message? Message { get; set; }

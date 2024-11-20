@@ -12,16 +12,17 @@ namespace Chats.BE.Services.Conversations;
 public class InChatContext()
 {
     private readonly long _firstTick = Stopwatch.GetTimestamp();
-    private long _preprocessTick, _firstResponseTick;
+    private long _preprocessTick, _firstResponseTick, _endResponseTick, _finishTick;
     private short _segmentCount;
-    public UserModelBalanceCost Cost { get; private set; } = null!;
+    public UserModelBalanceCost Cost { get; private set; } = UserModelBalanceCost.Empty;
     private UserModel _userModel = null!;
     private InternalChatSegment _lastSegment = InternalChatSegment.Empty;
     private readonly StringBuilder _fullResult = new();
-
+    public DBFinishReason FinishReason { get; set; } = DBFinishReason.Success;
 
     public async IAsyncEnumerable<InternalChatSegment> Run(decimal userBalance, UserModel userModel, IAsyncEnumerable<InternalChatSegment> segments)
     {
+        //_preprocessTick = Stopwatch.GetTimestamp();
         _userModel = userModel;
         if (userModel.ExpiresAt.IsExpired())
         {
@@ -40,24 +41,34 @@ public class InChatContext()
             throw new InsufficientBalanceException();
         }
 
-        _preprocessTick = Stopwatch.GetTimestamp();
-        await foreach (InternalChatSegment seg in segments)
+        try
         {
-            if (seg.IsFromUpstream)
+            _preprocessTick = Stopwatch.GetTimestamp();
+            await foreach (InternalChatSegment seg in segments)
             {
-                _segmentCount++;
-                _firstResponseTick = Stopwatch.GetTimestamp();
-            }
-            _lastSegment = seg;
-            _fullResult.Append(seg.TextSegment);
+                if (seg.IsFromUpstream)
+                {
+                    _segmentCount++;
+                    _firstResponseTick = Stopwatch.GetTimestamp();
+                }
+                _lastSegment = seg;
+                _fullResult.Append(seg.TextSegment);
 
-            UserModelBalanceCost currentCost = calculator.GetNewBalance(seg.Usage.InputTokens, seg.Usage.OutputTokens, priceConfig);
-            if (!currentCost.IsSufficient)
-            {
-                throw new InsufficientBalanceException();
+                UserModelBalanceCost currentCost = calculator.GetNewBalance(seg.Usage.InputTokens, seg.Usage.OutputTokens, priceConfig);
+                if (!currentCost.IsSufficient)
+                {
+                    FinishReason = DBFinishReason.InsufficientBalance;
+                    throw new InsufficientBalanceException();
+                }
+                Cost = currentCost;
+                FinishReason = seg.ToDBFinishReason() ?? FinishReason;
+
+                yield return seg;
             }
-            Cost = currentCost;
-            yield return seg;
+        }
+        finally
+        {
+            _endResponseTick = Stopwatch.GetTimestamp();
         }
     }
 
@@ -65,14 +76,18 @@ public class InChatContext()
 
     public UserModelUsage ToUserModelUsage(Guid userId, ClientInfo clientInfo, bool isApi)
     {
+        if (_finishTick == 0) _finishTick = Stopwatch.GetTimestamp();
+
         UserModelUsage usage = new()
         {
             UserModelId = _userModel.Id,
             CreatedAt = DateTime.UtcNow,
+            FinishReasonId = (byte)FinishReason,
             SegmentCount = _segmentCount,
             PreprocessDurationMs = (int)Stopwatch.GetElapsedTime(_firstTick, _preprocessTick).TotalMilliseconds,
             FirstResponseDurationMs = (int)Stopwatch.GetElapsedTime(_preprocessTick, _firstResponseTick).TotalMilliseconds,
-            TotalDurationMs = (int)Stopwatch.GetElapsedTime(_firstTick, Stopwatch.GetTimestamp()).TotalMilliseconds,
+            PostprocessDurationMs = (int)Stopwatch.GetElapsedTime(_endResponseTick, _finishTick).TotalMilliseconds,
+            TotalDurationMs = (int)Stopwatch.GetElapsedTime(_firstTick, _finishTick).TotalMilliseconds,
             InputTokens = _lastSegment.Usage.InputTokens,
             OutputTokens = _lastSegment.Usage.OutputTokens,
             ReasoningTokens = _lastSegment.Usage.ReasoningTokens,
