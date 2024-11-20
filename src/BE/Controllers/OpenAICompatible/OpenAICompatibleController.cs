@@ -42,7 +42,7 @@ public partial class OpenAICompatibleController(ChatsDB db, CurrentApiKey curren
         bool hasSuccessYield = false;
         try
         {
-            await foreach (InternalChatSegment seg in icc.Run(cco.Model, userBalance.Balance, userModel, s.ChatStreamedSimulated([.. cco.Messages], cco.ToCleanCco(), cancellationToken)))
+            await foreach (InternalChatSegment seg in icc.Run(userBalance.Balance, userModel, s.ChatStreamedSimulated([.. cco.Messages], cco.ToCleanCco(), cancellationToken)))
             {
                 if (seg.TextSegment == string.Empty) continue;
 

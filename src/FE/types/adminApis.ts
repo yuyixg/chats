@@ -40,6 +40,8 @@ export interface AdminModelDto {
   outputTokenPrice1M: number;
   allowSearch: boolean;
   allowVision: boolean;
+  allowSystemPrompt: boolean;
+  allowStreaming: boolean;
   minTemperature: number;
   maxTemperature: number;
   contextWindow: number;

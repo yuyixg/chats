@@ -34,7 +34,7 @@ export const changeUserPassword = (params: PostUserPassword) => {
 export const getUserMessages = (chatId: string): Promise<ChatMessage[]> => {
   const fetchService = useFetch();
   return fetchService
-    .get('/api/messages?chatId=' + chatId)
+    .get(`/api/messages/${chatId}`)
     .then((data: any) => {
       return calculateMessages(data) as any;
     });

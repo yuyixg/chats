@@ -51,6 +51,7 @@ const CopyAction = (props: Props) => {
                 <IconCopy stroke="#7d7d7d" />
               </Button>
             }
+            side="bottom"
             content={t('Copy')!}
           />
         )}

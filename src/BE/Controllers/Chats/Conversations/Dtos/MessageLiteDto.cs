@@ -1,6 +1,7 @@
 ﻿using Chats.BE.DB.Enums;
 using Chats.BE.Services.Conversations;
 using OpenAI.Chat;
+using System.Diagnostics;
 using System.Text;
 
 namespace Chats.BE.Controllers.Chats.Conversations.Dtos;
@@ -16,7 +17,7 @@ public record MessageLiteDto
     {
         return Role switch
         {
-            DBConversationRole.System => Content[0].ToOpenAISystemChatMessage(),
+            DBConversationRole.System => new SystemChatMessage(Content[0].ToString()),
             DBConversationRole.User => new UserChatMessage(Content.Select(c => c.ToOpenAI())),
             DBConversationRole.Assistant => new AssistantChatMessage(Content.Where(x => x.ContentType != DBMessageContentType.Error).Select(x => x.ToOpenAI())),
             _ => throw new NotImplementedException()
@@ -34,14 +35,20 @@ public record DBMessageSegment
     {
         return ContentType switch
         {
-            DBMessageContentType.Text => ChatMessageContentPart.CreateTextPart(Encoding.Unicode.GetString(Content)),
-            DBMessageContentType.ImageUrl => ChatMessageContentPart.CreateImagePart(new Uri(Encoding.UTF8.GetString(Content))),
+            DBMessageContentType.Text => ChatMessageContentPart.CreateTextPart(ToString()),
+            DBMessageContentType.ImageUrl => ChatMessageContentPart.CreateImagePart(new Uri(ToString())),
             _ => throw new NotImplementedException()
         };
     }
 
-    public SystemChatMessage ToOpenAISystemChatMessage()
+    public override string ToString()
     {
-        return new SystemChatMessage(Encoding.Unicode.GetString(Content));
+        return ContentType switch
+        {
+            DBMessageContentType.Text => Encoding.Unicode.GetString(Content),
+            DBMessageContentType.ImageUrl => Encoding.UTF8.GetString(Content),
+            DBMessageContentType.Error => Encoding.UTF8.GetString(Content),
+            _ => throw new NotImplementedException()
+        };
     }
 }

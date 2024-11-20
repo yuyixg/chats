@@ -11,16 +11,16 @@ namespace Chats.BE.Services.Conversations;
 
 public class InChatContext()
 {
-    private long _firstTick = Stopwatch.GetTimestamp();
+    private readonly long _firstTick = Stopwatch.GetTimestamp();
     private long _preprocessTick, _firstResponseTick;
     private short _segmentCount;
     public UserModelBalanceCost Cost { get; private set; } = null!;
     private UserModel _userModel = null!;
     private InternalChatSegment _lastSegment = InternalChatSegment.Empty;
-    private StringBuilder _fullResult = new();
+    private readonly StringBuilder _fullResult = new();
 
 
-    public async IAsyncEnumerable<InternalChatSegment> Run(string modelName, decimal userBalance, UserModel userModel, IAsyncEnumerable<InternalChatSegment> segments)
+    public async IAsyncEnumerable<InternalChatSegment> Run(decimal userBalance, UserModel userModel, IAsyncEnumerable<InternalChatSegment> segments)
     {
         _userModel = userModel;
         if (userModel.ExpiresAt.IsExpired())

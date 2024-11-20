@@ -63,32 +63,30 @@ public class ConversationController(ChatsDB db, CurrentUser currentUser, ILogger
             .Where(x => x.Role == DBConversationRole.System)
             .FirstOrDefault();
         // insert system message if it doesn't exist
-        if (systemMessage == null)
+        if (existingMessages.Count == 0)
         {
-            if (request.UserModelConfig.Prompt == null)
+            if (!string.IsNullOrWhiteSpace(request.UserModelConfig.Prompt))
             {
-                return this.BadRequestMessage("Prompt is required for the first message");
+                Message toBeInsert = new()
+                {
+                    ConversationId = conversationId,
+                    ChatRoleId = (byte)DBConversationRole.System,
+                    MessageContents =
+                    [
+                        MessageContent.FromText(request.UserModelConfig.Prompt)
+                    ],
+                    CreatedAt = DateTime.UtcNow,
+                };
+                db.Messages.Add(toBeInsert);
+
+                systemMessage = new MessageLiteDto
+                {
+                    Id = toBeInsert.Id,
+                    Content = [toBeInsert.MessageContents.First().ToSegment()],
+                    Role = DBConversationRole.System,
+                    ParentId = null,
+                };
             }
-
-            Message toBeInsert = new()
-            {
-                ConversationId = conversationId,
-                ChatRoleId = (byte)DBConversationRole.System,
-                MessageContents =
-                [
-                    MessageContent.FromText(request.UserModelConfig.Prompt)
-                ],
-                CreatedAt = DateTime.UtcNow,
-            };
-            db.Messages.Add(toBeInsert);
-
-            systemMessage = new MessageLiteDto
-            {
-                Id = toBeInsert.Id,
-                Content = [toBeInsert.MessageContents.First().ToSegment()],
-                Role = DBConversationRole.System,
-                ParentId = null,
-            };
 
             miscInfo.ThisChat.Title = request.UserMessage.Text[..Math.Min(50, request.UserMessage.Text.Length)];
             miscInfo.ThisChat.ModelId = request.ModelId;
@@ -107,7 +105,7 @@ public class ConversationController(ChatsDB db, CurrentUser currentUser, ILogger
 
         List<OpenAIChatMessage> messageToSend =
         [
-            systemMessage.Content[0].ToOpenAISystemChatMessage(),
+            ..(systemMessage != null ? [new SystemChatMessage(systemMessage.Content[0].ToString())] : Array.Empty<OpenAIChatMessage>()),
             ..GetMessageTree(existingMessages, messageId),
         ];
 
@@ -160,7 +158,7 @@ public class ConversationController(ChatsDB db, CurrentUser currentUser, ILogger
                     : null,
                 EndUserId = currentUser.Id.ToString(),
             };
-            await foreach (InternalChatSegment seg in icc.Run(request.ModelId.ToString(), miscInfo.UserBalance.Balance, userModel, s.ChatStreamedFEProcessed(messageToSend, cco, cancellationToken)))
+            await foreach (InternalChatSegment seg in icc.Run(miscInfo.UserBalance.Balance, userModel, s.ChatStreamedFEProcessed(messageToSend, cco, cancellationToken)))
             {
                 if (seg.TextSegment == string.Empty) continue;
                 await YieldResponse(new() { Result = seg.TextSegment, Success = true });

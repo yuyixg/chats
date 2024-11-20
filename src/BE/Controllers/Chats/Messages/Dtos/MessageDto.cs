@@ -4,9 +4,7 @@ using Chats.BE.DB.Enums;
 using Chats.BE.Services.Conversations;
 using Chats.BE.Services.IdEncryption;
 using System.Text;
-using System.Text.Json;
 using System.Text.Json.Serialization;
-using static System.Runtime.InteropServices.JavaScript.JSType;
 
 namespace Chats.BE.Controllers.Chats.Messages.Dtos;
 
@@ -47,8 +45,14 @@ public record ResponseMessageDto : MessageDto
     [JsonPropertyName("outputPrice")]
     public required decimal OutputPrice { get; init; }
 
+    [JsonPropertyName("reasoningTokens")]
+    public required int ReasoningTokens { get; init; }
+
     [JsonPropertyName("duration")]
     public required int Duration { get; init; }
+
+    [JsonPropertyName("firstTokenLatency")]
+    public required int FirstTokenLatency { get; init; }
 
     [JsonPropertyName("modelId")]
     public required short ModelId { get; init; }
@@ -118,10 +122,12 @@ public record ChatMessageTemp
     public required DBMessageSegment[] Content { get; init; }
     public required int? InputTokens { get; init; }
     public required int? OutputTokens { get; init; }
+    public required int? ReasoningTokens { get; init; }
     public required decimal? InputPrice { get; init; }
     public required decimal? OutputPrice { get; init; }
     public required DateTime CreatedAt { get; init; }
     public required int? Duration { get; init; }
+    public required int? FirstTokenLatency { get; init; }
     public required short? ModelId { get; init; }
     public required string? ModelName { get; init; }
 
@@ -151,7 +157,9 @@ public record ChatMessageTemp
                 OutputTokens = OutputTokens!.Value,
                 InputPrice = InputPrice!.Value,
                 OutputPrice = OutputPrice!.Value,
+                ReasoningTokens = ReasoningTokens!.Value,
                 Duration = Duration!.Value,
+                FirstTokenLatency = FirstTokenLatency!.Value,
                 ModelId = ModelId!.Value,
                 ModelName = ModelName
             };

@@ -8,7 +8,9 @@ export interface PropsMessage {
   content: Content;
   inputTokens: number;
   outputTokens: number;
+  reasoningTokens: number;
   inputPrice: Decimal;
   outputPrice: Decimal;
   duration: number;
+  firstTokenLatency: number;
 }

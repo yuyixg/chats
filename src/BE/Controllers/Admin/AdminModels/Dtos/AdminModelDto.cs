@@ -40,6 +40,12 @@ public record AdminModelDto
     [JsonPropertyName("allowVision")]
     public required bool AllowVision { get; init; }
 
+    [JsonPropertyName("allowSystemPrompt")]
+    public required bool AllowSystemPrompt { get; init; }
+
+    [JsonPropertyName("allowStreaming")]
+    public required bool AllowStreaming { get; init; }
+
     [JsonPropertyName("minTemperature")]
     public required decimal MinTemperature { get; init; }
 

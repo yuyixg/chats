@@ -1,5 +1,5 @@
 export interface ModelConfig {
-  prompt: string;
+  prompt: string | null;
   maxLength: number;
   temperature?: number;
   enableSearch?: boolean;

@@ -11,10 +11,12 @@ const Tips = ({
   trigger,
   content,
   className,
+  side = 'top',
 }: {
   className?: string;
   trigger: ReactElement | string;
   content?: ReactElement | string;
+  side?: 'top' | 'right' | 'bottom' | 'left';
 }) => {
   const [isOpen, setIsOpen] = useState(false);
   return (
@@ -29,7 +31,7 @@ const Tips = ({
         >
           {trigger}
         </TooltipTrigger>
-        {content && <TooltipContent>{content}</TooltipContent>}
+        {content && <TooltipContent side={side}>{content}</TooltipContent>}
       </Tooltip>
     </TooltipProvider>
   );

@@ -50,40 +50,46 @@ export const GenerateInformationAction = (props: Props) => {
             <div className="grid">
               <div className="grid grid-cols-1 items-center">
                 <GenerateInformation
-                  name={'duration'}
+                  name={'total duration'}
                   value={message?.duration.toLocaleString() + 'ms'}
                 />
                 <GenerateInformation
-                  name={'prompt_tokens'}
-                  value={`${message.inputTokens}`}
+                  name={'first token latency'}
+                  value={message?.firstTokenLatency.toLocaleString() + 'ms'}
                 />
                 <GenerateInformation
-                  name={'response_tokens'}
-                  value={`${message.outputTokens}`}
+                  name={'prompt tokens'}
+                  value={`${message.inputTokens.toLocaleString()}`}
                 />
                 <GenerateInformation
-                  name={'total_tokens'}
-                  value={`${message.inputTokens + message.outputTokens}`}
+                  name={'response tokens'}
+                  value={`${(message.outputTokens - message.reasoningTokens).toLocaleString()}`}
                 />
+                {!!message.reasoningTokens && (
+                  <GenerateInformation
+                    name={'reasoning tokens'}
+                    value={`${message.reasoningTokens.toLocaleString()}`}
+                  />
+                )}
                 <GenerateInformation
-                  name={'speed'}
+                  name={'response speed'}
                   value={
                     message?.duration
                       ? (
-                          (message.outputTokens / (message?.duration || 0)) *
+                          ((message.outputTokens - message.reasoningTokens) / (message?.duration || 0)) *
                           1000
-                        ).toFixed(2) + ' tokens/s'
+                        ).toFixed(2) + ' token/s'
                       : '-'
                   }
                 />
-                <GenerateInformation
+                {!message.inputPrice.isZero() && (<GenerateInformation
                   name={'prompt_price'}
                   value={'￥' + formatNumberAsMoney(+message.inputPrice, 6)}
-                />
-                <GenerateInformation
+                />)}
+                {!message.outputPrice.isZero() && (<GenerateInformation
                   name={'response_price'}
                   value={'￥' + formatNumberAsMoney(+message.outputPrice, 6)}
-                />
+                />)}
                 <GenerateInformation
                   name={'total_price'}
                   value={

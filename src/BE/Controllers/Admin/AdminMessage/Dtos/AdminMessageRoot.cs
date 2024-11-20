@@ -1,9 +1,7 @@
 ﻿using Chats.BE.Controllers.Chats.Conversations.Dtos;
 using Chats.BE.Controllers.Chats.Messages.Dtos;
-using Chats.BE.DB.Jsons;
 using Chats.BE.Services.Conversations;
 using Chats.BE.Services.IdEncryption;
-using System.Text.Json;
 using System.Text.Json.Serialization;
 
 namespace Chats.BE.Controllers.Admin.AdminMessage.Dtos;
@@ -71,7 +69,7 @@ public record AdminMessageBasicItem
     [JsonPropertyName("assistantChildrenIds")]
     public required List<string> AssistantChildrenIds { get; init; }
 
-    public AdminMessageAssistantItem WithAssistantDetails(int duration, int inputTokens, int outputTokens, decimal inputPrice, decimal outputPrice, string modelName)
+    public AdminMessageAssistantItem WithAssistantDetails(int duration, int firstTokenLatency, int inputTokens, int outputTokens, int reasoningTokens, decimal inputPrice, decimal outputPrice, string modelName)
     {
         return new AdminMessageAssistantItem
         {
@@ -83,8 +81,10 @@ public record AdminMessageBasicItem
             ChildrenIds = ChildrenIds,
             AssistantChildrenIds = AssistantChildrenIds,
             Duration = duration, 
+            FirstTokenLatency = firstTokenLatency,
             InputTokens = inputTokens,
             OutputTokens = outputTokens,
+            ReasoningTokens = reasoningTokens,
             InputPrice = inputPrice.ToString(),
             OutputPrice = outputPrice.ToString(),
             ModelName = modelName,
@@ -97,11 +97,17 @@ public record AdminMessageAssistantItem : AdminMessageBasicItem
     [JsonPropertyName("duration")]
     public required int Duration { get; init; }
 
+    [JsonPropertyName("firstTokenLatency")]
+    public required int FirstTokenLatency { get; init; }
+
     [JsonPropertyName("inputTokens")]
     public required int InputTokens { get; init; }
 
     [JsonPropertyName("outputTokens")]
     public required int OutputTokens { get; init; }
+
+    [JsonPropertyName("reasoningTokens")]
+    public required int ReasoningTokens { get; init; }
 
     [JsonPropertyName("inputPrice")]
     public required string InputPrice { get; init; }
@@ -123,9 +129,11 @@ public record AdminMessageItemTemp
     public required DBMessageSegment[] Content { get; init; }
     public required int? InputTokens { get; init; }
     public required int? OutputTokens { get; init; }
+    public required int? ReasoningTokens { get; init; }
     public required decimal? InputPrice { get; init; }
     public required decimal? OutputPrice { get; init; }
     public required int? Duration { get; init; }
+    public required int? FirstTokenLatency { get; init; }
 
     public static AdminMessageBasicItem[] ToDtos(AdminMessageItemTemp[] temps, IIdEncryptionService idEncryption)
     {
@@ -151,7 +159,7 @@ public record AdminMessageItemTemp
 
                 if (x.Role == DBConversationRole.Assistant)
                 {
-                    return basicItem.WithAssistantDetails(x.Duration!.Value, x.InputTokens!.Value, x.OutputTokens!.Value, x.InputPrice!.Value, x.OutputPrice!.Value, x.ModelName!);
+                    return basicItem.WithAssistantDetails(x.Duration!.Value, x.FirstTokenLatency!.Value, x.InputTokens!.Value, x.OutputTokens!.Value, x.ReasoningTokens!.Value, x.InputPrice!.Value, x.OutputPrice!.Value, x.ModelName!);
                 }
                 else
                 {

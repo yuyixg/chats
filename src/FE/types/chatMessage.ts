@@ -15,7 +15,9 @@ export interface ChatMessage {
   outputPrice?: Decimal;
   inputTokens?: number;
   outputTokens?: number;
+  reasoningTokens?: number;
   duration?: number;
+  firstTokenLatency?: number;
 }
 
 export interface MessageNode {
@@ -28,6 +30,7 @@ export interface MessageNode {
   role: Role;
   inputTokens: number;
   outputTokens: number;
+  reasoningTokens: number;
   inputPrice: Decimal;
   outputPrice: Decimal;
 }

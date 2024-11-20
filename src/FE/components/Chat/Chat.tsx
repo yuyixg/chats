@@ -171,6 +171,9 @@ export const Chat = memo(({ stopConversationRef }: Props) => {
       homeDispatch({ field: 'loading', value: true });
       homeDispatch({ field: 'messageIsStreaming', value: true });
       const messageContent = message.content;
+      if (selectModel && !selectModel.allowSystemPrompt && userModelConfig && userModelConfig.prompt) {
+        userModelConfig.prompt = null;
+      }
       const chatBody: ChatBody = {
         modelId: modelId || selectModel?.modelId!,
         chatId: selectChatId,
@@ -366,7 +369,7 @@ export const Chat = memo(({ stopConversationRef }: Props) => {
                 {models.length !== 0 && (
                   <div className="flex h-full flex-col space-y-4 rounded-lg border border-neutral-200 p-4 dark:border-neutral-600">
                     <ModelSelect />
-                    {userModelConfig?.prompt && (
+                    {selectModel && selectModel.allowSystemPrompt && userModelConfig?.prompt && (
                       <SystemPrompt
                         currentPrompt={userModelConfig?.prompt}
                         prompts={prompts}
@@ -476,8 +479,9 @@ export const Chat = memo(({ stopConversationRef }: Props) => {
                       duration: current.duration || 0,
                       inputTokens: current.inputTokens || 0,
                       outputTokens: current.outputTokens || 0,
-                      inputPrice: current.inputPrice || new Decimal(0),
-                      outputPrice: current.outputPrice || new Decimal(0),
+                      reasoningTokens: current.reasoningTokens || 0,
+                      inputPrice: new Decimal(current.inputPrice || 0),
+                      outputPrice: new Decimal(current.outputPrice || 0),
                     }}
                     onChangeMessage={(messageId) => {
                       handleUpdateSelectMessage(messageId);
