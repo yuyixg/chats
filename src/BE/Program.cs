@@ -4,6 +4,7 @@ using Chats.BE.Services;
 using Chats.BE.Services.Configs;
 using Chats.BE.Services.Conversations;
 using Chats.BE.Services.IdEncryption;
+using Chats.BE.Services.Init;
 using Chats.BE.Services.OpenAIApiKeySession;
 using Chats.BE.Services.Sessions;
 using Microsoft.AspNetCore.Authentication;
@@ -37,6 +38,7 @@ public class Program
             if (builder.Environment.IsDevelopment()) { o.EnableSensitiveDataLogging(); }
         });
         builder.Services.AddHttpClient();
+        builder.Services.AddSingleton<InitService>();
         builder.Services.AddSingleton<AppConfigService>();
         builder.Services.AddSingleton<PasswordHasher>();
         builder.Services.AddScoped<CurrentUser>();
@@ -44,7 +46,7 @@ public class Program
         builder.Services.AddSingleton<CsrfTokenService>();
         builder.Services.AddScoped<GlobalDBConfig>();
         builder.Services.AddScoped<UserManager>();
-        builder.Services.AddSingleton<JwtKeyManager>();
+        builder.Services.AddScoped<JwtKeyManager>();
         builder.Services.AddScoped<SessionManager>();
         builder.Services.AddScoped<UserModelManager>();
         builder.Services.AddSingleton<OpenAIApiKeySessionCache>();
@@ -81,7 +83,7 @@ public class Program
         app.UseStaticFiles();
 
         // before run:
-        await app.Services.GetRequiredService<JwtKeyManager>().GetOrCreateSecretKey(CancellationToken.None);
+        await app.Services.GetRequiredService<InitService>().Init();
 
         await app.RunAsync();
     }
