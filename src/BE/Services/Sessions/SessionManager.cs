@@ -1,69 +1,81 @@
 ﻿using Chats.BE.Controllers.Public.AccountLogin.Dtos;
 using Chats.BE.DB;
-using Chats.BE.Services.OpenAIApiKeySession;
-using Microsoft.EntityFrameworkCore;
+using Microsoft.IdentityModel.Tokens;
+using System.IdentityModel.Tokens.Jwt;
+using System.Security.Claims;
+using System.Security.Cryptography;
 
 namespace Chats.BE.Services.Sessions;
 
-public class SessionManager(ChatsDB db, SessionCache sessionCache)
+public class SessionManager(JwtKeyManager jwtKeyManager)
 {
-    public async Task<Guid> RefreshUserSessionId(Guid userId, CancellationToken cancellationToken)
+    private const string ValidIssuer = "chats";
+    private const string ValidAudience = "chats";
+    private static TimeSpan ValidPeriod = TimeSpan.FromHours(8);
+
+    public async Task<SessionEntry> GetCachedUserInfoBySession(string jwt, CancellationToken cancellationToken = default)
     {
-        await db.Sessions.Where(x => x.UserId == userId).ExecuteDeleteAsync(cancellationToken);
-        Session session = new()
+        ClaimsPrincipal claims = ValidateJwt(jwt, await GetSecurityKey(cancellationToken));
+        return SessionEntry.FromClaims(claims);
+    }
+
+    private ClaimsPrincipal ValidateJwt(string jwt, SecurityKey signingKey)
+    {
+        // 创建一个令牌验证参数对象
+        TokenValidationParameters validationParameters = new TokenValidationParameters
         {
-            Id = Guid.NewGuid(),
-            UserId = userId,
-            CreatedAt = DateTime.Now,
-            UpdatedAt = DateTime.Now,
+            ValidateIssuer = true,              // 验证发行者
+            ValidIssuer = ValidIssuer,          // 设置有效的发行者
+
+            ValidateAudience = true,            // 验证受众
+            ValidAudience = ValidAudience,      // 设置有效的受众
+
+            ValidateIssuerSigningKey = true,    // 验证签名密钥
+            IssuerSigningKey = signingKey,      // 设置用于验证签名的密钥
+
+            ValidateLifetime = true,            // 验证令牌的生存期
+            ClockSkew = TimeSpan.Zero           // 设置时钟偏移为0，避免时间验证误差
         };
-        db.Sessions.Add(session);
-        db.SaveChanges();
 
-        return session.Id;
+        // 创建一个 JwtSecurityTokenHandler 实例
+        JwtSecurityTokenHandler handler = new();
+
+        // 调用 ValidateToken 方法来验证令牌
+        ClaimsPrincipal principal = handler.ValidateToken(jwt, validationParameters, out _);
+        return principal; // 验证成功，返回 ClaimsPrincipal
     }
 
-    public async Task<SessionEntry?> GetUserInfoBySession(Guid sessionId, CancellationToken cancellationToken = default)
+    internal static byte[] Pdkdf2StringToByte32(string input)
     {
-        SessionEntry? sessionEntry = await db.Sessions
-            .Include(x => x.User)
-            .Where(x => x.Id == sessionId)
-            .Select(x => new SessionEntry()
-            {
-                UserId = x.User.Id,
-                UserName = x.User.Username,
-                Role = x.User.Role,
-                Sub = x.User.Sub,
-                Provider = x.User.Provider
-            })
-            .FirstOrDefaultAsync(cancellationToken);
-        return sessionEntry;
+        byte[] salt = new byte[16];
+        return new Rfc2898DeriveBytes(input, salt, 10000, HashAlgorithmName.SHA256).GetBytes(32);
     }
 
-    public async Task<SessionEntry?> GetCachedUserInfoBySession(Guid sessionId, CancellationToken cancellationToken = default)
-    {
-        SessionEntry? cached = sessionCache.Get(sessionId);
-        if (cached != null)
-        {
-            return cached;
-        }
-
-        SessionEntry? sessionEntry = await GetUserInfoBySession(sessionId, cancellationToken);
-        if (sessionEntry != null)
-        {
-            sessionCache.Set(sessionId, sessionEntry);
-        }
-
-        return sessionEntry;
-    }
+    private async Task<SymmetricSecurityKey> GetSecurityKey(CancellationToken cancellationToken) => new(Pdkdf2StringToByte32(await jwtKeyManager.GetOrCreateSecretKey(cancellationToken)));
 
     public async Task<LoginResponse> GenerateSessionForUser(User user, CancellationToken cancellationToken)
     {
-        Guid sessionId = await RefreshUserSessionId(user.Id, cancellationToken);
+        SigningCredentials cred = new(await GetSecurityKey(cancellationToken), SecurityAlgorithms.HmacSha256);
+        SessionEntry sessionEntry = new()
+        {
+            UserId = user.Id,
+            UserName = user.Username,
+            Role = user.Role,
+            Sub = user.Sub,
+            Provider = user.Provider
+        };
+        JwtSecurityToken token = new(
+            issuer: ValidIssuer,
+            audience: ValidAudience,
+            claims: sessionEntry.ToClaims(),
+            expires: DateTime.UtcNow.Add(ValidPeriod),
+            signingCredentials: cred);
+
+        string jwt = new JwtSecurityTokenHandler().WriteToken(token);
         bool hasPayService = false;
         return new LoginResponse
         {
-            SessionId = sessionId,
+            SessionId = jwt,
             UserName = user.Username,
             Role = user.Role,
             CanReCharge = hasPayService,

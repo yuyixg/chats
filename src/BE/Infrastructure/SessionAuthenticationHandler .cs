@@ -1,6 +1,7 @@
 ﻿using Chats.BE.Services.Sessions;
 using Microsoft.AspNetCore.Authentication;
 using Microsoft.Extensions.Options;
+using Microsoft.IdentityModel.Tokens;
 using System.Security.Claims;
 using System.Text.Encodings.Web;
 
@@ -22,21 +23,20 @@ public class SessionAuthenticationHandler(
         }
 
         string authorizationHeaderString = authorizationHeader.ToString();
-        if (!Guid.TryParse(authorizationHeaderString.Split(' ').Last(), out Guid sessionId))
+        string jwt = authorizationHeaderString.Split(' ').Last();
+
+        try
         {
-            return AuthenticateResult.Fail("Invalid session id.");
-        }
+            SessionEntry userInfo = await sessionManager.GetCachedUserInfoBySession(jwt);
+            ClaimsIdentity identity = new(userInfo.ToClaims(), Scheme.Name);
+            ClaimsPrincipal principal = new(identity);
+            AuthenticationTicket ticket = new(principal, Scheme.Name);
 
-        SessionEntry? userInfo = await sessionManager.GetCachedUserInfoBySession(sessionId);
-        if (userInfo == null)
+            return AuthenticateResult.Success(ticket);
+        }
+        catch (Exception ex)
         {
-            return AuthenticateResult.Fail($"Invalid session id: {sessionId}");
+            return AuthenticateResult.Fail(ex);
         }
-
-        var identity = new ClaimsIdentity(userInfo.ToClaims(), Scheme.Name);
-        var principal = new ClaimsPrincipal(identity);
-        var ticket = new AuthenticationTicket(principal, Scheme.Name);
-
-        return AuthenticateResult.Success(ticket);
     }
 }

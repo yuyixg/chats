@@ -16,7 +16,7 @@ namespace Chats.BE;
 
 public class Program
 {
-    public static void Main(string[] args)
+    public static async void Main(string[] args)
     {
         WebApplicationBuilder builder = WebApplication.CreateBuilder(args);
 
@@ -44,7 +44,7 @@ public class Program
         builder.Services.AddSingleton<CsrfTokenService>();
         builder.Services.AddScoped<GlobalDBConfig>();
         builder.Services.AddScoped<UserManager>();
-        builder.Services.AddSingleton<SessionCache>();
+        builder.Services.AddSingleton<JwtKeyManager>();
         builder.Services.AddScoped<SessionManager>();
         builder.Services.AddScoped<UserModelManager>();
         builder.Services.AddSingleton<OpenAIApiKeySessionCache>();
@@ -79,6 +79,10 @@ public class Program
         app.MapControllers();
         app.UseMiddleware<FrontendMiddleware>();
         app.UseStaticFiles();
+
+        // before run:
+        await app.Services.GetRequiredService<JwtKeyManager>().GetOrCreateSecretKey(CancellationToken.None);
+
         app.Run();
     }
 }

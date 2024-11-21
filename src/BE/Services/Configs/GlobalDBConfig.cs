@@ -19,10 +19,9 @@ public class GlobalDBConfig(ChatsDB db, ILogger<GlobalDBConfig> logger)
         return JsonSerializer.Deserialize<JsonKeycloakConfig>(loginService.Configs);
     }
 
-    public Task<TencentSmsConfig> GetTencentSmsConfig(CancellationToken cancellationToken) => GetRequiredConfigByKey<TencentSmsConfig>("tencentSms", cancellationToken);
+    public Task<TencentSmsConfig> GetTencentSmsConfig(CancellationToken cancellationToken) => GetRequiredConfigByKey<TencentSmsConfig>(DBConfigKey.TencentSms, cancellationToken);
 
-    public Task<SiteInfo?> GetFillingInfo(CancellationToken cancellationToken) => GetConfigByKey<SiteInfo>("siteInfo", cancellationToken);
-
+    public Task<SiteInfo?> GetFillingInfo(CancellationToken cancellationToken) => GetConfigByKey<SiteInfo>(DBConfigKey.SiteInfo, cancellationToken);
 
     private async Task<T?> GetConfigByKey<T>(string key, CancellationToken cancellationToken) where T : class
     {
@@ -41,7 +40,6 @@ public class GlobalDBConfig(ChatsDB db, ILogger<GlobalDBConfig> logger)
 
         return config;
     }
-
 
     private async Task<T> GetRequiredConfigByKey<T>(string key, CancellationToken cancellationToken)
     {
