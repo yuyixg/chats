@@ -1,4 +1,5 @@
 ﻿using Microsoft.Extensions.FileProviders;
+using System.Diagnostics.CodeAnalysis;
 
 namespace Chats.BE.Infrastructure;
 
@@ -26,11 +27,32 @@ public class FrontendMiddleware(RequestDelegate next, IWebHostEnvironment webHos
             }
             if (!Path.HasExtension(context.Request.Path))
             {
-                PathString suggestedPath = context.Request.Path + ".html";
-                if (fileProvider.GetFileInfo(suggestedPath).Exists)
+                int lastIndexOfSlash = context.Request.Path.Value.LastIndexOf('/');
+                if (lastIndexOfSlash != -1)
                 {
-                    context.Request.Path = suggestedPath;
-                    break;
+                    string prefixPart = context.Request.Path.Value[..lastIndexOfSlash];
+                    string suggestedPath = prefixPart + ".html";
+                    if (fileProvider.GetFileInfo(suggestedPath).Exists)
+                    {
+                        context.Request.Path = suggestedPath;
+                        break;
+                    }
+
+                    string suggestedPath2 = prefixPart + "/[id].html";
+                    if (fileProvider.GetFileInfo(suggestedPath2).Exists)
+                    {
+                        context.Request.Path = suggestedPath2;
+                        break;
+                    }
+                }
+                else
+                {
+                    string suggestedPath = context.Request.Path + ".html";
+                    if (fileProvider.GetFileInfo(suggestedPath).Exists)
+                    {
+                        context.Request.Path = suggestedPath;
+                        break;
+                    }
                 }
             }
         } while (false);
@@ -49,5 +71,4 @@ public class FrontendMiddleware(RequestDelegate next, IWebHostEnvironment webHos
     }
 
     private static bool IsGetOrHeadMethod(string method) => HttpMethods.IsGet(method) || HttpMethods.IsHead(method);
-
 }

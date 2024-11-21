@@ -11,10 +11,10 @@ import { ChatMessage as ChatMessageComponent } from '@/components/Admin/Messages
 
 import { getMessageDetails } from '@/apis/adminApis';
 import Decimal from 'decimal.js';
+import { getQueryId } from '@/utils/common';
 
 export default function MessageDetails() {
   const router = useRouter();
-  const { id } = router.query as { id: string };
   const [chat, setChat] = useState<GetMessageDetailsResult | null>(null);
   const [selectMessages, setSelectMessages] = useState<ChatMessage[]>([]);
   const [currentMessages, setCurrentMessages] = useState<ChatMessage[]>([]);
@@ -27,7 +27,8 @@ export default function MessageDetails() {
   });
 
   useEffect(() => {
-    getMessageDetails(id!).then((data) => {
+    const messageId = getQueryId(router);
+    getMessageDetails(messageId).then((data) => {
       document.title = data.name;
       if (data.messages.length > 0) {
         setChat(data);

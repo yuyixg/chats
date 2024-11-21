@@ -1,7 +1,7 @@
 import { useEffect, useState } from 'react';
 
 import Link from 'next/link';
-import { useRouter } from 'next/router';
+import { NextRouter, useRouter } from 'next/router';
 
 import useTranslation from '@/hooks/useTranslation';
 
@@ -16,6 +16,7 @@ import { Button } from '@/components/ui/button';
 
 import { getShareMessage } from '@/apis/adminApis';
 import Decimal from 'decimal.js';
+import { getQueryId } from '@/utils/common';
 
 export default function ShareMessage() {
   const { t } = useTranslation();
@@ -25,11 +26,13 @@ export default function ShareMessage() {
   const [loading, setLoading] = useState(true);
   const [currentMessages, setCurrentMessages] = useState<ChatMessage[]>([]);
 
+
+
   useEffect(() => {
     setLoading(true);
     if (!router.isReady) return;
-    const { id } = router.query as { id: string };
-    getShareMessage(id!)
+    const messageId = getQueryId(router)!;
+    getShareMessage(messageId)
       .then((data) => {
         document.title = data.name;
         if (data.messages.length > 0) {
@@ -98,8 +101,8 @@ export default function ShareMessage() {
                     inputTokens: current.inputTokens || 0,
                     outputTokens: current.outputTokens || 0,
                     reasoningTokens: current.reasoningTokens || 0,
-                    inputPrice: current.inputPrice || new Decimal(0),
-                    outputPrice: current.outputPrice || new Decimal(0),
+                    inputPrice: new Decimal(current.inputPrice || 0),
+                    outputPrice: new Decimal(current.outputPrice || 0),
                   }}
                 />
               );

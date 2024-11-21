@@ -1,3 +1,5 @@
+import { NextRouter } from "next/router";
+
 export const isMobile = () => {
   const userAgent =
     typeof window.navigator === 'undefined' ? '' : navigator.userAgent;
@@ -31,3 +33,18 @@ export const getApiUrl = () =>
   typeof window !== 'undefined'
     ? (window as any)['API_URL'] || ''
     : process.env.API_URL;
+
+export const getQueryId = (router: NextRouter): string => {
+  const { id } = router.query;
+  if (id) {
+    if (Array.isArray(id)) {
+      return id[0];
+    } else {
+      return id;
+    }
+  }
+  // 从 asPath 中解析 id，获取最后一个 '/' 后的部分
+  const asPath = router.asPath.split('?')[0]; // 移除查询参数
+  const pathSegments = asPath.split('/');
+  return pathSegments[pathSegments.length - 1] || '';
+}
