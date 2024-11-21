@@ -55,8 +55,6 @@ public partial class ChatsDB : DbContext
 
     public virtual DbSet<Prompt> Prompts { get; set; }
 
-    public virtual DbSet<Session> Sessions { get; set; }
-
     public virtual DbSet<SmsAttempt> SmsAttempts { get; set; }
 
     public virtual DbSet<SmsRecord> SmsRecords { get; set; }
@@ -81,8 +79,6 @@ public partial class ChatsDB : DbContext
 
     public virtual DbSet<UserInitialConfig> UserInitialConfigs { get; set; }
 
-    public virtual DbSet<UserInvitation> UserInvitations { get; set; }
-
     public virtual DbSet<UserModel> UserModels { get; set; }
 
     public virtual DbSet<UserModelUsage> UserModelUsages { get; set; }
@@ -96,7 +92,9 @@ public partial class ChatsDB : DbContext
         {
             entity.HasKey(e => e.Id).HasName("PK_BalanceLog2");
 
-            entity.HasOne(d => d.CreditUser).WithMany(p => p.BalanceTransactionCreditUsers).HasConstraintName("FK_BalanceLog2_CreditUser");
+            entity.HasOne(d => d.CreditUser).WithMany(p => p.BalanceTransactionCreditUsers)
+                .OnDelete(DeleteBehavior.ClientSetNull)
+                .HasConstraintName("FK_BalanceTransaction_CreditUserId");
 
             entity.HasOne(d => d.TransactionType).WithMany(p => p.BalanceTransactions)
                 .OnDelete(DeleteBehavior.ClientSetNull)
@@ -104,7 +102,7 @@ public partial class ChatsDB : DbContext
 
             entity.HasOne(d => d.User).WithMany(p => p.BalanceTransactionUsers)
                 .OnDelete(DeleteBehavior.ClientSetNull)
-                .HasConstraintName("FK_BalanceLog2_Users");
+                .HasConstraintName("FK_BalanceTransaction_UserId");
         });
 
         modelBuilder.Entity<Chat>(entity =>
@@ -117,7 +115,7 @@ public partial class ChatsDB : DbContext
 
             entity.HasOne(d => d.User).WithMany(p => p.Chats)
                 .OnDelete(DeleteBehavior.ClientSetNull)
-                .HasConstraintName("FK_Conversation2_Users");
+                .HasConstraintName("FK_Chat_UserId");
         });
 
         modelBuilder.Entity<ClientInfo>(entity =>
@@ -143,23 +141,17 @@ public partial class ChatsDB : DbContext
 
         modelBuilder.Entity<FileService>(entity =>
         {
-            entity.HasKey(e => e.Id).HasName("FileServices_pkey");
-
-            entity.Property(e => e.Id).ValueGeneratedNever();
+            entity.HasKey(e => e.Id).HasName("PK_FileServices2");
         });
 
         modelBuilder.Entity<InvitationCode>(entity =>
         {
-            entity.HasKey(e => e.Id).HasName("InvitationCode_pkey");
-
-            entity.Property(e => e.Id).ValueGeneratedNever();
+            entity.HasKey(e => e.Id).HasName("InvitationCode2_pkey");
         });
 
         modelBuilder.Entity<LoginService>(entity =>
         {
-            entity.HasKey(e => e.Id).HasName("LoginServices_pkey");
-
-            entity.Property(e => e.Id).ValueGeneratedNever();
+            entity.HasKey(e => e.Id).HasName("PK_LoginServices2");
         });
 
         modelBuilder.Entity<Message>(entity =>
@@ -195,7 +187,7 @@ public partial class ChatsDB : DbContext
 
         modelBuilder.Entity<Model>(entity =>
         {
-            entity.HasOne(d => d.FileService).WithMany(p => p.Models).HasConstraintName("FK_Model_FileService");
+            entity.HasOne(d => d.FileService).WithMany(p => p.Models).HasConstraintName("FK_Model_FileServiceId");
 
             entity.HasOne(d => d.ModelKey).WithMany(p => p.Models)
                 .OnDelete(DeleteBehavior.ClientSetNull)
@@ -244,18 +236,9 @@ public partial class ChatsDB : DbContext
         {
             entity.HasKey(e => e.Id).HasName("PK_Prompt2");
 
-            entity.HasOne(d => d.CreateUser).WithMany(p => p.Prompts).HasConstraintName("FK_Prompt2_User");
-        });
-
-        modelBuilder.Entity<Session>(entity =>
-        {
-            entity.HasKey(e => e.Id).HasName("PK_Sessions");
-
-            entity.Property(e => e.Id).ValueGeneratedNever();
-
-            entity.HasOne(d => d.User).WithMany(p => p.Sessions)
+            entity.HasOne(d => d.CreateUser).WithMany(p => p.Prompts)
                 .OnDelete(DeleteBehavior.ClientSetNull)
-                .HasConstraintName("FK_Sessions_userId");
+                .HasConstraintName("FK_Prompt_CreateUserId");
         });
 
         modelBuilder.Entity<SmsAttempt>(entity =>
@@ -278,6 +261,8 @@ public partial class ChatsDB : DbContext
             entity.HasOne(d => d.Type).WithMany(p => p.SmsRecords)
                 .OnDelete(DeleteBehavior.ClientSetNull)
                 .HasConstraintName("FK_SmsHistory_SmsType");
+
+            entity.HasOne(d => d.User).WithMany(p => p.SmsRecords).HasConstraintName("FK_SmsRecord_UserId");
         });
 
         modelBuilder.Entity<Tokenizer>(entity =>
@@ -305,16 +290,31 @@ public partial class ChatsDB : DbContext
 
         modelBuilder.Entity<User>(entity =>
         {
-            entity.HasKey(e => e.Id).HasName("Users_pkey");
+            entity.HasKey(e => e.Id).HasName("Users2_pkey");
 
-            entity.Property(e => e.Id).ValueGeneratedNever();
+            entity.HasMany(d => d.InvitationCodes).WithMany(p => p.Users)
+                .UsingEntity<Dictionary<string, object>>(
+                    "UserInvitation",
+                    r => r.HasOne<InvitationCode>().WithMany()
+                        .HasForeignKey("InvitationCodeId")
+                        .OnDelete(DeleteBehavior.ClientSetNull)
+                        .HasConstraintName("FK_UserInvitation_InvitationCode"),
+                    l => l.HasOne<User>().WithMany()
+                        .HasForeignKey("UserId")
+                        .OnDelete(DeleteBehavior.ClientSetNull)
+                        .HasConstraintName("FK_UserInvitation_Users"),
+                    j =>
+                    {
+                        j.HasKey("UserId", "InvitationCodeId").HasName("PK_UserInvitation_1");
+                        j.ToTable("UserInvitation");
+                    });
         });
 
         modelBuilder.Entity<UserApiKey>(entity =>
         {
             entity.HasOne(d => d.User).WithMany(p => p.UserApiKeys)
                 .OnDelete(DeleteBehavior.ClientSetNull)
-                .HasConstraintName("FK_UserApiKey_Users");
+                .HasConstraintName("FK_UserApiKey_UserId");
 
             entity.HasMany(d => d.Models).WithMany(p => p.ApiKeys)
                 .UsingEntity<Dictionary<string, object>>(
@@ -346,35 +346,11 @@ public partial class ChatsDB : DbContext
 
         modelBuilder.Entity<UserBalance>(entity =>
         {
-            entity.HasKey(e => e.Id).HasName("UserBalances_pkey");
-
-            entity.Property(e => e.Id).ValueGeneratedNever();
+            entity.HasKey(e => e.Id).HasName("PK_UserBalances2");
 
             entity.HasOne(d => d.User).WithOne(p => p.UserBalance)
                 .OnDelete(DeleteBehavior.ClientSetNull)
-                .HasConstraintName("UserBalances_userId_fkey");
-        });
-
-        modelBuilder.Entity<UserInitialConfig>(entity =>
-        {
-            entity.HasKey(e => e.Id).HasName("UserInitialConfig_pkey");
-
-            entity.Property(e => e.Id).ValueGeneratedNever();
-
-            entity.HasOne(d => d.InvitationCode).WithMany(p => p.UserInitialConfigs).HasConstraintName("FK_UserInitialConfig_InvitationCode");
-        });
-
-        modelBuilder.Entity<UserInvitation>(entity =>
-        {
-            entity.HasKey(e => new { e.UserId, e.InvitationCodeId }).HasName("PK_UserInvitation_1");
-
-            entity.HasOne(d => d.InvitationCode).WithMany(p => p.UserInvitations)
-                .OnDelete(DeleteBehavior.ClientSetNull)
-                .HasConstraintName("FK_UserInvitation_InvitationCode");
-
-            entity.HasOne(d => d.User).WithOne(p => p.UserInvitation)
-                .OnDelete(DeleteBehavior.ClientSetNull)
-                .HasConstraintName("FK_UserInvitation_Users");
+                .HasConstraintName("FK_UserBalance_UserId");
         });
 
         modelBuilder.Entity<UserModel>(entity =>
@@ -387,7 +363,7 @@ public partial class ChatsDB : DbContext
 
             entity.HasOne(d => d.User).WithMany(p => p.UserModels)
                 .OnDelete(DeleteBehavior.ClientSetNull)
-                .HasConstraintName("FK_UserModel2_User");
+                .HasConstraintName("FK_UserModel_UserId");
         });
 
         modelBuilder.Entity<UserModelUsage>(entity =>

@@ -7,11 +7,10 @@ using Microsoft.EntityFrameworkCore;
 namespace Chats.BE.DB;
 
 [Table("UserInitialConfig")]
-[Index("InvitationCodeId", Name = "IX_UserInitialConfig_InvitationCodeId")]
 public partial class UserInitialConfig
 {
     [Key]
-    public Guid Id { get; set; }
+    public int Id { get; set; }
 
     [StringLength(50)]
     public string Name { get; set; } = null!;
@@ -29,9 +28,5 @@ public partial class UserInitialConfig
 
     public DateTime UpdatedAt { get; set; }
 
-    public Guid? InvitationCodeId { get; set; }
-
-    [ForeignKey("InvitationCodeId")]
-    [InverseProperty("UserInitialConfigs")]
-    public virtual InvitationCode? InvitationCode { get; set; }
+    public int? InvitationCodeId { get; set; }
 }

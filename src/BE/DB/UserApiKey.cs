@@ -8,13 +8,11 @@ namespace Chats.BE.DB;
 
 [Table("UserApiKey")]
 [Index("Key", Name = "IX_UserApiKey_Key", IsUnique = true)]
-[Index("UserId", Name = "IX_UserApiKey_User")]
+[Index("UserId", Name = "IX_UserApiKey_UserId")]
 public partial class UserApiKey
 {
     [Key]
     public int Id { get; set; }
-
-    public Guid UserId { get; set; }
 
     [StringLength(200)]
     [Unicode(false)]
@@ -36,6 +34,8 @@ public partial class UserApiKey
     public DateTime CreatedAt { get; set; }
 
     public DateTime UpdatedAt { get; set; }
+
+    public int UserId { get; set; }
 
     [ForeignKey("UserId")]
     [InverseProperty("UserApiKeys")]

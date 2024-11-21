@@ -7,8 +7,8 @@ using Microsoft.EntityFrameworkCore;
 namespace Chats.BE.DB;
 
 [Table("Prompt")]
-[Index("CreateUserId", Name = "IX_Prompt2_CreateUserId")]
 [Index("Name", Name = "IX_Prompt2_Name")]
+[Index("CreateUserId", Name = "IX_Prompt_CreateUserId")]
 public partial class Prompt
 {
     [Key]
@@ -23,11 +23,11 @@ public partial class Prompt
 
     public bool IsSystem { get; set; }
 
-    public Guid CreateUserId { get; set; }
-
     public DateTime CreatedAt { get; set; }
 
     public DateTime UpdatedAt { get; set; }
+
+    public int CreateUserId { get; set; }
 
     [ForeignKey("CreateUserId")]
     [InverseProperty("Prompts")]

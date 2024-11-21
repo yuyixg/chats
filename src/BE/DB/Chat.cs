@@ -7,8 +7,8 @@ using Microsoft.EntityFrameworkCore;
 namespace Chats.BE.DB;
 
 [Table("Chat")]
+[Index("UserId", Name = "IX_Chat_UserId")]
 [Index("ModelId", Name = "IX_Conversation2_Model")]
-[Index("UserId", Name = "IX_Conversation2_User")]
 public partial class Chat
 {
     [Key]
@@ -16,8 +16,6 @@ public partial class Chat
 
     [StringLength(50)]
     public string Title { get; set; } = null!;
-
-    public Guid UserId { get; set; }
 
     public short ModelId { get; set; }
 
@@ -30,6 +28,8 @@ public partial class Chat
     public bool IsDeleted { get; set; }
 
     public DateTime CreatedAt { get; set; }
+
+    public int UserId { get; set; }
 
     [InverseProperty("Conversation")]
     public virtual ICollection<Message> Messages { get; set; } = new List<Message>();

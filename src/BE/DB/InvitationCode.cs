@@ -7,26 +7,24 @@ using Microsoft.EntityFrameworkCore;
 namespace Chats.BE.DB;
 
 [Table("InvitationCode")]
-[Index("Value", Name = "InvitationCode_value_key", IsUnique = true)]
+[Index("Value", Name = "InvitationCode2_value_key", IsUnique = true)]
 public partial class InvitationCode
 {
     [Key]
-    public Guid Id { get; set; }
+    public int Id { get; set; }
 
-    [StringLength(1000)]
+    [StringLength(100)]
     public string Value { get; set; } = null!;
 
     public short Count { get; set; }
-
-    public Guid CreateUserId { get; set; }
 
     public DateTime CreatedAt { get; set; }
 
     public bool IsDeleted { get; set; }
 
-    [InverseProperty("InvitationCode")]
-    public virtual ICollection<UserInitialConfig> UserInitialConfigs { get; set; } = new List<UserInitialConfig>();
+    public int CreateUserId { get; set; }
 
-    [InverseProperty("InvitationCode")]
-    public virtual ICollection<UserInvitation> UserInvitations { get; set; } = new List<UserInvitation>();
+    [ForeignKey("InvitationCodeId")]
+    [InverseProperty("InvitationCodes")]
+    public virtual ICollection<User> Users { get; set; } = new List<User>();
 }

@@ -29,8 +29,6 @@ public partial class Model
 
     public short? Order { get; set; }
 
-    public Guid? FileServiceId { get; set; }
-
     [Column(TypeName = "decimal(9, 5)")]
     public decimal PromptTokenPrice1M { get; set; }
 
@@ -42,6 +40,8 @@ public partial class Model
     public DateTime CreatedAt { get; set; }
 
     public DateTime UpdatedAt { get; set; }
+
+    public int? FileServiceId { get; set; }
 
     [InverseProperty("Model")]
     public virtual ICollection<Chat> Chats { get; set; } = new List<Chat>();

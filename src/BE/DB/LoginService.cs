@@ -10,7 +10,7 @@ namespace Chats.BE.DB;
 public partial class LoginService
 {
     [Key]
-    public Guid Id { get; set; }
+    public int Id { get; set; }
 
     [StringLength(1000)]
     public string Type { get; set; } = null!;

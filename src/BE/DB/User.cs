@@ -10,7 +10,7 @@ namespace Chats.BE.DB;
 public partial class User
 {
     [Key]
-    public Guid Id { get; set; }
+    public int Id { get; set; }
 
     [StringLength(1000)]
     public string? Avatar { get; set; }
@@ -58,7 +58,7 @@ public partial class User
     public virtual ICollection<Prompt> Prompts { get; set; } = new List<Prompt>();
 
     [InverseProperty("User")]
-    public virtual ICollection<Session> Sessions { get; set; } = new List<Session>();
+    public virtual ICollection<SmsRecord> SmsRecords { get; set; } = new List<SmsRecord>();
 
     [InverseProperty("User")]
     public virtual ICollection<UserApiKey> UserApiKeys { get; set; } = new List<UserApiKey>();
@@ -67,8 +67,9 @@ public partial class User
     public virtual UserBalance? UserBalance { get; set; }
 
     [InverseProperty("User")]
-    public virtual UserInvitation? UserInvitation { get; set; }
-
-    [InverseProperty("User")]
     public virtual ICollection<UserModel> UserModels { get; set; } = new List<UserModel>();
+
+    [ForeignKey("UserId")]
+    [InverseProperty("Users")]
+    public virtual ICollection<InvitationCode> InvitationCodes { get; set; } = new List<InvitationCode>();
 }

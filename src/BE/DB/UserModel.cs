@@ -8,13 +8,11 @@ namespace Chats.BE.DB;
 
 [Table("UserModel")]
 [Index("ModelId", Name = "IX_UserModel2_ModelId")]
-[Index("UserId", Name = "IX_UserModel2_UserId")]
+[Index("UserId", Name = "IX_UserModel_UserId")]
 public partial class UserModel
 {
     [Key]
     public int Id { get; set; }
-
-    public Guid UserId { get; set; }
 
     public short ModelId { get; set; }
 
@@ -29,6 +27,8 @@ public partial class UserModel
     public DateTime CreatedAt { get; set; }
 
     public DateTime UpdatedAt { get; set; }
+
+    public int UserId { get; set; }
 
     [ForeignKey("ModelId")]
     [InverseProperty("UserModels")]

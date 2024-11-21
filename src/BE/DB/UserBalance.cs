@@ -7,21 +7,20 @@ using Microsoft.EntityFrameworkCore;
 namespace Chats.BE.DB;
 
 [Table("UserBalance")]
-[Index("UserId", Name = "IDX_UserBalances_userId")]
 [Index("UserId", Name = "UserBalances_userId_key", IsUnique = true)]
 public partial class UserBalance
 {
     [Key]
-    public Guid Id { get; set; }
+    public int Id { get; set; }
 
     [Column(TypeName = "decimal(32, 16)")]
     public decimal Balance { get; set; }
 
-    public Guid UserId { get; set; }
-
     public DateTime CreatedAt { get; set; }
 
     public DateTime UpdatedAt { get; set; }
+
+    public int UserId { get; set; }
 
     [ForeignKey("UserId")]
     [InverseProperty("UserBalance")]

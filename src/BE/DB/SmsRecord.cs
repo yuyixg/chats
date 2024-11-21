@@ -8,13 +8,11 @@ namespace Chats.BE.DB;
 
 [Table("SmsRecord")]
 [Index("PhoneNumber", Name = "IX_SmsHistory_PhoneNumber")]
-[Index("UserId", Name = "IX_SmsHistory_UserId")]
+[Index("UserId", Name = "IX_SmsRecord_UserId")]
 public partial class SmsRecord
 {
     [Key]
     public int Id { get; set; }
-
-    public Guid? UserId { get; set; }
 
     [StringLength(20)]
     [Unicode(false)]
@@ -30,6 +28,8 @@ public partial class SmsRecord
 
     public DateTime CreatedAt { get; set; }
 
+    public int? UserId { get; set; }
+
     [InverseProperty("SmsRecord")]
     public virtual ICollection<SmsAttempt> SmsAttempts { get; set; } = new List<SmsAttempt>();
 
@@ -40,4 +40,8 @@ public partial class SmsRecord
     [ForeignKey("TypeId")]
     [InverseProperty("SmsRecords")]
     public virtual SmsType Type { get; set; } = null!;
+
+    [ForeignKey("UserId")]
+    [InverseProperty("SmsRecords")]
+    public virtual User? User { get; set; }
 }
