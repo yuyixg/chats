@@ -16,7 +16,7 @@ namespace Chats.BE;
 
 public class Program
 {
-    public static async void Main(string[] args)
+    public static async Task Main(string[] args)
     {
         WebApplicationBuilder builder = WebApplication.CreateBuilder(args);
 
@@ -83,6 +83,6 @@ public class Program
         // before run:
         await app.Services.GetRequiredService<JwtKeyManager>().GetOrCreateSecretKey(CancellationToken.None);
 
-        app.Run();
+        await app.RunAsync();
     }
 }

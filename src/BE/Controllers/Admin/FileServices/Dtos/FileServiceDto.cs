@@ -6,7 +6,7 @@ namespace Chats.BE.Controllers.Admin.FileServices.Dtos;
 public record FileServiceSimpleDto
 {
     [JsonPropertyName("id")]
-    public required Guid Id { get; init; }
+    public required int Id { get; init; }
 
     [JsonPropertyName("name")]
     public required string Name { get; init; }

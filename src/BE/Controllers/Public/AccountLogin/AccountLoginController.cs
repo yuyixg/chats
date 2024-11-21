@@ -194,7 +194,6 @@ public class AccountLoginController(ChatsDB db, ILogger<AccountLoginController> 
 
         User user = new()
         {
-            Id = Guid.NewGuid(),
             Phone = req.Phone,
             Enabled = true,
             CreatedAt = DateTime.UtcNow,
@@ -208,11 +207,7 @@ public class AccountLoginController(ChatsDB db, ILogger<AccountLoginController> 
             Role = "-",
             Sub = null, 
         };
-        user.UserInvitation = new UserInvitation()
-        {
-            UserId = user.Id,
-            InvitationCodeId = code.Id,
-        };
+        user.InvitationCodes.Add(code);
         db.Users.Add(user);
         await userManager.InitializeUserWithoutSave(user, KnownLoginProviders.Phone, req.InvitationCode, cancellationToken);
         await db.SaveChangesAsync(cancellationToken);

@@ -5,7 +5,7 @@ namespace Chats.BE.Controllers.Admin.UserBalances.Dtos;
 public record ChargeBalanceRequest
 {
     [JsonPropertyName("userId")]
-    public required Guid UserId { get; init; }
+    public required int UserId { get; init; }
 
     [JsonPropertyName("value")]
     public required decimal Amount { get; init; }

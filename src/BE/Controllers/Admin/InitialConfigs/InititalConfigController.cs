@@ -68,7 +68,6 @@ public class InititalConfigController(ChatsDB db) : ControllerBase
     {
         UserInitialConfig newOne = new()
         {
-            Id = Guid.NewGuid(), 
             CreatedAt = DateTime.UtcNow, 
             UpdatedAt = DateTime.UtcNow, 
         };

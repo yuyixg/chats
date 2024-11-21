@@ -6,7 +6,7 @@ namespace Chats.BE.Controllers.Admin.AdminModels.Dtos;
 public record UpdateUserModelRequest
 {
     [JsonPropertyName("userId")]
-    public required Guid UserId { get; init; }
+    public required int UserId { get; init; }
 
     [JsonPropertyName("models")]
     public required UserModelUpdateDto[] Models { get; init; }

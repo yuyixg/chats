@@ -5,7 +5,7 @@ namespace Chats.BE.Services;
 
 public class UserModelManager(ChatsDB db)
 {
-    public async Task<UserModel?> GetUserModel(Guid userId, short modelId, CancellationToken cancellationToken)
+    public async Task<UserModel?> GetUserModel(int userId, short modelId, CancellationToken cancellationToken)
     {
         UserModel? balances = await db.UserModels
             .Include(x => x.Model)
@@ -21,7 +21,7 @@ public class UserModelManager(ChatsDB db)
         return balances;
     }
 
-    private async Task<UserModel?> GetUserModel(Guid userId, string modelName, CancellationToken cancellationToken)
+    private async Task<UserModel?> GetUserModel(int userId, string modelName, CancellationToken cancellationToken)
     {
         UserModel? balances = await db.UserModels
             .Include(x => x.Model)
@@ -56,7 +56,7 @@ public class UserModelManager(ChatsDB db)
         }
     }
 
-    public async Task<UserModel[]> GetValidModelsByUserId(Guid userId, CancellationToken cancellationToken)
+    public async Task<UserModel[]> GetValidModelsByUserId(int userId, CancellationToken cancellationToken)
     {
         UserModel[] balances = await db.UserModels
             .Include(x => x.Model)

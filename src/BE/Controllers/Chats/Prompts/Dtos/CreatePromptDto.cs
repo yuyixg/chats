@@ -17,7 +17,7 @@ public record CreatePromptDto
     [JsonPropertyName("isDefault")]
     public bool IsDefault { get; init; }
 
-    public Prompt ToPrompt(Guid createUserId, bool isAdmin) => new()
+    public Prompt ToPrompt(int createUserId, bool isAdmin) => new()
     {
         Name = Name,
         Content = Content,

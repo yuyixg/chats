@@ -23,7 +23,7 @@ public class UserInitialConfigUpdateRequest
     public required string Price { get; init; }
 
     [JsonPropertyName("invitationCodeId")]
-    public required Guid? InvitationCodeId { get; init; }
+    public required int? InvitationCodeId { get; init; }
 
     public void ApplyTo(UserInitialConfig config)
     {
@@ -50,7 +50,7 @@ public class UserInitialConfigCreateRequest
     public required string Price { get; init; }
 
     [JsonPropertyName("invitationCodeId")]
-    public required Guid? InvitationCodeId { get; init; }
+    public required int? InvitationCodeId { get; init; }
 
     public void ApplyTo(UserInitialConfig config)
     {

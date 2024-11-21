@@ -5,7 +5,7 @@ namespace Chats.BE.Services;
 
 public class BalanceService(IServiceScopeFactory serviceScopeFactory)
 {
-    public Task AsyncUpdateBalance(Guid userId, CancellationToken cancellationToken)
+    public Task AsyncUpdateBalance(int userId, CancellationToken cancellationToken)
     {
         return Task.Run(async () =>
         {
@@ -15,7 +15,7 @@ public class BalanceService(IServiceScopeFactory serviceScopeFactory)
         }, cancellationToken);
     }
 
-    public async Task UpdateBalance(ChatsDB db, Guid userId, CancellationToken cancellationToken)
+    public async Task UpdateBalance(ChatsDB db, int userId, CancellationToken cancellationToken)
     {
         await db.UserBalances
             .Where(x => x.UserId == userId)

@@ -10,7 +10,7 @@ namespace Chats.BE.Controllers.Admin.LoginServices.Dtos;
 public record LoginServiceDto
 {
     [JsonPropertyName("id")]
-    public required Guid Id { get; init; }
+    public required int Id { get; init; }
 
     [JsonPropertyName("type")]
     public required string Type { get; init; }
@@ -28,7 +28,7 @@ public record LoginServiceDto
 
 public record LoginServiceDtoTemp
 {
-    public required Guid Id { get; init; }
+    public required int Id { get; init; }
 
     public required string Type { get; init; }
 

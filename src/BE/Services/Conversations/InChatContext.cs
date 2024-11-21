@@ -74,7 +74,7 @@ public class InChatContext()
 
     public InternalChatSegment FullResponse => _lastSegment with { TextSegment = _fullResult.ToString() };
 
-    public UserModelUsage ToUserModelUsage(Guid userId, ClientInfo clientInfo, bool isApi)
+    public UserModelUsage ToUserModelUsage(int userId, ClientInfo clientInfo, bool isApi)
     {
         if (_finishTick == 0) _finishTick = Stopwatch.GetTimestamp();
 

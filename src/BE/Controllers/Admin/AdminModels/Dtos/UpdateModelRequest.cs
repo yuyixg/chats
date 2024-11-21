@@ -21,7 +21,7 @@ public record UpdateModelRequest
     public required short ModelKeyId { get; init; }
 
     [JsonPropertyName("fileServiceId")]
-    public Guid? FileServiceId { get; init; }
+    public int? FileServiceId { get; init; }
 
     [JsonPropertyName("inputTokenPrice1M")]
     public required decimal InputTokenPrice1M { get; init; }

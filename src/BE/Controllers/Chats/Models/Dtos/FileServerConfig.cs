@@ -6,7 +6,7 @@ namespace Chats.BE.Controllers.Chats.Models.Dtos;
 public record FileServerConfig
 {
     [JsonPropertyName("id")]
-    public required Guid Id { get; init; }
+    public required int Id { get; init; }
 
     [JsonPropertyName("type")]
     public required string Type { get; init; }

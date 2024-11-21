@@ -142,8 +142,8 @@ public class AdminModelsController(ChatsDB db) : ControllerBase
         }
     }
 
-    [HttpGet("user-models/{userId:guid}")]
-    public async Task<ActionResult<IEnumerable<UserModelDto>>> GetUserModels(Guid userId, CancellationToken cancellationToken)
+    [HttpGet("user-models/{userId:int}")]
+    public async Task<ActionResult<IEnumerable<UserModelDto>>> GetUserModels(int userId, CancellationToken cancellationToken)
     {
         UserModelDto[] userModels = await db.Models
             .Where(x => !x.IsDeleted)

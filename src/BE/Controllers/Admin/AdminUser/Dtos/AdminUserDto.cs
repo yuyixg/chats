@@ -1,14 +1,11 @@
-﻿using Chats.BE.DB;
-using Chats.BE.DB.Jsons;
-using System.Text.Json;
-using System.Text.Json.Serialization;
+﻿using System.Text.Json.Serialization;
 
 namespace Chats.BE.Controllers.Admin.AdminUser.Dtos;
 
 public record AdminUserDto
 {
     [JsonPropertyName("id")]
-    public required Guid Id { get; init; }
+    public required int Id { get; init; }
 
     [JsonPropertyName("username")]
     public required string Username { get; init; }
@@ -49,7 +46,7 @@ public record AdminUserDto
 
 public record AdminUserDtoTemp
 {
-    public required Guid Id { get; init; }
+    public required int Id { get; init; }
     public required string Username { get; init; }
     public required string Account { get; init; }
     public required string Role { get; init; }

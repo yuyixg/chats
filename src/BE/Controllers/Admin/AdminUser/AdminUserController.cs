@@ -68,7 +68,6 @@ public class AdminUserController(ChatsDB db) : ControllerBase
 
         User user = new()
         {
-            Id = Guid.NewGuid(),
             Account = dto.UserName,
             Username = dto.UserName,
             Email = dto.Email,

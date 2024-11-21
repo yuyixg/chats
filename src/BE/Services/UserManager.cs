@@ -22,7 +22,6 @@ public class UserManager(ChatsDB db)
         {
             user = new User
             {
-                Id = Guid.NewGuid(), 
                 Provider = KnownLoginProviders.Keycloak,
                 Sub = token.Sub,
                 Account = token.GetSuggestedUserName(),

@@ -69,7 +69,6 @@ public class FileServiceController(ChatsDB db) : ControllerBase
     {
         db.FileServices.Add(new FileService
         {
-            Id = Guid.NewGuid(),
             Name = req.Name,
             Type = req.Type,
             Enabled = req.Enabled,
@@ -80,8 +79,8 @@ public class FileServiceController(ChatsDB db) : ControllerBase
         await db.SaveChangesAsync();
     }
 
-    [HttpDelete("{fileServiceId}")]
-    public async Task<ActionResult> DeleteFileService(Guid fileServiceId, CancellationToken cancellationToken)
+    [HttpDelete("{fileServiceId:int}")]
+    public async Task<ActionResult> DeleteFileService(int fileServiceId, CancellationToken cancellationToken)
     {
         if (await db.Models
             .Where(x => x.FileServiceId == fileServiceId)
