@@ -206,9 +206,10 @@ public class AccountLoginController(ChatsDB db, ILogger<AccountLoginController> 
             Provider = KnownLoginProviders.Phone,
             Role = "-",
             Sub = null, 
+            InvitationCodes = [code]
         };
-        user.InvitationCodes.Add(code);
         db.Users.Add(user);
+        await db.SaveChangesAsync(cancellationToken); // save first to get userId out
         await userManager.InitializeUserWithoutSave(user, KnownLoginProviders.Phone, req.InvitationCode, cancellationToken);
         await db.SaveChangesAsync(cancellationToken);
         return Ok(await sessionManager.GenerateSessionForUser(user, cancellationToken));

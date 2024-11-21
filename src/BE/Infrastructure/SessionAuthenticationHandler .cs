@@ -1,6 +1,7 @@
 ﻿using Chats.BE.Services.Sessions;
 using Microsoft.AspNetCore.Authentication;
 using Microsoft.Extensions.Options;
+using Microsoft.Extensions.Primitives;
 using Microsoft.IdentityModel.Tokens;
 using System.Security.Claims;
 using System.Text.Encodings.Web;
@@ -13,18 +14,21 @@ public class SessionAuthenticationHandler(
     SessionManager sessionManager,
     UrlEncoder encoder) : AuthenticationHandler<AuthenticationSchemeOptions>(options, loggerFactory, encoder)
 {
-    private readonly ILogger<SessionAuthenticationHandler> _logger = loggerFactory.CreateLogger<SessionAuthenticationHandler>();
-
     protected override async Task<AuthenticateResult> HandleAuthenticateAsync()
     {
-        if (!Request.Headers.TryGetValue("Authorization", out var authorizationHeader))
+        if (!Request.Headers.TryGetValue("Authorization", out StringValues authorizationHeader))
         {
             return AuthenticateResult.NoResult();
         }
 
         string authorizationHeaderString = authorizationHeader.ToString();
-        string jwt = authorizationHeaderString.Split(' ').Last();
+        string[] segments = authorizationHeaderString.Split(' ');
+        if (segments.Length != 2 || segments[0] != "Bearer")
+        {
+            return AuthenticateResult.Fail("Invalid authorization header");
+        }
 
+        string jwt = segments[1];
         try
         {
             SessionEntry userInfo = await sessionManager.GetCachedUserInfoBySession(jwt);

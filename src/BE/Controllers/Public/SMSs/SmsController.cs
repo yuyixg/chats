@@ -124,15 +124,16 @@ public class SmsController(ChatsDB db, GlobalDBConfig globalConfig, ILogger<SmsC
             return this.BadRequestMessage("Failed to send sms.");
         }
 
-        db.SmsRecords.Add(new SmsRecord
+        SmsRecord toInsert = new()
         {
             PhoneNumber = phone,
             TypeId = (byte)type,
             StatusId = (byte)DBSmsStatus.WaitingForVerification,
             ExpectedCode = code,
             CreatedAt = DateTime.UtcNow,
-            UserId = db.Users.Where(x => x.Phone == phone).Select(x => x.Id).FirstOrDefault()
-        });
+            UserId = db.Users.Where(x => x.Phone == phone).Select(x => (int?)x.Id).FirstOrDefault()
+        };
+        db.SmsRecords.Add(toInsert);
         await db.SaveChangesAsync(cancellationToken);
         return NoContent();
     }
