@@ -22,7 +22,7 @@ public class InChatContext()
 
     public async IAsyncEnumerable<InternalChatSegment> Run(decimal userBalance, UserModel userModel, IAsyncEnumerable<InternalChatSegment> segments)
     {
-        //_preprocessTick = Stopwatch.GetTimestamp();
+        _preprocessTick = Stopwatch.GetTimestamp(); // ensure _preprocessTick is not 0
         _userModel = userModel;
         if (userModel.ExpiresAt.IsExpired())
         {
