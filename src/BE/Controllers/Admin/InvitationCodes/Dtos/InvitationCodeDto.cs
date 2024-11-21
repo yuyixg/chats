@@ -5,7 +5,7 @@ namespace Chats.BE.Controllers.Admin.InvitationCodes.Dtos;
 public record InvitationCodeDto
 {
     [JsonPropertyName("id")]
-    public required Guid Id { get; init; }
+    public required int Id { get; init; }
 
     [JsonPropertyName("value")]
     public required string Value { get; init; }

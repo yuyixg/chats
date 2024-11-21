@@ -46,7 +46,6 @@ public class UserManager(ChatsDB db)
     {
         newUser.UserBalance = new()
         {
-            Id = Guid.NewGuid(),
             UserId = newUser.Id,
             Balance = 0,
             CreatedAt = DateTime.UtcNow,

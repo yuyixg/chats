@@ -8,14 +8,14 @@ public class CurrentUser
     {
         var httpContext = httpContextAccessor.HttpContext ?? throw new InvalidOperationException("HttpContext is null");
 
-        Id = Guid.TryParse(httpContext.User.FindFirstValue(ClaimTypes.NameIdentifier), out Guid guid) ? guid : throw new InvalidOperationException("User id is not a guid");
+        Id = int.TryParse(httpContext.User.FindFirstValue(ClaimTypes.NameIdentifier), out int id) ? id : throw new InvalidOperationException("User id is not a int");
         DisplayName = httpContext.User.FindFirstValue(ClaimTypes.Name) ?? throw new InvalidOperationException("User name is null");
         Role = httpContext.User.FindFirstValue(ClaimTypes.Role) ?? throw new InvalidOperationException("User role is null");
         Provider = httpContext.User.FindFirstValue("provider");
         ProviderSub = httpContext.User.FindFirstValue("provider-sub");
     }
 
-    public Guid Id { get; }
+    public int Id { get; }
     public string DisplayName { get; }
     public string Role { get; }
     public string? Provider { get; }

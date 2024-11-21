@@ -8,7 +8,7 @@ namespace Chats.BE.Controllers.Admin.InitialConfigs.Dtos;
 public class UserInitialConfigDto
 {
     [JsonPropertyName("id")]
-    public required Guid Id { get; init; }
+    public required int Id { get; init; }
 
     [JsonPropertyName("name")]
     public required string Name { get; init; }
@@ -31,7 +31,7 @@ public class UserInitialConfigDto
 
 public class UserInitialConfigDtoTemp
 {
-    public required Guid Id { get; init; }
+    public required int Id { get; init; }
 
     public required string Name { get; init; }
 
@@ -41,7 +41,7 @@ public class UserInitialConfigDtoTemp
 
     public required decimal Price { get; init; }
 
-    public required Guid? InvitationCodeId { get; init; }
+    public required int? InvitationCodeId { get; init; }
 
     public required string InvitationCode { get; init; }
 

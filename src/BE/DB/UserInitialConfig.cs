@@ -29,4 +29,6 @@ public partial class UserInitialConfig
     public DateTime UpdatedAt { get; set; }
 
     public int? InvitationCodeId { get; set; }
+
+    public InvitationCode? InvitationCode { get; set; }
 }

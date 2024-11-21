@@ -5,7 +5,7 @@ namespace Chats.BE.Controllers.Admin.InvitationCodes.Dtos;
 public record UpdateInvitationCodeRequest
 {
     [JsonPropertyName("id")]
-    public required Guid Id { get; init; }
+    public required int Id { get; init; }
 
     [JsonPropertyName("count")]
     public required short Count { get; init; }

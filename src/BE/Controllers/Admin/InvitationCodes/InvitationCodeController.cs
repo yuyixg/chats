@@ -1,6 +1,5 @@
 ﻿using Chats.BE.Controllers.Admin.Common;
 using Chats.BE.Controllers.Admin.InvitationCodes.Dtos;
-using Chats.BE.Controllers.Common;
 using Chats.BE.DB;
 using Chats.BE.Infrastructure;
 using Microsoft.AspNetCore.Mvc;
@@ -47,15 +46,18 @@ public class InvitationCodeController(ChatsDB db) : ControllerBase
     }
 
     [HttpDelete("{invitationCodeId}")]
-    public async Task<ActionResult> DeleteInvitationCode(Guid invitationCodeId, CancellationToken cancellationToken)
+    public async Task<ActionResult> DeleteInvitationCode(int invitationCodeId, CancellationToken cancellationToken)
     {
-        InvitationCode? code = await db.InvitationCodes.FindAsync([invitationCodeId], cancellationToken);
+        InvitationCode? code = await db.InvitationCodes
+            .Include(x => x.Users)
+            .Where(x => x.Id == invitationCodeId)
+            .FirstOrDefaultAsync(cancellationToken);
         if (code == null)
         {
             return NotFound();
         }
 
-        if (await db.UserInvitations.AnyAsync(x => x.InvitationCodeId == invitationCodeId, cancellationToken))
+        if (code.Users.Count != 0)
         {
             code.IsDeleted = true;
         }
@@ -73,7 +75,6 @@ public class InvitationCodeController(ChatsDB db) : ControllerBase
     {
         db.InvitationCodes.Add(new InvitationCode()
         {
-            Id = Guid.NewGuid(), 
             Value = req.Name,
             Count = req.Count,
             CreatedAt = DateTime.UtcNow,
