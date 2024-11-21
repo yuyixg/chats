@@ -49,7 +49,7 @@ public class InChatContext()
                 if (seg.IsFromUpstream)
                 {
                     _segmentCount++;
-                    _firstResponseTick = Stopwatch.GetTimestamp();
+                    if (_firstResponseTick == 0) _firstResponseTick = Stopwatch.GetTimestamp();
                 }
                 _lastSegment = seg;
                 _fullResult.Append(seg.TextSegment);
