@@ -18,7 +18,7 @@ public class TestConversationService(Model model) : ConversationService(model)
             Test success!
             inputTokens: {{inputTokens}}, outputTokens: ~{outputTokens}
             """;
-        string output = outputTemplate.Replace("{inputTokens}", inputTokens.ToString());
+        string output = outputTemplate.Replace("{outputTokens}", (Tokenizer.CountTokens(outputTemplate) - 3).ToString());
         StringBuilder outputed = new(output.Length);
         foreach (char c in output)
         {
