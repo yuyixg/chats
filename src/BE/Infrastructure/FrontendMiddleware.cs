@@ -16,48 +16,39 @@ public class FrontendMiddleware(RequestDelegate next, IWebHostEnvironment webHos
                 break;
             }
 
-            if (context.Request.Path.Value!.EndsWith('/'))
+            foreach (string tryPath in EnumerateTryPathes(context.Request.Path))
             {
-                PathString suggestedPath = context.Request.Path + "index.html";
-                if (fileProvider.GetFileInfo(suggestedPath).Exists)
+                IFileInfo fileInfo = fileProvider.GetFileInfo(tryPath);
+                if (fileInfo.Exists)
                 {
-                    context.Request.Path = suggestedPath;
+                    context.Request.Path = tryPath;
                     break;
-                }
-            }
-            if (!Path.HasExtension(context.Request.Path))
-            {
-                int lastIndexOfSlash = context.Request.Path.Value.LastIndexOf('/');
-                if (lastIndexOfSlash != -1)
-                {
-                    string prefixPart = context.Request.Path.Value[..lastIndexOfSlash];
-                    string suggestedPath = prefixPart + ".html";
-                    if (fileProvider.GetFileInfo(suggestedPath).Exists)
-                    {
-                        context.Request.Path = suggestedPath;
-                        break;
-                    }
-
-                    string suggestedPath2 = prefixPart + "/[id].html";
-                    if (fileProvider.GetFileInfo(suggestedPath2).Exists)
-                    {
-                        context.Request.Path = suggestedPath2;
-                        break;
-                    }
-                }
-                else
-                {
-                    string suggestedPath = context.Request.Path + ".html";
-                    if (fileProvider.GetFileInfo(suggestedPath).Exists)
-                    {
-                        context.Request.Path = suggestedPath;
-                        break;
-                    }
                 }
             }
         } while (false);
 
         await next(context);
+    }
+
+    static IEnumerable<string> EnumerateTryPathes(string requestPath)
+    {
+        if (requestPath.EndsWith('/'))
+        {
+            yield return requestPath + "index.html"; // example: /login -> /login/index.html
+        }
+
+        if (!Path.HasExtension(requestPath))
+        {
+            yield return requestPath + ".html"; // example: /login -> /login.html
+
+            int lastIndexOfSlash = requestPath.LastIndexOf('/');
+            if (lastIndexOfSlash != -1)
+            {
+                string prefixPart = requestPath[..lastIndexOfSlash];
+                yield return prefixPart + ".html"; // example: /login/ -> /login.html
+                yield return prefixPart + "/[id].html";
+            }
+        }
     }
 
     private bool ShouldBypassProcessing(HttpContext context)
