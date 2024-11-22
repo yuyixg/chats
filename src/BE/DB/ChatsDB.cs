@@ -353,6 +353,13 @@ public partial class ChatsDB : DbContext
                 .HasConstraintName("FK_UserBalance_UserId");
         });
 
+        modelBuilder.Entity<UserInitialConfig>(entity =>
+        {
+            entity.HasOne(d => d.InvitationCode).WithMany(p => p.UserInitialConfigs)
+                .OnDelete(DeleteBehavior.SetNull)
+                .HasConstraintName("FK_UserInitialConfig_InvitationCode");
+        });
+
         modelBuilder.Entity<UserModel>(entity =>
         {
             entity.HasKey(e => e.Id).HasName("PK_UserModel2");

@@ -24,6 +24,9 @@ public partial class InvitationCode
 
     public int CreateUserId { get; set; }
 
+    [InverseProperty("InvitationCode")]
+    public virtual ICollection<UserInitialConfig> UserInitialConfigs { get; set; } = new List<UserInitialConfig>();
+
     [ForeignKey("InvitationCodeId")]
     [InverseProperty("InvitationCodes")]
     public virtual ICollection<User> Users { get; set; } = new List<User>();

@@ -30,5 +30,7 @@ public partial class UserInitialConfig
 
     public int? InvitationCodeId { get; set; }
 
-    public InvitationCode? InvitationCode { get; set; }
+    [ForeignKey("InvitationCodeId")]
+    [InverseProperty("UserInitialConfigs")]
+    public virtual InvitationCode? InvitationCode { get; set; }
 }
