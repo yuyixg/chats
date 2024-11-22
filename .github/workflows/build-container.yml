@@ -10,6 +10,9 @@ on:
       - '.github/workflows/deploy.yml'
   workflow_dispatch:
 
+permissions:
+  contents: write
+
 jobs:
   build-container:
     runs-on: ubuntu-latest
@@ -41,11 +44,6 @@ jobs:
           docker push ${{ vars.DOCKER_REGISTRY }}/${{ vars.DOCKER_NAMESPACE }}/chats:r-${{ github.run_number }}
           docker push ${{ vars.DOCKER_REGISTRY }}/${{ vars.DOCKER_NAMESPACE }}/chats:latest
 
-      - name: build windows binary
-        run: |
-          dotnet publish ./src/BE/Chats.BE.csproj -c Release -r win-x64 --self-contained true -o ./Publish /p:DeleteExistingFiles=True /p:PublishSingleFile=true /p:PublishReadyToRun=true /p:EnableCompressionInSingleFile=true
-          7z a -tzip -mx=1 chats-r${{ github.run_number }}.zip ./Publish/*
-
       - name: Create Release
         id: create_release
         uses: actions/create-release@v1
@@ -57,14 +55,49 @@ jobs:
           draft: false
           prerelease: false
 
-      - name: Upload Release Asset
+      - name: build win-x64 binary
+        run: |
+          dotnet publish ./src/BE/Chats.BE.csproj -c Release -r win-x64 --self-contained true -o ./Publish /p:DeleteExistingFiles=True /p:PublishSingleFile=true /p:PublishReadyToRun=true /p:EnableCompressionInSingleFile=true
+          7z a -tzip -mx=1 chats-win-x64-r${{ github.run_number }}.zip ./Publish/*
+
+      - name: Upload win-x64 Asset
         uses: actions/upload-release-asset@v1
         env:
           GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
         with:
           upload_url: ${{ steps.create_release.outputs.upload_url }}
-          asset_path: chats-r${{ github.run_number }}.zip
-          asset_name: chats-r${{ github.run_number }}.zip
+          asset_path: chats-win-x64-r${{ github.run_number }}.zip
+          asset_name: chats-win-x64-r${{ github.run_number }}.zip
+          asset_content_type: application/octet-stream
+
+      - name: build linux-x64 binary
+        run: |
+          dotnet publish ./src/BE/Chats.BE.csproj -c Release -r linux-x64 --self-contained true -o ./Publish /p:DeleteExistingFiles=True /p:PublishSingleFile=true /p:PublishReadyToRun=true /p:EnableCompressionInSingleFile=true
+          7z a -tzip -mx=1 chats-linux-x64-r${{ github.run_number }}.zip ./Publish/*
+
+      - name: Upload linux-x64 Asset
+        uses: actions/upload-release-asset@v1
+        env:
+          GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+        with:
+          upload_url: ${{ steps.create_release.outputs.upload_url }}
+          asset_path: chats-linux-x64-r${{ github.run_number }}.zip
+          asset_name: chats-linux-x64-r${{ github.run_number }}.zip
+          asset_content_type: application/octet-stream
+
+      - name: build linux-arm64 binary
+        run: |
+          dotnet publish ./src/BE/Chats.BE.csproj -c Release -r linux-arm64 --self-contained true -o ./Publish /p:DeleteExistingFiles=True /p:PublishSingleFile=true /p:PublishReadyToRun=true /p:EnableCompressionInSingleFile=true
+          7z a -tzip -mx=1 chats-linux-arm64-r${{ github.run_number }}.zip ./Publish/*
+
+      - name: Upload linux-arm64 Asset
+        uses: actions/upload-release-asset@v1
+        env:
+          GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+        with:
+          upload_url: ${{ steps.create_release.outputs.upload_url }}
+          asset_path: chats-linux-arm64-r${{ github.run_number }}.zip
+          asset_name: chats-linux-arm64-r${{ github.run_number }}.zip
           asset_content_type: application/octet-stream
 
   deploy-dev-stg:
