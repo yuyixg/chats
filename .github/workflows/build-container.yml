@@ -20,17 +20,17 @@ jobs:
       - name: Checkout code
         uses: actions/checkout@v4
 
+      - uses: actions/setup-dotnet@v4
+        with:
+          dotnet-version: 9.x
+          cache: true
+
       - name: Build frontend
         run: |
           cd ./src/FE
           npm i
           npm run build
           mv ./out/* ../BE/wwwroot
-
-      - uses: actions/setup-dotnet@v4
-        with:
-          dotnet-version: 9.x
-          cache: true
 
       - name: Build container
         run: |
