@@ -50,13 +50,14 @@ jobs:
         env:
           GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
         with:
-          tag_name: ${{ github.run_id }}
+          tag_name: r-${{ github.run_number }}
           release_name: r-${{ github.run_number }}
           draft: false
           prerelease: false
 
       - name: build win-x64 binary
         run: |
+          rm -rf ./Publish
           dotnet publish ./src/BE/Chats.BE.csproj -c Release -r win-x64 --self-contained true -o ./Publish /p:DeleteExistingFiles=True /p:PublishSingleFile=true /p:PublishReadyToRun=true /p:EnableCompressionInSingleFile=true
           7z a -tzip -mx=1 chats-win-x64-r${{ github.run_number }}.zip ./Publish/*
 
@@ -72,6 +73,7 @@ jobs:
 
       - name: build linux-x64 binary
         run: |
+          rm -rf ./Publish
           dotnet publish ./src/BE/Chats.BE.csproj -c Release -r linux-x64 --self-contained true -o ./Publish /p:DeleteExistingFiles=True /p:PublishSingleFile=true /p:PublishReadyToRun=true /p:EnableCompressionInSingleFile=true
           7z a -tzip -mx=1 chats-linux-x64-r${{ github.run_number }}.zip ./Publish/*
 
@@ -87,6 +89,7 @@ jobs:
 
       - name: build linux-arm64 binary
         run: |
+          rm -rf ./Publish
           dotnet publish ./src/BE/Chats.BE.csproj -c Release -r linux-arm64 --self-contained true -o ./Publish /p:DeleteExistingFiles=True /p:PublishSingleFile=true /p:PublishReadyToRun=true /p:EnableCompressionInSingleFile=true
           7z a -tzip -mx=1 chats-linux-arm64-r${{ github.run_number }}.zip ./Publish/*
 
