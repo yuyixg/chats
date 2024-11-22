@@ -11,9 +11,9 @@ namespace Chats.BE.Controllers.Chats.Files;
 [Route("api/files")]
 public class FileController(ChatsDB db) : ControllerBase
 {
-    [Route("{fileServiceId:guid}"), HttpPost]
+    [Route("{fileServiceId:int}"), HttpPost]
     public async Task<ActionResult<FileUrlsDto>> GetFileUrls(
-        Guid fileServiceId, 
+        int fileServiceId, 
         [FromBody] GetFileUrlsRequest fileInfo, 
         CancellationToken cancellationToken)
     {
