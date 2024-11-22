@@ -10,7 +10,6 @@ import { mergeConfigs } from '@/utils/model';
 import {
   GetLoginServicesResult,
   PostLoginServicesParams,
-  PutLoginServicesParams,
 } from '@/types/adminApis';
 import { LoginType } from '@/types/user';
 

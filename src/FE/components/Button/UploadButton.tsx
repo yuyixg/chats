@@ -15,7 +15,7 @@ interface Props {
   onUploading?: () => void;
   onFailed?: (type?: UploadFailType) => void;
   children?: React.ReactNode;
-  fileServerId: string;
+  fileServerId: number;
   fileConfig: ChatModelFileConfig;
   maxFileSize?: number;
 }

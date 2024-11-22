@@ -6,7 +6,7 @@ import useTranslation from '@/hooks/useTranslation';
 
 export async function uploadFile(
   file: File,
-  fileServiceId: string,
+  fileServiceId: number,
   onUploading?: () => void,
   onSuccessful?: (url: string) => void,
   onFailed?: (type?: UploadFailType) => void,

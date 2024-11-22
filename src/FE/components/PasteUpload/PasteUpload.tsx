@@ -8,7 +8,7 @@ import {
 import { ChatModelFileConfig } from '@/types/model';
 
 interface IPasteUploadProps {
-  fileServiceId: string;
+  fileServiceId: number;
   fileConfig: ChatModelFileConfig;
   onUploading?: () => void;
   onSuccessful?: (url: string) => void;
