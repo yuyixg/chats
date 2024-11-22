@@ -11,7 +11,7 @@ public class SessionManager(JwtKeyManager jwtKeyManager)
 {
     private const string ValidIssuer = "chats";
     private const string ValidAudience = "chats";
-    private static TimeSpan ValidPeriod = TimeSpan.FromHours(8);
+    private static readonly TimeSpan ValidPeriod = TimeSpan.FromHours(8);
 
     public async Task<SessionEntry> GetCachedUserInfoBySession(string jwt, CancellationToken cancellationToken = default)
     {
@@ -19,10 +19,10 @@ public class SessionManager(JwtKeyManager jwtKeyManager)
         return SessionEntry.FromClaims(claims);
     }
 
-    private ClaimsPrincipal ValidateJwt(string jwt, SecurityKey signingKey)
+    private static ClaimsPrincipal ValidateJwt(string jwt, SecurityKey signingKey)
     {
         // 创建一个令牌验证参数对象
-        TokenValidationParameters validationParameters = new TokenValidationParameters
+        TokenValidationParameters validationParameters = new()
         {
             ValidateIssuer = true,              // 验证发行者
             ValidIssuer = ValidIssuer,          // 设置有效的发行者
@@ -34,7 +34,7 @@ public class SessionManager(JwtKeyManager jwtKeyManager)
             IssuerSigningKey = signingKey,      // 设置用于验证签名的密钥
 
             ValidateLifetime = true,            // 验证令牌的生存期
-            ClockSkew = TimeSpan.Zero           // 设置时钟偏移为0，避免时间验证误差
+            ClockSkew = TimeSpan.FromSeconds(3) // 设置时钟偏移为3秒
         };
 
         // 创建一个 JwtSecurityTokenHandler 实例

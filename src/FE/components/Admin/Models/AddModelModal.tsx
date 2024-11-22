@@ -287,7 +287,7 @@ export const AddModelModal = (props: IProps) => {
                       hidden={!modelReference?.allowVision}
                       items={fileServices.map((item) => ({
                         name: item.name,
-                        value: item.id,
+                        value: item.id.toString(),
                       }))}
                     />
                   );

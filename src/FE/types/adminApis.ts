@@ -33,7 +33,7 @@ export interface AdminModelDto {
   name: string;
   rank: number | null;
   enabled: boolean;
-  fileServiceId: string;
+  fileServiceId: number | null;
   modelKeyId: number;
   deploymentName: string | null;
   inputTokenPrice1M: number;
@@ -125,7 +125,7 @@ export interface PostFileServicesParams {
 export interface PutFileServicesParams extends PostFileServicesParams { }
 
 export interface GetFileServicesResult extends PutFileServicesParams {
-  id: string;
+  id: number;
   createdAt: string;
   updatedAt: string;
 }

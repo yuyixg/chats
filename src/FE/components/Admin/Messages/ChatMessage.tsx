@@ -85,11 +85,10 @@ export const ChatMessage: FC<Props> = memo(
 
     return (
       <div
-        className={`group md:px-4 ${
-          message.role === 'assistant'
-            ? 'text-gray-800 dark:text-gray-100'
-            : 'text-gray-800 dark:text-gray-100'
-        }`}
+        className={`group md:px-4 ${message.role === 'assistant'
+          ? 'text-gray-800 dark:text-gray-100'
+          : 'text-gray-800 dark:text-gray-100'
+          }`}
         style={{ overflowWrap: 'anywhere' }}
       >
         <div className="relative m-auto flex px-4 py-[10px] text-base md:max-w-2xl lg:max-w-2xl lg:px-0 xl:max-w-5xl">
@@ -118,11 +117,10 @@ export const ChatMessage: FC<Props> = memo(
                       ))}
                   </div>
                   <div
-                    className={`prose whitespace-pre-wrap dark:prose-invert ${
-                      message.content?.image && message.content.image.length > 0
-                        ? 'mt-2'
-                        : ''
-                    }`}
+                    className={`prose whitespace-pre-wrap dark:prose-invert ${message.content?.image && message.content.image.length > 0
+                      ? 'mt-2'
+                      : ''
+                      }`}
                   >
                     {message.content.text}
                   </div>
@@ -146,9 +144,8 @@ export const ChatMessage: FC<Props> = memo(
                           <IconChevronLeft stroke="#7d7d7d" />
                         </Button>
                         <span className="font-bold text-[#7d7d7d]">
-                          {`${currentSelectIndex + 1}/${
-                            parentChildrenIds.length
-                          }`}
+                          {`${currentSelectIndex + 1}/${parentChildrenIds.length
+                            }`}
                         </span>
                         <Button
                           variant="ghost"
@@ -167,6 +164,7 @@ export const ChatMessage: FC<Props> = memo(
                         </Button>
                       </div>
                     )}
+                  <CopyAction text={message.content.text} />
                   </>
                 </div>
               </>
@@ -253,9 +251,8 @@ export const ChatMessage: FC<Props> = memo(
                         <IconChevronLeft stroke="#7d7d7d" />
                       </Button>
                       <span className="font-bold text-[#7d7d7d]">
-                        {`${assistantCurrentSelectIndex + 1}/${
-                          assistantChildrenIds.length
-                        }`}
+                        {`${assistantCurrentSelectIndex + 1}/${assistantChildrenIds.length
+                          }`}
                       </span>
                       <Button
                         variant="ghost"
@@ -276,9 +273,8 @@ export const ChatMessage: FC<Props> = memo(
                     </div>
                   )}
                   <div
-                    className={`flex gap-1 ${
-                      isLastMessage ? 'visible' : 'invisible'
-                    } group-hover:visible focus:visible`}
+                    className={`flex gap-1 ${isLastMessage ? 'visible' : 'invisible'
+                      } group-hover:visible focus:visible`}
                   >
                     <CopyAction text={message.content.text} />
                     <GenerateInformationAction message={message} />

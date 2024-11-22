@@ -32,7 +32,7 @@ export const GenerateInformationAction = (props: Props) => {
   const Render = () => {
     return (
       <Tips
-        className="h-[28px]"
+        className="h-[28px]" side="bottom"
         trigger={
           <Button variant="ghost" className="p-1 m-0 h-auto">
             <IconInfo stroke="#7d7d7d" />

@@ -134,7 +134,7 @@ export const EditModelModal = (props: IProps) => {
       form.setValue('name', name);
       form.setValue('modelId', modelId.toString());
       form.setValue('enabled', enabled);
-      form.setValue('fileServiceId', fileServiceId || null);
+      form.setValue('fileServiceId', fileServiceId?.toString() || null);
       form.setValue('modelKeyId', modelKeyId.toString());
       form.setValue('deploymentName', deploymentName || '');
       form.setValue('inputPrice1M', inputTokenPrice1M);
@@ -292,7 +292,7 @@ export const EditModelModal = (props: IProps) => {
                         hidden={!selected.allowVision}
                         items={fileServices.map((item) => ({
                           name: item.name,
-                          value: item.id,
+                          value: item.id.toString(),
                         }))}
                       />
                     );
