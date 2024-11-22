@@ -12,18 +12,13 @@ on:
 
 jobs:
   build-container:
-    runs-on: ubuntu-latest
+    runs-on: windows-latest
     steps:
       - name: Login container
         run: echo ${{ secrets.DOCKER_PASSWORD }} | docker login -u ${{ vars.DOCKER_USERNAME }} ${{ vars.DOCKER_REGISTRY }} --password-stdin
 
       - name: Checkout code
         uses: actions/checkout@v4
-
-      - uses: actions/setup-dotnet@v4
-        with:
-          dotnet-version: 9.x
-          cache: true
 
       - name: Build frontend
         run: |
