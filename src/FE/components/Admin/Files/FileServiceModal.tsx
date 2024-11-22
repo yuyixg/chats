@@ -134,7 +134,7 @@ export const FileServiceModal = (props: IProps) => {
         form.setValue('enabled', selected.enabled);
         form.setValue(
           'configs',
-          mergeConfigs(defaultFileConfig, selected.configs),
+          JSON.stringify(selected.configs, null, 2),
         );
       }
     }

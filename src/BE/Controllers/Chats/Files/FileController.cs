@@ -19,7 +19,7 @@ public class FileController(ChatsDB db) : ControllerBase
     {
         FileService? fileService = await db.FileServices
             .FindAsync([fileServiceId], cancellationToken);
-        if (fileService == null)
+        if (fileService == null || !fileService.Enabled)
         {
             return NotFound("File server config not found.");
         }

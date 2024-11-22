@@ -155,7 +155,7 @@ export interface GetRequestLogsDetailsResult extends GetRequestLogsListResult {
 }
 
 export interface GetLoginServicesResult {
-  id: string;
+  id: number;
   type: LoginType;
   enabled: boolean;
   configs: string;
@@ -166,10 +166,6 @@ export interface PostLoginServicesParams {
   type: LoginType;
   enabled: boolean;
   configs: string;
-}
-
-export interface PutLoginServicesParams extends PostLoginServicesParams {
-  id: string;
 }
 
 export interface GetPayServicesResult {

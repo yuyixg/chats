@@ -45,8 +45,8 @@ public class FileServiceController(ChatsDB db) : ControllerBase
         }
     }
 
-    [HttpPut("{fileServiceId}")]
-    public async Task<ActionResult> UpdateFileService(Guid fileServiceId, [FromBody] FileServiceUpdateRequest req, CancellationToken cancellationToken)
+    [HttpPut("{fileServiceId:int}")]
+    public async Task<ActionResult> UpdateFileService(int fileServiceId, [FromBody] FileServiceUpdateRequest req, CancellationToken cancellationToken)
     {
         FileService? existingData = await db.FileServices.FindAsync([fileServiceId], cancellationToken);
         if (existingData == null)

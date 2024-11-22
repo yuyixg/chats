@@ -1,6 +1,8 @@
 import { UploadFailType } from '@/types/components/upload';
 import { getApiUrl } from './common';
 import { getUserSession } from './user';
+import toast from 'react-hot-toast';
+import useTranslation from '@/hooks/useTranslation';
 
 export async function uploadFile(
   file: File,
@@ -9,6 +11,7 @@ export async function uploadFile(
   onSuccessful?: (url: string) => void,
   onFailed?: (type?: UploadFailType) => void,
 ) {
+  const { t } = useTranslation();
   const url = `${getApiUrl()}/api/files/${fileServiceId}`;
   onUploading && onUploading();
 
@@ -27,6 +30,12 @@ export async function uploadFile(
       fileType: fileType.replace('.', ''),
     }),
   });
+
+  if (!res.ok) {
+    toast.error(t(await res.text()));
+    return;
+  }
+
   const { putUrl, getUrl } = await res.json();
 
   fetch(putUrl, {

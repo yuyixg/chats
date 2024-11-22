@@ -2,14 +2,12 @@ using Chats.BE.DB;
 using Chats.BE.DB.Jsons;
 using Chats.BE.Services.Common;
 using System.Text.Json;
-using System.Text.Json.Nodes;
 using System.Text.Json.Serialization;
+
+namespace Chats.BE.Controllers.Admin.LoginServices.Dtos;
 
 public record LoginServiceUpdateRequest
 {
-    [JsonPropertyName("id")]
-    public required Guid Id { get; init; }
-
     [JsonPropertyName("type")]
     public required string Type { get; init; }
 

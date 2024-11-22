@@ -320,5 +320,6 @@
   "Invalid JSON config": "无效的JSON配置",
   "Invalid host": "无效的host",
   "Invalid secret": "无效的secret",
-  "Secret": "密钥"
+  "Secret": "密钥",
+  "File server config not found.": "未找到文件服务器配置。"
 }

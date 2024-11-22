@@ -28,7 +28,6 @@ import {
   PostUserParams,
   PutFileServicesParams,
   PutInvitationCodeParams,
-  PutLoginServicesParams,
   UpdateModelDto,
   PutPayServicesParams,
   PutUserBalanceParams,
@@ -147,7 +146,7 @@ export const postFileService = (params: PostFileServicesParams) => {
   });
 };
 
-export const putFileService = (id: string, params: PutFileServicesParams) => {
+export const putFileService = (id: number, params: PutFileServicesParams) => {
   const fetchService = useFetch();
   return fetchService.put(`/api/admin/file-service/${id}`, {
     body: params,
@@ -187,9 +186,9 @@ export const postLoginService = (params: PostLoginServicesParams) => {
   });
 };
 
-export const putLoginService = (params: PutLoginServicesParams) => {
+export const putLoginService = (loginServiceId: number, params: PostLoginServicesParams) => {
   const fetchService = useFetch();
-  return fetchService.put('/api/admin/login-service', {
+  return fetchService.put(`/api/admin/login-service/${loginServiceId}`, {
     body: params,
   });
 };

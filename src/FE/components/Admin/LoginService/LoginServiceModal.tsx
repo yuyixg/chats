@@ -106,10 +106,7 @@ export const LoginServiceModal = (props: IProps) => {
     if (!form.formState.isValid) return;
     let p = null;
     if (selected) {
-      p = putLoginService({
-        ...values,
-        id: selected.id,
-      } as PutLoginServicesParams);
+      p = putLoginService(selected.id, values as PostLoginServicesParams);
     } else {
       p = postLoginService(values as PostLoginServicesParams);
     }
