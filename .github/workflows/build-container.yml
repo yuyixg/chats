@@ -12,7 +12,7 @@ on:
 
 jobs:
   build-container:
-    runs-on: windows-latest
+    runs-on: ubuntu-latest
     steps:
       - name: Login container
         run: echo ${{ secrets.DOCKER_PASSWORD }} | docker login -u ${{ vars.DOCKER_USERNAME }} ${{ vars.DOCKER_REGISTRY }} --password-stdin
