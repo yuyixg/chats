@@ -27,6 +27,11 @@ jobs:
           npm run build
           mv ./out/* ../BE/wwwroot
 
+      - uses: actions/setup-dotnet@v4
+        with:
+          dotnet-version: 9.x
+          cache: true
+
       - name: Build container
         run: |
           dotnet publish ./src/BE/Chats.BE.csproj -c Release --os linux --arch x64 /t:PublishContainer /p:ContainerRepository=chats
