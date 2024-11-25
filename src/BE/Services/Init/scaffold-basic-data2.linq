@@ -40,6 +40,7 @@ void Main()
 
 static CompilationUnitSyntax GenerateReplaceDetailsForTables(TableDef[] tableDefs)
 {
+	
 	CompilationUnitSyntax cu = CompilationUnit()
 		.AddUsings(
 			UsingDirective(ParseName("Chats.BE.DB")),
@@ -47,21 +48,23 @@ static CompilationUnitSyntax GenerateReplaceDetailsForTables(TableDef[] tableDef
 			UsingDirective(ParseName("Chats.BE.Services.Conversations"))
 		)
 		.AddMembers(
-			FileScopedNamespaceDeclaration(ParseName("Chats.BE.Services.Init")).AddMembers(ClassDeclaration("BasicData2")
-				.AddModifiers(Token(SyntaxKind.InternalKeyword), Token(SyntaxKind.StaticKeyword))
-				.AddMembers(tableDefs.Select(x => MakeMethod(x)).ToArray())
-				)
+			FileScopedNamespaceDeclaration(ParseName("Chats.BE.Services.Init")).AddMembers(
+				ClassDeclaration("BasicData2")
+					.AddModifiers(Token(SyntaxKind.InternalKeyword), Token(SyntaxKind.StaticKeyword)))
 		)
-		;
-	return cu;
+		.NormalizeWhitespace();
+	ClassDeclarationSyntax cls = cu.DescendantNodes().OfType<ClassDeclarationSyntax>().First();
+	ClassDeclarationSyntax newCls = cls.AddMembers(tableDefs.Select(x => MakeMethod(x)).ToArray());
+	return cu.ReplaceNode(cls, newCls);
 }
 
 static MethodDeclarationSyntax MakeMethod(TableDef def)
 {
 	int ident = 4;
-	return MethodDeclaration(PredefinedType(Token(SyntaxKind.VoidKeyword)), "InsertAll")
+	return MethodDeclaration(PredefinedType(Token(SyntaxKind.VoidKeyword)), $"Insert{def.PropertyName}")
 		.AddModifiers(Token(SyntaxKind.PublicKeyword), Token(SyntaxKind.StaticKeyword))
 		.AddParameterListParameters(Parameter(Identifier("db")).WithType(IdentifierName("ChatsDB")))
+		.NormalizeWhitespace()
 		.WithBody(Block(
 			OpenBrace(),
 			[ExpressionStatement(
