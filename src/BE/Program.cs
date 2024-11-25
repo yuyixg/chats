@@ -9,6 +9,7 @@ using Chats.BE.Services.OpenAIApiKeySession;
 using Chats.BE.Services.Sessions;
 using Microsoft.AspNetCore.Authentication;
 using Microsoft.AspNetCore.Mvc;
+using Microsoft.EntityFrameworkCore;
 using System.Runtime.CompilerServices;
 
 [assembly: InternalsVisibleTo("Chats.BE.Tests")]
@@ -35,7 +36,24 @@ public class Program
         builder.Services.AddSwaggerGen();
         builder.Services.AddDbContext<ChatsDB>(o =>
         {
-            if (builder.Environment.IsDevelopment()) { o.EnableSensitiveDataLogging(); }
+            string? dbType = builder.Configuration["DBType"];
+            if (dbType == "sqlite" || dbType == null)
+            {
+                o.UseSqlite("Name=ConnectionStrings:ChatsDB");
+            }
+            else if (dbType == "sqlserver")
+            {
+                o.UseSqlite("Name=ConnectionStrings:ChatsDB");
+            }
+            else
+            {
+                throw new Exception("Unknown DBType: " + dbType);
+            }
+
+            if (builder.Environment.IsDevelopment())
+            {
+                o.EnableSensitiveDataLogging();
+            }
         });
         builder.Services.AddHttpClient();
         builder.Services.AddSingleton<InitService>();

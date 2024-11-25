@@ -6,10 +6,6 @@ namespace Chats.BE.DB;
 
 public partial class ChatsDB : DbContext
 {
-    public ChatsDB()
-    {
-    }
-
     public ChatsDB(DbContextOptions<ChatsDB> options)
         : base(options)
     {
@@ -82,9 +78,6 @@ public partial class ChatsDB : DbContext
     public virtual DbSet<UserModel> UserModels { get; set; }
 
     public virtual DbSet<UserModelUsage> UserModelUsages { get; set; }
-
-    protected override void OnConfiguring(DbContextOptionsBuilder optionsBuilder)
-        => optionsBuilder.UseSqlServer("Name=ConnectionStrings:ChatsDB");
 
     protected override void OnModelCreating(ModelBuilder modelBuilder)
     {

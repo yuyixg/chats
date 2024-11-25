@@ -15,6 +15,7 @@ Directory.SetCurrentDirectory(projectFolder);
 		$"--context {contextName}",
 		"--output-dir DB",
 		"--verbose",
+		$"--no-onconfiguring",
 	});
 	string cmd = $"dotnet ef dbcontext scaffold Name={connectionStringName} {provider} {options}";
 	Util.Cmd(cmd.Dump("command text"));
