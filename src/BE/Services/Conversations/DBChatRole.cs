@@ -1,6 +1,6 @@
 ﻿namespace Chats.BE.Services.Conversations;
 
-public enum DBConversationRole
+public enum DBChatRole
 {
     System = 1, 
     User = 2,

@@ -118,7 +118,7 @@ public record ChatMessageTemp
 {
     public required long Id { get; init; }
     public required long? ParentId { get; init; }
-    public required DBConversationRole Role { get; init; }
+    public required DBChatRole Role { get; init; }
     public required DBMessageSegment[] Content { get; init; }
     public required int? InputTokens { get; init; }
     public required int? OutputTokens { get; init; }

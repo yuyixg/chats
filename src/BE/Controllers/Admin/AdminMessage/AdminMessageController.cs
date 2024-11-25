@@ -79,7 +79,7 @@ public class AdminMessageController(ChatsDB db, CurrentUser currentUser, IIdEncr
                 InputPrice = x.Usage.InputCost,
                 OutputPrice = x.Usage.OutputCost,
                 ReasoningTokens = x.Usage.ReasoningTokens,
-                Role = (DBConversationRole)x.ChatRoleId,
+                Role = (DBChatRole)x.ChatRoleId,
                 Content = x.MessageContents
                     .Select(x => new DBMessageSegment 
                     { 

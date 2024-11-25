@@ -10,16 +10,16 @@ public record MessageLiteDto
 {
     public required long Id { get; init; }
     public required long? ParentId { get; init; }
-    public required DBConversationRole Role { get; init; }
+    public required DBChatRole Role { get; init; }
     public required DBMessageSegment[] Content { get; init; }
 
     public ChatMessage ToOpenAI()
     {
         return Role switch
         {
-            DBConversationRole.System => new SystemChatMessage(Content[0].ToString()),
-            DBConversationRole.User => new UserChatMessage(Content.Select(c => c.ToOpenAI())),
-            DBConversationRole.Assistant => new AssistantChatMessage(Content.Where(x => x.ContentType != DBMessageContentType.Error).Select(x => x.ToOpenAI())),
+            DBChatRole.System => new SystemChatMessage(Content[0].ToString()),
+            DBChatRole.User => new UserChatMessage(Content.Select(c => c.ToOpenAI())),
+            DBChatRole.Assistant => new AssistantChatMessage(Content.Where(x => x.ContentType != DBMessageContentType.Error).Select(x => x.ToOpenAI())),
             _ => throw new NotImplementedException()
         };
     }

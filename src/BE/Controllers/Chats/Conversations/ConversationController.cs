@@ -36,14 +36,12 @@ public class ConversationController(ChatsDB db, CurrentUser currentUser, ILogger
 
         UserModel? userModel = await userModelManager.GetUserModel(currentUser.Id, request.ModelId, cancellationToken);
 
-        var miscInfo = await db.Users
-            .Where(x => x.Id == currentUser.Id)
-            .Select(x => new
-            {
-                UserBalance = x.UserBalance!,
-                ThisChat = db.Chats.Single(x => x.Id == conversationId && x.UserId == currentUser.Id)
-            })
-            .SingleAsync(cancellationToken);
+        UserBalance userBalance = await db.UserBalances.Where(x => x.UserId == currentUser.Id).SingleAsync(cancellationToken);
+        Chat? thisChat = await db.Chats.SingleOrDefaultAsync(x => x.Id == conversationId && x.UserId == currentUser.Id, cancellationToken);
+        if (thisChat == null)
+        {
+            return this.BadRequestMessage("Chat not found");
+        }
 
         Dictionary<long, MessageLiteDto> existingMessages = await db.Messages
             .Where(x => x.ConversationId == conversationId && x.Conversation.UserId == currentUser.Id)
@@ -54,13 +52,13 @@ public class ConversationController(ChatsDB db, CurrentUser currentUser, ILogger
                     .OrderBy(x => x.Id)
                     .Select(x => x.ToSegment())
                     .ToArray(),
-                Role = (DBConversationRole)x.ChatRoleId,
+                Role = (DBChatRole)x.ChatRoleId,
                 ParentId = x.ParentId,
             })
             .ToDictionaryAsync(x => x.Id, x => x, cancellationToken);
         MessageLiteDto? systemMessage = existingMessages
             .Values
-            .Where(x => x.Role == DBConversationRole.System)
+            .Where(x => x.Role == DBChatRole.System)
             .FirstOrDefault();
         // insert system message if it doesn't exist
         if (existingMessages.Count == 0)
@@ -70,7 +68,7 @@ public class ConversationController(ChatsDB db, CurrentUser currentUser, ILogger
                 Message toBeInsert = new()
                 {
                     ConversationId = conversationId,
-                    ChatRoleId = (byte)DBConversationRole.System,
+                    ChatRoleId = (byte)DBChatRole.System,
                     MessageContents =
                     [
                         MessageContent.FromText(request.UserModelConfig.Prompt)
@@ -83,13 +81,13 @@ public class ConversationController(ChatsDB db, CurrentUser currentUser, ILogger
                 {
                     Id = toBeInsert.Id,
                     Content = [toBeInsert.MessageContents.First().ToSegment()],
-                    Role = DBConversationRole.System,
+                    Role = DBChatRole.System,
                     ParentId = null,
                 };
             }
 
-            miscInfo.ThisChat.Title = request.UserMessage.Text[..Math.Min(50, request.UserMessage.Text.Length)];
-            miscInfo.ThisChat.ModelId = request.ModelId;
+            thisChat.Title = request.UserMessage.Text[..Math.Min(50, request.UserMessage.Text.Length)];
+            thisChat.ModelId = request.ModelId;
         }
         else
         {
@@ -97,8 +95,8 @@ public class ConversationController(ChatsDB db, CurrentUser currentUser, ILogger
             {
                 UserModelConfig = new JsonUserModelConfig
                 {
-                    EnableSearch = miscInfo.ThisChat.EnableSearch,
-                    Temperature = miscInfo.ThisChat.Temperature,
+                    EnableSearch = thisChat.EnableSearch,
+                    Temperature = thisChat.Temperature,
                 }
             };
         }
@@ -111,7 +109,7 @@ public class ConversationController(ChatsDB db, CurrentUser currentUser, ILogger
 
         // new user message
         MessageLiteDto userMessage;
-        if (messageId != null && existingMessages.TryGetValue(messageId.Value, out MessageLiteDto? parentMessage) && parentMessage.Role == DBConversationRole.User)
+        if (messageId != null && existingMessages.TryGetValue(messageId.Value, out MessageLiteDto? parentMessage) && parentMessage.Role == DBChatRole.User)
         {
             // existing user message
             userMessage = existingMessages[messageId!.Value];
@@ -122,7 +120,7 @@ public class ConversationController(ChatsDB db, CurrentUser currentUser, ILogger
             Message dbUserMessage = new()
             {
                 ConversationId = conversationId,
-                ChatRoleId = (byte)DBConversationRole.User,
+                ChatRoleId = (byte)DBChatRole.User,
                 MessageContents = request.UserMessage.ToMessageContents(),
                 CreatedAt = DateTime.UtcNow,
                 ParentId = messageId,
@@ -133,7 +131,7 @@ public class ConversationController(ChatsDB db, CurrentUser currentUser, ILogger
             {
                 Id = dbUserMessage.Id,
                 Content = request.UserMessage.ToMessageSegments(),
-                Role = (DBConversationRole)dbUserMessage.ChatRoleId,
+                Role = (DBChatRole)dbUserMessage.ChatRoleId,
                 ParentId = dbUserMessage.ParentId,
             };
             messageToSend.Add(userMessage.ToOpenAI());
@@ -159,7 +157,7 @@ public class ConversationController(ChatsDB db, CurrentUser currentUser, ILogger
                     : null,
                 EndUserId = currentUser.Id.ToString(),
             };
-            await foreach (InternalChatSegment seg in icc.Run(miscInfo.UserBalance.Balance, userModel, s.ChatStreamedFEProcessed(messageToSend, cco, cancellationToken)))
+            await foreach (InternalChatSegment seg in icc.Run(userBalance.Balance, userModel, s.ChatStreamedFEProcessed(messageToSend, cco, cancellationToken)))
             {
                 if (seg.TextSegment == string.Empty) continue;
                 await YieldResponse(new() { Result = seg.TextSegment, Success = true });
@@ -205,7 +203,7 @@ public class ConversationController(ChatsDB db, CurrentUser currentUser, ILogger
         Message assistantMessage = new()
         {
             ConversationId = conversationId,
-            ChatRoleId = (byte)DBConversationRole.Assistant,
+            ChatRoleId = (byte)DBChatRole.Assistant,
             MessageContents =
             [
                 MessageContent.FromText(fullResponse.TextSegment),

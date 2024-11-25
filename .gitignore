@@ -54,3 +54,6 @@ logs.txt
 /src/**/obj
 /src/**/bin
 /src/BE/wwwroot
+/**/chats.db
+/**/chats.db-shm
+/**/chats.db-wal

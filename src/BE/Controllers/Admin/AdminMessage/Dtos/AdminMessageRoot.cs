@@ -38,8 +38,8 @@ public record AdminMessageDtoTemp
             Name = Name,
             ModelName = ModelName,
             ModelTemperature = Temperature ?? ConversationService.DefaultTemperature,
-            ModelPrompt = messages.FirstOrDefault(x => x.Role.Equals(DBConversationRole.System.ToString(), StringComparison.OrdinalIgnoreCase))?.Content.Text,
-            Messages = messages.Where(x => !x.Role.Equals(DBConversationRole.System.ToString(), StringComparison.OrdinalIgnoreCase)).ToArray(),
+            ModelPrompt = messages.FirstOrDefault(x => x.Role.Equals(DBChatRole.System.ToString(), StringComparison.OrdinalIgnoreCase))?.Content.Text,
+            Messages = messages.Where(x => !x.Role.Equals(DBChatRole.System.ToString(), StringComparison.OrdinalIgnoreCase)).ToArray(),
         };
     }
 }
@@ -125,7 +125,7 @@ public record AdminMessageItemTemp
     public required long? ParentId { get; init; }
     public string? ModelName { get; init; }
     public required DateTime CreatedAt { get; init; }
-    public required DBConversationRole Role { get; init; }
+    public required DBChatRole Role { get; init; }
     public required DBMessageSegment[] Content { get; init; }
     public required int? InputTokens { get; init; }
     public required int? OutputTokens { get; init; }
@@ -148,16 +148,16 @@ public record AdminMessageItemTemp
                     Role = x.Role.ToString().ToLowerInvariant(),
                     Content = MessageContentResponse.FromSegments(x.Content),
                     ChildrenIds = temps
-                        .Where(v => v.ParentId == x.Id && v.Role == DBConversationRole.User)
+                        .Where(v => v.ParentId == x.Id && v.Role == DBChatRole.User)
                         .Select(v => idEncryption.Encrypt(v.Id))
                         .ToList(),
                     AssistantChildrenIds = temps
-                        .Where(v => v.ParentId == x.ParentId && v.Role == DBConversationRole.Assistant)
+                        .Where(v => v.ParentId == x.ParentId && v.Role == DBChatRole.Assistant)
                         .Select(v => idEncryption.Encrypt(v.Id))
                         .ToList(),
                 };
 
-                if (x.Role == DBConversationRole.Assistant)
+                if (x.Role == DBChatRole.Assistant)
                 {
                     return basicItem.WithAssistantDetails(x.Duration!.Value, x.FirstTokenLatency!.Value, x.InputTokens!.Value, x.OutputTokens!.Value, x.ReasoningTokens!.Value, x.InputPrice!.Value, x.OutputPrice!.Value, x.ModelName!);
                 }
