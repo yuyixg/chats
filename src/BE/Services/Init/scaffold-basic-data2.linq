@@ -40,7 +40,6 @@ void Main()
 
 static CompilationUnitSyntax GenerateReplaceDetailsForTables(TableDef[] tableDefs)
 {
-	
 	CompilationUnitSyntax cu = CompilationUnit()
 		.AddUsings(
 			UsingDirective(ParseName("Chats.BE.DB")),
@@ -54,17 +53,18 @@ static CompilationUnitSyntax GenerateReplaceDetailsForTables(TableDef[] tableDef
 		)
 		.NormalizeWhitespace();
 	ClassDeclarationSyntax cls = cu.DescendantNodes().OfType<ClassDeclarationSyntax>().First();
-	ClassDeclarationSyntax newCls = cls.AddMembers(tableDefs.Select(x => MakeMethod(x)).ToArray());
+	ClassDeclarationSyntax newCls = cls.AddMembers(tableDefs.Select((x, i) => MakeMethod(x, needEmptyLine: i != tableDefs.Length)).ToArray());
 	return cu.ReplaceNode(cls, newCls);
 }
 
-static MethodDeclarationSyntax MakeMethod(TableDef def)
+static MethodDeclarationSyntax MakeMethod(TableDef def, bool needEmptyLine)
 {
 	int ident = 4;
-	return MethodDeclaration(PredefinedType(Token(SyntaxKind.VoidKeyword)), $"Insert{def.PropertyName}")
-		.AddModifiers(Token(SyntaxKind.PublicKeyword), Token(SyntaxKind.StaticKeyword))
+	return MethodDeclaration(PredefinedType(Token(SyntaxKind.VoidKeyword)).WithTrailingTrivia(Whitespace(" ")), $"Insert{def.PropertyName}")
+		.AddModifiers(Token(SyntaxKind.PublicKeyword).WithTrailingTrivia(Whitespace(" ")), Token(SyntaxKind.StaticKeyword).WithTrailingTrivia(Whitespace(" ")))
 		.AddParameterListParameters(Parameter(Identifier("db")).WithType(IdentifierName("ChatsDB")))
-		.NormalizeWhitespace()
+		.WithLeadingTrivia(WS())
+		.WithTrailingTrivia(Whitespace("\n"))
 		.WithBody(Block(
 			OpenBrace(),
 			[ExpressionStatement(
@@ -79,7 +79,8 @@ static MethodDeclarationSyntax MakeMethod(TableDef def)
 						))],
 					CloseParen()
 				))).WithLeadingTrivia(WS(), Comment($"// Generated from data, hash: {def.GenerateDataHash()}\n"), WS())],
-			CloseBrace()));
+			CloseBrace()).WithTrailingTrivia(Whitespace("\n"))
+		);
 
 	// {}
 	SyntaxToken OpenBrace() => Token(SyntaxKind.OpenBraceToken).WithLeadingTrivia(BeginWS()).WithTrailingTrivia(Whitespace("\n"));
