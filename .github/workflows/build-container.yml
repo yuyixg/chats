@@ -47,7 +47,7 @@ jobs:
       - name: Upload FE build artifacts
         uses: actions/upload-artifact@v4
         with:
-          name: chats-fe-r${{ github.run_number }}
+          name: chats-fe
           path: ./src/FE/out
 
   build-container:
@@ -63,7 +63,7 @@ jobs:
       - name: Download FE build artifacts
         uses: actions/download-artifact@v4
         with:
-          name: chats-fe-r${{ github.run_number }}
+          name: chats-fe
           path: ./src/BE/wwwroot
 
       - name: Build container
@@ -96,7 +96,7 @@ jobs:
       - name: Download FE build artifacts
         uses: actions/download-artifact@v4
         with:
-          name: chats-fe-r${{ github.run_number }}
+          name: chats-fe
           path: ./src/BE/wwwroot
 
       - name: build binary
@@ -105,41 +105,66 @@ jobs:
 
       - name: Archive binary
         run: |
-          7z a -tzip -mx=1 chats-win-x64-r${{ github.run_number }}.zip ./Publish/*
+          7z a -tzip -mx=1 chats-win-x64.zip ./Publish/*
 
       - name: Upload artifacts
         uses: actions/upload-artifact@v4
         with:
-          name: chats-${{ matrix.runtime }}-r${{ github.run_number }}
+          name: chats-${{ matrix.runtime }}
           path: ./Publish
 
   create-release:
     needs: [build-container, build-binaries]
     runs-on: ubuntu-latest
     outputs:
-      upload_url: ${{ steps.create_release.outputs.upload_url }}
+      release_id: ${{ steps.create_release.outputs.release_id }}
     steps:
-      - name: Create Release
-        id: create_release
-        uses: actions/create-release@v1
+      - name: Get latest tag
+        id: get_latest_tag
+        uses: actions/github-script@v7
+        with:
+          script: |
+            const { data: tags } = await github.rest.repos.listTags({
+              owner: context.repo.owner,
+              repo: context.repo.repo,
+              per_page: 1,
+            });
+            if (tags.length === 0) {
+              return { latestTag: "" };
+            }
+            return { latestTag: tags[0].name };
+          result-encoding: string
         env:
           GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+
+      - name: Create Release
+        id: create_release
+        uses: actions/github-script@v6
         with:
-          tag_name: r-${{ github.run_number }}
-          release_name: r-${{ github.run_number }}
-          draft: false
-          prerelease: false
-          body: |
-            docker download: `docker pull ${{ vars.DOCKER_REGISTRY }}/${{ vars.DOCKER_NAMESPACE }}/chats:r-${{ github.run_number }}`
+          script: |
+            const latestTag = "${{ steps.get_latest_tag.outputs.latestTag }}";
+            const response = await github.rest.repos.createRelease({
+              owner: context.repo.owner,
+              repo: context.repo.repo,
+              tag_name: `r-${{ github.run_number }}`,
+              name: `r-${{ github.run_number }}`,
+              body: `**Docker Download**: \`docker pull ${{ vars.DOCKER_REGISTRY }}/${{ vars.DOCKER_NAMESPACE }}/chats:r-${{ github.run_number }}\`
+                    **Full Changelog**: https://github.com/sdcb/chats/compare/${latestTag}...r-${{ github.run_number }}`,
+              draft: false,
+              prerelease: false,
+            });
+            core.setOutput('release_id', response.data.id);
+        env:
+          GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
 
   upload-release-assets:
     strategy:
       matrix:
         include:
-          - asset: chats-win-x64-r${{ github.run_number }}
-          - asset: chats-linux-x64-r${{ github.run_number }}
-          - asset: chats-linux-arm64-r${{ github.run_number }}
-          - asset: chats-fe-r${{ github.run_number }}
+          - asset: chats-win-x64
+          - asset: chats-linux-x64
+          - asset: chats-linux-arm64
+          - asset: chats-fe
     needs: create-release
     runs-on: ubuntu-latest
     steps:
@@ -155,14 +180,23 @@ jobs:
         shell: bash
   
       - name: Upload Asset
-        uses: actions/upload-release-asset@v1
+        uses: actions/github-script@v7
+        with:
+          script: |
+            const fs = require('fs');
+            const assetPath = './${{ matrix.asset }}.zip';
+            const releaseId = "${{ needs.create-release.outputs.release_id }}";
+            const asset = fs.readFileSync(assetPath);
+
+            await github.rest.repos.uploadReleaseAsset({
+              owner: context.repo.owner,
+              repo: context.repo.repo,
+              release_id: releaseId,
+              name: '${{ matrix.asset }}.zip',
+              data: asset,
+            });
         env:
           GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
-        with:
-          upload_url: ${{ needs.create-release.outputs.upload_url }}
-          asset_path: ${{ matrix.asset }}.zip
-          asset_name: ${{ matrix.asset }}.zip
-          asset_content_type: application/zip
 
   deploy-dev-stg:
     runs-on: ubuntu-latest
