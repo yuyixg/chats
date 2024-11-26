@@ -50,9 +50,6 @@ jobs:
           name: fe-build
           path: ./src/FE/out
 
-      - name: Move build files
-        run: mv ./src/FE/out/* ./src/BE/wwwroot
-
   build-container:
     needs: build-fe
     runs-on: ubuntu-latest
@@ -75,6 +72,39 @@ jobs:
       - name: Build container
         run: |
           dotnet publish ./src/BE/Chats.BE.csproj -c Release --os linux --arch x64 /t:PublishContainer /p:ContainerRepository=chats
+
+      - name: Tag container with 'latest' & run number
+        run: |
+          docker tag chats ${{ vars.DOCKER_REGISTRY }}/${{ vars.DOCKER_NAMESPACE }}/chats:r-${{ github.run_number }}
+          docker tag chats ${{ vars.DOCKER_REGISTRY }}/${{ vars.DOCKER_NAMESPACE }}/chats:latest
+          
+      - name: Push container
+        run: |
+          docker push ${{ vars.DOCKER_REGISTRY }}/${{ vars.DOCKER_NAMESPACE }}/chats:r-${{ github.run_number }}
+          docker push ${{ vars.DOCKER_REGISTRY }}/${{ vars.DOCKER_NAMESPACE }}/chats:latest
+
+  build-windows-container:
+    needs: build-fe
+    runs-on: windows-latest
+    steps:
+      - name: Login container
+        run: echo ${{ secrets.DOCKER_PASSWORD }} | docker login -u ${{ vars.DOCKER_USERNAME }} ${{ vars.DOCKER_REGISTRY }} --password-stdin
+
+      - name: Checkout code
+        uses: actions/checkout@v4
+
+      - name: Download FE build artifacts
+        uses: actions/download-artifact@v4
+        with:
+          name: fe-build
+          path: ./src/FE/out
+
+      - name: Move build files
+        run: mv ./src/FE/out/* ./src/BE/wwwroot
+
+      - name: Build container
+        run: |
+          dotnet publish ./src/BE/Chats.BE.csproj -c Release --os windows --arch x64 /t:PublishContainer /p:ContainerRepository=chats
 
       - name: Tag container with 'latest' & run number
         run: |
