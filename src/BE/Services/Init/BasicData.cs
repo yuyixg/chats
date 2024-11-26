@@ -1,6 +1,4 @@
 using Chats.BE.DB;
-using Chats.BE.DB.Enums;
-using Chats.BE.Services.Conversations;
 
 namespace Chats.BE.Services.Init;
 
@@ -8,71 +6,88 @@ internal static class BasicData
 {
     public static void InsertAll(ChatsDB db)
     {
-        db.ChatRoles.AddRange(
-        [
-            new() { Id = (byte)DBChatRole.System, Name = "system" },
-            new() { Id = (byte)DBChatRole.User, Name = "user" },
-            new() { Id = (byte)DBChatRole.Assistant, Name = "assistant" },
-        ]);
-        db.CurrencyRates.AddRange(
-        [
-            new() { Code = "RMB", ExchangeRate = 1 },
-            new() { Code = "USD", ExchangeRate = 7.2439m },
-        ]);
-        db.FinishReasons.AddRange(
-        [
-            new() { Id = 0, Name = "Success" },
-            new() { Id = 1, Name = "Stop" },
-            new() { Id = 2, Name = "Length" },
-            new() { Id = 3, Name = "ToolCalls" },
-            new() { Id = 4, Name = "ContentFilter" },
-            new() { Id = 5, Name = "FunctionCall" },
-            new() { Id = 100, Name = "UnknownError" },
-            new() { Id = 101, Name = "InsufficientBalance" },
-            new() { Id = 102, Name = "UpstreamError" },
-            new() { Id = 103, Name = "InvalidModel" },
-            new() { Id = 104, Name = "SubscriptionExpired" },
-            new() { Id = 105, Name = "BadParameter" },
-            new() { Id = 106, Name = "Cancelled" },
-        ]);
-        db.MessageContentTypes.AddRange(
-        [
-            new() { Id = (byte)DBMessageContentType.Error, ContentType = "error" },
-            new() { Id = (byte)DBMessageContentType.Text, ContentType = "text" },
-            new() { Id = (byte)DBMessageContentType.ImageUrl, ContentType = "imageUrl" },
-        ]);
-        db.Tokenizers.AddRange(
-        [
-            new() { Id = 1, Name = "cl100k_base" },
-            new() { Id = 2, Name = "o200k_base" },
-        ]);
-        db.TransactionTypes.AddRange(
-        [
-            new() { Id = 1, Name = "Charge" },
-            new() { Id = 2, Name = "Cost" },
-            new() { Id = 3, Name = "Initial" },
-            new() { Id = 4, Name = "ApiCost" },
-        ]);
-
-        InsertModelProviders(db);
+        InsertChatRoles(db);
+        InsertCurrencyRates(db);
+        InsertFinishReasons(db);
+        InsertMessageContentTypes(db);
+        InsertTokenizers(db);
+        InsertTransactionTypes(db);
         InsertModelReferences(db);
+        InsertModelProviders(db);
     }
 
-    private static void InsertModelProviders(ChatsDB db)
+    private static void InsertChatRoles(ChatsDB db)
     {
-        // Generated from data, hash: e8f98eadd7a95d299afc4aeed38610d3fd0d876b87b34b38690ae53741e31001
-        db.ModelProviders.AddRange(
+        // Generated from data, hash: e2b927c371db77befad6f04b1844b97f12985d9ffdec513fdf08aee842f75cf1
+        db.ChatRoles.AddRange(
         [
-            new(){ Id=0, Name="Test",     InitialHost=null,                                       InitialSecret=null,                                                  },
-            new(){ Id=1, Name="Azure",    InitialHost="https://<resource-name>.openai.azure.com", InitialSecret="",                                                    },
-            new(){ Id=2, Name="HunYuan",  InitialHost="hunyuan.tencentcloudapi.com",              InitialSecret="{\"secretId\":\"\", \"secretKey\":\"\"}",             },
-            new(){ Id=3, Name="LingYi",   InitialHost=null,                                       InitialSecret="",                                                    },
-            new(){ Id=4, Name="Moonshot", InitialHost=null,                                       InitialSecret="",                                                    },
-            new(){ Id=5, Name="OpenAI",   InitialHost="https://api.openai.com/v1",                InitialSecret="",                                                    },
-            new(){ Id=6, Name="QianFan",  InitialHost=null,                                       InitialSecret="{\"apiKey\":\"\", \"secret\":\"\"}",                  },
-            new(){ Id=7, Name="QianWen",  InitialHost=null,                                       InitialSecret="",                                                    },
-            new(){ Id=8, Name="Spark",    InitialHost=null,                                       InitialSecret="{\"appId\": \"\", \"apiKey\":\"\", \"secret\":\"\"}", },
-            new(){ Id=9, Name="ZhiPuAI",  InitialHost=null,                                       InitialSecret="",                                                    }
+            new(){ Id=1, Name="system",    },
+            new(){ Id=2, Name="user",      },
+            new(){ Id=3, Name="assistant", }
+        ]);
+    }
+
+    private static void InsertCurrencyRates(ChatsDB db)
+    {
+        // Generated from data, hash: bc4028c01aefd32ef1bf1533fc9e181ab4f0f673b85a9a282cab92a90cf4116c
+        db.CurrencyRates.AddRange(
+        [
+            new(){ Code="RMB", ExchangeRate=1.000000M, },
+            new(){ Code="USD", ExchangeRate=7.120300M, }
+        ]);
+    }
+
+    private static void InsertFinishReasons(ChatsDB db)
+    {
+        // Generated from data, hash: a39da809c9c6d37bb1d7933fd873bd0bd11185aa4cb2cf324826ae98846758e2
+        db.FinishReasons.AddRange(
+        [
+            new(){ Id=0,   Name="Success",             },
+            new(){ Id=1,   Name="Stop",                },
+            new(){ Id=2,   Name="Length",              },
+            new(){ Id=3,   Name="ToolCalls",           },
+            new(){ Id=4,   Name="ContentFilter",       },
+            new(){ Id=5,   Name="FunctionCall",        },
+            new(){ Id=100, Name="UnknownError",        },
+            new(){ Id=101, Name="InsufficientBalance", },
+            new(){ Id=102, Name="UpstreamError",       },
+            new(){ Id=103, Name="InvalidModel",        },
+            new(){ Id=104, Name="SubscriptionExpired", },
+            new(){ Id=105, Name="BadParameter",        },
+            new(){ Id=106, Name="Cancelled",           }
+        ]);
+    }
+
+    private static void InsertMessageContentTypes(ChatsDB db)
+    {
+        // Generated from data, hash: 2ff6ae5b9be6782105b642ab440c0968c14b2b7409b5b881d58f879fd5ac37c1
+        db.MessageContentTypes.AddRange(
+        [
+            new(){ Id=0, ContentType="error",    },
+            new(){ Id=1, ContentType="text",     },
+            new(){ Id=2, ContentType="imageUrl", }
+        ]);
+    }
+
+    private static void InsertTokenizers(ChatsDB db)
+    {
+        // Generated from data, hash: 3fd4898bb31e7a12b5d2b9b158efa6f20ca250507be2fc1dddefcd6846ab4ac9
+        db.Tokenizers.AddRange(
+        [
+            new(){ Id=1, Name="cl100k_base", },
+            new(){ Id=2, Name="o200k_base",  }
+        ]);
+    }
+
+    private static void InsertTransactionTypes(ChatsDB db)
+    {
+        // Generated from data, hash: 03debb1a3f79c1b2fd21af5a0c0ede05a461481794cbe7e0a6a65bd47090e970
+        db.TransactionTypes.AddRange(
+        [
+            new(){ Id=1, Name="Charge",  },
+            new(){ Id=2, Name="Cost",    },
+            new(){ Id=3, Name="Initial", },
+            new(){ Id=4, Name="ApiCost", }
         ]);
     }
 
@@ -192,4 +207,22 @@ internal static class BasicData
             new(){ Id=908, ProviderId=9, Name="glm-4v",                      MinTemperature=0.00M, MaxTemperature=1.00M, AllowSearch=false, AllowVision=true,  AllowSystemPrompt=true,  AllowStreaming=true,  ContextWindow=2048,     MaxResponseTokens=1024,   TokenizerId=null, PromptTokenPrice1M=50.00000M,  ResponseTokenPrice1M=50.00000M,  CurrencyCode="RMB", }
         ]);
     }
-}
+
+    private static void InsertModelProviders(ChatsDB db)
+    {
+        // Generated from data, hash: a6daa736eb55f92bb8f9dac40291e66ebc9fe6a441c7911b705bbfe5fd923d4c
+        db.ModelProviders.AddRange(
+        [
+            new(){ Id=0, Name="Test",     InitialHost=null,                                        InitialSecret=null,                                          },
+            new(){ Id=1, Name="Azure",    InitialHost="https://<resource-name>.openai.azure.com/", InitialSecret="",                                            },
+            new(){ Id=2, Name="HunYuan",  InitialHost="hunyuan.tencentcloudapi.com",               InitialSecret="""{"secretId":"", "secretKey":""}""",         },
+            new(){ Id=3, Name="LingYi",   InitialHost=null,                                        InitialSecret="",                                            },
+            new(){ Id=4, Name="Moonshot", InitialHost=null,                                        InitialSecret="",                                            },
+            new(){ Id=5, Name="OpenAI",   InitialHost="https://api.openai.com/v1",                 InitialSecret="",                                            },
+            new(){ Id=6, Name="QianFan",  InitialHost=null,                                        InitialSecret="""{"apiKey":"", "secret":""}""",              },
+            new(){ Id=7, Name="QianWen",  InitialHost=null,                                        InitialSecret="",                                            },
+            new(){ Id=8, Name="Spark",    InitialHost=null,                                        InitialSecret="""{"appId": "", "apiKey":"", "secret":""}""", },
+            new(){ Id=9, Name="ZhiPuAI",  InitialHost=null,                                        InitialSecret="",                                            }
+        ]);
+    }
+};

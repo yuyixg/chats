@@ -26,113 +26,95 @@
 void Main()
 {
 	Environment.CurrentDirectory = Path.GetDirectoryName(Util.CurrentQueryPath)!;
-	string path = "./BasicData.cs";
-	SyntaxNode root = CSharpSyntaxTree.ParseText(File.ReadAllText(path)).GetRoot();
-	SyntaxNode modelReferenceReplaced = GenerateReplaceDetailsForTable(root, ModelReferences);
-	SyntaxNode modelProvidersReplaced = GenerateReplaceDetailsForTable(modelReferenceReplaced, ModelProviders);
-	File.WriteAllText(path, modelProvidersReplaced.ToFullString());
+	TableDef[] tableDefs = new string[]
+	{
+		"ChatRole",
+		"CurrencyRate",
+		"FinishReason",
+		"MessageContentType",
+		"Tokenizer",
+		"TransactionType",
+		"ModelReference",
+		"ModelProvider"
+	}
+	.Select(tableName => TableDef.FromContextTableDef(this, tableName))
+	.ToArray();
+	SyntaxNode cu = GenerateCompilationUnit(tableDefs);
+	Util.FixedFont(cu.ToFullString()).Dump();
+	File.WriteAllText("BasicData.cs", cu.ToFullString());
 }
 
-static SyntaxNode GenerateReplaceDetailsForTable<T>(SyntaxNode root, Table<T> dataTable) where T : class
+static CompilationUnitSyntax GenerateCompilationUnit(TableDef[] tableDefs)
 {
-	string className = typeof(T).Name;
-	BlockSyntax existingFunctionBlock = root.DescendantNodes()
-		.OfType<MethodDeclarationSyntax>()
-		.Where(x => x.Identifier.Text == $"Insert{className}s")
-		.First()
-		.ChildNodes()
-		.OfType<BlockSyntax>()
-		.First();
-	int ident = existingFunctionBlock.GetLeadingTrivia()[0].Span.Length;
-	T[] datas = dataTable.ToArray();
-	FieldInfo[] fields = typeof(T)
-			.GetFields()
-			.Where(x => x.GetCustomAttribute<ColumnAttribute>() != null)
-			.ToArray();
-	Dictionary<string, int> fieldsMaxLength = fields
-		.ToDictionary(k => k.Name, v => datas.Max(data => GetValueDisplayLength(v.GetValue(data))));
-
-	BlockSyntax statement = Block(
-		OpenBrace(),
-		[ExpressionStatement(
-			InvocationExpression(MemberAccess("db", $"{className}s", "AddRange"),
-			ArgumentList(
-				OpenParen(),
-				[Argument(CollectionExpression(
-					OpenBracket(),
-					SeparatedList<CollectionElementSyntax>(datas.Select(x => ToExpression(x, fields, fieldsMaxLength).WithLeadingTrivia(WS())),
-						Enumerable.Repeat(Token(SyntaxKind.CommaToken).WithTrailingTrivia(Whitespace("\n")), datas.Length - 1)),
-					CloseBracket()
-					))],
-				CloseParen()
-			))).WithLeadingTrivia(WS(), Comment($"// Generated from data, hash: {GenerateDataHash(datas, fields)}\n"), WS())],
-		CloseBrace());
-	return root.ReplaceNode(existingFunctionBlock, statement);
-
-	// {}
-	SyntaxToken OpenBrace() => Token(SyntaxKind.OpenBraceToken).WithLeadingTrivia(BeginWS()).WithTrailingTrivia(Whitespace("\n"));
-	SyntaxToken CloseBrace() { ident -= 4; return Token(SyntaxKind.CloseBraceToken).WithLeadingTrivia(Whitespace("\n"), WS()).WithTrailingTrivia(Whitespace("\n")); }
-
-	// []
-	SyntaxToken OpenBracket() => Token(SyntaxKind.OpenBracketToken).WithLeadingTrivia(BeginWS()).WithTrailingTrivia(Whitespace("\n"));
-	SyntaxToken CloseBracket() { ident -= 4; return Token(SyntaxKind.CloseBracketToken).WithLeadingTrivia(Whitespace("\n"), WS()); }
-
-	// ()
-	SyntaxToken OpenParen() { return Token(SyntaxKind.OpenParenToken).WithTrailingTrivia(Whitespace("\n")); }
-	SyntaxToken CloseParen() { return Token(SyntaxKind.CloseParenToken); }
-
-	SyntaxTrivia BeginWS()
-	{
-		SyntaxTrivia ws = WS();
-		ident += 4;
-		return ws;
-	}
-
-	SyntaxTrivia WS(int offset = 0) => Whitespace(new string(' ', ident + offset));
-
-	static MemberAccessExpressionSyntax MemberAccess(params string[] identifiers)
-	{
-		if (identifiers == null || identifiers.Length == 0)
-			throw new ArgumentException("No identifiers provided.");
-
-		// 从第一个标识符开始
-		ExpressionSyntax expression = IdentifierName(identifiers[0]);
-
-		// 累积构建成员访问表达式
-		for (int i = 1; i < identifiers.Length; i++)
-		{
-			expression = MemberAccessExpression(
-				SyntaxKind.SimpleMemberAccessExpression,
-				expression,
-				IdentifierName(identifiers[i])
-			);
-		}
-
-		// 返回完整的成员访问表达式
-		return (MemberAccessExpressionSyntax)expression;
-	}
-}
-
-static ExpressionElementSyntax ToExpression<T>(T data, FieldInfo[] fields, Dictionary<string, int> fieldMaxLength)
-{
-	if (data == null) throw new ArgumentNullException(nameof(data));
-
-	return ExpressionElement(
-		ImplicitObjectCreationExpression(
-			ArgumentList(),
-			InitializerExpression(
-				SyntaxKind.ObjectInitializerExpression,
-				Token(SyntaxKind.OpenBraceToken).WithTrailingTrivia(Whitespace(" ")),
-				SeparatedList<ExpressionSyntax>(fields.Select(x => AssignmentExpression(SyntaxKind.SimpleAssignmentExpression,
-					IdentifierName(x.Name),
-					ValueToLiteral(x.GetValue(data)))),
-					fields.Select(x => Token(SyntaxKind.CommaToken)
-						.WithTrailingTrivia(Whitespace(new string(' ', fieldMaxLength[x.Name] - GetValueDisplayLength(x.GetValue(data)) + 1))))
-				),
-				Token(SyntaxKind.CloseBraceToken)
-			)
+	var usingDef = static (string ns) => UsingDirective(
+		Token(SyntaxKind.UsingKeyword).WS(), default, default, ParseName(ns), Token(SyntaxKind.SemicolonToken).WS("\n"));
+	var fileScopedNamespaceDef = static (string ns) => FileScopedNamespaceDeclaration(
+		default, default, Token(SyntaxKind.NamespaceKeyword).WS(), ParseName(ns), Token(SyntaxKind.SemicolonToken).WS("\n\n"), default, default, default);
+	var classDef = static (string name) => ClassDeclaration(
+		default, [Token(SyntaxKind.InternalKeyword).WS(), Token(SyntaxKind.StaticKeyword).WS()], Token(SyntaxKind.ClassKeyword).WS(), Identifier(name).WS("\n"),
+		default, default, default, Token(SyntaxKind.OpenBraceToken).WS("\n"), default, Token(SyntaxKind.CloseBraceToken), Token(SyntaxKind.SemicolonToken));
+	CompilationUnitSyntax cu = CompilationUnit()
+		.AddUsings(
+			usingDef("Chats.BE.DB").WS("\n\n")
 		)
-	);
+		.AddMembers(
+			fileScopedNamespaceDef("Chats.BE.Services.Init").AddMembers(
+				classDef("BasicData")
+					.AddMembers(
+					[
+						InsertAllMethod(tableDefs),
+						..tableDefs.Select((x, i) => InsertSimpleDataMethod(x, needEmptyLine: i != tableDefs.Length - 1)).ToArray()
+					]))
+		);
+	return cu;
+}
+
+static MethodDeclarationSyntax InsertAllMethod(TableDef[] defs)
+{
+	var im = new IdentManager(4);
+	return MethodDeclaration(PredefinedType(Token(SyntaxKind.VoidKeyword)).WS(), $"InsertAll")
+		.AddModifiers(Token(SyntaxKind.PublicKeyword).WS(), Token(SyntaxKind.StaticKeyword).WS())
+		.AddParameterListParameters(Parameter(Identifier("db")).WithType(IdentifierName("ChatsDB").WS()))
+		.WithLeadingTrivia(im.WS())
+		.WS("\n")
+		.WithBody(Block(
+			im.OpenBrace(),
+			[..defs.Select(def => ExpressionStatement(
+				InvocationExpression(ParseName(def.InsertMethodName), ArgumentList([Argument(ParseName("db"))])))
+				.WithLeadingTrivia(im.WS())
+				.WS("\n")
+				)],
+			im.CloseBrace())
+		).WS("\n\n");
+}
+
+static MethodDeclarationSyntax InsertSimpleDataMethod(TableDef def, bool needEmptyLine)
+{
+	var im = new IdentManager(4);
+	return MethodDeclaration(PredefinedType(Token(SyntaxKind.VoidKeyword)).WS(), def.InsertMethodName)
+		.AddModifiers(Token(SyntaxKind.PrivateKeyword).WS(), Token(SyntaxKind.StaticKeyword).WS())
+		.AddParameterListParameters(Parameter(Identifier("db")).WithType(IdentifierName("ChatsDB").WS()))
+		.WithLeadingTrivia(im.WS())
+		.WS("\n")
+		.WithBody(Block(
+			im.OpenBrace(),
+			[ExpressionStatement(
+				InvocationExpression(ParseName($"db.{def.PropertyName}.AddRange"),
+				ArgumentList(
+					im.OpenParen(),
+					[Argument(CollectionExpression(
+						im.OpenBracket(),
+						SeparatedList<CollectionElementSyntax>(def.TableData.Value.Select(x => def.ToExpression(x).WithLeadingTrivia(im.WS())),
+							Enumerable.Repeat(Token(SyntaxKind.CommaToken).WS("\n"), def.TableData.Value.Length - 1)),
+						im.CloseBracket()
+						))],
+					im.CloseParen()
+				)))
+				.WithLeadingTrivia(im.WS(), Comment($"// Generated from data, hash: {def.GenerateDataHash()}\n"), im.WS())
+				.WS("\n")
+			],
+			im.CloseBrace()).WS("\n" + (needEmptyLine ? "\n" : ""))
+		);
 }
 
 static int GetValueDisplayLength(object? value)
@@ -140,85 +122,240 @@ static int GetValueDisplayLength(object? value)
 	return value switch
 	{
 		null => 4,
-		string str => str.Length + str.Count(ch => ch == '"') + 2,
+		string str => GetStringDisplayLength(str),
 		decimal d => d.ToString().Length + 1,
 		not null => value.ToString()!.Length,
 	};
+
+	static int GetStringDisplayLength(string str)
+	{
+		if (str.Contains('"'))
+		{
+			// 使用原始字符串字面量
+			int quoteCount = GetRequiredQuoteCount(str);
+			int quoteStringLength = quoteCount * 2; // 起始和结束的引号
+			return str.Length + quoteStringLength;
+		}
+		else
+		{
+			// 常规字符串字面量，需要考虑转义的引号
+			int escapedLength = str.Length + str.Count(ch => ch == '"');
+			return escapedLength + 2; // 包含开头和结尾的引号
+		}
+	}
+}
+
+static int GetRequiredQuoteCount(string value)
+{
+	int maxQuoteCount = MaxConsecutiveChar(value, '"');
+	return Math.Max(3, maxQuoteCount + 1);
+}
+
+// 辅助方法：计算字符串中连续引号的最大数量
+static int MaxConsecutiveChar(string s, char c)
+{
+	int maxCount = 0;
+	int currentCount = 0;
+	foreach (char ch in s)
+	{
+		if (ch == c)
+		{
+			currentCount++;
+			if (currentCount > maxCount)
+				maxCount = currentCount;
+		}
+		else
+		{
+			currentCount = 0;
+		}
+	}
+	return maxCount;
 }
 
 static LiteralExpressionSyntax ValueToLiteral(object? value)
 {
-	if (value == null)
+	return value switch
 	{
-		return SyntaxFactory.LiteralExpression(SyntaxKind.NullLiteralExpression);
-	}
+		null => SyntaxFactory.LiteralExpression(SyntaxKind.NullLiteralExpression),
 
-	if (value is int intValue)
-	{
-		return SyntaxFactory.LiteralExpression(SyntaxKind.NumericLiteralExpression, SyntaxFactory.Literal(intValue));
-	}
+		byte byteValue => LiteralExpression(SyntaxKind.NumericLiteralExpression, Literal(byteValue)),
 
-	if (value is short shortValue)
-	{
-		return SyntaxFactory.LiteralExpression(SyntaxKind.NumericLiteralExpression, SyntaxFactory.Literal(shortValue));
-	}
+		int intValue => LiteralExpression(SyntaxKind.NumericLiteralExpression, Literal(intValue)),
 
-	if (value is decimal decimalValue)
-	{
-		return SyntaxFactory.LiteralExpression(SyntaxKind.NumericLiteralExpression, SyntaxFactory.Literal(decimalValue));
-	}
+		short shortValue => LiteralExpression(SyntaxKind.NumericLiteralExpression, Literal(shortValue)),
 
-	if (value is double doubleValue)
-	{
-		return SyntaxFactory.LiteralExpression(SyntaxKind.NumericLiteralExpression, SyntaxFactory.Literal(doubleValue));
-	}
+		decimal decimalValue => LiteralExpression(SyntaxKind.NumericLiteralExpression, Literal(decimalValue)),
 
-	if (value is bool boolValue)
-	{
-		return boolValue
+		double doubleValue => LiteralExpression(SyntaxKind.NumericLiteralExpression, Literal(doubleValue)),
+
+		bool boolValue => boolValue
 			? SyntaxFactory.LiteralExpression(SyntaxKind.TrueLiteralExpression)
-			: SyntaxFactory.LiteralExpression(SyntaxKind.FalseLiteralExpression);
-	}
+			: SyntaxFactory.LiteralExpression(SyntaxKind.FalseLiteralExpression),
 
-	if (value is string stringValue)
+		string stringValue => stringValue switch
+		{
+			var x when x.Contains('"') => CreateRawStringLiteralExpression(stringValue),
+			_ => LiteralExpression(SyntaxKind.StringLiteralExpression, Literal(stringValue)),
+		},
+
+		_ => throw new ArgumentException("Unsupported literal type", value.GetType().FullName)
+	};
+
+	static LiteralExpressionSyntax CreateRawStringLiteralExpression(string value)
 	{
-		return SyntaxFactory.LiteralExpression(SyntaxKind.StringLiteralExpression, SyntaxFactory.Literal(stringValue));
-	}
+		int quoteCount = GetRequiredQuoteCount(value);
+		string quoteString = new string('"', quoteCount);
+		string rawStringLiteralText = quoteString + value + quoteString;
 
-	throw new ArgumentException("Unsupported literal type", value.GetType().FullName);
+		var literalToken = SyntaxFactory.Token(
+			SyntaxTriviaList.Empty,
+			SyntaxKind.SingleLineRawStringLiteralToken,
+			rawStringLiteralText,
+			value,
+			SyntaxTriviaList.Empty
+		);
+
+		return LiteralExpression(SyntaxKind.StringLiteralExpression, literalToken);
+	}
 }
 
-static string GenerateDataHash<T>(T[] data, FieldInfo[] fields) where T : class
+record TableDef
 {
-    if (data == null || fields == null)
-    {
-        throw new ArgumentNullException("Data or fields cannot be null.");
-    }
+	public Type Type { get; }
 
-    using (SHA256 sha256 = SHA256.Create())
-    {
-        StringBuilder builder = new StringBuilder();
+	public Lazy<object[]> TableData { get; }
+	
+	public string PropertyName => Type.Name + "s";
+	
+	public string InsertMethodName => $"Insert{Type.Name}s";
 
-        foreach (T item in data)
-        {
-            if (item != null)
-            {
-                foreach (FieldInfo field in fields)
-                {
-                    object? value = field.GetValue(item);
-					builder.Append(value?.ToString() ?? string.Empty);
+	public FieldInfo[] Fields { get; }
+
+	public Lazy<Dictionary<string, int>> FieldsMaxLength { get; }
+
+	public static TableDef FromContextTableDef(object me, string tableName)
+	{
+		PropertyInfo prop = me.GetType().GetProperty($"{tableName}s") ?? throw new InvalidOperationException($"Property {tableName}s not found.");
+		Type propType = prop.PropertyType.GenericTypeArguments[0];
+		IEnumerable dataTable = (IEnumerable)prop.GetValue(me)!;
+		return new TableDef(propType, new Lazy<object[]>(() => dataTable.OfType<object>().ToArray()));
+	}
+
+	public TableDef(Type type, Lazy<object[]> tableData)
+	{
+		Type = type;
+		TableData = tableData;
+		Fields = Type
+			.GetFields()
+			.Where(x => x.GetCustomAttribute<ColumnAttribute>() != null)
+			.ToArray();
+		FieldsMaxLength = new Lazy<Dictionary<string, int>>(() => Fields
+			.ToDictionary(k => k.Name, v => TableData.Value.Max(data => GetValueDisplayLength(v.GetValue(data)))));
+	}
+
+	public string GenerateDataHash()
+	{
+		using (SHA256 sha256 = SHA256.Create())
+		{
+			StringBuilder builder = new StringBuilder();
+
+			foreach (object item in TableData.Value)
+			{
+				if (item != null)
+				{
+					foreach (FieldInfo field in Fields)
+					{
+						object? value = field.GetValue(item);
+						builder.Append(value?.ToString() ?? string.Empty);
+					}
 				}
 			}
+
+			byte[] hashBytes = sha256.ComputeHash(Encoding.UTF8.GetBytes(builder.ToString()));
+
+			StringBuilder hashString = new StringBuilder();
+			foreach (byte b in hashBytes)
+			{
+				hashString.Append(b.ToString("x2"));
+			}
+
+			return hashString.ToString();
 		}
-
-		byte[] hashBytes = sha256.ComputeHash(Encoding.UTF8.GetBytes(builder.ToString()));
-
-		StringBuilder hashString = new StringBuilder();
-		foreach (byte b in hashBytes)
-		{
-			hashString.Append(b.ToString("x2"));
-		}
-
-		return hashString.ToString();
 	}
+
+	public ExpressionElementSyntax ToExpression(object data)
+	{
+		return ExpressionElement(
+			ImplicitObjectCreationExpression(
+				ArgumentList(),
+				InitializerExpression(
+					SyntaxKind.ObjectInitializerExpression,
+					Token(SyntaxKind.OpenBraceToken).WS(),
+					SeparatedList<ExpressionSyntax>(Fields.Select(x => AssignmentExpression(SyntaxKind.SimpleAssignmentExpression,
+						IdentifierName(x.Name),
+						ValueToLiteral(x.GetValue(data)))),
+						Fields.Select(x => Token(SyntaxKind.CommaToken)
+							.WS(new string(' ', FieldsMaxLength.Value[x.Name] - GetValueDisplayLength(x.GetValue(data)) + 1)))
+					),
+					Token(SyntaxKind.CloseBraceToken)
+				)
+			)
+		);
+	}
+}
+
+public static class SyntaxExtensions
+{
+	public static TSyntax WS<TSyntax>(this TSyntax node, string text = " ") where TSyntax : SyntaxNode
+	{
+		return node.WithTrailingTrivia(Whitespace(text));
+	}
+
+	public static SyntaxToken WS(this SyntaxToken token, string text = " ")
+	{
+		return token.WithTrailingTrivia(Whitespace(text));
+	}
+}
+
+class IdentManager
+{
+	private int ident;
+	private readonly int step;
+	private readonly char identChar;
+
+	public IdentManager(int ident, int step = 4, char identChar = ' ')
+	{
+		this.ident = ident;
+		this.step = step;
+		this.identChar = identChar;
+	}
+
+	// {}
+	public SyntaxToken OpenBrace() => Token(SyntaxKind.OpenBraceToken).WithLeadingTrivia(BeginWS()).WS("\n");
+	public SyntaxToken CloseBrace()
+	{
+		ident -= step;
+		return Token(SyntaxKind.CloseBraceToken).WithLeadingTrivia(WS()).WS("\n");
+	}
+
+	// []
+	public SyntaxToken OpenBracket() => Token(SyntaxKind.OpenBracketToken).WithLeadingTrivia(BeginWS()).WS("\n");
+	public SyntaxToken CloseBracket()
+	{
+		ident -= step;
+		return Token(SyntaxKind.CloseBracketToken).WithLeadingTrivia(Whitespace("\n"), WS());
+	}
+
+	// ()
+	public SyntaxToken OpenParen() => Token(SyntaxKind.OpenParenToken).WS("\n");
+	public SyntaxToken CloseParen() => Token(SyntaxKind.CloseParenToken);
+
+	public SyntaxTrivia BeginWS()
+	{
+		SyntaxTrivia ws = WS();
+		ident += step;
+		return ws;
+	}
+
+	public SyntaxTrivia WS(int offset = 0) => Whitespace(new string(identChar, ident + offset));
 }
