@@ -23,12 +23,32 @@ jobs:
       - name: Checkout code
         uses: actions/checkout@v4
 
+      - name: Cache npm cache
+        uses: actions/cache@v4
+        with:
+          path: ~/.npm
+          key: ${{ runner.os }}-npm-cache-${{ hashFiles('src/FE/package-lock.json') }}
+          restore-keys: |
+            ${{ runner.os }}-npm-cache-
+
+      - name: Install dependencies
+        working-directory: ./src/FE
+        run: npm ci
+
+      - name: Cache Next.js build cache
+        uses: actions/cache@v4
+        with:
+          path: src/FE/.next/cache
+          key: ${{ runner.os }}-nextjs-${{ hashFiles('**/package-lock.json') }}-${{ hashFiles('**/*.svg', '**/*.png', '**/*.ts', '**/*.tsx') }}
+          restore-keys: |
+            ${{ runner.os }}-next-cache-
+
       - name: Build frontend
-        run: |
-          cd ./src/FE
-          npm i
-          npm run build
-          mv ./out/* ../BE/wwwroot
+        working-directory: ./src/FE
+        run: npm run build
+
+      - name: Move build files
+        run: mv ./src/FE/out/* ./src/BE/wwwroot
 
       - name: Build container
         run: |
@@ -44,71 +64,78 @@ jobs:
           docker push ${{ vars.DOCKER_REGISTRY }}/${{ vars.DOCKER_NAMESPACE }}/chats:r-${{ github.run_number }}
           docker push ${{ vars.DOCKER_REGISTRY }}/${{ vars.DOCKER_NAMESPACE }}/chats:latest
 
-      - name: Create Release
-        id: create_release
-        uses: actions/create-release@v1
-        env:
-          GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
-        with:
-          tag_name: r-${{ github.run_number }}
-          release_name: r-${{ github.run_number }}
-          draft: false
-          prerelease: false
+      # - name: Create Release
+      #   id: create_release
+      #   uses: actions/create-release@v1
+      #   env:
+      #     GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+      #   with:
+      #     tag_name: r-${{ github.run_number }}
+      #     release_name: r-${{ github.run_number }}
+      #     draft: false
+      #     prerelease: false
 
-      - name: build win-x64 binary
-        run: |
-          rm -rf ./Publish
-          dotnet publish ./src/BE/Chats.BE.csproj -c Release -r win-x64 --self-contained true -o ./Publish /p:DeleteExistingFiles=True /p:PublishSingleFile=true /p:PublishReadyToRun=true /p:EnableCompressionInSingleFile=true
-          7z a -tzip -mx=1 chats-win-x64-r${{ github.run_number }}.zip ./Publish/*
+      # - name: build win-x64 binary
+      #   run: |
+      #     rm -rf ./Publish
+      #     dotnet publish ./src/BE/Chats.BE.csproj -c Release -r win-x64 --self-contained true -o ./Publish /p:DeleteExistingFiles=True /p:PublishSingleFile=true /p:PublishReadyToRun=true /p:EnableCompressionInSingleFile=true
+      #     7z a -tzip -mx=1 chats-win-x64-r${{ github.run_number }}.zip ./Publish/*
 
-      - name: Upload win-x64 Asset
-        uses: actions/upload-release-asset@v1
-        env:
-          GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
-        with:
-          upload_url: ${{ steps.create_release.outputs.upload_url }}
-          asset_path: chats-win-x64-r${{ github.run_number }}.zip
-          asset_name: chats-win-x64-r${{ github.run_number }}.zip
-          asset_content_type: application/octet-stream
+      # - name: Upload win-x64 Asset
+      #   uses: actions/upload-release-asset@v1
+      #   env:
+      #     GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+      #   with:
+      #     upload_url: ${{ steps.create_release.outputs.upload_url }}
+      #     asset_path: chats-win-x64-r${{ github.run_number }}.zip
+      #     asset_name: chats-win-x64-r${{ github.run_number }}.zip
+      #     asset_content_type: application/octet-stream
 
-      - name: build linux-x64 binary
-        run: |
-          rm -rf ./Publish
-          dotnet publish ./src/BE/Chats.BE.csproj -c Release -r linux-x64 --self-contained true -o ./Publish /p:DeleteExistingFiles=True /p:PublishSingleFile=true /p:PublishReadyToRun=true /p:EnableCompressionInSingleFile=true
-          7z a -tzip -mx=1 chats-linux-x64-r${{ github.run_number }}.zip ./Publish/*
+      # - name: build linux-x64 binary
+      #   run: |
+      #     rm -rf ./Publish
+      #     dotnet publish ./src/BE/Chats.BE.csproj -c Release -r linux-x64 --self-contained true -o ./Publish /p:DeleteExistingFiles=True /p:PublishSingleFile=true /p:PublishReadyToRun=true /p:EnableCompressionInSingleFile=true
+      #     7z a -tzip -mx=1 chats-linux-x64-r${{ github.run_number }}.zip ./Publish/*
 
-      - name: Upload linux-x64 Asset
-        uses: actions/upload-release-asset@v1
-        env:
-          GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
-        with:
-          upload_url: ${{ steps.create_release.outputs.upload_url }}
-          asset_path: chats-linux-x64-r${{ github.run_number }}.zip
-          asset_name: chats-linux-x64-r${{ github.run_number }}.zip
-          asset_content_type: application/octet-stream
+      # - name: Upload linux-x64 Asset
+      #   uses: actions/upload-release-asset@v1
+      #   env:
+      #     GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+      #   with:
+      #     upload_url: ${{ steps.create_release.outputs.upload_url }}
+      #     asset_path: chats-linux-x64-r${{ github.run_number }}.zip
+      #     asset_name: chats-linux-x64-r${{ github.run_number }}.zip
+      #     asset_content_type: application/octet-stream
 
-      - name: build linux-arm64 binary
-        run: |
-          rm -rf ./Publish
-          dotnet publish ./src/BE/Chats.BE.csproj -c Release -r linux-arm64 --self-contained true -o ./Publish /p:DeleteExistingFiles=True /p:PublishSingleFile=true /p:PublishReadyToRun=true /p:EnableCompressionInSingleFile=true
-          7z a -tzip -mx=1 chats-linux-arm64-r${{ github.run_number }}.zip ./Publish/*
+      # - name: build linux-arm64 binary
+      #   run: |
+      #     rm -rf ./Publish
+      #     dotnet publish ./src/BE/Chats.BE.csproj -c Release -r linux-arm64 --self-contained true -o ./Publish /p:DeleteExistingFiles=True /p:PublishSingleFile=true /p:PublishReadyToRun=true /p:EnableCompressionInSingleFile=true
+      #     7z a -tzip -mx=1 chats-linux-arm64-r${{ github.run_number }}.zip ./Publish/*
 
-      - name: Upload linux-arm64 Asset
-        uses: actions/upload-release-asset@v1
-        env:
-          GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
-        with:
-          upload_url: ${{ steps.create_release.outputs.upload_url }}
-          asset_path: chats-linux-arm64-r${{ github.run_number }}.zip
-          asset_name: chats-linux-arm64-r${{ github.run_number }}.zip
-          asset_content_type: application/octet-stream
+      # - name: Upload linux-arm64 Asset
+      #   uses: actions/upload-release-asset@v1
+      #   env:
+      #     GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+      #   with:
+      #     upload_url: ${{ steps.create_release.outputs.upload_url }}
+      #     asset_path: chats-linux-arm64-r${{ github.run_number }}.zip
+      #     asset_name: chats-linux-arm64-r${{ github.run_number }}.zip
+      #     asset_content_type: application/octet-stream
 
   deploy-dev-stg:
-    needs: build-container
-    uses: ./.github/workflows/deploy.yml
-    with:
-      DOCKER_REGISTRY: ${{ vars.DOCKER_REGISTRY }}
-      DOCKER_NAMESPACE: ${{ vars.DOCKER_NAMESPACE }}
-      TAG: r-${{ github.run_number }}
-    secrets:
-      SSH_PRIVATE_KEY: ${{ secrets.SSH_PRIVATE_KEY }}
+    runs-on: ubuntu-latest
+    steps:
+      - uses: webfactory/ssh-agent@v0.9.0
+        with:
+            ssh-private-key: ${{ secrets.SSH_PRIVATE_KEY }}
+
+      - name: deploy dev/stg
+        run: |
+          ssh -o StrictHostKeyChecking=no -p 22 zhoujie@home.starworks.cc << 'EOF'
+            docker pull ${{ vars.DOCKER_REGISTRY }}/${{ vars.DOCKER_NAMESPACE }}/chats:r-${{ github.run_number }}
+            cd chats
+            sed -i "s/^TAG=.*/TAG=r-${{ github.run_number }}/" ~/chats/dev.env
+            sed -i "s/^TAG=.*/TAG=r-${{ github.run_number }}/" ~/chats/stg.env
+            ./dev.sh && ./stg.sh
+            
