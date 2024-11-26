@@ -14,12 +14,9 @@ permissions:
   contents: write
 
 jobs:
-  build-container:
+  build-fe:
     runs-on: ubuntu-latest
     steps:
-      - name: Login container
-        run: echo ${{ secrets.DOCKER_PASSWORD }} | docker login -u ${{ vars.DOCKER_USERNAME }} ${{ vars.DOCKER_REGISTRY }} --password-stdin
-
       - name: Checkout code
         uses: actions/checkout@v4
 
@@ -46,6 +43,31 @@ jobs:
       - name: Build frontend
         working-directory: ./src/FE
         run: npm run build
+
+      - name: Upload FE build artifacts
+        uses: actions/upload-artifact@v4
+        with:
+          name: fe-build
+          path: ./src/FE/out
+
+      - name: Move build files
+        run: mv ./src/FE/out/* ./src/BE/wwwroot
+
+  build-container:
+    needs: build-fe
+    runs-on: ubuntu-latest
+    steps:
+      - name: Login container
+        run: echo ${{ secrets.DOCKER_PASSWORD }} | docker login -u ${{ vars.DOCKER_USERNAME }} ${{ vars.DOCKER_REGISTRY }} --password-stdin
+
+      - name: Checkout code
+        uses: actions/checkout@v4
+
+      - name: Download FE build artifacts
+        uses: actions/download-artifact@v4
+        with:
+          name: fe-build
+          path: ./src/FE/out
 
       - name: Move build files
         run: mv ./src/FE/out/* ./src/BE/wwwroot
