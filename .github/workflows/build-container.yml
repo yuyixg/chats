@@ -47,7 +47,7 @@ jobs:
       - name: Upload FE build artifacts
         uses: actions/upload-artifact@v4
         with:
-          name: fe-build
+          name: chats-fe-r${{ github.run_number }}
           path: ./src/FE/out
 
   build-container:
@@ -63,7 +63,7 @@ jobs:
       - name: Download FE build artifacts
         uses: actions/download-artifact@v4
         with:
-          name: fe-build
+          name: chats-fe-r${{ github.run_number }}
           path: ./src/BE/wwwroot
 
       - name: Build container
@@ -96,13 +96,15 @@ jobs:
       - name: Download FE build artifacts
         uses: actions/download-artifact@v4
         with:
-          name: fe-build
+          name: chats-fe-r${{ github.run_number }}
           path: ./src/BE/wwwroot
 
       - name: build binary
         run: |
-          rm -rf ./Publish
           dotnet publish ./src/BE/Chats.BE.csproj -c Release -r ${{ matrix.runtime }} --self-contained true -o ./Publish /p:DeleteExistingFiles=True /p:PublishSingleFile=true /p:PublishReadyToRun=true /p:EnableCompressionInSingleFile=true
+
+      - name: Archive binary
+        run: |
           7z a -tzip -mx=1 chats-win-x64-r${{ github.run_number }}.zip ./Publish/*
 
       - name: Upload artifacts
@@ -111,58 +113,46 @@ jobs:
           name: chats-${{ matrix.runtime }}-r${{ github.run_number }}
           path: ./Publish
 
-      # - name: Create Release
-      #   id: create_release
-      #   uses: actions/create-release@v1
-      #   env:
-      #     GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
-      #   with:
-      #     tag_name: r-${{ github.run_number }}
-      #     release_name: r-${{ github.run_number }}
-      #     draft: false
-      #     prerelease: false
+  create-release:
+    needs: [build-fe, build-container, build-binaries]
+    runs-on: ubuntu-latest
+    steps:
+      - name: Create Release
+        id: create_release
+        uses: actions/create-release@v1
+        env:
+          GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+        with:
+          tag_name: r-${{ github.run_number }}
+          release_name: r-${{ github.run_number }}
+          draft: false
+          prerelease: false
 
-      # - name: Upload win-x64 Asset
-      #   uses: actions/upload-release-asset@v1
-      #   env:
-      #     GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
-      #   with:
-      #     upload_url: ${{ steps.create_release.outputs.upload_url }}
-      #     asset_path: chats-win-x64-r${{ github.run_number }}.zip
-      #     asset_name: chats-win-x64-r${{ github.run_number }}.zip
-      #     asset_content_type: application/octet-stream
+  upload-release-assets:
+    strategy:
+      matrix:
+        include:
+          - runtime: win-x64
+          - runtime: linux-x64
+          - runtime: linux-arm64
+    needs: create-release
+    runs-on: ubuntu-latest
+    steps:
+      - name: Download build artifacts
+        uses: actions/download-artifact@v4
+        with:
+          name: chats-${{ matrix.runtime }}-r${{ github.run_number }}
+          path: chats-${{ matrix.runtime }}-r${{ github.run_number }}
 
-      # - name: build linux-x64 binary
-      #   run: |
-      #     rm -rf ./Publish
-      #     dotnet publish ./src/BE/Chats.BE.csproj -c Release -r linux-x64 --self-contained true -o ./Publish /p:DeleteExistingFiles=True /p:PublishSingleFile=true /p:PublishReadyToRun=true /p:EnableCompressionInSingleFile=true
-      #     7z a -tzip -mx=1 chats-linux-x64-r${{ github.run_number }}.zip ./Publish/*
-
-      # - name: Upload linux-x64 Asset
-      #   uses: actions/upload-release-asset@v1
-      #   env:
-      #     GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
-      #   with:
-      #     upload_url: ${{ steps.create_release.outputs.upload_url }}
-      #     asset_path: chats-linux-x64-r${{ github.run_number }}.zip
-      #     asset_name: chats-linux-x64-r${{ github.run_number }}.zip
-      #     asset_content_type: application/octet-stream
-
-      # - name: build linux-arm64 binary
-      #   run: |
-      #     rm -rf ./Publish
-      #     dotnet publish ./src/BE/Chats.BE.csproj -c Release -r linux-arm64 --self-contained true -o ./Publish /p:DeleteExistingFiles=True /p:PublishSingleFile=true /p:PublishReadyToRun=true /p:EnableCompressionInSingleFile=true
-      #     7z a -tzip -mx=1 chats-linux-arm64-r${{ github.run_number }}.zip ./Publish/*
-
-      # - name: Upload linux-arm64 Asset
-      #   uses: actions/upload-release-asset@v1
-      #   env:
-      #     GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
-      #   with:
-      #     upload_url: ${{ steps.create_release.outputs.upload_url }}
-      #     asset_path: chats-linux-arm64-r${{ github.run_number }}.zip
-      #     asset_name: chats-linux-arm64-r${{ github.run_number }}.zip
-      #     asset_content_type: application/octet-stream
+      - name: Upload Asset
+        uses: actions/upload-release-asset@v1
+        env:
+          GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+        with:
+          upload_url: ${{ steps.create_release.outputs.upload_url }}
+          asset_path: chats-${{ matrix.runtime }}-r${{ github.run_number }}
+          asset_name: chats-${{ matrix.runtime }}-r${{ github.run_number }}.zip
+          asset_content_type: application/octet-stream
 
   deploy-dev-stg:
     runs-on: ubuntu-latest
