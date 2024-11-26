@@ -114,8 +114,10 @@ jobs:
           path: ./Publish
 
   create-release:
-    needs: [build-fe, build-container, build-binaries]
+    needs: [build-container, build-binaries]
     runs-on: ubuntu-latest
+    outputs:
+      upload_url: ${{ steps.create_release.outputs.upload_url }}
     steps:
       - name: Create Release
         id: create_release
@@ -127,8 +129,10 @@ jobs:
           release_name: r-${{ github.run_number }}
           draft: false
           prerelease: false
+          body: |
+            docker download: `docker pull ${{ vars.DOCKER_REGISTRY }}/${{ vars.DOCKER_NAMESPACE }}/chats:r-${{ github.run_number }}`
 
-  upload-release-assets:
+  upload-release-binaries:
     strategy:
       matrix:
         include:
@@ -143,16 +147,21 @@ jobs:
         with:
           name: chats-${{ matrix.runtime }}-r${{ github.run_number }}
           path: chats-${{ matrix.runtime }}-r${{ github.run_number }}
-
+  
+      - name: Compress artifacts into ZIP
+        run: |
+          zip -r chats-${{ matrix.runtime }}-r${{ github.run_number }}.zip chats-${{ matrix.runtime }}-r${{ github.run_number }}
+        shell: bash
+  
       - name: Upload Asset
         uses: actions/upload-release-asset@v1
         env:
           GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
         with:
-          upload_url: ${{ steps.create_release.outputs.upload_url }}
-          asset_path: chats-${{ matrix.runtime }}-r${{ github.run_number }}
+          upload_url: ${{ needs.create-release.outputs.upload_url }}
+          asset_path: chats-${{ matrix.runtime }}-r${{ github.run_number }}.zip
           asset_name: chats-${{ matrix.runtime }}-r${{ github.run_number }}.zip
-          asset_content_type: application/octet-stream
+          asset_content_type: application/zip
 
   deploy-dev-stg:
     runs-on: ubuntu-latest
