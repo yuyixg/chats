@@ -132,25 +132,26 @@ jobs:
           body: |
             docker download: `docker pull ${{ vars.DOCKER_REGISTRY }}/${{ vars.DOCKER_NAMESPACE }}/chats:r-${{ github.run_number }}`
 
-  upload-release-binaries:
+  upload-release-assets:
     strategy:
       matrix:
         include:
-          - runtime: win-x64
-          - runtime: linux-x64
-          - runtime: linux-arm64
+          - asset: chats-win-x64-r${{ github.run_number }}
+          - asset: chats-linux-x64-r${{ github.run_number }}
+          - asset: chats-linux-arm64-r${{ github.run_number }}
+          - asset: chats-fe-r${{ github.run_number }}
     needs: create-release
     runs-on: ubuntu-latest
     steps:
       - name: Download build artifacts
         uses: actions/download-artifact@v4
         with:
-          name: chats-${{ matrix.runtime }}-r${{ github.run_number }}
-          path: chats-${{ matrix.runtime }}-r${{ github.run_number }}
+          name: ${{ matrix.asset }}
+          path: ${{ matrix.asset }}
   
       - name: Compress artifacts into ZIP
         run: |
-          zip -r chats-${{ matrix.runtime }}-r${{ github.run_number }}.zip chats-${{ matrix.runtime }}-r${{ github.run_number }}
+          zip -r ${{ matrix.asset }}.zip ${{ matrix.asset }}
         shell: bash
   
       - name: Upload Asset
@@ -159,8 +160,8 @@ jobs:
           GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
         with:
           upload_url: ${{ needs.create-release.outputs.upload_url }}
-          asset_path: chats-${{ matrix.runtime }}-r${{ github.run_number }}.zip
-          asset_name: chats-${{ matrix.runtime }}-r${{ github.run_number }}.zip
+          asset_path: ${{ matrix.asset }}.zip
+          asset_name: ${{ matrix.asset }}.zip
           asset_content_type: application/zip
 
   deploy-dev-stg:
