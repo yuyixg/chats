@@ -1,6 +1,6 @@
 import { useContext, useState } from 'react';
 
-import { HomeContext } from '@/pages/home/home';
+import { HomeContext } from '@/pages/home';
 
 import ChatIcon from '@/components/ChatIcon/ChatIcon';
 import { IconChevronDown } from '@/components/Icons';

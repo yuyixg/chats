@@ -2,7 +2,7 @@ import { useContext } from 'react';
 
 import { PropsMessage } from '@/types/components/chat';
 
-import { HomeContext } from '@/pages/home/home';
+import { HomeContext } from '@/pages/home';
 
 import { CodeBlock } from '@/components/Markdown/CodeBlock';
 import { MemoizedReactMarkdown } from '@/components/Markdown/MemoizedReactMarkdown';

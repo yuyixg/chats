@@ -2,7 +2,7 @@ import { FC, useContext, useRef, useState } from 'react';
 
 import useTranslation from '@/hooks/useTranslation';
 
-import { HomeContext } from '@/pages/home/home';
+import { HomeContext } from '@/pages/home';
 
 import { IconX } from '@/components/Icons/index';
 

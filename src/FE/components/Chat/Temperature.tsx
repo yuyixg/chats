@@ -2,7 +2,7 @@ import { FC, useContext, useEffect, useState } from 'react';
 
 import useTranslation from '@/hooks/useTranslation';
 
-import { HomeContext } from '@/pages/home/home';
+import { HomeContext } from '@/pages/home';
 
 import { Slider } from '@/components/ui/slider';
 

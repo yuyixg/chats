@@ -7,7 +7,7 @@ import { removeSelectChatId, saveSelectChatId } from '@/utils/chats';
 
 import { ChatResult } from '@/types/clientApis';
 
-import { HomeContext } from '@/pages/home/home';
+import { HomeContext } from '@/pages/home';
 
 import Sidebar from '@/components/Sidebar';
 

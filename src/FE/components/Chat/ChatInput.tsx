@@ -17,7 +17,7 @@ import { Content, Message } from '@/types/chat';
 import { UploadFailType } from '@/types/components/upload';
 import { Prompt } from '@/types/prompt';
 
-import { HomeContext } from '@/pages/home/home';
+import { HomeContext } from '@/pages/home';
 
 import UploadButton from '@/components/Button/UploadButton';
 import {

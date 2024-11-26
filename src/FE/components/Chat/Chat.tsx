@@ -17,7 +17,7 @@ import { getUserSession } from '@/utils/user';
 
 import { ChatBody, Content, Message, Role } from '@/types/chat';
 
-import { HomeContext } from '@/pages/home/home';
+import { HomeContext } from '@/pages/home';
 
 import { ModeToggle } from '@/components/ModeToggle/ModeTooggle';
 

@@ -1,6 +1,6 @@
 import { useContext, useEffect, useState } from 'react';
 
-import { HomeContext } from '@/pages/home/home';
+import { HomeContext } from '@/pages/home';
 
 import { IconX } from '../Icons';
 import ChatSettings from './ChatSettings';

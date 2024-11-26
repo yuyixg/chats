@@ -7,7 +7,7 @@ import { useCreateReducer } from '@/hooks/useCreateReducer';
 
 import { Prompt } from '@/types/prompt';
 
-import { HomeContext } from '@/pages/home/home';
+import { HomeContext } from '@/pages/home';
 
 import { Prompts } from './components/Prompts';
 import Sidebar from '@/components/Sidebar';

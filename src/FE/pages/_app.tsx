@@ -6,7 +6,7 @@ import { useRouter } from 'next/router';
 
 import { ThemeProvider } from '@/components/Theme/ThemeProvider';
 
-import AdminLayout from './admin/layout/layout';
+import AdminLayout from './admin/layout';
 import './globals.css';
 
 import 'katex/dist/katex.min.css';

@@ -4,7 +4,7 @@ import useTranslation from '@/hooks/useTranslation';
 
 import { formatRMB } from '@/utils/common';
 
-import { HomeContext } from '@/pages/home/home';
+import { HomeContext } from '@/pages/home';
 
 import { getUserBalanceOnly } from '@/apis/clientApis';
 

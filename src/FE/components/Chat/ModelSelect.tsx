@@ -4,7 +4,7 @@ import useTranslation from '@/hooks/useTranslation';
 
 import { formatNumberAsMoney } from '@/utils/common';
 
-import { HomeContext } from '@/pages/home/home';
+import { HomeContext } from '@/pages/home';
 import { ModelUsageDto } from '@/types/clientApis';
 import { getModelUsage } from '@/apis/clientApis';
 
