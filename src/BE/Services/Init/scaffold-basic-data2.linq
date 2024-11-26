@@ -26,19 +26,19 @@
 void Main()
 {
 	Environment.CurrentDirectory = Path.GetDirectoryName(Util.CurrentQueryPath)!;
-	TableDef[] tableDefs = new[]
+	TableDef[] tableDefs = new string[]
 	{
-		"ModelReference",
+		//"ModelReference",
 		"ModelProvider"
 	}
 	.Select(tableName => TableDef.FromContextTableDef(this, tableName))
 	.ToArray();
-	SyntaxNode cu = GenerateReplaceDetailsForTables(tableDefs);
+	SyntaxNode cu = GenerateCompilationUnit(tableDefs);
 	Util.FixedFont(cu.ToFullString()).Dump();
 	//File.WriteAllText("./BasicData2.cs", modelProvidersReplaced.ToFullString());
 }
 
-static CompilationUnitSyntax GenerateReplaceDetailsForTables(TableDef[] tableDefs)
+static CompilationUnitSyntax GenerateCompilationUnit(TableDef[] tableDefs)
 {
 	CompilationUnitSyntax cu = CompilationUnit()
 		.AddUsings(
@@ -49,20 +49,18 @@ static CompilationUnitSyntax GenerateReplaceDetailsForTables(TableDef[] tableDef
 		.AddMembers(
 			FileScopedNamespaceDeclaration(ParseName("Chats.BE.Services.Init")).AddMembers(
 				ClassDeclaration("BasicData2")
-					.AddModifiers(Token(SyntaxKind.InternalKeyword), Token(SyntaxKind.StaticKeyword)))
-		)
-		.NormalizeWhitespace();
-	ClassDeclarationSyntax cls = cu.DescendantNodes().OfType<ClassDeclarationSyntax>().First();
-	ClassDeclarationSyntax newCls = cls.AddMembers(tableDefs.Select((x, i) => MakeMethod(x, needEmptyLine: i != tableDefs.Length)).ToArray());
-	return cu.ReplaceNode(cls, newCls);
+					.AddModifiers(Token(SyntaxKind.InternalKeyword), Token(SyntaxKind.StaticKeyword))
+					.AddMembers(tableDefs.Select((x, i) => InsertSimpleDataMethod(x, needEmptyLine: i != tableDefs.Length - 1)).ToArray()))
+		);
+	return cu;
 }
 
-static MethodDeclarationSyntax MakeMethod(TableDef def, bool needEmptyLine)
+static MethodDeclarationSyntax InsertSimpleDataMethod(TableDef def, bool needEmptyLine)
 {
 	int ident = 4;
 	return MethodDeclaration(PredefinedType(Token(SyntaxKind.VoidKeyword)).WithTrailingTrivia(Whitespace(" ")), $"Insert{def.PropertyName}")
-		.AddModifiers(Token(SyntaxKind.PublicKeyword).WithTrailingTrivia(Whitespace(" ")), Token(SyntaxKind.StaticKeyword).WithTrailingTrivia(Whitespace(" ")))
-		.AddParameterListParameters(Parameter(Identifier("db")).WithType(IdentifierName("ChatsDB")))
+		.AddModifiers(Token(SyntaxKind.PrivateKeyword).WithTrailingTrivia(Whitespace(" ")), Token(SyntaxKind.StaticKeyword).WithTrailingTrivia(Whitespace(" ")))
+		.AddParameterListParameters(Parameter(Identifier("db")).WithType(IdentifierName("ChatsDB").WithTrailingTrivia(Whitespace(" "))))
 		.WithLeadingTrivia(WS())
 		.WithTrailingTrivia(Whitespace("\n"))
 		.WithBody(Block(
@@ -73,13 +71,13 @@ static MethodDeclarationSyntax MakeMethod(TableDef def, bool needEmptyLine)
 					OpenParen(),
 					[Argument(CollectionExpression(
 						OpenBracket(),
-						SeparatedList<CollectionElementSyntax>(def.TableData.Select(x => def.ToExpression(x).WithLeadingTrivia(WS())),
-							Enumerable.Repeat(Token(SyntaxKind.CommaToken).WithTrailingTrivia(Whitespace("\n")), def.TableData.Length - 1)),
+						SeparatedList<CollectionElementSyntax>(def.TableData.Value.Select(x => def.ToExpression(x).WithLeadingTrivia(WS())),
+							Enumerable.Repeat(Token(SyntaxKind.CommaToken).WithTrailingTrivia(Whitespace("\n")), def.TableData.Value.Length - 1)),
 						CloseBracket()
 						))],
 					CloseParen()
 				))).WithLeadingTrivia(WS(), Comment($"// Generated from data, hash: {def.GenerateDataHash()}\n"), WS())],
-			CloseBrace()).WithTrailingTrivia(Whitespace("\n"))
+			CloseBrace()).WithTrailingTrivia(Whitespace("\n" + (needEmptyLine ? "\n" : "")))
 		);
 
 	// {}
@@ -161,23 +159,23 @@ record TableDef
 {
 	public Type Type { get; }
 
-	public object[] TableData { get; }
+	public Lazy<object[]> TableData { get; }
 
 	public string PropertyName => Type.Name + 's';
 
 	public FieldInfo[] Fields { get; }
 
-	public Dictionary<string, int> FieldsMaxLength { get; }
+	public Lazy<Dictionary<string, int>> FieldsMaxLength { get; }
 	
 	public static TableDef FromContextTableDef(object me, string tableName)
 	{
 		PropertyInfo prop = me.GetType().GetProperty($"{tableName}s") ?? throw new InvalidOperationException($"Property {tableName}s not found.");
 		Type propType = prop.PropertyType.GenericTypeArguments[0];
 		IEnumerable dataTable = (IEnumerable)prop.GetValue(me)!;
-		return new TableDef(propType, dataTable.OfType<object>().ToArray());
+		return new TableDef(propType, new Lazy<object[]>(() => dataTable.OfType<object>().ToArray()));
 	}
 
-	public TableDef(Type type, object[] tableData)
+	public TableDef(Type type, Lazy<object[]> tableData)
 	{
 		Type = type;
 		TableData = tableData;
@@ -185,8 +183,8 @@ record TableDef
 			.GetFields()
 			.Where(x => x.GetCustomAttribute<ColumnAttribute>() != null)
 			.ToArray();
-		FieldsMaxLength = Fields
-			.ToDictionary(k => k.Name, v => TableData.Max(data => GetValueDisplayLength(v.GetValue(data))));
+		FieldsMaxLength = new Lazy<Dictionary<string, int>>(() => Fields
+			.ToDictionary(k => k.Name, v => TableData.Value.Max(data => GetValueDisplayLength(v.GetValue(data)))));
 	}
 
 	public string GenerateDataHash()
@@ -195,7 +193,7 @@ record TableDef
 		{
 			StringBuilder builder = new StringBuilder();
 
-			foreach (object item in TableData)
+			foreach (object item in TableData.Value)
 			{
 				if (item != null)
 				{
@@ -231,7 +229,7 @@ record TableDef
 						IdentifierName(x.Name),
 						ValueToLiteral(x.GetValue(data)))),
 						Fields.Select(x => Token(SyntaxKind.CommaToken)
-							.WithTrailingTrivia(Whitespace(new string(' ', FieldsMaxLength[x.Name] - GetValueDisplayLength(x.GetValue(data)) + 1))))
+							.WithTrailingTrivia(Whitespace(new string(' ', FieldsMaxLength.Value[x.Name] - GetValueDisplayLength(x.GetValue(data)) + 1))))
 					),
 					Token(SyntaxKind.CloseBraceToken)
 				)
