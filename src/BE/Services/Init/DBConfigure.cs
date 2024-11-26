@@ -7,13 +7,18 @@ public static class DBConfigure
     public static void Configure(this DbContextOptionsBuilder dbContextOptionsBuilder, IConfiguration configuration, IWebHostEnvironment environment)
     {
         string? dbType = configuration["DBType"];
-        if (dbType == "sqlite" || dbType == null)
+        string connectionString = "Name=ConnectionStrings:ChatsDB";
+        if (dbType == null || dbType.Equals("sqlite", StringComparison.OrdinalIgnoreCase))
         {
-            dbContextOptionsBuilder.UseSqlite("Name=ConnectionStrings:ChatsDB");
+            dbContextOptionsBuilder.UseSqlite(connectionString);
         }
-        else if (dbType == "sqlserver")
+        else if (dbType.Equals("sqlserver", StringComparison.OrdinalIgnoreCase) || dbType.Equals("mssql", StringComparison.OrdinalIgnoreCase))
         {
-            dbContextOptionsBuilder.UseSqlite("Name=ConnectionStrings:ChatsDB");
+            dbContextOptionsBuilder.UseSqlServer(connectionString);
+        }
+        else if (dbType.Equals("postgresql", StringComparison.OrdinalIgnoreCase) || dbType.Equals("pgsql", StringComparison.OrdinalIgnoreCase))
+        {
+            dbContextOptionsBuilder.UseNpgsql(connectionString);
         }
         else
         {
