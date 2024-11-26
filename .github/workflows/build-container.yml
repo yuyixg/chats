@@ -125,6 +125,7 @@ jobs:
 
   deploy-dev-stg:
     runs-on: ubuntu-latest
+    needs: build-container
     steps:
       - uses: webfactory/ssh-agent@v0.9.0
         with:
