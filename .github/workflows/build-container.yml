@@ -89,11 +89,15 @@ jobs:
             os: win
             arch: x64
             args: /p:ContainerBaseImage=mcr.microsoft.com/dotnet/aspnet:8.0-nanoserver-1809
-          - tag: r-${{ github.run_number }}-nanoserver-ltsc2022
+          - tag: r${{ github.run_number }}-nanoserver-ltsc2022
             runs-on: windows-latest
             os: win
             arch: x64
             args: /p:ContainerBaseImage=mcr.microsoft.com/dotnet/aspnet:8.0-nanoserver-ltsc2022
+          - tag: r${{ github.run_number }}-linux-arm64
+            runs-on: ubuntu-latest
+            os: linux
+            arch: arm64
     runs-on: ${{ matrix.runs-on }}
     steps:
       - name: Login container
@@ -131,6 +135,7 @@ jobs:
         run: |
           docker manifest create --amend docker.io/sdcb/chats:r${{ github.run_number }} \
             docker.io/sdcb/chats:r${{ github.run_number }}-linux-x64 \
+            docker.io/sdcb/chats:r${{ github.run_number }}-linux-arm64 \
             docker.io/sdcb/chats:r${{ github.run_number }}-nanoserver-1809 \
             docker.io/sdcb/chats:r${{ github.run_number }}-nanoserver-ltsc2022
 
@@ -195,7 +200,7 @@ jobs:
           path: ./Publish
 
   create-release:
-    needs: [build-primary-container, build-containers, build-binaries]
+    needs: [docker-manifest, build-binaries]
     runs-on: ubuntu-latest
     outputs:
       release_id: ${{ steps.create_release.outputs.release_id }}
