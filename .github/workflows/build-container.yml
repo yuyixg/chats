@@ -77,7 +77,7 @@ jobs:
           
       - name: Push container
         run: |
-          docker push ${{ vars.DOCKER_REGISTRY }}/${{ vars.DOCKER_NAMESPACE }}/chats:r-${{ github.run_number }}-linux-x64
+          docker push ${{ vars.DOCKER_REGISTRY }}/${{ vars.DOCKER_NAMESPACE }}/chats:r${{ github.run_number }}-linux-x64
 
   build-containers:
     needs: build-fe
