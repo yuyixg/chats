@@ -71,22 +71,20 @@ jobs:
         run: |
           dotnet publish ./src/BE/Chats.BE.csproj -c Release --os linux --arch x64 /t:PublishContainer /p:ContainerRepository=chats
 
-      - name: Tag container with 'latest' & run number
+      - name: Tag container with run number
         run: |
-          docker tag chats ${{ vars.DOCKER_REGISTRY }}/${{ vars.DOCKER_NAMESPACE }}/chats:r-${{ github.run_number }}
-          docker tag chats ${{ vars.DOCKER_REGISTRY }}/${{ vars.DOCKER_NAMESPACE }}/chats:latest
+          docker tag chats ${{ vars.DOCKER_REGISTRY }}/${{ vars.DOCKER_NAMESPACE }}/chats:r${{ github.run_number }}-linux-x64
           
       - name: Push container
         run: |
-          docker push ${{ vars.DOCKER_REGISTRY }}/${{ vars.DOCKER_NAMESPACE }}/chats:r-${{ github.run_number }}
-          docker push ${{ vars.DOCKER_REGISTRY }}/${{ vars.DOCKER_NAMESPACE }}/chats:latest
+          docker push ${{ vars.DOCKER_REGISTRY }}/${{ vars.DOCKER_NAMESPACE }}/chats:r-${{ github.run_number }}-linux-x64
 
   build-containers:
     needs: build-fe
     strategy:
       matrix:
         include:
-          - tag: r-${{ github.run_number }}-nanoserver-1809
+          - tag: r${{ github.run_number }}-nanoserver-1809
             runs-on: windows-latest
             os: win
             arch: x64
@@ -121,6 +119,38 @@ jobs:
       - name: Push container
         run: |
           docker push ${{ vars.DOCKER_REGISTRY }}/${{ vars.DOCKER_NAMESPACE }}/chats:${{ matrix.tag }}
+
+  docker-manifest:
+    needs: [build-primary-container, build-containers]
+    runs-on: ubuntu-latest
+    steps:
+      - name: Login container
+        run: echo ${{ secrets.DOCKER_PASSWORD }} | docker login -u ${{ vars.DOCKER_USERNAME }} ${{ vars.DOCKER_REGISTRY }} --password-stdin
+        
+      - name: Create manifest
+        run: |
+          docker manifest create --amend docker.io/sdcb/chats:r${{ github.run_number }} \
+            docker.io/sdcb/chats:r${{ github.run_number }}-linux-x64 \
+            docker.io/sdcb/chats:r${{ github.run_number }}-nanoserver-1809 \
+            docker.io/sdcb/chats:r${{ github.run_number }}-nanoserver-ltsc2022
+
+      - name: Annotation
+        run: |
+          docker manifest annotate docker.io/sdcb/chats:r${{ github.run_number }} docker.io/sdcb/chats:r${{ github.run_number }}-nanoserver-1809 --os windows --arch x64 --os-version 10.0.17763.6532
+          docker manifest annotate docker.io/sdcb/chats:r${{ github.run_number }} docker.io/sdcb/chats:r${{ github.run_number }}-nanoserver-ltsc2022 --os windows --arch x64 --os-version 10.0.20348.2849
+          docker manifest inspect docker.io/sdcb/chats:r${{ github.run_number }}
+
+      - name: Push manifest
+        run: |
+          docker manifest push docker.io/sdcb/chats:r${{ github.run_number }}
+
+      - name: Tag latest manifest
+        run: |
+          docker tag docker.io/sdcb/chats:r${{ github.run_number }} docker.io/sdcb/chats:latest
+
+      - name: Push latest manifest
+        run: |
+          docker push docker.io/sdcb/chats:latest
 
   build-binaries:
     needs: build-fe
@@ -199,7 +229,7 @@ jobs:
               repo: context.repo.repo,
               tag_name: `r-${{ github.run_number }}`,
               name: `r-${{ github.run_number }}`,
-              body: `**Docker Download**: \`docker pull ${{ vars.DOCKER_REGISTRY }}/${{ vars.DOCKER_NAMESPACE }}/chats:r-${{ github.run_number }}\`
+              body: `**Docker Download**: \`docker pull ${{ vars.DOCKER_REGISTRY }}/${{ vars.DOCKER_NAMESPACE }}/chats:r${{ github.run_number }}\`
                     **Full Changelog**: https://github.com/sdcb/chats/compare/${latestTag}...r-${{ github.run_number }}`,
               draft: false,
               prerelease: false,
@@ -265,9 +295,9 @@ jobs:
       - name: deploy dev/stg
         run: |
           ssh -o StrictHostKeyChecking=no -p 22 zhoujie@home.starworks.cc << 'EOF'
-            docker pull ${{ vars.DOCKER_REGISTRY }}/${{ vars.DOCKER_NAMESPACE }}/chats:r-${{ github.run_number }}
+            docker pull ${{ vars.DOCKER_REGISTRY }}/${{ vars.DOCKER_NAMESPACE }}/chats:r${{ github.run_number }}-linux-x64
             cd chats
-            sed -i "s/^TAG=.*/TAG=r-${{ github.run_number }}/" ~/chats/dev.env
-            sed -i "s/^TAG=.*/TAG=r-${{ github.run_number }}/" ~/chats/stg.env
+            sed -i "s/^TAG=.*/TAG=r${{ github.run_number }}-linux-x64/" ~/chats/dev.env
+            sed -i "s/^TAG=.*/TAG=r${{ github.run_number }}-linux-x64/" ~/chats/stg.env
             ./dev.sh && ./stg.sh
-            
+          EOF
