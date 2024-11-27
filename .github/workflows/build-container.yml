@@ -51,7 +51,7 @@ jobs:
           name: chats-fe
           path: ./src/FE/out
 
-  build-container:
+  build-primary-container:
     needs: build-fe
     runs-on: ubuntu-latest
     steps:
@@ -80,6 +80,47 @@ jobs:
         run: |
           docker push ${{ vars.DOCKER_REGISTRY }}/${{ vars.DOCKER_NAMESPACE }}/chats:r-${{ github.run_number }}
           docker push ${{ vars.DOCKER_REGISTRY }}/${{ vars.DOCKER_NAMESPACE }}/chats:latest
+
+  build-containers:
+    needs: build-fe
+    strategy:
+      matrix:
+        include:
+          - tag: r-${{ github.run_number }}-nanoserver-1809
+            runs-on: windows-latest
+            os: win
+            arch: x64
+            args: /p:ContainerBaseImage=mcr.microsoft.com/dotnet/aspnet:8.0-nanoserver-1809
+          - tag: r-${{ github.run_number }}-nanoserver-ltsc2022
+            runs-on: windows-latest
+            os: win
+            arch: x64
+            args: /p:ContainerBaseImage=mcr.microsoft.com/dotnet/aspnet:8.0-nanoserver-ltsc2022
+    runs-on: ${{ matrix.runs-on }}
+    steps:
+      - name: Login container
+        run: echo ${{ secrets.DOCKER_PASSWORD }} | docker login -u ${{ vars.DOCKER_USERNAME }} ${{ vars.DOCKER_REGISTRY }} --password-stdin
+
+      - name: Checkout code
+        uses: actions/checkout@v4
+
+      - name: Download FE build artifacts
+        uses: actions/download-artifact@v4
+        with:
+          name: chats-fe
+          path: ./src/BE/wwwroot
+
+      - name: Build container
+        run: |
+          dotnet publish ./src/BE/Chats.BE.csproj -c Release --os ${{ matrix.os }} --arch ${{ matrix.arch }} /t:PublishContainer /p:ContainerRepository=chats ${{ matrix.args }}
+
+      - name: Tag container with run number
+        run: |
+          docker tag chats ${{ vars.DOCKER_REGISTRY }}/${{ vars.DOCKER_NAMESPACE }}/chats:${{ matrix.tag }}
+          
+      - name: Push container
+        run: |
+          docker push ${{ vars.DOCKER_REGISTRY }}/${{ vars.DOCKER_NAMESPACE }}/chats:r-${{ matrix.tag }}
 
   build-binaries:
     needs: build-fe
@@ -215,7 +256,7 @@ jobs:
 
   deploy-dev-stg:
     runs-on: ubuntu-latest
-    needs: build-container
+    needs: build-primary-container
     steps:
       - uses: webfactory/ssh-agent@v0.9.0
         with:
