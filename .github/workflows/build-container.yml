@@ -86,9 +86,22 @@ jobs:
     strategy:
       matrix:
         include:
-          - runtime: win-x64
-          - runtime: linux-x64
-          - runtime: linux-arm64
+          - id: chats
+          - id: chats-win-x64
+            args: -r win-x64 --self-contained true /p:PublishSingleFile=true /p:PublishReadyToRun=true /p:EnableCompressionInSingleFile=true
+          - id: chats-linux-x64
+            args: -r linux-x64 --self-contained true /p:PublishSingleFile=true /p:PublishReadyToRun=true /p:EnableCompressionInSingleFile=true
+          - id: chats-linux-arm64
+            args: -r linux-arm64 --self-contained true /p:PublishSingleFile=true /p:PublishReadyToRun=true /p:EnableCompressionInSingleFile=true
+          - id: chats-linux-musl-x64
+            args: -r linux-musl-x64 --self-contained true /p:PublishSingleFile=true /p:PublishReadyToRun=true /p:EnableCompressionInSingleFile=true
+          - id: chats-linux-musl-arm64
+            args: -r linux-musl-arm64 --self-contained true /p:PublishSingleFile=true /p:PublishReadyToRun=true /p:EnableCompressionInSingleFile=true
+          - id: chats-osx-arm64
+            args: -r osx-arm64 --self-contained true /p:PublishSingleFile=true /p:PublishReadyToRun=true /p:EnableCompressionInSingleFile=true
+          - id: chats-osx-x64
+            args: -r osx-x64 --self-contained true /p:PublishSingleFile=true /p:PublishReadyToRun=true /p:EnableCompressionInSingleFile=true
+
     runs-on: ubuntu-latest
     steps:
       - name: Checkout code
@@ -100,13 +113,13 @@ jobs:
           name: chats-fe
           path: ./src/BE/wwwroot
 
+      - name: Restore NuGets
+        run: |
+          dotnet restore ./src/BE/Chats.BE.csproj
+
       - name: build binary
         run: |
-          dotnet publish ./src/BE/Chats.BE.csproj -c Release -r ${{ matrix.runtime }} --self-contained true -o ./Publish /p:DeleteExistingFiles=True /p:PublishSingleFile=true /p:PublishReadyToRun=true /p:EnableCompressionInSingleFile=true
-
-      - name: Archive binary
-        run: |
-          7z a -tzip -mx=1 chats-win-x64.zip ./Publish/*
+          dotnet publish ./src/BE/Chats.BE.csproj -c Release -o ./Publish --no-restore /p:DeleteExistingFiles=True ${{ matrix.args }}
 
       - name: Upload artifacts
         uses: actions/upload-artifact@v4
@@ -162,10 +175,15 @@ jobs:
     strategy:
       matrix:
         include:
+          - asset: chats
+          - asset: chats-fe
           - asset: chats-win-x64
           - asset: chats-linux-x64
           - asset: chats-linux-arm64
-          - asset: chats-fe
+          - asset: chats-linux-musl-x64
+          - asset: chats-linux-musl-arm64
+          - asset: chats-osx-arm64
+          - asset: chats-osx-x64
     needs: create-release
     runs-on: ubuntu-latest
     steps:
