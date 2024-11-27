@@ -35,6 +35,7 @@
 
   <ItemGroup>
     <None Include="wwwroot\.gitkeep" />
+    <None Include="AppData\.gitkeep" />
   </ItemGroup>
 
 </Project>
