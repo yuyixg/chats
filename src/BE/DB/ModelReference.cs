@@ -19,6 +19,11 @@ public partial class ModelReference
     [StringLength(50)]
     public string Name { get; set; } = null!;
 
+    [StringLength(50)]
+    public string? ShortName { get; set; }
+
+    public bool IsLegacy { get; set; }
+
     [Column(TypeName = "decimal(3, 2)")]
     public decimal MinTemperature { get; set; }
 
