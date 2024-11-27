@@ -161,8 +161,9 @@ jobs:
           docker manifest annotate docker.io/sdcb/chats:latest docker.io/sdcb/chats:r${{ github.run_number }}-nanoserver-1809 --os-version 10.0.17763.6532
           docker manifest annotate docker.io/sdcb/chats:latest docker.io/sdcb/chats:r${{ github.run_number }}-nanoserver-ltsc2022 --os-version 10.0.20348.2849
 
-      - name: Push latest manifest
+      - name: Push manifest
         run: |
+          docker manifest push docker.io/sdcb/chats:r${{ github.run_number }}
           docker manifest push docker.io/sdcb/chats:latest
 
   build-binaries:
