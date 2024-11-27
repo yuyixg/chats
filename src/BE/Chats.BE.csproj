@@ -34,8 +34,9 @@
   </ItemGroup>
 
   <ItemGroup>
-    <None Include="wwwroot\.gitkeep" />
-    <None Include="AppData\.gitkeep" />
+    <Content Include="AppData\**\*">
+      <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
+    </Content>
   </ItemGroup>
 
 </Project>
