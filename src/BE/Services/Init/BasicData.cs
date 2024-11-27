@@ -93,10 +93,10 @@ internal static class BasicData
 
     private static void InsertModelReferences(ChatsDB db)
     {
-        // Generated from data, hash: acc96cbafd75b16dd4f551f4450dd446897268b3ea6e180dbe00e8e68a9c3614
+        // Generated from data, hash: 2f71b9fdb8a3ee3f905f73602058c19b4f248636ac640e22e001c145dc7031f6
         db.ModelReferences.AddRange(
         [
-            new(){ Id=0,   ProviderId=0, Name="Test",                        MinTemperature=0.00M, MaxTemperature=2.00M, AllowSearch=false, AllowVision=true,  AllowSystemPrompt=true,  AllowStreaming=true,  ContextWindow=2048,     MaxResponseTokens=2048,   TokenizerId=1,    PromptTokenPrice1M=0.00000M,   ResponseTokenPrice1M=0.00000M,   CurrencyCode="RMB", },
+            new(){ Id=0,   ProviderId=0, Name="HelloWorld",                  MinTemperature=0.00M, MaxTemperature=2.00M, AllowSearch=false, AllowVision=true,  AllowSystemPrompt=true,  AllowStreaming=true,  ContextWindow=2048,     MaxResponseTokens=2048,   TokenizerId=1,    PromptTokenPrice1M=0.00000M,   ResponseTokenPrice1M=0.00000M,   CurrencyCode="RMB", },
             new(){ Id=100, ProviderId=1, Name="gpt-3.5-turbo-0301",          MinTemperature=0.00M, MaxTemperature=2.00M, AllowSearch=false, AllowVision=false, AllowSystemPrompt=true,  AllowStreaming=true,  ContextWindow=4096,     MaxResponseTokens=4096,   TokenizerId=1,    PromptTokenPrice1M=1.50000M,   ResponseTokenPrice1M=2.00000M,   CurrencyCode="USD", },
             new(){ Id=101, ProviderId=1, Name="gpt-3.5-turbo-16k-0613",      MinTemperature=0.00M, MaxTemperature=2.00M, AllowSearch=false, AllowVision=false, AllowSystemPrompt=true,  AllowStreaming=true,  ContextWindow=16385,    MaxResponseTokens=16385,  TokenizerId=1,    PromptTokenPrice1M=3.00000M,   ResponseTokenPrice1M=4.00000M,   CurrencyCode="USD", },
             new(){ Id=102, ProviderId=1, Name="gpt-3.5-turbo-0613",          MinTemperature=0.00M, MaxTemperature=2.00M, AllowSearch=false, AllowVision=false, AllowSystemPrompt=true,  AllowStreaming=true,  ContextWindow=4096,     MaxResponseTokens=4096,   TokenizerId=1,    PromptTokenPrice1M=1.50000M,   ResponseTokenPrice1M=2.00000M,   CurrencyCode="USD", },
@@ -210,19 +210,19 @@ internal static class BasicData
 
     private static void InsertModelProviders(ChatsDB db)
     {
-        // Generated from data, hash: a6daa736eb55f92bb8f9dac40291e66ebc9fe6a441c7911b705bbfe5fd923d4c
+        // Generated from data, hash: ca9e34b1fc83836aecd72657462504eb25310d59fd3a997cd8348b99cac737f1
         db.ModelProviders.AddRange(
         [
-            new(){ Id=0, Name="Test",     InitialHost=null,                                        InitialSecret=null,                                          },
-            new(){ Id=1, Name="Azure",    InitialHost="https://<resource-name>.openai.azure.com/", InitialSecret="",                                            },
-            new(){ Id=2, Name="HunYuan",  InitialHost="hunyuan.tencentcloudapi.com",               InitialSecret="""{"secretId":"", "secretKey":""}""",         },
-            new(){ Id=3, Name="LingYi",   InitialHost=null,                                        InitialSecret="",                                            },
-            new(){ Id=4, Name="Moonshot", InitialHost=null,                                        InitialSecret="",                                            },
-            new(){ Id=5, Name="OpenAI",   InitialHost="https://api.openai.com/v1",                 InitialSecret="",                                            },
-            new(){ Id=6, Name="QianFan",  InitialHost=null,                                        InitialSecret="""{"apiKey":"", "secret":""}""",              },
-            new(){ Id=7, Name="QianWen",  InitialHost=null,                                        InitialSecret="",                                            },
-            new(){ Id=8, Name="Spark",    InitialHost=null,                                        InitialSecret="""{"appId": "", "apiKey":"", "secret":""}""", },
-            new(){ Id=9, Name="ZhiPuAI",  InitialHost=null,                                        InitialSecret="",                                            }
+            new(){ Id=0, Name="HelloWorld", InitialHost=null,                                        InitialSecret=null,                                          },
+            new(){ Id=1, Name="Azure",      InitialHost="https://<resource-name>.openai.azure.com/", InitialSecret="",                                            },
+            new(){ Id=2, Name="HunYuan",    InitialHost="hunyuan.tencentcloudapi.com",               InitialSecret="""{"secretId":"", "secretKey":""}""",         },
+            new(){ Id=3, Name="LingYi",     InitialHost=null,                                        InitialSecret="",                                            },
+            new(){ Id=4, Name="Moonshot",   InitialHost=null,                                        InitialSecret="",                                            },
+            new(){ Id=5, Name="OpenAI",     InitialHost="https://api.openai.com/v1",                 InitialSecret="",                                            },
+            new(){ Id=6, Name="QianFan",    InitialHost=null,                                        InitialSecret="""{"apiKey":"", "secret":""}""",              },
+            new(){ Id=7, Name="QianWen",    InitialHost=null,                                        InitialSecret="",                                            },
+            new(){ Id=8, Name="Spark",      InitialHost=null,                                        InitialSecret="""{"appId": "", "apiKey":"", "secret":""}""", },
+            new(){ Id=9, Name="ZhiPuAI",    InitialHost=null,                                        InitialSecret="",                                            }
         ]);
     }
 };

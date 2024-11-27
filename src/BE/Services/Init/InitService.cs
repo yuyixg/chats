@@ -27,7 +27,7 @@ public class InitService(IServiceScopeFactory scopeFactory)
 
         Model model = new()
         {
-            Name = "Test Model",
+            Name = "Hello-World Model",
             UpdatedAt = DateTime.UtcNow,
             CreatedAt = DateTime.UtcNow,
             ModelReferenceId = 0,
@@ -35,7 +35,7 @@ public class InitService(IServiceScopeFactory scopeFactory)
         ModelKey modelKey = new()
         {
             ModelProviderId = (byte)DBModelProvider.Test,
-            Name = "Test Key",
+            Name = "Hello-World Key",
             UpdatedAt = DateTime.UtcNow,
             CreatedAt = DateTime.UtcNow,
             Models = [model],
@@ -79,6 +79,16 @@ public class InitService(IServiceScopeFactory scopeFactory)
         };
         db.Users.Add(adminUser);
         db.BalanceTransactions.Add(balanceTransaction);
+        db.Prompts.Add(new Prompt
+        {
+            CreateUser = adminUser,
+            UpdatedAt = DateTime.UtcNow,
+            CreatedAt = DateTime.UtcNow,
+            Content = "You are {{MODEL_NAME}}, please follow user instructions carefully and respond thoughtfully. Current date: {{CURRENT_DATE}}.",
+            IsDefault = true, 
+            IsSystem = true, 
+            Name = "Default Prompt",
+        });
         await db.SaveChangesAsync(cancellationToken);
     }
 }
