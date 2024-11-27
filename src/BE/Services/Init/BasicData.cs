@@ -93,10 +93,10 @@ internal static class BasicData
 
     private static void InsertModelReferences(ChatsDB db)
     {
-        // Generated from data, hash: dcb4925554649058ad0574b250f0b9960399f82a737828fb15551d30474db381
+        // Generated from data, hash: acc96cbafd75b16dd4f551f4450dd446897268b3ea6e180dbe00e8e68a9c3614
         db.ModelReferences.AddRange(
         [
-            new(){ Id=0,   ProviderId=0, Name="Test",                        MinTemperature=0.00M, MaxTemperature=2.00M, AllowSearch=true,  AllowVision=true,  AllowSystemPrompt=true,  AllowStreaming=true,  ContextWindow=2048,     MaxResponseTokens=2048,   TokenizerId=1,    PromptTokenPrice1M=0.00000M,   ResponseTokenPrice1M=0.00000M,   CurrencyCode="RMB", },
+            new(){ Id=0,   ProviderId=0, Name="Test",                        MinTemperature=0.00M, MaxTemperature=2.00M, AllowSearch=false, AllowVision=true,  AllowSystemPrompt=true,  AllowStreaming=true,  ContextWindow=2048,     MaxResponseTokens=2048,   TokenizerId=1,    PromptTokenPrice1M=0.00000M,   ResponseTokenPrice1M=0.00000M,   CurrencyCode="RMB", },
             new(){ Id=100, ProviderId=1, Name="gpt-3.5-turbo-0301",          MinTemperature=0.00M, MaxTemperature=2.00M, AllowSearch=false, AllowVision=false, AllowSystemPrompt=true,  AllowStreaming=true,  ContextWindow=4096,     MaxResponseTokens=4096,   TokenizerId=1,    PromptTokenPrice1M=1.50000M,   ResponseTokenPrice1M=2.00000M,   CurrencyCode="USD", },
             new(){ Id=101, ProviderId=1, Name="gpt-3.5-turbo-16k-0613",      MinTemperature=0.00M, MaxTemperature=2.00M, AllowSearch=false, AllowVision=false, AllowSystemPrompt=true,  AllowStreaming=true,  ContextWindow=16385,    MaxResponseTokens=16385,  TokenizerId=1,    PromptTokenPrice1M=3.00000M,   ResponseTokenPrice1M=4.00000M,   CurrencyCode="USD", },
             new(){ Id=102, ProviderId=1, Name="gpt-3.5-turbo-0613",          MinTemperature=0.00M, MaxTemperature=2.00M, AllowSearch=false, AllowVision=false, AllowSystemPrompt=true,  AllowStreaming=true,  ContextWindow=4096,     MaxResponseTokens=4096,   TokenizerId=1,    PromptTokenPrice1M=1.50000M,   ResponseTokenPrice1M=2.00000M,   CurrencyCode="USD", },
