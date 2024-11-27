@@ -113,13 +113,9 @@ jobs:
           name: chats-fe
           path: ./src/BE/wwwroot
 
-      - name: Restore NuGets
-        run: |
-          dotnet restore ./src/BE/Chats.BE.csproj
-
       - name: build binary
         run: |
-          dotnet publish ./src/BE/Chats.BE.csproj -c Release -o ./Publish --no-restore ${{ matrix.args }} /p:DeleteExistingFiles=True
+          dotnet publish ./src/BE/Chats.BE.csproj -c Release -o ./Publish ${{ matrix.args }} /p:DeleteExistingFiles=True
 
       - name: Upload artifacts
         uses: actions/upload-artifact@v4
