@@ -165,7 +165,7 @@ jobs:
           path: ./Publish
 
   create-release:
-    needs: [build-container, build-binaries]
+    needs: [build-primary-container, build-containers, build-binaries]
     runs-on: ubuntu-latest
     outputs:
       release_id: ${{ steps.create_release.outputs.release_id }}
