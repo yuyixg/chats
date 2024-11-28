@@ -31,7 +31,7 @@ import { Form, FormField } from '@/components/ui/form';
 import FormInput from '@/components/ui/form/input';
 import FormSwitch from '@/components/ui/form/switch';
 
-import { getFileServices, putModels } from '@/apis/adminApis';
+import { deleteModels, getFileServices, putModels } from '@/apis/adminApis';
 import { zodResolver } from '@hookform/resolvers/zod';
 import { z } from 'zod';
 
@@ -111,6 +111,22 @@ export const EditModelModal = (props: IProps) => {
           );
         }
       })
+  }
+
+  async function onDelete() {
+    try {
+      await deleteModels(selected!.modelId);
+      onSuccessful();
+      toast.success(t('Deleted successful!'));
+    }
+    catch (err: any) {
+      try {
+        const resp = await err.json();
+        toast.error(t(resp.message));
+      } catch {
+        toast.error(t('Operation failed! Please try again later, or contact technical personnel.'));
+      }
+    }
   }
 
   useEffect(() => {
@@ -314,6 +330,16 @@ export const EditModelModal = (props: IProps) => {
                 </div>
               </div>
               <DialogFooter className="pt-4">
+                <Button
+                  type="button"
+                  variant="destructive"
+                  onClick={(e) => {
+                    onDelete();
+                    e.preventDefault();
+                  }}
+                >
+                  {t('Delete')}
+                </Button>
                 <Button type="submit">{t('Save')}</Button>
               </DialogFooter>
             </form>

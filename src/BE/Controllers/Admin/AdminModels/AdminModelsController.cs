@@ -100,6 +100,38 @@ public class AdminModelsController(ChatsDB db) : ControllerBase
         return Created();
     }
 
+    [HttpDelete("models/{modelId:int}")]
+    public async Task<ActionResult> DeleteModel(short modelId, CancellationToken cancellationToken)
+    {
+        Model? cm = await db.Models.FindAsync([modelId], cancellationToken);
+        if (cm == null) return NotFound();
+
+        var refInfo = await db.Models
+            .Where(x => x.Id == modelId)
+            .Select(x => new
+            {
+                Chats = x.Chats.Any(), 
+                UserModels = x.UserModels.Any(),
+                ApiKeys = x.ApiKeys.Any(),
+            })
+            .SingleAsync(cancellationToken);
+
+        if (refInfo.Chats || refInfo.UserModels || refInfo.ApiKeys)
+        {
+            string message = "Cannot delete model because it is referenced by: ";
+            if (refInfo.Chats) message += "Chats, ";
+            if (refInfo.UserModels) message += "UserModels, ";
+            if (refInfo.ApiKeys) message += "ApiKeys, ";
+            return this.BadRequestMessage(message);
+        }
+        else
+        {
+            db.Models.Remove(cm);
+            await db.SaveChangesAsync(cancellationToken);
+            return NoContent();
+        }
+    }
+
     [HttpPost("models/validate")]
     public async Task<ActionResult<ModelValidateResult>> ValidateModel(
         [FromBody] ValidateModelRequest req,

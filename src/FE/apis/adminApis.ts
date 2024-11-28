@@ -71,9 +71,9 @@ export const putModels = (
   });
 };
 
-export const deleteModels = (id: string): Promise<any> => {
+export const deleteModels = (id: number): Promise<any> => {
   const fetchService = useFetch();
-  return fetchService.delete('/api/admin/models?id=' + id);
+  return fetchService.delete(`/api/admin/models/${id}`);
 };
 
 export const postModels = (params: UpdateModelDto): Promise<any> => {
