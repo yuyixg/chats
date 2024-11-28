@@ -25,6 +25,7 @@ import FormInput from '@/components/ui/form/input';
 import FormTextarea from '@/components/ui/form/textarea';
 
 import {
+  postAutoCreateModels,
   deleteModelKeys,
   getModelProviderInitialConfig,
   postModelKeys,
@@ -33,6 +34,9 @@ import {
 import { zodResolver } from '@hookform/resolvers/zod';
 import { z } from 'zod';
 import { feModelProviders } from '@/types/model';
+import Tips from '@/components/Tips/Tips';
+import { IconInfo } from '@/components/Icons';
+import { Label } from '@radix-ui/react-dropdown-menu';
 
 interface IProps {
   selected: GetModelKeysResult | null;
@@ -73,7 +77,7 @@ export const ModelKeysModal = (props: IProps) => {
     },
   });
 
-  function onSubmit(values: z.infer<typeof formSchema>) {
+  const onSave = async  (values: z.infer<typeof formSchema>) => {
     if (!form.formState.isValid) return;
 
     const modelKeyDto: PostModelKeysParams = {
@@ -83,23 +87,40 @@ export const ModelKeysModal = (props: IProps) => {
       secret: values.secret || null,
     };
 
-    handleModelKeyRequest().then(() => {
+    try {
+      const id = await handleModelKeyRequest();
       onSuccessful();
-      toast.success(t('Save successful!'));
-    }).catch(() => {
+      return id;
+    } catch {
       toast.error(
         t(
           'Operation failed! Please try again later, or contact technical personnel.',
         ),
       );
-    });
+    }
 
-    function handleModelKeyRequest() {
+    async function handleModelKeyRequest() {
       if (selected) {
-        return putModelKeys(selected.id, modelKeyDto);
+        await putModelKeys(selected.id, modelKeyDto);
+        return selected.id;
       } else {
-        return postModelKeys(modelKeyDto);
+        return await postModelKeys(modelKeyDto);
       }
+    }
+  }
+
+  const autoCreateModels = async (modelKeyId: number) => {
+    const result = await postAutoCreateModels(modelKeyId);
+    const hasSuccess = result.some(r => r.isCreated);
+    if (hasSuccess) {
+      // 如果有成功，则提示成功信息和成功的模型名字
+      const successMessages = result.filter(r => r.isCreated).map(r => r.modelName).join('\n');
+      toast.success(`${t('Following models are auto created successfully:')}\n${successMessages}`);
+      onSuccessful();
+    } else {
+      // 如果全部失败，则提示失败信息
+      const failMessages = result.map(r => `${r.modelName}: ${r.error}`).join('\n');
+      toast.error(`${t('Failed to auto create models, reasons:')}\n${failMessages}`);
     }
   }
 
@@ -119,8 +140,7 @@ export const ModelKeysModal = (props: IProps) => {
     }
   };
 
-  const reloadInitialConfig = async () => {
-    const modelProviderId = parseInt(form.getValues().modelProviderId || "0");
+  const reloadInitialConfig = async (modelProviderId: number) => {
     getModelProviderInitialConfig(modelProviderId).then(initialConfig => {
       setInitialConfig(initialConfig);
     });
@@ -134,7 +154,7 @@ export const ModelKeysModal = (props: IProps) => {
   useEffect(() => {
     const subscription = form.watch((value, { name, type }) => {
       if (name === 'modelProviderId' && type === 'change') {
-        reloadInitialConfig();
+        reloadInitialConfig(parseInt(form.getValues('modelProviderId') || '0'));
       }
     });
     return () => subscription.unsubscribe();
@@ -151,7 +171,7 @@ export const ModelKeysModal = (props: IProps) => {
         form.setValue('host', host || undefined);
         form.setValue('secret', secret || undefined);
       }
-      reloadInitialConfig();
+      reloadInitialConfig(selected?.modelProviderId || 0);
     }
   }, [isOpen]);
 
@@ -164,7 +184,7 @@ export const ModelKeysModal = (props: IProps) => {
           </DialogTitle>
         </DialogHeader>
         <Form {...form}>
-          <form onSubmit={form.handleSubmit(onSubmit)}>
+          <form onSubmit={form.handleSubmit(onSave)}>
             <FormField key="name" control={form.control} name="name" render={({ field }) => (
               <FormInput label={t('Name')} field={field} />
             )} />
@@ -184,20 +204,50 @@ export const ModelKeysModal = (props: IProps) => {
               <FormField key="secret" control={form.control} name="secret" render={({ field }) => (
                 <FormTextarea rows={2} label={t('Secret')} field={field} />
               )} />)}
-            <DialogFooter className="pt-4">
-              {selected && (
-                <Button
-                  type="button"
-                  variant="destructive"
-                  onClick={(e) => {
-                    onDelete();
-                    e.preventDefault();
+            <DialogFooter className="pt-4 md:justify-between">
+              <div>
+                <Button type="button"
+                  onClick={async () => {
+                    const id = await onSave(form.getValues());
+                    await autoCreateModels(id);
                   }}
                 >
-                  {t('Delete')}
+                  {t('Save and auto create all models')}
+                  <Tips
+                    side="bottom"
+                    content={
+                      <>
+                        <Label>{t("Click this button to create all models that are not outdated")}</Label>
+                        <Label>{t("Outdated models, such as gpt-3.5-turbo, will not be generated")}</Label>
+                        <Label>{t("The model's display name is its official name, and the price is based on the database reference price")}</Label>
+                        <Label>{t("If a model with the same name exists, it will not be altered")}</Label>
+                        <Label>{t("Once all models are created, the system will notify you of the attempts and list successful creations")}</Label>
+                      </>
+                    }
+                    trigger={
+                      <Button variant="ghost" className="p-1 m-0 h-auto">
+                        <IconInfo stroke="#7d7d7d" />
+                      </Button>
+                    }
+                  />
                 </Button>
-              )}
-              <Button type="submit">{t('Save')}</Button>
+
+              </div>
+              <div className="flex gap-2">
+                {selected && (
+                  <Button
+                    type="button"
+                    variant="destructive"
+                    onClick={(e) => {
+                      onDelete();
+                      e.preventDefault();
+                    }}
+                  >
+                    {t('Delete')}
+                  </Button>
+                )}
+                <Button type="submit">{t('Save')}</Button>
+              </div>
             </DialogFooter>
           </form>
         </Form>

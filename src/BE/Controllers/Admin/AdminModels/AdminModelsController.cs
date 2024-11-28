@@ -101,7 +101,7 @@ public class AdminModelsController(ChatsDB db) : ControllerBase
     }
 
     [HttpPost("models/validate")]
-    public async Task<ActionResult> ValidateModel(
+    public async Task<ActionResult<ModelValidateResult>> ValidateModel(
         [FromBody] ValidateModelRequest req,
         [FromServices] ConversationFactory conversationFactory,
         CancellationToken cancellationToken)
@@ -125,21 +125,8 @@ public class AdminModelsController(ChatsDB db) : ControllerBase
             return this.BadRequestMessage($"Model reference id: {req.ModelReferenceId} not found");
         }
 
-        ConversationService s = conversationFactory.CreateConversationService(new Model()
-        {
-            ModelKey = modelKey,
-            ModelReference = modelReference,
-            DeploymentName = req.DeploymentName,
-        });
-        try
-        {
-            await s.Chat([new UserChatMessage("1+1=?")], new ChatCompletionOptions(), cancellationToken);
-            return Ok();
-        }
-        catch (Exception e)
-        {
-            return this.BadRequestMessage(e.Message);
-        }
+        ModelValidateResult result = await conversationFactory.ValidateModel(modelKey, modelReference, req.DeploymentName, cancellationToken);
+        return Ok(result);
     }
 
     [HttpGet("user-models/{userId:int}")]

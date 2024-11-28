@@ -38,6 +38,7 @@ import {
   UserModelDisplayDto,
   SimpleModelReferenceDto,
   ModelProviderInitialConfig,
+  AutoCreateModelResult,
 } from '@/types/adminApis';
 import { ChatModelFileConfig, DBModelProvider } from '@/types/model';
 import { PageResult } from '@/types/page';
@@ -220,7 +221,7 @@ export const getModelKeys = async (): Promise<GetModelKeysResult[]> => {
 
 export const postModelKeys = (params: PostModelKeysParams) => {
   const fetchService = useFetch();
-  return fetchService.post('/api/admin/model-keys', {
+  return fetchService.post<number>('/api/admin/model-keys', {
     body: params,
   });
 };
@@ -236,6 +237,11 @@ export const deleteModelKeys = (id: number) => {
   const fetchService = useFetch();
   return fetchService.delete(`/api/admin/model-keys/${id}`);
 };
+
+export const postAutoCreateModels = (modelKey: number) => {
+  const fetchService = useFetch();
+  return fetchService.post<AutoCreateModelResult[]>(`/api/admin/model-keys/${modelKey}/auto-create-models`);
+}
 
 export const getUserInitialConfig = () => {
   const fetchServer = useFetch();

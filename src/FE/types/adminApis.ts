@@ -363,3 +363,9 @@ export interface ModelReferenceDto extends SimpleModelReferenceDto {
   currencyCode: string;
   exchangeRate: number;
 }
+
+export interface AutoCreateModelResult {
+  modelName: string;
+  isCreated: boolean;
+  error: string | null;
+}

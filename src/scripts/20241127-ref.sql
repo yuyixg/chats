@@ -390,3 +390,4 @@ update ModelProvider set name = 'Wenxin Qianfan' where id = 6
 update ModelProvider set name = 'DashScope' where id = 7
 update ModelProvider set name = 'Xunfei SparkDesk' where id = 8
 update ModelProvider set name = 'Zhipu AI' where id = 9
+update ModelReference set name = replace(name, 'gpt-3.5', 'gpt-35'), ShortName = replace(shortname, 'gpt-3.5', 'gpt-35') where ProviderId = 1

@@ -28,7 +28,6 @@ public class DashScopeConversationService : ConversationService
         ChatClient = Client.TextGeneration;
     }
 
-
     public override async IAsyncEnumerable<ChatSegment> ChatStreamed(IReadOnlyList<OpenAIChatMessage> messages, ChatCompletionOptions options, [EnumeratorCancellation] CancellationToken cancellationToken)
     {
         ChatParameters chatParameters = new()

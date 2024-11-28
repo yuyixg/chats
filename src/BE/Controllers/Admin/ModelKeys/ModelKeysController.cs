@@ -2,12 +2,10 @@
 using Chats.BE.Controllers.Admin.ModelKeys.Dtos;
 using Chats.BE.Controllers.Common;
 using Chats.BE.DB;
-using Chats.BE.DB.Jsons;
-using Chats.BE.Services;
 using Chats.BE.Services.Common;
+using Chats.BE.Services.Conversations;
 using Microsoft.AspNetCore.Mvc;
 using Microsoft.EntityFrameworkCore;
-using System.Text.Json;
 
 namespace Chats.BE.Controllers.Admin.ModelKeys;
 
@@ -92,7 +90,7 @@ public class ModelKeysController(ChatsDB db) : ControllerBase
         db.ModelKeys.Add(newModelKey);
         await db.SaveChangesAsync(cancellationToken);
 
-        return Created();
+        return Created(default(string), value: newModelKey.Id);
     }
 
     [HttpDelete("{modelKeyId}")]
@@ -114,5 +112,73 @@ public class ModelKeysController(ChatsDB db) : ControllerBase
         await db.SaveChangesAsync(cancellationToken);
 
         return NoContent();
+    }
+
+    [HttpPost("{modelKeyId:int}/auto-create-models")]
+    public async Task<ActionResult<AutoCreateModelResult[]>> AutoCreateModels(short modelKeyId, [FromServices] ConversationFactory conversationFactory, CancellationToken cancellationToken)
+    {
+        ModelKey? modelKey = await db
+            .ModelKeys
+            .Include(x => x.Models)
+            .AsSplitQuery()
+            .FirstOrDefaultAsync(x => x.Id == modelKeyId, cancellationToken);
+
+        if (modelKey == null)
+        {
+            return NotFound();
+        }
+
+        HashSet<short> existingModelRefIds = modelKey.Models
+            .Select(x => x.ModelReferenceId)
+            .ToHashSet();
+
+        ModelReference[] readyRefs = await db.ModelReferences
+            .Include(x => x.CurrencyCodeNavigation)
+            .Where(x => !x.IsLegacy && x.ProviderId == modelKey.ModelProviderId)
+            .ToArrayAsync(cancellationToken);
+
+        ParepareAutoCreateModelResult[] scanedModels = await Task.WhenAll(readyRefs
+            .Select(async r => existingModelRefIds.Contains(r.Id)
+                ? ParepareAutoCreateModelResult.ModelAlreadyExists(r)
+                : ParepareAutoCreateModelResult.FromModelValidateResult(await conversationFactory.ValidateModel(modelKey, r, r.Name, cancellationToken), r)));
+
+        FileService? fileService = await db.FileServices
+            .OrderByDescending(x => x.Id)
+            .FirstOrDefaultAsync(cancellationToken);
+        AutoCreateModelResult[] results = await scanedModels
+            .ToAsyncEnumerable()
+            .SelectAwait(async (m) =>
+            {
+                if (!m.IsValidationPassed)
+                {
+                    return m.ToResult(null);
+                }
+
+                db.Models.Add(new Model
+                {
+                    ModelKeyId = modelKeyId,
+                    ModelReferenceId = m.ModelReference.Id,
+                    Name = m.ModelReference.Name,
+                    CreatedAt = DateTime.UtcNow,
+                    UpdatedAt = DateTime.UtcNow,
+                    DeploymentName = m.ModelReference.Name,
+                    FileService = m.ModelReference.AllowSearch ? fileService : null,
+                    IsDeleted = false,
+                    PromptTokenPrice1M = m.ModelReference.PromptTokenPrice1M * m.ModelReference.CurrencyCodeNavigation.ExchangeRate,
+                    ResponseTokenPrice1M = m.ModelReference.ResponseTokenPrice1M * m.ModelReference.CurrencyCodeNavigation.ExchangeRate,
+                });
+                try
+                {
+                    await db.SaveChangesAsync(cancellationToken);
+                    return m.ToResult(null);
+                }
+                catch (Exception ex)
+                {
+                    return m.ToResult(ex.Message);
+                }
+            })
+            .ToArrayAsync(cancellationToken);
+
+        return Ok(results);
     }
 }

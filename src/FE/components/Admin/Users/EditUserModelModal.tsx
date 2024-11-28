@@ -173,6 +173,9 @@ export const EditUserModelModal = (props: IProps) => {
                       checked={model.enabled}
                       onCheckedChange={(checked) => {
                         onChangeModel(index, 'enabled', checked);
+                        if (checked) {
+                          onChangeModel(index, 'expires', termDateString());
+                        }
                       }}
                     />
                   </TableCell>
