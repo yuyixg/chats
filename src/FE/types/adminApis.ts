@@ -30,6 +30,7 @@ export interface AdminModelDto {
   modelProviderId: number;
   modelReferenceId: number;
   modelReferenceName: string;
+  modelReferenceShortName: string | null;
   name: string;
   rank: number | null;
   enabled: boolean;
@@ -208,10 +209,14 @@ export class GetModelKeysResult {
   }
 
   toConfigs() {
-    return {
-      host: this.host,
-      secret: this.secret,
-    };
+    const configs: any = {};
+    if (this.host !== null) {
+      configs.host = this.host;
+    }
+    if (this.secret !== null) {
+      configs.secret = this.secret;
+    }
+    return configs;
   }
 }
 

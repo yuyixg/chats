@@ -33,6 +33,7 @@ public class AdminModelsController(ChatsDB db) : ControllerBase
                 ModelProviderId = x.ModelKey.ModelProviderId,
                 ModelReferenceId = x.ModelReferenceId,
                 ModelReferenceName = x.ModelReference.Name,
+                ModelReferenceShortName = x.ModelReference.ShortName,
                 InputTokenPrice1M = x.PromptTokenPrice1M,
                 OutputTokenPrice1M = x.ResponseTokenPrice1M,
                 Rank = x.Order,

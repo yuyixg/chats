@@ -78,7 +78,7 @@ export default function Models() {
             <TableRow>
               <TableHead className="w-20">{t('Rank')}</TableHead>
               <TableHead>{t('Model Display Name')}</TableHead>
-              <TableHead>{t('Model Provider')}</TableHead>
+              <TableHead>{t('Model Key')}</TableHead>
               <TableHead>{t('Model Version')}</TableHead>
               <TableHead>{t('Token Price')}</TableHead>
             </TableRow>
@@ -101,7 +101,7 @@ export default function Models() {
                   </div>
                 </TableCell>
                 <TableCell>
-                  {t(feModelProviders[item.modelProviderId].name)}
+                  {modelKeys.find(k => k.id === item.modelKeyId)?.name}
                 </TableCell>
                 <TableCell>{item.modelReferenceName}</TableCell>
                 <TableCell>

@@ -131,8 +131,11 @@ export const EditModelModal = (props: IProps) => {
 
   useEffect(() => {
     if (isOpen) {
+      setLoading(true);
       getFileServices(true).then((data) => {
         setFileServices(data);
+      }).finally(() => {
+        setLoading(false);
       });
       form.reset();
       form.formState.isValid;

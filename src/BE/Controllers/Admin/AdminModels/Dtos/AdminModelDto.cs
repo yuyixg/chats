@@ -16,6 +16,9 @@ public record AdminModelDto
     [JsonPropertyName("modelReferenceName")]
     public required string ModelReferenceName { get; init; }
 
+    [JsonPropertyName("modelReferenceShortName")]
+    public required string? ModelReferenceShortName { get; init; }
+
     [JsonPropertyName("name")]
     public required string Name { get; init; }
 

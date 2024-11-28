@@ -7,7 +7,7 @@ interface PromptParams {
 export const PromptVariables = {
   '{{CURRENT_DATE}}': () => new Date().toLocaleDateString(),
   '{{CURRENT_TIME}}': () => new Date().toLocaleString(),
-  '{{MODEL_NAME}}': (params?: PromptParams) => params?.model?.modelReferenceName || '',
+  '{{MODEL_NAME}}': (params?: PromptParams) => params?.model?.modelReferenceShortName || params?.model?.modelReferenceName || '',
 };
 
 export function formatPrompt(prompt: string, params?: PromptParams) {
