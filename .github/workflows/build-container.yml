@@ -246,31 +246,31 @@ jobs:
               tag_name: `r-${{ github.run_number }}`,
               name: `r-${{ github.run_number }}`,
               body: `# r-${{ github.run_number }}
-                ### Full Changelog
-                https://github.com/sdcb/chats/compare/${latestTag}...r-${{ github.run_number }}`
+            ### Full Changelog
+            https://github.com/sdcb/chats/compare/${latestTag}...r-${{ github.run_number }}
     
-                ### Docker
-                | Description                   | Docker Image                                                                                                 |
-                | ----------------------------- | ------------------------------------------------------------------------------------------------------------ |
-                | r${{ github.run_number }}     | ${{ vars.DOCKER_REGISTRY }}/${{ vars.DOCKER_NAMESPACE }}/chats:r${{ github.run_number }}                     |
-                | Linux x64                     | ${{ vars.DOCKER_REGISTRY }}/${{ vars.DOCKER_NAMESPACE }}/chats:r${{ github.run_number }}-linux-x64           |
-                | Linux ARM64                   | ${{ vars.DOCKER_REGISTRY }}/${{ vars.DOCKER_NAMESPACE }}/chats:r${{ github.run_number }}-linux-arm64         |
-                | Windows Nano Server 1809      | ${{ vars.DOCKER_REGISTRY }}/${{ vars.DOCKER_NAMESPACE }}/chats:r${{ github.run_number }}-nanoserver-1809     |
-                | Windows Nano Server LTSC 2022 | ${{ vars.DOCKER_REGISTRY }}/${{ vars.DOCKER_NAMESPACE }}/chats:r${{ github.run_number }}-nanoserver-ltsc2022 |
-                | Latest                        | ${{ vars.DOCKER_REGISTRY }}/${{ vars.DOCKER_NAMESPACE }}/chats:latest                                        |
+            ### Docker
+            | Description                   | Docker Image                                                                                                 |
+            | ----------------------------- | ------------------------------------------------------------------------------------------------------------ |
+            | r${{ github.run_number }}     | ${{ vars.DOCKER_REGISTRY }}/${{ vars.DOCKER_NAMESPACE }}/chats:r${{ github.run_number }}                     |
+            | Linux x64                     | ${{ vars.DOCKER_REGISTRY }}/${{ vars.DOCKER_NAMESPACE }}/chats:r${{ github.run_number }}-linux-x64           |
+            | Linux ARM64                   | ${{ vars.DOCKER_REGISTRY }}/${{ vars.DOCKER_NAMESPACE }}/chats:r${{ github.run_number }}-linux-arm64         |
+            | Windows Nano Server 1809      | ${{ vars.DOCKER_REGISTRY }}/${{ vars.DOCKER_NAMESPACE }}/chats:r${{ github.run_number }}-nanoserver-1809     |
+            | Windows Nano Server LTSC 2022 | ${{ vars.DOCKER_REGISTRY }}/${{ vars.DOCKER_NAMESPACE }}/chats:r${{ github.run_number }}-nanoserver-ltsc2022 |
+            | Latest                        | ${{ vars.DOCKER_REGISTRY }}/${{ vars.DOCKER_NAMESPACE }}/chats:latest                                        |
     
-                ### Artifact to download for China users(which should be faster):
-                | Artifact                   | This Release Download Link                                                       | Latest Download Link                                          |
-                | -------------------------- | -------------------------------------------------------------------------------- | ------------------------------------------------------------- |
-                | chats-win-x64.zip          | ${{ vars.MINIO_URL }}/chats/r${{ github.run_number }}/chats-win-x64.zip          | ${{ vars.MINIO_URL }}/chats/latest/chats-win-x64.zip          |
-                | chats-linux-x64.zip        | ${{ vars.MINIO_URL }}/chats/r${{ github.run_number }}/chats-linux-x64.zip        | ${{ vars.MINIO_URL }}/chats/latest/chats-linux-x64.zip        |
-                | chats-linux-arm64.zip      | ${{ vars.MINIO_URL }}/chats/r${{ github.run_number }}/chats-linux-arm64.zip      | ${{ vars.MINIO_URL }}/chats/latest/chats-linux-arm64.zip      |
-                | chats-linux-musl-x64.zip   | ${{ vars.MINIO_URL }}/chats/r${{ github.run_number }}/chats-linux-musl-x64.zip   | ${{ vars.MINIO_URL }}/chats/latest/chats-linux-musl-x64.zip   |
-                | chats-linux-musl-arm64.zip | ${{ vars.MINIO_URL }}/chats/r${{ github.run_number }}/chats-linux-musl-arm64.zip | ${{ vars.MINIO_URL }}/chats/latest/chats-linux-musl-arm64.zip |
-                | chats-osx-arm64.zip        | ${{ vars.MINIO_URL }}/chats/r${{ github.run_number }}/chats-osx-arm64.zip        | ${{ vars.MINIO_URL }}/chats/latest/chats-osx-arm64.zip        |
-                | chats-osx-x64.zip          | ${{ vars.MINIO_URL }}/chats/r${{ github.run_number }}/chats-osx-x64.zip          | ${{ vars.MINIO_URL }}/chats/latest/chats-osx-x64.zip          |
-                | chats-fe.zip               | ${{ vars.MINIO_URL }}/chats/r${{ github.run_number }}/chats-fe.zip               | ${{ vars.MINIO_URL }}/chats/latest/chats-fe.zip               |
-                | chats                      | ${{ vars.MINIO_URL }}/chats/r${{ github.run_number }}/chats                      | ${{ vars.MINIO_URL }}/chats/latest/chats                      |
+            ### Artifact to download for China users(which should be faster):
+            | Artifact                   | This Release Download Link                                                       | Latest Download Link                                          |
+            | -------------------------- | -------------------------------------------------------------------------------- | ------------------------------------------------------------- |
+            | chats-win-x64.zip          | ${{ vars.MINIO_URL }}/chats/r${{ github.run_number }}/chats-win-x64.zip          | ${{ vars.MINIO_URL }}/chats/latest/chats-win-x64.zip          |
+            | chats-linux-x64.zip        | ${{ vars.MINIO_URL }}/chats/r${{ github.run_number }}/chats-linux-x64.zip        | ${{ vars.MINIO_URL }}/chats/latest/chats-linux-x64.zip        |
+            | chats-linux-arm64.zip      | ${{ vars.MINIO_URL }}/chats/r${{ github.run_number }}/chats-linux-arm64.zip      | ${{ vars.MINIO_URL }}/chats/latest/chats-linux-arm64.zip      |
+            | chats-linux-musl-x64.zip   | ${{ vars.MINIO_URL }}/chats/r${{ github.run_number }}/chats-linux-musl-x64.zip   | ${{ vars.MINIO_URL }}/chats/latest/chats-linux-musl-x64.zip   |
+            | chats-linux-musl-arm64.zip | ${{ vars.MINIO_URL }}/chats/r${{ github.run_number }}/chats-linux-musl-arm64.zip | ${{ vars.MINIO_URL }}/chats/latest/chats-linux-musl-arm64.zip |
+            | chats-osx-arm64.zip        | ${{ vars.MINIO_URL }}/chats/r${{ github.run_number }}/chats-osx-arm64.zip        | ${{ vars.MINIO_URL }}/chats/latest/chats-osx-arm64.zip        |
+            | chats-osx-x64.zip          | ${{ vars.MINIO_URL }}/chats/r${{ github.run_number }}/chats-osx-x64.zip          | ${{ vars.MINIO_URL }}/chats/latest/chats-osx-x64.zip          |
+            | chats-fe.zip               | ${{ vars.MINIO_URL }}/chats/r${{ github.run_number }}/chats-fe.zip               | ${{ vars.MINIO_URL }}/chats/latest/chats-fe.zip               |
+            | chats                      | ${{ vars.MINIO_URL }}/chats/r${{ github.run_number }}/chats                      | ${{ vars.MINIO_URL }}/chats/latest/chats                      |
             `,
               draft: false,
               prerelease: false,
