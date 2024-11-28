@@ -141,10 +141,6 @@ export const ModelKeysModal = (props: IProps) => {
   }, [form.watch]);
 
   useEffect(() => {
-    reloadInitialConfig();
-  }, [selected]);
-
-  useEffect(() => {
     if (isOpen) {
       form.reset();
       form.formState.isValid;
@@ -155,6 +151,7 @@ export const ModelKeysModal = (props: IProps) => {
         form.setValue('host', host || undefined);
         form.setValue('secret', secret || undefined);
       }
+      reloadInitialConfig();
     }
   }, [isOpen]);
 
