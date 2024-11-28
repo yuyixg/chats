@@ -5,6 +5,7 @@ import toast from 'react-hot-toast';
 import useTranslation from '@/hooks/useTranslation';
 
 import {
+  AutoCreateModelResult,
   GetModelKeysResult,
   ModelProviderInitialConfig,
   PostModelKeysParams
@@ -37,6 +38,7 @@ import { feModelProviders } from '@/types/model';
 import Tips from '@/components/Tips/Tips';
 import { IconInfo } from '@/components/Icons';
 import { Label } from '@radix-ui/react-dropdown-menu';
+import Spinner from '@/components/Spinner';
 
 interface IProps {
   selected: GetModelKeysResult | null;
@@ -50,6 +52,7 @@ export const ModelKeysModal = (props: IProps) => {
   const { t } = useTranslation();
   const { selected, isOpen, onClose, onSuccessful } = props;
   const [initialConfig, setInitialConfig] = React.useState<ModelProviderInitialConfig>();
+  const [loading, setLoading] = React.useState(false);
 
   const formSchema = z.object({
     modelProviderId: z
@@ -77,8 +80,8 @@ export const ModelKeysModal = (props: IProps) => {
     },
   });
 
-  const onSave = async  (values: z.infer<typeof formSchema>) => {
-    if (!form.formState.isValid) return;
+  const onSave = async (values: z.infer<typeof formSchema>): Promise<number | undefined> => {
+    if (!form.formState.isValid) return undefined;
 
     const modelKeyDto: PostModelKeysParams = {
       modelProviderId: parseInt(values.modelProviderId),
@@ -111,16 +114,13 @@ export const ModelKeysModal = (props: IProps) => {
 
   const autoCreateModels = async (modelKeyId: number) => {
     const result = await postAutoCreateModels(modelKeyId);
-    const hasSuccess = result.some(r => r.isCreated);
-    if (hasSuccess) {
-      // 如果有成功，则提示成功信息和成功的模型名字
-      const successMessages = result.filter(r => r.isCreated).map(r => r.modelName).join('\n');
-      toast.success(`${t('Following models are auto created successfully:')}\n${successMessages}`);
+    const getMessage = (r: AutoCreateModelResult) => r.modelName + ': ' + (r.isCreated ? '✅' : '⚠️' + t(r.error!));
+    const message = result.map(r => getMessage(r)).join('\n');
+    if (result.some(r => r.isCreated)) {
+      toast.success(`${t('Following models are auto created successfully:')}\n${message}`);
       onSuccessful();
     } else {
-      // 如果全部失败，则提示失败信息
-      const failMessages = result.map(r => `${r.modelName}: ${r.error}`).join('\n');
-      toast.error(`${t('Failed to auto create models, reasons:')}\n${failMessages}`);
+      toast.error(`${t('Failed to auto create models, reasons:')}\n${message}`);
     }
   }
 
@@ -133,7 +133,7 @@ export const ModelKeysModal = (props: IProps) => {
     catch (err: any) {
       try {
         const resp = await err.json();
-        toast.error(resp.message);
+        toast.error(t(resp.message));
       } catch {
         toast.error(t('Operation failed! Please try again later, or contact technical personnel.'));
       }
@@ -141,12 +141,11 @@ export const ModelKeysModal = (props: IProps) => {
   };
 
   const reloadInitialConfig = async (modelProviderId: number) => {
-    getModelProviderInitialConfig(modelProviderId).then(initialConfig => {
-      setInitialConfig(initialConfig);
-    });
+    setInitialConfig(await getModelProviderInitialConfig(modelProviderId));
   }
 
   useEffect(() => {
+    if (selected) return;
     form.setValue('host', initialConfig?.initialHost || undefined);
     form.setValue('secret', initialConfig?.initialSecret || undefined);
   }, [initialConfig]);
@@ -209,7 +208,14 @@ export const ModelKeysModal = (props: IProps) => {
                 <Button type="button"
                   onClick={async () => {
                     const id = await onSave(form.getValues());
-                    await autoCreateModels(id);
+                    if (id) {
+                      try {
+                        setLoading(true);
+                        await autoCreateModels(id);
+                      } finally {
+                        setLoading(false);
+                      }
+                    }
                   }}
                 >
                   {t('Save and auto create all models')}
@@ -251,6 +257,17 @@ export const ModelKeysModal = (props: IProps) => {
             </DialogFooter>
           </form>
         </Form>
+        {loading && (
+          <div
+            className={`fixed top-0 left-0 bottom-0 right-0 bg-white dark:bg-[#202123] text-black/80 dark:text-white/80 z-50 text-center text-[12.5px]`}
+          >
+            <div className="fixed w-screen h-screen top-1/2">
+              <div className="flex justify-center">
+                <Spinner className="text-gray-500 dark:text-gray-50" />
+              </div>
+            </div>
+          </div>
+        )}
       </DialogContent>
     </Dialog>
   );

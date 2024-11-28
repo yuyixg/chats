@@ -320,5 +320,7 @@
   "Once all models are created, the system will notify you of the attempts and list successful creations": "所有模型创建完成后，系统将通知尝试创建了哪些模型，并列出成功创建的模型",
   "Save and auto create all models": "保存并自动创建所有模型",
   "Following models are auto created successfully:": "以下模型已成功自动创建：",
-  "Failed to auto create models, reasons:": "自动创建模型失败，原因："
+  "Failed to auto create models, reasons:": "自动创建模型失败，原因：",
+  "Model already exists.": "模型已存在。",
+  "Model key is in use": "模型密钥已被使用"
 }
