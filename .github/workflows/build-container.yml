@@ -136,35 +136,35 @@ jobs:
         
       - name: Create manifest
         run: |
-          docker manifest create --amend docker.io/sdcb/chats:r${{ github.run_number }} \
-            docker.io/sdcb/chats:r${{ github.run_number }}-linux-x64 \
-            docker.io/sdcb/chats:r${{ github.run_number }}-linux-arm64 \
-            docker.io/sdcb/chats:r${{ github.run_number }}-nanoserver-1809 \
-            docker.io/sdcb/chats:r${{ github.run_number }}-nanoserver-ltsc2022
+          docker manifest create --amend ${{ vars.DOCKER_REGISTRY }}/${{ vars.DOCKER_NAMESPACE }}/chats:r${{ github.run_number }} \
+            ${{ vars.DOCKER_REGISTRY }}/${{ vars.DOCKER_NAMESPACE }}/chats:r${{ github.run_number }}-linux-x64 \
+            ${{ vars.DOCKER_REGISTRY }}/${{ vars.DOCKER_NAMESPACE }}/chats:r${{ github.run_number }}-linux-arm64 \
+            ${{ vars.DOCKER_REGISTRY }}/${{ vars.DOCKER_NAMESPACE }}/chats:r${{ github.run_number }}-nanoserver-1809 \
+            ${{ vars.DOCKER_REGISTRY }}/${{ vars.DOCKER_NAMESPACE }}/chats:r${{ github.run_number }}-nanoserver-ltsc2022
 
       - name: Annotation
         run: |
-          docker manifest annotate docker.io/sdcb/chats:r${{ github.run_number }} docker.io/sdcb/chats:r${{ github.run_number }}-nanoserver-1809 --os-version 10.0.17763.6532
-          docker manifest annotate docker.io/sdcb/chats:r${{ github.run_number }} docker.io/sdcb/chats:r${{ github.run_number }}-nanoserver-ltsc2022 --os-version 10.0.20348.2849
-          docker manifest inspect docker.io/sdcb/chats:r${{ github.run_number }}
+          docker manifest annotate ${{ vars.DOCKER_REGISTRY }}/${{ vars.DOCKER_NAMESPACE }}/chats:r${{ github.run_number }} ${{ vars.DOCKER_REGISTRY }}/${{ vars.DOCKER_NAMESPACE }}/chats:r${{ github.run_number }}-nanoserver-1809 --os-version 10.0.17763.6532
+          docker manifest annotate ${{ vars.DOCKER_REGISTRY }}/${{ vars.DOCKER_NAMESPACE }}/chats:r${{ github.run_number }} ${{ vars.DOCKER_REGISTRY }}/${{ vars.DOCKER_NAMESPACE }}/chats:r${{ github.run_number }}-nanoserver-ltsc2022 --os-version 10.0.20348.2849
+          docker manifest inspect ${{ vars.DOCKER_REGISTRY }}/${{ vars.DOCKER_NAMESPACE }}/chats:r${{ github.run_number }}
 
       - name: Create latest manifest
         run: |
-          docker manifest create --amend docker.io/sdcb/chats:latest \
-            docker.io/sdcb/chats:r${{ github.run_number }}-linux-x64 \
-            docker.io/sdcb/chats:r${{ github.run_number }}-linux-arm64 \
-            docker.io/sdcb/chats:r${{ github.run_number }}-nanoserver-1809 \
-            docker.io/sdcb/chats:r${{ github.run_number }}-nanoserver-ltsc2022
+          docker manifest create --amend ${{ vars.DOCKER_REGISTRY }}/${{ vars.DOCKER_NAMESPACE }}/chats:latest \
+            ${{ vars.DOCKER_REGISTRY }}/${{ vars.DOCKER_NAMESPACE }}/chats:r${{ github.run_number }}-linux-x64 \
+            ${{ vars.DOCKER_REGISTRY }}/${{ vars.DOCKER_NAMESPACE }}/chats:r${{ github.run_number }}-linux-arm64 \
+            ${{ vars.DOCKER_REGISTRY }}/${{ vars.DOCKER_NAMESPACE }}/chats:r${{ github.run_number }}-nanoserver-1809 \
+            ${{ vars.DOCKER_REGISTRY }}/${{ vars.DOCKER_NAMESPACE }}/chats:r${{ github.run_number }}-nanoserver-ltsc2022
 
       - name: Annotate latest manifest
         run: |
-          docker manifest annotate docker.io/sdcb/chats:latest docker.io/sdcb/chats:r${{ github.run_number }}-nanoserver-1809 --os-version 10.0.17763.6532
-          docker manifest annotate docker.io/sdcb/chats:latest docker.io/sdcb/chats:r${{ github.run_number }}-nanoserver-ltsc2022 --os-version 10.0.20348.2849
+          docker manifest annotate ${{ vars.DOCKER_REGISTRY }}/${{ vars.DOCKER_NAMESPACE }}/chats:latest ${{ vars.DOCKER_REGISTRY }}/${{ vars.DOCKER_NAMESPACE }}/chats:r${{ github.run_number }}-nanoserver-1809 --os-version 10.0.17763.6532
+          docker manifest annotate ${{ vars.DOCKER_REGISTRY }}/${{ vars.DOCKER_NAMESPACE }}/chats:latest ${{ vars.DOCKER_REGISTRY }}/${{ vars.DOCKER_NAMESPACE }}/chats:r${{ github.run_number }}-nanoserver-ltsc2022 --os-version 10.0.20348.2849
 
       - name: Push manifest
         run: |
-          docker manifest push docker.io/sdcb/chats:r${{ github.run_number }}
-          docker manifest push docker.io/sdcb/chats:latest
+          docker manifest push ${{ vars.DOCKER_REGISTRY }}/${{ vars.DOCKER_NAMESPACE }}/chats:r${{ github.run_number }}
+          docker manifest push ${{ vars.DOCKER_REGISTRY }}/${{ vars.DOCKER_NAMESPACE }}/chats:latest
 
   build-binaries:
     if: github.ref == 'refs/heads/main'
@@ -211,7 +211,7 @@ jobs:
 
   create-release:
     if: github.ref == 'refs/heads/main'
-    needs: [docker-manifest, build-binaries]
+    needs: [docker-manifest, build-binaries, upload-minio-latest]
     runs-on: ubuntu-latest
     outputs:
       release_id: ${{ steps.create_release.outputs.release_id }}
@@ -245,8 +245,33 @@ jobs:
               repo: context.repo.repo,
               tag_name: `r-${{ github.run_number }}`,
               name: `r-${{ github.run_number }}`,
-              body: `**Docker Download**: \`docker pull ${{ vars.DOCKER_REGISTRY }}/${{ vars.DOCKER_NAMESPACE }}/chats:r${{ github.run_number }}\`
-            **Full Changelog**: https://github.com/sdcb/chats/compare/${latestTag}...r-${{ github.run_number }}`,
+              body: `# r-${{ github.run_number }}
+                ### Full Changelog
+                https://github.com/sdcb/chats/compare/${latestTag}...r-${{ github.run_number }}`
+    
+                ### Docker
+                | Description                   | Docker Image                                                                                                 |
+                | ----------------------------- | ------------------------------------------------------------------------------------------------------------ |
+                | r${{ github.run_number }}     | ${{ vars.DOCKER_REGISTRY }}/${{ vars.DOCKER_NAMESPACE }}/chats:r${{ github.run_number }}                     |
+                | Linux x64                     | ${{ vars.DOCKER_REGISTRY }}/${{ vars.DOCKER_NAMESPACE }}/chats:r${{ github.run_number }}-linux-x64           |
+                | Linux ARM64                   | ${{ vars.DOCKER_REGISTRY }}/${{ vars.DOCKER_NAMESPACE }}/chats:r${{ github.run_number }}-linux-arm64         |
+                | Windows Nano Server 1809      | ${{ vars.DOCKER_REGISTRY }}/${{ vars.DOCKER_NAMESPACE }}/chats:r${{ github.run_number }}-nanoserver-1809     |
+                | Windows Nano Server LTSC 2022 | ${{ vars.DOCKER_REGISTRY }}/${{ vars.DOCKER_NAMESPACE }}/chats:r${{ github.run_number }}-nanoserver-ltsc2022 |
+                | Latest                        | ${{ vars.DOCKER_REGISTRY }}/${{ vars.DOCKER_NAMESPACE }}/chats:latest                                        |
+    
+                ### Artifact to download for China users(which should be faster):
+                | Artifact                   | This Release Download Link                                                       | Latest Download Link                                          |
+                | -------------------------- | -------------------------------------------------------------------------------- | ------------------------------------------------------------- |
+                | chats-win-x64.zip          | ${{ vars.MINIO_URL }}/chats/r${{ github.run_number }}/chats-win-x64.zip          | ${{ vars.MINIO_URL }}/chats/latest/chats-win-x64.zip          |
+                | chats-linux-x64.zip        | ${{ vars.MINIO_URL }}/chats/r${{ github.run_number }}/chats-linux-x64.zip        | ${{ vars.MINIO_URL }}/chats/latest/chats-linux-x64.zip        |
+                | chats-linux-arm64.zip      | ${{ vars.MINIO_URL }}/chats/r${{ github.run_number }}/chats-linux-arm64.zip      | ${{ vars.MINIO_URL }}/chats/latest/chats-linux-arm64.zip      |
+                | chats-linux-musl-x64.zip   | ${{ vars.MINIO_URL }}/chats/r${{ github.run_number }}/chats-linux-musl-x64.zip   | ${{ vars.MINIO_URL }}/chats/latest/chats-linux-musl-x64.zip   |
+                | chats-linux-musl-arm64.zip | ${{ vars.MINIO_URL }}/chats/r${{ github.run_number }}/chats-linux-musl-arm64.zip | ${{ vars.MINIO_URL }}/chats/latest/chats-linux-musl-arm64.zip |
+                | chats-osx-arm64.zip        | ${{ vars.MINIO_URL }}/chats/r${{ github.run_number }}/chats-osx-arm64.zip        | ${{ vars.MINIO_URL }}/chats/latest/chats-osx-arm64.zip        |
+                | chats-osx-x64.zip          | ${{ vars.MINIO_URL }}/chats/r${{ github.run_number }}/chats-osx-x64.zip          | ${{ vars.MINIO_URL }}/chats/latest/chats-osx-x64.zip          |
+                | chats-fe.zip               | ${{ vars.MINIO_URL }}/chats/r${{ github.run_number }}/chats-fe.zip               | ${{ vars.MINIO_URL }}/chats/latest/chats-fe.zip               |
+                | chats                      | ${{ vars.MINIO_URL }}/chats/r${{ github.run_number }}/chats                      | ${{ vars.MINIO_URL }}/chats/latest/chats                      |
+            `,
               draft: false,
               prerelease: false,
             });
@@ -301,6 +326,62 @@ jobs:
         env:
           GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
 
+  upload-minio:
+    if: github.ref == 'refs/heads/main'
+    strategy:
+      matrix:
+        include:
+          - asset: chats
+          - asset: chats-fe
+          - asset: chats-win-x64
+          - asset: chats-linux-x64
+          - asset: chats-linux-arm64
+          - asset: chats-linux-musl-x64
+          - asset: chats-linux-musl-arm64
+          - asset: chats-osx-arm64
+          - asset: chats-osx-x64
+    needs: build-binaries
+    runs-on: ubuntu-latest
+    steps:
+      - name: Download build artifacts
+        uses: actions/download-artifact@v4
+        with:
+          name: ${{ matrix.asset }}
+          path: ${{ matrix.asset }}
+  
+      - name: Compress artifacts into ZIP
+        run: |
+          zip -r ${{ matrix.asset }}.zip ${{ matrix.asset }}
+        shell: bash
+
+      - name: Configure AWS Credentials
+        uses: aws-actions/configure-aws-credentials@v4
+        with:
+          aws-access-key-id: ${{ secrets.MINIO_KEY }}
+          aws-secret-access-key: ${{ secrets.MINIO_SECRET }}
+          aws-region: us-east-1
+
+      - name: Upload to Minio
+        run: |
+          aws --endpoint-url ${{ vars.MINIO_URL }} s3 cp ${{ matrix.asset }}.zip s3://chats/r${{ github.run_number }}/${{ matrix.asset }}.zip
+
+  upload-minio-latest:
+    if: github.ref == 'refs/heads/main'
+    needs: upload-minio
+    runs-on: ubuntu-latest
+    steps:
+      - name: Configure AWS Credentials
+        uses: aws-actions/configure-aws-credentials@v4
+        with:
+          aws-access-key-id: ${{ secrets.MINIO_KEY }}
+          aws-secret-access-key: ${{ secrets.MINIO_SECRET }}
+          aws-region: us-east-1
+
+      - name: Update latest files
+        run: |
+          aws --endpoint-url ${{ vars.MINIO_URL }} s3 rm s3://chats/latest --recursive
+          aws --endpoint-url ${{ vars.MINIO_URL }} s3 cp s3://chats/r${{ github.run_number }} s3://chats/latest --recursive
+      
   deploy-dev-stg:
     runs-on: ubuntu-latest
     needs: build-primary-container
