@@ -7,7 +7,7 @@ public static class DBConfigure
     public static void Configure(this DbContextOptionsBuilder dbContextOptionsBuilder, IConfiguration configuration, IWebHostEnvironment environment)
     {
         string? dbType = configuration["DBType"];
-        string? connectionString = configuration.GetConnectionString("ConnectionStrings:ChatsDB") ?? throw new Exception("ConnectionStrings:ChatsDB not found");
+        string? connectionString = configuration.GetConnectionString("ChatsDB") ?? throw new Exception("ConnectionStrings:ChatsDB not found");
         if (dbType == null || dbType.Equals("sqlite", StringComparison.OrdinalIgnoreCase))
         {
             // help client create the AppData folder for better startup experience

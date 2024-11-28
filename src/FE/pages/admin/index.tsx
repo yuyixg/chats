@@ -2,7 +2,6 @@ import React, { useEffect, useState } from 'react';
 
 import useTranslation from '@/hooks/useTranslation';
 
-import { DEFAULT_LANGUAGE } from '@/utils/settings';
 import { getUserInfo } from '@/utils/user';
 
 const Dashboard = () => {

@@ -32,13 +32,13 @@ const AdminLayout = ({
   const [isCollapsed, setIsCollapsed] = useState(false);
 
   const menus = [
-    {
-      url: '/admin/dashboard',
-      icon: (stroke?: string) => {
-        return <IconChartPie stroke={stroke} />;
-      },
-      title: t('Dashboard'),
-    },
+    // {
+    //   url: '/admin/dashboard',
+    //   icon: (stroke?: string) => {
+    //     return <IconChartPie stroke={stroke} />;
+    //   },
+    //   title: t('Dashboard'),
+    // },
     {
       url: '/admin/users',
       icon: (stroke?: string) => {
@@ -46,13 +46,6 @@ const AdminLayout = ({
       },
       title: t('User Management'),
     },
-    // {
-    //   url: '/admin/user-models',
-    //   icon: (stroke?: string) => {
-    //     return <IconUserCog stroke={stroke} />;
-    //   },
-    //   title: t('User Models'),
-    // },
     {
       url: '/admin/model-keys',
       icon: (stroke?: string) => {

@@ -1,11 +1,12 @@
 import React, { useEffect } from 'react';
-import { useForm } from 'react-hook-form';
+import { set, useForm } from 'react-hook-form';
 import toast from 'react-hot-toast';
 
 import useTranslation from '@/hooks/useTranslation';
 
 import {
   GetModelKeysResult,
+  ModelProviderInitialConfig,
   PostModelKeysParams
 } from '@/types/adminApis';
 
@@ -22,7 +23,6 @@ import {
 import { Form, FormField } from '@/components/ui/form';
 import FormInput from '@/components/ui/form/input';
 import FormTextarea from '@/components/ui/form/textarea';
-import { FormFieldType, IFormFieldOption } from '@/components/ui/form/type';
 
 import {
   deleteModelKeys,
@@ -45,50 +45,7 @@ interface IProps {
 export const ModelKeysModal = (props: IProps) => {
   const { t } = useTranslation();
   const { selected, isOpen, onClose, onSuccessful } = props;
-  const formFields: IFormFieldOption[] = [
-    {
-      name: 'name',
-      label: t('Key Name'),
-      defaultValue: '',
-      render: (options: IFormFieldOption, field: FormFieldType) => (
-        <FormInput options={options} field={field} />
-      ),
-    },
-    {
-      name: 'modelProviderId',
-      label: t('Model Provider'),
-      defaultValue: '',
-      render: (options: IFormFieldOption, field: FormFieldType) => (
-        <FormSelect
-          disabled={!!selected}
-          field={field}
-          options={options}
-          items={feModelProviders.map(p => {
-            return {
-              name: t(p.name),
-              value: p.id.toString(),
-            }
-          })}
-        />
-      ),
-    },
-    {
-      name: 'host',
-      label: t('Host'),
-      defaultValue: '',
-      render: (options: IFormFieldOption, field: FormFieldType) => (
-        <FormInput options={options} field={field} />
-      ),
-    },
-    {
-      name: 'secret',
-      label: t('Secret'),
-      defaultValue: '',
-      render: (options: IFormFieldOption, field: FormFieldType) => (
-        <FormTextarea rows={2} options={options} field={field} />
-      ),
-    },
-  ];
+  const [initialConfig, setInitialConfig] = React.useState<ModelProviderInitialConfig>();
 
   const formSchema = z.object({
     modelProviderId: z
@@ -108,10 +65,12 @@ export const ModelKeysModal = (props: IProps) => {
 
   const form = useForm<z.infer<typeof formSchema>>({
     resolver: zodResolver(formSchema),
-    defaultValues: formFields.reduce((obj: any, field) => {
-      obj[field.name] = field.defaultValue;
-      return obj;
-    }, {}),
+    defaultValues: {
+      modelProviderId: "0",
+      name: '',
+      host: '',
+      secret: '',
+    },
   });
 
   function onSubmit(values: z.infer<typeof formSchema>) {
@@ -160,18 +119,30 @@ export const ModelKeysModal = (props: IProps) => {
     }
   };
 
+  const reloadInitialConfig = async () => {
+    const modelProviderId = parseInt(form.getValues().modelProviderId || "0");
+    getModelProviderInitialConfig(modelProviderId).then(initialConfig => {
+      setInitialConfig(initialConfig);
+    });
+  }
+
+  useEffect(() => {
+    form.setValue('host', initialConfig?.initialHost || undefined);
+    form.setValue('secret', initialConfig?.initialSecret || undefined);
+  }, [initialConfig]);
+
   useEffect(() => {
     const subscription = form.watch((value, { name, type }) => {
       if (name === 'modelProviderId' && type === 'change') {
-        const modelProviderId = parseInt(value.modelProviderId || "0");
-        getModelProviderInitialConfig(modelProviderId).then((modelProvider) => {
-          form.setValue('host', modelProvider.initialHost || undefined);
-          form.setValue('secret', modelProvider.initialSecret || undefined);
-        });
+        reloadInitialConfig();
       }
     });
     return () => subscription.unsubscribe();
   }, [form.watch]);
+
+  useEffect(() => {
+    reloadInitialConfig();
+  }, [selected]);
 
   useEffect(() => {
     if (isOpen) {
@@ -197,14 +168,25 @@ export const ModelKeysModal = (props: IProps) => {
         </DialogHeader>
         <Form {...form}>
           <form onSubmit={form.handleSubmit(onSubmit)}>
-            {formFields.map((item) => (
-              <FormField
-                key={item.name}
-                control={form.control}
-                name={item.name as never}
-                render={({ field }) => item.render(item, field)}
+            <FormField key="name" control={form.control} name="name" render={({ field }) => (
+              <FormInput label={t('Name')} field={field} />
+            )} />
+            <FormField key="modelProviderId" control={form.control} name="modelProviderId" render={({ field }) => (
+              <FormSelect
+                label={t('Model Provider')}
+                disabled={!!selected}
+                field={field}
+                items={feModelProviders.map(p => ({ value: p.id.toString(), name: p.name }))}
               />
-            ))}
+            )} />
+            {initialConfig?.initialHost !== null && (
+              <FormField key="host" control={form.control} name="host" render={({ field }) => (
+                <FormInput label={t('Host')} field={field} />
+              )} />)}
+            {initialConfig?.initialSecret !== null && (
+              <FormField key="secret" control={form.control} name="secret" render={({ field }) => (
+                <FormTextarea rows={2} label={t('Secret')} field={field} />
+              )} />)}
             <DialogFooter className="pt-4">
               {selected && (
                 <Button
