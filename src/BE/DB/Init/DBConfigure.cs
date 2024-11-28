@@ -1,15 +1,21 @@
 ﻿using Microsoft.EntityFrameworkCore;
 
-namespace Chats.BE.Services.Init;
+namespace Chats.BE.DB.Init;
 
 public static class DBConfigure
 {
     public static void Configure(this DbContextOptionsBuilder dbContextOptionsBuilder, IConfiguration configuration, IWebHostEnvironment environment)
     {
         string? dbType = configuration["DBType"];
-        string connectionString = "Name=ConnectionStrings:ChatsDB";
+        string? connectionString = configuration.GetConnectionString("ConnectionStrings:ChatsDB") ?? throw new Exception("ConnectionStrings:ChatsDB not found");
         if (dbType == null || dbType.Equals("sqlite", StringComparison.OrdinalIgnoreCase))
         {
+            // help client create the AppData folder for better startup experience
+            if (connectionString == "Data Source=./AppData/chats.db" && !Directory.Exists("AppData"))
+            {
+                Console.WriteLine("Creating AppData folder...");
+                Directory.CreateDirectory("AppData");
+            }
             dbContextOptionsBuilder.UseSqlite(connectionString);
         }
         else if (dbType.Equals("sqlserver", StringComparison.OrdinalIgnoreCase) || dbType.Equals("mssql", StringComparison.OrdinalIgnoreCase))

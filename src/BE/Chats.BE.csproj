@@ -33,10 +33,4 @@
     <PackageReference Include="TencentCloudSDK.Sms" Version="3.0.1129" />
   </ItemGroup>
 
-  <ItemGroup>
-    <Content Include="AppData\**\*">
-      <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
-    </Content>
-  </ItemGroup>
-
 </Project>

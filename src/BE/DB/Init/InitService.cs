@@ -1,8 +1,8 @@
-﻿using Chats.BE.DB;
-using Chats.BE.DB.Enums;
+﻿using Chats.BE.DB.Enums;
+using Chats.BE.Services;
 using Chats.BE.Services.Sessions;
 
-namespace Chats.BE.Services.Init;
+namespace Chats.BE.DB.Init;
 
 public class InitService(IServiceScopeFactory scopeFactory)
 {
@@ -13,7 +13,9 @@ public class InitService(IServiceScopeFactory scopeFactory)
 
         if (await db.Database.EnsureCreatedAsync(cancellationToken))
         {
+            Console.WriteLine("Database created, inserting initial data...");
             await InsertInitialData(scope, db, cancellationToken);
+            Console.WriteLine("Initial data inserted.");
         }
     }
 
@@ -85,8 +87,8 @@ public class InitService(IServiceScopeFactory scopeFactory)
             UpdatedAt = DateTime.UtcNow,
             CreatedAt = DateTime.UtcNow,
             Content = "You are {{MODEL_NAME}}, please follow user instructions carefully and respond thoughtfully. Current date: {{CURRENT_DATE}}.",
-            IsDefault = true, 
-            IsSystem = true, 
+            IsDefault = true,
+            IsSystem = true,
             Name = "Default Prompt",
         });
         await db.SaveChangesAsync(cancellationToken);

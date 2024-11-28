@@ -25,15 +25,15 @@ export type FEModelProvider = {
 
 export const feModelProviders: FEModelProvider[] = [
   { id: 0, name: 'Test', icon: '/icons/logo.png' },
-  { id: 1, name: 'Azure', icon: '/logos/azure.svg' },
-  { id: 2, name: 'HunYuan', icon: '/logos/hunyuan.svg' },
-  { id: 3, name: 'LingYi', icon: '/logos/lingyi.svg' },
+  { id: 1, name: 'Azure OpenAI', icon: '/logos/azure.svg' },
+  { id: 2, name: 'Tencent Hunyuan', icon: '/logos/hunyuan.svg' },
+  { id: 3, name: '01.ai', icon: '/logos/lingyi.svg' },
   { id: 4, name: 'Moonshot', icon: '/logos/moonshot.svg' },
   { id: 5, name: 'OpenAI', icon: '/logos/openai.svg' },
-  { id: 6, name: 'QianFan', icon: '/logos/qianfan.svg' },
-  { id: 7, name: 'QianWen', icon: '/logos/qianwen.svg' },
-  { id: 8, name: 'Spark', icon: '/logos/spark.svg' },
-  { id: 9, name: 'ZhiPuAI', icon: '/logos/zhipuai.svg' },
+  { id: 6, name: 'Wenxin Qianfan', icon: '/logos/qianfan.svg' },
+  { id: 7, name: 'DashScope', icon: '/logos/qianwen.svg' },
+  { id: 8, name: 'Xunfei SparkDesk', icon: '/logos/spark.svg' },
+  { id: 9, name: 'Zhipu AI', icon: '/logos/zhipuai.svg' },
 ];
 
 export interface ChatModelFileConfig {
