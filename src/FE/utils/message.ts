@@ -1,7 +1,5 @@
 import { ChatMessage, MessageNode } from '@/types/chatMessage';
 
-import Decimal from 'decimal.js';
-
 function findMessageChildren(
   conversations: ChatMessage[],
   nodeId: string,

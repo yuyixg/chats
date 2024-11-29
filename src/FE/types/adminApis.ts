@@ -1,7 +1,6 @@
 import { ChatMessage } from './chatMessage';
-import {
-  DBModelProvider,
-} from './model';
+import { FileServicesType } from './file';
+import { DBModelProvider } from './model';
 import { Paging } from './page';
 import { PayServiceType } from './pay';
 import { StatusCode } from './statusCode';
@@ -11,11 +10,6 @@ import Decimal from 'decimal.js';
 
 export const enum UserRole {
   'admin' = 'admin',
-}
-
-export interface UserModelResult extends UserInitialModel {
-  modelName?: string;
-  modelVersion?: string;
 }
 
 export interface PutUserModelParams {
@@ -121,7 +115,7 @@ export interface PostFileServicesParams {
   configs: string;
 }
 
-export interface PutFileServicesParams extends PostFileServicesParams { }
+export interface PutFileServicesParams extends PostFileServicesParams {}
 
 export interface GetFileServicesResult extends PutFileServicesParams {
   id: number;
@@ -371,4 +365,28 @@ export interface AutoCreateModelResult {
   modelName: string;
   isCreated: boolean;
   error: string | null;
+}
+
+export interface PossibleModelResult {
+  referenceName: string;
+  modelReferenceId: number;
+  isExists: boolean;
+  isLegacy: boolean;
+}
+
+export interface ValidateModelParams {
+  modelReferenceId: number;
+  modelKeyId: number;
+  deploymentName: string | null;
+}
+
+export interface ModelFastCreateParams {
+  modelReferenceId: number;
+  modelKeyId: number;
+  deploymentName: string | null;
+}
+
+export interface ErrorResult {
+  isSuccess: boolean;
+  errorMessage: string;
 }

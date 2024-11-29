@@ -83,11 +83,11 @@ export const InvitationCodeModal = (props: IProps) => {
     }
     p.then(() => {
       onSuccessful();
-      toast.success(t('Save successful!'));
+      toast.success(t('Save successful'));
     }).catch(() => {
       toast.error(
         t(
-          'Operation failed! Please try again later, or contact technical personnel.',
+          'Operation failed, Please try again later, or contact technical personnel',
         ),
       );
     });
@@ -97,12 +97,12 @@ export const InvitationCodeModal = (props: IProps) => {
     deleteInvitationCode(selected!.id)
       .then(() => {
         onSuccessful();
-        toast.success(t('Delete successful!'));
+        toast.success(t('Delete successful'));
       })
       .catch(() => {
         toast.error(
           t(
-            'Operation failed! Please try again later, or contact technical personnel.',
+            'Operation failed, Please try again later, or contact technical personnel',
           ),
         );
       });

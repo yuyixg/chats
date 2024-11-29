@@ -12,11 +12,6 @@ export interface UserInfo {
   canRecharge: boolean;
 }
 
-export interface StorageSession {
-  sessionId: string;
-  expires: number;
-}
-
 export const saveUserInfo = (user: UserInfo) => {
   localStorage.setItem('user', JSON.stringify(user));
 };

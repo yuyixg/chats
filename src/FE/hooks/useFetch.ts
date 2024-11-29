@@ -70,7 +70,7 @@ export const useFetch = () => {
             ? await err.json()
             : err;
 
-        throw errResult;
+        return errResult;
       });
   };
 

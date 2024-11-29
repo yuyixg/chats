@@ -3,18 +3,23 @@ import { FormControl, FormItem, FormLabel, FormMessage } from '../form';
 import { FormFieldType, IFormFieldOption } from './type';
 
 const FormCheckbox = ({
+  label,
+  disabled,
   options,
   field,
 }: {
-  options: IFormFieldOption;
+  
+  label?: string;
+  disabled?: boolean;
+  options?: IFormFieldOption;
   field: FormFieldType;
 }) => {
   return (
     <FormItem className="py-2 flex items-center gap-2">
       <FormControl className="flex">
-        <Checkbox checked={field.value} onCheckedChange={field.onChange} />
+        <Checkbox checked={field.value} disabled={disabled} onCheckedChange={field.onChange} />
       </FormControl>
-      <FormLabel style={{ marginTop: 0 }}>{options.label}</FormLabel>
+      <FormLabel style={{ marginTop: 0 }}>{label}</FormLabel>
       <FormMessage />
     </FormItem>
   );

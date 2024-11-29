@@ -15,7 +15,7 @@ function ChatsDocument(props: Props) {
   return (
     <Html>
       <Head>
-        <meta name="apple-mobile-web-app-capable" content="yes" />
+        <meta name="mobile-mobile-web-app-capable" content="yes" />
         <meta name="apple-mobile-web-app-title" content="Chats"></meta>
         <link rel="manifest" href="/manifest.json" crossOrigin="use-credentials" />
         <link rel="apple-touch-icon" href="/icons/192x192.png" />

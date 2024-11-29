@@ -1,5 +1,6 @@
-import React, { useEffect } from 'react';
-import { set, useForm } from 'react-hook-form';
+import { Label } from '@radix-ui/react-dropdown-menu';
+import React, { useEffect, useState } from 'react';
+import { useForm } from 'react-hook-form';
 import toast from 'react-hot-toast';
 
 import useTranslation from '@/hooks/useTranslation';
@@ -8,11 +9,13 @@ import {
   AutoCreateModelResult,
   GetModelKeysResult,
   ModelProviderInitialConfig,
-  PostModelKeysParams
+  PostModelKeysParams,
 } from '@/types/adminApis';
+import { feModelProviders } from '@/types/model';
 
-import FormSelect from '@/components/ui/form/select';
-
+import { IconInfo } from '@/components/Icons';
+import Spinner from '@/components/Spinner';
+import Tips from '@/components/Tips/Tips';
 import { Button } from '@/components/ui/button';
 import {
   Dialog,
@@ -23,64 +26,66 @@ import {
 } from '@/components/ui/dialog';
 import { Form, FormField } from '@/components/ui/form';
 import FormInput from '@/components/ui/form/input';
+import FormSelect from '@/components/ui/form/select';
 import FormTextarea from '@/components/ui/form/textarea';
 
 import {
-  postAutoCreateModels,
   deleteModelKeys,
   getModelProviderInitialConfig,
+  postAutoCreateModels,
   postModelKeys,
   putModelKeys,
 } from '@/apis/adminApis';
 import { zodResolver } from '@hookform/resolvers/zod';
 import { z } from 'zod';
-import { feModelProviders } from '@/types/model';
-import Tips from '@/components/Tips/Tips';
-import { IconInfo } from '@/components/Icons';
-import { Label } from '@radix-ui/react-dropdown-menu';
-import Spinner from '@/components/Spinner';
 
 interface IProps {
   selected: GetModelKeysResult | null;
   isOpen: boolean;
   onClose: () => void;
-  onSuccessful: () => void;
+  onConfigModel: (id: number) => void;
+  onSaveSuccessful: () => void;
+  onDeleteSuccessful: () => void;
   saveLoading?: boolean;
 }
 
 export const ModelKeysModal = (props: IProps) => {
   const { t } = useTranslation();
-  const { selected, isOpen, onClose, onSuccessful } = props;
-  const [initialConfig, setInitialConfig] = React.useState<ModelProviderInitialConfig>();
+  const {
+    selected,
+    isOpen,
+    onClose,
+    onConfigModel,
+    onSaveSuccessful,
+    onDeleteSuccessful,
+  } = props;
+  const [initialConfig, setInitialConfig] =
+    React.useState<ModelProviderInitialConfig>();
   const [loading, setLoading] = React.useState(false);
 
   const formSchema = z.object({
     modelProviderId: z
       .string()
       .min(1, `${t('This field is require')}`)
-      .default("0"),
-    name: z
-      .string()
-      .min(1, `${t('This field is require')}`),
-    host: z
-      .string()
-      .optional(),
-    secret: z
-      .string()
-      .optional(),
+      .default('0'),
+    name: z.string().min(1, `${t('This field is require')}`),
+    host: z.string().optional(),
+    secret: z.string().optional(),
   });
 
   const form = useForm<z.infer<typeof formSchema>>({
     resolver: zodResolver(formSchema),
     defaultValues: {
-      modelProviderId: "0",
+      modelProviderId: '0',
       name: '',
       host: '',
       secret: '',
     },
   });
 
-  const onSave = async (values: z.infer<typeof formSchema>): Promise<number | undefined> => {
+  const onSave = async (
+    values: z.infer<typeof formSchema>,
+  ): Promise<number | undefined> => {
     if (!form.formState.isValid) return undefined;
 
     const modelKeyDto: PostModelKeysParams = {
@@ -92,12 +97,11 @@ export const ModelKeysModal = (props: IProps) => {
 
     try {
       const id = await handleModelKeyRequest();
-      onSuccessful();
-      return id;
+      selected ? onSaveSuccessful() : onConfigModel(id);
     } catch {
       toast.error(
         t(
-          'Operation failed! Please try again later, or contact technical personnel.',
+          'Operation failed, Please try again later, or contact technical personnel',
         ),
       );
     }
@@ -110,39 +114,30 @@ export const ModelKeysModal = (props: IProps) => {
         return await postModelKeys(modelKeyDto);
       }
     }
-  }
-
-  const autoCreateModels = async (modelKeyId: number) => {
-    const result = await postAutoCreateModels(modelKeyId);
-    const getMessage = (r: AutoCreateModelResult) => r.modelName + ': ' + (r.isCreated ? '✅' : '⚠️' + t(r.error!));
-    const message = result.map(r => getMessage(r)).join('\n');
-    if (result.some(r => r.isCreated)) {
-      toast.success(`${t('Following models are auto created successfully:')}\n${message}`);
-      onSuccessful();
-    } else {
-      toast.error(`${t('Failed to auto create models, reasons:')}\n${message}`);
-    }
-  }
+  };
 
   async function onDelete() {
     try {
       await deleteModelKeys(selected?.id!);
-      onSuccessful();
-      toast.success(t('Deleted successful!'));
-    }
-    catch (err: any) {
+      onDeleteSuccessful();
+      toast.success(t('Deleted successful'));
+    } catch (err: any) {
       try {
         const resp = await err.json();
         toast.error(t(resp.message));
       } catch {
-        toast.error(t('Operation failed! Please try again later, or contact technical personnel.'));
+        toast.error(
+          t(
+            'Operation failed, Please try again later, or contact technical personnel',
+          ),
+        );
       }
     }
-  };
+  }
 
   const reloadInitialConfig = async (modelProviderId: number) => {
     setInitialConfig(await getModelProviderInitialConfig(modelProviderId));
-  }
+  };
 
   useEffect(() => {
     if (selected) return;
@@ -184,63 +179,62 @@ export const ModelKeysModal = (props: IProps) => {
         </DialogHeader>
         <Form {...form}>
           <form onSubmit={form.handleSubmit(onSave)}>
-            <FormField key="name" control={form.control} name="name" render={({ field }) => (
-              <FormInput label={t('Name')} field={field} />
-            )} />
-            <FormField key="modelProviderId" control={form.control} name="modelProviderId" render={({ field }) => (
-              <FormSelect
-                label={t('Model Provider')}
-                disabled={!!selected}
-                field={field}
-                items={feModelProviders.map(p => ({ value: p.id.toString(), name: p.name }))}
-              />
-            )} />
+            <FormField
+              key="name"
+              control={form.control}
+              name="name"
+              render={({ field }) => (
+                <FormInput label={t('Name')} field={field} />
+              )}
+            />
+            <FormField
+              key="modelProviderId"
+              control={form.control}
+              name="modelProviderId"
+              render={({ field }) => (
+                <FormSelect
+                  label={t('Model Provider')}
+                  disabled={!!selected}
+                  field={field}
+                  items={feModelProviders.map((p) => ({
+                    value: p.id.toString(),
+                    name: p.name,
+                  }))}
+                />
+              )}
+            />
             {initialConfig?.initialHost !== null && (
-              <FormField key="host" control={form.control} name="host" render={({ field }) => (
-                <FormInput label={t('Host')} field={field} />
-              )} />)}
+              <FormField
+                key="host"
+                control={form.control}
+                name="host"
+                render={({ field }) => (
+                  <FormInput label={t('Host')} field={field} />
+                )}
+              />
+            )}
             {initialConfig?.initialSecret !== null && (
-              <FormField key="secret" control={form.control} name="secret" render={({ field }) => (
-                <FormTextarea rows={2} label={t('Secret')} field={field} />
-              )} />)}
-            <DialogFooter className="pt-4 md:justify-between">
-              <div>
-                <Button type="button"
-                  onClick={async () => {
-                    const id = await onSave(form.getValues());
-                    if (id) {
-                      try {
-                        setLoading(true);
-                        await autoCreateModels(id);
-                      } finally {
-                        setLoading(false);
-                      }
-                    }
-                  }}
-                >
-                  {t('Save and auto create all models')}
-                  <Tips
-                    side="bottom"
-                    content={
-                      <>
-                        <Label>{t("Click this button to create all models that are not outdated")}</Label>
-                        <Label>{t("Outdated models, such as gpt-3.5-turbo, will not be generated")}</Label>
-                        <Label>{t("The model's display name is its official name, and the price is based on the database reference price")}</Label>
-                        <Label>{t("If a model with the same name exists, it will not be altered")}</Label>
-                        <Label>{t("Once all models are created, the system will notify you of the attempts and list successful creations")}</Label>
-                      </>
-                    }
-                    trigger={
-                      <Button variant="ghost" className="p-1 m-0 h-auto">
-                        <IconInfo stroke="#7d7d7d" />
-                      </Button>
-                    }
-                  />
-                </Button>
-
-              </div>
-              <div className="flex gap-2">
-                {selected && (
+              <FormField
+                key="secret"
+                control={form.control}
+                name="secret"
+                render={({ field }) => (
+                  <FormTextarea rows={2} label={t('Secret')} field={field} />
+                )}
+              />
+            )}
+            <DialogFooter className="pt-4">
+              {selected ? (
+                <div className="flex gap-4">
+                  <Button
+                    variant="secondary"
+                    type="submit"
+                    onClick={() => {
+                      onConfigModel(selected.id);
+                    }}
+                  >
+                    {t('Save and add the model')}
+                  </Button>
                   <Button
                     type="button"
                     variant="destructive"
@@ -251,9 +245,14 @@ export const ModelKeysModal = (props: IProps) => {
                   >
                     {t('Delete')}
                   </Button>
-                )}
-                <Button type="submit">{t('Save')}</Button>
-              </div>
+
+                  <Button type="submit">{t('Save')}</Button>
+                </div>
+              ) : (
+                <>
+                  <Button type="submit">{t('Save and add the model')}</Button>
+                </>
+              )}
             </DialogFooter>
           </form>
         </Form>

@@ -1,13 +1,8 @@
 import { useEffect, useRef } from 'react';
 
-import useTranslation from '@/hooks/useTranslation';
-
 import { checkFileSizeCanUpload, uploadFile } from '@/utils/uploadFile';
 
-import {
-  FileUploadServerConfig,
-  UploadFailType,
-} from '@/types/components/upload';
+import { UploadFailType } from '@/types/components/upload';
 import { ChatModelFileConfig } from '@/types/model';
 
 interface Props {
@@ -28,7 +23,6 @@ const UploadButton: React.FunctionComponent<Props> = ({
   fileServerId: fileServiceId,
   children,
 }: Props) => {
-  const { t } = useTranslation();
   const uploadRef = useRef<HTMLInputElement>(null);
   const { maxSize } = fileConfig || { maxSize: 0 };
   const changeFile = async (event: any) => {
@@ -40,13 +34,7 @@ const UploadButton: React.FunctionComponent<Props> = ({
 
     try {
       if (file) {
-        uploadFile(
-          file,
-          fileServiceId,
-          onUploading,
-          onSuccessful,
-          onFailed,
-        );
+        uploadFile(file, fileServiceId, onUploading, onSuccessful, onFailed);
       }
     } catch (error) {
       console.error(error);

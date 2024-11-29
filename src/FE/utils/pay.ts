@@ -14,12 +14,3 @@ export const PayDefaultTemplates = {
     apiClientKey: '',
   },
 };
-
-export interface LoginTemplateAllProperty {
-  appId: string;
-  secret: string;
-  mchId: string;
-  apiV3Key: string;
-  apiClientCert: string;
-  apiClientKey: string;
-}
