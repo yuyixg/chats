@@ -77,7 +77,7 @@ public class AdminModelsController(ChatsDB db) : ControllerBase
     }
 
     [HttpPost("models")]
-    public async Task<ActionResult> CreateModel([FromBody] UpdateModelRequest req, CancellationToken cancellationToken)
+    public async Task<ActionResult<int>> CreateModel([FromBody] UpdateModelRequest req, CancellationToken cancellationToken)
     {
         if (!ModelState.IsValid)
         {
@@ -98,7 +98,61 @@ public class AdminModelsController(ChatsDB db) : ControllerBase
         db.Models.Add(toCreate);
         await db.SaveChangesAsync(cancellationToken);
 
-        return Created();
+        return Created(default(string), toCreate.Id);
+    }
+
+    [HttpPost("models/fast-create")]
+    public async Task<ActionResult<int>> FastCreateModel([FromBody] ValidateModelRequest req, CancellationToken cancellationToken)
+    {
+        if (!ModelState.IsValid)
+        {
+            return BadRequest(ModelState);
+        }
+
+        ModelKey? modelKey = await db
+            .ModelKeys
+            .Include(x => x.Models)
+            .AsSplitQuery()
+            .FirstOrDefaultAsync(x => x.Id == req.ModelKeyId, cancellationToken);
+
+        if (modelKey == null)
+        {
+            return BadRequest($"Invalid ModelKeyId: {req.ModelKeyId}");
+        }
+
+        ModelReference? modelRef = await db.ModelReferences.FindAsync([req.ModelReferenceId], cancellationToken);
+        if (modelRef == null)
+        {
+            return BadRequest($"Invalid ModelReferenceId: {req.ModelReferenceId}");
+        }
+
+        bool hasExistingModel = await db.Models
+            .AnyAsync(x => x.ModelKeyId == req.ModelKeyId && x.ModelReferenceId == req.ModelReferenceId && x.DeploymentName == req.DeploymentName, cancellationToken);
+        if (hasExistingModel)
+        {
+            return BadRequest("Model already exists");
+        }
+
+        FileService? fileService = await db.FileServices
+            .OrderByDescending(x => x.Id)
+            .FirstOrDefaultAsync(cancellationToken);
+        Model toCreate = new()
+        {
+            ModelKeyId = req.ModelKeyId,
+            ModelReferenceId = req.ModelReferenceId,
+            Name = req.DeploymentName ?? modelRef.Name,
+            CreatedAt = DateTime.UtcNow,
+            UpdatedAt = DateTime.UtcNow,
+            DeploymentName = req.DeploymentName,
+            FileService = modelRef.AllowSearch ? fileService : null,
+            IsDeleted = false,
+            PromptTokenPrice1M = modelRef.PromptTokenPrice1M * modelRef.CurrencyCodeNavigation.ExchangeRate,
+            ResponseTokenPrice1M = modelRef.ResponseTokenPrice1M * modelRef.CurrencyCodeNavigation.ExchangeRate,
+        };
+        db.Models.Add(toCreate);
+        await db.SaveChangesAsync(cancellationToken);
+
+        return Created(default(string), toCreate.Id);
     }
 
     [HttpDelete("models/{modelId:int}")]
@@ -111,7 +165,7 @@ public class AdminModelsController(ChatsDB db) : ControllerBase
             .Where(x => x.Id == modelId)
             .Select(x => new
             {
-                Chats = x.Chats.Any(), 
+                Chats = x.Chats.Any(),
                 UserModels = x.UserModels.Any(),
                 ApiKeys = x.ApiKeys.Any(),
             })
@@ -151,7 +205,7 @@ public class AdminModelsController(ChatsDB db) : ControllerBase
         ModelReference? modelReference = await db.ModelReferences
             .Include(x => x.Provider)
             .Include(x => x.Tokenizer)
-            .Where(x => x.Name == req.ModelReferenceId && x.ProviderId == modelKey.Id)
+            .Where(x => x.Id == req.ModelReferenceId && x.ProviderId == modelKey.Id)
             .SingleOrDefaultAsync(cancellationToken);
         if (modelReference == null)
         {

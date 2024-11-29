@@ -181,4 +181,37 @@ public class ModelKeysController(ChatsDB db) : ControllerBase
 
         return Ok(results);
     }
+
+    [HttpGet("{modelKeyId:int}/possible-models")]
+    public async Task<ActionResult<PossibleModelDto[]>> ListModelKeyPossibleModels(short modelKeyId, CancellationToken cancellationToken)
+    {
+        ModelKey? modelKey = await db
+           .ModelKeys
+           .Include(x => x.Models)
+           .AsSplitQuery()
+           .FirstOrDefaultAsync(x => x.Id == modelKeyId, cancellationToken);
+
+        if (modelKey == null)
+        {
+            return NotFound();
+        }
+
+        HashSet<short> existingModelRefIds = modelKey.Models
+            .Select(x => x.ModelReferenceId)
+            .ToHashSet();
+
+        PossibleModelDto[] readyRefs = await db.ModelReferences
+            .Where(x => x.ProviderId == modelKey.ModelProviderId)
+            .OrderBy(x => x.Name)
+            .Select(x => new PossibleModelDto()
+            {
+                IsExists = x.Models.Any(m => m.ModelKeyId == modelKeyId),
+                ReferenceId = x.Id,
+                ReferenceName = x.Name,
+                IsLegacy = x.IsLegacy,
+            })
+            .ToArrayAsync(cancellationToken);
+
+        return Ok(readyRefs);
+    }
 }
