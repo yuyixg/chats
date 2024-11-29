@@ -99,12 +99,12 @@ export const AddModelModal = (props: IProps) => {
     postModels(dto)
       .then(() => {
         onSuccessful();
-        toast.success(t('Save successful!'));
+        toast.success(t('Save successful'));
       })
       .catch(() => {
         toast.error(
           t(
-            'Operation failed! Please try again later, or contact technical personnel.',
+            'Operation failed, Please try again later, or contact technical personnel',
           ),
         );
       });

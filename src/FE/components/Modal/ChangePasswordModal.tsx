@@ -113,7 +113,7 @@ export const ChangePasswordModal = (props: Props) => {
     setLoading(true);
     changeUserPassword(values)
       .then(() => {
-        toast.success(t('Modified successfully!'));
+        toast.success(t('Modified successfully'));
         clearUserSession();
         clearUserInfo();
         router.push(getLoginUrl());
@@ -125,14 +125,14 @@ export const ChangePasswordModal = (props: Props) => {
           toast.error(
             t(
               errorResponse.message ||
-                'Operation failed! Please try again later, or contact technical personnel.',
+                'Operation failed, Please try again later, or contact technical personnel',
             ),
           );
         } catch (jsonError) {
           console.log('Error is not in JSON format:', jsonError);
           toast.error(
             t(
-              'Operation failed! Please try again later, or contact technical personnel.',
+              'Operation failed, Please try again later, or contact technical personnel',
             ),
           );
         }

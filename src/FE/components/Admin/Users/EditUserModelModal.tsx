@@ -60,7 +60,7 @@ export const EditUserModelModal = (props: IProps) => {
     setSubmit(true);
     putUserModel({ userId: props.userId, models: models.map(x => x.toUpdateDto()) })
       .then(() => {
-        toast.success(t('Save successful!'));
+        toast.success(t('Save successful'));
         onSuccessful();
       })
       .catch(async (err) => {
@@ -70,7 +70,7 @@ export const EditUserModelModal = (props: IProps) => {
         } catch {
           toast.error(
             t(
-              'Operation failed! Please try again later, or contact technical personnel.',
+              'Operation failed, Please try again later, or contact technical personnel',
             ),
           );
         }

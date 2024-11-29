@@ -1,8 +1,6 @@
 const STORAGE_KEY = 'settings';
-export const Themes = ['light', 'dark'];
 export const Languages = ['zh-CN', 'en'];
 export const DEFAULT_LANGUAGE = 'zh-CN';
-export const DEFAULT_THEME = 'light';
 
 export interface Settings {
   language: (typeof Languages)[number];

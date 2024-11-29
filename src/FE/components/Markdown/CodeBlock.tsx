@@ -44,7 +44,7 @@ export const CodeBlock: FC<Props> = memo(({ language, value }) => {
             ) : (
               <IconClipboard stroke={'white'} size={18} />
             )}
-            {isCopied ? t('Copied!') : t('Click Copy')}
+            {isCopied ? t('Copied') : t('Click Copy')}
           </button>
         </div>
       </div>

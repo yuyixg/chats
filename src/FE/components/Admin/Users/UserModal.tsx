@@ -172,13 +172,13 @@ export const UserModal = (props: IProps) => {
       p = postUser(params);
     }
     p.then(() => {
-      toast.success(t('Save successful!'));
+      toast.success(t('Save successful'));
       onSuccessful();
     })
       .catch(() => {
         toast.error(
           t(
-            'Operation failed! Please try again later, or contact technical personnel.',
+            'Operation failed, Please try again later, or contact technical personnel',
           ),
         );
       })

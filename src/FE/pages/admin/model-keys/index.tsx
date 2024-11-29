@@ -1,9 +1,12 @@
 import React, { useEffect, useState } from 'react';
+import toast from 'react-hot-toast';
 
 import useTranslation from '@/hooks/useTranslation';
 
 import { GetModelKeysResult } from '@/types/adminApis';
+import { feModelProviders } from '@/types/model';
 
+import { ConfigModelModal } from '@/components/Admin/ModelKeys/ConfigModelModal';
 import { ModelKeysModal } from '@/components/Admin/ModelKeys/ModelKeysModal';
 import { Button } from '@/components/ui/button';
 import { Card } from '@/components/ui/card';
@@ -17,11 +20,12 @@ import {
 } from '@/components/ui/table';
 
 import { getModelKeys } from '@/apis/adminApis';
-import { feModelProviders } from '@/types/model';
 
 export default function ModelKeys() {
   const { t } = useTranslation();
   const [isOpen, setIsOpen] = useState(false);
+  const [isOpenConfigModel, setIsOpenConfigModel] = useState(false);
+  const [modelKeyId, setModelKeyId] = useState<number>();
   const [selected, setSelected] = useState<GetModelKeysResult | null>(null);
   const [services, setServices] = useState<GetModelKeysResult[]>([]);
   const [loading, setLoading] = useState(true);
@@ -46,6 +50,7 @@ export default function ModelKeys() {
 
   const handleClose = () => {
     setIsOpen(false);
+    setIsOpenConfigModel(false);
     setSelected(null);
   };
 
@@ -101,13 +106,28 @@ export default function ModelKeys() {
           </TableBody>
         </Table>
       </Card>
-      {<ModelKeysModal
-        selected={selected}
-        isOpen={isOpen}
+      {
+        <ModelKeysModal
+          selected={selected}
+          isOpen={isOpen}
+          onClose={handleClose}
+          onConfigModel={(id) => {
+            setModelKeyId(id);
+            setIsOpenConfigModel(true);
+          }}
+          onSaveSuccessful={() => {
+            toast.success(t('Save successful'));
+            init();
+          }}
+          onDeleteSuccessful={init}
+        />
+      }
+      <ConfigModelModal
+        modelKeyId={modelKeyId!}
+        isOpen={isOpenConfigModel}
         onClose={handleClose}
         onSuccessful={init}
       />
-      }
     </>
   );
 }

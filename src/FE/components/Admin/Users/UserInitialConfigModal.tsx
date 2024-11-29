@@ -151,13 +151,13 @@ export const UserInitialConfigModal = (props: IProps) => {
       });
     }
     p.then(() => {
-      toast.success(t('Save successful!'));
+      toast.success(t('Save successful'));
       onSuccessful();
     })
       .catch(() => {
         toast.error(
           t(
-            'Operation failed! Please try again later, or contact technical personnel.',
+            'Operation failed, Please try again later, or contact technical personnel',
           ),
         );
       })
@@ -180,13 +180,13 @@ export const UserInitialConfigModal = (props: IProps) => {
     setSubmit(true);
     deleteUserInitialConfig(select!.id)
       .then(() => {
-        toast.success(t('Delete successful!'));
+        toast.success(t('Delete successful'));
         onSuccessful();
       })
       .catch(() => {
         toast.error(
           t(
-            'Operation failed! Please try again later, or contact technical personnel.',
+            'Operation failed, Please try again later, or contact technical personnel',
           ),
         );
       })

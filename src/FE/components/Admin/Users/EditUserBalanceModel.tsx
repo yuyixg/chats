@@ -83,7 +83,7 @@ export const EditUserBalanceModal = (props: IProps) => {
       .catch(() => {
         toast.error(
           t(
-            'Operation failed! Please try again later, or contact technical personnel.',
+            'Operation failed, Please try again later, or contact technical personnel',
           ),
         );
       })

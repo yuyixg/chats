@@ -123,11 +123,11 @@ export const PayServiceModal = (props: IProps) => {
     }
     p.then(() => {
       onSuccessful();
-      toast.success(t('Save successful!'));
+      toast.success(t('Save successful'));
     }).catch(() => {
       toast.error(
         t(
-          'Operation failed! Please try again later, or contact technical personnel.',
+          'Operation failed, Please try again later, or contact technical personnel',
         ),
       );
     });

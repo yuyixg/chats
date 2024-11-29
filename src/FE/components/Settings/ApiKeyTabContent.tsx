@@ -74,12 +74,12 @@ export const ApiKeyTab = () => {
     timer = setTimeout(() => {
       putUserApiKey(apiKey.id, { [type]: value })
         .then(() => {
-          toast.success(t('Save successful!'));
+          toast.success(t('Save successful'));
         })
         .catch(() => {
           toast.error(
             t(
-              'Operation failed! Please try again later, or contact technical personnel.',
+              'Operation failed, Please try again later, or contact technical personnel',
             ),
           );
         });
@@ -94,12 +94,12 @@ export const ApiKeyTab = () => {
             return x.id !== id;
           }),
         );
-        toast.success(t('Delete successful!'));
+        toast.success(t('Delete successful'));
       })
       .catch(() => {
         toast.error(
           t(
-            'Operation failed! Please try again later, or contact technical personnel.',
+            'Operation failed, Please try again later, or contact technical personnel',
           ),
         );
       });

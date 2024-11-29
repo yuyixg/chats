@@ -26,6 +26,7 @@ import { Settings } from '@/utils/settings';
 import { getLoginUrl, getUserInfo, getUserSession } from '@/utils/user';
 import { UserSession } from '@/utils/user';
 
+import { AdminModelDto } from '@/types/adminApis';
 import { IChat, Role } from '@/types/chat';
 import { ChatMessage } from '@/types/chatMessage';
 import { ChatResult, GetChatsParams } from '@/types/clientApis';
@@ -48,7 +49,6 @@ import {
 } from '@/apis/clientApis';
 import Decimal from 'decimal.js';
 import { v4 as uuidv4 } from 'uuid';
-import { AdminModelDto } from '@/types/adminApis';
 
 interface HandleUpdateChatParams {
   isShared?: boolean;
@@ -154,7 +154,7 @@ const Home = () => {
     return model;
   };
 
-  const chatErrorMessage = (messageId: string) : ChatMessage => {
+  const chatErrorMessage = (messageId: string): ChatMessage => {
     return {
       id: uuidv4(),
       parentId: messageId,
@@ -171,7 +171,7 @@ const Home = () => {
 
   const clamp = (value: number, min: number, max: number) => {
     return Math.min(Math.max(value, min), max);
-  }
+  };
 
   const handleSelectModel = (model: AdminModelDto) => {
     if (!model) return;
@@ -413,7 +413,9 @@ const Home = () => {
         dispatch({ field: 'models', value: modelData });
         if (modelData && modelData.length > 0) {
           const selectModelId = getStorageModelId();
-          const model = modelData.find((x) => x.modelId.toString() === selectModelId) ?? modelData[0];
+          const model =
+            modelData.find((x) => x.modelId.toString() === selectModelId) ??
+            modelData[0];
           if (model) {
             setStorageModelId(model.modelId);
             handleSelectModel(model);
@@ -431,7 +433,8 @@ const Home = () => {
 
   useEffect(() => {
     const handlePopState = (event: PopStateEvent) => {
-      const chatId = getPathChatId(event.state.as);
+      console.log(event.state);
+      const chatId = getPathChatId(event.state?.as || '');
       selectChat(chats, chatId, models);
     };
 

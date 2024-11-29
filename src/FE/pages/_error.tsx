@@ -1,26 +1,27 @@
 import React from 'react';
 
-import { useRouter } from 'next/router';
+import useTranslation from '@/hooks/useTranslation';
 
-const Custom404 = () => (
-  <div>
-    <h1>404: 页面未找到</h1>
-    <p>抱歉，我们找不到你要访问的页面。</p>
-  </div>
-);
+const Custom404 = () => {
+  const { t } = useTranslation();
+  return (
+    <div>
+      <h1>{t('404: Page not found')}</h1>
+      <p>{t("Sorry, we couldn't find the page you were trying to access.")}</p>
+    </div>
+  );
+};
 
 const ErrorPage = ({ statusCode }: { statusCode: number }) => {
-  const router = useRouter();
-  const currentURL = router.asPath;
-  console.error('ErrorPage', currentURL, statusCode);
+  const { t } = useTranslation();
   if (statusCode === 404) {
     return <Custom404 />;
   }
 
   return (
     <div>
-      <h1>{statusCode}: 发生错误</h1>
-      <p>抱歉，出现了意外错误，请稍后再试。</p>
+      <h1>{statusCode}{t(': An error has occurred')}</h1>
+      <p>{t('Sorry, there was an unexpected error, please try again later.')}</p>
     </div>
   );
 };

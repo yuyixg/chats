@@ -57,7 +57,7 @@ const PromptBar = () => {
     postUserPrompts(newPrompt).then((data) => {
       const updatedPrompts = [...prompts, data];
       homeDispatch({ field: 'prompts', value: updatedPrompts });
-      toast.success(t('Created successful!'));
+      toast.success(t('Created successful'));
     });
   };
 
@@ -65,7 +65,7 @@ const PromptBar = () => {
     deleteUserPrompts(prompt.id).then(() => {
       const updatedPrompts = prompts.filter((p) => p.id !== prompt.id);
       homeDispatch({ field: 'prompts', value: updatedPrompts });
-      toast.success(t('Deleted successful!'));
+      toast.success(t('Deleted successful'));
     });
   };
 
@@ -78,7 +78,7 @@ const PromptBar = () => {
         return p;
       });
       homeDispatch({ field: 'prompts', value: updatedPrompts });
-      toast.success(t('Updated successful!'));
+      toast.success(t('Updated successful'));
     });
   };
 

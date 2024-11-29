@@ -97,7 +97,7 @@ export const EditModelModal = (props: IProps) => {
     putModels(values.modelId!, dto)
       .then(() => {
         onSuccessful();
-        toast.success(t('Save successful!'));
+        toast.success(t('Save successful'));
       })
       .catch(async (err) => {
         try {
@@ -106,7 +106,7 @@ export const EditModelModal = (props: IProps) => {
         } catch {
           toast.error(
             t(
-              'Operation failed! Please try again later, or contact technical personnel.',
+              'Operation failed, Please try again later, or contact technical personnel',
             ),
           );
         }
@@ -117,14 +117,14 @@ export const EditModelModal = (props: IProps) => {
     try {
       await deleteModels(selected!.modelId);
       onSuccessful();
-      toast.success(t('Deleted successful!'));
+      toast.success(t('Deleted successful'));
     }
     catch (err: any) {
       try {
         const resp = await err.json();
         toast.error(t(resp.message));
       } catch {
-        toast.error(t('Operation failed! Please try again later, or contact technical personnel.'));
+        toast.error(t('Operation failed, Please try again later, or contact technical personnel'));
       }
     }
   }

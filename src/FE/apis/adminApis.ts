@@ -1,13 +1,15 @@
 import { useFetch } from '@/hooks/useFetch';
 
 import {
+  AdminModelDto,
+  AutoCreateModelResult,
+  ErrorResult,
   GetConfigsResult,
   GetFileServicesResult,
   GetInvitationCodeResult,
   GetLoginServicesResult,
   GetMessageDetailsResult,
   GetModelKeysResult,
-  AdminModelDto,
   GetPayServicesResult,
   GetRequestLogsDetailsResult,
   GetRequestLogsListResult,
@@ -17,7 +19,10 @@ import {
   GetUserMessageResult,
   GetUsersParams,
   GetUsersResult,
+  ModelFastCreateParams,
+  ModelProviderInitialConfig,
   ModelReferenceDto,
+  PossibleModelResult,
   PostAndPutConfigParams,
   PostFileServicesParams,
   PostInvitationCodeParams,
@@ -28,26 +33,29 @@ import {
   PostUserParams,
   PutFileServicesParams,
   PutInvitationCodeParams,
-  UpdateModelDto,
   PutPayServicesParams,
   PutUserBalanceParams,
   PutUserInitialConfigParams,
   PutUserModelParams,
   PutUserParams,
+  SimpleModelReferenceDto,
+  UpdateModelDto,
   UserModelDisplay,
   UserModelDisplayDto,
-  SimpleModelReferenceDto,
-  ModelProviderInitialConfig,
-  AutoCreateModelResult,
+  ValidateModelParams,
 } from '@/types/adminApis';
 import { ChatModelFileConfig, DBModelProvider } from '@/types/model';
 import { PageResult } from '@/types/page';
 
-export const getModelsByUserId = async (userId: string): Promise<UserModelDisplay[]> => {
+export const getModelsByUserId = async (
+  userId: string,
+): Promise<UserModelDisplay[]> => {
   const fetchService = useFetch();
-  const data = await fetchService.get<UserModelDisplayDto[]>(`/api/admin/user-models/${userId}`);
-  return data.map(x => new UserModelDisplay(x));
-}
+  const data = await fetchService.get<UserModelDisplayDto[]>(
+    `/api/admin/user-models/${userId}`,
+  );
+  return data.map((x) => new UserModelDisplay(x));
+};
 
 export const putUserModel = (params: PutUserModelParams): Promise<any> => {
   const fetchService = useFetch();
@@ -88,7 +96,8 @@ export const getUsers = (
 ): Promise<PageResult<GetUsersResult[]>> => {
   const fetchService = useFetch();
   return fetchService.get(
-    `/api/admin/users?page=${params.page}&pageSize=${params.pageSize}&query=${params?.query || ''
+    `/api/admin/users?page=${params.page}&pageSize=${params.pageSize}&query=${
+      params?.query || ''
     }`,
   );
 };
@@ -187,7 +196,10 @@ export const postLoginService = (params: PostLoginServicesParams) => {
   });
 };
 
-export const putLoginService = (loginServiceId: number, params: PostLoginServicesParams) => {
+export const putLoginService = (
+  loginServiceId: number,
+  params: PostLoginServicesParams,
+) => {
   const fetchService = useFetch();
   return fetchService.put(`/api/admin/login-service/${loginServiceId}`, {
     body: params,
@@ -216,7 +228,7 @@ export const putPayService = (params: PutPayServicesParams) => {
 export const getModelKeys = async (): Promise<GetModelKeysResult[]> => {
   const fetchService = useFetch();
   const data = await fetchService.get<Object[]>('/api/admin/model-keys');
-  return data.map(x => new GetModelKeysResult(x));
+  return data.map((x) => new GetModelKeysResult(x));
 };
 
 export const postModelKeys = (params: PostModelKeysParams) => {
@@ -240,8 +252,10 @@ export const deleteModelKeys = (id: number) => {
 
 export const postAutoCreateModels = (modelKey: number) => {
   const fetchService = useFetch();
-  return fetchService.post<AutoCreateModelResult[]>(`/api/admin/model-keys/${modelKey}/auto-create-models`);
-}
+  return fetchService.post<AutoCreateModelResult[]>(
+    `/api/admin/model-keys/${modelKey}/auto-create-models`,
+  );
+};
 
 export const getUserInitialConfig = () => {
   const fetchServer = useFetch();
@@ -310,30 +324,53 @@ export const deleteInvitationCode = (id: string) => {
 export const getAllModelProviderIds = () => {
   const fetchServer = useFetch();
   return fetchServer.get<DBModelProvider[]>('/api/model-provider');
-}
+};
 
-export const getModelProviderInitialConfig = (modelProviderId: DBModelProvider) => {
+export const getModelProviderInitialConfig = (
+  modelProviderId: DBModelProvider,
+) => {
   const fetchServer = useFetch();
   return fetchServer.get<ModelProviderInitialConfig>(
     `/api/model-provider/${modelProviderId}/initial-config`,
   );
-}
+};
 
 export const getModelProviderModels = (modelProviderId: DBModelProvider) => {
   const fetchServer = useFetch();
   return fetchServer.get<SimpleModelReferenceDto[]>(
     `/api/model-provider/${modelProviderId}/models`,
   );
-}
+};
 
 export const getModelReference = (modelReferenceId: number) => {
   const fetchServer = useFetch();
   return fetchServer.get<ModelReferenceDto>(
     `/api/model-reference/${modelReferenceId}`,
   );
-}
+};
 
-export const defaultFileConfig : ChatModelFileConfig = {
+export const getModelKeyPossibleModels = (modelKeyId: number) => {
+  const fetchServer = useFetch();
+  return fetchServer.get<PossibleModelResult[]>(
+    `/api/admin/model-keys/${modelKeyId}/possible-models`,
+  );
+};
+
+export const postModelValidate = (params: ValidateModelParams) => {
+  const fetchServer = useFetch();
+  return fetchServer.post<ErrorResult>(`/api/admin/models/validate`, {
+    body: params,
+  });
+};
+
+export const postModelFastCreate = (params: ModelFastCreateParams) => {
+  const fetchServer = useFetch();
+  return fetchServer.post<ErrorResult>(`/api/admin/models/fast-create`, {
+    body: params,
+  });
+};
+
+export const defaultFileConfig: ChatModelFileConfig = {
   count: 5,
-  maxSize: 10240
-}
+  maxSize: 10240,
+};
