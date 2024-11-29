@@ -11,50 +11,50 @@ INSERT INTO FileServiceType (Id, Name, InitialConfig) VALUES
 (3, 'Aliyun OSS', '{"endpoint": "oss-cn-hangzhou.aliyuncs.com", "accessKeyId": "your-access-key-id", "accessKeySecret": "your-access-key-secret", "bucket": "your-bucket"}'),
 (4, 'Azure Blob Storage', 'DefaultEndpointsProtocol=https;AccountName=your-account-name;AccountKey=your-account-key;EndpointSuffix=core.windows.net');
 
--- Ìí¼ÓÁĞ FileServiceTypeId£¬Ö¸¶¨Ä¬ÈÏÔ¼ÊøÃû³Æ
+-- æ·»åŠ åˆ— FileServiceTypeIdï¼ŒæŒ‡å®šé»˜è®¤çº¦æŸåç§°
 ALTER TABLE [ChatsSTG].[dbo].[FileService]
 ADD [FileServiceTypeId] INT NOT NULL CONSTRAINT [DF_FileService_FileServiceTypeId] DEFAULT (1);
 
--- É¾³ıÄ¬ÈÏÔ¼Êø
+-- åˆ é™¤é»˜è®¤çº¦æŸ
 ALTER TABLE [ChatsSTG].[dbo].[FileService]
 DROP CONSTRAINT [DF_FileService_FileServiceTypeId];
 
--- É¾³ı Type ×Ö¶Î
+-- åˆ é™¤ Type å­—æ®µ
 ALTER TABLE [ChatsSTG].[dbo].[FileService]
 DROP COLUMN [Type];
 
 ALTER TABLE [ChatsSTG].[dbo].[FileService]
 DROP CONSTRAINT DF_FileServices_enabled;
 
--- É¾³ı Enabled ×Ö¶Î
+-- åˆ é™¤ Enabled å­—æ®µ
 ALTER TABLE [ChatsSTG].[dbo].[FileService]
 DROP COLUMN [Enabled];
 
--- Ìí¼Ó IsDefault ×Ö¶Î
+-- æ·»åŠ  IsDefault å­—æ®µ
 ALTER TABLE [ChatsSTG].[dbo].[FileService]
 ADD [IsDefault] BIT NOT NULL CONSTRAINT [DF_FileService_IsDefault] DEFAULT (0);
 
 ALTER TABLE [ChatsSTG].[dbo].[FileService]
 DROP CONSTRAINT [DF_FileService_IsDefault];
 
--- ¸üĞÂ Configs ÁĞ£¬½« accessSecret ÊôĞÔ¸ÄÎª secretKey£¬È»ºóÉ¾³ı accessSecret ÊôĞÔ
--- Ê×ÏÈ£¬½« secretKey ÉèÖÃÎª accessSecret µÄÖµ
+-- æ›´æ–° Configs åˆ—ï¼Œå°† accessSecret å±æ€§æ”¹ä¸º secretKeyï¼Œç„¶ååˆ é™¤ accessSecret å±æ€§
+-- é¦–å…ˆï¼Œå°† secretKey è®¾ç½®ä¸º accessSecret çš„å€¼
 UPDATE [ChatsSTG].[dbo].[FileService]
 SET [Configs] = JSON_MODIFY([Configs], '$.secretKey', JSON_VALUE([Configs], '$.accessSecret'));
 
--- È»ºó£¬É¾³ı accessSecret ÊôĞÔ
+-- ç„¶åï¼Œåˆ é™¤ accessSecret å±æ€§
 UPDATE [ChatsSTG].[dbo].[FileService]
 SET [Configs] = JSON_MODIFY([Configs], '$.accessSecret', NULL);
 
 UPDATE [ChatsSTG].[dbo].[FileService]
 SET [Configs] = JSON_MODIFY([Configs], '$.bucket', JSON_VALUE([Configs], '$.bucketName'));
 
--- È»ºó£¬É¾³ı accessSecret ÊôĞÔ
+-- ç„¶åï¼Œåˆ é™¤ accessSecret å±æ€§
 UPDATE [ChatsSTG].[dbo].[FileService]
 SET [Configs] = JSON_MODIFY([Configs], '$.bucketName', NULL);
 
 
-/* ÎªÁË·ÀÖ¹ÈÎºÎ¿ÉÄÜ³öÏÖµÄÊı¾İ¶ªÊ§ÎÊÌâ£¬ÄúÓ¦¸ÃÏÈ×ĞÏ¸¼ì²é´Ë½Å±¾£¬È»ºóÔÙÔÚÊı¾İ¿âÉè¼ÆÆ÷µÄÉÏÏÂÎÄÖ®ÍâÔËĞĞ´Ë½Å±¾¡£*/
+/* ä¸ºäº†é˜²æ­¢ä»»ä½•å¯èƒ½å‡ºç°çš„æ•°æ®ä¸¢å¤±é—®é¢˜ï¼Œæ‚¨åº”è¯¥å…ˆä»”ç»†æ£€æŸ¥æ­¤è„šæœ¬ï¼Œç„¶åå†åœ¨æ•°æ®åº“è®¾è®¡å™¨çš„ä¸Šä¸‹æ–‡ä¹‹å¤–è¿è¡Œæ­¤è„šæœ¬ã€‚*/
 BEGIN TRANSACTION
 SET QUOTED_IDENTIFIER ON
 SET ARITHABORT ON
@@ -132,7 +132,7 @@ GO
 COMMIT
 
 
-/* ÎªÁË·ÀÖ¹ÈÎºÎ¿ÉÄÜ³öÏÖµÄÊı¾İ¶ªÊ§ÎÊÌâ£¬ÄúÓ¦¸ÃÏÈ×ĞÏ¸¼ì²é´Ë½Å±¾£¬È»ºóÔÙÔÚÊı¾İ¿âÉè¼ÆÆ÷µÄÉÏÏÂÎÄÖ®ÍâÔËĞĞ´Ë½Å±¾¡£*/
+/* ä¸ºäº†é˜²æ­¢ä»»ä½•å¯èƒ½å‡ºç°çš„æ•°æ®ä¸¢å¤±é—®é¢˜ï¼Œæ‚¨åº”è¯¥å…ˆä»”ç»†æ£€æŸ¥æ­¤è„šæœ¬ï¼Œç„¶åå†åœ¨æ•°æ®åº“è®¾è®¡å™¨çš„ä¸Šä¸‹æ–‡ä¹‹å¤–è¿è¡Œæ­¤è„šæœ¬ã€‚*/
 BEGIN TRANSACTION
 SET QUOTED_IDENTIFIER ON
 SET ARITHABORT ON
@@ -170,7 +170,7 @@ GO
 COMMIT
 
 
-/* ÎªÁË·ÀÖ¹ÈÎºÎ¿ÉÄÜ³öÏÖµÄÊı¾İ¶ªÊ§ÎÊÌâ£¬ÄúÓ¦¸ÃÏÈ×ĞÏ¸¼ì²é´Ë½Å±¾£¬È»ºóÔÙÔÚÊı¾İ¿âÉè¼ÆÆ÷µÄÉÏÏÂÎÄÖ®ÍâÔËĞĞ´Ë½Å±¾¡£*/
+/* ä¸ºäº†é˜²æ­¢ä»»ä½•å¯èƒ½å‡ºç°çš„æ•°æ®ä¸¢å¤±é—®é¢˜ï¼Œæ‚¨åº”è¯¥å…ˆä»”ç»†æ£€æŸ¥æ­¤è„šæœ¬ï¼Œç„¶åå†åœ¨æ•°æ®åº“è®¾è®¡å™¨çš„ä¸Šä¸‹æ–‡ä¹‹å¤–è¿è¡Œæ­¤è„šæœ¬ã€‚*/
 BEGIN TRANSACTION
 SET QUOTED_IDENTIFIER ON
 SET ARITHABORT ON
@@ -195,7 +195,7 @@ GO
 COMMIT
 
 
-/* ÎªÁË·ÀÖ¹ÈÎºÎ¿ÉÄÜ³öÏÖµÄÊı¾İ¶ªÊ§ÎÊÌâ£¬ÄúÓ¦¸ÃÏÈ×ĞÏ¸¼ì²é´Ë½Å±¾£¬È»ºóÔÙÔÚÊı¾İ¿âÉè¼ÆÆ÷µÄÉÏÏÂÎÄÖ®ÍâÔËĞĞ´Ë½Å±¾¡£*/
+/* ä¸ºäº†é˜²æ­¢ä»»ä½•å¯èƒ½å‡ºç°çš„æ•°æ®ä¸¢å¤±é—®é¢˜ï¼Œæ‚¨åº”è¯¥å…ˆä»”ç»†æ£€æŸ¥æ­¤è„šæœ¬ï¼Œç„¶åå†åœ¨æ•°æ®åº“è®¾è®¡å™¨çš„ä¸Šä¸‹æ–‡ä¹‹å¤–è¿è¡Œæ­¤è„šæœ¬ã€‚*/
 BEGIN TRANSACTION
 SET QUOTED_IDENTIFIER ON
 SET ARITHABORT ON
@@ -275,7 +275,7 @@ COMMIT
 
 
 
-/* ÎªÁË·ÀÖ¹ÈÎºÎ¿ÉÄÜ³öÏÖµÄÊı¾İ¶ªÊ§ÎÊÌâ£¬ÄúÓ¦¸ÃÏÈ×ĞÏ¸¼ì²é´Ë½Å±¾£¬È»ºóÔÙÔÚÊı¾İ¿âÉè¼ÆÆ÷µÄÉÏÏÂÎÄÖ®ÍâÔËĞĞ´Ë½Å±¾¡£*/
+/* ä¸ºäº†é˜²æ­¢ä»»ä½•å¯èƒ½å‡ºç°çš„æ•°æ®ä¸¢å¤±é—®é¢˜ï¼Œæ‚¨åº”è¯¥å…ˆä»”ç»†æ£€æŸ¥æ­¤è„šæœ¬ï¼Œç„¶åå†åœ¨æ•°æ®åº“è®¾è®¡å™¨çš„ä¸Šä¸‹æ–‡ä¹‹å¤–è¿è¡Œæ­¤è„šæœ¬ã€‚*/
 BEGIN TRANSACTION
 SET QUOTED_IDENTIFIER ON
 SET ARITHABORT ON
@@ -348,3 +348,473 @@ ALTER TABLE dbo.FileService ADD CONSTRAINT
 	
 GO
 COMMIT
+
+
+
+/* ä¸ºäº†é˜²æ­¢ä»»ä½•å¯èƒ½å‡ºç°çš„æ•°æ®ä¸¢å¤±é—®é¢˜ï¼Œæ‚¨åº”è¯¥å…ˆä»”ç»†æ£€æŸ¥æ­¤è„šæœ¬ï¼Œç„¶åå†åœ¨æ•°æ®åº“è®¾è®¡å™¨çš„ä¸Šä¸‹æ–‡ä¹‹å¤–è¿è¡Œæ­¤è„šæœ¬ã€‚*/
+BEGIN TRANSACTION
+SET QUOTED_IDENTIFIER ON
+SET ARITHABORT ON
+SET NUMERIC_ROUNDABORT OFF
+SET CONCAT_NULL_YIELDS_NULL ON
+SET ANSI_NULLS ON
+SET ANSI_PADDING ON
+SET ANSI_WARNINGS ON
+COMMIT
+BEGIN TRANSACTION
+GO
+ALTER TABLE dbo.Message
+	DROP CONSTRAINT FK_Message2_Conversation
+GO
+ALTER TABLE dbo.Chat SET (LOCK_ESCALATION = TABLE)
+GO
+COMMIT
+BEGIN TRANSACTION
+GO
+ALTER TABLE dbo.Message
+	DROP CONSTRAINT FK_Message2_ChatRole
+GO
+ALTER TABLE dbo.ChatRole SET (LOCK_ESCALATION = TABLE)
+GO
+COMMIT
+BEGIN TRANSACTION
+GO
+ALTER TABLE dbo.Message
+	DROP CONSTRAINT FK_Message2_UserModelUsage
+GO
+ALTER TABLE dbo.UserModelUsage SET (LOCK_ESCALATION = TABLE)
+GO
+COMMIT
+BEGIN TRANSACTION
+GO
+ALTER TABLE dbo.Message
+	DROP CONSTRAINT FK_Message2_ParentMessage
+GO
+ALTER TABLE dbo.MessageContent
+	DROP CONSTRAINT FK_MessageContent2_Message
+GO
+EXECUTE sp_rename N'dbo.Message.ConversationId', N'Tmp_ChatId', 'COLUMN' 
+GO
+EXECUTE sp_rename N'dbo.Message.Tmp_ChatId', N'ChatId', 'COLUMN' 
+GO
+ALTER TABLE dbo.Message ADD CONSTRAINT
+	FK_Message_UserModelUsage FOREIGN KEY
+	(
+	UsageId
+	) REFERENCES dbo.UserModelUsage
+	(
+	Id
+	) ON UPDATE  NO ACTION 
+	 ON DELETE  NO ACTION 
+	
+GO
+ALTER TABLE dbo.Message ADD CONSTRAINT
+	FK_Message_ChatRole FOREIGN KEY
+	(
+	ChatRoleId
+	) REFERENCES dbo.ChatRole
+	(
+	Id
+	) ON UPDATE  NO ACTION 
+	 ON DELETE  NO ACTION 
+	
+GO
+ALTER TABLE dbo.Message ADD CONSTRAINT
+	FK_Message_Chat FOREIGN KEY
+	(
+	ChatId
+	) REFERENCES dbo.Chat
+	(
+	Id
+	) ON UPDATE  CASCADE 
+	 ON DELETE  CASCADE 
+	
+GO
+ALTER TABLE dbo.Message ADD CONSTRAINT
+	FK_Message_ParentMessage FOREIGN KEY
+	(
+	ParentId
+	) REFERENCES dbo.Message
+	(
+	Id
+	) ON UPDATE  NO ACTION 
+	 ON DELETE  NO ACTION 
+	
+GO
+ALTER TABLE dbo.Message SET (LOCK_ESCALATION = TABLE)
+GO
+COMMIT
+BEGIN TRANSACTION
+GO
+ALTER TABLE dbo.MessageContent ADD CONSTRAINT
+	FK_MessageContent_Message FOREIGN KEY
+	(
+	MessageId
+	) REFERENCES dbo.Message
+	(
+	Id
+	) ON UPDATE  CASCADE 
+	 ON DELETE  CASCADE 
+	
+GO
+ALTER TABLE dbo.MessageContent SET (LOCK_ESCALATION = TABLE)
+GO
+COMMIT
+
+
+/* ä¸ºäº†é˜²æ­¢ä»»ä½•å¯èƒ½å‡ºç°çš„æ•°æ®ä¸¢å¤±é—®é¢˜ï¼Œæ‚¨åº”è¯¥å…ˆä»”ç»†æ£€æŸ¥æ­¤è„šæœ¬ï¼Œç„¶åå†åœ¨æ•°æ®åº“è®¾è®¡å™¨çš„ä¸Šä¸‹æ–‡ä¹‹å¤–è¿è¡Œæ­¤è„šæœ¬ã€‚*/
+BEGIN TRANSACTION
+SET QUOTED_IDENTIFIER ON
+SET ARITHABORT ON
+SET NUMERIC_ROUNDABORT OFF
+SET CONCAT_NULL_YIELDS_NULL ON
+SET ANSI_NULLS ON
+SET ANSI_PADDING ON
+SET ANSI_WARNINGS ON
+COMMIT
+BEGIN TRANSACTION
+GO
+ALTER TABLE dbo.UsageTransaction
+	DROP CONSTRAINT FK_UserModelTransactionLog_UserModel2
+GO
+ALTER TABLE dbo.UserModel SET (LOCK_ESCALATION = TABLE)
+GO
+COMMIT
+BEGIN TRANSACTION
+GO
+ALTER TABLE dbo.UsageTransaction
+	DROP CONSTRAINT FK_UserModelTransactionLog_TransactionType
+GO
+ALTER TABLE dbo.TransactionType SET (LOCK_ESCALATION = TABLE)
+GO
+COMMIT
+BEGIN TRANSACTION
+GO
+CREATE TABLE dbo.Tmp_UsageTransaction
+	(
+	Id bigint NOT NULL IDENTITY (1, 1),
+	UserModelId int NOT NULL,
+	TransactionTypeId tinyint NOT NULL,
+	TokenAmount int NOT NULL,
+	CountAmount int NOT NULL,
+	CreditUserId int NULL,
+	CreatedAt datetime2(7) NOT NULL
+	)  ON [PRIMARY]
+GO
+ALTER TABLE dbo.Tmp_UsageTransaction SET (LOCK_ESCALATION = TABLE)
+GO
+SET IDENTITY_INSERT dbo.Tmp_UsageTransaction ON
+GO
+IF EXISTS(SELECT * FROM dbo.UsageTransaction)
+	 EXEC('INSERT INTO dbo.Tmp_UsageTransaction (Id, UserModelId, TransactionTypeId, TokenAmount, CountAmount, CreatedAt)
+		SELECT Id, UserModelId, TransactionTypeId, TokenAmount, CountAmount, CreatedAt FROM dbo.UsageTransaction WITH (HOLDLOCK TABLOCKX)')
+GO
+SET IDENTITY_INSERT dbo.Tmp_UsageTransaction OFF
+GO
+ALTER TABLE dbo.UserModelUsage
+	DROP CONSTRAINT FK_ModelUsage_UsageTransactionLog
+GO
+DROP TABLE dbo.UsageTransaction
+GO
+EXECUTE sp_rename N'dbo.Tmp_UsageTransaction', N'UsageTransaction', 'OBJECT' 
+GO
+ALTER TABLE dbo.UsageTransaction ADD CONSTRAINT
+	PK_UserModelTransactionLog PRIMARY KEY CLUSTERED 
+	(
+	Id
+	) WITH( STATISTICS_NORECOMPUTE = OFF, IGNORE_DUP_KEY = OFF, ALLOW_ROW_LOCKS = ON, ALLOW_PAGE_LOCKS = ON) ON [PRIMARY]
+
+GO
+CREATE NONCLUSTERED INDEX IX_UserModelTransactionLog_UserModelId ON dbo.UsageTransaction
+	(
+	UserModelId
+	) WITH( STATISTICS_NORECOMPUTE = OFF, IGNORE_DUP_KEY = OFF, ALLOW_ROW_LOCKS = ON, ALLOW_PAGE_LOCKS = ON) ON [PRIMARY]
+GO
+ALTER TABLE dbo.UsageTransaction ADD CONSTRAINT
+	FK_UserModelTransactionLog_TransactionType FOREIGN KEY
+	(
+	TransactionTypeId
+	) REFERENCES dbo.TransactionType
+	(
+	Id
+	) ON UPDATE  NO ACTION 
+	 ON DELETE  NO ACTION 
+	
+GO
+ALTER TABLE dbo.UsageTransaction ADD CONSTRAINT
+	FK_UserModelTransactionLog_UserModel2 FOREIGN KEY
+	(
+	UserModelId
+	) REFERENCES dbo.UserModel
+	(
+	Id
+	) ON UPDATE  NO ACTION 
+	 ON DELETE  NO ACTION 
+	
+GO
+COMMIT
+BEGIN TRANSACTION
+GO
+ALTER TABLE dbo.UserModelUsage ADD CONSTRAINT
+	FK_ModelUsage_UsageTransactionLog FOREIGN KEY
+	(
+	UsageTransactionId
+	) REFERENCES dbo.UsageTransaction
+	(
+	Id
+	) ON UPDATE  NO ACTION 
+	 ON DELETE  NO ACTION 
+	
+GO
+ALTER TABLE dbo.UserModelUsage SET (LOCK_ESCALATION = TABLE)
+GO
+COMMIT
+
+
+UPDATE ut
+SET ut.CreditUserId = um.UserId
+FROM [ChatsSTG].[dbo].[UsageTransaction] ut
+JOIN [ChatsSTG].[dbo].[UserModel] um
+ON ut.UserModelId = um.Id; -- assuming UserModelId corresponds to UserModel.Id
+
+
+
+/* ä¸ºäº†é˜²æ­¢ä»»ä½•å¯èƒ½å‡ºç°çš„æ•°æ®ä¸¢å¤±é—®é¢˜ï¼Œæ‚¨åº”è¯¥å…ˆä»”ç»†æ£€æŸ¥æ­¤è„šæœ¬ï¼Œç„¶åå†åœ¨æ•°æ®åº“è®¾è®¡å™¨çš„ä¸Šä¸‹æ–‡ä¹‹å¤–è¿è¡Œæ­¤è„šæœ¬ã€‚*/
+BEGIN TRANSACTION
+SET QUOTED_IDENTIFIER ON
+SET ARITHABORT ON
+SET NUMERIC_ROUNDABORT OFF
+SET CONCAT_NULL_YIELDS_NULL ON
+SET ANSI_NULLS ON
+SET ANSI_PADDING ON
+SET ANSI_WARNINGS ON
+COMMIT
+BEGIN TRANSACTION
+GO
+ALTER TABLE dbo.[User] SET (LOCK_ESCALATION = TABLE)
+GO
+COMMIT
+BEGIN TRANSACTION
+GO
+ALTER TABLE dbo.UsageTransaction
+	DROP CONSTRAINT FK_UserModelTransactionLog_UserModel2
+GO
+ALTER TABLE dbo.UserModel SET (LOCK_ESCALATION = TABLE)
+GO
+COMMIT
+BEGIN TRANSACTION
+GO
+ALTER TABLE dbo.UsageTransaction
+	DROP CONSTRAINT FK_UserModelTransactionLog_TransactionType
+GO
+ALTER TABLE dbo.TransactionType SET (LOCK_ESCALATION = TABLE)
+GO
+COMMIT
+BEGIN TRANSACTION
+GO
+CREATE TABLE dbo.Tmp_UsageTransaction
+	(
+	Id bigint NOT NULL IDENTITY (1, 1),
+	UserModelId int NOT NULL,
+	TransactionTypeId tinyint NOT NULL,
+	TokenAmount int NOT NULL,
+	CountAmount int NOT NULL,
+	CreditUserId int NOT NULL,
+	CreatedAt datetime2(7) NOT NULL
+	)  ON [PRIMARY]
+GO
+ALTER TABLE dbo.Tmp_UsageTransaction SET (LOCK_ESCALATION = TABLE)
+GO
+SET IDENTITY_INSERT dbo.Tmp_UsageTransaction ON
+GO
+IF EXISTS(SELECT * FROM dbo.UsageTransaction)
+	 EXEC('INSERT INTO dbo.Tmp_UsageTransaction (Id, UserModelId, TransactionTypeId, TokenAmount, CountAmount, CreditUserId, CreatedAt)
+		SELECT Id, UserModelId, TransactionTypeId, TokenAmount, CountAmount, CreditUserId, CreatedAt FROM dbo.UsageTransaction WITH (HOLDLOCK TABLOCKX)')
+GO
+SET IDENTITY_INSERT dbo.Tmp_UsageTransaction OFF
+GO
+ALTER TABLE dbo.UserModelUsage
+	DROP CONSTRAINT FK_ModelUsage_UsageTransactionLog
+GO
+DROP TABLE dbo.UsageTransaction
+GO
+EXECUTE sp_rename N'dbo.Tmp_UsageTransaction', N'UsageTransaction', 'OBJECT' 
+GO
+ALTER TABLE dbo.UsageTransaction ADD CONSTRAINT
+	PK_UsageTransaction PRIMARY KEY CLUSTERED 
+	(
+	Id
+	) WITH( STATISTICS_NORECOMPUTE = OFF, IGNORE_DUP_KEY = OFF, ALLOW_ROW_LOCKS = ON, ALLOW_PAGE_LOCKS = ON) ON [PRIMARY]
+
+GO
+CREATE NONCLUSTERED INDEX IX_UsageTransaction_UserModelId ON dbo.UsageTransaction
+	(
+	UserModelId
+	) WITH( STATISTICS_NORECOMPUTE = OFF, IGNORE_DUP_KEY = OFF, ALLOW_ROW_LOCKS = ON, ALLOW_PAGE_LOCKS = ON) ON [PRIMARY]
+GO
+CREATE NONCLUSTERED INDEX IX_UsageTransaction_CreditUser ON dbo.UsageTransaction
+	(
+	CreditUserId
+	) WITH( STATISTICS_NORECOMPUTE = OFF, IGNORE_DUP_KEY = OFF, ALLOW_ROW_LOCKS = ON, ALLOW_PAGE_LOCKS = ON) ON [PRIMARY]
+GO
+ALTER TABLE dbo.UsageTransaction ADD CONSTRAINT
+	FK_UsageTransaction_TransactionType FOREIGN KEY
+	(
+	TransactionTypeId
+	) REFERENCES dbo.TransactionType
+	(
+	Id
+	) ON UPDATE  NO ACTION 
+	 ON DELETE  NO ACTION 
+	
+GO
+ALTER TABLE dbo.UsageTransaction ADD CONSTRAINT
+	FK_UsageTransaction_UserModel FOREIGN KEY
+	(
+	UserModelId
+	) REFERENCES dbo.UserModel
+	(
+	Id
+	) ON UPDATE  NO ACTION 
+	 ON DELETE  NO ACTION 
+	
+GO
+ALTER TABLE dbo.UsageTransaction ADD CONSTRAINT
+	FK_UsageTransaction_User FOREIGN KEY
+	(
+	CreditUserId
+	) REFERENCES dbo.[User]
+	(
+	Id
+	) ON UPDATE  NO ACTION 
+	 ON DELETE  NO ACTION 
+	
+GO
+COMMIT
+BEGIN TRANSACTION
+GO
+ALTER TABLE dbo.UserModelUsage ADD CONSTRAINT
+	FK_ModelUsage_UsageTransactionLog FOREIGN KEY
+	(
+	UsageTransactionId
+	) REFERENCES dbo.UsageTransaction
+	(
+	Id
+	) ON UPDATE  NO ACTION 
+	 ON DELETE  NO ACTION 
+	
+GO
+ALTER TABLE dbo.UserModelUsage SET (LOCK_ESCALATION = TABLE)
+GO
+COMMIT
+
+
+
+
+/* ä¸ºäº†é˜²æ­¢ä»»ä½•å¯èƒ½å‡ºç°çš„æ•°æ®ä¸¢å¤±é—®é¢˜ï¼Œæ‚¨åº”è¯¥å…ˆä»”ç»†æ£€æŸ¥æ­¤è„šæœ¬ï¼Œç„¶åå†åœ¨æ•°æ®åº“è®¾è®¡å™¨çš„ä¸Šä¸‹æ–‡ä¹‹å¤–è¿è¡Œæ­¤è„šæœ¬ã€‚*/
+BEGIN TRANSACTION
+SET QUOTED_IDENTIFIER ON
+SET ARITHABORT ON
+SET NUMERIC_ROUNDABORT OFF
+SET CONCAT_NULL_YIELDS_NULL ON
+SET ANSI_NULLS ON
+SET ANSI_PADDING ON
+SET ANSI_WARNINGS ON
+COMMIT
+BEGIN TRANSACTION
+GO
+ALTER TABLE dbo.[User] SET (LOCK_ESCALATION = TABLE)
+GO
+COMMIT
+BEGIN TRANSACTION
+GO
+ALTER TABLE dbo.ClientInfo SET (LOCK_ESCALATION = TABLE)
+GO
+COMMIT
+BEGIN TRANSACTION
+GO
+ALTER TABLE dbo.FileService SET (LOCK_ESCALATION = TABLE)
+GO
+COMMIT
+BEGIN TRANSACTION
+GO
+CREATE TABLE dbo.[File]
+	(
+	Id int NOT NULL IDENTITY (1, 1),
+	FileName nvarchar(200) NOT NULL,
+	FileServiceId int NOT NULL,
+	StorageKey nvarchar(300) NOT NULL,
+	Size int NOT NULL,
+	ClientInfoId int NOT NULL,
+	CreateUserId int NOT NULL,
+	CreatedAt datetime2(7) NOT NULL
+	)  ON [PRIMARY]
+GO
+ALTER TABLE dbo.[File] ADD CONSTRAINT
+	PK_File PRIMARY KEY CLUSTERED 
+	(
+	Id
+	) WITH( STATISTICS_NORECOMPUTE = OFF, IGNORE_DUP_KEY = OFF, ALLOW_ROW_LOCKS = ON, ALLOW_PAGE_LOCKS = ON) ON [PRIMARY]
+
+GO
+CREATE UNIQUE NONCLUSTERED INDEX IX_File_StorageKey ON dbo.[File]
+	(
+	FileServiceId,
+	StorageKey
+	) WITH( STATISTICS_NORECOMPUTE = OFF, IGNORE_DUP_KEY = OFF, ALLOW_ROW_LOCKS = ON, ALLOW_PAGE_LOCKS = ON) ON [PRIMARY]
+GO
+CREATE NONCLUSTERED INDEX IX_File_ClientInfo ON dbo.[File]
+	(
+	ClientInfoId
+	) WITH( STATISTICS_NORECOMPUTE = OFF, IGNORE_DUP_KEY = OFF, ALLOW_ROW_LOCKS = ON, ALLOW_PAGE_LOCKS = ON) ON [PRIMARY]
+GO
+CREATE NONCLUSTERED INDEX IX_File_CreateUser ON dbo.[File]
+	(
+	CreateUserId
+	) WITH( STATISTICS_NORECOMPUTE = OFF, IGNORE_DUP_KEY = OFF, ALLOW_ROW_LOCKS = ON, ALLOW_PAGE_LOCKS = ON) ON [PRIMARY]
+GO
+ALTER TABLE dbo.[File] ADD CONSTRAINT
+	FK_File_FileService FOREIGN KEY
+	(
+	FileServiceId
+	) REFERENCES dbo.FileService
+	(
+	Id
+	) ON UPDATE  NO ACTION 
+	 ON DELETE  NO ACTION 
+	
+GO
+ALTER TABLE dbo.[File] ADD CONSTRAINT
+	FK_File_ClientInfo FOREIGN KEY
+	(
+	ClientInfoId
+	) REFERENCES dbo.ClientInfo
+	(
+	Id
+	) ON UPDATE  NO ACTION 
+	 ON DELETE  NO ACTION 
+	
+GO
+ALTER TABLE dbo.[File] ADD CONSTRAINT
+	FK_File_User FOREIGN KEY
+	(
+	CreateUserId
+	) REFERENCES dbo.[User]
+	(
+	Id
+	) ON UPDATE  NO ACTION 
+	 ON DELETE  NO ACTION 
+	
+GO
+ALTER TABLE dbo.[File] SET (LOCK_ESCALATION = TABLE)
+GO
+COMMIT
+
+
+CREATE TABLE FileImageInfo (
+    FileId INT PRIMARY KEY,  -- è®¾ç½® FileId ä¸ºä¸»é”®
+    Width INT NOT NULL,
+    Height INT NOT NULL,
+    CONSTRAINT FK_FileImageInfo_File FOREIGN KEY (FileId) REFERENCES [ChatsSTG].[dbo].[File](Id)
+    -- è®¾ç½® FileId ä¸ºå¤–é”®ï¼Œå¼•ç”¨ File è¡¨çš„ Id åˆ—
+);
