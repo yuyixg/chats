@@ -161,7 +161,7 @@ public class ModelKeysController(ChatsDB db) : ControllerBase
                     Name = m.ModelReference.Name,
                     CreatedAt = DateTime.UtcNow,
                     UpdatedAt = DateTime.UtcNow,
-                    DeploymentName = m.ModelReference.Name,
+                    DeploymentName = null, // don't need to specify deploymentName because it's auto created
                     FileService = m.ModelReference.AllowSearch ? fileService : null,
                     IsDeleted = false,
                     PromptTokenPrice1M = m.ModelReference.PromptTokenPrice1M * m.ModelReference.CurrencyCodeNavigation.ExchangeRate,
