@@ -271,7 +271,7 @@ jobs:
             | chats                      | ${{ vars.MINIO_URL }}/chats/r${{ github.run_number }}/chats                      |
     
             **NOTE**: 
-            Replace `r${{ github.run_number }}` with `latest` in the download link to get the latest version, for example: `${{ vars.MINIO_URL }}/chats/latest/chats-win-x64.zip`
+            Replace \`r${{ github.run_number }}\` with \`latest\` in the download link to get the latest version, for example: \`${{ vars.MINIO_URL }}/chats/latest/chats-win-x64.zip\`
             `,
               draft: false,
               prerelease: false,
