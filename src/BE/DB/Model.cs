@@ -7,7 +7,6 @@ using Microsoft.EntityFrameworkCore;
 namespace Chats.BE.DB;
 
 [Table("Model")]
-[Index("FileServiceId", Name = "IX_Model_FileServiceId")]
 [Index("ModelKeyId", Name = "IX_Model_ModelKeyId")]
 [Index("ModelReferenceId", Name = "IX_Model_ModelReferenceId")]
 [Index("Name", Name = "IX_Model_Name")]
@@ -30,10 +29,10 @@ public partial class Model
     public short? Order { get; set; }
 
     [Column(TypeName = "decimal(9, 5)")]
-    public decimal PromptTokenPrice1M { get; set; }
+    public decimal InputTokenPrice1M { get; set; }
 
     [Column(TypeName = "decimal(9, 5)")]
-    public decimal ResponseTokenPrice1M { get; set; }
+    public decimal OutputTokenPrice1M { get; set; }
 
     public bool IsDeleted { get; set; }
 
@@ -41,14 +40,8 @@ public partial class Model
 
     public DateTime UpdatedAt { get; set; }
 
-    public int? FileServiceId { get; set; }
-
     [InverseProperty("Model")]
     public virtual ICollection<Chat> Chats { get; set; } = new List<Chat>();
-
-    [ForeignKey("FileServiceId")]
-    [InverseProperty("Models")]
-    public virtual FileService? FileService { get; set; }
 
     [ForeignKey("ModelKeyId")]
     [InverseProperty("Models")]

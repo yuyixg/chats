@@ -19,6 +19,8 @@ public partial class Prompt
 
     public string Content { get; set; } = null!;
 
+    public float? Temperature { get; set; }
+
     public bool IsDefault { get; set; }
 
     public bool IsSystem { get; set; }

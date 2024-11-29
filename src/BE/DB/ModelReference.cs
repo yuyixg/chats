@@ -45,10 +45,10 @@ public partial class ModelReference
     public short? TokenizerId { get; set; }
 
     [Column(TypeName = "decimal(9, 5)")]
-    public decimal PromptTokenPrice1M { get; set; }
+    public decimal InputTokenPrice1M { get; set; }
 
     [Column(TypeName = "decimal(9, 5)")]
-    public decimal ResponseTokenPrice1M { get; set; }
+    public decimal OutputTokenPrice1M { get; set; }
 
     [StringLength(3)]
     [Unicode(false)]

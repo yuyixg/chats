@@ -29,6 +29,8 @@ public partial class ChatsDB : DbContext
 
     public virtual DbSet<FileService> FileServices { get; set; }
 
+    public virtual DbSet<FileServiceType> FileServiceTypes { get; set; }
+
     public virtual DbSet<FinishReason> FinishReasons { get; set; }
 
     public virtual DbSet<InvitationCode> InvitationCodes { get; set; }
@@ -135,6 +137,15 @@ public partial class ChatsDB : DbContext
         modelBuilder.Entity<FileService>(entity =>
         {
             entity.HasKey(e => e.Id).HasName("PK_FileServices2");
+
+            entity.HasOne(d => d.FileServiceType).WithMany(p => p.FileServices)
+                .OnDelete(DeleteBehavior.ClientSetNull)
+                .HasConstraintName("FK_FileService_FileServiceType");
+        });
+
+        modelBuilder.Entity<FileServiceType>(entity =>
+        {
+            entity.HasKey(e => e.Id).HasName("PK__FileServ__3214EC0798D85940");
         });
 
         modelBuilder.Entity<InvitationCode>(entity =>
@@ -180,8 +191,6 @@ public partial class ChatsDB : DbContext
 
         modelBuilder.Entity<Model>(entity =>
         {
-            entity.HasOne(d => d.FileService).WithMany(p => p.Models).HasConstraintName("FK_Model_FileServiceId");
-
             entity.HasOne(d => d.ModelKey).WithMany(p => p.Models)
                 .OnDelete(DeleteBehavior.ClientSetNull)
                 .HasConstraintName("FK_Model_ModelKey2");
