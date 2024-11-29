@@ -244,6 +244,7 @@ jobs:
               repo: context.repo.repo,
               tag_name: `r-${{ github.run_number }}`,
               name: `r-${{ github.run_number }}`,
+              target_commitish: '${{ github.sha }}',
               body: `### Full Changelogs
             https://github.com/sdcb/chats/compare/${latestTag}...r-${{ github.run_number }}
     
