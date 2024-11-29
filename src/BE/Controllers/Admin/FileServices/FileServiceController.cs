@@ -65,30 +65,21 @@ public class FileServiceController(ChatsDB db) : ControllerBase
     }
 
     [HttpPost]
-    public async Task CreateFileService([FromBody] FileServiceUpdateRequest req, CancellationToken cancellationToken)
+    public async Task<ActionResult> CreateFileService([FromBody] FileServiceUpdateRequest req, CancellationToken cancellationToken)
     {
-        db.FileServices.Add(new FileService
+        FileService toInsert = new()
         {
-            Name = req.Name,
-            Type = req.Type,
-            Enabled = req.Enabled,
-            Configs = req.Configs,
             CreatedAt = DateTime.UtcNow,
             UpdatedAt = DateTime.UtcNow,
-        });
-        await db.SaveChangesAsync();
+        };
+        req.ApplyTo(toInsert);
+        await db.SaveChangesAsync(cancellationToken);
+        return Created(default(string), value: toInsert.Id);
     }
 
     [HttpDelete("{fileServiceId:int}")]
     public async Task<ActionResult> DeleteFileService(int fileServiceId, CancellationToken cancellationToken)
     {
-        if (await db.Models
-            .Where(x => x.FileServiceId == fileServiceId)
-            .AnyAsync(cancellationToken))
-        {
-            return this.BadRequestMessage("Cannot delete file service that is being used by chat models");
-        }
-
         FileService? existingData = await db.FileServices.FindAsync([fileServiceId], cancellationToken);
         if (existingData == null)
         {

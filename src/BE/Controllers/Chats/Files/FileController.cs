@@ -20,14 +20,14 @@ public class FileController(ChatsDB db) : ControllerBase
     {
         FileService? fileService = await db.FileServices
             .FindAsync([fileServiceId], cancellationToken);
-        if (fileService == null || !fileService.Enabled)
+        if (fileService == null)
         {
             return NotFound("File server config not found.");
         }
 
-        if (fileService.Type != DBFileServiceType.Minio.ToString())
+        if (fileService.FileServiceTypeId != (byte)DBFileServiceType.Minio)
         {
-            return this.BadRequestMessage("Unsupported file service type: " + fileService.Type);
+            return this.BadRequestMessage("Unsupported file service type: " + fileService.FileServiceTypeId);
         }
 
         JsonMinioConfig config = JsonMinioConfig.Parse(fileService.Configs);

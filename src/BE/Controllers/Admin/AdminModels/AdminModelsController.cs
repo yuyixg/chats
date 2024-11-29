@@ -21,6 +21,7 @@ public class AdminModelsController(ChatsDB db) : ControllerBase
         IQueryable<Model> query = db.Models;
         if (!all) query = query.Where(x => !x.IsDeleted);
 
+        int? fileServiceId = await FileService.GetDefaultId(db, cancellationToken);
         AdminModelDto[] data = await query
             .OrderBy(x => x.Order)
             .Select(x => new AdminModelDto
@@ -28,14 +29,14 @@ public class AdminModelsController(ChatsDB db) : ControllerBase
                 ModelId = x.Id,
                 Name = x.Name,
                 Enabled = !x.IsDeleted,
-                FileServiceId = x.FileServiceId,
+                FileServiceId = fileServiceId,
                 ModelKeyId = x.ModelKeyId,
                 ModelProviderId = x.ModelKey.ModelProviderId,
                 ModelReferenceId = x.ModelReferenceId,
                 ModelReferenceName = x.ModelReference.Name,
                 ModelReferenceShortName = x.ModelReference.ShortName,
-                InputTokenPrice1M = x.PromptTokenPrice1M,
-                OutputTokenPrice1M = x.ResponseTokenPrice1M,
+                InputTokenPrice1M = x.InputTokenPrice1M,
+                OutputTokenPrice1M = x.OutputTokenPrice1M,
                 Rank = x.Order,
                 DeploymentName = x.DeploymentName,
                 AllowSearch = x.ModelReference.AllowSearch,
@@ -129,9 +130,6 @@ public class AdminModelsController(ChatsDB db) : ControllerBase
             return BadRequest("Model already exists");
         }
 
-        FileService? fileService = await db.FileServices
-            .OrderByDescending(x => x.Id)
-            .FirstOrDefaultAsync(cancellationToken);
         Model toCreate = new()
         {
             ModelKeyId = req.ModelKeyId,
@@ -140,10 +138,9 @@ public class AdminModelsController(ChatsDB db) : ControllerBase
             CreatedAt = DateTime.UtcNow,
             UpdatedAt = DateTime.UtcNow,
             DeploymentName = req.DeploymentName,
-            FileService = modelRef.AllowSearch ? fileService : null,
             IsDeleted = false,
-            PromptTokenPrice1M = modelRef.PromptTokenPrice1M * modelRef.CurrencyCodeNavigation.ExchangeRate,
-            ResponseTokenPrice1M = modelRef.ResponseTokenPrice1M * modelRef.CurrencyCodeNavigation.ExchangeRate,
+            InputTokenPrice1M = modelRef.InputTokenPrice1M * modelRef.CurrencyCodeNavigation.ExchangeRate,
+            OutputTokenPrice1M = modelRef.OutputTokenPrice1M * modelRef.CurrencyCodeNavigation.ExchangeRate,
         };
         db.Models.Add(toCreate);
         await db.SaveChangesAsync(cancellationToken);

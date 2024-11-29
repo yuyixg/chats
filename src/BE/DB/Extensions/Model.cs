@@ -5,12 +5,10 @@ namespace Chats.BE.DB;
 
 public partial class Model
 {
-    public ModelIdentifier ToIdentifier() => new(ModelKey.ModelProvider.Name, ModelReference.Name);
-
     public JsonPriceConfig ToPriceConfig() => new()
     {
-        InputTokenPrice = PromptTokenPrice1M / 100_0000,
-        OutputTokenPrice = ResponseTokenPrice1M / 100_0000
+        InputTokenPrice = InputTokenPrice1M / 100_0000,
+        OutputTokenPrice = OutputTokenPrice1M / 100_0000
     };
 
     public string ApiModelId

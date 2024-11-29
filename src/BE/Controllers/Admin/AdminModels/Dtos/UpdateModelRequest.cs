@@ -20,9 +20,6 @@ public record UpdateModelRequest
     [JsonPropertyName("modelKeyId")]
     public required short ModelKeyId { get; init; }
 
-    [JsonPropertyName("fileServiceId")]
-    public int? FileServiceId { get; init; }
-
     [JsonPropertyName("inputTokenPrice1M")]
     public required decimal InputTokenPrice1M { get; init; }
 
@@ -35,9 +32,8 @@ public record UpdateModelRequest
         cm.Name = Name;
         cm.IsDeleted = !Enabled;
         cm.ModelKeyId = ModelKeyId;
-        cm.FileServiceId = FileServiceId;
-        cm.PromptTokenPrice1M = InputTokenPrice1M;
-        cm.ResponseTokenPrice1M = OutputTokenPrice1M;
+        cm.InputTokenPrice1M = InputTokenPrice1M;
+        cm.OutputTokenPrice1M = OutputTokenPrice1M;
         cm.DeploymentName = DeploymentName;
     }
 }

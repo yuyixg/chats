@@ -30,8 +30,8 @@ public record ModelUsageDto
             Counts = userModel.CountBalance,
             Expires = userModel.ExpiresAt,
             IsTerm = userModel.ExpiresAt - DateTime.UtcNow > TimeSpan.FromDays(365 * 2),
-            InputTokenPrice1M = userModel.Model.PromptTokenPrice1M,
-            OutputTokenPrice1M = userModel.Model.ResponseTokenPrice1M,
+            InputTokenPrice1M = userModel.Model.InputTokenPrice1M,
+            OutputTokenPrice1M = userModel.Model.OutputTokenPrice1M,
             Tokens = userModel.TokenBalance,
         };
     }

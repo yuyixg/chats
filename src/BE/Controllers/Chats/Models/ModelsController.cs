@@ -17,6 +17,7 @@ public class ModelsController : ControllerBase
     [HttpGet]
     public async Task<ActionResult<AdminModelDto[]>> Get([FromServices] ChatsDB db, [FromServices] CurrentUser currentUser, CancellationToken cancellationToken)
     {
+        int? fileServiceId = await FileService.GetDefaultId(db, cancellationToken);
         AdminModelDto[] data = await db.UserModels
             .Where(x => x.UserId == currentUser.Id && !x.IsDeleted && !x.Model.IsDeleted)
             .OrderBy(x => x.Model.Order)
@@ -26,14 +27,14 @@ public class ModelsController : ControllerBase
                 ModelId = x.Id,
                 Name = x.Name,
                 Enabled = !x.IsDeleted,
-                FileServiceId = x.FileServiceId,
+                FileServiceId = fileServiceId,
                 ModelKeyId = x.ModelKeyId,
                 ModelProviderId = x.ModelKey.ModelProviderId,
                 ModelReferenceId = x.ModelReferenceId,
                 ModelReferenceName = x.ModelReference.Name,
                 ModelReferenceShortName = x.ModelReference.ShortName,
-                InputTokenPrice1M = x.PromptTokenPrice1M,
-                OutputTokenPrice1M = x.ResponseTokenPrice1M,
+                InputTokenPrice1M = x.InputTokenPrice1M,
+                OutputTokenPrice1M = x.OutputTokenPrice1M,
                 Rank = x.Order,
                 DeploymentName = x.DeploymentName,
                 AllowSearch = x.ModelReference.AllowSearch,

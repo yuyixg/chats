@@ -162,10 +162,9 @@ public class ModelKeysController(ChatsDB db) : ControllerBase
                     CreatedAt = DateTime.UtcNow,
                     UpdatedAt = DateTime.UtcNow,
                     DeploymentName = null, // don't need to specify deploymentName because it's auto created
-                    FileService = m.ModelReference.AllowSearch ? fileService : null,
                     IsDeleted = false,
-                    PromptTokenPrice1M = m.ModelReference.PromptTokenPrice1M * m.ModelReference.CurrencyCodeNavigation.ExchangeRate,
-                    ResponseTokenPrice1M = m.ModelReference.ResponseTokenPrice1M * m.ModelReference.CurrencyCodeNavigation.ExchangeRate,
+                    InputTokenPrice1M = m.ModelReference.InputTokenPrice1M * m.ModelReference.CurrencyCodeNavigation.ExchangeRate,
+                    OutputTokenPrice1M = m.ModelReference.OutputTokenPrice1M * m.ModelReference.CurrencyCodeNavigation.ExchangeRate,
                 });
                 try
                 {
