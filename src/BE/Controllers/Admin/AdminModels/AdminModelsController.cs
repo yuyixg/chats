@@ -205,7 +205,7 @@ public class AdminModelsController(ChatsDB db) : ControllerBase
         ModelReference? modelReference = await db.ModelReferences
             .Include(x => x.Provider)
             .Include(x => x.Tokenizer)
-            .Where(x => x.Id == req.ModelReferenceId && x.ProviderId == modelKey.Id)
+            .Where(x => x.Id == req.ModelReferenceId)
             .SingleOrDefaultAsync(cancellationToken);
         if (modelReference == null)
         {
