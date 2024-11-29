@@ -109,18 +109,14 @@ public class AdminModelsController(ChatsDB db) : ControllerBase
             return BadRequest(ModelState);
         }
 
-        ModelKey? modelKey = await db
-            .ModelKeys
-            .Include(x => x.Models)
-            .AsSplitQuery()
-            .FirstOrDefaultAsync(x => x.Id == req.ModelKeyId, cancellationToken);
-
-        if (modelKey == null)
+        if (!await db.ModelKeys.AnyAsync(r => r.Id == req.ModelKeyId, cancellationToken))
         {
             return BadRequest($"Invalid ModelKeyId: {req.ModelKeyId}");
         }
 
-        ModelReference? modelRef = await db.ModelReferences.FindAsync([req.ModelReferenceId], cancellationToken);
+        ModelReference? modelRef = await db.ModelReferences
+            .Include(x => x.CurrencyCodeNavigation)
+            .FirstOrDefaultAsync(x => x.Id == req.ModelReferenceId, cancellationToken);
         if (modelRef == null)
         {
             return BadRequest($"Invalid ModelReferenceId: {req.ModelReferenceId}");
