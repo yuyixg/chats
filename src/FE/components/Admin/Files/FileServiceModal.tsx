@@ -5,7 +5,7 @@ import toast from 'react-hot-toast';
 import useTranslation from '@/hooks/useTranslation';
 import { mergeConfigs } from '@/utils/model';
 
-import { GetFileServicesResult, PostFileServicesParams, PutFileServicesParams } from '@/types/adminApis';
+import { GetFileServicesResult, PostFileServicesParams } from '@/types/adminApis';
 
 import { Button } from '@/components/ui/button';
 import {
@@ -25,7 +25,7 @@ import { FormFieldType, IFormFieldOption } from '@/components/ui/form/type';
 import { defaultFileConfig, postFileService, putFileService } from '@/apis/adminApis';
 import { zodResolver } from '@hookform/resolvers/zod';
 import { z } from 'zod';
-import { fileServiceTypes } from '@/types/file';
+import { feFileServiceTypes } from '@/types/file';
 
 interface IProps {
   selected: GetFileServicesResult | null;
@@ -45,9 +45,9 @@ export const FileServiceModal = (props: IProps) => {
       defaultValue: '',
       render: (options: IFormFieldOption, field: FormFieldType) => (
         <FormSelect
-          items={fileServiceTypes.map(x => ({
-              name: t(x.name),
-              value: x.id.toString()
+          items={feFileServiceTypes.map(x => ({
+            name: t(x.name),
+            value: x.id.toString()
           }))}
           options={options}
           field={field}
@@ -107,10 +107,16 @@ export const FileServiceModal = (props: IProps) => {
   function onSubmit(values: z.infer<typeof formSchema>) {
     if (!form.formState.isValid) return;
     let p = null;
+    const dto: PostFileServicesParams = {
+      fileServiceTypeId: parseInt(values.fileServiceTypeId!),
+      name: values.name!,
+      isDefault: values.isDefault,
+      configs: values.configs!,
+    };
     if (selected) {
-      p = putFileService(selected.id, values as PutFileServicesParams);
+      p = putFileService(selected.id, dto);
     } else {
-      p = postFileService(values as PostFileServicesParams);
+      p = postFileService(dto);
     }
     p.then(() => {
       onSuccessful();
@@ -130,8 +136,8 @@ export const FileServiceModal = (props: IProps) => {
       form.formState.isValid;
       if (selected) {
         form.setValue('name', selected.name);
-        form.setValue('fileServiceTypeId', selected.type);
-        form.setValue('isDefault', selected.enabled);
+        form.setValue('fileServiceTypeId', selected.fileServiceTypeId.toString());
+        form.setValue('isDefault', selected.isDefault);
         form.setValue(
           'configs',
           JSON.stringify(selected.configs, null, 2),
@@ -142,7 +148,7 @@ export const FileServiceModal = (props: IProps) => {
 
   useEffect(() => {
     const subscription = form.watch((value, { name, type }) => {
-      if (name === 'type' && type === 'change') {
+      if (name === 'fileServiceTypeId' && type === 'change') {
         const type = value.type as FileServicesType;
         form.setValue(
           'configs',

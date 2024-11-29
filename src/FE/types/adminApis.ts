@@ -1,5 +1,5 @@
 import { ChatMessage } from './chatMessage';
-import { FileServicesType } from './file';
+import { DBFileServiceType } from './file';
 import { DBModelProvider } from './model';
 import { Paging } from './page';
 import { PayServiceType } from './pay';
@@ -109,15 +109,13 @@ export interface GetMessageDetailsResult {
 }
 
 export interface PostFileServicesParams {
-  type: FileServicesType;
+  fileServiceTypeId: DBFileServiceType;
   name: string;
-  enabled: boolean;
+  isDefault: boolean;
   configs: string;
 }
 
-export interface PutFileServicesParams extends PostFileServicesParams {}
-
-export interface GetFileServicesResult extends PutFileServicesParams {
+export interface GetFileServicesResult extends PostFileServicesParams {
   id: number;
   createdAt: string;
   updatedAt: string;

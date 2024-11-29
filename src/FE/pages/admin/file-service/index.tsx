@@ -67,6 +67,7 @@ export default function FileService() {
             <TableRow>
               <TableHead>{t('Service Name')}</TableHead>
               <TableHead>{t('File Service Type')}</TableHead>
+              <TableHead>{t('Is Default')}</TableHead>
               <TableHead>{t('Created Time')}</TableHead>
             </TableRow>
           </TableHeader>
@@ -82,12 +83,13 @@ export default function FileService() {
                 <TableCell className="flex items-center gap-1">
                   <div
                     className={`w-2 h-2 rounded-full ${
-                      item.enabled ? 'bg-green-400' : 'bg-gray-400'
+                      item.isDefault ? 'bg-green-400' : 'bg-gray-400'
                     }`}
                   ></div>
                   {item.name}
                 </TableCell>
-                <TableCell>{item.type}</TableCell>
+                <TableCell>{item.fileServiceTypeId}</TableCell>
+                <TableCell>{item.isDefault ? '✅' : ''}</TableCell>
                 <TableCell>
                   {new Date(item.createdAt).toLocaleString()}
                 </TableCell>

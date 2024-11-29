@@ -3,7 +3,7 @@ export type FileServiceType = {
   name: string;
 };
 
-export const fileServiceTypes: FileServiceType[] = [
+export const feFileServiceTypes: FileServiceType[] = [
   { id: 0, name: 'Local' },
   { id: 1, name: 'Minio' },
   { id: 2, name: 'AWS S3' },
@@ -11,7 +11,7 @@ export const fileServiceTypes: FileServiceType[] = [
   { id: 4, name: 'Azure Blob Storage' }
 ];
 
-export enum FileServiceTypes {
+export enum DBFileServiceType {
   Local = 0,
   Minio = 1,
   AWSS3 = 2,
