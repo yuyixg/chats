@@ -58,7 +58,7 @@ static CompilationUnitSyntax GenerateCompilationUnit(TableDef[] tableDefs)
 			usingDef("Chats.BE.DB").WS("\n\n")
 		)
 		.AddMembers(
-			fileScopedNamespaceDef("Chats.BE.Services.Init").AddMembers(
+			fileScopedNamespaceDef("Chats.BE.DB.Init").AddMembers(
 				classDef("BasicData")
 					.AddMembers(
 					[
