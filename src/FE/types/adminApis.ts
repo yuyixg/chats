@@ -1,7 +1,5 @@
 import { ChatMessage } from './chatMessage';
-import { FileServicesType } from './file';
 import {
-  ChatModelPriceConfig,
   DBModelProvider,
 } from './model';
 import { Paging } from './page';

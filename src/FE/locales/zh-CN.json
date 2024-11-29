@@ -323,5 +323,12 @@
   "Failed to auto create models, reasons:": "自动创建模型失败，原因：",
   "Model already exists.": "模型已存在。",
   "Model key is in use": "模型密钥已被使用",
-  "Token Price": "Token价格"
+  "Token Price": "Token价格",
+
+  "Local": "本地",
+  "Minio": "Minio",
+  "AWS S3": "AWS S3",
+  "Aliyun OSS": "阿里云OSS",
+  "Azure Blob Storage": "Azure Blob 存储",
+  "Is Default": "是否默认"
 }

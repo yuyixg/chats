@@ -1,6 +1,7 @@
 ﻿using Chats.BE.Controllers.Admin.FileServices.Dtos;
 using Chats.BE.Controllers.Common;
 using Chats.BE.DB;
+using Chats.BE.DB.Enums;
 using Microsoft.AspNetCore.Mvc;
 using Microsoft.EntityFrameworkCore;
 
@@ -16,7 +17,6 @@ public class FileServiceController(ChatsDB db) : ControllerBase
         {
             // simple mode, only return enabled id and name
             FileServiceSimpleDto[] data = await db.FileServices
-                .Where(x => x.Enabled)
                 .Select(x => new FileServiceSimpleDto
                 {
                     Id = x.Id,
@@ -29,17 +29,17 @@ public class FileServiceController(ChatsDB db) : ControllerBase
         {
             // full mode, return all fields
             FileServiceDto[] data = db.FileServices
-                .Select(x => new FileServiceDtoTemp
+                .Select(x => new FileServiceDto
                 {
                     Id = x.Id,
                     Name = x.Name,
-                    Type = x.Type,
+                    FileServiceTypeId = (DBFileServiceType)x.FileServiceTypeId,
                     Configs = x.Configs,
-                    Enabled = x.Enabled,
+                    IsDefault = x.IsDefault,
                     CreatedAt = x.CreatedAt,
                 })
                 .AsEnumerable()
-                .Select(x => x.ToDto().WithMaskedKeys())
+                .Select(x => x.WithMaskedKeys())
                 .ToArray();
             return Ok(data);
         }

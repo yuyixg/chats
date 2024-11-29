@@ -6,7 +6,6 @@ import useTranslation from '@/hooks/useTranslation';
 import { mergeConfigs } from '@/utils/model';
 
 import { GetFileServicesResult, PostFileServicesParams, PutFileServicesParams } from '@/types/adminApis';
-import { FileServicesType } from '@/types/file';
 
 import { Button } from '@/components/ui/button';
 import {
@@ -26,6 +25,7 @@ import { FormFieldType, IFormFieldOption } from '@/components/ui/form/type';
 import { defaultFileConfig, postFileService, putFileService } from '@/apis/adminApis';
 import { zodResolver } from '@hookform/resolvers/zod';
 import { z } from 'zod';
+import { fileServiceTypes } from '@/types/file';
 
 interface IProps {
   selected: GetFileServicesResult | null;
@@ -40,14 +40,14 @@ export const FileServiceModal = (props: IProps) => {
   const { selected, isOpen, onClose, onSuccessful } = props;
   const formFields: IFormFieldOption[] = [
     {
-      name: 'type',
+      name: 'fileServiceTypeId',
       label: t('File Service Type'),
       defaultValue: '',
       render: (options: IFormFieldOption, field: FormFieldType) => (
         <FormSelect
-          items={Object.keys(FileServicesType).map((key) => ({
-            name: FileServicesType[key as keyof typeof FileServicesType],
-            value: FileServicesType[key as keyof typeof FileServicesType],
+          items={fileServiceTypes.map(x => ({
+              name: t(x.name),
+              value: x.id.toString()
           }))}
           options={options}
           field={field}
@@ -63,8 +63,8 @@ export const FileServiceModal = (props: IProps) => {
       ),
     },
     {
-      name: 'enabled',
-      label: t('Is it enabled'),
+      name: 'isDefault',
+      label: t('Is Default'),
       defaultValue: true,
       render: (options: IFormFieldOption, field: FormFieldType) => (
         <FormSwitch options={options} field={field} />
@@ -81,7 +81,7 @@ export const FileServiceModal = (props: IProps) => {
   ];
 
   const formSchema = z.object({
-    type: z
+    fileServiceTypeId: z
       .string()
       .min(1, `${t('This field is require')}`)
       .optional(),
@@ -89,7 +89,7 @@ export const FileServiceModal = (props: IProps) => {
       .string()
       .min(1, `${t('This field is require')}`)
       .optional(),
-    enabled: z.boolean().optional(),
+    isDefault: z.boolean(),
     configs: z
       .string()
       .min(1, `${t('This field is require')}`)
@@ -130,8 +130,8 @@ export const FileServiceModal = (props: IProps) => {
       form.formState.isValid;
       if (selected) {
         form.setValue('name', selected.name);
-        form.setValue('type', selected.type);
-        form.setValue('enabled', selected.enabled);
+        form.setValue('fileServiceTypeId', selected.type);
+        form.setValue('isDefault', selected.enabled);
         form.setValue(
           'configs',
           JSON.stringify(selected.configs, null, 2),
