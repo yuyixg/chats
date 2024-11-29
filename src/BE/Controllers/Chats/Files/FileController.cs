@@ -3,6 +3,7 @@ using Amazon.S3.Model;
 using Chats.BE.Controllers.Chats.Files.Dtos;
 using Chats.BE.Controllers.Common;
 using Chats.BE.DB;
+using Chats.BE.DB.Enums;
 using Chats.BE.DB.Jsons;
 using Microsoft.AspNetCore.Mvc;
 
@@ -24,7 +25,7 @@ public class FileController(ChatsDB db) : ControllerBase
             return NotFound("File server config not found.");
         }
 
-        if (fileService.Type != FileServiceTypes.Minio.ToString())
+        if (fileService.Type != DBFileServiceType.Minio.ToString())
         {
             return this.BadRequestMessage("Unsupported file service type: " + fileService.Type);
         }
