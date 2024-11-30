@@ -29,4 +29,7 @@ public partial class FileService
     [ForeignKey("FileServiceTypeId")]
     [InverseProperty("FileServices")]
     public virtual FileServiceType FileServiceType { get; set; } = null!;
+
+    [InverseProperty("FileService")]
+    public virtual ICollection<File> Files { get; set; } = new List<File>();
 }

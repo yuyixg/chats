@@ -7,7 +7,8 @@ using Microsoft.EntityFrameworkCore;
 namespace Chats.BE.DB;
 
 [Table("UsageTransaction")]
-[Index("UserModelId", Name = "IX_UserModelTransactionLog_UserModelId")]
+[Index("CreditUserId", Name = "IX_UsageTransaction_CreditUser")]
+[Index("UserModelId", Name = "IX_UsageTransaction_UserModelId")]
 public partial class UsageTransaction
 {
     [Key]
@@ -21,7 +22,13 @@ public partial class UsageTransaction
 
     public int CountAmount { get; set; }
 
+    public int CreditUserId { get; set; }
+
     public DateTime CreatedAt { get; set; }
+
+    [ForeignKey("CreditUserId")]
+    [InverseProperty("UsageTransactions")]
+    public virtual User CreditUser { get; set; } = null!;
 
     [ForeignKey("TransactionTypeId")]
     [InverseProperty("UsageTransactions")]

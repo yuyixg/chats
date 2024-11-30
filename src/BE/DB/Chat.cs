@@ -31,7 +31,7 @@ public partial class Chat
 
     public int UserId { get; set; }
 
-    [InverseProperty("Conversation")]
+    [InverseProperty("Chat")]
     public virtual ICollection<Message> Messages { get; set; } = new List<Message>();
 
     [ForeignKey("ModelId")]

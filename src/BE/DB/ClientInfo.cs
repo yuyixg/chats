@@ -26,6 +26,9 @@ public partial class ClientInfo
     public virtual ClientUserAgent ClientUserAgent { get; set; } = null!;
 
     [InverseProperty("ClientInfo")]
+    public virtual ICollection<File> Files { get; set; } = new List<File>();
+
+    [InverseProperty("ClientInfo")]
     public virtual ICollection<SmsAttempt> SmsAttempts { get; set; } = new List<SmsAttempt>();
 
     [InverseProperty("ClientInfo")]

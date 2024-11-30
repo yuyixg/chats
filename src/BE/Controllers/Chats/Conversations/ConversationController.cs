@@ -31,20 +31,20 @@ public class ConversationController(ChatsDB db, CurrentUser currentUser, ILogger
         CancellationToken cancellationToken)
     {
         InChatContext icc = new();
-        int conversationId = idEncryption.DecryptAsInt32(request.ConversationId);
+        int chatId = idEncryption.DecryptAsInt32(request.ChatId);
         long? messageId = request.MessageId != null ? idEncryption.DecryptAsInt64(request.MessageId) : null;
 
         UserModel? userModel = await userModelManager.GetUserModel(currentUser.Id, request.ModelId, cancellationToken);
 
         UserBalance userBalance = await db.UserBalances.Where(x => x.UserId == currentUser.Id).SingleAsync(cancellationToken);
-        Chat? thisChat = await db.Chats.SingleOrDefaultAsync(x => x.Id == conversationId && x.UserId == currentUser.Id, cancellationToken);
+        Chat? thisChat = await db.Chats.SingleOrDefaultAsync(x => x.Id == chatId && x.UserId == currentUser.Id, cancellationToken);
         if (thisChat == null)
         {
             return this.BadRequestMessage("Chat not found");
         }
 
         Dictionary<long, MessageLiteDto> existingMessages = await db.Messages
-            .Where(x => x.ConversationId == conversationId && x.Conversation.UserId == currentUser.Id)
+            .Where(x => x.ChatId == chatId && x.Chat.UserId == currentUser.Id)
             .Select(x => new MessageLiteDto()
             {
                 Id = x.Id,
@@ -67,7 +67,7 @@ public class ConversationController(ChatsDB db, CurrentUser currentUser, ILogger
             {
                 Message toBeInsert = new()
                 {
-                    ConversationId = conversationId,
+                    ChatId = chatId,
                     ChatRoleId = (byte)DBChatRole.System,
                     MessageContents =
                     [
@@ -119,7 +119,7 @@ public class ConversationController(ChatsDB db, CurrentUser currentUser, ILogger
             // insert new user message
             Message dbUserMessage = new()
             {
-                ConversationId = conversationId,
+                ChatId = chatId,
                 ChatRoleId = (byte)DBChatRole.User,
                 MessageContents = request.UserMessage.ToMessageContents(),
                 CreatedAt = DateTime.UtcNow,
@@ -202,7 +202,7 @@ public class ConversationController(ChatsDB db, CurrentUser currentUser, ILogger
         InternalChatSegment fullResponse = icc.FullResponse;
         Message assistantMessage = new()
         {
-            ConversationId = conversationId,
+            ChatId = chatId,
             ChatRoleId = (byte)DBChatRole.Assistant,
             MessageContents =
             [

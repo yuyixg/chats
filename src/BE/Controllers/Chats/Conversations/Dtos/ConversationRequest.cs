@@ -10,7 +10,7 @@ public record ConversationRequest
     public required short ModelId { get; init; }
 
     [JsonPropertyName("chatId")]
-    public required string ConversationId { get; init; }
+    public required string ChatId { get; init; }
 
     [JsonPropertyName("messageId")]
     public string? MessageId { get; init; }

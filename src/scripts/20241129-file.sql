@@ -12,45 +12,45 @@ INSERT INTO FileServiceType (Id, Name, InitialConfig) VALUES
 (4, 'Azure Blob Storage', 'DefaultEndpointsProtocol=https;AccountName=your-account-name;AccountKey=your-account-key;EndpointSuffix=core.windows.net');
 
 -- 添加列 FileServiceTypeId，指定默认约束名称
-ALTER TABLE [ChatsSTG].[dbo].[FileService]
+ALTER TABLE [FileService]
 ADD [FileServiceTypeId] INT NOT NULL CONSTRAINT [DF_FileService_FileServiceTypeId] DEFAULT (1);
 
 -- 删除默认约束
-ALTER TABLE [ChatsSTG].[dbo].[FileService]
+ALTER TABLE [FileService]
 DROP CONSTRAINT [DF_FileService_FileServiceTypeId];
 
 -- 删除 Type 字段
-ALTER TABLE [ChatsSTG].[dbo].[FileService]
+ALTER TABLE [FileService]
 DROP COLUMN [Type];
 
-ALTER TABLE [ChatsSTG].[dbo].[FileService]
+ALTER TABLE [FileService]
 DROP CONSTRAINT DF_FileServices_enabled;
 
 -- 删除 Enabled 字段
-ALTER TABLE [ChatsSTG].[dbo].[FileService]
+ALTER TABLE [FileService]
 DROP COLUMN [Enabled];
 
 -- 添加 IsDefault 字段
-ALTER TABLE [ChatsSTG].[dbo].[FileService]
+ALTER TABLE [FileService]
 ADD [IsDefault] BIT NOT NULL CONSTRAINT [DF_FileService_IsDefault] DEFAULT (0);
 
-ALTER TABLE [ChatsSTG].[dbo].[FileService]
+ALTER TABLE [FileService]
 DROP CONSTRAINT [DF_FileService_IsDefault];
 
 -- 更新 Configs 列，将 accessSecret 属性改为 secretKey，然后删除 accessSecret 属性
 -- 首先，将 secretKey 设置为 accessSecret 的值
-UPDATE [ChatsSTG].[dbo].[FileService]
+UPDATE [FileService]
 SET [Configs] = JSON_MODIFY([Configs], '$.secretKey', JSON_VALUE([Configs], '$.accessSecret'));
 
 -- 然后，删除 accessSecret 属性
-UPDATE [ChatsSTG].[dbo].[FileService]
+UPDATE [FileService]
 SET [Configs] = JSON_MODIFY([Configs], '$.accessSecret', NULL);
 
-UPDATE [ChatsSTG].[dbo].[FileService]
+UPDATE [FileService]
 SET [Configs] = JSON_MODIFY([Configs], '$.bucket', JSON_VALUE([Configs], '$.bucketName'));
 
 -- 然后，删除 accessSecret 属性
-UPDATE [ChatsSTG].[dbo].[FileService]
+UPDATE [FileService]
 SET [Configs] = JSON_MODIFY([Configs], '$.bucketName', NULL);
 
 
@@ -573,8 +573,8 @@ COMMIT
 
 UPDATE ut
 SET ut.CreditUserId = um.UserId
-FROM [ChatsSTG].[dbo].[UsageTransaction] ut
-JOIN [ChatsSTG].[dbo].[UserModel] um
+FROM [UsageTransaction] ut
+JOIN [UserModel] um
 ON ut.UserModelId = um.Id; -- assuming UserModelId corresponds to UserModel.Id
 
 
@@ -815,6 +815,218 @@ CREATE TABLE FileImageInfo (
     FileId INT PRIMARY KEY,  -- 设置 FileId 为主键
     Width INT NOT NULL,
     Height INT NOT NULL,
-    CONSTRAINT FK_FileImageInfo_File FOREIGN KEY (FileId) REFERENCES [ChatsSTG].[dbo].[File](Id)
-    -- 设置 FileId 为外键，引用 File 表的 Id 列
+    CONSTRAINT FK_FileImageInfo_File FOREIGN KEY (FileId)
+        REFERENCES [File](Id)
+        ON UPDATE CASCADE
+        ON DELETE CASCADE
 );
+
+
+/* 为了防止任何可能出现的数据丢失问题，您应该先仔细检查此脚本，然后再在数据库设计器的上下文之外运行此脚本。*/
+BEGIN TRANSACTION
+SET QUOTED_IDENTIFIER ON
+SET ARITHABORT ON
+SET NUMERIC_ROUNDABORT OFF
+SET CONCAT_NULL_YIELDS_NULL ON
+SET ANSI_NULLS ON
+SET ANSI_PADDING ON
+SET ANSI_WARNINGS ON
+COMMIT
+BEGIN TRANSACTION
+GO
+CREATE TABLE dbo.FileContentType
+	(
+	Id smallint NOT NULL IDENTITY (1, 1),
+	ContentType varchar(100) NOT NULL
+	)  ON [PRIMARY]
+GO
+ALTER TABLE dbo.FileContentType ADD CONSTRAINT
+	PK_FileContentType PRIMARY KEY CLUSTERED 
+	(
+	Id
+	) WITH( STATISTICS_NORECOMPUTE = OFF, IGNORE_DUP_KEY = OFF, ALLOW_ROW_LOCKS = ON, ALLOW_PAGE_LOCKS = ON) ON [PRIMARY]
+
+GO
+ALTER TABLE dbo.FileContentType SET (LOCK_ESCALATION = TABLE)
+GO
+COMMIT
+
+
+-- 首先禁用标识列自动递增
+SET IDENTITY_INSERT [FileContentType] ON;
+
+-- 插入新的内容类型
+INSERT INTO [FileContentType] ([Id], [ContentType])
+VALUES
+    (1, 'image/jpeg'),
+    (2, 'image/png'),
+    (3, 'image/gif'),
+    (4, 'image/bmp'),
+    (5, 'image/svg+xml'),
+    (6, 'image/webp'),
+    (7, 'image/tiff'),
+    (8, 'image/heif'),
+    (9, 'image/heic');
+
+-- 重新启用标识列自动递增
+SET IDENTITY_INSERT [FileContentType] OFF;
+
+/* 为了防止任何可能出现的数据丢失问题，您应该先仔细检查此脚本，然后再在数据库设计器的上下文之外运行此脚本。*/
+BEGIN TRANSACTION
+SET QUOTED_IDENTIFIER ON
+SET ARITHABORT ON
+SET NUMERIC_ROUNDABORT OFF
+SET CONCAT_NULL_YIELDS_NULL ON
+SET ANSI_NULLS ON
+SET ANSI_PADDING ON
+SET ANSI_WARNINGS ON
+COMMIT
+BEGIN TRANSACTION
+GO
+ALTER TABLE dbo.FileContentType SET (LOCK_ESCALATION = TABLE)
+GO
+COMMIT
+BEGIN TRANSACTION
+GO
+ALTER TABLE dbo.[File]
+	DROP CONSTRAINT FK_File_User
+GO
+ALTER TABLE dbo.[User] SET (LOCK_ESCALATION = TABLE)
+GO
+COMMIT
+BEGIN TRANSACTION
+GO
+ALTER TABLE dbo.[File]
+	DROP CONSTRAINT FK_File_ClientInfo
+GO
+ALTER TABLE dbo.ClientInfo SET (LOCK_ESCALATION = TABLE)
+GO
+COMMIT
+BEGIN TRANSACTION
+GO
+ALTER TABLE dbo.[File]
+	DROP CONSTRAINT FK_File_FileService
+GO
+ALTER TABLE dbo.FileService SET (LOCK_ESCALATION = TABLE)
+GO
+COMMIT
+BEGIN TRANSACTION
+GO
+CREATE TABLE dbo.Tmp_File
+	(
+	Id int NOT NULL IDENTITY (1, 1),
+	FileName nvarchar(200) NOT NULL,
+	FileContentTypeId smallint NOT NULL,
+	FileServiceId int NOT NULL,
+	StorageKey nvarchar(300) NOT NULL,
+	Size int NOT NULL,
+	ClientInfoId int NOT NULL,
+	CreateUserId int NOT NULL,
+	CreatedAt datetime2(7) NOT NULL
+	)  ON [PRIMARY]
+GO
+ALTER TABLE dbo.Tmp_File SET (LOCK_ESCALATION = TABLE)
+GO
+SET IDENTITY_INSERT dbo.Tmp_File ON
+GO
+IF EXISTS(SELECT * FROM dbo.[File])
+	 EXEC('INSERT INTO dbo.Tmp_File (Id, FileName, FileServiceId, StorageKey, Size, ClientInfoId, CreateUserId, CreatedAt)
+		SELECT Id, FileName, FileServiceId, StorageKey, Size, ClientInfoId, CreateUserId, CreatedAt FROM dbo.[File] WITH (HOLDLOCK TABLOCKX)')
+GO
+SET IDENTITY_INSERT dbo.Tmp_File OFF
+GO
+ALTER TABLE dbo.FileImageInfo
+	DROP CONSTRAINT FK_FileImageInfo_File
+GO
+DROP TABLE dbo.[File]
+GO
+EXECUTE sp_rename N'dbo.Tmp_File', N'File', 'OBJECT' 
+GO
+ALTER TABLE dbo.[File] ADD CONSTRAINT
+	PK_File PRIMARY KEY CLUSTERED 
+	(
+	Id
+	) WITH( STATISTICS_NORECOMPUTE = OFF, IGNORE_DUP_KEY = OFF, ALLOW_ROW_LOCKS = ON, ALLOW_PAGE_LOCKS = ON) ON [PRIMARY]
+
+GO
+CREATE UNIQUE NONCLUSTERED INDEX IX_File_StorageKey ON dbo.[File]
+	(
+	FileServiceId,
+	StorageKey
+	) WITH( STATISTICS_NORECOMPUTE = OFF, IGNORE_DUP_KEY = OFF, ALLOW_ROW_LOCKS = ON, ALLOW_PAGE_LOCKS = ON) ON [PRIMARY]
+GO
+CREATE NONCLUSTERED INDEX IX_File_ClientInfo ON dbo.[File]
+	(
+	ClientInfoId
+	) WITH( STATISTICS_NORECOMPUTE = OFF, IGNORE_DUP_KEY = OFF, ALLOW_ROW_LOCKS = ON, ALLOW_PAGE_LOCKS = ON) ON [PRIMARY]
+GO
+CREATE NONCLUSTERED INDEX IX_File_CreateUser ON dbo.[File]
+	(
+	CreateUserId
+	) WITH( STATISTICS_NORECOMPUTE = OFF, IGNORE_DUP_KEY = OFF, ALLOW_ROW_LOCKS = ON, ALLOW_PAGE_LOCKS = ON) ON [PRIMARY]
+GO
+ALTER TABLE dbo.[File] ADD CONSTRAINT
+	FK_File_FileService FOREIGN KEY
+	(
+	FileServiceId
+	) REFERENCES dbo.FileService
+	(
+	Id
+	) ON UPDATE  NO ACTION 
+	 ON DELETE  NO ACTION 
+	
+GO
+ALTER TABLE dbo.[File] ADD CONSTRAINT
+	FK_File_ClientInfo FOREIGN KEY
+	(
+	ClientInfoId
+	) REFERENCES dbo.ClientInfo
+	(
+	Id
+	) ON UPDATE  NO ACTION 
+	 ON DELETE  NO ACTION 
+	
+GO
+ALTER TABLE dbo.[File] ADD CONSTRAINT
+	FK_File_User FOREIGN KEY
+	(
+	CreateUserId
+	) REFERENCES dbo.[User]
+	(
+	Id
+	) ON UPDATE  NO ACTION 
+	 ON DELETE  NO ACTION 
+	
+GO
+ALTER TABLE dbo.[File] ADD CONSTRAINT
+	FK_File_FileContentType FOREIGN KEY
+	(
+	FileContentTypeId
+	) REFERENCES dbo.FileContentType
+	(
+	Id
+	) ON UPDATE  NO ACTION 
+	 ON DELETE  NO ACTION 
+	
+GO
+COMMIT
+BEGIN TRANSACTION
+GO
+ALTER TABLE dbo.FileImageInfo ADD CONSTRAINT
+	FK_FileImageInfo_File FOREIGN KEY
+	(
+	FileId
+	) REFERENCES dbo.[File]
+	(
+	Id
+	) ON UPDATE  CASCADE 
+	 ON DELETE  CASCADE 
+	
+GO
+ALTER TABLE dbo.FileImageInfo SET (LOCK_ESCALATION = TABLE)
+GO
+COMMIT
+
+
+INSERT INTO [MessageContentType] ([Id], [ContentType])
+VALUES (3, 'fileId');

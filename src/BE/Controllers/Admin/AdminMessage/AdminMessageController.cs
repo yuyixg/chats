@@ -67,7 +67,7 @@ public class AdminMessageController(ChatsDB db, CurrentUser currentUser, IIdEncr
         if (adminMessageTemp == null) return new NotFoundResult();
 
         AdminMessageItemTemp[] messagesTemp = await db.Messages
-            .Where(x => x.ConversationId == conversationId)
+            .Where(x => x.ChatId == conversationId)
             .Select(x => new AdminMessageItemTemp
             {
                 Id = x.Id,

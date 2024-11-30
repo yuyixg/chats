@@ -18,7 +18,7 @@ public class MessagesController(ChatsDB db, CurrentUser currentUser, IIdEncrypti
     public async Task<ActionResult<MessageDto[]>> GetMessages(string chatId, CancellationToken cancellationToken)
     {
         MessageDto[] messages = await db.Messages
-            .Where(m => m.ConversationId == idEncryption.DecryptAsInt32(chatId) && m.Conversation.UserId == currentUser.Id && m.ChatRoleId != (byte)DBChatRole.System)
+            .Where(m => m.ChatId == idEncryption.DecryptAsInt32(chatId) && m.Chat.UserId == currentUser.Id && m.ChatRoleId != (byte)DBChatRole.System)
             .Select(x => new ChatMessageTemp()
             {
                 Id = x.Id,
@@ -55,7 +55,7 @@ public class MessagesController(ChatsDB db, CurrentUser currentUser, IIdEncrypti
     public async Task<ActionResult<string?>> GetChatSystemPrompt(string chatId, CancellationToken cancellationToken)
     {
         DBMessageSegment? content = await db.Messages
-            .Where(m => m.ConversationId == idEncryption.DecryptAsInt32(chatId) && m.ChatRoleId == (byte)DBChatRole.System)
+            .Where(m => m.ChatId == idEncryption.DecryptAsInt32(chatId) && m.ChatRoleId == (byte)DBChatRole.System)
             .Select(x => x.MessageContents
                 .Select(x => new DBMessageSegment()
                 {

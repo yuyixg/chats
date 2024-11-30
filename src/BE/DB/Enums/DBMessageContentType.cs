@@ -19,4 +19,9 @@ public enum DBMessageContentType : byte
     /// Image URL content type encoded in UTF-8.
     /// </summary>
     ImageUrl = 2,
+
+    /// <summary>
+    /// 32bit little-endian integer file ID content type.
+    /// </summary>
+    FileId = 3,
 }

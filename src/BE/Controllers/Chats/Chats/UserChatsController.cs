@@ -135,7 +135,7 @@ public class UserChatsController(ChatsDB db, CurrentUser currentUser, IIdEncrypt
             return NotFound();
         }
 
-        if (await db.Messages.AnyAsync(m => m.ConversationId == idEncryption.DecryptAsInt32(chatId), cancellationToken))
+        if (await db.Messages.AnyAsync(m => m.ChatId == idEncryption.DecryptAsInt32(chatId), cancellationToken))
         {
             await db.Chats
                 .Where(x => x.Id == idEncryption.DecryptAsInt32(chatId))

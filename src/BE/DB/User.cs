@@ -55,10 +55,16 @@ public partial class User
     public virtual ICollection<Chat> Chats { get; set; } = new List<Chat>();
 
     [InverseProperty("CreateUser")]
+    public virtual ICollection<File> Files { get; set; } = new List<File>();
+
+    [InverseProperty("CreateUser")]
     public virtual ICollection<Prompt> Prompts { get; set; } = new List<Prompt>();
 
     [InverseProperty("User")]
     public virtual ICollection<SmsRecord> SmsRecords { get; set; } = new List<SmsRecord>();
+
+    [InverseProperty("CreditUser")]
+    public virtual ICollection<UsageTransaction> UsageTransactions { get; set; } = new List<UsageTransaction>();
 
     [InverseProperty("User")]
     public virtual ICollection<UserApiKey> UserApiKeys { get; set; } = new List<UserApiKey>();
