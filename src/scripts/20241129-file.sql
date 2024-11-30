@@ -1030,3 +1030,5 @@ COMMIT
 
 INSERT INTO [MessageContentType] ([Id], [ContentType])
 VALUES (3, 'fileId');
+
+update FileService set IsDefault = 1
