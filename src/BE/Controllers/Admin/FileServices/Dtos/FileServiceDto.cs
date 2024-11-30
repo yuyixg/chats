@@ -24,8 +24,14 @@ public record FileServiceDto : FileServiceSimpleDto
     [JsonPropertyName("isDefault")]
     public required bool IsDefault { get; init; }
 
+    [JsonPropertyName("fileCount")]
+    public required int FileCount { get; init; }
+
     [JsonPropertyName("createdAt")]
     public required DateTime CreatedAt { get; init; }
+
+    [JsonPropertyName("updatedAt")]
+    public required DateTime UpdatedAt { get; init; }
 
     public FileServiceDto WithMaskedKeys() => this with 
     { 

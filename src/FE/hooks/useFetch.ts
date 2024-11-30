@@ -11,6 +11,21 @@ export type RequestWithBodyModel = RequestModel & {
   body?: object | FormData;
 };
 
+const readResponse = async (response: Response) => {
+  const contentType = response.headers.get('content-type');
+  const contentDisposition = response.headers.get('content-disposition');
+
+  if (contentType?.indexOf('application/json') !== -1) {
+    return response.json();
+  } else if (contentType?.indexOf('text/plain') !== -1) {
+    return response.text();
+  } else if (contentDisposition?.indexOf('attachment') !== -1) {
+    return response.blob();
+  } else {
+    return response;
+  }
+};
+
 export const useFetch = () => {
   const handleFetch = async (
     url: string,
@@ -48,18 +63,8 @@ export const useFetch = () => {
           throw response;
         }
 
-        const contentType = response.headers.get('content-type');
-        const contentDisposition = response.headers.get('content-disposition');
 
-        const result =
-          contentType &&
-            (contentType?.indexOf('application/json') !== -1 ||
-              contentType?.indexOf('text/plain') !== -1)
-            ? response.json()
-            : contentDisposition?.indexOf('attachment') !== -1
-              ? response.blob()
-              : response;
-
+        const result = readResponse(response);
         return result;
       })
       .catch(async (err) => {

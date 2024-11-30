@@ -67,8 +67,8 @@ export default function FileService() {
             <TableRow>
               <TableHead>{t('Service Name')}</TableHead>
               <TableHead>{t('File Service Type')}</TableHead>
-              <TableHead>{t('Is Default')}</TableHead>
-              <TableHead>{t('Created Time')}</TableHead>
+              <TableHead>{t('File Count')}</TableHead>
+              <TableHead>{t('Updated Time')}</TableHead>
             </TableRow>
           </TableHeader>
           <TableBody isLoading={loading} isEmpty={fileServices.length === 0}>
@@ -89,9 +89,9 @@ export default function FileService() {
                   {item.name}
                 </TableCell>
                 <TableCell>{item.fileServiceTypeId}</TableCell>
-                <TableCell>{item.isDefault ? '✅' : ''}</TableCell>
+                <TableCell>{item.fileCount}</TableCell>
                 <TableCell>
-                  {new Date(item.createdAt).toLocaleString()}
+                  {new Date(item.updatedAt).toLocaleString()}
                 </TableCell>
               </TableRow>
             ))}

@@ -38,6 +38,8 @@ public class FileServiceController(ChatsDB db) : ControllerBase
                     Configs = x.Configs,
                     IsDefault = x.IsDefault,
                     CreatedAt = x.CreatedAt,
+                    FileCount = x.Files.Count,
+                    UpdatedAt = x.UpdatedAt,
                 })
                 .AsEnumerable()
                 .Select(x => x.WithMaskedKeys())
@@ -74,6 +76,7 @@ public class FileServiceController(ChatsDB db) : ControllerBase
             UpdatedAt = DateTime.UtcNow,
         };
         req.ApplyTo(toInsert);
+        db.FileServices.Add(toInsert);
         await db.SaveChangesAsync(cancellationToken);
         return Created(default(string), value: toInsert.Id);
     }

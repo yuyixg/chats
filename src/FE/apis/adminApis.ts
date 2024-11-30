@@ -161,6 +161,11 @@ export const putFileService = (id: number, params: PostFileServicesParams) => {
   });
 };
 
+export const deleteFileService = (id: number) => {
+  const fetchService = useFetch();
+  return fetchService.delete(`/api/admin/file-service/${id}`);
+}
+
 export const getFileServiceTypeInitialConfig = (fileServiceTypeId: number) => {
   const fetchService = useFetch();
   return fetchService.get<string>(`/api/admin/file-service-type/${fileServiceTypeId}/initial-config`);

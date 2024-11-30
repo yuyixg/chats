@@ -8,7 +8,7 @@ namespace Chats.BE.Controllers.Admin.FileServices;
 public class FileServiceTypeController(ChatsDB db) : ControllerBase
 {
     [HttpGet("{fileServiceTypeId:int}/initial-config")]
-    public async Task<ActionResult<string>> GetFileServiceTypeInitialConfig(int fileServiceTypeId, CancellationToken cancellationToken)
+    public async Task<ActionResult<string>> GetFileServiceTypeInitialConfig(byte fileServiceTypeId, CancellationToken cancellationToken)
     {
         FileServiceType? fileServiceType = await db.FileServiceTypes.FindAsync([fileServiceTypeId], cancellationToken);
         if (fileServiceType == null)

@@ -1,4 +1,5 @@
-﻿using System.Text.Json;
+﻿using System.Text.Encodings.Web;
+using System.Text.Json;
 using System.Text.Json.Nodes;
 
 namespace Chats.BE.Services.Common;
@@ -14,6 +15,14 @@ internal static class MaskedKeyUtils
     {
         return key is not null && key.Length > 7 ? key[..5] + "****" + key[^2..] : key;
     }
+
+    private static JsonSerializerOptions _jsonOptions = new()
+    {
+        Encoder = JavaScriptEncoder.UnsafeRelaxedJsonEscaping,
+        WriteIndented = true,
+        IndentCharacter = ' ',
+        IndentSize = 2,
+    };
 
     public static string? JsonToMaskedNull(this string? jsonKey)
     {
@@ -34,7 +43,7 @@ internal static class MaskedKeyUtils
             }
 
             // 创建一个字典来存储修改后的键值对
-            var modifiedDict = new Dictionary<string, object?>();
+            Dictionary<string, object?> modifiedDict = [];
 
             foreach (JsonProperty property in root.EnumerateObject())
             {
@@ -57,7 +66,7 @@ internal static class MaskedKeyUtils
             }
 
             // 序列化修改后的字典为 JSON 字符串
-            string result = JsonSerializer.Serialize(modifiedDict);
+            string result = JsonSerializer.Serialize(modifiedDict, _jsonOptions);
             return result;
         }
         catch (JsonException)

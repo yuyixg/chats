@@ -117,6 +117,7 @@ export interface PostFileServicesParams {
 export interface GetFileServicesResult extends PostFileServicesParams {
   id: number;
   createdAt: string;
+  fileCount: number;
   updatedAt: string;
 }
 

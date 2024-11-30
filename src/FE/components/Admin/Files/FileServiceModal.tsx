@@ -22,7 +22,7 @@ import FormSwitch from '@/components/ui/form/switch';
 import FormTextarea from '@/components/ui/form/textarea';
 import { FormFieldType, IFormFieldOption } from '@/components/ui/form/type';
 
-import { getFileServiceTypeInitialConfig, postFileService, putFileService } from '@/apis/adminApis';
+import { deleteFileService, getFileServiceTypeInitialConfig, postFileService, putFileService } from '@/apis/adminApis';
 import { zodResolver } from '@hookform/resolvers/zod';
 import { z } from 'zod';
 import { feFileServiceTypes } from '@/types/file';
@@ -104,6 +104,25 @@ export const FileServiceModal = (props: IProps) => {
     }, {}),
   });
 
+  async function onDelete() {
+    try {
+      await deleteFileService(selected!.id);
+      onSuccessful();
+      toast.success(t('Deleted successful'));
+    } catch (err: any) {
+      try {
+        const resp = await err.json();
+        toast.error(t(resp.message));
+      } catch {
+        toast.error(
+          t(
+            'Operation failed, Please try again later, or contact technical personnel',
+          ),
+        );
+      }
+    }
+  }
+
   function onSubmit(values: z.infer<typeof formSchema>) {
     if (!form.formState.isValid) return;
     let p = null;
@@ -130,6 +149,15 @@ export const FileServiceModal = (props: IProps) => {
     });
   }
 
+  const formatConfigs = (config: string) => {
+    try {
+      JSON.parse(config);
+      return config;
+    } catch {
+      return config;
+    }
+  }
+
   useEffect(() => {
     if (isOpen) {
       form.reset();
@@ -138,10 +166,7 @@ export const FileServiceModal = (props: IProps) => {
         form.setValue('name', selected.name);
         form.setValue('fileServiceTypeId', selected.fileServiceTypeId.toString());
         form.setValue('isDefault', selected.isDefault);
-        form.setValue(
-          'configs',
-          JSON.stringify(selected.configs, null, 2),
-        );
+        form.setValue('configs', formatConfigs(selected.configs));
       }
     }
   }, [isOpen]);
@@ -151,12 +176,7 @@ export const FileServiceModal = (props: IProps) => {
       if (name === 'fileServiceTypeId' && type === 'change') {
         const fileServiceTypeId = parseInt(value.fileServiceTypeId!);
         getFileServiceTypeInitialConfig(fileServiceTypeId).then((res) => {
-          try {
-            const configs = JSON.parse(res);
-            form.setValue('configs', JSON.stringify(configs, null, 2));
-          } catch {
-            form.setValue('configs', res);
-          }
+          form.setValue('configs', formatConfigs(res));
         });
       }
     });
@@ -182,6 +202,11 @@ export const FileServiceModal = (props: IProps) => {
               />
             ))}
             <DialogFooter className="pt-4">
+              {selected && (
+                <Button type="button" variant="destructive" onClick={onDelete}>
+                  {t('Delete')}
+                </Button>
+              )}
               <Button type="submit">{t('Save')}</Button>
             </DialogFooter>
           </form>
