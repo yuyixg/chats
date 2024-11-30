@@ -1,11 +1,12 @@
 import { MouseEventHandler, useContext, useEffect, useState } from 'react';
 
-import { Prompt } from '@/types/prompt';
+import { Prompt, PromptSlim } from '@/types/prompt';
 
 import SidebarActionButton from '@/components/Button/SidebarActionButton';
 import {
   IconBulbFilled,
   IconCheck,
+  IconMistOff,
   IconTrash,
   IconX,
 } from '@/components/Icons/index';
@@ -16,7 +17,7 @@ import { PromptModal } from './PromptModal';
 import { getUserPromptDetail } from '@/apis/clientApis';
 
 interface Props {
-  prompt: Prompt;
+  prompt: PromptSlim;
 }
 
 export const PromptComponent = ({ prompt }: Props) => {
@@ -73,6 +74,16 @@ export const PromptComponent = ({ prompt }: Props) => {
     }
   }, [isRenaming, isDeleting]);
 
+  const getPromptColor = (prompt: PromptSlim) => {
+    if (prompt.isSystem) {
+      return 'yellow';
+    } else if (prompt.isDefault) {
+      return 'white';
+    } else {
+      return 'grey';
+    }
+  }
+
   return (
     <div className="relative flex items-center">
       <button
@@ -81,7 +92,7 @@ export const PromptComponent = ({ prompt }: Props) => {
           handlePromptDetail(e);
         }}
       >
-        <IconBulbFilled size={18} />
+        <IconBulbFilled size={18} style={{ color: getPromptColor(prompt) }} />
 
         <div className="relative max-h-5 flex-1 overflow-hidden text-ellipsis whitespace-nowrap break-all pr-4 text-left text-[12.5px] leading-3">
           {prompt.name}

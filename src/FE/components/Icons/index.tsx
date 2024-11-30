@@ -584,6 +584,7 @@ const IconBulbFilled = (props: IconProps) => {
       stroke={stroke || 'hsl(var(--foreground))'}
       viewBox="0 0 24 24"
       fill="none"
+      style={props.style}
       strokeLinecap="round"
       strokeLinejoin="round"
     >

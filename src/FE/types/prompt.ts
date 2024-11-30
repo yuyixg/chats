@@ -1,9 +1,16 @@
 export interface Prompt extends IdName {
-  description: string;
   content: string;
+  temperature: number | null;
+  isDefault: boolean;
+  isSystem: boolean;
 }
 
 export interface IdName {
-  id: string;
+  id: number;
   name: string;
+}
+
+export interface PromptSlim extends IdName {
+  isDefault: boolean;
+  isSystem: boolean;
 }

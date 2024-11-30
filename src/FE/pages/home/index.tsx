@@ -177,14 +177,18 @@ const Home = () => {
     if (!model) return;
     dispatch({ field: 'selectModel', value: model });
     const initialConfig = {
-      temperature: clamp(0.85, model.minTemperature, model.maxTemperature),
+      temperature: 0.5,
       enableSearch: model.allowSearch ? false : null,
     };
     handleUpdateUserModelConfig(initialConfig);
 
     getDefaultPrompt().then((data) => {
-      handleUpdateUserModelConfig({
+      const newConfig = {
         ...initialConfig,
+        temperature: data.temperature || initialConfig.temperature,
+      };
+      handleUpdateUserModelConfig({
+        ...newConfig,
         prompt: formatPrompt(data.content, { model }),
       });
     });
@@ -433,7 +437,6 @@ const Home = () => {
 
   useEffect(() => {
     const handlePopState = (event: PopStateEvent) => {
-      console.log(event.state);
       const chatId = getPathChatId(event.state?.as || '');
       selectChat(chats, chatId, models);
     };

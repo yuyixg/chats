@@ -15,4 +15,7 @@ public record BriefPromptDto
 
     [JsonPropertyName("isDefault")]
     public required bool IsDefault { get; init; }
+
+    [JsonPropertyName("isSystem")]
+    public required bool IsSystem { get; init; }
 }

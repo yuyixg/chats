@@ -2,7 +2,7 @@ import { useFetch } from '@/hooks/useFetch';
 
 import { calculateMessages } from '@/utils/message';
 
-import { AdminModelDto, PostPromptParams, PutPromptParams } from '@/types/adminApis';
+import { AdminModelDto, PostPromptParams } from '@/types/adminApis';
 import { ChatMessage } from '@/types/chatMessage';
 import {
   ChatResult,
@@ -117,7 +117,7 @@ export const getUserPromptBrief = () => {
   return fetchServer.get<IdName[]>('/api/prompts/brief');
 };
 
-export const getUserPromptDetail = (id: string) => {
+export const getUserPromptDetail = (id: number) => {
   const fetchServer = useFetch();
   return fetchServer.get<Prompt>('/api/prompts/' + id);
 };
@@ -132,12 +132,12 @@ export const postUserPrompts = (params: PostPromptParams) => {
   return fetchServer.post('/api/prompts', { body: params });
 };
 
-export const putUserPrompts = (params: PutPromptParams) => {
+export const putUserPrompts = (promptId: number, params: PostPromptParams) => {
   const fetchServer = useFetch();
-  return fetchServer.put('/api/prompts', { body: params });
+  return fetchServer.put(`/api/prompts/${promptId}`, { body: params });
 };
 
-export const deleteUserPrompts = (id: string) => {
+export const deleteUserPrompts = (id: number) => {
   const fetchServer = useFetch();
   return fetchServer.delete('/api/prompts?id=' + id);
 };

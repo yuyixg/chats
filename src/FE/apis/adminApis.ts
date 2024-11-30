@@ -31,7 +31,6 @@ import {
   PostPayServicesParams,
   PostUserInitialConfigParams,
   PostUserParams,
-  PutFileServicesParams,
   PutInvitationCodeParams,
   PutPayServicesParams,
   PutUserBalanceParams,
@@ -96,8 +95,7 @@ export const getUsers = (
 ): Promise<PageResult<GetUsersResult[]>> => {
   const fetchService = useFetch();
   return fetchService.get(
-    `/api/admin/users?page=${params.page}&pageSize=${params.pageSize}&query=${
-      params?.query || ''
+    `/api/admin/users?page=${params.page}&pageSize=${params.pageSize}&query=${params?.query || ''
     }`,
   );
 };
@@ -156,12 +154,17 @@ export const postFileService = (params: PostFileServicesParams) => {
   });
 };
 
-export const putFileService = (id: number, params: PutFileServicesParams) => {
+export const putFileService = (id: number, params: PostFileServicesParams) => {
   const fetchService = useFetch();
   return fetchService.put(`/api/admin/file-service/${id}`, {
     body: params,
   });
 };
+
+export const getFileServiceTypeInitialConfig = (fileServiceTypeId: number) => {
+  const fetchService = useFetch();
+  return fetchService.get<string>(`/api/admin/file-service-type/${fileServiceTypeId}/initial-config`);
+}
 
 export const getShareMessage = (
   chatId: string,

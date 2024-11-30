@@ -5,7 +5,7 @@ import useTranslation from '@/hooks/useTranslation';
 
 import { useCreateReducer } from '@/hooks/useCreateReducer';
 
-import { Prompt } from '@/types/prompt';
+import { Prompt, PromptSlim } from '@/types/prompt';
 
 import { HomeContext } from '@/pages/home';
 
@@ -20,7 +20,7 @@ import {
   postUserPrompts,
   putUserPrompts,
 } from '@/apis/clientApis';
-import { v4 as uuidv4 } from 'uuid';
+import { PostPromptParams } from '@/types/adminApis';
 
 const PromptBar = () => {
   const { t } = useTranslation();
@@ -48,10 +48,12 @@ const PromptBar = () => {
 
   const handleCreatePrompt = () => {
     const newPrompt: Prompt = {
-      id: uuidv4(),
+      id: 0,
       name: `Prompt ${prompts.length + 1}`,
-      description: '',
       content: '',
+      isDefault: false,
+      isSystem: false,
+      temperature: null,
     };
 
     postUserPrompts(newPrompt).then((data) => {
@@ -61,7 +63,7 @@ const PromptBar = () => {
     });
   };
 
-  const handleDeletePrompt = (prompt: Prompt) => {
+  const handleDeletePrompt = (prompt: PromptSlim) => {
     deleteUserPrompts(prompt.id).then(() => {
       const updatedPrompts = prompts.filter((p) => p.id !== prompt.id);
       homeDispatch({ field: 'prompts', value: updatedPrompts });
@@ -70,14 +72,9 @@ const PromptBar = () => {
   };
 
   const handleUpdatePrompt = (prompt: Prompt) => {
-    putUserPrompts(prompt).then(() => {
-      const updatedPrompts = prompts.map((p) => {
-        if (p.id === prompt.id) {
-          return prompt;
-        }
-        return p;
-      });
-      homeDispatch({ field: 'prompts', value: updatedPrompts });
+    putUserPrompts(prompt.id, prompt).then(() => {
+      const existingPrompts = prompts.filter(x => x.id !== prompt.id);
+      homeDispatch({ field: 'prompts', value: [...existingPrompts, prompt] });
       toast.success(t('Updated successful'));
     });
   };
@@ -89,8 +86,6 @@ const PromptBar = () => {
         value: prompts.filter((prompt) => {
           const searchable =
             prompt.name.toLowerCase() +
-            ' ' +
-            prompt.description.toLowerCase() +
             ' ' +
             prompt.content.toLowerCase();
           return searchable.includes(searchTerm.toLowerCase());
@@ -110,7 +105,7 @@ const PromptBar = () => {
         handleUpdatePrompt,
       }}
     >
-      <Sidebar<Prompt>
+      <Sidebar<PromptSlim>
         hasModel={hasModel}
         side={'right'}
         showOpenButton={false}

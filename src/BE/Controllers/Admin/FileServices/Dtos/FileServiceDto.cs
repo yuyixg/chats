@@ -27,5 +27,12 @@ public record FileServiceDto : FileServiceSimpleDto
     [JsonPropertyName("createdAt")]
     public required DateTime CreatedAt { get; init; }
 
-    public FileServiceDto WithMaskedKeys() => this with { Configs = Configs.JsonToMaskedNull()! };
+    public FileServiceDto WithMaskedKeys() => this with 
+    { 
+        Configs = FileServiceTypeId switch
+        { 
+            DBFileServiceType.Local => Configs, 
+            _ => Configs.JsonToMaskedNull()!
+        }
+    };
 }

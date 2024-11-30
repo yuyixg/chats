@@ -1,133 +1,156 @@
-import { FC, KeyboardEvent, useEffect, useRef, useState } from 'react';
-
+import React, { useContext } from 'react';
+import { useForm } from 'react-hook-form';
 import useTranslation from '@/hooks/useTranslation';
+import { z } from 'zod';
+import { zodResolver } from '@hookform/resolvers/zod';
 
-import { PromptVariables } from '@/utils/promptVariable';
-
-import { Prompt } from '@/types/prompt';
-
-import { IconInfo } from '@/components/Icons';
-import Tips from '@/components/Tips/Tips';
+import { Dialog, DialogContent, DialogHeader, DialogTitle } from '@/components/ui/dialog';
+import { Form, FormField } from '@/components/ui/form';
+import FormInput from '@/components/ui/form/input';
+import FormTextarea from '@/components/ui/form/textarea';
 import { Button } from '@/components/ui/button';
-import { Dialog, DialogContent } from '@/components/ui/dialog';
-import { Input } from '@/components/ui/input';
-import { Textarea } from '@/components/ui/textarea';
+import { Prompt } from '@/types/prompt';
+import FormSwitch from '@/components/ui/form/switch';
+import { HomeContext } from '@/pages/home';
+import { UserRole } from '@/types/adminApis';
+import { IconInfo } from '@/components/Icons';
+import { PromptVariables } from '@/utils/promptVariable';
+import Tips from '@/components/Tips/Tips';
+import { TemperatureSlider } from '@/components/Chat/Temperature';
 
-interface Props {
+
+interface IProps {
   prompt: Prompt;
-  onClose: () => void;
   onUpdatePrompt: (prompt: Prompt) => void;
+  onClose: () => void;
 }
 
-export const PromptModal: FC<Props> = ({ prompt, onClose, onUpdatePrompt }) => {
+export const PromptModal = (props: IProps) => {
   const { t } = useTranslation();
-  const [name, setName] = useState(prompt.name);
-  const [description, setDescription] = useState(prompt.description);
-  const [content, setContent] = useState(prompt.content);
+  const { prompt, onUpdatePrompt, onClose } = props;
 
-  const modalRef = useRef<HTMLDivElement>(null);
-  const nameInputRef = useRef<HTMLInputElement>(null);
+  const {
+    state: {
+      user,
+    },
+  } = useContext(HomeContext);
 
-  const handleEnter = (e: KeyboardEvent<HTMLDivElement>) => {
-    if (e.key === 'Enter' && !e.shiftKey) {
-      onUpdatePrompt({ ...prompt, name, description, content: content.trim() });
-      onClose();
-    }
+  const formSchema = z.object({
+    name: z.string().min(1, t('This field is require')),
+    content: z.string().min(1, t('This field is require')),
+    isDefault: z.boolean().optional(),
+    isSystem: z.boolean().optional(),
+    setsTemperature: z.boolean().default(false),
+    temperature: z.number().nullable(),
+  });
+
+  const form = useForm<z.infer<typeof formSchema>>({
+    resolver: zodResolver(formSchema),
+    defaultValues: {
+      name: prompt.name || '',
+      content: prompt.content || '',
+      isDefault: prompt.isDefault || false,
+      isSystem: prompt.isSystem || false,
+      setsTemperature: prompt.temperature !== null,
+      temperature: prompt.temperature,
+    },
+  });
+
+  const onSubmit = (values: z.infer<typeof formSchema>) => {
+    const updatedPrompt: Prompt = {
+      ...prompt,
+      name: values.name,
+      content: values.content.trim(),
+      isDefault: values.isDefault || false,
+      isSystem: values.isSystem || false,
+      temperature: values.setsTemperature ? values.temperature : null,
+    };
+    onUpdatePrompt(updatedPrompt);
+    onClose();
   };
 
-  useEffect(() => {
-    const handleMouseDown = (e: MouseEvent) => {
-      if (modalRef.current && !modalRef.current.contains(e.target as Node)) {
-        window.addEventListener('mouseup', handleMouseUp);
-      }
-    };
-
-    const handleMouseUp = (e: MouseEvent) => {
-      window.removeEventListener('mouseup', handleMouseUp);
-      onClose();
-    };
-
-    window.addEventListener('mousedown', handleMouseDown);
-
-    return () => {
-      window.removeEventListener('mousedown', handleMouseDown);
-    };
-  }, [onClose]);
-
-  useEffect(() => {
-    nameInputRef.current?.focus();
-  }, []);
-
   return (
-    <Dialog open={!!prompt} onOpenChange={onClose}>
-      <DialogContent className="w-2/5" onKeyDown={handleEnter}>
-        <div className="text-sm font-bold text-black dark:text-neutral-200">
-          {t('Name')}
-        </div>
-        <Input
-          ref={nameInputRef}
-          placeholder={t('A name for your prompt.') || ''}
-          value={name}
-          onChange={(e) => setName(e.target.value)}
-        ></Input>
-
-        <div className="mt-4 gap-1 text-sm flex align-middle items-center font-bold text-black dark:text-neutral-200">
-          {t('Prompt')}
-          <Tips
-            trigger={
-              <Button className="w-auto h-auto" size="icon" variant="link">
-                <IconInfo size={18} />
-              </Button>
-            }
-            content={
-              <div className="text-xs font-normal">
-                <span className="font-semibold">{t('System Variables')}</span>
-                <div className="mt-2 flex-col">
-                  {Object.keys(PromptVariables).map((key) => (
-                    <p key={key}>
-                      {key}：
-                      {PromptVariables[key as keyof typeof PromptVariables]()}
-                    </p>
-                  ))}
-                </div>
-              </div>
-            }
-          />
-        </div>
-        <Textarea
-          placeholder={
-            t(
-              'Prompt content. Use {{}} to denote a variable. Ex: {{name}} is a {{adjective}} {{noun}}',
-            ) || ''
-          }
-          value={content}
-          onChange={(e) => setContent(e.target.value)}
-          rows={8}
-        ></Textarea>
-        <div className="mt-6 text-sm font-bold text-black dark:text-neutral-200">
-          {t('Description')}
-        </div>
-        <Textarea
-          placeholder={t('A description for your prompt.') || ''}
-          value={description}
-          onChange={(e) => setDescription(e.target.value)}
-          rows={2}
-        ></Textarea>
-        <Button
-          onClick={() => {
-            const updatedPrompt = {
-              ...prompt,
-              name,
-              description,
-              content: content.trim(),
-            };
-
-            onUpdatePrompt(updatedPrompt);
-            onClose();
-          }}
-        >
-          {t('Save')}
-        </Button>
+    <Dialog open={true} onOpenChange={onClose}>
+      <DialogContent>
+        <DialogHeader>
+          <DialogTitle>{t('Edit Prompt')}</DialogTitle>
+        </DialogHeader>
+        <Form {...form}>
+          <form onSubmit={form.handleSubmit(onSubmit)}>
+            <FormField
+              control={form.control}
+              name="name"
+              render={({ field }) => (
+                <FormInput label={t('Name')} field={field} />
+              )}
+            />
+            <FormField
+              control={form.control}
+              name="content"
+              render={({ field }) => (
+                <FormTextarea label={(
+                  <div className="mt-4 gap-1 text-sm flex align-middle items-center font-bold text-black dark:text-neutral-200">
+                    {t('Prompt')}
+                    <Tips
+                      side='right'
+                      trigger={
+                        <Button type="button" className="w-auto h-auto" size="icon" variant="link">
+                          <IconInfo size={18} />
+                        </Button>
+                      }
+                      content={
+                        <div className="text-xs font-normal">
+                          <span className="font-semibold">{t('System Variables')}</span>
+                          <div className="mt-2 flex-col">
+                            {Object.keys(PromptVariables).map((key) => (
+                              <p key={key}>
+                                {key}:
+                                {PromptVariables[key as keyof typeof PromptVariables]()}
+                              </p>
+                            ))}
+                          </div>
+                        </div>
+                      }
+                    />
+                  </div>) as any as string
+                } field={field} rows={10} />
+              )}
+            />
+            <div className="flex space-x-4">
+              <FormField
+                control={form.control}
+                name="isDefault"
+                render={({ field }) => (
+                  <FormSwitch field={field} label={t('Is Default')} />
+                )}
+              />
+              {user?.role === UserRole.admin && <FormField
+                control={form.control}
+                name="isSystem"
+                render={({ field }) => (
+                  <FormSwitch field={field} label={t('Is System')} />
+                )}
+              />}
+              <FormField
+                control={form.control}
+                name="setsTemperature"
+                render={({ field }) => (
+                  <FormSwitch field={field} label={t('Sets Temperature')} />
+                )}
+              />
+            </div>
+            {form.getValues('setsTemperature') && <TemperatureSlider
+              label={t('Temperature')}
+              min={0}
+              max={1}
+              defaultTemperature={form.getValues('temperature') !== null ? form.getValues('temperature')! : 0.5}
+              onChangeTemperature={(temperature) => form.setValue('temperature', temperature)}
+            />}
+            <div className="pt-4 text-right">
+              <Button type="submit">{t('Save')}</Button>
+            </div>
+          </form>
+        </Form>
       </DialogContent>
     </Dialog>
   );

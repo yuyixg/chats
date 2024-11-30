@@ -1,4 +1,5 @@
-﻿using Chats.BE.Controllers.Admin.FileServices.Dtos;
+﻿using Chats.BE.Controllers.Admin.Common;
+using Chats.BE.Controllers.Admin.FileServices.Dtos;
 using Chats.BE.Controllers.Common;
 using Chats.BE.DB;
 using Chats.BE.DB.Enums;
@@ -7,7 +8,7 @@ using Microsoft.EntityFrameworkCore;
 
 namespace Chats.BE.Controllers.Admin.FileServices;
 
-[Route("api/admin/file-service")]
+[Route("api/admin/file-service"), AuthorizeAdmin]
 public class FileServiceController(ChatsDB db) : ControllerBase
 {
     [HttpGet]
@@ -84,6 +85,11 @@ public class FileServiceController(ChatsDB db) : ControllerBase
         if (existingData == null)
         {
             return NotFound();
+        }
+
+        if (await db.Files.AnyAsync(x => x.FileServiceId == fileServiceId, cancellationToken))
+        {
+            return this.BadRequestMessage("Cannot delete file service with existing files");
         }
 
         db.FileServices.Remove(existingData);

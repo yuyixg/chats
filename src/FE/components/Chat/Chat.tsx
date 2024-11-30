@@ -33,6 +33,7 @@ import { getChat, postChats, putUserChatModel } from '@/apis/clientApis';
 import { cn } from '@/lib/utils';
 import Decimal from 'decimal.js';
 import { v4 as uuidv4 } from 'uuid';
+import { Prompt } from '@/types/prompt';
 
 interface Props {
   stopConversationRef: MutableRefObject<boolean>;
@@ -355,6 +356,12 @@ export const Chat = memo(({ stopConversationRef }: Props) => {
 
   useEffect(() => {}, [userModelConfig]);
 
+  const onChangePrompt = (prompt: Prompt) => {
+    if (prompt.temperature !== null) {
+      handleUpdateUserModelConfig({ temperature: prompt.temperature });
+    }
+  }
+
   return (
     <div className="relative flex-1 overflow-hidden bg-white dark:bg-[#262630]">
       <>
@@ -373,16 +380,18 @@ export const Chat = memo(({ stopConversationRef }: Props) => {
                       <SystemPrompt
                         currentPrompt={userModelConfig?.prompt}
                         prompts={prompts}
-                        onChangePrompt={(prompt) => {
+                        model={selectModel}
+                        onChangePromptText={(prompt) => {
                           handleUpdateUserModelConfig({ prompt });
                         }}
+                        onChangePrompt={onChangePrompt}
                       />
                     )}
-                    {userModelConfig?.temperature !== undefined && (selectModel?.minTemperature !== selectModel?.maxTemperature) && (
+                    {userModelConfig?.temperature !== undefined && (selectModel?.allowTemperature) && (
                       <TemperatureSlider
                         label={t('Temperature')}
-                        min={selectModel?.minTemperature!}
-                        max={selectModel?.maxTemperature!}
+                        min={0}
+                        max={1}
                         defaultTemperature={userModelConfig.temperature}
                         onChangeTemperature={(temperature) =>
                           handleUpdateUserModelConfig({
@@ -523,6 +532,7 @@ export const Chat = memo(({ stopConversationRef }: Props) => {
             }}
             onScrollDownClick={handleScrollDown}
             showScrollDownButton={showScrollDownButton}
+            onChangePrompt={onChangePrompt}
           />
         )}
       </>

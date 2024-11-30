@@ -22,7 +22,7 @@ import FormSwitch from '@/components/ui/form/switch';
 import FormTextarea from '@/components/ui/form/textarea';
 import { FormFieldType, IFormFieldOption } from '@/components/ui/form/type';
 
-import { defaultFileConfig, postFileService, putFileService } from '@/apis/adminApis';
+import { getFileServiceTypeInitialConfig, postFileService, putFileService } from '@/apis/adminApis';
 import { zodResolver } from '@hookform/resolvers/zod';
 import { z } from 'zod';
 import { feFileServiceTypes } from '@/types/file';
@@ -149,11 +149,15 @@ export const FileServiceModal = (props: IProps) => {
   useEffect(() => {
     const subscription = form.watch((value, { name, type }) => {
       if (name === 'fileServiceTypeId' && type === 'change') {
-        const type = value.type as FileServicesType;
-        form.setValue(
-          'configs',
-          JSON.stringify(defaultFileConfig, null, 2),
-        );
+        const fileServiceTypeId = parseInt(value.fileServiceTypeId!);
+        getFileServiceTypeInitialConfig(fileServiceTypeId).then((res) => {
+          try {
+            const configs = JSON.parse(res);
+            form.setValue('configs', JSON.stringify(configs, null, 2));
+          } catch {
+            form.setValue('configs', res);
+          }
+        });
       }
     });
     return () => subscription.unsubscribe();

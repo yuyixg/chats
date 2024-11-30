@@ -35,8 +35,7 @@ export interface AdminModelDto {
   allowVision: boolean;
   allowSystemPrompt: boolean;
   allowStreaming: boolean;
-  minTemperature: number;
-  maxTemperature: number;
+  allowTemperature: boolean;
   contextWindow: number;
 }
 
@@ -220,11 +219,8 @@ export interface PostModelKeysParams {
 export interface PostPromptParams {
   name: string;
   content: string;
-  description: string;
-}
-
-export interface PutPromptParams {
-  id: string;
+  isDefault: boolean;
+  isSystem: boolean;
 }
 
 export interface GetConfigsResult {

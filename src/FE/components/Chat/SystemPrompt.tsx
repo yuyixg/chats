@@ -15,16 +15,22 @@ import { PromptList } from './PromptList';
 import { VariableModal } from './VariableModal';
 
 import { getUserPromptDetail } from '@/apis/clientApis';
+import { formatPrompt } from '@/utils/promptVariable';
+import { AdminModelDto } from '@/types/adminApis';
 
 interface Props {
   currentPrompt: string;
   prompts: Prompt[];
-  onChangePrompt: (prompt: string) => void;
+  model: AdminModelDto,
+  onChangePromptText: (prompt: string) => void;
+  onChangePrompt: (prompt: Prompt) => void;
 }
 
 export const SystemPrompt: FC<Props> = ({
   currentPrompt,
   prompts,
+  model, 
+  onChangePromptText,
   onChangePrompt,
 }) => {
   const { t } = useTranslation();
@@ -50,7 +56,7 @@ export const SystemPrompt: FC<Props> = ({
     updatePromptListVisibility(value);
 
     if (value.length > 0) {
-      onChangePrompt(value);
+      onChangePromptText(value);
     }
   };
 
@@ -63,6 +69,7 @@ export const SystemPrompt: FC<Props> = ({
         });
         handlePromptSelect(data);
         setShowPromptList(false);
+        onChangePrompt(data);
       });
   };
 
@@ -90,18 +97,19 @@ export const SystemPrompt: FC<Props> = ({
   }, []);
 
   const handlePromptSelect = (prompt: Prompt) => {
-    const parsedVariables = parseVariables(prompt.content);
+    const formattedContent = formatPrompt(prompt.content, { model });
+    const parsedVariables = parseVariables(formattedContent);
     setVariables(parsedVariables);
 
     if (parsedVariables.length > 0) {
       setIsModalVisible(true);
     } else {
-      const updatedContent = value?.replace(/\/\w*$/, prompt.content);
+      const updatedContent = value?.replace(/\/\w*$/, formattedContent);
 
+      onChangePromptText(updatedContent);
       setValue(updatedContent);
-      onChangePrompt(updatedContent);
 
-      updatePromptListVisibility(prompt.content);
+      updatePromptListVisibility(formattedContent);
     }
   };
 
@@ -112,7 +120,7 @@ export const SystemPrompt: FC<Props> = ({
     });
 
     setValue(newContent);
-    onChangePrompt(newContent);
+    onChangePromptText(newContent);
 
     if (textareaRef && textareaRef.current) {
       textareaRef.current.focus();

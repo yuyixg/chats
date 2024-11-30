@@ -15,15 +15,17 @@ public class PromptsController(ChatsDB db, CurrentUser currentUser) : Controller
     public async Task<ActionResult<PromptDto[]>> GetPrompts(CancellationToken cancellationToken)
     {
         PromptDto[] prompts = await db.Prompts
-            .Where(x => x.CreateUserId == currentUser.Id && !x.IsSystem)
+            .Where(x => x.CreateUserId == currentUser.Id || currentUser.IsAdmin && x.IsSystem)
             .OrderBy(x => x.UpdatedAt)
             .Select(x => new PromptDto()
             {
                 Content = x.Content,
+                Temperature = x.Temperature,
                 Id = x.Id,
                 Name = x.Name,
                 IsDefault = x.IsDefault,
-                UpdatedAt = x.UpdatedAt
+                UpdatedAt = x.UpdatedAt,
+                IsSystem = x.IsSystem
             })
             .ToArrayAsync(cancellationToken);
         return Ok(prompts);
@@ -33,13 +35,14 @@ public class PromptsController(ChatsDB db, CurrentUser currentUser) : Controller
     public async Task<ActionResult<BriefPromptDto[]>> GetBriefPrompts(CancellationToken cancellationToken)
     {
         BriefPromptDto[] prompts = await db.Prompts
-            .Where(x => x.CreateUserId == currentUser.Id && !x.IsSystem)
+            .Where(x => x.CreateUserId == currentUser.Id || currentUser.IsAdmin && x.IsSystem)
             .OrderBy(x => x.UpdatedAt)
             .Select(x => new BriefPromptDto()
             {
                 Id = x.Id,
                 Name = x.Name,
                 IsDefault = x.IsDefault,
+                IsSystem = x.IsSystem,
                 UpdatedAt = x.UpdatedAt
             })
             .ToArrayAsync(cancellationToken);
@@ -57,10 +60,12 @@ public class PromptsController(ChatsDB db, CurrentUser currentUser) : Controller
         return Ok(new PromptDto()
         {
             Content = prompt.Content,
+            Temperature = prompt.Temperature,
             Id = prompt.Id,
             Name = prompt.Name,
             IsDefault = prompt.IsDefault,
-            UpdatedAt = prompt.UpdatedAt
+            UpdatedAt = prompt.UpdatedAt,
+            IsSystem = prompt.IsSystem,
         });
     }
 
@@ -70,24 +75,26 @@ public class PromptsController(ChatsDB db, CurrentUser currentUser) : Controller
         Prompt? userDefault = await db.Prompts
                 .OrderByDescending(x => x.UpdatedAt)
                 .Where(x => x.IsDefault && x.CreateUserId == currentUser.Id)
-                .FirstOrDefaultAsync(cancellationToken)
-                ??
-            await db.Prompts
+                .FirstOrDefaultAsync(cancellationToken);
+        Prompt? systemDefault = await db.Prompts
                 .OrderByDescending(x => x.UpdatedAt)
                 .Where(x => x.IsDefault && x.IsSystem)
                 .FirstOrDefaultAsync(cancellationToken);
+        Prompt? consolidated = userDefault ?? systemDefault;
 
-        PromptDto dto = userDefault != null ? new PromptDto()
+        PromptDto dto = consolidated != null ? new PromptDto()
         {
-            Content = userDefault.Content,
-            Id = userDefault.Id,
-            Name = userDefault.Name,
-            IsDefault = userDefault.IsDefault,
-            UpdatedAt = userDefault.UpdatedAt,
-            IsSystem = true,
+            Content = consolidated.Content,
+            Temperature = consolidated.Temperature,
+            Id = consolidated.Id,
+            Name = consolidated.Name,
+            IsDefault = consolidated.IsDefault,
+            UpdatedAt = consolidated.UpdatedAt,
+            IsSystem = consolidated.IsSystem,
         } : new PromptDto()
         {
             Content = ConversationService.DefaultPrompt,
+            Temperature = ConversationService.DefaultTemperature,
             Id = -1,
             IsDefault = true,
             Name = "Default",
@@ -95,7 +102,7 @@ public class PromptsController(ChatsDB db, CurrentUser currentUser) : Controller
             IsSystem = true
         };
 
-        return Ok(userDefault);
+        return Ok(dto);
     }
 
     [HttpPost]
@@ -110,14 +117,15 @@ public class PromptsController(ChatsDB db, CurrentUser currentUser) : Controller
             Id = prompt.Id,
             IsDefault = prompt.IsDefault,
             Name = prompt.Name,
-            UpdatedAt = prompt.UpdatedAt
+            UpdatedAt = prompt.UpdatedAt,
+            IsSystem = prompt.IsSystem
         });
     }
 
     [HttpDelete]
     public async Task<ActionResult> DeletePrompt([FromQuery] int id, CancellationToken cancellationToken)
     {
-        Prompt? prompt = await db.Prompts.FirstOrDefaultAsync(x => x.Id == id && x.CreateUserId == currentUser.Id, cancellationToken);
+        Prompt? prompt = await db.Prompts.FirstOrDefaultAsync(x => x.Id == id && (x.CreateUserId == currentUser.Id || currentUser.IsAdmin), cancellationToken);
         if (prompt == null)
         {
             return NotFound();
@@ -127,14 +135,15 @@ public class PromptsController(ChatsDB db, CurrentUser currentUser) : Controller
         return NoContent();
     }
 
-    [HttpPut]
-    public async Task<ActionResult<PromptDto>> UpdatePrompt([FromBody] PromptDto request, CancellationToken cancellationToken)
+    [HttpPut("{promptId:int}")]
+    public async Task<ActionResult<PromptDto>> UpdatePrompt(int promptId, [FromBody] CreatePromptDto request, CancellationToken cancellationToken)
     {
-        Prompt? prompt = await db.Prompts.FirstOrDefaultAsync(x => x.Id == request.Id && x.CreateUserId == currentUser.Id, cancellationToken);
+        Prompt? prompt = await db.Prompts.FirstOrDefaultAsync(x => x.Id == promptId && (x.CreateUserId == currentUser.Id || currentUser.IsAdmin), cancellationToken);
         if (prompt == null)
         {
             return NotFound();
         }
+
         request.ApplyTo(prompt, currentUser.IsAdmin);
         if (db.ChangeTracker.HasChanges())
         {

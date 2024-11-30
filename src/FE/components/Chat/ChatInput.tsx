@@ -34,10 +34,14 @@ import { VariableModal } from './VariableModal';
 
 import { getUserPromptDetail } from '@/apis/clientApis';
 import { defaultFileConfig } from '@/apis/adminApis';
+import { AdminModelDto } from '@/types/adminApis';
+import { formatPrompt } from '@/utils/promptVariable';
 
 interface Props {
   onSend: (message: Message) => void;
   onScrollDownClick: () => void;
+  onChangePrompt: (prompt: Prompt) => void;
+  model: AdminModelDto,
   stopConversationRef: MutableRefObject<boolean>;
   textareaRef: MutableRefObject<HTMLTextAreaElement | null>;
   showScrollDownButton: boolean;
@@ -46,6 +50,8 @@ interface Props {
 export const ChatInput = ({
   onSend,
   onScrollDownClick,
+  onChangePrompt,
+  model,
   stopConversationRef,
   textareaRef,
   showScrollDownButton,
@@ -165,7 +171,9 @@ export const ChatInput = ({
   };
 
   const handlePromptSelect = (prompt: Prompt) => {
-    const parsedVariables = parseVariables(prompt.content);
+    const formatted = formatPrompt(prompt.content, { model });
+    const parsedVariables = parseVariables(formatted);
+    onChangePrompt(prompt);
     setVariables(parsedVariables);
 
     if (parsedVariables.length > 0) {
@@ -174,11 +182,11 @@ export const ChatInput = ({
       setContent((prevContent) => {
         const updatedContent = prevContent.text?.replace(
           /\/\w*$/,
-          prompt.content,
+          formatted,
         );
         return { ...prevContent, text: updatedContent };
       });
-      updatePromptListVisibility(prompt.content);
+      updatePromptListVisibility(formatted);
     }
   };
 
