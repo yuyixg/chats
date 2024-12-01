@@ -11,7 +11,7 @@ using SkiaSharp;
 namespace Chats.BE.Controllers.Chats.Files;
 
 [Route("api")]
-public class FileController(ChatsDB db, FileServiceFactory fileServiceFactory, CurrentUser currentUser, IIdEncryptionService idEncryptionService) : ControllerBase
+public class FileController(ChatsDB db, FileServiceFactory fileServiceFactory, CurrentUser currentUser, IIdEncryptionService idEncryptionService, ILogger<FileController> logger) : ControllerBase
 {
     //[Route("{fileServiceId:int}"), HttpPost]
     //public async Task<ActionResult<FileUrlsDto>> GetFileUrls(
@@ -132,20 +132,28 @@ public class FileController(ChatsDB db, FileServiceFactory fileServiceFactory, C
         return ms.ToArray();
     }
 
-    private static FileImageInfo? GetImageInfo(byte[] fileBytes)
+    private FileImageInfo? GetImageInfo(string fileName, byte[] fileBytes)
     {
         using Stream stream = new MemoryStream(fileBytes);
-        using SKCodec codec = SKCodec.Create(stream);
-        if (codec == null)
+        try
         {
+            using SKCodec codec = SKCodec.Create(stream);
+            if (codec == null)
+            {
+                return null;
+            }
+
+            return new FileImageInfo
+            {
+                Width = codec.Info.Width,
+                Height = codec.Info.Height
+            };
+        }
+        catch (Exception ex)
+        {
+            logger.LogError(ex, "Failed to parse the file: {fileName}", fileName);
             return null;
         }
-
-        return new FileImageInfo
-        {
-            Width = codec.Info.Width,
-            Height = codec.Info.Height
-        };
     }
 
     private async Task<FileContentType> GetOrCreateDBContentType(string contentType, CancellationToken cancellationToken)
