@@ -73,6 +73,10 @@ public class FileController(ChatsDB db, FileServiceFactory fileServiceFactory, C
         {
             return BadRequest("File is too large.");
         }
+        if (!string.IsNullOrWhiteSpace(file.FileName) && file.FileName.IndexOfAny(Path.GetInvalidFileNameChars()) == -1)
+        {
+            return BadRequest("Invalid file name.");
+        }
 
         FileService? fileService = await db.FileServices.FindAsync([fileServiceId], cancellationToken);
         if (fileService == null)
@@ -83,7 +87,12 @@ public class FileController(ChatsDB db, FileServiceFactory fileServiceFactory, C
         IFileService fs = fileServiceFactory.Create((DBFileServiceType)fileService.FileServiceTypeId, fileService.Configs);
         using Stream baseStream = file.OpenReadStream();
         using PartialBufferedStream pbStream = new(baseStream, 4 * 1024);
-        string storageKey = await fs.Upload(file.ContentType, baseStream, cancellationToken);
+        string storageKey = await fs.Upload(new FileUploadRequest
+        {
+            ContentType = file.ContentType,
+            Stream = pbStream,
+            FileName = file.FileName
+        }, cancellationToken);
         DB.File dbFile = new()
         {
             FileName = file.FileName,

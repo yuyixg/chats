@@ -2,6 +2,6 @@
 
 public interface IFileService
 {
-    Task<string> Upload(string contentType, Stream stream, CancellationToken cancellationToken);
+    Task<string> Upload(FileUploadRequest request, CancellationToken cancellationToken);
     string CreateDownloadUrl(string storageKey);
 }

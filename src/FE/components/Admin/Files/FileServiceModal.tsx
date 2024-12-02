@@ -3,7 +3,6 @@ import { useForm } from 'react-hook-form';
 import toast from 'react-hot-toast';
 
 import useTranslation from '@/hooks/useTranslation';
-import { mergeConfigs } from '@/utils/model';
 
 import { GetFileServicesResult, PostFileServicesParams } from '@/types/adminApis';
 
