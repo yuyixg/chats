@@ -146,7 +146,7 @@ public record AdminMessageItemTemp
                     ParentId = x.ParentId != null ? idEncryption.Encrypt(x.ParentId.Value) : null,
                     CreatedAt = x.CreatedAt,
                     Role = x.Role.ToString().ToLowerInvariant(),
-                    Content = MessageContentResponse.FromSegments(x.Content),
+                    Content = MessageContentResponse.FromSegments(x.Content, idEncryption),
                     ChildrenIds = temps
                         .Where(v => v.ParentId == x.Id && v.Role == DBChatRole.User)
                         .Select(v => idEncryption.Encrypt(v.Id))

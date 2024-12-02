@@ -8,13 +8,13 @@ using System.Text.Json;
 
 namespace Chats.BE.Services.FileServices;
 
-public class FileServiceFactory
+public class FileServiceFactory(HostUrlService hostUrlService)
 {
     public IFileService Create(DBFileServiceType fileServiceType, string config)
     {
         return fileServiceType switch
         {
-            DBFileServiceType.Local => new LocalFileService(config),
+            DBFileServiceType.Local => new LocalFileService(config, hostUrlService),
             DBFileServiceType.Minio => new MinioFileService(JsonSerializer.Deserialize<MinioConfig>(config)!),
             DBFileServiceType.AwsS3 => new AwsS3FileService(JsonSerializer.Deserialize<AwsS3Config>(config)!),
             DBFileServiceType.AliyunOSS => new AliyunOSSFileService(JsonSerializer.Deserialize<AliyunOssConfig>(config)!),

@@ -36,6 +36,7 @@ import { getUserPromptDetail } from '@/apis/clientApis';
 import { defaultFileConfig } from '@/apis/adminApis';
 import { AdminModelDto } from '@/types/adminApis';
 import { formatPrompt } from '@/utils/promptVariable';
+import { getImageUrl } from '@/utils/uploadFile';
 
 interface Props {
   onSend: (message: Message) => void;
@@ -65,6 +66,7 @@ export const ChatInput = ({
   const [content, setContent] = useState<Content>({
     text: '',
     image: [],
+    fileIds: [],
   });
   const [isTyping, setIsTyping] = useState<boolean>(false);
   const [uploading, setUploading] = useState<boolean>(false);
@@ -115,7 +117,7 @@ export const ChatInput = ({
       return;
     }
     onSend({ role: 'user', content });
-    setContent({ text: '', image: [] });
+    setContent({ text: '', image: [], fileIds: [] });
 
     if (window.innerWidth < 640 && textareaRef && textareaRef.current) {
       textareaRef.current.blur();
@@ -218,9 +220,9 @@ export const ChatInput = ({
 
   const canUploadFile = () => {
     return (
-      selectModel && selectModel.allowVision && selectModel.fileServiceId && 
+      selectModel && selectModel.allowVision && selectModel.fileServiceId &&
       !uploading &&
-      (content?.image?.length ?? 0) <= defaultFileConfig.count
+      (content?.fileIds?.length ?? 0) <= defaultFileConfig.count
     );
   };
 
@@ -237,12 +239,12 @@ export const ChatInput = ({
     }
   };
 
-  const handleUploadSuccessful = (url: string) => {
+  const handleUploadSuccessful = (imageId: string) => {
     setContent((pre) => {
-      const image = pre.image!.concat(url);
+      const imageIds = pre.fileIds!.concat(imageId);
       return {
-        text: pre.text,
-        image,
+        ...pre,
+        fileIds: imageIds,
       };
     });
     setUploading(false);
@@ -256,14 +258,13 @@ export const ChatInput = ({
     if (textareaRef && textareaRef.current) {
       textareaRef.current.style.height = 'inherit';
       textareaRef.current.style.height = `${textareaRef.current?.scrollHeight}px`;
-      textareaRef.current.style.overflow = `${
-        textareaRef?.current?.scrollHeight > 400 ? 'auto' : 'hidden'
-      }`;
+      textareaRef.current.style.overflow = `${textareaRef?.current?.scrollHeight > 400 ? 'auto' : 'hidden'
+        }`;
     }
   }, [content]);
 
   useEffect(() => {
-    setContent({ ...content, image: [] });
+    setContent({ ...content, image: [], fileIds: [] });
   }, [selectModel, selectChat]);
 
   return (
@@ -301,6 +302,35 @@ export const ChatInput = ({
                     </div>
                   </div>
                 ))}
+              {content?.fileIds &&
+                content.fileIds.map((imageId, index) => (
+                  <div className="relative group" key={index}>
+                    <div className="mr-1 w-[32px] h-[32px] rounded overflow-hidden">
+                      <img
+                        src={getImageUrl(imageId)}
+                        alt=""
+                        className="w-full h-full object-cover shadow-lg"
+                      />
+                      <button
+                        onClick={() => {
+                          setContent((pre) => {
+                            const image = pre.fileIds?.filter((x) => x !== imageId);
+                            return {
+                              text: pre.text,
+                              image,
+                            };
+                          });
+                        }}
+                        className="absolute top-[-5px] right-[-1px]"
+                      >
+                        <IconCircleX
+                          className="text-black/50 dark:text-white/50"
+                          size={12}
+                        />
+                      </button>
+                    </div>
+                  </div>
+                ))}
             </div>
 
             <textarea
@@ -310,11 +340,10 @@ export const ChatInput = ({
                 resize: 'none',
                 bottom: `${textareaRef?.current?.scrollHeight}px`,
                 maxHeight: '400px',
-                overflow: `${
-                  textareaRef.current && textareaRef.current.scrollHeight > 400
+                overflow: `${textareaRef.current && textareaRef.current.scrollHeight > 400
                     ? 'auto'
                     : 'hidden'
-                }`,
+                  }`,
               }}
               placeholder={
                 t('Type a message or type "/" to select a prompt...') || ''

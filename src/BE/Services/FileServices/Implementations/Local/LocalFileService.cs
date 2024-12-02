@@ -2,12 +2,11 @@
 
 namespace Chats.BE.Services.FileServices.Implementations.Local;
 
-public class LocalFileService(string localFolder) : IFileService
+public class LocalFileService(string localFolder, HostUrlService hostUrlservice) : IFileService
 {
     public string CreateDownloadUrl(string storageKey)
     {
-        // This method is not supported for LocalFileService
-        throw new NotSupportedException();
+        return $"{hostUrlservice.GetBEUrl()}/api/file/{storageKey}";
     }
 
     public async Task<string> Upload(FileUploadRequest request, CancellationToken cancellationToken)

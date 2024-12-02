@@ -1,6 +1,8 @@
 ﻿using Chats.BE.Controllers.Chats.Conversations.Dtos;
 using Chats.BE.DB.Enums;
+using Chats.BE.Services.IdEncryption;
 using OpenAI.Chat;
+using System.Buffers.Binary;
 using System.Text;
 
 namespace Chats.BE.DB;
@@ -39,5 +41,12 @@ public partial class MessageContent
     public static MessageContent FromError(string error)
     {
         return new MessageContent { Content = Encoding.UTF8.GetBytes(error), ContentTypeId = (byte)DBMessageContentType.Error };
+    }
+
+    public static MessageContent FromFileId(string fileId, IIdEncryptionService idEncryptionService)
+    {
+        byte[] bytes = new byte[4];
+        BinaryPrimitives.WriteInt32LittleEndian(bytes, idEncryptionService.DecryptAsInt32(fileId));
+        return new MessageContent { Content = bytes, ContentTypeId = (byte)DBMessageContentType.FileId };
     }
 }

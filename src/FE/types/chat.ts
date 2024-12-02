@@ -9,6 +9,7 @@ export interface Content {
   error?: string;
   text?: string;
   image?: string[];
+  fileIds?: string[];
 }
 
 export interface ChatBody {

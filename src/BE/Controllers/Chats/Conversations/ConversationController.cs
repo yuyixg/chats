@@ -6,6 +6,7 @@ using Chats.BE.Infrastructure;
 using Chats.BE.Services;
 using Chats.BE.Services.Conversations;
 using Chats.BE.Services.Conversations.Dtos;
+using Chats.BE.Services.FileServices;
 using Chats.BE.Services.IdEncryption;
 using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Mvc;
@@ -28,6 +29,7 @@ public class ConversationController(ChatsDB db, CurrentUser currentUser, ILogger
         [FromServices] ConversationFactory conversationFactory,
         [FromServices] UserModelManager userModelManager,
         [FromServices] ClientInfoManager clientInfoManager,
+        [FromServices] FileDownloadUrlProvider fileDownloadUrlProvider,
         CancellationToken cancellationToken)
     {
         InChatContext icc = new();
@@ -104,7 +106,7 @@ public class ConversationController(ChatsDB db, CurrentUser currentUser, ILogger
         List<OpenAIChatMessage> messageToSend =
         [
             ..(systemMessage != null ? [new SystemChatMessage(systemMessage.Content[0].ToString())] : Array.Empty<OpenAIChatMessage>()),
-            ..GetMessageTree(existingMessages, messageId),
+            ..await GetMessageTree(existingMessages, messageId).ToAsyncEnumerable().SelectAwait(async x => await x.ToOpenAI(fileDownloadUrlProvider, cancellationToken)).ToArrayAsync(cancellationToken),
         ];
 
         // new user message
@@ -121,7 +123,7 @@ public class ConversationController(ChatsDB db, CurrentUser currentUser, ILogger
             {
                 ChatId = chatId,
                 ChatRoleId = (byte)DBChatRole.User,
-                MessageContents = request.UserMessage.ToMessageContents(),
+                MessageContents = request.UserMessage.ToMessageContents(idEncryption),
                 CreatedAt = DateTime.UtcNow,
                 ParentId = messageId,
             };
@@ -130,11 +132,11 @@ public class ConversationController(ChatsDB db, CurrentUser currentUser, ILogger
             userMessage = new()
             {
                 Id = dbUserMessage.Id,
-                Content = request.UserMessage.ToMessageSegments(),
+                Content = request.UserMessage.ToMessageSegments(idEncryption),
                 Role = (DBChatRole)dbUserMessage.ChatRoleId,
                 ParentId = dbUserMessage.ParentId,
             };
-            messageToSend.Add(userMessage.ToOpenAI());
+            messageToSend.Add(await userMessage.ToOpenAI(fileDownloadUrlProvider, cancellationToken));
         }
 
         Response.Headers.ContentType = "text/event-stream";
@@ -244,7 +246,7 @@ public class ConversationController(ChatsDB db, CurrentUser currentUser, ILogger
         await Response.Body.FlushAsync();
     }
 
-    static IEnumerable<OpenAIChatMessage> GetMessageTree(Dictionary<long, MessageLiteDto> existingMessages, long? fromParentId)
+    static LinkedList<MessageLiteDto> GetMessageTree(Dictionary<long, MessageLiteDto> existingMessages, long? fromParentId)
     {
         LinkedList<MessageLiteDto> line = [];
         long? currentParentId = fromParentId;
@@ -257,6 +259,6 @@ public class ConversationController(ChatsDB db, CurrentUser currentUser, ILogger
             line.AddFirst(existingMessages[currentParentId.Value]);
             currentParentId = existingMessages[currentParentId.Value].ParentId;
         }
-        return line.Select(x => x.ToOpenAI());
+        return line;
     }
 }

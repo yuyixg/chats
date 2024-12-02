@@ -3,6 +3,7 @@ using Chats.BE.DB;
 using Chats.BE.DB.Enums;
 using Chats.BE.Services.Conversations;
 using Chats.BE.Services.IdEncryption;
+using System.Buffers.Binary;
 using System.Text;
 using System.Text.Json.Serialization;
 
@@ -69,18 +70,22 @@ public record MessageContentRequest
     [JsonPropertyName("image")]
     public List<string>? Image { get; init; }
 
-    public MessageContent[] ToMessageContents()
+    [JsonPropertyName("fileIds")]
+    public List<string>? FileIds { get; init; }
+
+    public MessageContent[] ToMessageContents(IIdEncryptionService idEncryptionService)
     {
         return
         [
             MessageContent.FromText(Text),
             ..(Image ?? []).Select(MessageContent.FromImageUrl),
+            ..(FileIds ?? []).Select(x => MessageContent.FromFileId(x, idEncryptionService)),
         ];
     }
 
-    public DBMessageSegment[] ToMessageSegments()
+    public DBMessageSegment[] ToMessageSegments(IIdEncryptionService idEncryptionService)
     {
-        return ToMessageContents().Select(x => x.ToSegment()).ToArray();
+        return ToMessageContents(idEncryptionService).Select(x => x.ToSegment()).ToArray();
     }
 }
 
@@ -92,10 +97,13 @@ public record MessageContentResponse
     [JsonPropertyName("image"), JsonIgnore(Condition = JsonIgnoreCondition.WhenWritingNull)]
     public required List<string>? Image { get; init; }
 
+    [JsonPropertyName("fileIds"), JsonIgnore(Condition = JsonIgnoreCondition.WhenWritingNull)]
+    public required List<string>? FileIds { get; init; }
+
     [JsonPropertyName("error"), JsonIgnore(Condition = JsonIgnoreCondition.WhenWritingNull)]
     public required string? Error { get; init; }
 
-    public static MessageContentResponse FromSegments(DBMessageSegment[] segments)
+    public static MessageContentResponse FromSegments(DBMessageSegment[] segments, IIdEncryptionService idEncryptionService)
     {
         Dictionary<DBMessageContentType, byte[][]> groups = segments
             .GroupBy(x => x.ContentType)
@@ -109,6 +117,7 @@ public record MessageContentResponse
         {
             Text = string.Join("\n", groups[DBMessageContentType.Text].Select(Encoding.Unicode.GetString)),
             Image = groups[DBMessageContentType.ImageUrl].Select(Encoding.UTF8.GetString).ToList() switch { [] => null, var x => x },
+            FileIds = groups[DBMessageContentType.FileId].Select(x => idEncryptionService.Encrypt(BinaryPrimitives.ReadInt32LittleEndian(x))).ToList() switch { [] => null, var x => x },
             Error = string.Join("\n", groups[DBMessageContentType.Error].Select(Encoding.UTF8.GetString)) switch { "" => null, var x => x }
         };
     }
@@ -131,16 +140,16 @@ public record ChatMessageTemp
     public required short? ModelId { get; init; }
     public required string? ModelName { get; init; }
 
-    public MessageDto ToDto(IIdEncryptionService idEncryption)
+    public MessageDto ToDto(IIdEncryptionService idEncryptionService)
     {
         if (ModelId == null)
         {
             return new RequestMessageDto()
             {
-                Id = idEncryption.Encrypt(Id),
-                ParentId = ParentId != null ? idEncryption.Encrypt(ParentId.Value) : null, 
+                Id = idEncryptionService.Encrypt(Id),
+                ParentId = ParentId != null ? idEncryptionService.Encrypt(ParentId.Value) : null, 
                 Role = Role.ToString().ToLowerInvariant(),
-                Content = MessageContentResponse.FromSegments(Content),
+                Content = MessageContentResponse.FromSegments(Content, idEncryptionService),
                 CreatedAt = CreatedAt
             };
         }
@@ -148,10 +157,10 @@ public record ChatMessageTemp
         {
             return new ResponseMessageDto()
             {
-                Id = idEncryption.Encrypt(Id),
-                ParentId = ParentId != null ? idEncryption.Encrypt(ParentId.Value) : null, 
+                Id = idEncryptionService.Encrypt(Id),
+                ParentId = ParentId != null ? idEncryptionService.Encrypt(ParentId.Value) : null, 
                 Role = Role.ToString().ToLowerInvariant(),
-                Content = MessageContentResponse.FromSegments(Content),
+                Content = MessageContentResponse.FromSegments(Content, idEncryptionService),
                 CreatedAt = CreatedAt,
                 InputTokens = InputTokens!.Value,
                 OutputTokens = OutputTokens!.Value,

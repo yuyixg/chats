@@ -27,6 +27,7 @@ import remarkGfm from 'remark-gfm';
 import remarkMath from 'remark-math';
 import CopyAction from '@/components/Chat/ChatMessage/CopyAction';
 import GenerateInformationAction from '@/components/Chat/ChatMessage/GenerateInformationAction';
+import { getImageUrl } from '@/utils/uploadFile';
 
 interface PropsMessage {
   id: string;
@@ -115,9 +116,19 @@ export const ChatMessage: FC<Props> = memo(
                           alt=""
                         />
                       ))}
+                    {message.content?.fileIds &&
+                      message.content.fileIds.map((imageId, index) => (
+                        <img
+                          className="rounded-md mr-2 not-prose"
+                          key={index}
+                          style={{ maxWidth: 268, maxHeight: 168 }}
+                          src={getImageUrl(imageId)}
+                          alt=""
+                        />
+                      ))}
                   </div>
                   <div
-                    className={`prose whitespace-pre-wrap dark:prose-invert ${message.content?.image && message.content.image.length > 0
+                    className={`prose whitespace-pre-wrap dark:prose-invert ${message.content?.image && message.content.image.length > 0 || message.content?.fileIds && message.content.fileIds.length > 0
                       ? 'mt-2'
                       : ''
                       }`}
@@ -164,7 +175,7 @@ export const ChatMessage: FC<Props> = memo(
                         </Button>
                       </div>
                     )}
-                  <CopyAction text={message.content.text} />
+                    <CopyAction text={message.content.text} />
                   </>
                 </div>
               </>

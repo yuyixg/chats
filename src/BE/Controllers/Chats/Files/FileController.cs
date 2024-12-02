@@ -62,7 +62,7 @@ public class FileController(ChatsDB db, FileServiceFactory fileServiceFactory, C
     //    });
     //}
 
-    [Route("file-service/{fileServiceId:int}/file"), HttpPost]
+    [Route("file-service/{fileServiceId:int}/upload"), HttpPut]
     public async Task<ActionResult<string>> Upload(int fileServiceId, IFormFile file, [FromServices] ClientInfoManager clientInfoManager, CancellationToken cancellationToken)
     {
         if (file.Length == 0)
@@ -81,6 +81,11 @@ public class FileController(ChatsDB db, FileServiceFactory fileServiceFactory, C
         FileService? fileService = await db.FileServices.FindAsync([fileServiceId], cancellationToken);
         if (fileService == null)
         {
+            return NotFound("File server config not found.");
+        }
+        if (!fileService.IsDefault && !currentUser.IsAdmin)
+        {
+            // only admin can upload to non-default file service
             return NotFound("File server config not found.");
         }
 
@@ -108,18 +113,25 @@ public class FileController(ChatsDB db, FileServiceFactory fileServiceFactory, C
         db.Files.Add(dbFile);
         await db.SaveChangesAsync(cancellationToken);
 
-        return Created(default(string), value: dbFile.Id);
+        string encryptedFileId = idEncryptionService.Encrypt(dbFile.Id);
+        return Created(default(string), value: encryptedFileId);
     }
 
-    [Route("file/{fileId:int}"), HttpGet]
-    public async Task<ActionResult> Download(int fileId, CancellationToken cancellationToken)
+    [Route("file/{encryptedFileId}"), HttpGet]
+    public async Task<ActionResult> Download(string encryptedFileId, CancellationToken cancellationToken)
     {
+        int fileId = idEncryptionService.DecryptAsInt32(encryptedFileId);
         DB.File? file = await db.Files
             .Include(x => x.FileService)
             .Include(x => x.FileContentType)
             .FirstOrDefaultAsync(x => x.Id == fileId, cancellationToken);
         if (file == null)
         {
+            return NotFound("File not found.");
+        }
+        if (file.CreateUserId != currentUser.Id && !currentUser.IsAdmin)
+        {
+            // only the creator or admin can download the file
             return NotFound("File not found.");
         }
 
