@@ -6,7 +6,7 @@ public class CurrentUser
 {
     public CurrentUser(IHttpContextAccessor httpContextAccessor)
     {
-        var httpContext = httpContextAccessor.HttpContext ?? throw new InvalidOperationException("HttpContext is null");
+        HttpContext httpContext = httpContextAccessor.HttpContext ?? throw new InvalidOperationException("HttpContext is null");
 
         Id = int.TryParse(httpContext.User.FindFirstValue(ClaimTypes.NameIdentifier), out int id) ? id : throw new InvalidOperationException("User id is not a int");
         DisplayName = httpContext.User.FindFirstValue(ClaimTypes.Name) ?? throw new InvalidOperationException("User name is null");

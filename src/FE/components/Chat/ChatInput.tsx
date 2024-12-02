@@ -52,7 +52,6 @@ export const ChatInput = ({
   onSend,
   onScrollDownClick,
   onChangePrompt,
-  model,
   stopConversationRef,
   textareaRef,
   showScrollDownButton,
@@ -173,7 +172,7 @@ export const ChatInput = ({
   };
 
   const handlePromptSelect = (prompt: Prompt) => {
-    const formatted = formatPrompt(prompt.content, { model });
+    const formatted = formatPrompt(prompt.content, { model: selectModel! });
     const parsedVariables = parseVariables(formatted);
     onChangePrompt(prompt);
     setVariables(parsedVariables);

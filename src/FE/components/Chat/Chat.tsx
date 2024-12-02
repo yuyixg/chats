@@ -530,6 +530,7 @@ export const Chat = memo(({ stopConversationRef }: Props) => {
               const { lastMessage } = getSelectMessagesLast();
               handleSend(message, lastMessage?.id, false);
             }}
+            model={selectModel!}
             onScrollDownClick={handleScrollDown}
             showScrollDownButton={showScrollDownButton}
             onChangePrompt={onChangePrompt}
