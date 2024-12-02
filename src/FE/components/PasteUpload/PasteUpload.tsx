@@ -6,12 +6,13 @@ import {
   UploadFailType,
 } from '@/types/components/upload';
 import { ChatModelFileConfig } from '@/types/model';
+import { ImageDef } from '@/types/chat';
 
 interface IPasteUploadProps {
   fileServiceId: number;
   fileConfig: ChatModelFileConfig;
   onUploading?: () => void;
-  onSuccessful?: (url: string) => void;
+  onSuccessful?: (def: ImageDef) => void;
   onFailed?: (type?: UploadFailType) => void;
 }
 

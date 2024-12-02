@@ -4,9 +4,10 @@ import { checkFileSizeCanUpload, uploadFile } from '@/utils/uploadFile';
 
 import { UploadFailType } from '@/types/components/upload';
 import { ChatModelFileConfig } from '@/types/model';
+import { ImageDef } from '@/types/chat';
 
 interface Props {
-  onSuccessful?: (url: string) => void;
+  onSuccessful?: (def: ImageDef) => void;
   onUploading?: () => void;
   onFailed?: (type?: UploadFailType) => void;
   children?: React.ReactNode;

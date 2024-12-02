@@ -139,7 +139,7 @@ const UserMessage = (props: Props) => {
                     className="rounded-md mr-2 not-prose"
                     key={index}
                     style={{ maxWidth: 268, maxHeight: 168 }}
-                    src={img}
+                    src={img.url}
                     alt=""
                   />
                 ))}

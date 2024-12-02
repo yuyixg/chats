@@ -67,18 +67,14 @@ public record MessageContentRequest
     [JsonPropertyName("text")]
     public required string Text { get; init; }
 
-    [JsonPropertyName("image")]
-    public List<string>? Image { get; init; }
-
     [JsonPropertyName("fileIds")]
-    public List<string>? FileIds { get; init; }
+    public string[]? FileIds { get; init; }
 
     public MessageContent[] ToMessageContents(IIdEncryptionService idEncryptionService)
     {
         return
         [
             MessageContent.FromText(Text),
-            ..(Image ?? []).Select(MessageContent.FromImageUrl),
             ..(FileIds ?? []).Select(x => MessageContent.FromFileId(x, idEncryptionService)),
         ];
     }
@@ -89,16 +85,22 @@ public record MessageContentRequest
     }
 }
 
+public record ImageDto
+{
+    [JsonPropertyName("id")]
+    public required string Id { get; init; }
+
+    [JsonPropertyName("url")]
+    public required string Url { get; init; }
+}
+
 public record MessageContentResponse
 {
     [JsonPropertyName("text")]
     public required string Text { get; init; }
 
     [JsonPropertyName("image"), JsonIgnore(Condition = JsonIgnoreCondition.WhenWritingNull)]
-    public required List<string>? Image { get; init; }
-
-    [JsonPropertyName("fileIds"), JsonIgnore(Condition = JsonIgnoreCondition.WhenWritingNull)]
-    public required List<string>? FileIds { get; init; }
+    public required List<ImageDto>? Image { get; init; }
 
     [JsonPropertyName("error"), JsonIgnore(Condition = JsonIgnoreCondition.WhenWritingNull)]
     public required string? Error { get; init; }
@@ -147,7 +149,7 @@ public record ChatMessageTemp
             return new RequestMessageDto()
             {
                 Id = idEncryptionService.Encrypt(Id),
-                ParentId = ParentId != null ? idEncryptionService.Encrypt(ParentId.Value) : null, 
+                ParentId = ParentId != null ? idEncryptionService.Encrypt(ParentId.Value) : null,
                 Role = Role.ToString().ToLowerInvariant(),
                 Content = MessageContentResponse.FromSegments(Content, idEncryptionService),
                 CreatedAt = CreatedAt
@@ -158,7 +160,7 @@ public record ChatMessageTemp
             return new ResponseMessageDto()
             {
                 Id = idEncryptionService.Encrypt(Id),
-                ParentId = ParentId != null ? idEncryptionService.Encrypt(ParentId.Value) : null, 
+                ParentId = ParentId != null ? idEncryptionService.Encrypt(ParentId.Value) : null,
                 Role = Role.ToString().ToLowerInvariant(),
                 Content = MessageContentResponse.FromSegments(Content, idEncryptionService),
                 CreatedAt = CreatedAt,

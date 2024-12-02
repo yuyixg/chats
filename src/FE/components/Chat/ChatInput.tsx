@@ -13,7 +13,7 @@ import useTranslation from '@/hooks/useTranslation';
 
 import { isMobile } from '@/utils/common';
 
-import { Content, Message } from '@/types/chat';
+import { Content, ImageDef, Message } from '@/types/chat';
 import { UploadFailType } from '@/types/components/upload';
 import { Prompt } from '@/types/prompt';
 
@@ -65,7 +65,6 @@ export const ChatInput = ({
   const [content, setContent] = useState<Content>({
     text: '',
     image: [],
-    fileIds: [],
   });
   const [isTyping, setIsTyping] = useState<boolean>(false);
   const [uploading, setUploading] = useState<boolean>(false);
@@ -116,7 +115,7 @@ export const ChatInput = ({
       return;
     }
     onSend({ role: 'user', content });
-    setContent({ text: '', image: [], fileIds: [] });
+    setContent({ text: '', image: [] });
 
     if (window.innerWidth < 640 && textareaRef && textareaRef.current) {
       textareaRef.current.blur();
@@ -221,7 +220,7 @@ export const ChatInput = ({
     return (
       selectModel && selectModel.allowVision && selectModel.fileServiceId &&
       !uploading &&
-      (content?.fileIds?.length ?? 0) <= defaultFileConfig.count
+      (content?.image?.length ?? 0) <= defaultFileConfig.count
     );
   };
 
@@ -238,12 +237,11 @@ export const ChatInput = ({
     }
   };
 
-  const handleUploadSuccessful = (imageId: string) => {
-    setContent((pre) => {
-      const imageIds = pre.fileIds!.concat(imageId);
+  const handleUploadSuccessful = (def: ImageDef) => {
+    setContent((old) => {
       return {
-        ...pre,
-        fileIds: imageIds,
+        ...old,
+        image: old.image!.concat(def)
       };
     });
     setUploading(false);
@@ -263,7 +261,7 @@ export const ChatInput = ({
   }, [content]);
 
   useEffect(() => {
-    setContent({ ...content, image: [], fileIds: [] });
+    setContent({ ...content, image: [] });
   }, [selectModel, selectChat]);
 
   return (
@@ -277,7 +275,7 @@ export const ChatInput = ({
                   <div className="relative group" key={index}>
                     <div className="mr-1 w-[32px] h-[32px] rounded overflow-hidden">
                       <img
-                        src={img}
+                        src={img.url}
                         alt=""
                         className="w-full h-full object-cover shadow-lg"
                       />
@@ -285,35 +283,6 @@ export const ChatInput = ({
                         onClick={() => {
                           setContent((pre) => {
                             const image = pre.image?.filter((x) => x !== img);
-                            return {
-                              text: pre.text,
-                              image,
-                            };
-                          });
-                        }}
-                        className="absolute top-[-5px] right-[-1px]"
-                      >
-                        <IconCircleX
-                          className="text-black/50 dark:text-white/50"
-                          size={12}
-                        />
-                      </button>
-                    </div>
-                  </div>
-                ))}
-              {content?.fileIds &&
-                content.fileIds.map((imageId, index) => (
-                  <div className="relative group" key={index}>
-                    <div className="mr-1 w-[32px] h-[32px] rounded overflow-hidden">
-                      <img
-                        src={getImageUrl(imageId)}
-                        alt=""
-                        className="w-full h-full object-cover shadow-lg"
-                      />
-                      <button
-                        onClick={() => {
-                          setContent((pre) => {
-                            const image = pre.fileIds?.filter((x) => x !== imageId);
                             return {
                               text: pre.text,
                               image,
@@ -340,8 +309,8 @@ export const ChatInput = ({
                 bottom: `${textareaRef?.current?.scrollHeight}px`,
                 maxHeight: '400px',
                 overflow: `${textareaRef.current && textareaRef.current.scrollHeight > 400
-                    ? 'auto'
-                    : 'hidden'
+                  ? 'auto'
+                  : 'hidden'
                   }`,
               }}
               placeholder={

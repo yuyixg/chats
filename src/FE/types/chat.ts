@@ -5,16 +5,25 @@ export interface Message {
   content: Content;
 }
 
+export interface ImageDef {
+  id: string;
+  url: string;
+}
+
 export interface Content {
   error?: string;
   text?: string;
-  image?: string[];
-  fileIds?: string[];
+  image?: ImageDef[];
+}
+
+export interface ContentRequest {
+  text: string;
+  fileIds: string[] | null;
 }
 
 export interface ChatBody {
   modelId: number;
-  userMessage: Content;
+  userMessage: ContentRequest;
   messageId: string | null;
   chatId: string;
   userModelConfig: any;

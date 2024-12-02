@@ -1027,8 +1027,62 @@ ALTER TABLE dbo.FileImageInfo SET (LOCK_ESCALATION = TABLE)
 GO
 COMMIT
 
-
-INSERT INTO [MessageContentType] ([Id], [ContentType])
-VALUES (3, 'fileId');
-
 update FileService set IsDefault = 1
+update [MessageContentType] set ContentType = 'fileId' where id = 2
+GO
+
+DROP FUNCTION IF EXISTS UrlDecode;
+GO
+
+CREATE FUNCTION dbo.UrlDecode (@encoded NVARCHAR(MAX))
+RETURNS NVARCHAR(MAX)
+AS
+BEGIN
+    DECLARE @decoded NVARCHAR(MAX) = N'';
+    DECLARE @i INT = 1;
+    DECLARE @len INT = LEN(@encoded);
+    WHILE @i <= @len
+    BEGIN
+        DECLARE @char NCHAR(1) = SUBSTRING(@encoded, @i, 1);
+        IF @char = '%'
+        BEGIN
+            DECLARE @hex NVARCHAR(4) = SUBSTRING(@encoded, @i + 1, 2);
+            -- 将十六进制字符串转换为整数，然后转换为对应的 Unicode 字符
+            SET @decoded += NCHAR(CONVERT(INT, @hex, 16));
+            SET @i += 2; -- 额外增加 2，跳过十六进制字符
+        END
+        ELSE IF @char = '+'
+        BEGIN
+            SET @decoded += N' '; -- 将加号替换为空格
+        END
+        ELSE
+        BEGIN
+            SET @decoded += @char;
+        END
+        SET @i += 1;
+    END
+    RETURN @decoded;
+END
+GO
+
+SELECT TOP (1000) 
+    [Id],
+    [ContentTypeId],
+    [MessageId],
+	ContentAsString,
+    dbo.UrlDecode(SUBSTRING(
+        ContentAsString,
+        CHARINDEX(':88/', ContentAsString) + 4, -- Find position of ':88/' and adjust to start after it
+        CHARINDEX('?', ContentAsString) - CHARINDEX(':88/', ContentAsString) - 4 -- Calculate length from ':88/' to '?'
+    )) AS ExtractedPart
+FROM 
+(
+    SELECT 
+        [Id],
+        [ContentTypeId],
+        [MessageId],
+        CAST([Content] AS VARCHAR(MAX)) COLLATE Latin1_General_100_CI_AS_SC_UTF8 AS ContentAsString
+    FROM 
+        [ChatsSTG].[dbo].[MessageContent]
+	WHERE ContentTypeId = 2
+) AS Derived

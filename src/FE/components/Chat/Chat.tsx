@@ -15,7 +15,7 @@ import { getApiUrl } from '@/utils/common';
 import { throttle } from '@/utils/throttle';
 import { getUserSession } from '@/utils/user';
 
-import { ChatBody, Content, Message, Role } from '@/types/chat';
+import { ChatBody, Content, ContentRequest, Message, Role } from '@/types/chat';
 
 import { HomeContext } from '@/pages/home';
 
@@ -171,7 +171,10 @@ export const Chat = memo(({ stopConversationRef }: Props) => {
       });
       homeDispatch({ field: 'loading', value: true });
       homeDispatch({ field: 'messageIsStreaming', value: true });
-      const messageContent = message.content;
+      const messageContent: ContentRequest = {
+        text: message.content.text!,
+        fileIds: message.content.image?.map((x) => x.id) || null,
+      }
       if (selectModel && !selectModel.allowSystemPrompt && userModelConfig && userModelConfig.prompt) {
         userModelConfig.prompt = null;
       }
@@ -354,7 +357,7 @@ export const Chat = memo(({ stopConversationRef }: Props) => {
     throttledScrollDown();
   }, [selectMessages, throttledScrollDown]);
 
-  useEffect(() => {}, [userModelConfig]);
+  useEffect(() => { }, [userModelConfig]);
 
   const onChangePrompt = (prompt: Prompt) => {
     if (prompt.temperature !== null) {

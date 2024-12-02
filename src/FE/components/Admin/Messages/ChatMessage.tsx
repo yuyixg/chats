@@ -1,25 +1,20 @@
-import { FC, memo, useEffect, useRef, useState } from 'react';
+import { FC, memo, useState } from 'react';
 
 import useTranslation from '@/hooks/useTranslation';
 
 import { preprocessLaTeX } from '@/utils/chats';
-import { formatNumberAsMoney } from '@/utils/common';
 
 import { Content, Message, Role } from '@/types/chat';
 
 import {
-  IconCheck,
   IconChevronLeft,
   IconChevronRight,
-  IconCopy,
-  IconInfo,
   IconRobot,
   IconUser,
 } from '@/components/Icons/index';
 import { CodeBlock } from '@/components/Markdown/CodeBlock';
 import { MemoizedReactMarkdown } from '@/components/Markdown/MemoizedReactMarkdown';
 import { Button } from '@/components/ui/button';
-import { Label } from '@/components/ui/label';
 
 import Decimal from 'decimal.js';
 import rehypeKatex from 'rehype-katex';
@@ -27,7 +22,6 @@ import remarkGfm from 'remark-gfm';
 import remarkMath from 'remark-math';
 import CopyAction from '@/components/Chat/ChatMessage/CopyAction';
 import GenerateInformationAction from '@/components/Chat/ChatMessage/GenerateInformationAction';
-import { getImageUrl } from '@/utils/uploadFile';
 
 interface PropsMessage {
   id: string;
@@ -112,23 +106,13 @@ export const ChatMessage: FC<Props> = memo(
                           className="rounded-md mr-2 not-prose"
                           key={index}
                           style={{ maxWidth: 268, maxHeight: 168 }}
-                          src={img}
-                          alt=""
-                        />
-                      ))}
-                    {message.content?.fileIds &&
-                      message.content.fileIds.map((imageId, index) => (
-                        <img
-                          className="rounded-md mr-2 not-prose"
-                          key={index}
-                          style={{ maxWidth: 268, maxHeight: 168 }}
-                          src={getImageUrl(imageId)}
+                          src={img.url}
                           alt=""
                         />
                       ))}
                   </div>
                   <div
-                    className={`prose whitespace-pre-wrap dark:prose-invert ${message.content?.image && message.content.image.length > 0 || message.content?.fileIds && message.content.fileIds.length > 0
+                    className={`prose whitespace-pre-wrap dark:prose-invert ${message.content?.image && message.content.image.length > 0
                       ? 'mt-2'
                       : ''
                       }`}
