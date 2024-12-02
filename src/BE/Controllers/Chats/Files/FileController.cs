@@ -4,9 +4,10 @@ using Chats.BE.Infrastructure;
 using Chats.BE.Services;
 using Chats.BE.Services.FileServices;
 using Chats.BE.Services.IdEncryption;
+using Chats.BE.Services.ImageInfo;
 using Microsoft.AspNetCore.Mvc;
 using Microsoft.EntityFrameworkCore;
-using SkiaSharp;
+using System.Drawing;
 
 namespace Chats.BE.Controllers.Chats.Files;
 
@@ -80,8 +81,9 @@ public class FileController(ChatsDB db, FileServiceFactory fileServiceFactory, C
         }
 
         IFileService fs = fileServiceFactory.Create((DBFileServiceType)fileService.FileServiceTypeId, fileService.Configs);
-        byte[] fileBytes = ReadFileBytes(file);
-        string storageKey = await fs.Upload(file.ContentType, fileBytes, cancellationToken);
+        using Stream baseStream = file.OpenReadStream();
+        using PartialBufferedStream pbStream = new(baseStream, 4 * 1024);
+        string storageKey = await fs.Upload(file.ContentType, baseStream, cancellationToken);
         DB.File dbFile = new()
         {
             FileName = file.FileName,
@@ -92,7 +94,7 @@ public class FileController(ChatsDB db, FileServiceFactory fileServiceFactory, C
             ClientInfo = await clientInfoManager.GetClientInfo(cancellationToken),
             CreateUserId = currentUser.Id,
             CreatedAt = DateTime.UtcNow,
-            FileImageInfo = GetImageInfo(fileBytes)
+            FileImageInfo = GetImageInfo(file.FileName, file.ContentType, pbStream.SeekedBytes)
         };
         db.Files.Add(dbFile);
         await db.SaveChangesAsync(cancellationToken);
@@ -125,40 +127,28 @@ public class FileController(ChatsDB db, FileServiceFactory fileServiceFactory, C
         }
     }
 
-    private static byte[] ReadFileBytes(IFormFile file)
+    private FileImageInfo? GetImageInfo(string fileName, string contentType, byte[] imageFirst4KBytes)
     {
-        using MemoryStream ms = new();
-        file.CopyTo(ms);
-        return ms.ToArray();
-    }
-
-    private FileImageInfo? GetImageInfo(string fileName, byte[] fileBytes)
-    {
-        using Stream stream = new MemoryStream(fileBytes);
         try
         {
-            using SKCodec codec = SKCodec.Create(stream);
-            if (codec == null)
-            {
-                return null;
-            }
-
+            IImageInfoService iis = ImageInfoFactory.CreateImageInfoService(contentType);
+            Size size = iis.GetImageSize(imageFirst4KBytes);
             return new FileImageInfo
             {
-                Width = codec.Info.Width,
-                Height = codec.Info.Height
+                Width = size.Width,
+                Height = size.Height
             };
         }
-        catch (Exception ex)
+        catch (Exception e)
         {
-            logger.LogError(ex, "Failed to parse the file: {fileName}", fileName);
+            logger.LogWarning(e, "Failed to get image size for {fileName}({contentType})", fileName, contentType);
             return null;
         }
     }
 
     private async Task<FileContentType> GetOrCreateDBContentType(string contentType, CancellationToken cancellationToken)
     {
-        FileContentType? dbContentType = db.FileContentTypes.FirstOrDefault(x => x.ContentType == contentType);
+        FileContentType? dbContentType = await db.FileContentTypes.FirstOrDefaultAsync(x => x.ContentType == contentType, cancellationToken);
         if (dbContentType == null)
         {
             dbContentType = new FileContentType
