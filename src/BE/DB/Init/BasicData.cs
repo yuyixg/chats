@@ -1,3 +1,5 @@
+using Chats.BE.DB;
+
 namespace Chats.BE.DB.Init;
 
 internal static class BasicData
@@ -18,7 +20,7 @@ internal static class BasicData
 
     private static void InsertFileContentTypes(ChatsDB db)
     {
-        // Generated from data, hash: 84c703836219bfb53bb7b0b273640901c61910927175f5a8b7085f1d72b6a32b
+        // Generated from data, hash: 00da6e3e68293772044e11ac14d834ed6b065e0b3d4df85afbb29a4811ea3a56
         db.FileContentTypes.AddRange(
         [
             new(){ Id=1, ContentType="image/jpeg",    },
@@ -28,8 +30,7 @@ internal static class BasicData
             new(){ Id=5, ContentType="image/svg+xml", },
             new(){ Id=6, ContentType="image/webp",    },
             new(){ Id=7, ContentType="image/tiff",    },
-            new(){ Id=8, ContentType="image/heif",    },
-            new(){ Id=9, ContentType="image/heic",    }
+            new(){ Id=8, ContentType="image/heic",    }
         ]);
     }
 
@@ -90,13 +91,12 @@ internal static class BasicData
 
     private static void InsertMessageContentTypes(ChatsDB db)
     {
-        // Generated from data, hash: f5f9d05c9352665080659fabd30a4dcdf3da3133d4fbd5beb5fff6c4708c6178
+        // Generated from data, hash: c14a3bad5d785fdd7b32526ab911a1ec31daf536c3567b17569bf6210b198479
         db.MessageContentTypes.AddRange(
         [
-            new(){ Id=0, ContentType="error",    },
-            new(){ Id=1, ContentType="text",     },
-            new(){ Id=2, ContentType="imageUrl", },
-            new(){ Id=3, ContentType="fileId",   }
+            new(){ Id=0, ContentType="error",  },
+            new(){ Id=1, ContentType="text",   },
+            new(){ Id=2, ContentType="fileId", }
         ]);
     }
 
