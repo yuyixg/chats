@@ -391,7 +391,6 @@ const Home = () => {
 
   useEffect(() => {
     const settings = getSettings();
-
     dispatch({
       field: 'settings',
       value: settings,
@@ -433,7 +432,6 @@ const Home = () => {
 
   useEffect(() => {
     const handlePopState = (event: PopStateEvent) => {
-      console.log(event.state);
       const chatId = getPathChatId(event.state?.as || '');
       selectChat(chats, chatId, models);
     };
@@ -489,7 +487,7 @@ const Home = () => {
             <div className="flex w-full">
               <Chat stopConversationRef={stopConversationRef} />
             </div>
-            <PromptBar />
+            {settings.showPromptBar && <PromptBar />}
             <ChatSettingsBar />
           </div>
         </div>

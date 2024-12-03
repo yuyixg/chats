@@ -1,9 +1,8 @@
 import { useContext, useEffect } from 'react';
 import toast from 'react-hot-toast';
 
-import useTranslation from '@/hooks/useTranslation';
-
 import { useCreateReducer } from '@/hooks/useCreateReducer';
+import useTranslation from '@/hooks/useTranslation';
 
 import { Prompt } from '@/types/prompt';
 
@@ -42,7 +41,7 @@ const PromptBar = () => {
   } = promptBarContextValue;
 
   const handleTogglePromptBar = () => {
-    const promptBar = !settings.showChatBar;
+    const promptBar = !settings.showPromptBar;
     handleUpdateSettings('showPromptBar', promptBar);
   };
 
@@ -87,12 +86,7 @@ const PromptBar = () => {
       promptDispatch({
         field: 'filteredPrompts',
         value: prompts.filter((prompt) => {
-          const searchable =
-            prompt.name.toLowerCase() +
-            ' ' +
-            prompt.description.toLowerCase() +
-            ' ' +
-            prompt.content.toLowerCase();
+          const searchable = prompt.name.toLowerCase();
           return searchable.includes(searchTerm.toLowerCase());
         }),
       });
