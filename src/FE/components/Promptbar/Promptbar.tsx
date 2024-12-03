@@ -49,7 +49,6 @@ const PromptBar = () => {
     const newPrompt: Prompt = {
       id: uuidv4(),
       name: `Prompt ${prompts.length + 1}`,
-      description: '',
       content: '',
     };
 

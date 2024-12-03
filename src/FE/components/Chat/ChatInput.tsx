@@ -32,8 +32,8 @@ import PasteUpload from '@/components/PasteUpload/PasteUpload';
 import { PromptList } from './PromptList';
 import { VariableModal } from './VariableModal';
 
-import { getUserPromptDetail } from '@/apis/clientApis';
 import { defaultFileConfig } from '@/apis/adminApis';
+import { getUserPromptDetail } from '@/apis/clientApis';
 
 interface Props {
   onSend: (message: Message) => void;
@@ -89,7 +89,10 @@ export const ChatInput = ({
       toast.error(
         t(
           `Message limit is {{maxLength}} characters. You have entered {{valueLength}} characters.`,
-          { maxLength: selectModel.contextWindow * 2, valueLength: value.length },
+          {
+            maxLength: selectModel.contextWindow * 2,
+            valueLength: value.length,
+          },
         ),
       );
       return;
@@ -210,7 +213,9 @@ export const ChatInput = ({
 
   const canUploadFile = () => {
     return (
-      selectModel && selectModel.allowVision && selectModel.fileServiceId && 
+      selectModel &&
+      selectModel.allowVision &&
+      selectModel.fileServiceId &&
       !uploading &&
       (content?.image?.length ?? 0) <= defaultFileConfig.count
     );
@@ -262,12 +267,12 @@ export const ChatInput = ({
     <div className="absolute bottom-0 left-0 w-full border-transparent bg-gradient-to-b from-transparent via-white to-white pt-6 dark:border-white/20 dark:via-[#262630] dark:to-[#262630] md:pt-2">
       <div className="stretch mx-2 mt-4 flex flex-row gap-3 last:mb-2 md:mx-4 md:mt-[52px] md:last:mb-6 lg:mx-auto lg:max-w-5xl">
         {!chatError ? (
-          <div className="relative flex w-full flex-grow flex-col rounded-md bg-white shadow-[0_0_10px_rgba(0,0,0,0.10)] dark:border-gray-900/50 dark:bg-[#40414F] dark:text-white dark:shadow-[0_0_15px_rgba(0,0,0,0.10)]">
+          <div className="relative flex w-full flex-grow flex-col rounded-md bg-background shadow-[0_0_10px_rgba(0,0,0,0.10)] dark:border-gray-900/50  dark:text-white dark:shadow-[0_0_15px_rgba(0,0,0,0.10)]">
             <div className="absolute mb-1 bottom-full mx-auto flex w-full justify-start z-10">
               {content?.image &&
                 content.image.map((img, index) => (
                   <div className="relative group" key={index}>
-                    <div className="mr-1 w-[32px] h-[32px] rounded overflow-hidden">
+                    <div className="mr-1 w-[4rem] h-[4rem] rounded overflow-hidden">
                       <img
                         src={img}
                         alt=""
@@ -283,11 +288,11 @@ export const ChatInput = ({
                             };
                           });
                         }}
-                        className="absolute top-[-5px] right-[-1px]"
+                        className="absolute top-[-4px] right-[0px]"
                       >
                         <IconCircleX
-                          className="text-black/50 dark:text-white/50"
-                          size={12}
+                          className="bg-background rounded-full text-black/50 dark:text-white/50"
+                          size={20}
                         />
                       </button>
                     </div>
@@ -297,7 +302,7 @@ export const ChatInput = ({
 
             <textarea
               ref={textareaRef}
-              className="m-0 w-full resize-none border-none outline-none bg-transparent rounded-md p-0 py-2 pr-16 pl-4 text-black dark:bg-[#202123] dark:text-white md:py-3 md:pl-4"
+              className="m-0 w-full resize-none border-none outline-none rounded-md p-0 py-2 pr-16 pl-4 bg-background md:py-3 md:pl-4"
               style={{
                 resize: 'none',
                 bottom: `${textareaRef?.current?.scrollHeight}px`,
@@ -335,7 +340,7 @@ export const ChatInput = ({
               </button>
               {canUploadFile() && (
                 <UploadButton
-                  fileServerId={selectModel?.fileServiceId!}
+                  fileServiceId={selectModel?.fileServiceId!}
                   fileConfig={defaultFileConfig}
                   onUploading={handleUploading}
                   onFailed={handleUploadFailed}
@@ -389,14 +394,6 @@ export const ChatInput = ({
           </div>
         ) : (
           <></>
-          // <div className='flex flex-col w-full items-center gap-2'>
-          //   <Button onClick={handleSend}>
-          //     {t('Regenerate response')}
-          //   </Button>
-          //   <div className='text-black/50 dark:text-white/50'>
-          //     {t('Error generating response, click to regenerate response.')}
-          //   </div>
-          // </div>
         )}
       </div>
       <div className="px-3 pt-1 pb-2 text-center text-[11px] text-black/50 dark:text-white/50 md:px-4 md:pt-2 md:pb-2">

@@ -171,7 +171,12 @@ export const Chat = memo(({ stopConversationRef }: Props) => {
       homeDispatch({ field: 'loading', value: true });
       homeDispatch({ field: 'messageIsStreaming', value: true });
       const messageContent = message.content;
-      if (selectModel && !selectModel.allowSystemPrompt && userModelConfig && userModelConfig.prompt) {
+      if (
+        selectModel &&
+        !selectModel.allowSystemPrompt &&
+        userModelConfig &&
+        userModelConfig.prompt
+      ) {
         userModelConfig.prompt = null;
       }
       const chatBody: ChatBody = {
@@ -356,7 +361,7 @@ export const Chat = memo(({ stopConversationRef }: Props) => {
   useEffect(() => {}, [userModelConfig]);
 
   return (
-    <div className="relative flex-1 overflow-hidden bg-white dark:bg-[#262630]">
+    <div className="relative flex-1 overflow-hidden bg-background">
       <>
         <div
           className="max-h-full overflow-x-hidden"
@@ -369,28 +374,32 @@ export const Chat = memo(({ stopConversationRef }: Props) => {
                 {models.length !== 0 && (
                   <div className="flex h-full flex-col space-y-4 rounded-lg border border-neutral-200 p-4 dark:border-neutral-600">
                     <ModelSelect />
-                    {selectModel && selectModel.allowSystemPrompt && userModelConfig?.prompt && (
-                      <SystemPrompt
-                        currentPrompt={userModelConfig?.prompt}
-                        prompts={prompts}
-                        onChangePrompt={(prompt) => {
-                          handleUpdateUserModelConfig({ prompt });
-                        }}
-                      />
-                    )}
-                    {userModelConfig?.temperature !== undefined && (selectModel?.minTemperature !== selectModel?.maxTemperature) && (
-                      <TemperatureSlider
-                        label={t('Temperature')}
-                        min={selectModel?.minTemperature!}
-                        max={selectModel?.maxTemperature!}
-                        defaultTemperature={userModelConfig.temperature}
-                        onChangeTemperature={(temperature) =>
-                          handleUpdateUserModelConfig({
-                            temperature,
-                          })
-                        }
-                      />
-                    )}
+                    {selectModel &&
+                      selectModel.allowSystemPrompt &&
+                      userModelConfig?.prompt && (
+                        <SystemPrompt
+                          currentPrompt={userModelConfig?.prompt}
+                          prompts={prompts}
+                          onChangePrompt={(prompt) => {
+                            handleUpdateUserModelConfig({ prompt });
+                          }}
+                        />
+                      )}
+                    {userModelConfig?.temperature !== undefined &&
+                      selectModel?.minTemperature !==
+                        selectModel?.maxTemperature && (
+                        <TemperatureSlider
+                          label={t('Temperature')}
+                          min={selectModel?.minTemperature!}
+                          max={selectModel?.maxTemperature!}
+                          defaultTemperature={userModelConfig.temperature}
+                          onChangeTemperature={(temperature) =>
+                            handleUpdateUserModelConfig({
+                              temperature,
+                            })
+                          }
+                        />
+                      )}
                     {userModelConfig?.enableSearch != undefined && (
                       <EnableNetworkSearch
                         label={t('Internet Search')}
@@ -416,7 +425,7 @@ export const Chat = memo(({ stopConversationRef }: Props) => {
           ) : (
             <>
               {selectChat?.id && (
-                <div className="sticky top-0 pt-1 z-10 text-sm bg-white dark:bg-[#262630] dark:text-neutral-200 flex items-center justify-between">
+                <div className="sticky top-0 pt-1 z-10 text-sm bg-background flex items-center justify-between">
                   <div
                     className={cn(
                       'ml-[84px] flex justify-start items-center',
@@ -507,7 +516,7 @@ export const Chat = memo(({ stopConversationRef }: Props) => {
               })}
 
               <div
-                className="h-[162px] bg-white dark:bg-[#262630]"
+                className="h-[162px] bg-background"
                 ref={messagesEndRef}
               />
             </>

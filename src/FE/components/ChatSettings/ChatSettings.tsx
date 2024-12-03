@@ -18,7 +18,7 @@ const ChatSettings = (props: Props) => {
         <Slider defaultValue={[50]} max={100} step={1} className="w-[70%]" />
         <Input
           type="number"
-          className="no-spin-button text-xs px-2 w-[30%] h-1 bg-[#ececec] dark:bg-[#262630] border-none outline-none"
+          className="no-spin-button text-xs px-2 w-[30%] h-1 bg-muted border-none outline-none"
         />
       </div>
     </div>

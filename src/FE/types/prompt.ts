@@ -1,5 +1,4 @@
 export interface Prompt extends IdName {
-  description: string;
   content: string;
 }
 

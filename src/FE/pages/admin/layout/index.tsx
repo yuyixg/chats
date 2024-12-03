@@ -124,14 +124,14 @@ const AdminLayout = ({
 
   return (
     <div className="h-full w-full flex">
-      <div className="min-w-[180px] h-screen" style={{ borderRightWidth: 1 }}>
+      <div className="min-w-[192px] h-screen" style={{ borderRightWidth: 1 }}>
         <div className={cn('px-4 py-4 overflow-y-auto', isCollapsed && 'px-2')}>
           <a
             onClick={() => {
               router.push('/');
             }}
             className={cn(
-              'flex items-center cursor-pointer',
+              'flex items-center cursor-pointer gap-2',
               isCollapsed && 'justify-center',
             )}
           >
@@ -144,7 +144,7 @@ const AdminLayout = ({
             />
             <span
               hidden={isCollapsed}
-              className="self-center text-lg font-medium whitespace-nowrap"
+              className="self-center text-2xl font-medium whitespace-nowrap"
             >
               Chats
             </span>

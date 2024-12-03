@@ -10,7 +10,7 @@ interface Props {
   onUploading?: () => void;
   onFailed?: (type?: UploadFailType) => void;
   children?: React.ReactNode;
-  fileServerId: number;
+  fileServiceId: number;
   fileConfig: ChatModelFileConfig;
   maxFileSize?: number;
 }
@@ -20,7 +20,7 @@ const UploadButton: React.FunctionComponent<Props> = ({
   onUploading,
   onFailed,
   fileConfig,
-  fileServerId: fileServiceId,
+  fileServiceId,
   children,
 }: Props) => {
   const uploadRef = useRef<HTMLInputElement>(null);

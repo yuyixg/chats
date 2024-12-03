@@ -92,7 +92,7 @@ const UserMessage = (props: Props) => {
           <div className="flex w-full flex-col">
             <textarea
               ref={textareaRef}
-              className="w-full outline-none resize-none whitespace-pre-wrap border-none rounded-md bg-[#ececec] dark:bg-[#2f2f2f]"
+              className="w-full outline-none resize-none whitespace-pre-wrap border-none rounded-md bg-muted"
               value={messageContent.text}
               onChange={handleInputChange}
               onKeyDown={handlePressEnter}
@@ -131,7 +131,7 @@ const UserMessage = (props: Props) => {
             </div>
           </div>
         ) : (
-          <div className="bg-[#ececec]/40 dark:bg-[#2f2f2f] py-2 px-3 rounded-md overflow-x-scroll">
+          <div className="bg-muted py-2 px-3 rounded-md overflow-x-scroll">
             <div className="flex flex-wrap justify-end text-right gap-2">
               {message.content?.image &&
                 message.content.image.map((img, index) => (

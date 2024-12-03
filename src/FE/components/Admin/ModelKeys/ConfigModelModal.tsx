@@ -201,7 +201,7 @@ export const ConfigModelModal = (props: IProps) => {
         </div>
         {loading && (
           <div
-            className={`fixed top-0 left-0 bottom-0 right-0 bg-white dark:bg-[#202123] text-black/80 dark:text-white/80 z-50 text-center text-[12.5px]`}
+            className={`fixed top-0 left-0 bottom-0 right-0 bg-background z-50 text-center text-[12.5px]`}
           >
             <div className="fixed w-screen h-screen top-1/2">
               <div className="flex justify-center">

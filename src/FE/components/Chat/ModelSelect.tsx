@@ -4,8 +4,18 @@ import useTranslation from '@/hooks/useTranslation';
 
 import { formatNumberAsMoney } from '@/utils/common';
 
-import { HomeContext } from '@/pages/home';
 import { ModelUsageDto } from '@/types/clientApis';
+
+import { HomeContext } from '@/pages/home';
+
+import {
+  Select,
+  SelectContent,
+  SelectItem,
+  SelectTrigger,
+  SelectValue,
+} from '../ui/select';
+
 import { getModelUsage } from '@/apis/clientApis';
 
 export const ModelSelect = () => {
@@ -25,8 +35,8 @@ export const ModelSelect = () => {
     }
   }, [selectModel]);
 
-  const handleChange = (e: React.ChangeEvent<HTMLSelectElement>) => {
-    const model = models.find((m) => m.modelId.toString() == e.target.value);
+  const handleChange = (value: string) => {
+    const model = models.find((m) => m.modelId.toString() == value);
     if (!model) return;
 
     handleSelectModel(model);
@@ -40,28 +50,28 @@ export const ModelSelect = () => {
       <label className="mb-2 text-left text-neutral-700 dark:text-neutral-400">
         {t('Model')}
       </label>
-      <div className="w-full focus:outline-none active:outline-none rounded-lg border border-neutral-200 bg-transparent pr-2 text-neutral-900 dark:border-neutral-600 dark:text-white">
-        <select
-          className="w-full bg-transparent p-2"
-          placeholder={t('Select a model') || ''}
-          value={selectModel?.modelId}
-          onChange={handleChange}
+      <div className="w-full focus:outline-none active:outline-none rounded-lg border bg-background border-neutral-200 pr-2  dark:border-neutral-600">
+        <Select
+          onValueChange={handleChange}
+          value={selectModel?.modelId?.toString()}
+          defaultValue={selectModel?.modelId?.toString()}
         >
-          {models.map((model) => (
-            <option
-              key={model.modelId}
-              value={model.modelId}
-              className="dark:bg-[#262630] dark:text-white"
-            >
-              {model.name}
-            </option>
-          ))}
-        </select>
+          <SelectTrigger className='focus:ring-0 focus:ring-offset-0 border-1'>
+            <SelectValue placeholder={t('Select a model')} />
+          </SelectTrigger>
+          <SelectContent className='w-full'>
+            {models.map((model) => (
+              <SelectItem key={model.modelId} value={model.modelId.toString()}>
+                {model.name}
+              </SelectItem>
+            ))}
+          </SelectContent>
+        </Select>
       </div>
-      {modelUsage &&
-        (modelUsage.tokens === 0 && modelUsage.counts === 0) ? (
-        <span className="text-xs pt-1">
-          {t('unit-price')}: ￥{modelUsage.inputTokenPrice1M.toFixed(4)}/{modelUsage.outputTokenPrice1M.toFixed(4)} (1M tokens)
+      {modelUsage && modelUsage.tokens === 0 && modelUsage.counts === 0 ? (
+        <span className="text-xs pt-2">
+          {t('unit-price')}: ￥{modelUsage.inputTokenPrice1M.toFixed(4)}/
+          {modelUsage.outputTokenPrice1M.toFixed(4)} (1M tokens)
         </span>
       ) : (
         <>
@@ -79,7 +89,9 @@ export const ModelSelect = () => {
                   </span>
                 ) : (
                   <span>
-                    {t('unit-price')}: ￥{modelUsage.inputTokenPrice1M.toFixed(4)}/{modelUsage.outputTokenPrice1M.toFixed(4)} (1M tokens)
+                    {t('unit-price')}: ￥
+                    {modelUsage.inputTokenPrice1M.toFixed(4)}/
+                    {modelUsage.outputTokenPrice1M.toFixed(4)} (1M tokens)
                   </span>
                 )}
               </div>

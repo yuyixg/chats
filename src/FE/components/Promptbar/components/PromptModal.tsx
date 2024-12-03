@@ -22,7 +22,6 @@ interface Props {
 export const PromptModal: FC<Props> = ({ prompt, onClose, onUpdatePrompt }) => {
   const { t } = useTranslation();
   const [name, setName] = useState(prompt.name);
-  const [description, setDescription] = useState(prompt.description);
   const [content, setContent] = useState(prompt.content);
 
   const modalRef = useRef<HTMLDivElement>(null);
@@ -30,7 +29,7 @@ export const PromptModal: FC<Props> = ({ prompt, onClose, onUpdatePrompt }) => {
 
   const handleEnter = (e: KeyboardEvent<HTMLDivElement>) => {
     if (e.key === 'Enter' && !e.shiftKey) {
-      onUpdatePrompt({ ...prompt, name, description, content: content.trim() });
+      onUpdatePrompt({ ...prompt, name, content: content.trim() });
       onClose();
     }
   };
@@ -65,6 +64,7 @@ export const PromptModal: FC<Props> = ({ prompt, onClose, onUpdatePrompt }) => {
           {t('Name')}
         </div>
         <Input
+          className="focus-visible:ring-offset-0"
           ref={nameInputRef}
           placeholder={t('A name for your prompt.') || ''}
           value={name}
@@ -95,6 +95,7 @@ export const PromptModal: FC<Props> = ({ prompt, onClose, onUpdatePrompt }) => {
           />
         </div>
         <Textarea
+          className="focus-visible:ring-offset-0"
           placeholder={
             t(
               'Prompt content. Use {{}} to denote a variable. Ex: {{name}} is a {{adjective}} {{noun}}',
@@ -104,21 +105,11 @@ export const PromptModal: FC<Props> = ({ prompt, onClose, onUpdatePrompt }) => {
           onChange={(e) => setContent(e.target.value)}
           rows={8}
         ></Textarea>
-        <div className="mt-6 text-sm font-bold text-black dark:text-neutral-200">
-          {t('Description')}
-        </div>
-        <Textarea
-          placeholder={t('A description for your prompt.') || ''}
-          value={description}
-          onChange={(e) => setDescription(e.target.value)}
-          rows={2}
-        ></Textarea>
         <Button
           onClick={() => {
             const updatedPrompt = {
               ...prompt,
               name,
-              description,
               content: content.trim(),
             };
 

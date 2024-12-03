@@ -53,7 +53,7 @@ const Search: FC<Props> = ({
       <input
         disabled={messageIsStreaming}
         className={cn(
-          'w-full flex-1 rounded-md px-3 py-3 pr-10 text-[14px] bg-[#ececec] dark:bg-[#262630] leading-3 border-none outline-none',
+          'w-full flex-1 rounded-md px-3 py-3 pr-10 text-[14px] bg-muted leading-3 border-none outline-none',
           className,
         )}
         type="text"

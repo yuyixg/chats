@@ -126,7 +126,7 @@ export const ConversationComponent = ({ chat }: Props) => {
   return (
     <div className="relative flex items-center">
       {isChanging && selectChatId === chat.id ? (
-        <div className="flex w-full items-center gap-2 rounded-lg text-black dark:text-white dark:bg-[#262630]/90 p-3">
+        <div className="flex w-full items-center gap-2 rounded-lg bg-background p-3">
           <ChatIcon
             isShard={chat.isShared}
             providerId={chat.modelProviderId}
@@ -142,8 +142,8 @@ export const ConversationComponent = ({ chat }: Props) => {
         </div>
       ) : (
         <button
-          className={`flex w-full cursor-pointer items-center gap-2 rounded-lg p-3 text-sm transition-colors duration-200 hover:bg-[#cdcdcd] hover:dark:bg-[#262630] ${messageIsStreaming ? 'disabled:cursor-not-allowed' : ''
-            } ${selectChatId === chat.id ? 'bg-[#ececec] dark:bg-[#262630]/90' : ''
+          className={`flex w-full cursor-pointer items-center gap-2 rounded-lg p-3 text-sm transition-colors duration-200 hover:bg-muted ${messageIsStreaming ? 'disabled:cursor-not-allowed' : ''
+            } ${selectChatId === chat.id ? 'bg-muted' : ''
             }`}
           onClick={() => handleSelectChat(chat)}
           disabled={messageIsStreaming}
@@ -182,21 +182,21 @@ export const ConversationComponent = ({ chat }: Props) => {
             </DropdownMenuTrigger>
             <DropdownMenuContent className="w-42">
               <DropdownMenuItem
-                className="flex justify-start gap-2"
+                className="flex justify-start gap-3"
                 onClick={handleOpenChangeTitleModal}
               >
                 <IconPencil size={18} />
                 {t('Edit')}
               </DropdownMenuItem>
               <DropdownMenuItem
-                className="flex justify-start gap-2"
+                className="flex justify-start gap-3"
                 onClick={handleOpenShareModal}
               >
                 <IconShare size={18} />
                 {t('Share')}
               </DropdownMenuItem>
               <DropdownMenuItem
-                className="flex justify-start gap-2"
+                className="flex justify-start gap-3"
                 onClick={handleOpenDeleteModal}
               >
                 <IconTrash size={18} />

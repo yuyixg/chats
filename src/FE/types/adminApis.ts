@@ -222,7 +222,6 @@ export interface PostModelKeysParams {
 export interface PostPromptParams {
   name: string;
   content: string;
-  description: string;
 }
 
 export interface PutPromptParams {
