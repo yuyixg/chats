@@ -1,7 +1,8 @@
 import { useContext, useState } from 'react';
 
-import useTranslation from '@/hooks/useTranslation';
 import { useRouter } from 'next/router';
+
+import useTranslation from '@/hooks/useTranslation';
 
 import { clearUserInfo, clearUserSession, getLoginUrl } from '@/utils/user';
 
@@ -15,8 +16,8 @@ import {
   IconLogout,
   IconMoneybag,
   IconPasswordUser,
+  IconSettingsCog,
   IconUser,
-  IconUserCog,
 } from '@/components/Icons/index';
 import { ChangePasswordModal } from '@/components/Modal/ChangePasswordModal';
 import UserBalanceModal from '@/components/Modal/UserBalanceModal';
@@ -67,7 +68,7 @@ export const ChatBarSettings = () => {
       {user?.role === UserRole.admin && (
         <SidebarButton
           text={t('Admin Panel')}
-          icon={<IconUserCog size={18} />}
+          icon={<IconSettingsCog size={18} />}
           onClick={() => {
             router.push('/admin');
           }}

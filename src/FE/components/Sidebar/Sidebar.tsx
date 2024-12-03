@@ -98,7 +98,7 @@ const Sidebar = <T,>({
           searchTerm={searchTerm}
           onSearch={handleSearchTerm}
         />
-        <div className="flex-grow overflow-auto">
+        <div className="flex-grow overflow-auto scroll-container">
           {items?.length > 0 ? (
             <div className="pt-2">{itemComponent}</div>
           ) : (
