@@ -95,7 +95,6 @@ export const VariableModal: FC<Props> = ({
       <DialogContent className="w-2/5" onKeyDown={handleKeyDown}>
         <DialogHeader>
           <DialogTitle>{prompt.name}</DialogTitle>
-          <div className="text-sm">{prompt.description}</div>
         </DialogHeader>
         {updatedVariables.map((variable, index) => (
           <div className="mb-4" key={index}>
