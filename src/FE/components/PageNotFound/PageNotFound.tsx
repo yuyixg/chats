@@ -6,7 +6,7 @@ import { Button } from '@/components/ui/button';
 const PageNotFound = () => {
   const { t } = useTranslation();
   return (
-    <main className="grid min-h-full place-items-center dark:bg-[#262630] bg-white py-24 sm:py-32">
+    <main className="grid min-h-full place-items-center bg-background py-24 sm:py-32">
       <div className="text-center">
         <p className="text-3xl font-semibold text-primary">404</p>
         <h1 className="mt-4 text-lg font-bold tracking-tight text-gray-900 dark:text-gray-100">

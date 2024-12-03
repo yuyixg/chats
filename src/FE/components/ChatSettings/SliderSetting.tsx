@@ -47,7 +47,7 @@ const SliderSetting = (props: Props) => {
           <Input
             value={finalValue}
             type="number"
-            className="no-spin-button text-center text-xs px-2 w-[30%] h-1 bg-[#ececec] dark:bg-[#262630] border-none outline-none"
+            className="no-spin-button text-center text-xs px-2 w-[30%] h-1 bg-muted border-none outline-none"
           />
         </div>
       )}

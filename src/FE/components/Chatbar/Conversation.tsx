@@ -126,11 +126,8 @@ export const ConversationComponent = ({ chat }: Props) => {
   return (
     <div className="relative flex items-center">
       {isChanging && selectChatId === chat.id ? (
-        <div className="flex w-full items-center gap-2 rounded-lg text-black dark:text-white dark:bg-[#262630]/90 p-3">
-          <ChatIcon
-            isShard={chat.isShared}
-            providerId={chat.modelProviderId}
-          />
+        <div className="flex w-full items-center gap-2 rounded-lg bg-background p-3">
+          <ChatIcon isShard={chat.isShared} providerId={chat.modelProviderId} />
           <input
             className="mr-12 flex-1 overflow-hidden overflow-ellipsis border-neutral-400 bg-transparent text-left text-[12.5px] leading-3 outline-none text-black dark:text-white"
             type="text"
@@ -142,19 +139,17 @@ export const ConversationComponent = ({ chat }: Props) => {
         </div>
       ) : (
         <button
-          className={`flex w-full cursor-pointer items-center gap-2 rounded-lg p-3 text-sm transition-colors duration-200 hover:bg-[#cdcdcd] hover:dark:bg-[#262630] ${messageIsStreaming ? 'disabled:cursor-not-allowed' : ''
-            } ${selectChatId === chat.id ? 'bg-[#ececec] dark:bg-[#262630]/90' : ''
-            }`}
+          className={`flex w-full cursor-pointer items-center gap-2 rounded-lg p-3 text-sm transition-colors duration-200 hover:bg-muted ${
+            messageIsStreaming ? 'disabled:cursor-not-allowed' : ''
+          } ${selectChatId === chat.id ? 'bg-muted' : ''}`}
           onClick={() => handleSelectChat(chat)}
           disabled={messageIsStreaming}
         >
-          <ChatIcon
-            isShard={chat.isShared}
-            providerId={chat.modelProviderId}
-          />
+          <ChatIcon isShard={chat.isShared} providerId={chat.modelProviderId} />
           <div
-            className={`relative max-h-5 flex-1 overflow-hidden text-ellipsis whitespace-nowrap break-all text-left text-[12.5px] leading-4 ${selectChatId === chat.id ? 'pr-12' : 'pr-1'
-              }`}
+            className={`relative max-h-5 flex-1 overflow-hidden text-ellipsis whitespace-nowrap break-all text-left text-[12.5px] leading-4 ${
+              selectChatId === chat.id ? 'pr-12' : 'pr-1'
+            }`}
           >
             {chat.title}
           </div>
@@ -173,30 +168,33 @@ export const ConversationComponent = ({ chat }: Props) => {
       )}
 
       {selectChatId === chat.id && !isDeleting && !isChanging && (
-        <div className="absolute right-2 z-10 flex text-gray-300">
+        <div className="absolute right-[0.6rem] z-10 flex text-gray-300">
           <DropdownMenu>
-            <DropdownMenuTrigger disabled={messageIsStreaming}>
+            <DropdownMenuTrigger
+              disabled={messageIsStreaming}
+              className="focus:outline-none"
+            >
               <Button variant="ghost" className="p-[6px] m-0 h-auto">
                 <IconDots size={16} />
               </Button>
             </DropdownMenuTrigger>
             <DropdownMenuContent className="w-42">
               <DropdownMenuItem
-                className="flex justify-start gap-2"
+                className="flex justify-start gap-3"
                 onClick={handleOpenChangeTitleModal}
               >
                 <IconPencil size={18} />
                 {t('Edit')}
               </DropdownMenuItem>
               <DropdownMenuItem
-                className="flex justify-start gap-2"
+                className="flex justify-start gap-3"
                 onClick={handleOpenShareModal}
               >
                 <IconShare size={18} />
                 {t('Share')}
               </DropdownMenuItem>
               <DropdownMenuItem
-                className="flex justify-start gap-2"
+                className="flex justify-start gap-3"
                 onClick={handleOpenDeleteModal}
               >
                 <IconTrash size={18} />

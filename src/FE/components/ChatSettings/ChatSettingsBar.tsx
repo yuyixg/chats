@@ -20,7 +20,7 @@ const ChatSettingsBar = () => {
     <div
       className={`${
         settings.showChatSettingBar ? 'w-[360px]' : 'w-0 hidden'
-      } fixed top-0 right-0 z-40 flex h-full flex-none flex-col text-black bg-[#f9f9f9] dark:bg-[#202123] dark:text-white p-2 text-[14px] sm:relative sm:top-0`}
+      } fixed top-0 right-0 z-40 flex h-full flex-none flex-col bg-background p-2 text-[14px] sm:relative sm:top-0`}
     >
       <div className="">
         <div className="flex w-full justify-between h-9 items-center px-2">

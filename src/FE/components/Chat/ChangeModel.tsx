@@ -1,5 +1,10 @@
 import { useContext, useState } from 'react';
 
+import useTranslation from '@/hooks/useTranslation';
+
+import { AdminModelDto } from '@/types/adminApis';
+import { feModelProviders } from '@/types/model';
+
 import { HomeContext } from '@/pages/home';
 
 import ChatIcon from '@/components/ChatIcon/ChatIcon';
@@ -19,9 +24,6 @@ import {
 } from '@/components/ui/dropdown-menu';
 
 import { cn } from '@/lib/utils';
-import { AdminModelDto } from '@/types/adminApis';
-import { feModelProviders } from '@/types/model';
-import useTranslation from '@/hooks/useTranslation';
 
 const ChangeModel = ({
   readonly,
@@ -80,7 +82,7 @@ const ChangeModel = ({
           )}
         </Button>
       </DropdownMenuTrigger>
-      <DropdownMenuContent className="w-36">
+      <DropdownMenuContent className="w-40">
         <Search
           className="p-2 mx-1"
           containerClassName="pt-1 pb-1"
@@ -97,7 +99,9 @@ const ChangeModel = ({
                   className="p-2 flex gap-2"
                 >
                   <ChatIcon providerId={m.providerId} />
-                  {t(feModelProviders[m.providerId].name)}
+                  <span className="w-full text-nowrap overflow-hidden text-ellipsis whitespace-nowrap">
+                    {t(feModelProviders[m.providerId].name)}
+                  </span>
                 </DropdownMenuSubTrigger>
                 <DropdownMenuPortal>
                   <DropdownMenuSubContent className="max-w-[64px] md:max-w-[200px]">

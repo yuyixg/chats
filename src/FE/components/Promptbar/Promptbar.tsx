@@ -20,7 +20,6 @@ import {
   postUserPrompts,
   putUserPrompts,
 } from '@/apis/clientApis';
-import { PostPromptParams } from '@/types/adminApis';
 
 const PromptBar = () => {
   const { t } = useTranslation();
@@ -42,7 +41,7 @@ const PromptBar = () => {
   } = promptBarContextValue;
 
   const handleTogglePromptBar = () => {
-    const promptBar = !settings.showChatBar;
+    const promptBar = !settings.showPromptBar;
     handleUpdateSettings('showPromptBar', promptBar);
   };
 
@@ -84,10 +83,7 @@ const PromptBar = () => {
       promptDispatch({
         field: 'filteredPrompts',
         value: prompts.filter((prompt) => {
-          const searchable =
-            prompt.name.toLowerCase() +
-            ' ' +
-            prompt.content.toLowerCase();
+          const searchable = prompt.name.toLowerCase();
           return searchable.includes(searchTerm.toLowerCase());
         }),
       });
