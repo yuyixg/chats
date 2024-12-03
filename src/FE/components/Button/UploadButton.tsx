@@ -1,15 +1,12 @@
 import { useEffect, useRef } from 'react';
-
 import { checkFileSizeCanUpload, uploadFile } from '@/utils/uploadFile';
-
-import { UploadFailType } from '@/types/components/upload';
 import { ChatModelFileConfig } from '@/types/model';
 import { ImageDef } from '@/types/chat';
 
 interface Props {
   onSuccessful?: (def: ImageDef) => void;
   onUploading?: () => void;
-  onFailed?: (type?: UploadFailType) => void;
+  onFailed?: (reason: string | null) => void;
   children?: React.ReactNode;
   fileServerId: number;
   fileConfig: ChatModelFileConfig;
@@ -29,7 +26,7 @@ const UploadButton: React.FunctionComponent<Props> = ({
   const changeFile = async (event: any) => {
     const file = event?.target?.files[0];
     if (checkFileSizeCanUpload(maxSize, file.size)) {
-      onFailed && onFailed(UploadFailType.size);
+      onFailed && onFailed('File is too large.');
       return;
     }
 

@@ -7,10 +7,13 @@ using Microsoft.EntityFrameworkCore;
 
 namespace Chats.BE.Services.FileServices;
 
-public class FileUrlProvider(ChatsDB db, FileServiceFactory fileServiceFactory, IUrlEncryptionService urlEncryptionService, CurrentUser currentUser)
+public class FileUrlProvider(IServiceScopeFactory scopeFactory, FileServiceFactory fileServiceFactory, IUrlEncryptionService urlEncryptionService, CurrentUser currentUser)
 {
     public async Task<Uri> CreateUrl(int fileId, CancellationToken cancellationToken)
     {
+        using IServiceScope scope = scopeFactory.CreateScope();
+        using ChatsDB db = scope.ServiceProvider.GetRequiredService<ChatsDB>();
+
         DB.File? file = await db.Files
             .Include(x => x.FileService)
             .Include(x => x.FileContentType)
@@ -37,15 +40,6 @@ public class FileUrlProvider(ChatsDB db, FileServiceFactory fileServiceFactory, 
         return downloadUrl;
     }
 
-    public async Task<FileDto> CreateFileDto(int fileId, CancellationToken cancellationToken)
-    {
-        return new FileDto
-        {
-            Id = urlEncryptionService.EncryptFileId(fileId),
-            Url = await CreateUrl(fileId, cancellationToken)
-        };
-    }
-
     public FileDto CreateFileDto(DB.File file)
     {
         return new FileDto
@@ -57,6 +51,9 @@ public class FileUrlProvider(ChatsDB db, FileServiceFactory fileServiceFactory, 
 
     public async Task<FileDto[]> CreateFileDtos(int[] fileIds, CancellationToken cancellationToken)
     {
+        using IServiceScope scope = scopeFactory.CreateScope();
+        using ChatsDB db = scope.ServiceProvider.GetRequiredService<ChatsDB>();
+
         Dictionary<int, DB.File> files = await db.Files
             .Include(x => x.FileService)
             .Include(x => x.FileContentType)

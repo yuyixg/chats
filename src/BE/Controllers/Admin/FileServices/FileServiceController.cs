@@ -62,6 +62,13 @@ public class FileServiceController(ChatsDB db) : ControllerBase
         {
             existingData.UpdatedAt = DateTime.UtcNow;
             await db.SaveChangesAsync(cancellationToken);
+
+            if (existingData.IsDefault)
+            {
+                await db.FileServices
+                    .Where(x => x.Id != existingData.Id && x.IsDefault)
+                    .ExecuteUpdateAsync(p => p.SetProperty(x => x.IsDefault, false), cancellationToken);
+            }
         }
 
         return NoContent();
@@ -78,6 +85,13 @@ public class FileServiceController(ChatsDB db) : ControllerBase
         req.ApplyTo(toInsert);
         db.FileServices.Add(toInsert);
         await db.SaveChangesAsync(cancellationToken);
+
+        if (toInsert.IsDefault)
+        {
+            await db.FileServices
+                .Where(x => x.Id != toInsert.Id && x.IsDefault)
+                .ExecuteUpdateAsync(p => p.SetProperty(x => x.IsDefault, false), cancellationToken);
+        }
         return Created(default(string), value: toInsert.Id);
     }
 

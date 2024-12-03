@@ -10,6 +10,7 @@ using Chats.BE.Services.Sessions;
 using Microsoft.AspNetCore.Authentication;
 using Microsoft.AspNetCore.Mvc;
 using System.Runtime.CompilerServices;
+using Chats.BE.Services.FileServices;
 
 [assembly: InternalsVisibleTo("Chats.BE.Tests")]
 
@@ -48,10 +49,12 @@ public class Program
         builder.Services.AddScoped<UserModelManager>();
         builder.Services.AddSingleton<OpenAIApiKeySessionCache>();
         builder.Services.AddScoped<OpenAIApiKeySessionManager>();
-        builder.Services.AddScoped<HostUrlService>();
+        builder.Services.AddSingleton<HostUrlService>();
         builder.Services.AddSingleton<ConversationFactory>();
         builder.Services.AddSingleton<BalanceService>();
         builder.Services.AddScoped<ClientInfoManager>();
+        builder.Services.AddScoped<FileUrlProvider>();
+        builder.Services.AddSingleton<FileServiceFactory>();
         builder.Services.AddUrlEncryption();
         builder.Services.AddHttpContextAccessor();
 

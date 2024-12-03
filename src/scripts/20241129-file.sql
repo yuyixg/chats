@@ -1029,60 +1029,223 @@ COMMIT
 
 update FileService set IsDefault = 1
 update [MessageContentType] set ContentType = 'fileId' where id = 2
+delete FileContentType where id = 8
+DELETE FROM FileContentType WHERE id = 9;
+
+DBCC CHECKIDENT ('FileContentType', RESEED, 8);
+SET IDENTITY_INSERT FileContentType ON;
+INSERT INTO FileContentType (Id, ContentType)
+VALUES (8, 'image/heic');
+SET IDENTITY_INSERT FileContentType OFF;
 GO
+
+
+
+
+
+/* 为了防止任何可能出现的数据丢失问题，您应该先仔细检查此脚本，然后再在数据库设计器的上下文之外运行此脚本。*/
+BEGIN TRANSACTION
+SET QUOTED_IDENTIFIER ON
+SET ARITHABORT ON
+SET NUMERIC_ROUNDABORT OFF
+SET CONCAT_NULL_YIELDS_NULL ON
+SET ANSI_NULLS ON
+SET ANSI_PADDING ON
+SET ANSI_WARNINGS ON
+COMMIT
+BEGIN TRANSACTION
+GO
+DROP INDEX IX_File_StorageKey ON dbo.[File]
+GO
+CREATE NONCLUSTERED INDEX IX_File_StorageKey ON dbo.[File]
+	(
+	FileServiceId,
+	StorageKey
+	) WITH( STATISTICS_NORECOMPUTE = OFF, IGNORE_DUP_KEY = OFF, ALLOW_ROW_LOCKS = ON, ALLOW_PAGE_LOCKS = ON) ON [PRIMARY]
+GO
+ALTER TABLE dbo.[File] SET (LOCK_ESCALATION = TABLE)
+GO
+COMMIT
+
+
 
 DROP FUNCTION IF EXISTS UrlDecode;
 GO
 
-CREATE FUNCTION dbo.UrlDecode (@encoded NVARCHAR(MAX))
-RETURNS NVARCHAR(MAX)
-AS
-BEGIN
-    DECLARE @decoded NVARCHAR(MAX) = N'';
-    DECLARE @i INT = 1;
-    DECLARE @len INT = LEN(@encoded);
-    WHILE @i <= @len
+-- code from: https://www.codeproject.com/Articles/1005508/URL-Decode-in-T-SQL
+CREATE FUNCTION [dbo].[UrlDecode] (
+    @URL NVARCHAR(4000) )   RETURNS NVARCHAR(4000) AS BEGIN
+    DECLARE @Position INT, @Base CHAR(16), @High TINYINT, @Low TINYINT, @Pattern CHAR(21)
+    DECLARE @Byte1Value INT, @SurrogateHign INT, @SurrogateLow INT
+    SELECT @Pattern = '%[%][0-9a-f][0-9a-f]%', @Position = PATINDEX(@Pattern, @URL)
+
+    WHILE @Position > 0
     BEGIN
-        DECLARE @char NCHAR(1) = SUBSTRING(@encoded, @i, 1);
-        IF @char = '%'
-        BEGIN
-            DECLARE @hex NVARCHAR(4) = SUBSTRING(@encoded, @i + 1, 2);
-            -- 将十六进制字符串转换为整数，然后转换为对应的 Unicode 字符
-            SET @decoded += NCHAR(CONVERT(INT, @hex, 16));
-            SET @i += 2; -- 额外增加 2，跳过十六进制字符
-        END
-        ELSE IF @char = '+'
-        BEGIN
-            SET @decoded += N' '; -- 将加号替换为空格
-        END
-        ELSE
-        BEGIN
-            SET @decoded += @char;
-        END
-        SET @i += 1;
+       SELECT @High = ASCII(UPPER(SUBSTRING(@URL, @Position + 1, 1))) - 48,
+              @Low  = ASCII(UPPER(SUBSTRING(@URL, @Position + 2, 1))) - 48,
+              @High = @High / 17 * 10 + @High % 17,
+              @Low  = @Low  / 17 * 10 + @Low  % 17,
+              @Byte1Value = 16 * @High + @Low
+       IF @Byte1Value < 128 --1-byte UTF-8
+          SELECT @URL = STUFF(@URL, @Position, 3, NCHAR(@Byte1Value)),
+                 @Position = PATINDEX(@Pattern, @URL)
+       ELSE IF @Byte1Value >= 192 AND @Byte1Value < 224 AND @Position > 0 --2-byte UTF-8
+       BEGIN
+           SELECT @Byte1Value = (@Byte1Value & (POWER(2,5) - 1)) * POWER(2,6),
+                  @URL = STUFF(@URL, @Position, 3, ''),
+                  @Position = PATINDEX(@Pattern, @URL)
+           IF @Position > 0
+              SELECT @High = ASCII(UPPER(SUBSTRING(@URL, @Position + 1, 1))) - 48,
+                     @Low  = ASCII(UPPER(SUBSTRING(@URL, @Position + 2, 1))) - 48,
+                     @High = @High / 17 * 10 + @High % 17,
+                     @Low  = @Low  / 17 * 10 + @Low  % 17,
+                     @Byte1Value = @Byte1Value + ((16 * @High + @Low) & (POWER(2,6) - 1)),
+                     @URL = STUFF(@URL, @Position, 3, NCHAR(@Byte1Value)),
+                     @Position = PATINDEX(@Pattern, @URL)
+       END
+       ELSE IF @Byte1Value >= 224 AND @Byte1Value < 240 AND @Position > 0 --3-byte UTF-8
+       BEGIN
+           SELECT @Byte1Value = (@Byte1Value & (POWER(2,4) - 1)) * POWER(2,12),
+                  @URL = STUFF(@URL, @Position, 3, ''),
+                  @Position = PATINDEX(@Pattern, @URL)
+           IF @Position > 0
+              SELECT @High = ASCII(UPPER(SUBSTRING(@URL, @Position + 1, 1))) - 48,
+                     @Low  = ASCII(UPPER(SUBSTRING(@URL, @Position + 2, 1))) - 48,
+                     @High = @High / 17 * 10 + @High % 17,
+                     @Low  = @Low  / 17 * 10 + @Low  % 17,
+                     @Byte1Value = @Byte1Value + ((16 * @High + @Low) & (POWER(2,6) - 1)) * POWER(2,6),
+                     @URL = STUFF(@URL, @Position, 3, ''),
+                     @Position = PATINDEX(@Pattern, @URL)
+           IF @Position > 0
+              SELECT @High = ASCII(UPPER(SUBSTRING(@URL, @Position + 1, 1))) - 48,
+                     @Low  = ASCII(UPPER(SUBSTRING(@URL, @Position + 2, 1))) - 48,
+                     @High = @High / 17 * 10 + @High % 17,
+                     @Low  = @Low  / 17 * 10 + @Low  % 17,
+                     @Byte1Value = @Byte1Value + ((16 * @High + @Low) & (POWER(2,6) - 1)),
+                     @URL = STUFF(@URL, @Position, 3, NCHAR(@Byte1Value)),
+                     @Position = PATINDEX(@Pattern, @URL)
+       END
+       ELSE IF @Byte1Value >= 240 AND @Position > 0  --4-byte UTF-8
+       BEGIN
+           SELECT @Byte1Value = (@Byte1Value & (POWER(2,3) - 1)) * POWER(2,18),
+                  @URL = STUFF(@URL, @Position, 3, ''),
+                  @Position = PATINDEX(@Pattern, @URL)
+           IF @Position > 0
+              SELECT @High = ASCII(UPPER(SUBSTRING(@URL, @Position + 1, 1))) - 48,
+                     @Low  = ASCII(UPPER(SUBSTRING(@URL, @Position + 2, 1))) - 48,
+                     @High = @High / 17 * 10 + @High % 17,
+                     @Low  = @Low  / 17 * 10 + @Low  % 17,
+                     @Byte1Value = @Byte1Value + ((16 * @High + @Low) & (POWER(2,6) - 1)) * POWER(2,12),
+                     @URL = STUFF(@URL, @Position, 3, ''),
+                     @Position = PATINDEX(@Pattern, @URL)
+           IF @Position > 0
+              SELECT @High = ASCII(UPPER(SUBSTRING(@URL, @Position + 1, 1))) - 48,
+                     @Low  = ASCII(UPPER(SUBSTRING(@URL, @Position + 2, 1))) - 48,
+                     @High = @High / 17 * 10 + @High % 17,
+                     @Low  = @Low  / 17 * 10 + @Low  % 17,
+                     @Byte1Value = @Byte1Value + ((16 * @High + @Low) & (POWER(2,6) - 1)) * POWER(2,6),
+                     @URL = STUFF(@URL, @Position, 3, ''),
+                     @Position = PATINDEX(@Pattern, @URL)
+           IF @Position > 0
+           BEGIN
+              SELECT @High = ASCII(UPPER(SUBSTRING(@URL, @Position + 1, 1))) - 48,
+                     @Low  = ASCII(UPPER(SUBSTRING(@URL, @Position + 2, 1))) - 48,
+                     @High = @High / 17 * 10 + @High % 17,
+                     @Low  = @Low  / 17 * 10 + @Low  % 17,
+                     @Byte1Value = @Byte1Value + ((16 * @High + @Low) & (POWER(2,6) - 1))
+                     --,@URL = STUFF(@URL, @Position, 3, cast(@Byte1Value as varchar))
+                     --,@Position = PATINDEX(@Pattern, @URL)
+
+              SELECT @SurrogateHign = ((@Byte1Value - POWER(16,4)) & (POWER(2,20) - 1)) / POWER(2,10) + 13 * POWER(16,3) + 8 * POWER(16,2),
+                     @SurrogateLow = ((@Byte1Value - POWER(16,4)) & (POWER(2,10) - 1)) + 13 * POWER(16,3) + 12 * POWER(16,2),
+                     @URL = STUFF(@URL, @Position, 3, NCHAR(@SurrogateHign) + NCHAR(@SurrogateLow)),
+                     @Position = PATINDEX(@Pattern, @URL)
+           END
+       END
     END
-    RETURN @decoded;
-END
+    RETURN REPLACE(@URL, '+', ' ') END
 GO
 
-SELECT TOP (1000) 
-    [Id],
-    [ContentTypeId],
-    [MessageId],
-	ContentAsString,
-    dbo.UrlDecode(SUBSTRING(
-        ContentAsString,
-        CHARINDEX(':88/', ContentAsString) + 4, -- Find position of ':88/' and adjust to start after it
-        CHARINDEX('?', ContentAsString) - CHARINDEX(':88/', ContentAsString) - 4 -- Calculate length from ':88/' to '?'
-    )) AS ExtractedPart
-FROM 
-(
-    SELECT 
-        [Id],
-        [ContentTypeId],
-        [MessageId],
-        CAST([Content] AS VARCHAR(MAX)) COLLATE Latin1_General_100_CI_AS_SC_UTF8 AS ContentAsString
-    FROM 
-        [ChatsSTG].[dbo].[MessageContent]
-	WHERE ContentTypeId = 2
-) AS Derived
+WITH DecodedData AS (
+    SELECT
+        dbo.UrlDecode(ExtractedPart) AS Decoded,
+		CreatedAt,
+		UserId
+    FROM
+    (
+        SELECT 
+            *,
+            SUBSTRING(
+                ContentAsString,
+                CHARINDEX(':88/', ContentAsString) + 4, -- 找到':88/'的位置，并调整起点
+                CHARINDEX('?', ContentAsString) - CHARINDEX(':88/', ContentAsString) - 4 -- 计算从':88/'到'?'之间的长度
+            ) AS ExtractedPart
+        FROM 
+        (
+            SELECT 
+                MessageContent.[Id],
+                [ContentTypeId],
+                [MessageId],
+				Message.CreatedAt,
+				[Chat].UserId,
+                CAST([Content] AS VARCHAR(MAX)) COLLATE Latin1_General_100_CI_AS_SC_UTF8 AS ContentAsString
+            FROM 
+                [MessageContent]
+			JOIN [Message] ON Message.Id = MessageContent.MessageId 
+			JOIN [Chat] ON Chat.Id = Message.ChatId
+            WHERE ContentTypeId = 2
+        ) AS Derived
+    ) AS Derived
+),
+ParsedData AS (
+    SELECT
+        Decoded,
+        -- 获取文件名（从最后一个'/'之后的部分）
+        RIGHT(Decoded, CHARINDEX('/', REVERSE(Decoded)) - 1) AS FileNameWithExt,
+        -- 获取文件扩展名（从最后一个'.'之后的部分）
+        RIGHT(Decoded, CHARINDEX('.', REVERSE(Decoded)) - 1) AS Extension,
+		CreatedAt,
+		UserId
+    FROM DecodedData
+),
+FinalData AS (
+    SELECT
+        Decoded AS StorageKey,
+        FileNameWithExt AS FileName,
+        CASE
+            WHEN LOWER(Extension) = 'jpg' THEN 1
+            WHEN LOWER(Extension) = 'png' THEN 2
+            WHEN LOWER(Extension) = 'heic' THEN 8
+            ELSE NULL -- 如果有其他扩展名，可以根据需要添加对应的FileContentTypeId
+        END AS FileContentTypeId,
+		1 AS FileServiceId,
+        0 AS Size,
+        1 AS ClientInfoId,
+        UserId AS CreateUserId,
+        CreatedAt
+    FROM ParsedData
+    WHERE Extension IN ('jpg', 'png', 'heic') -- 过滤出符合条件的扩展名
+)
+INSERT INTO [File] (
+    [FileName],
+    [FileContentTypeId],
+	[FileServiceId],
+    [StorageKey],
+    [Size],
+    [ClientInfoId],
+    [CreateUserId],
+    [CreatedAt]
+)
+SELECT
+    FileName,
+    FileContentTypeId,
+	FileServiceId,
+    StorageKey,
+    Size,
+    ClientInfoId,
+    CreateUserId,
+    CreatedAt
+FROM FinalData;
+
+DROP FUNCTION IF EXISTS UrlDecode;
+GO

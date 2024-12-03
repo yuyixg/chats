@@ -58,3 +58,4 @@ logs.txt
 /**/chats.db-shm
 /**/chats.db-wal
 /Publish
+/src/BE/AppData/*

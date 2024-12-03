@@ -14,7 +14,6 @@ import useTranslation from '@/hooks/useTranslation';
 import { isMobile } from '@/utils/common';
 
 import { Content, ImageDef, Message } from '@/types/chat';
-import { UploadFailType } from '@/types/components/upload';
 import { Prompt } from '@/types/prompt';
 
 import { HomeContext } from '@/pages/home';
@@ -36,7 +35,6 @@ import { getUserPromptDetail } from '@/apis/clientApis';
 import { defaultFileConfig } from '@/apis/adminApis';
 import { AdminModelDto } from '@/types/adminApis';
 import { formatPrompt } from '@/utils/promptVariable';
-import { getImageUrl } from '@/utils/uploadFile';
 
 interface Props {
   onSend: (message: Message) => void;
@@ -224,14 +222,10 @@ export const ChatInput = ({
     );
   };
 
-  const handleUploadFailed = (type?: UploadFailType) => {
+  const handleUploadFailed = (reason: string | null) => {
     setUploading(false);
-    if (type === UploadFailType.size) {
-      toast.error(
-        t(`The file size limit is {{fileSize}}`, {
-          fileSize: defaultFileConfig!.maxSize / 1024 + 'MB',
-        }),
-      );
+    if (reason) {
+      toast.error(t(reason));
     } else {
       toast.error(t('File upload failed'));
     }

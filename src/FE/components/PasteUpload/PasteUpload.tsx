@@ -1,10 +1,6 @@
 import React, { useEffect, useRef } from 'react';
 
 import { checkFileSizeCanUpload, uploadFile } from '@/utils/uploadFile';
-
-import {
-  UploadFailType,
-} from '@/types/components/upload';
 import { ChatModelFileConfig } from '@/types/model';
 import { ImageDef } from '@/types/chat';
 
@@ -13,7 +9,7 @@ interface IPasteUploadProps {
   fileConfig: ChatModelFileConfig;
   onUploading?: () => void;
   onSuccessful?: (def: ImageDef) => void;
-  onFailed?: (type?: UploadFailType) => void;
+  onFailed?: (reason: string | null) => void;
 }
 
 const PasteUpload = (props: IPasteUploadProps) => {
@@ -47,7 +43,7 @@ const PasteUpload = (props: IPasteUploadProps) => {
   const handleFileUpload = (file: File) => {
     const { maxSize } = fileConfig || { maxSize: 0 };
     if (checkFileSizeCanUpload(maxSize, file.size)) {
-      onFailed && onFailed(UploadFailType.size);
+      onFailed && onFailed('File is too large.');
       return;
     }
     uploadFile(file, fileServiceId, onUploading, onSuccessful, onFailed);

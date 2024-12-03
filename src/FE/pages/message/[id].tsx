@@ -27,6 +27,7 @@ export default function MessageDetails() {
   });
 
   useEffect(() => {
+    if (!router.isReady) return;
     const messageId = getQueryId(router);
     getMessageDetails(messageId).then((data) => {
       document.title = data.name;

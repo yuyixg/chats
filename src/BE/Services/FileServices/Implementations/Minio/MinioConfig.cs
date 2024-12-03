@@ -17,5 +17,5 @@ public record MinioConfig
     public required string Bucket { get; init; }
 
     [JsonPropertyName("region")]
-    public required string? Region { get; init; } // Nullable for the default null value.
+    public string? Region { get; init; } // Nullable for the default null value.
 }

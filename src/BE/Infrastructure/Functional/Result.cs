@@ -32,12 +32,12 @@ public record Result
 
     public static Result Ok()
     {
-        return new Result(true, string.Empty);
+        return new Result(true, null);
     }
 
     public static Result<T> Ok<T>(T value)
     {
-        return new Result<T>(value, true, string.Empty);
+        return new Result<T>(value, true, null);
     }
 
     public static Result Combine(IEnumerable<Result> results)

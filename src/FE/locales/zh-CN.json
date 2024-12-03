@@ -351,5 +351,8 @@
   "Is Default": "是否默认",
   "Is System": "是否系统",
   "Sets Temperature": "设置温度",
-  "File Count": "文件数量"
+  "File Count": "文件数量",
+  "File is empty.": "文件为空。",
+  "File is too large.": "文件过大。",
+  "Invalid file name.": "无效的文件名。"
 }
