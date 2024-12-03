@@ -2,7 +2,6 @@
 using Chats.BE.Controllers.Admin.InitialConfigs.Dtos;
 using Chats.BE.DB;
 using Microsoft.AspNetCore.Mvc;
-using Microsoft.EntityFrameworkCore;
 
 namespace Chats.BE.Controllers.Admin.InitialConfigs;
 

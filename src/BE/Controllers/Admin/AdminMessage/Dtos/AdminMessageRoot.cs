@@ -1,7 +1,8 @@
 ﻿using Chats.BE.Controllers.Chats.Conversations.Dtos;
 using Chats.BE.Controllers.Chats.Messages.Dtos;
 using Chats.BE.Services.Conversations;
-using Chats.BE.Services.IdEncryption;
+using Chats.BE.Services.FileServices;
+using Chats.BE.Services.UrlEncryption;
 using System.Text.Json.Serialization;
 
 namespace Chats.BE.Controllers.Admin.AdminMessage.Dtos;
@@ -135,25 +136,26 @@ public record AdminMessageItemTemp
     public required int? Duration { get; init; }
     public required int? FirstTokenLatency { get; init; }
 
-    public static AdminMessageBasicItem[] ToDtos(AdminMessageItemTemp[] temps, IIdEncryptionService idEncryption)
+    public static async Task<AdminMessageBasicItem[]> ToDtos(AdminMessageItemTemp[] temps, IUrlEncryptionService idEncryption, FileUrlProvider fup, CancellationToken cancellationToken)
     {
-        return temps
-            .Select(x =>
+        return await temps
+            .ToAsyncEnumerable()
+            .SelectAwait(async x =>
             {
                 AdminMessageBasicItem basicItem = new()
                 {
-                    Id = idEncryption.Encrypt(x.Id),
-                    ParentId = x.ParentId != null ? idEncryption.Encrypt(x.ParentId.Value) : null,
+                    Id = idEncryption.EncryptMessageId(x.Id),
+                    ParentId = x.ParentId != null ? idEncryption.EncryptMessageId(x.ParentId.Value) : null,
                     CreatedAt = x.CreatedAt,
                     Role = x.Role.ToString().ToLowerInvariant(),
-                    Content = MessageContentResponse.FromSegments(x.Content, idEncryption),
+                    Content = await MessageContentResponse.FromSegments(x.Content, fup, cancellationToken),
                     ChildrenIds = temps
                         .Where(v => v.ParentId == x.Id && v.Role == DBChatRole.User)
-                        .Select(v => idEncryption.Encrypt(v.Id))
+                        .Select(v => idEncryption.EncryptMessageId(v.Id))
                         .ToList(),
                     AssistantChildrenIds = temps
                         .Where(v => v.ParentId == x.ParentId && v.Role == DBChatRole.Assistant)
-                        .Select(v => idEncryption.Encrypt(v.Id))
+                        .Select(v => idEncryption.EncryptMessageId(v.Id))
                         .ToList(),
                 };
 
@@ -166,6 +168,6 @@ public record AdminMessageItemTemp
                     return basicItem;
                 }
             })
-            .ToArray();
+            .ToArrayAsync(cancellationToken);
     }
 }

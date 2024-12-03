@@ -1,10 +1,8 @@
 ﻿using Chats.BE.DB.Enums;
+using Chats.BE.DB.Extensions;
 using Chats.BE.Services.Conversations;
 using Chats.BE.Services.FileServices;
 using OpenAI.Chat;
-using System.Buffers.Binary;
-using System.Diagnostics;
-using System.Text;
 
 namespace Chats.BE.Controllers.Chats.Conversations.Dtos;
 
@@ -15,7 +13,7 @@ public record MessageLiteDto
     public required DBChatRole Role { get; init; }
     public required DBMessageSegment[] Content { get; init; }
 
-    public async Task<ChatMessage> ToOpenAI(FileDownloadUrlProvider fileDownloadUrlProvider, CancellationToken cancellationToken)
+    public async Task<ChatMessage> ToOpenAI(FileUrlProvider fileDownloadUrlProvider, CancellationToken cancellationToken)
     {
         return Role switch
         {
@@ -40,13 +38,12 @@ public record DBMessageSegment
 
     public required byte[] Content { get; init; }
 
-    public async Task<ChatMessageContentPart> ToOpenAI(FileDownloadUrlProvider fileDownloadUrlProvider, CancellationToken cancellationToken)
+    public async Task<ChatMessageContentPart> ToOpenAI(FileUrlProvider fdup, CancellationToken cancellationToken)
     {
         return ContentType switch
         {
             DBMessageContentType.Text => ChatMessageContentPart.CreateTextPart(ToString()),
-            DBMessageContentType.ImageUrl => ChatMessageContentPart.CreateImagePart(new Uri(ToString())),
-            DBMessageContentType.FileId => ChatMessageContentPart.CreateImagePart(new Uri(await fileDownloadUrlProvider.GetDownloadUrlForFileId(BinaryPrimitives.ReadInt32LittleEndian(Content), cancellationToken))),
+            DBMessageContentType.FileId => ChatMessageContentPart.CreateImagePart(await fdup.CreateUrl(MessageContentUtil.ReadFileId(Content), cancellationToken)),
             _ => throw new NotImplementedException()
         };
     }
@@ -55,10 +52,10 @@ public record DBMessageSegment
     {
         return ContentType switch
         {
-            DBMessageContentType.Text => Encoding.Unicode.GetString(Content),
-            DBMessageContentType.ImageUrl => Encoding.UTF8.GetString(Content),
-            DBMessageContentType.Error => Encoding.UTF8.GetString(Content),
-            _ => throw new NotImplementedException()
+            DBMessageContentType.Text => MessageContentUtil.ReadText(Content),
+            DBMessageContentType.Error => MessageContentUtil.ReadError(Content),
+            //DBMessageContentType.FileId => MessageContentUtil.ReadFileId(Content).ToString(), // not supported
+            _ => throw new NotSupportedException(),
         };
     }
 }

@@ -7,14 +7,15 @@ using Chats.BE.DB.Enums;
 using Chats.BE.DB.Jsons;
 using Chats.BE.Infrastructure;
 using Chats.BE.Services.Conversations;
-using Chats.BE.Services.IdEncryption;
+using Chats.BE.Services.FileServices;
+using Chats.BE.Services.UrlEncryption;
 using Microsoft.AspNetCore.Mvc;
 using Microsoft.EntityFrameworkCore;
 
 namespace Chats.BE.Controllers.Admin.AdminMessage;
 
 [Route("api/admin"), AuthorizeAdmin]
-public class AdminMessageController(ChatsDB db, CurrentUser currentUser, IIdEncryptionService idEncryption) : ControllerBase
+public class AdminMessageController(ChatsDB db, CurrentUser currentUser, IUrlEncryptionService idEncryption) : ControllerBase
 {
     [HttpGet("messages")]
     public async Task<ActionResult<PagedResult<AdminChatsDto>>> GetMessages([FromQuery] PagingRequest req, CancellationToken cancellationToken)
@@ -47,12 +48,17 @@ public class AdminMessageController(ChatsDB db, CurrentUser currentUser, IIdEncr
     }
 
     [HttpGet("message-details")]
-    public async Task<ActionResult<AdminMessageRoot>> GetAdminMessage(int chatId, CancellationToken cancellationToken)
+    public async Task<ActionResult<AdminMessageRoot>> GetAdminMessage(int chatId,
+        [FromServices] FileUrlProvider fup,
+        CancellationToken cancellationToken)
     {
-        return await GetAdminMessageInternal(db, chatId, idEncryption, cancellationToken);
+        return await GetAdminMessageInternal(db, chatId, idEncryption, fup, cancellationToken);
     }
 
-    internal static async Task<ActionResult<AdminMessageRoot>> GetAdminMessageInternal(ChatsDB db, int conversationId, IIdEncryptionService idEncryption, CancellationToken cancellationToken)
+    internal static async Task<ActionResult<AdminMessageRoot>> GetAdminMessageInternal(ChatsDB db, int conversationId, 
+        IUrlEncryptionService urlEncryption, 
+        FileUrlProvider fup,
+        CancellationToken cancellationToken)
     {
         AdminMessageDtoTemp? adminMessageTemp = await db.Chats
                     .Where(x => x.Id == conversationId)
@@ -93,7 +99,7 @@ public class AdminMessageController(ChatsDB db, CurrentUser currentUser, IIdEncr
             .OrderBy(x => x.Id)
             .ToArrayAsync(cancellationToken);
 
-        AdminMessageBasicItem[] items = AdminMessageItemTemp.ToDtos(messagesTemp, idEncryption);
+        AdminMessageBasicItem[] items = await AdminMessageItemTemp.ToDtos(messagesTemp, urlEncryption, fup, cancellationToken);
         AdminMessageRoot dto = adminMessageTemp.ToDto(items);
 
         return new OkObjectResult(dto);

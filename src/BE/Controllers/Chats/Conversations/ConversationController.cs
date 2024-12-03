@@ -7,7 +7,7 @@ using Chats.BE.Services;
 using Chats.BE.Services.Conversations;
 using Chats.BE.Services.Conversations.Dtos;
 using Chats.BE.Services.FileServices;
-using Chats.BE.Services.IdEncryption;
+using Chats.BE.Services.UrlEncryption;
 using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Mvc;
 using Microsoft.EntityFrameworkCore;
@@ -20,7 +20,7 @@ using OpenAIChatMessage = OpenAI.Chat.ChatMessage;
 namespace Chats.BE.Controllers.Chats.Conversations;
 
 [Route("api/chats"), Authorize]
-public class ConversationController(ChatsDB db, CurrentUser currentUser, ILogger<ConversationController> logger, IIdEncryptionService idEncryption) : ControllerBase
+public class ConversationController(ChatsDB db, CurrentUser currentUser, ILogger<ConversationController> logger, IUrlEncryptionService idEncryption) : ControllerBase
 {
     [HttpPost]
     public async Task<IActionResult> StartConversationStreamed(
@@ -29,12 +29,12 @@ public class ConversationController(ChatsDB db, CurrentUser currentUser, ILogger
         [FromServices] ConversationFactory conversationFactory,
         [FromServices] UserModelManager userModelManager,
         [FromServices] ClientInfoManager clientInfoManager,
-        [FromServices] FileDownloadUrlProvider fileDownloadUrlProvider,
+        [FromServices] FileUrlProvider fileDownloadUrlProvider,
         CancellationToken cancellationToken)
     {
         InChatContext icc = new();
-        int chatId = idEncryption.DecryptAsInt32(request.ChatId);
-        long? messageId = request.MessageId != null ? idEncryption.DecryptAsInt64(request.MessageId) : null;
+        int chatId = idEncryption.DecryptChatId(request.EncryptedChatId);
+        long? messageId = request.EncryptedMessageId != null ? idEncryption.DecryptMessageId(request.EncryptedMessageId) : null;
 
         UserModel? userModel = await userModelManager.GetUserModel(currentUser.Id, request.ModelId, cancellationToken);
 

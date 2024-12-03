@@ -1,5 +1,4 @@
 ﻿using System.Text.Json.Serialization;
-using System.Threading;
 using Chats.BE.Services.Common;
 using Chats.BE.Services.Keycloak;
 

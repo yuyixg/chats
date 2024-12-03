@@ -3,7 +3,7 @@ namespace Chats.BE.Services.FileServices.Implementations.Minio;
 
 public class MinioFileService(MinioConfig minioConfig) : IFileService
 {
-    public string CreateDownloadUrl(string storageKey)
+    public Uri CreateDownloadUrl(CreateDownloadUrlRequest req)
     {
         throw new NotImplementedException();
     }

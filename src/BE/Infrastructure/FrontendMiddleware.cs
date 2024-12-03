@@ -1,5 +1,4 @@
 ﻿using Microsoft.Extensions.FileProviders;
-using System.Diagnostics.CodeAnalysis;
 
 namespace Chats.BE.Infrastructure;
 

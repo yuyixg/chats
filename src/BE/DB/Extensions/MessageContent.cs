@@ -1,20 +1,19 @@
 ﻿using Chats.BE.Controllers.Chats.Conversations.Dtos;
 using Chats.BE.DB.Enums;
-using Chats.BE.Services.IdEncryption;
+using Chats.BE.DB.Extensions;
+using Chats.BE.Services.FileServices;
 using OpenAI.Chat;
-using System.Buffers.Binary;
-using System.Text;
 
 namespace Chats.BE.DB;
 
 public partial class MessageContent
 {
-    public ChatMessageContentPart ToOpenAI()
+    public async Task<ChatMessageContentPart> ToOpenAI(FileUrlProvider fup, CancellationToken cancellationToken)
     {
         return (DBMessageContentType)ContentTypeId switch
         {
-            DBMessageContentType.Text => ChatMessageContentPart.CreateTextPart(Encoding.Unicode.GetString(Content)),
-            DBMessageContentType.ImageUrl => ChatMessageContentPart.CreateImagePart(new Uri(Encoding.UTF8.GetString(Content))),
+            DBMessageContentType.Text => ChatMessageContentPart.CreateTextPart(MessageContentUtil.ReadText(Content)),
+            DBMessageContentType.FileId => ChatMessageContentPart.CreateImagePart(await fup.CreateUrl(MessageContentUtil.ReadFileId(Content), cancellationToken)),
             _ => throw new NotImplementedException()
         };
     }
@@ -30,23 +29,16 @@ public partial class MessageContent
 
     public static MessageContent FromText(string text)
     {
-        return new MessageContent { Content = Encoding.Unicode.GetBytes(text), ContentTypeId = (byte)DBMessageContentType.Text };
+        return new MessageContent { Content = MessageContentUtil.WriteText(text), ContentTypeId = (byte)DBMessageContentType.Text };
     }
 
-    public static MessageContent FromImageUrl(string imageUrl)
+    public static MessageContent FromFileId(int fileId)
     {
-        return new MessageContent { Content = Encoding.UTF8.GetBytes(imageUrl), ContentTypeId = (byte)DBMessageContentType.ImageUrl };
+        return new MessageContent { Content = MessageContentUtil.WriteFileId(fileId), ContentTypeId = (byte)DBMessageContentType.FileId };
     }
 
     public static MessageContent FromError(string error)
     {
-        return new MessageContent { Content = Encoding.UTF8.GetBytes(error), ContentTypeId = (byte)DBMessageContentType.Error };
-    }
-
-    public static MessageContent FromFileId(string fileId, IIdEncryptionService idEncryptionService)
-    {
-        byte[] bytes = new byte[4];
-        BinaryPrimitives.WriteInt32LittleEndian(bytes, idEncryptionService.DecryptAsInt32(fileId));
-        return new MessageContent { Content = bytes, ContentTypeId = (byte)DBMessageContentType.FileId };
+        return new MessageContent { Content = MessageContentUtil.WriteError(error), ContentTypeId = (byte)DBMessageContentType.Error };
     }
 }

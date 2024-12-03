@@ -8,7 +8,7 @@ using Chats.BE.Infrastructure;
 using Chats.BE.Services;
 using Chats.BE.Services.Common;
 using Chats.BE.Services.Conversations;
-using Chats.BE.Services.IdEncryption;
+using Chats.BE.Services.UrlEncryption;
 using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Mvc;
 using Microsoft.EntityFrameworkCore;
@@ -16,13 +16,13 @@ using Microsoft.EntityFrameworkCore;
 namespace Chats.BE.Controllers.Chats.Chats;
 
 [Route("api/user/chats"), Authorize]
-public class UserChatsController(ChatsDB db, CurrentUser currentUser, IIdEncryptionService idEncryption) : ControllerBase
+public class UserChatsController(ChatsDB db, CurrentUser currentUser, IUrlEncryptionService idEncryption) : ControllerBase
 {
-    [HttpGet("{chatId}")]
-    public async Task<ActionResult<ChatsResponse>> GetOneChat(string chatId, CancellationToken cancellationToken)
+    [HttpGet("{encryptedChatId}")]
+    public async Task<ActionResult<ChatsResponse>> GetOneChat(string encryptedChatId, CancellationToken cancellationToken)
     {
         ChatsResponseTemp? temp = await db.Chats
-            .Where(x => x.Id == idEncryption.DecryptAsInt32(chatId) && x.UserId == currentUser.Id && !x.IsDeleted)
+            .Where(x => x.Id == idEncryption.DecryptChatId(encryptedChatId) && x.UserId == currentUser.Id && !x.IsDeleted)
             .Select(x => new ChatsResponseTemp()
             {
                 Id = x.Id,
@@ -125,37 +125,38 @@ public class UserChatsController(ChatsDB db, CurrentUser currentUser, IIdEncrypt
         return Ok(ChatsResponse.FromDB(chat, idEncryption));
     }
 
-    [HttpDelete("{chatId}")]
-    public async Task<IActionResult> DeleteChats(string chatId, CancellationToken cancellationToken)
+    [HttpDelete("{encryptedChatId}")]
+    public async Task<IActionResult> DeleteChats(string encryptedChatId, CancellationToken cancellationToken)
     {
+        int chatId = idEncryption.DecryptChatId(encryptedChatId);
         bool exists = await db.Chats
-            .AnyAsync(x => x.Id == idEncryption.DecryptAsInt32(chatId) && x.UserId == currentUser.Id, cancellationToken);
+            .AnyAsync(x => x.Id == chatId && x.UserId == currentUser.Id, cancellationToken);
         if (!exists)
         {
             return NotFound();
         }
 
-        if (await db.Messages.AnyAsync(m => m.ChatId == idEncryption.DecryptAsInt32(chatId), cancellationToken))
+        if (await db.Messages.AnyAsync(m => m.ChatId == chatId, cancellationToken))
         {
             await db.Chats
-                .Where(x => x.Id == idEncryption.DecryptAsInt32(chatId))
+                .Where(x => x.Id == chatId)
                 .ExecuteUpdateAsync(x => x.SetProperty(y => y.IsDeleted, true), cancellationToken);
         }
         else
         {
             await db.Chats
-                .Where(x => x.Id == idEncryption.DecryptAsInt32(chatId))
+                .Where(x => x.Id == chatId)
                 .ExecuteDeleteAsync(cancellationToken);
         }
 
         return NoContent();
     }
 
-    [HttpPut("{chatId}")]
-    public async Task<IActionResult> UpdateChats(string chatId, [FromBody] UpdateChatsRequest request, CancellationToken cancellationToken)
+    [HttpPut("{encryptedChatId}")]
+    public async Task<IActionResult> UpdateChats(string encryptedChatId, [FromBody] UpdateChatsRequest request, CancellationToken cancellationToken)
     {
         Chat? chat = await db.Chats
-            .Where(x => x.Id == idEncryption.DecryptAsInt32(chatId) && x.UserId == currentUser.Id)
+            .Where(x => x.Id == idEncryption.DecryptChatId(encryptedChatId) && x.UserId == currentUser.Id)
             .FirstOrDefaultAsync(cancellationToken);
         if (chat == null)
         {

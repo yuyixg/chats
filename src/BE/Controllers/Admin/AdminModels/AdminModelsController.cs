@@ -8,7 +8,6 @@ using Chats.BE.Services.Conversations;
 using Microsoft.AspNetCore.Mvc;
 using Microsoft.AspNetCore.Mvc.ModelBinding;
 using Microsoft.EntityFrameworkCore;
-using OpenAI.Chat;
 
 namespace Chats.BE.Controllers.Admin.AdminModels;
 

@@ -1,9 +1,7 @@
 ﻿using Chats.BE.Controllers.Admin.Common;
 using Chats.BE.Controllers.Admin.RequestLogs.Dtos;
 using Chats.BE.Controllers.Common.Dtos;
-using Chats.BE.DB;
 using Microsoft.AspNetCore.Mvc;
-using Microsoft.EntityFrameworkCore;
 
 namespace Chats.BE.Controllers.Admin.RequestLogs;
 

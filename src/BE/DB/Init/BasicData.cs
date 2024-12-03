@@ -1,5 +1,3 @@
-using Chats.BE.DB;
-
 namespace Chats.BE.DB.Init;
 
 internal static class BasicData

@@ -3,7 +3,7 @@ namespace Chats.BE.Services.FileServices.Implementations.AliyunOSS;
 
 public class AliyunOSSFileService(AliyunOssConfig aliyunOssConfig) : IFileService
 {
-    public string CreateDownloadUrl(string storageKey)
+    public Uri CreateDownloadUrl(CreateDownloadUrlRequest req)
     {
         throw new NotImplementedException();
     }

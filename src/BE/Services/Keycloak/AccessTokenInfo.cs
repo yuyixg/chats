@@ -1,9 +1,6 @@
 ﻿using System.Text.Json.Serialization;
 using System.Text.Json;
 using System.Text;
-using Chats.BE.DB;
-using Microsoft.EntityFrameworkCore;
-using Chats.BE.Services.Common;
 
 namespace Chats.BE.Services.Keycloak;
 

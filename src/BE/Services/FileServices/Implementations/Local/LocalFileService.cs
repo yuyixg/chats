@@ -1,12 +1,16 @@
 ﻿
 
+using Chats.BE.Services.UrlEncryption;
+
 namespace Chats.BE.Services.FileServices.Implementations.Local;
 
-public class LocalFileService(string localFolder, HostUrlService hostUrlservice) : IFileService
+public class LocalFileService(string localFolder, HostUrlService hostUrlservice, IUrlEncryptionService urlEncryption) : IFileService
 {
-    public string CreateDownloadUrl(string storageKey)
+    public Uri CreateDownloadUrl(CreateDownloadUrlRequest request)
     {
-        return $"{hostUrlservice.GetBEUrl()}/api/file/{storageKey}";
+        TimedId timedId = TimedId.Create2Hours(request.FileId);
+        string path = urlEncryption.CreateFileIdPath(timedId);
+        return new Uri($"{hostUrlservice.GetBEUrl()}/api/file/{path}");
     }
 
     public async Task<string> Upload(FileUploadRequest request, CancellationToken cancellationToken)

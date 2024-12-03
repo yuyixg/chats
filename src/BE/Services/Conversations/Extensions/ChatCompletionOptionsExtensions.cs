@@ -1,8 +1,6 @@
 ﻿using OpenAI.Chat;
-using System.ClientModel.Primitives;
 using System.Reflection;
 using System.Runtime.CompilerServices;
-using System.Text.Json;
 
 namespace Chats.BE.Services.Conversations.Extensions;
 

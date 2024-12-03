@@ -4,7 +4,6 @@ using OpenAI;
 using System.Runtime.CompilerServices;
 using System.ClientModel;
 using Chats.BE.DB;
-using Microsoft.EntityFrameworkCore.ChangeTracking.Internal;
 
 namespace Chats.BE.Services.Conversations.Implementations.OpenAI;
 

@@ -3,7 +3,7 @@ namespace Chats.BE.Services.FileServices.Implementations.AzureBlobStorage;
 
 public class AzureBlobStorageFileService(string azureStorageConnectionString) : IFileService
 {
-    public string CreateDownloadUrl(string storageKey)
+    public Uri CreateDownloadUrl(CreateDownloadUrlRequest req)
     {
         throw new NotImplementedException();
     }

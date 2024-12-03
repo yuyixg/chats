@@ -3,16 +3,19 @@ using Chats.BE.DB.Enums;
 using Chats.BE.Infrastructure;
 using Chats.BE.Services;
 using Chats.BE.Services.FileServices;
-using Chats.BE.Services.IdEncryption;
+using Chats.BE.Services.UrlEncryption;
 using Chats.BE.Services.ImageInfo;
 using Microsoft.AspNetCore.Mvc;
 using Microsoft.EntityFrameworkCore;
 using System.Drawing;
+using Microsoft.AspNetCore.Authorization;
+using Chats.BE.Infrastructure.Functional;
+using Chats.BE.Controllers.Chats.Messages.Dtos;
 
 namespace Chats.BE.Controllers.Chats.Files;
 
 [Route("api")]
-public class FileController(ChatsDB db, FileServiceFactory fileServiceFactory, CurrentUser currentUser, IIdEncryptionService idEncryptionService, ILogger<FileController> logger) : ControllerBase
+public class FileController(ChatsDB db, FileServiceFactory fileServiceFactory, CurrentUser currentUser, IUrlEncryptionService urlEncryption, ILogger<FileController> logger) : ControllerBase
 {
     //[Route("{fileServiceId:int}"), HttpPost]
     //public async Task<ActionResult<FileUrlsDto>> GetFileUrls(
@@ -63,7 +66,10 @@ public class FileController(ChatsDB db, FileServiceFactory fileServiceFactory, C
     //}
 
     [Route("file-service/{fileServiceId:int}/upload"), HttpPut]
-    public async Task<ActionResult<string>> Upload(int fileServiceId, IFormFile file, [FromServices] ClientInfoManager clientInfoManager, CancellationToken cancellationToken)
+    public async Task<ActionResult<FileDto>> Upload(int fileServiceId, IFormFile file, 
+        [FromServices] ClientInfoManager clientInfoManager,
+        [FromServices] FileUrlProvider fdup, 
+        CancellationToken cancellationToken)
     {
         if (file.Length == 0)
         {
@@ -113,14 +119,15 @@ public class FileController(ChatsDB db, FileServiceFactory fileServiceFactory, C
         db.Files.Add(dbFile);
         await db.SaveChangesAsync(cancellationToken);
 
-        string encryptedFileId = idEncryptionService.Encrypt(dbFile.Id);
-        return Created(default(string), value: encryptedFileId);
+        
+        FileDto fileDto = fdup.CreateFileDto(dbFile);
+        return Created(fileDto.Url, value: fileDto);
     }
 
-    [Route("file/{encryptedFileId}"), HttpGet]
-    public async Task<ActionResult> Download(string encryptedFileId, CancellationToken cancellationToken)
+    [Route("file/private/{encryptedFileId}"), HttpGet]
+    public async Task<ActionResult> DownloadPrivate(string encryptedFileId, CancellationToken cancellationToken)
     {
-        int fileId = idEncryptionService.DecryptAsInt32(encryptedFileId);
+        int fileId = urlEncryption.DecryptFileId(encryptedFileId);
         DB.File? file = await db.Files
             .Include(x => x.FileService)
             .Include(x => x.FileContentType)
@@ -143,8 +150,40 @@ public class FileController(ChatsDB db, FileServiceFactory fileServiceFactory, C
         }
         else
         {
-            string downloadUrl = fs.CreateDownloadUrl(file.StorageKey);
-            return Redirect(downloadUrl);
+            Uri downloadUrl = fs.CreateDownloadUrl(CreateDownloadUrlRequest.FromFile(file));
+            return Redirect(downloadUrl.ToString());
+        }
+    }
+
+    [Route("file/{encryptedFileId:int}"), HttpGet, AllowAnonymous]
+    public async Task<ActionResult> DownloadPublic(string encryptedFileId, long validBefore, string hash, CancellationToken cancellationToken)
+    {
+        Result<int> decodeResult = urlEncryption.DecodeFileIdPath(encryptedFileId, validBefore, hash);
+        if (decodeResult.IsFailure)
+        {
+            return BadRequest(decodeResult.Error);
+        }
+
+        int fileId = decodeResult.Value;
+        DB.File? file = await db.Files
+            .Include(x => x.FileService)
+            .Include(x => x.FileContentType)
+            .FirstOrDefaultAsync(x => x.Id == fileId, cancellationToken);
+        if (file == null)
+        {
+            return NotFound("File not found.");
+        }
+
+        DBFileServiceType fileServiceType = (DBFileServiceType)file.FileService.FileServiceTypeId;
+        IFileService fs = fileServiceFactory.Create(fileServiceType, file.FileService.Configs);
+        if (fileServiceType == DBFileServiceType.Local)
+        {
+            return PhysicalFile(Path.Combine(file.FileService.Configs, file.StorageKey), file.FileContentType.ContentType);
+        }
+        else
+        {
+            Uri downloadUrl = fs.CreateDownloadUrl(CreateDownloadUrlRequest.FromFile(file));
+            return Redirect(downloadUrl.ToString());
         }
     }
 

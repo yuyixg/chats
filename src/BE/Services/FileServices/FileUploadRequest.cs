@@ -9,6 +9,17 @@ public record FileUploadRequest
     public required Stream Stream { get; init; }
 }
 
+public record CreateDownloadUrlRequest
+{
+    public required int FileId { get; init; }
+    public required string StorageKey { get; init; }
+
+    public static CreateDownloadUrlRequest FromFile(DB.File file)
+    {
+        return new CreateDownloadUrlRequest { FileId = file.Id, StorageKey = file.StorageKey };
+    }
+}
+
 public record SuggestedStorageInfo(string Folder, string FileName)
 {
     public string StorageKey { get; } = $"{Folder}/{FileName}";

@@ -1,5 +1,4 @@
-﻿using Microsoft.EntityFrameworkCore.Storage.Json;
-using OpenAI.Chat;
+﻿using OpenAI.Chat;
 using System.ClientModel.Primitives;
 using System.Text.Json;
 using System.Text.Json.Nodes;

@@ -1,10 +1,10 @@
 ﻿using Chats.BE.Controllers.Chats.Conversations.Dtos;
 using Chats.BE.DB;
 using Chats.BE.DB.Enums;
+using Chats.BE.DB.Extensions;
 using Chats.BE.Services.Conversations;
-using Chats.BE.Services.IdEncryption;
-using System.Buffers.Binary;
-using System.Text;
+using Chats.BE.Services.FileServices;
+using Chats.BE.Services.UrlEncryption;
 using System.Text.Json.Serialization;
 
 namespace Chats.BE.Controllers.Chats.Messages.Dtos;
@@ -68,30 +68,21 @@ public record MessageContentRequest
     public required string Text { get; init; }
 
     [JsonPropertyName("fileIds")]
-    public string[]? FileIds { get; init; }
+    public List<string>? FileIds { get; init; }
 
-    public MessageContent[] ToMessageContents(IIdEncryptionService idEncryptionService)
+    public MessageContent[] ToMessageContents(IUrlEncryptionService idEncryptionService)
     {
         return
         [
             MessageContent.FromText(Text),
-            ..(FileIds ?? []).Select(x => MessageContent.FromFileId(x, idEncryptionService)),
+            ..(FileIds ?? []).Select(x => MessageContent.FromFileId(idEncryptionService.DecryptFileId(x))),
         ];
     }
 
-    public DBMessageSegment[] ToMessageSegments(IIdEncryptionService idEncryptionService)
+    public DBMessageSegment[] ToMessageSegments(IUrlEncryptionService idEncryptionService)
     {
         return ToMessageContents(idEncryptionService).Select(x => x.ToSegment()).ToArray();
     }
-}
-
-public record ImageDto
-{
-    [JsonPropertyName("id")]
-    public required string Id { get; init; }
-
-    [JsonPropertyName("url")]
-    public required string Url { get; init; }
 }
 
 public record MessageContentResponse
@@ -99,13 +90,13 @@ public record MessageContentResponse
     [JsonPropertyName("text")]
     public required string Text { get; init; }
 
-    [JsonPropertyName("image"), JsonIgnore(Condition = JsonIgnoreCondition.WhenWritingNull)]
-    public required List<ImageDto>? Image { get; init; }
+    [JsonPropertyName("fileIds"), JsonIgnore(Condition = JsonIgnoreCondition.WhenWritingNull)]
+    public required FileDto[]? FileIds { get; init; }
 
     [JsonPropertyName("error"), JsonIgnore(Condition = JsonIgnoreCondition.WhenWritingNull)]
     public required string? Error { get; init; }
 
-    public static MessageContentResponse FromSegments(DBMessageSegment[] segments, IIdEncryptionService idEncryptionService)
+    public static async Task<MessageContentResponse> FromSegments(DBMessageSegment[] segments, FileUrlProvider fup, CancellationToken cancellationToken)
     {
         Dictionary<DBMessageContentType, byte[][]> groups = segments
             .GroupBy(x => x.ContentType)
@@ -117,12 +108,22 @@ public record MessageContentResponse
 
         return new MessageContentResponse()
         {
-            Text = string.Join("\n", groups[DBMessageContentType.Text].Select(Encoding.Unicode.GetString)),
-            Image = groups[DBMessageContentType.ImageUrl].Select(Encoding.UTF8.GetString).ToList() switch { [] => null, var x => x },
-            FileIds = groups[DBMessageContentType.FileId].Select(x => idEncryptionService.Encrypt(BinaryPrimitives.ReadInt32LittleEndian(x))).ToList() switch { [] => null, var x => x },
-            Error = string.Join("\n", groups[DBMessageContentType.Error].Select(Encoding.UTF8.GetString)) switch { "" => null, var x => x }
+            Text = string.Join("\n", groups[DBMessageContentType.Text].Select(MessageContentUtil.ReadText)),
+            FileIds = groups[DBMessageContentType.FileId].Select(MessageContentUtil.ReadFileId).ToArray() switch 
+            {
+                [] => null, 
+                var x => await fup.CreateFileDtos(x, cancellationToken)
+            },
+            Error = string.Join("\n", groups[DBMessageContentType.Error].Select(MessageContentUtil.ReadError)) switch { "" => null, var x => x }
         };
     }
+}
+
+public record FileDto
+{
+    public required string Id { get; init; }
+
+    public required Uri Url { get; init; }
 }
 
 public record ChatMessageTemp
@@ -142,16 +143,16 @@ public record ChatMessageTemp
     public required short? ModelId { get; init; }
     public required string? ModelName { get; init; }
 
-    public MessageDto ToDto(IIdEncryptionService idEncryptionService)
+    public async Task<MessageDto> ToDto(IUrlEncryptionService urlEncryption, FileUrlProvider fup, CancellationToken cancellationToken)
     {
         if (ModelId == null)
         {
             return new RequestMessageDto()
             {
-                Id = idEncryptionService.Encrypt(Id),
-                ParentId = ParentId != null ? idEncryptionService.Encrypt(ParentId.Value) : null,
+                Id = urlEncryption.EncryptMessageId(Id),
+                ParentId = ParentId != null ? urlEncryption.EncryptMessageId(ParentId.Value) : null, 
                 Role = Role.ToString().ToLowerInvariant(),
-                Content = MessageContentResponse.FromSegments(Content, idEncryptionService),
+                Content = await MessageContentResponse.FromSegments(Content, fup, cancellationToken),
                 CreatedAt = CreatedAt
             };
         }
@@ -159,10 +160,10 @@ public record ChatMessageTemp
         {
             return new ResponseMessageDto()
             {
-                Id = idEncryptionService.Encrypt(Id),
-                ParentId = ParentId != null ? idEncryptionService.Encrypt(ParentId.Value) : null,
+                Id = urlEncryption.EncryptMessageId(Id),
+                ParentId = ParentId != null ? urlEncryption.EncryptMessageId(ParentId.Value) : null, 
                 Role = Role.ToString().ToLowerInvariant(),
-                Content = MessageContentResponse.FromSegments(Content, idEncryptionService),
+                Content = await MessageContentResponse.FromSegments(Content, fup, cancellationToken),
                 CreatedAt = CreatedAt,
                 InputTokens = InputTokens!.Value,
                 OutputTokens = OutputTokens!.Value,

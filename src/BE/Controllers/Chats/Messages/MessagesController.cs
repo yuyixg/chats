@@ -4,7 +4,8 @@ using Chats.BE.DB;
 using Chats.BE.DB.Enums;
 using Chats.BE.Infrastructure;
 using Chats.BE.Services.Conversations;
-using Chats.BE.Services.IdEncryption;
+using Chats.BE.Services.FileServices;
+using Chats.BE.Services.UrlEncryption;
 using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Mvc;
 using Microsoft.EntityFrameworkCore;
@@ -12,13 +13,15 @@ using Microsoft.EntityFrameworkCore;
 namespace Chats.BE.Controllers.Chats.Messages;
 
 [Route("api/messages"), Authorize]
-public class MessagesController(ChatsDB db, CurrentUser currentUser, IIdEncryptionService idEncryption) : ControllerBase
+public class MessagesController(ChatsDB db, CurrentUser currentUser, IUrlEncryptionService urlEncryption) : ControllerBase
 {
     [HttpGet("{chatId}")]
-    public async Task<ActionResult<MessageDto[]>> GetMessages(string chatId, CancellationToken cancellationToken)
+    public async Task<ActionResult<MessageDto[]>> GetMessages(string chatId,
+        [FromServices] FileUrlProvider fup,
+        CancellationToken cancellationToken)
     {
         MessageDto[] messages = await db.Messages
-            .Where(m => m.ChatId == idEncryption.DecryptAsInt32(chatId) && m.Chat.UserId == currentUser.Id && m.ChatRoleId != (byte)DBChatRole.System)
+            .Where(m => m.ChatId == urlEncryption.DecryptChatId(chatId) && m.Chat.UserId == currentUser.Id && m.ChatRoleId != (byte)DBChatRole.System)
             .Select(x => new ChatMessageTemp()
             {
                 Id = x.Id,
@@ -45,7 +48,7 @@ public class MessagesController(ChatsDB db, CurrentUser currentUser, IIdEncrypti
             })
             .OrderBy(x => x.CreatedAt)
             .AsAsyncEnumerable()
-            .Select(x => x.ToDto(idEncryption))
+            .SelectAwait(async x => await x.ToDto(urlEncryption, fup, cancellationToken))
             .ToArrayAsync(cancellationToken);
 
         return Ok(messages);
@@ -55,7 +58,7 @@ public class MessagesController(ChatsDB db, CurrentUser currentUser, IIdEncrypti
     public async Task<ActionResult<string?>> GetChatSystemPrompt(string chatId, CancellationToken cancellationToken)
     {
         DBMessageSegment? content = await db.Messages
-            .Where(m => m.ChatId == idEncryption.DecryptAsInt32(chatId) && m.ChatRoleId == (byte)DBChatRole.System)
+            .Where(m => m.ChatId == urlEncryption.DecryptChatId(chatId) && m.ChatRoleId == (byte)DBChatRole.System)
             .Select(x => x.MessageContents
                 .Select(x => new DBMessageSegment()
                 {
