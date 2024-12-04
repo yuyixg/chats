@@ -12,7 +12,7 @@ export interface UserInfo {
 
 export const saveUserInfo = (user: UserInfo) => {
   const json = JSON.stringify(user);
-  const value = btoa(btoa(encodeURIComponent(json)));
+  const value = btoa(encodeURIComponent(json));
   localStorage.setItem('user', value);
 };
 export const clearUserInfo = () => {
@@ -21,7 +21,7 @@ export const clearUserInfo = () => {
 
 export const getUserInfo = () => {
   const value = localStorage.getItem('user');
-  const user = decodeURIComponent(atob(atob(value || '')));
+  const user = decodeURIComponent(atob(value || ''));
   if (!user) {
     return null;
   }
