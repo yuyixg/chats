@@ -74,7 +74,7 @@ public class AdminMessageController(ChatsDB db, CurrentUser currentUser, IUrlEnc
 
         AdminMessageItemTemp[] messagesTemp = await db.Messages
             .Include(x => x.MessageContents).ThenInclude(x => x.MessageContentBlob)
-            .Include(x => x.MessageContents).ThenInclude(x => x.MessageContentFile)
+            .Include(x => x.MessageContents).ThenInclude(x => x.MessageContentFile).ThenInclude(x => x!.File).ThenInclude(x => x.FileService)
             .Include(x => x.MessageContents).ThenInclude(x => x.MessageContentUtf16)
             .Include(x => x.MessageContents).ThenInclude(x => x.MessageContentUtf8)
             .Where(x => x.ChatId == conversationId)
