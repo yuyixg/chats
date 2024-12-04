@@ -62,7 +62,7 @@ export const ChatInput = ({
 
   const [content, setContent] = useState<Content>({
     text: '',
-    image: [],
+    fileIds: [],
   });
   const [isTyping, setIsTyping] = useState<boolean>(false);
   const [uploading, setUploading] = useState<boolean>(false);
@@ -116,7 +116,7 @@ export const ChatInput = ({
       return;
     }
     onSend({ role: 'user', content });
-    setContent({ text: '', image: [] });
+    setContent({ text: '', fileIds: [] });
 
     if (window.innerWidth < 640 && textareaRef && textareaRef.current) {
       textareaRef.current.blur();
@@ -223,7 +223,7 @@ export const ChatInput = ({
       selectModel.allowVision &&
       selectModel.fileServiceId &&
       !uploading &&
-      (content?.image?.length ?? 0) <= defaultFileConfig.count
+      (content?.fileIds?.length ?? 0) <= defaultFileConfig.count
     );
   };
 
@@ -240,7 +240,7 @@ export const ChatInput = ({
     setContent((old) => {
       return {
         ...old,
-        image: old.image!.concat(def)
+        fileIds: old.fileIds!.concat(def)
       };
     });
     setUploading(false);
@@ -260,7 +260,7 @@ export const ChatInput = ({
   }, [content]);
 
   useEffect(() => {
-    setContent({ ...content, image: [] });
+    setContent({ ...content, fileIds: [] });
   }, [selectModel, selectChat]);
 
   return (
@@ -269,8 +269,8 @@ export const ChatInput = ({
         {!chatError ? (
           <div className="relative flex w-full flex-grow flex-col rounded-md bg-background shadow-[0_0_10px_rgba(0,0,0,0.10)] dark:border-gray-900/50  dark:text-white dark:shadow-[0_0_15px_rgba(0,0,0,0.10)]">
             <div className="absolute mb-1 bottom-full mx-auto flex w-full justify-start z-10">
-              {content?.image &&
-                content.image.map((img, index) => (
+              {content?.fileIds &&
+                content.fileIds.map((img, index) => (
                   <div className="relative group" key={index}>
                     <div className="mr-1 w-[4rem] h-[4rem] rounded overflow-hidden">
                       <img
@@ -281,7 +281,7 @@ export const ChatInput = ({
                       <button
                         onClick={() => {
                           setContent((pre) => {
-                            const image = pre.image?.filter((x) => x !== img);
+                            const image = pre.fileIds?.filter((x) => x !== img);
                             return {
                               text: pre.text,
                               image,

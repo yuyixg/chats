@@ -13,16 +13,12 @@ import {
 import { getSelectMessages } from '@/utils/message';
 import { getStorageModelId, setStorageModelId } from '@/utils/model';
 import { formatPrompt } from '@/utils/promptVariable';
-import {
-  getSettings,
-  getSettingsLanguage,
-  saveSettings,
-} from '@/utils/settings';
+import { getSettings, saveSettings } from '@/utils/settings';
 import { Settings } from '@/utils/settings';
 import { getLoginUrl, getUserInfo, getUserSession } from '@/utils/user';
 
 import { AdminModelDto } from '@/types/adminApis';
-import { IChat, Role } from '@/types/chat';
+import { DEFAULT_TEMPERATURE, IChat, Role } from '@/types/chat';
 import { ChatMessage } from '@/types/chatMessage';
 import { ChatResult, GetChatsParams } from '@/types/clientApis';
 
@@ -104,7 +100,10 @@ const HomeContent = () => {
     getDefaultPrompt().then((data) => {
       handleUpdateUserModelConfig({
         ...initialConfig,
-        temperature: data.temperature,
+        temperature:
+          data.temperature ??
+          userModelConfig?.temperature ??
+          DEFAULT_TEMPERATURE,
         prompt: formatPrompt(data.content, { model }),
       });
     });

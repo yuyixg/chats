@@ -26,6 +26,7 @@ import FormTextarea from '@/components/ui/form/textarea';
 import { HomeContext } from '@/contexts/Home.context';
 import { zodResolver } from '@hookform/resolvers/zod';
 import { z } from 'zod';
+import { DEFAULT_TEMPERATURE } from '@/types/chat';
 
 interface IProps {
   prompt: Prompt;
@@ -34,8 +35,6 @@ interface IProps {
 }
 
 export const PromptModal = (props: IProps) => {
-  const DEFAULT_TEMPERATURE = 0.5;
-
   const { t } = useTranslation();
   const { prompt, onUpdatePrompt, onClose } = props;
 

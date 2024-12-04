@@ -20,12 +20,16 @@ export const clearUserInfo = () => {
 };
 
 export const getUserInfo = () => {
-  const value = localStorage.getItem('user');
-  const user = decodeURIComponent(atob(value || ''));
-  if (!user) {
+  try {
+    const value = localStorage.getItem('user');
+    const user = decodeURIComponent(atob(value || ''));
+    if (!user) {
+      return null;
+    }
+    return JSON.parse(user) as UserInfo;
+  } catch {
     return null;
   }
-  return JSON.parse(user) as UserInfo;
 };
 
 export const getLoginUrl = () => {

@@ -1,4 +1,5 @@
 export type Role = 'assistant' | 'user' | 'system';
+export const DEFAULT_TEMPERATURE = 0.5;
 
 export interface Message {
   role: Role;
@@ -13,7 +14,7 @@ export interface ImageDef {
 export interface Content {
   error?: string;
   text?: string;
-  image?: ImageDef[];
+  fileIds?: ImageDef[];
 }
 
 export interface ContentRequest {

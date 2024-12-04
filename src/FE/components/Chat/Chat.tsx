@@ -16,8 +16,7 @@ import { throttle } from '@/utils/throttle';
 import { getUserSession } from '@/utils/user';
 
 import { ChatBody, Content, ContentRequest, Message, Role } from '@/types/chat';
-
-import { HomeContext } from '@/contexts/Home.context';
+import { Prompt } from '@/types/prompt';
 
 import { ModeToggle } from '@/components/ModeToggle/ModeTooggle';
 
@@ -30,10 +29,10 @@ import { SystemPrompt } from './SystemPrompt';
 import { TemperatureSlider } from './Temperature';
 
 import { getChat, postChats, putUserChatModel } from '@/apis/clientApis';
+import { HomeContext } from '@/contexts/Home.context';
 import { cn } from '@/lib/utils';
 import Decimal from 'decimal.js';
 import { v4 as uuidv4 } from 'uuid';
-import { Prompt } from '@/types/prompt';
 
 interface Props {
   stopConversationRef: MutableRefObject<boolean>;
@@ -173,9 +172,14 @@ export const Chat = memo(({ stopConversationRef }: Props) => {
       homeDispatch({ field: 'messageIsStreaming', value: true });
       const messageContent: ContentRequest = {
         text: message.content.text!,
-        fileIds: message.content.image?.map((x) => x.id) || null,
-      }
-      if (selectModel && !selectModel.allowSystemPrompt && userModelConfig && userModelConfig.prompt) {
+        fileIds: message.content.fileIds?.map((x) => x.id) || null,
+      };
+      if (
+        selectModel &&
+        !selectModel.allowSystemPrompt &&
+        userModelConfig &&
+        userModelConfig.prompt
+      ) {
         userModelConfig.prompt = null;
       }
       const chatBody: ChatBody = {
@@ -357,13 +361,13 @@ export const Chat = memo(({ stopConversationRef }: Props) => {
     throttledScrollDown();
   }, [selectMessages, throttledScrollDown]);
 
-  useEffect(() => { }, [userModelConfig]);
+  useEffect(() => {}, [userModelConfig]);
 
   const onChangePrompt = (prompt: Prompt) => {
     if (prompt.temperature !== null) {
       handleUpdateUserModelConfig({ temperature: prompt.temperature });
     }
-  }
+  };
 
   return (
     <div className="relative flex-1 overflow-hidden bg-background">
@@ -373,36 +377,66 @@ export const Chat = memo(({ stopConversationRef }: Props) => {
           ref={chatContainerRef}
           onScroll={handleScroll}
         >
+          {selectChat?.id && (
+            <div className="sticky top-0 pt-1 z-10 text-sm bg-background flex items-center justify-between">
+              <div
+                className={cn(
+                  'flex justify-start items-center ml-24',
+                  settings.showChatBar && 'ml-6',
+                )}
+              >
+                {hasModel() && selectMessages?.length != 0 && (
+                  <ChangeModel
+                    className="font-semibold text-base"
+                    content={selectModel?.name}
+                    onChangeModel={(model) => {
+                      homeDispatch({
+                        field: 'selectModel',
+                        value: model,
+                      });
+                      putUserChatModel(selectChat.id, model.modelId);
+                    }}
+                  />
+                )}
+              </div>
+              <div className="pr-2 md:pr-4">
+                {selectMessages?.length === 0 && <ModeToggle />}
+              </div>
+            </div>
+          )}
           {selectMessages?.length === 0 ? (
             <>
               <div className="mx-auto flex flex-col space-y-5 md:space-y-10 px-3 pt-[52px] sm:max-w-[600px]">
                 {models.length !== 0 && (
                   <div className="flex h-full flex-col space-y-4 rounded-lg border border-neutral-200 p-4 dark:border-neutral-600">
                     <ModelSelect />
-                    {selectModel && selectModel.allowSystemPrompt && userModelConfig?.prompt && (
-                      <SystemPrompt
-                        currentPrompt={userModelConfig?.prompt}
-                        prompts={prompts}
-                        model={selectModel}
-                        onChangePromptText={(prompt) => {
-                          handleUpdateUserModelConfig({ prompt });
-                        }}
-                        onChangePrompt={onChangePrompt}
-                      />
-                    )}
-                    {userModelConfig?.temperature !== undefined && (selectModel?.allowTemperature) && (
-                      <TemperatureSlider
-                        label={t('Temperature')}
-                        min={0}
-                        max={1}
-                        defaultTemperature={userModelConfig.temperature}
-                        onChangeTemperature={(temperature) =>
-                          handleUpdateUserModelConfig({
-                            temperature,
-                          })
-                        }
-                      />
-                    )}
+                    {selectModel &&
+                      selectModel.allowSystemPrompt &&
+                      userModelConfig?.prompt && (
+                        <SystemPrompt
+                          currentPrompt={userModelConfig?.prompt}
+                          prompts={prompts}
+                          model={selectModel}
+                          onChangePromptText={(prompt) => {
+                            handleUpdateUserModelConfig({ prompt });
+                          }}
+                          onChangePrompt={onChangePrompt}
+                        />
+                      )}
+                    {userModelConfig?.temperature !== undefined &&
+                      selectModel?.allowTemperature && (
+                        <TemperatureSlider
+                          label={t('Temperature')}
+                          min={0}
+                          max={1}
+                          defaultTemperature={userModelConfig.temperature}
+                          onChangeTemperature={(temperature) =>
+                            handleUpdateUserModelConfig({
+                              temperature,
+                            })
+                          }
+                        />
+                      )}
                     {userModelConfig?.enableSearch != undefined && (
                       <EnableNetworkSearch
                         label={t('Internet Search')}
@@ -427,34 +461,6 @@ export const Chat = memo(({ stopConversationRef }: Props) => {
             </>
           ) : (
             <>
-              {selectChat?.id && (
-                <div className="sticky top-0 pt-1 z-10 text-sm bg-background flex items-center justify-between">
-                  <div
-                    className={cn(
-                      'ml-[84px] flex justify-start items-center',
-                      settings.showChatBar && 'ml-6',
-                    )}
-                  >
-                    {hasModel() && (
-                      <ChangeModel
-                        className="font-semibold text-base"
-                        content={selectModel?.name}
-                        onChangeModel={(model) => {
-                          homeDispatch({
-                            field: 'selectModel',
-                            value: model,
-                          });
-                          putUserChatModel(selectChat.id, model.modelId);
-                        }}
-                      />
-                    )}
-                  </div>
-                  <div className="flex justify-start px-[6px]">
-                    <ModeToggle />
-                  </div>
-                </div>
-              )}
-
               {selectMessages.map((current, index) => {
                 let lastMessage = selectMessages[selectMessages.length - 1];
                 let parentChildrenIds: string[] = [];
@@ -518,10 +524,7 @@ export const Chat = memo(({ stopConversationRef }: Props) => {
                 );
               })}
 
-              <div
-                className="h-[162px] bg-background"
-                ref={messagesEndRef}
-              />
+              <div className="h-[162px] bg-background" ref={messagesEndRef} />
             </>
           )}
         </div>

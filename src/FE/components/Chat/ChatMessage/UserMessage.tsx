@@ -55,7 +55,7 @@ const UserMessage = (props: Props) => {
   const handleInputChange = (event: React.ChangeEvent<HTMLTextAreaElement>) => {
     setMessageContent({
       text: event.target.value,
-      image: message.content.image,
+      fileIds: message.content.fileIds,
     });
     if (textareaRef.current) {
       textareaRef.current.style.height = 'inherit';
@@ -133,8 +133,8 @@ const UserMessage = (props: Props) => {
         ) : (
           <div className="bg-muted py-2 px-3 rounded-md overflow-x-scroll">
             <div className="flex flex-wrap justify-end text-right gap-2">
-              {message.content?.image &&
-                message.content.image.map((img, index) => (
+              {message.content?.fileIds &&
+                message.content.fileIds.map((img, index) => (
                   <img
                     className="rounded-md mr-2 not-prose"
                     key={index}
@@ -146,7 +146,7 @@ const UserMessage = (props: Props) => {
             </div>
             <div
               className={`prose whitespace-pre-wrap dark:prose-invert ${
-                message.content?.image && message.content.image.length > 0
+                message.content?.fileIds && message.content.fileIds.length > 0
                   ? 'mt-2'
                   : ''
               }`}

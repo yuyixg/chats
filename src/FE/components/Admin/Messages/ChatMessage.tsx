@@ -100,8 +100,8 @@ export const ChatMessage: FC<Props> = memo(
               <>
                 <div>
                   <div className="flex flex-wrap gap-2">
-                    {message.content?.image &&
-                      message.content.image.map((img, index) => (
+                    {message.content?.fileIds &&
+                      message.content.fileIds.map((img, index) => (
                         <img
                           className="rounded-md mr-2 not-prose"
                           key={index}
@@ -112,7 +112,7 @@ export const ChatMessage: FC<Props> = memo(
                       ))}
                   </div>
                   <div
-                    className={`prose whitespace-pre-wrap dark:prose-invert ${message.content?.image && message.content.image.length > 0
+                    className={`prose whitespace-pre-wrap dark:prose-invert ${message.content?.fileIds && message.content.fileIds.length > 0
                       ? 'mt-2'
                       : ''
                       }`}
