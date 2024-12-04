@@ -137,11 +137,10 @@ public record AdminMessageItemTemp
     public required int? Duration { get; init; }
     public required int? FirstTokenLatency { get; init; }
 
-    public static async Task<AdminMessageBasicItem[]> ToDtos(AdminMessageItemTemp[] temps, IUrlEncryptionService idEncryption, FileUrlProvider fup, CancellationToken cancellationToken)
+    public static AdminMessageBasicItem[] ToDtos(AdminMessageItemTemp[] temps, IUrlEncryptionService idEncryption, FileUrlProvider fup)
     {
-        return await temps
-            .ToAsyncEnumerable()
-            .SelectAwait(async x =>
+        return temps
+            .Select(x =>
             {
                 AdminMessageBasicItem basicItem = new()
                 {
@@ -149,7 +148,7 @@ public record AdminMessageItemTemp
                     ParentId = x.ParentId != null ? idEncryption.EncryptMessageId(x.ParentId.Value) : null,
                     CreatedAt = x.CreatedAt,
                     Role = x.Role.ToString().ToLowerInvariant(),
-                    Content = await MessageContentResponse.FromSegments(x.Content, fup, cancellationToken),
+                    Content = MessageContentResponse.FromSegments(x.Content, fup),
                     ChildrenIds = temps
                         .Where(v => v.ParentId == x.Id && v.Role == DBChatRole.User)
                         .Select(v => idEncryption.EncryptMessageId(v.Id))
@@ -169,6 +168,6 @@ public record AdminMessageItemTemp
                     return basicItem;
                 }
             })
-            .ToArrayAsync(cancellationToken);
+            .ToArray();
     }
 }

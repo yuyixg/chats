@@ -111,19 +111,6 @@ public class PartialBufferedStreamTest
         Assert.Throws<NotSupportedException>(() => partialStream.SetLength(100));
     }
 
-    [Fact]
-    public void Should_Not_Support_Write()
-    {
-        // Arrange
-        byte[] data = Encoding.UTF8.GetBytes("Test data");
-        using MemoryStream baseStream = new(data);
-        var partialStream = new PartialBufferedStream(baseStream, 4);
-
-        // Act & Assert
-        Assert.False(partialStream.CanWrite);
-        Assert.Throws<NotSupportedException>(() => partialStream.Write(data, 0, data.Length));
-    }
-
     // 自定义的非可查找流，用于测试基础流不可查找的情况
     private class NonSeekableStream : Stream
     {

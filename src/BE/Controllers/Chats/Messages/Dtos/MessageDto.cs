@@ -89,7 +89,7 @@ public record MessageContentResponse
     [JsonPropertyName("error"), JsonIgnore(Condition = JsonIgnoreCondition.WhenWritingNull)]
     public required string? Error { get; init; }
 
-    public static async Task<MessageContentResponse> FromSegments(MessageContent[] segments, FileUrlProvider fup, CancellationToken cancellationToken)
+    public static MessageContentResponse FromSegments(MessageContent[] segments, FileUrlProvider fup)
     {
         Dictionary<DBMessageContentType, MessageContent[]> groups = segments
             .GroupBy(x => (DBMessageContentType)x.ContentTypeId)
@@ -102,11 +102,13 @@ public record MessageContentResponse
         return new MessageContentResponse()
         {
             Text = string.Join("\n", groups[DBMessageContentType.Text].Select(x => x.ToString())),
-            FileIds = groups[DBMessageContentType.FileId].Select(x => x.FileId).ToArray() switch 
-            {
-                [] => null, 
-                var x => await fup.CreateFileDtos(x, cancellationToken)
-            },
+            FileIds = groups[DBMessageContentType.FileId]
+                .Select(x => fup.CreateFileDto(x.MessageContentFile!.File))
+                .ToArray() switch 
+                {
+                    [] => null,
+                    var x => x
+                },
             Error = string.Join("\n", groups[DBMessageContentType.Error].Select(x => x.ToString())) switch { "" => null, var x => x }
         };
     }
@@ -136,7 +138,7 @@ public record ChatMessageTemp
     public required short? ModelId { get; init; }
     public required string? ModelName { get; init; }
 
-    public async Task<MessageDto> ToDto(IUrlEncryptionService urlEncryption, FileUrlProvider fup, CancellationToken cancellationToken)
+    public MessageDto ToDto(IUrlEncryptionService urlEncryption, FileUrlProvider fup)
     {
         if (ModelId == null)
         {
@@ -145,7 +147,7 @@ public record ChatMessageTemp
                 Id = urlEncryption.EncryptMessageId(Id),
                 ParentId = ParentId != null ? urlEncryption.EncryptMessageId(ParentId.Value) : null, 
                 Role = Role.ToString().ToLowerInvariant(),
-                Content = await MessageContentResponse.FromSegments(Content, fup, cancellationToken),
+                Content = MessageContentResponse.FromSegments(Content, fup),
                 CreatedAt = CreatedAt
             };
         }
@@ -156,7 +158,7 @@ public record ChatMessageTemp
                 Id = urlEncryption.EncryptMessageId(Id),
                 ParentId = ParentId != null ? urlEncryption.EncryptMessageId(ParentId.Value) : null, 
                 Role = Role.ToString().ToLowerInvariant(),
-                Content = await MessageContentResponse.FromSegments(Content, fup, cancellationToken),
+                Content = MessageContentResponse.FromSegments(Content, fup),
                 CreatedAt = CreatedAt,
                 InputTokens = InputTokens!.Value,
                 OutputTokens = OutputTokens!.Value,

@@ -98,7 +98,7 @@ public class AdminMessageController(ChatsDB db, CurrentUser currentUser, IUrlEnc
             .OrderBy(x => x.Id)
             .ToArrayAsync(cancellationToken);
 
-        AdminMessageBasicItem[] items = await AdminMessageItemTemp.ToDtos(messagesTemp, urlEncryption, fup, cancellationToken);
+        AdminMessageBasicItem[] items = AdminMessageItemTemp.ToDtos(messagesTemp, urlEncryption, fup);
         AdminMessageRoot dto = adminMessageTemp.ToDto(items);
 
         return new OkObjectResult(dto);

@@ -4,9 +4,9 @@ namespace Chats.BE.Services.UrlEncryption;
 
 public record TimedId(int Id, DateTimeOffset ValidBefore)
 {
-    public static TimedId Create2Hours(int id)
+    public static TimedId CreateFor(int id, TimeSpan validTime)
     {
-        return new TimedId(id, DateTimeOffset.UtcNow.AddHours(2));
+        return new TimedId(id, DateTimeOffset.UtcNow + validTime);
     }
 
     public byte[] Serialize()

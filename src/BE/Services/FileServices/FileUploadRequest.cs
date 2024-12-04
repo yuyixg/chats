@@ -14,6 +14,8 @@ public record CreateDownloadUrlRequest
     public required int FileId { get; init; }
     public required string StorageKey { get; init; }
 
+    public TimeSpan ValidPeriod { get; init; } = TimeSpan.FromHours(2);
+
     public static CreateDownloadUrlRequest FromFile(DB.File file)
     {
         return new CreateDownloadUrlRequest { FileId = file.Id, StorageKey = file.StorageKey };

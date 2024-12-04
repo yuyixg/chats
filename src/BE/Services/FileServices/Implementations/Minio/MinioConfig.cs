@@ -1,8 +1,9 @@
-﻿using System.Text.Json.Serialization;
+﻿using Chats.BE.Services.FileServices.Implementations.AwsS3;
+using System.Text.Json.Serialization;
 
 namespace Chats.BE.Services.FileServices.Implementations.Minio;
 
-public record MinioConfig
+public record MinioConfig : IHaveBucket
 {
     [JsonPropertyName("endpoint")]
     public required string Endpoint { get; init; }

@@ -14,13 +14,11 @@ namespace Chats.BE.Controllers.Chats.Messages;
 public class MessagesController(ChatsDB db, CurrentUser currentUser, IUrlEncryptionService urlEncryption) : ControllerBase
 {
     [HttpGet("{chatId}")]
-    public async Task<ActionResult<MessageDto[]>> GetMessages(string chatId,
-        [FromServices] FileUrlProvider fup,
-        CancellationToken cancellationToken)
+    public async Task<ActionResult<MessageDto[]>> GetMessages(string chatId, [FromServices] FileUrlProvider fup, CancellationToken cancellationToken)
     {
         MessageDto[] messages = await db.Messages
             .Include(x => x.MessageContents).ThenInclude(x => x.MessageContentBlob)
-            .Include(x => x.MessageContents).ThenInclude(x => x.MessageContentFile)
+            .Include(x => x.MessageContents).ThenInclude(x => x.MessageContentFile).ThenInclude(x => x!.File).ThenInclude(x => x.FileService)
             .Include(x => x.MessageContents).ThenInclude(x => x.MessageContentUtf16)
             .Include(x => x.MessageContents).ThenInclude(x => x.MessageContentUtf8)
             .Where(m => m.ChatId == urlEncryption.DecryptChatId(chatId) && m.Chat.UserId == currentUser.Id && m.ChatRoleId != (byte)DBChatRole.System)
@@ -44,8 +42,7 @@ public class MessagesController(ChatsDB db, CurrentUser currentUser, IUrlEncrypt
                 ModelName = x.Usage.UserModel.Model.Name
             })
             .OrderBy(x => x.CreatedAt)
-            .AsAsyncEnumerable()
-            .SelectAwait(async x => await x.ToDto(urlEncryption, fup, cancellationToken))
+            .Select(x => x.ToDto(urlEncryption, fup))
             .ToArrayAsync(cancellationToken);
 
         return Ok(messages);

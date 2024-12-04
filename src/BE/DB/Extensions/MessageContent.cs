@@ -11,7 +11,7 @@ public partial class MessageContent
         return (DBMessageContentType)ContentTypeId switch
         {
             DBMessageContentType.Text => ChatMessageContentPart.CreateTextPart(MessageContentUtf16!.Content),
-            DBMessageContentType.FileId => ChatMessageContentPart.CreateImagePart(await fup.CreateUrl(FileId, cancellationToken)),
+            DBMessageContentType.FileId => await fup.CreateOpenAIPart(MessageContentFile!.File, cancellationToken),
             _ => throw new NotImplementedException()
         };
     }

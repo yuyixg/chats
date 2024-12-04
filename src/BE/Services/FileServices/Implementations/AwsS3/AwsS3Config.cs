@@ -2,17 +2,22 @@
 
 namespace Chats.BE.Services.FileServices.Implementations.AwsS3;
 
-public record AwsS3Config
+public record AwsS3Config : IHaveBucket
 {
     [JsonPropertyName("region")]
-    public required string Region { get; init; }
+    public string? Region { get; init; }
 
     [JsonPropertyName("accessKeyId")]
-    public required string AccessKeyId { get; init; }
+    public string? AccessKeyId { get; init; }
 
     [JsonPropertyName("secretAccessKey")]
-    public required string SecretAccessKey { get; init; }
+    public string? SecretAccessKey { get; init; }
 
     [JsonPropertyName("bucket")]
     public required string Bucket { get; init; }
+}
+
+public interface IHaveBucket
+{
+    string Bucket { get; }
 }

@@ -5,13 +5,28 @@ using Chats.BE.Services.FileServices.Implementations.AzureBlobStorage;
 using Chats.BE.Services.FileServices.Implementations.Local;
 using Chats.BE.Services.FileServices.Implementations.Minio;
 using Chats.BE.Services.UrlEncryption;
+using System.Collections.Concurrent;
 using System.Text.Json;
 
 namespace Chats.BE.Services.FileServices;
 
 public class FileServiceFactory(HostUrlService hostUrlService, IUrlEncryptionService urlEncryption)
 {
+    private readonly ConcurrentDictionary<CacheKey, IFileService> _cache = [];
+
     public IFileService Create(DBFileServiceType fileServiceType, string config)
+    {
+        CacheKey key = new(fileServiceType, config);
+        if (_cache.TryGetValue(key, out IFileService? fileService))
+        {
+            return fileService;
+        }
+        fileService = CreateNoCache(fileServiceType, config);
+        _cache[key] = fileService;
+        return fileService;
+    }
+
+    private IFileService CreateNoCache(DBFileServiceType fileServiceType, string config)
     {
         return fileServiceType switch
         {
@@ -23,4 +38,6 @@ public class FileServiceFactory(HostUrlService hostUrlService, IUrlEncryptionSer
             _ => throw new ArgumentException($"Unsupported file service type: {fileServiceType}")
         };
     }
+
+    private record CacheKey(DBFileServiceType FileServiceType, string Config);
 }

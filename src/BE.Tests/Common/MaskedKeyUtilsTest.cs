@@ -30,7 +30,13 @@ public class MaskedKeyUtilsTest
     public void JsonToMaskedNull_ValidJsonWithSimpleValues_MasksValues()
     {
         string? input = "{\"key1\":\"value12345\",\"key2\":\"short\",\"key3\":\"value67890\"}";
-        string? expected = "{\"key1\":\"value****45\",\"key2\":\"short\",\"key3\":\"value****90\"}";
+        string? expected = """
+            {
+              "key1": "value****45",
+              "key2": "short",
+              "key3": "value****90"
+            }
+            """;
 
         string? actual = MaskedKeyUtils.JsonToMaskedNull(input);
 
@@ -41,7 +47,12 @@ public class MaskedKeyUtilsTest
     public void JsonToMaskedNull_ValuesShorterThan7Chars_NoMasking()
     {
         string? input = "{\"key1\":\"short\",\"key2\":\"1234567\"}";
-        string? expected = "{\"key1\":\"short\",\"key2\":\"1234567\"}";
+        string? expected = """
+            {
+              "key1": "short",
+              "key2": "1234567"
+            }
+            """;
 
         string? actual = MaskedKeyUtils.JsonToMaskedNull(input);
 
@@ -52,7 +63,12 @@ public class MaskedKeyUtilsTest
     public void JsonToMaskedNull_ValuesLongerThan7Chars_Masked()
     {
         string? input = "{\"key1\":\"longvalue123\",\"key2\":\"anotherlongvalue\"}";
-        string? expected = "{\"key1\":\"longv****23\",\"key2\":\"anoth****ue\"}";
+        string? expected = """
+            {
+              "key1": "longv****23",
+              "key2": "anoth****ue"
+            }
+            """;
 
         string? actual = MaskedKeyUtils.JsonToMaskedNull(input);
 
@@ -104,7 +120,12 @@ public class MaskedKeyUtilsTest
     public void JsonToMaskedNull_ValuesWithNull_DoesNotThrowException()
     {
         string? input = "{\"key1\":null,\"key2\":\"value12345\"}";
-        string? expected = "{\"key1\":null,\"key2\":\"value****45\"}";
+        string? expected = """
+            {
+              "key1": null,
+              "key2": "value****45"
+            }
+            """;
 
         string? actual = MaskedKeyUtils.JsonToMaskedNull(input);
 

@@ -24,11 +24,11 @@ public class PartialBufferedStream : Stream
 
     public override bool CanRead => _baseStream.CanRead;
 
-    public override bool CanSeek => false; // don't support seek operation
+    public override bool CanSeek => _baseStream.CanSeek;
 
-    public override bool CanWrite => false; // read-only stream
+    public override bool CanWrite => _baseStream.CanWrite;
 
-    public override long Length => throw new NotSupportedException();
+    public override long Length => _baseStream.Length;
 
     public override long Position
     {
@@ -71,6 +71,11 @@ public class PartialBufferedStream : Stream
 
     public override long Seek(long offset, SeekOrigin origin)
     {
+        if (offset <= _seekedBytes.Length && origin == SeekOrigin.Begin)
+        {
+            _position = offset;
+            return _position;
+        }
         throw new NotSupportedException("Seek operation is not supported.");
     }
 

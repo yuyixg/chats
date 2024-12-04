@@ -47,7 +47,8 @@ public class ConversationController(ChatsDB db, CurrentUser currentUser, ILogger
 
         Dictionary<long, MessageLiteDto> existingMessages = await db.Messages
             .Include(x => x.MessageContents).ThenInclude(x => x.MessageContentBlob)
-            .Include(x => x.MessageContents).ThenInclude(x => x.MessageContentFile)
+            .Include(x => x.MessageContents).ThenInclude(x => x.MessageContentFile).ThenInclude(x => x!.File).ThenInclude(x => x.FileService)
+            .Include(x => x.MessageContents).ThenInclude(x => x.MessageContentFile).ThenInclude(x => x!.File).ThenInclude(x => x.FileImageInfo)
             .Include(x => x.MessageContents).ThenInclude(x => x.MessageContentUtf16)
             .Include(x => x.MessageContents).ThenInclude(x => x.MessageContentUtf8)
             .Where(x => x.ChatId == chatId && x.Chat.UserId == currentUser.Id)
