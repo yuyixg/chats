@@ -3,33 +3,32 @@ export interface UserSession {
   username: string;
   password: string;
   role: string;
-  canRecharge: boolean;
 }
 
 export interface UserInfo {
   username: string;
   role: string;
-  canRecharge: boolean;
 }
 
 export const saveUserInfo = (user: UserInfo) => {
-  localStorage.setItem('user', JSON.stringify(user));
+  const json = JSON.stringify(user);
+  const value = btoa(btoa(encodeURIComponent(json)));
+  localStorage.setItem('user', value);
 };
 export const clearUserInfo = () => {
   localStorage.removeItem('user');
 };
 
 export const getUserInfo = () => {
-  const user = localStorage.getItem('user');
+  const value = localStorage.getItem('user');
+  const user = decodeURIComponent(atob(atob(value || '')));
   if (!user) {
     return null;
   }
   return JSON.parse(user) as UserInfo;
 };
 
-export const getLoginUrl = (locale?: string) => {
-  // const _locale = locale || getSettingsLanguage();
-  // return (_locale ? '/' + _locale : '') + '/login';
+export const getLoginUrl = () => {
   return '/login';
 };
 

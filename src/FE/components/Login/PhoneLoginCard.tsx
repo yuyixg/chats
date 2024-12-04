@@ -101,7 +101,6 @@ const PhoneLoginCard = (props: {
         .then((response) => {
           setUserSession(response.sessionId);
           saveUserInfo({
-            canRecharge: response.canRecharge,
             role: response.role,
             username: response.username,
           });

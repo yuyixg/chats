@@ -1,6 +1,6 @@
-import { DBModelProvider } from "./model";
-import { Paging } from "./page";
-import { LoginType } from "./user";
+import { DBModelProvider } from './model';
+import { Paging } from './page';
+import { LoginType } from './user';
 
 export interface SingInParams {
   username?: string;
@@ -13,7 +13,6 @@ export interface SingInResult {
   sessionId: string;
   username: string;
   role: string;
-  canRecharge: boolean;
 }
 
 export interface LoginConfigsResult {

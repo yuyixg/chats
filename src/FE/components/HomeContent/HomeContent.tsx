@@ -57,15 +57,7 @@ const HomeContent = () => {
   });
 
   const {
-    state: {
-      chats,
-      currentMessages,
-      models,
-      user,
-      userModelConfig,
-      settings,
-      prompts,
-    },
+    state: { chats, currentMessages, models, user, userModelConfig, settings },
     dispatch,
   } = contextValue;
   const stopConversationRef = useRef<boolean>(false);
@@ -333,7 +325,7 @@ const HomeContent = () => {
         dispatch({ field: 'user', value: session });
       }, 1000);
     } else {
-      router.push(getLoginUrl(getSettingsLanguage()));
+      router.push(getLoginUrl());
     }
     if (sessionId) {
       getUserModels().then((modelData) => {

@@ -2,8 +2,9 @@ import { useEffect, useState } from 'react';
 import { useForm } from 'react-hook-form';
 import toast from 'react-hot-toast';
 
-import useTranslation from '@/hooks/useTranslation';
 import { useRouter } from 'next/router';
+
+import useTranslation from '@/hooks/useTranslation';
 
 import { PhoneRegExp, SmsExpirationSeconds } from '@/utils/common';
 import { saveUserInfo, setUserSession } from '@/utils/user';
@@ -108,7 +109,6 @@ const PhoneRegisterCard = (props: {
         .then((response) => {
           setUserSession(response.sessionId);
           saveUserInfo({
-            canRecharge: response.canRecharge,
             role: response.role,
             username: response.username,
           });
