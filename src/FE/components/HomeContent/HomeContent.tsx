@@ -81,7 +81,7 @@ const HomeContent = () => {
       childrenIds: [],
       assistantChildrenIds: [],
       role: 'assistant' as Role,
-      content: { text: '', image: [] },
+      content: { text: '', fileIds: [] },
       inputTokens: 0,
       outputTokens: 0,
       inputPrice: new Decimal(0),
