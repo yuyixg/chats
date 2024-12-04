@@ -1,4 +1,6 @@
-﻿using System.ComponentModel.DataAnnotations;
+﻿using System;
+using System.Collections.Generic;
+using System.ComponentModel.DataAnnotations;
 using System.ComponentModel.DataAnnotations.Schema;
 using Microsoft.EntityFrameworkCore;
 
@@ -7,7 +9,7 @@ namespace Chats.BE.DB;
 [Table("File")]
 [Index("ClientInfoId", Name = "IX_File_ClientInfo")]
 [Index("CreateUserId", Name = "IX_File_CreateUser")]
-[Index("FileServiceId", "StorageKey", Name = "IX_File_StorageKey", IsUnique = true)]
+[Index("FileServiceId", "StorageKey", Name = "IX_File_StorageKey")]
 public partial class File
 {
     [Key]

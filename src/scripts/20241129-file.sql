@@ -1032,11 +1032,12 @@ update [MessageContentType] set ContentType = 'fileId' where id = 2
 delete FileContentType where id = 8
 DELETE FROM FileContentType WHERE id = 9;
 
-DBCC CHECKIDENT ('FileContentType', RESEED, 8);
 SET IDENTITY_INSERT FileContentType ON;
-INSERT INTO FileContentType (Id, ContentType)
-VALUES (8, 'image/heic');
+INSERT INTO FileContentType (Id, ContentType) VALUES 
+	(8, 'image/heic'),
+	(9, 'application/pdf')
 SET IDENTITY_INSERT FileContentType OFF;
+DBCC CHECKIDENT ('FileContentType', RESEED, 10);
 GO
 
 
@@ -1153,99 +1154,200 @@ CREATE FUNCTION [dbo].[UrlDecode] (
                      @High = @High / 17 * 10 + @High % 17,
                      @Low  = @Low  / 17 * 10 + @Low  % 17,
                      @Byte1Value = @Byte1Value + ((16 * @High + @Low) & (POWER(2,6) - 1))
-                     --,@URL = STUFF(@URL, @Position, 3, cast(@Byte1Value as varchar))
-                     --,@Position = PATINDEX(@Pattern, @URL)
-
-              SELECT @SurrogateHign = ((@Byte1Value - POWER(16,4)) & (POWER(2,20) - 1)) / POWER(2,10) + 13 * POWER(16,3) + 8 * POWER(16,2),
-                     @SurrogateLow = ((@Byte1Value - POWER(16,4)) & (POWER(2,10) - 1)) + 13 * POWER(16,3) + 12 * POWER(16,2),
-                     @URL = STUFF(@URL, @Position, 3, NCHAR(@SurrogateHign) + NCHAR(@SurrogateLow)),
-                     @Position = PATINDEX(@Pattern, @URL)
+                     SELECT @SurrogateHign = ((@Byte1Value - POWER(16,4)) & (POWER(2,20) - 1)) / POWER(2,10) + 13 * POWER(16,3) + 8 * POWER(16,2),
+                            @SurrogateLow = ((@Byte1Value - POWER(16,4)) & (POWER(2,10) - 1)) + 13 * POWER(16,3) + 12 * POWER(16,2),
+                            @URL = STUFF(@URL, @Position, 3, NCHAR(@SurrogateHign) + NCHAR(@SurrogateLow)),
+                            @Position = PATINDEX(@Pattern, @URL)
            END
        END
     END
-    RETURN REPLACE(@URL, '+', ' ') END
+    RETURN REPLACE(@URL, '+', ' ') 
+END
 GO
 
+-- 创建一个临时表，用于存储提取的数据，包括MessageContentId和解码后的StorageKey
+DROP TABLE IF EXISTS #ExtractedData
+CREATE TABLE #ExtractedData (
+    [MessageContentId] INT,
+    [StorageKey] NVARCHAR(MAX),
+    [FileName] NVARCHAR(255),
+    [Extension] NVARCHAR(10),
+    [FileContentTypeId] INT,
+    [FileServiceId] INT,
+    [Size] BIGINT,
+    [ClientInfoId] INT,
+    [CreateUserId] INT,
+    [CreatedAt] DATETIME
+);
+
+-- 使用公用表表达式（CTE）处理数据，并将结果插入到临时表#ExtractedData中
 WITH DecodedData AS (
-    SELECT
-        dbo.UrlDecode(ExtractedPart) AS Decoded,
-		CreatedAt,
-		UserId
-    FROM
-    (
-        SELECT 
-            *,
-            SUBSTRING(
-                ContentAsString,
-                CHARINDEX(':88/', ContentAsString) + 4, -- 找到':88/'的位置，并调整起点
-                CHARINDEX('?', ContentAsString) - CHARINDEX(':88/', ContentAsString) - 4 -- 计算从':88/'到'?'之间的长度
-            ) AS ExtractedPart
-        FROM 
-        (
-            SELECT 
-                MessageContent.[Id],
-                [ContentTypeId],
-                [MessageId],
-				Message.CreatedAt,
-				[Chat].UserId,
-                CAST([Content] AS VARCHAR(MAX)) COLLATE Latin1_General_100_CI_AS_SC_UTF8 AS ContentAsString
-            FROM 
-                [MessageContent]
-			JOIN [Message] ON Message.Id = MessageContent.MessageId 
-			JOIN [Chat] ON Chat.Id = Message.ChatId
-            WHERE ContentTypeId = 2
-        ) AS Derived
-    ) AS Derived
-),
-ParsedData AS (
-    SELECT
-        Decoded,
-        -- 获取文件名（从最后一个'/'之后的部分）
-        RIGHT(Decoded, CHARINDEX('/', REVERSE(Decoded)) - 1) AS FileNameWithExt,
-        -- 获取文件扩展名（从最后一个'.'之后的部分）
-        RIGHT(Decoded, CHARINDEX('.', REVERSE(Decoded)) - 1) AS Extension,
-		CreatedAt,
-		UserId
-    FROM DecodedData
-),
-FinalData AS (
-    SELECT
-        Decoded AS StorageKey,
-        FileNameWithExt AS FileName,
-        CASE
-            WHEN LOWER(Extension) = 'jpg' THEN 1
-            WHEN LOWER(Extension) = 'png' THEN 2
-            WHEN LOWER(Extension) = 'heic' THEN 8
-            ELSE NULL -- 如果有其他扩展名，可以根据需要添加对应的FileContentTypeId
-        END AS FileContentTypeId,
-		1 AS FileServiceId,
-        0 AS Size,
-        1 AS ClientInfoId,
-        UserId AS CreateUserId,
-        CreatedAt
-    FROM ParsedData
-    WHERE Extension IN ('jpg', 'png', 'heic') -- 过滤出符合条件的扩展名
+	SELECT
+		[MessageContent].[Id] AS MessageContentId,
+		CASE 
+			WHEN CHARINDEX(':88/', ContentAsString) > 0 AND CHARINDEX('?', ContentAsString) > CHARINDEX(':88/', ContentAsString)
+			THEN dbo.UrlDecode(SUBSTRING(
+				ContentAsString,
+				CHARINDEX(':88/', ContentAsString) + 4,
+				CHARINDEX('?', ContentAsString) - CHARINDEX(':88/', ContentAsString) - 4
+			))
+			ELSE NULL -- Or any default value or handling mechanism
+		END AS Decoded,
+		Message.CreatedAt,
+		[Chat].UserId
+	FROM 
+        [MessageContent]
+    JOIN [Message] ON [Message].Id = MessageContent.MessageId
+    JOIN [Chat] ON Chat.Id = [Message].ChatId
+    CROSS APPLY (
+        SELECT CAST([Content] AS VARCHAR(MAX)) COLLATE Latin1_General_100_CI_AS_SC_UTF8 AS ContentAsString
+    ) AS ContentConvert
+    WHERE ContentTypeId = 2
 )
-INSERT INTO [File] (
-    [FileName],
-    [FileContentTypeId],
-	[FileServiceId],
+INSERT INTO #ExtractedData (
+    [MessageContentId],
     [StorageKey],
+    [FileName],
+    [Extension],
+    [FileContentTypeId],
+    [FileServiceId],
     [Size],
     [ClientInfoId],
     [CreateUserId],
     [CreatedAt]
 )
 SELECT
-    FileName,
-    FileContentTypeId,
-	FileServiceId,
-    StorageKey,
-    Size,
-    ClientInfoId,
-    CreateUserId,
-    CreatedAt
-FROM FinalData;
+    dd.MessageContentId,
+    dd.Decoded AS StorageKey,
+    RIGHT(dd.Decoded, CHARINDEX('/', REVERSE(dd.Decoded)) - 1) AS FileName,
+    RIGHT(dd.Decoded, CHARINDEX('.', REVERSE(dd.Decoded)) - 1) AS Extension,
+    CASE
+        WHEN LOWER(RIGHT(dd.Decoded, CHARINDEX('.', REVERSE(dd.Decoded)) - 1)) = 'jpg' THEN 1
+        WHEN LOWER(RIGHT(dd.Decoded, CHARINDEX('.', REVERSE(dd.Decoded)) - 1)) = 'jpeg' THEN 1
+        WHEN LOWER(RIGHT(dd.Decoded, CHARINDEX('.', REVERSE(dd.Decoded)) - 1)) = 'png' THEN 2
+        WHEN LOWER(RIGHT(dd.Decoded, CHARINDEX('.', REVERSE(dd.Decoded)) - 1)) = 'webp' THEN 6
+        WHEN LOWER(RIGHT(dd.Decoded, CHARINDEX('.', REVERSE(dd.Decoded)) - 1)) = 'heic' THEN 8
+        WHEN LOWER(RIGHT(dd.Decoded, CHARINDEX('.', REVERSE(dd.Decoded)) - 1)) = 'pdf' THEN 9
+        ELSE NULL
+    END AS FileContentTypeId,
+    1 AS FileServiceId,
+    0 AS Size,
+    1 AS ClientInfoId,
+    dd.UserId AS CreateUserId,
+    dd.CreatedAt
+FROM DecodedData dd
+WHERE RIGHT(dd.Decoded, CHARINDEX('.', REVERSE(dd.Decoded)) - 1) IN ('jpg', 'png', 'heic', 'jpeg', 'webp', 'pdf');
 
-DROP FUNCTION IF EXISTS UrlDecode;
+-- 创建一个临时表，用于存储唯一的StorageKey和对应的FileId
+DROP TABLE IF EXISTS #FileMapping
+CREATE TABLE #FileMapping (
+    [StorageKey] NVARCHAR(MAX),
+    [FileId] INT
+);
+
+-- 将唯一的StorageKey插入到[File]表，并获取FileId
+INSERT INTO [File] (
+    [FileName],
+    [FileContentTypeId],
+    [FileServiceId],
+    [StorageKey],
+    [Size],
+    [ClientInfoId],
+    [CreateUserId],
+    [CreatedAt]
+)
+OUTPUT inserted.StorageKey, inserted.Id INTO #FileMapping([StorageKey], [FileId])
+SELECT DISTINCT
+    ed.FileName,
+    ed.FileContentTypeId,
+    ed.FileServiceId,
+    ed.StorageKey,
+    ed.Size,
+    ed.ClientInfoId,
+    ed.CreateUserId,
+    ed.CreatedAt
+FROM #ExtractedData ed;
+
+-- 更新MessageContent表，将Content字段替换为FileId的字节序（小端）
+-- 通过StorageKey将FileId与所有的MessageContentId关联
+UPDATE mc
+SET Content = CONVERT(VARBINARY(4), fm.FileId)
+FROM MessageContent mc
+JOIN #ExtractedData ed ON mc.Id = ed.MessageContentId
+JOIN #FileMapping fm ON ed.StorageKey = fm.StorageKey;
+
+-- 删除临时表
+DROP TABLE #ExtractedData;
+DROP TABLE #FileMapping;
+DROP FUNCTION dbo.UrlDecode;
 GO
+
+-- Content migration
+CREATE TABLE [dbo].[MessageContentUTF16](
+    [Id] [bigint] NOT NULL PRIMARY KEY,
+    [Content] [nvarchar](max) NOT NULL,
+    CONSTRAINT [FK_MessageContentUTF16_MessageContent] FOREIGN KEY([Id]) 
+        REFERENCES [dbo].[MessageContent]([Id]) 
+        ON DELETE CASCADE
+);
+
+CREATE TABLE [dbo].[MessageContentUTF8](
+    [Id] [bigint] NOT NULL PRIMARY KEY,
+    [Content] [varchar](max) COLLATE Latin1_General_100_CI_AS_SC_UTF8 NOT NULL,
+    CONSTRAINT [FK_MessageContentUTF8_MessageContent] FOREIGN KEY([Id]) 
+        REFERENCES [dbo].[MessageContent]([Id]) 
+        ON DELETE CASCADE
+);
+
+CREATE TABLE [dbo].[MessageContentBlob](
+    [Id] [bigint] NOT NULL PRIMARY KEY,
+    [Content] [varbinary](max) NOT NULL,
+    CONSTRAINT [FK_MessageContentBlob_MessageContent] FOREIGN KEY([Id]) 
+        REFERENCES [dbo].[MessageContent]([Id]) 
+        ON DELETE CASCADE
+);
+
+CREATE TABLE [dbo].[MessageContentFile](
+    [Id] [bigint] NOT NULL PRIMARY KEY,
+    [FileId] [int] NOT NULL,
+    CONSTRAINT [FK_MessageContentFile_File] FOREIGN KEY([FileId]) 
+        REFERENCES [dbo].[File]([Id]) 
+        ON DELETE CASCADE,
+    CONSTRAINT [FK_MessageContentFile_MessageContent] FOREIGN KEY([Id]) 
+        REFERENCES [dbo].[MessageContent]([Id]) 
+        ON DELETE CASCADE
+);
+
+CREATE NONCLUSTERED INDEX [IX_MessageContentFile_FileId] ON [dbo].[MessageContentFile]([FileId]);
+
+-- 迁移 MessageContentTypeId = 0 的数据到 MessageContentUTF8
+INSERT INTO [dbo].[MessageContentUTF8] (Id, Content)
+SELECT 
+    Id, 
+    CAST(
+    '<?xml version=''1.0'' encoding=''utf-8''?><![CDATA[' --start CDATA
+    + REPLACE(
+      Content,
+      ']]>', 
+      ']]]]><![CDATA[>'
+    ) + ']]>' AS XML
+  ).value('.', 'nvarchar(max)')
+FROM [dbo].[MessageContent] 
+WHERE ContentTypeId = 0;
+
+
+-- 迁移 MessageContentTypeId = 1 的数据到 MessageContentUTF16
+INSERT INTO [dbo].[MessageContentUTF16] (Id, Content)
+SELECT Id, CONVERT(nvarchar(max), Content) 
+FROM [dbo].[MessageContent] 
+WHERE ContentTypeId = 1;
+
+-- 迁移 MessageContentTypeId = 2 的数据到 MessageContentFile
+-- 首先将 varbinary 转换为 int 按小端序处理
+INSERT INTO [dbo].[MessageContentFile] (Id, FileId)
+SELECT Id, CONVERT(int, Content)
+FROM [dbo].[MessageContent] 
+WHERE ContentTypeId = 2;
+
+ALTER TABLE [dbo].[MessageContent]
+DROP COLUMN [Content];

@@ -1,4 +1,6 @@
-﻿using Microsoft.EntityFrameworkCore;
+﻿using System;
+using System.Collections.Generic;
+using Microsoft.EntityFrameworkCore;
 
 namespace Chats.BE.DB;
 
@@ -159,7 +161,7 @@ public partial class ChatsDB : DbContext
 
         modelBuilder.Entity<FileImageInfo>(entity =>
         {
-            entity.HasKey(e => e.FileId).HasName("PK__FileImag__6F0F98BF337B5ECA");
+            entity.HasKey(e => e.FileId).HasName("PK__FileImag__6F0F98BFECCD99B0");
 
             entity.Property(e => e.FileId).ValueGeneratedNever();
 
@@ -177,7 +179,7 @@ public partial class ChatsDB : DbContext
 
         modelBuilder.Entity<FileServiceType>(entity =>
         {
-            entity.HasKey(e => e.Id).HasName("PK__FileServ__3214EC0736EE78C9");
+            entity.HasKey(e => e.Id).HasName("PK__FileServ__3214EC07B386AD0F");
         });
 
         modelBuilder.Entity<InvitationCode>(entity =>
