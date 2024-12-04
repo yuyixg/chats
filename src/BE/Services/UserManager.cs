@@ -33,7 +33,7 @@ public class UserManager(ChatsDB db)
                 CreatedAt = DateTime.UtcNow,
                 UpdatedAt = DateTime.UtcNow,
             };
-            await InitializeUserWithoutSave(user, KnownLoginProviders.Keycloak, null, cancellationToken);
+            await InitializeUserWithoutSave(user, KnownLoginProviders.Keycloak, null, null, cancellationToken);
             db.Users.Add(user);
             await db.SaveChangesAsync(cancellationToken);
         }
@@ -41,11 +41,11 @@ public class UserManager(ChatsDB db)
         return user;
     }
 
-    public async Task InitializeUserWithoutSave(User newUser, string? provider, string? invitationCode, CancellationToken cancellationToken)
+    public async Task InitializeUserWithoutSave(User newUser, string? provider, string? invitationCode, int? creditUserId, CancellationToken cancellationToken)
     {
         newUser.UserBalance = new()
         {
-            UserId = newUser.Id,
+            User = newUser,
             Balance = 0,
             CreatedAt = DateTime.UtcNow,
             UpdatedAt = DateTime.UtcNow,
@@ -75,19 +75,29 @@ public class UserManager(ChatsDB db)
                     {
                         ModelId = m.ModelId,
                         CreatedAt = DateTime.UtcNow,
+                        User = newUser,
                     };
-                    m.ApplyTo(toReturn);
+                    m.ApplyTo(toReturn, creditUserId);
                     return toReturn;
                 })
                 .ToArray();
-            db.BalanceTransactions.Add(new BalanceTransaction()
+            BalanceTransaction bt = new()
             {
-                UserId = newUser.Id,
-                CreditUserId = newUser.Id,
+                User = newUser,
+                CreditUser = newUser,
                 TransactionTypeId = (byte)DBTransactionType.Initial,
                 CreatedAt = DateTime.UtcNow,
                 Amount = config.Price,
-            });
+            };
+            if (creditUserId != null)
+            {
+                bt.CreditUserId = creditUserId.Value;
+            }
+            else
+            {
+                bt.CreditUser = newUser;
+            }
+            db.BalanceTransactions.Add(bt);
         }
     }
 }

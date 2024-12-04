@@ -3,6 +3,7 @@ using Chats.BE.Controllers.Admin.Common;
 using Chats.BE.Controllers.Common;
 using Chats.BE.DB;
 using Chats.BE.DB.Jsons;
+using Chats.BE.Infrastructure;
 using Chats.BE.Services;
 using Chats.BE.Services.Conversations;
 using Microsoft.AspNetCore.Mvc;
@@ -12,7 +13,7 @@ using Microsoft.EntityFrameworkCore;
 namespace Chats.BE.Controllers.Admin.AdminModels;
 
 [Route("api/admin"), AuthorizeAdmin]
-public class AdminModelsController(ChatsDB db) : ControllerBase
+public class AdminModelsController(ChatsDB db, CurrentUser adminUser) : ControllerBase
 {
     [HttpGet("models")]
     public async Task<ActionResult<AdminModelDto[]>> GetAdminModels(bool all, CancellationToken cancellationToken)
@@ -272,7 +273,7 @@ public class AdminModelsController(ChatsDB db) : ControllerBase
         {
             if (userModels.TryGetValue(req.ModelId, out UserModel? existingItem))
             {
-                bool hasDifference = req.ApplyTo(existingItem);
+                bool hasDifference = req.ApplyTo(existingItem, adminUser.Id);
                 if (hasDifference)
                 {
                     effectedUserModels.Add(existingItem);
@@ -286,7 +287,7 @@ public class AdminModelsController(ChatsDB db) : ControllerBase
                     ModelId = req.ModelId,
                     CreatedAt = DateTime.UtcNow,
                 };
-                req.ApplyTo(newItem);
+                req.ApplyTo(newItem, adminUser.Id);
                 userModels[req.ModelId] = newItem;
                 db.UserModels.Add(newItem);
                 effectedUserModels.Add(newItem);

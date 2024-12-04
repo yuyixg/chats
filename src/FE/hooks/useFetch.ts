@@ -16,17 +16,24 @@ export type RequestWithBodyModel = RequestModel & {
 };
 
 const readResponse = async (response: Response) => {
+  if (!response.headers) {
+    console.log();
+    return response;
+  }
+  console.log(response.status, [...response.headers.keys()]);
   const contentType = response.headers.get('content-type');
   const contentDisposition = response.headers.get('content-disposition');
 
-  if (contentType?.indexOf('application/json') !== -1) {
-    return response.json();
-  } else if (contentType?.indexOf('text/plain') !== -1) {
-    return response.text();
-  } else if (contentDisposition?.indexOf('attachment') !== -1) {
-    return response.blob();
+  if (contentType === null) {
+    return null;
+  } else if (contentType.indexOf('application/json') !== -1) {
+    return await response.json();
+  } else if (contentType.indexOf('text/plain') !== -1) {
+    return await response.text();
+  } else if (contentDisposition != null && contentDisposition.indexOf('attachment') !== -1) {
+    return await response.blob();
   } else {
-    return response;
+    return null;
   }
 };
 

@@ -2,6 +2,7 @@
 using Chats.BE.Controllers.Admin.Common;
 using Chats.BE.Controllers.Common.Dtos;
 using Chats.BE.DB;
+using Chats.BE.Infrastructure;
 using Chats.BE.Services;
 using Microsoft.AspNetCore.Mvc;
 using Microsoft.EntityFrameworkCore;
@@ -9,7 +10,7 @@ using Microsoft.EntityFrameworkCore;
 namespace Chats.BE.Controllers.Admin.AdminUser;
 
 [Route("api/admin/users"), AuthorizeAdmin]
-public class AdminUserController(ChatsDB db) : ControllerBase
+public class AdminUserController(ChatsDB db, CurrentUser adminUser) : ControllerBase
 {
     [HttpGet]
     public async Task<ActionResult<PagedResult<AdminUserDto>>> GetUsers(PagingRequest pagingRequest, CancellationToken cancellationToken)
@@ -81,8 +82,8 @@ public class AdminUserController(ChatsDB db) : ControllerBase
             UpdatedAt = DateTime.UtcNow,
         };
         db.Users.Add(user);
-        await userManager.InitializeUserWithoutSave(user, null, null, cancellationToken);
+        await userManager.InitializeUserWithoutSave(user, null, null, adminUser.Id, cancellationToken);
         await db.SaveChangesAsync(cancellationToken);
-        return Created();
+        return Created(default(string), value: user.Id);
     }
 }

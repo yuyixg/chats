@@ -114,6 +114,7 @@ public class InChatContext()
             usage.UsageTransaction = new()
             {
                 UserModelId = _userModel.Id,
+                CreditUserId = userId,
                 CreatedAt = usage.CreatedAt,
                 CountAmount = -Cost.CostCount,
                 TokenAmount = -Cost.CostTokens,

@@ -21,7 +21,7 @@ public record JsonTokenBalance
     [JsonPropertyName("enabled")]
     public required bool Enabled { get; init; }
 
-    public bool ApplyTo(UserModel existingItem)
+    public bool ApplyTo(UserModel existingItem, int? creditUserId)
     {
         bool needsTransaction = existingItem.CountBalance != Counts || existingItem.TokenBalance != Tokens;
         bool hasDifference =
@@ -31,14 +31,16 @@ public record JsonTokenBalance
 
         if (needsTransaction)
         {
-            existingItem.UsageTransactions.Add(new UsageTransaction
+            UsageTransaction ut = new()
             {
                 CreatedAt = DateTime.UtcNow,
                 CountAmount = Counts - existingItem.CountBalance,
                 TokenAmount = Tokens - existingItem.TokenBalance,
                 UserModelId = existingItem.Id,
                 TransactionTypeId = (byte)DBTransactionType.Charge,
-            });
+            };
+            ApplyCreditUser(existingItem, creditUserId, ut);
+            existingItem.UsageTransactions.Add(ut);
         }
 
         if (hasDifference)
@@ -51,5 +53,21 @@ public record JsonTokenBalance
         }
 
         return hasDifference;
+    }
+
+    private static void ApplyCreditUser(UserModel existingItem, int? creditUserId, UsageTransaction ut)
+    {
+        if (creditUserId.HasValue)
+        {
+            ut.CreditUserId = creditUserId.Value;
+        }
+        else if (existingItem.User != null)
+        {
+            ut.CreditUser = existingItem.User;
+        }
+        else
+        {
+            ut.CreditUserId = existingItem.UserId;
+        }
     }
 }

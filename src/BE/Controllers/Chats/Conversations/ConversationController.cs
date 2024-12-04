@@ -143,10 +143,8 @@ public class ConversationController(ChatsDB db, CurrentUser currentUser, ILogger
             messageToSend.Add(await userMessage.ToOpenAI(fileDownloadUrlProvider, cancellationToken));
         }
 
-        Response.Headers.ContentType = "text/event-stream";
-        Response.Headers.CacheControl = "no-cache";
-        Response.Headers.Connection = "keep-alive";
         string? errorText = null;
+        bool everYield = false;
         try
         {
             if (userModel == null)
@@ -166,6 +164,13 @@ public class ConversationController(ChatsDB db, CurrentUser currentUser, ILogger
             await foreach (InternalChatSegment seg in icc.Run(userBalance.Balance, userModel, s.ChatStreamedFEProcessed(messageToSend, cco, cancellationToken)))
             {
                 if (seg.TextSegment == string.Empty) continue;
+                if (!everYield)
+                {
+                    Response.Headers.ContentType = "text/event-stream";
+                    Response.Headers.CacheControl = "no-cache";
+                    Response.Headers.Connection = "keep-alive";
+                    everYield = true;
+                }
                 await YieldResponse(new() { Result = seg.TextSegment, Success = true });
 
                 if (cancellationToken.IsCancellationRequested)
