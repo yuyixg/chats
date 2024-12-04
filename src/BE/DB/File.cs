@@ -51,4 +51,7 @@ public partial class File
     [ForeignKey("FileServiceId")]
     [InverseProperty("Files")]
     public virtual FileService FileService { get; set; } = null!;
+
+    [InverseProperty("File")]
+    public virtual ICollection<MessageContentFile> MessageContentFiles { get; set; } = new List<MessageContentFile>();
 }

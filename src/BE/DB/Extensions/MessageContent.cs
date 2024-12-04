@@ -1,6 +1,4 @@
-﻿using Chats.BE.Controllers.Chats.Conversations.Dtos;
-using Chats.BE.DB.Enums;
-using Chats.BE.DB.Extensions;
+﻿using Chats.BE.DB.Enums;
 using Chats.BE.Services.FileServices;
 using OpenAI.Chat;
 
@@ -12,33 +10,37 @@ public partial class MessageContent
     {
         return (DBMessageContentType)ContentTypeId switch
         {
-            DBMessageContentType.Text => ChatMessageContentPart.CreateTextPart(MessageContentUtil.ReadText(Content)),
-            DBMessageContentType.FileId => ChatMessageContentPart.CreateImagePart(await fup.CreateUrl(MessageContentUtil.ReadFileId(Content), cancellationToken)),
+            DBMessageContentType.Text => ChatMessageContentPart.CreateTextPart(MessageContentUtf16!.Content),
+            DBMessageContentType.FileId => ChatMessageContentPart.CreateImagePart(await fup.CreateUrl(FileId, cancellationToken)),
             _ => throw new NotImplementedException()
         };
     }
 
-    public DBMessageSegment ToSegment()
+    public override string ToString()
     {
-        return new DBMessageSegment
+        return (DBMessageContentType)ContentTypeId switch
         {
-            ContentType = (DBMessageContentType)ContentTypeId,
-            Content = Content
+            DBMessageContentType.Text => MessageContentUtf16!.Content,
+            DBMessageContentType.Error => MessageContentUtf8!.Content,
+            //DBMessageContentType.FileId => MessageContentUtil.ReadFileId(Content).ToString(), // not supported
+            _ => throw new NotSupportedException(),
         };
     }
 
+    public int FileId => MessageContentFile!.FileId;
+
     public static MessageContent FromText(string text)
     {
-        return new MessageContent { Content = MessageContentUtil.WriteText(text), ContentTypeId = (byte)DBMessageContentType.Text };
+        return new MessageContent { MessageContentUtf16 = new() { Content = text }, ContentTypeId = (byte)DBMessageContentType.Text };
     }
 
     public static MessageContent FromFileId(int fileId)
     {
-        return new MessageContent { Content = MessageContentUtil.WriteFileId(fileId), ContentTypeId = (byte)DBMessageContentType.FileId };
+        return new MessageContent { MessageContentFile = new() { FileId = fileId }, ContentTypeId = (byte)DBMessageContentType.FileId };
     }
 
     public static MessageContent FromError(string error)
     {
-        return new MessageContent { Content = MessageContentUtil.WriteError(error), ContentTypeId = (byte)DBMessageContentType.Error };
+        return new MessageContent { MessageContentUtf8 = new() { Content = error }, ContentTypeId = (byte)DBMessageContentType.Error };
     }
 }

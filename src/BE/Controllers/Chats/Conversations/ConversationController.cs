@@ -46,13 +46,16 @@ public class ConversationController(ChatsDB db, CurrentUser currentUser, ILogger
         }
 
         Dictionary<long, MessageLiteDto> existingMessages = await db.Messages
+            .Include(x => x.MessageContents).ThenInclude(x => x.MessageContentBlob)
+            .Include(x => x.MessageContents).ThenInclude(x => x.MessageContentFile)
+            .Include(x => x.MessageContents).ThenInclude(x => x.MessageContentUtf16)
+            .Include(x => x.MessageContents).ThenInclude(x => x.MessageContentUtf8)
             .Where(x => x.ChatId == chatId && x.Chat.UserId == currentUser.Id)
             .Select(x => new MessageLiteDto()
             {
                 Id = x.Id,
                 Content = x.MessageContents
                     .OrderBy(x => x.Id)
-                    .Select(x => x.ToSegment())
                     .ToArray(),
                 Role = (DBChatRole)x.ChatRoleId,
                 ParentId = x.ParentId,
@@ -82,7 +85,7 @@ public class ConversationController(ChatsDB db, CurrentUser currentUser, ILogger
                 systemMessage = new MessageLiteDto
                 {
                     Id = toBeInsert.Id,
-                    Content = [toBeInsert.MessageContents.First().ToSegment()],
+                    Content = [toBeInsert.MessageContents.First()],
                     Role = DBChatRole.System,
                     ParentId = null,
                 };
@@ -132,7 +135,7 @@ public class ConversationController(ChatsDB db, CurrentUser currentUser, ILogger
             userMessage = new()
             {
                 Id = dbUserMessage.Id,
-                Content = request.UserMessage.ToMessageSegments(idEncryption),
+                Content = request.UserMessage.ToMessageContents(idEncryption),
                 Role = (DBChatRole)dbUserMessage.ChatRoleId,
                 ParentId = dbUserMessage.ParentId,
             };

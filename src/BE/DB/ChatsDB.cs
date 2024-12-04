@@ -47,7 +47,15 @@ public partial class ChatsDB : DbContext
 
     public virtual DbSet<MessageContent> MessageContents { get; set; }
 
+    public virtual DbSet<MessageContentBlob> MessageContentBlobs { get; set; }
+
+    public virtual DbSet<MessageContentFile> MessageContentFiles { get; set; }
+
     public virtual DbSet<MessageContentType> MessageContentTypes { get; set; }
+
+    public virtual DbSet<MessageContentUtf16> MessageContentUtf16s { get; set; }
+
+    public virtual DbSet<MessageContentUtf8> MessageContentUtf8s { get; set; }
 
     public virtual DbSet<Model> Models { get; set; }
 
@@ -218,9 +226,48 @@ public partial class ChatsDB : DbContext
             entity.HasOne(d => d.Message).WithMany(p => p.MessageContents).HasConstraintName("FK_MessageContent_Message");
         });
 
+        modelBuilder.Entity<MessageContentBlob>(entity =>
+        {
+            entity.HasKey(e => e.Id).HasName("PK__MessageC__3214EC073F7CC783");
+
+            entity.Property(e => e.Id).ValueGeneratedNever();
+
+            entity.HasOne(d => d.IdNavigation).WithOne(p => p.MessageContentBlob).HasConstraintName("FK_MessageContentBlob_MessageContent");
+        });
+
+        modelBuilder.Entity<MessageContentFile>(entity =>
+        {
+            entity.HasKey(e => e.Id).HasName("PK__MessageC__3214EC072B2C47D4");
+
+            entity.Property(e => e.Id).ValueGeneratedNever();
+
+            entity.HasOne(d => d.File).WithMany(p => p.MessageContentFiles).HasConstraintName("FK_MessageContentFile_File");
+
+            entity.HasOne(d => d.IdNavigation).WithOne(p => p.MessageContentFile).HasConstraintName("FK_MessageContentFile_MessageContent");
+        });
+
         modelBuilder.Entity<MessageContentType>(entity =>
         {
             entity.HasKey(e => e.Id).HasName("PK__MessageC__3214EC07D7BA864A");
+        });
+
+        modelBuilder.Entity<MessageContentUtf16>(entity =>
+        {
+            entity.HasKey(e => e.Id).HasName("PK__MessageC__3214EC070448BEFF");
+
+            entity.Property(e => e.Id).ValueGeneratedNever();
+
+            entity.HasOne(d => d.IdNavigation).WithOne(p => p.MessageContentUtf16).HasConstraintName("FK_MessageContentUTF16_MessageContent");
+        });
+
+        modelBuilder.Entity<MessageContentUtf8>(entity =>
+        {
+            entity.HasKey(e => e.Id).HasName("PK__MessageC__3214EC0755163DAC");
+
+            entity.Property(e => e.Id).ValueGeneratedNever();
+            entity.Property(e => e.Content).UseCollation("Latin1_General_100_CI_AS_SC_UTF8");
+
+            entity.HasOne(d => d.IdNavigation).WithOne(p => p.MessageContentUtf8).HasConstraintName("FK_MessageContentUTF8_MessageContent");
         });
 
         modelBuilder.Entity<Model>(entity =>

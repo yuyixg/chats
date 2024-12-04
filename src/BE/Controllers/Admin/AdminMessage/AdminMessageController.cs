@@ -73,6 +73,10 @@ public class AdminMessageController(ChatsDB db, CurrentUser currentUser, IUrlEnc
         if (adminMessageTemp == null) return new NotFoundResult();
 
         AdminMessageItemTemp[] messagesTemp = await db.Messages
+            .Include(x => x.MessageContents).ThenInclude(x => x.MessageContentBlob)
+            .Include(x => x.MessageContents).ThenInclude(x => x.MessageContentFile)
+            .Include(x => x.MessageContents).ThenInclude(x => x.MessageContentUtf16)
+            .Include(x => x.MessageContents).ThenInclude(x => x.MessageContentUtf8)
             .Where(x => x.ChatId == conversationId)
             .Select(x => new AdminMessageItemTemp
             {
@@ -87,11 +91,6 @@ public class AdminMessageController(ChatsDB db, CurrentUser currentUser, IUrlEnc
                 ReasoningTokens = x.Usage.ReasoningTokens,
                 Role = (DBChatRole)x.ChatRoleId,
                 Content = x.MessageContents
-                    .Select(x => new DBMessageSegment 
-                    { 
-                        Content = x.Content, 
-                        ContentType = (DBMessageContentType)x.ContentTypeId
-                    })
                     .ToArray(),
                 Duration = x.Usage.TotalDurationMs - x.Usage.PreprocessDurationMs,
                 FirstTokenLatency = x.Usage.FirstResponseDurationMs

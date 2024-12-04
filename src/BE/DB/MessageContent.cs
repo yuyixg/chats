@@ -17,8 +17,6 @@ public partial class MessageContent
 
     public long MessageId { get; set; }
 
-    public byte[] Content { get; set; } = null!;
-
     [ForeignKey("ContentTypeId")]
     [InverseProperty("MessageContents")]
     public virtual MessageContentType ContentType { get; set; } = null!;
@@ -26,4 +24,16 @@ public partial class MessageContent
     [ForeignKey("MessageId")]
     [InverseProperty("MessageContents")]
     public virtual Message Message { get; set; } = null!;
+
+    [InverseProperty("IdNavigation")]
+    public virtual MessageContentBlob? MessageContentBlob { get; set; }
+
+    [InverseProperty("IdNavigation")]
+    public virtual MessageContentFile? MessageContentFile { get; set; }
+
+    [InverseProperty("IdNavigation")]
+    public virtual MessageContentUtf16? MessageContentUtf16 { get; set; }
+
+    [InverseProperty("IdNavigation")]
+    public virtual MessageContentUtf8? MessageContentUtf8 { get; set; }
 }

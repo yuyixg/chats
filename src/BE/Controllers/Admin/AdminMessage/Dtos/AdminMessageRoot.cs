@@ -1,5 +1,6 @@
 ﻿using Chats.BE.Controllers.Chats.Conversations.Dtos;
 using Chats.BE.Controllers.Chats.Messages.Dtos;
+using Chats.BE.DB;
 using Chats.BE.Services.Conversations;
 using Chats.BE.Services.FileServices;
 using Chats.BE.Services.UrlEncryption;
@@ -127,7 +128,7 @@ public record AdminMessageItemTemp
     public string? ModelName { get; init; }
     public required DateTime CreatedAt { get; init; }
     public required DBChatRole Role { get; init; }
-    public required DBMessageSegment[] Content { get; init; }
+    public required MessageContent[] Content { get; init; }
     public required int? InputTokens { get; init; }
     public required int? OutputTokens { get; init; }
     public required int? ReasoningTokens { get; init; }

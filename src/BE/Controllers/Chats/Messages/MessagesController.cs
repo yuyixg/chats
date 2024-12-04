@@ -1,7 +1,5 @@
-﻿using Chats.BE.Controllers.Chats.Conversations.Dtos;
-using Chats.BE.Controllers.Chats.Messages.Dtos;
+﻿using Chats.BE.Controllers.Chats.Messages.Dtos;
 using Chats.BE.DB;
-using Chats.BE.DB.Enums;
 using Chats.BE.Infrastructure;
 using Chats.BE.Services.Conversations;
 using Chats.BE.Services.FileServices;
@@ -21,6 +19,10 @@ public class MessagesController(ChatsDB db, CurrentUser currentUser, IUrlEncrypt
         CancellationToken cancellationToken)
     {
         MessageDto[] messages = await db.Messages
+            .Include(x => x.MessageContents).ThenInclude(x => x.MessageContentBlob)
+            .Include(x => x.MessageContents).ThenInclude(x => x.MessageContentFile)
+            .Include(x => x.MessageContents).ThenInclude(x => x.MessageContentUtf16)
+            .Include(x => x.MessageContents).ThenInclude(x => x.MessageContentUtf8)
             .Where(m => m.ChatId == urlEncryption.DecryptChatId(chatId) && m.Chat.UserId == currentUser.Id && m.ChatRoleId != (byte)DBChatRole.System)
             .Select(x => new ChatMessageTemp()
             {
@@ -29,11 +31,6 @@ public class MessagesController(ChatsDB db, CurrentUser currentUser, IUrlEncrypt
                 Role = (DBChatRole)x.ChatRoleId,
                 Content = x.MessageContents
                     .OrderBy(x => x.Id)
-                    .Select(x => new DBMessageSegment
-                    {
-                        ContentType = (DBMessageContentType)x.ContentTypeId,
-                        Content = x.Content
-                    })
                     .ToArray(),
                 CreatedAt = x.CreatedAt,
                 InputTokens = x.Usage!.InputTokens,
@@ -57,16 +54,10 @@ public class MessagesController(ChatsDB db, CurrentUser currentUser, IUrlEncrypt
     [HttpGet("{chatId}/system-prompt")]
     public async Task<ActionResult<string?>> GetChatSystemPrompt(string chatId, CancellationToken cancellationToken)
     {
-        DBMessageSegment? content = await db.Messages
+        MessageContent? content = await db.Messages
+            .Include(x => x.MessageContents).ThenInclude(x => x.MessageContentUtf16)
             .Where(m => m.ChatId == urlEncryption.DecryptChatId(chatId) && m.ChatRoleId == (byte)DBChatRole.System)
-            .Select(x => x.MessageContents
-                .Select(x => new DBMessageSegment()
-                {
-                    Content = x.Content,
-                    ContentType = (DBMessageContentType)x.ContentTypeId,
-                })
-                .First()
-            )
+            .Select(x => x.MessageContents.First())
             .FirstOrDefaultAsync(cancellationToken);
 
         if (content == null)

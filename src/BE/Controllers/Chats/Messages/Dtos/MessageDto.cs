@@ -1,7 +1,5 @@
-﻿using Chats.BE.Controllers.Chats.Conversations.Dtos;
-using Chats.BE.DB;
+﻿using Chats.BE.DB;
 using Chats.BE.DB.Enums;
-using Chats.BE.DB.Extensions;
 using Chats.BE.Services.Conversations;
 using Chats.BE.Services.FileServices;
 using Chats.BE.Services.UrlEncryption;
@@ -78,11 +76,6 @@ public record MessageContentRequest
             ..(FileIds ?? []).Select(x => MessageContent.FromFileId(idEncryptionService.DecryptFileId(x))),
         ];
     }
-
-    public DBMessageSegment[] ToMessageSegments(IUrlEncryptionService idEncryptionService)
-    {
-        return ToMessageContents(idEncryptionService).Select(x => x.ToSegment()).ToArray();
-    }
 }
 
 public record MessageContentResponse
@@ -96,11 +89,11 @@ public record MessageContentResponse
     [JsonPropertyName("error"), JsonIgnore(Condition = JsonIgnoreCondition.WhenWritingNull)]
     public required string? Error { get; init; }
 
-    public static async Task<MessageContentResponse> FromSegments(DBMessageSegment[] segments, FileUrlProvider fup, CancellationToken cancellationToken)
+    public static async Task<MessageContentResponse> FromSegments(MessageContent[] segments, FileUrlProvider fup, CancellationToken cancellationToken)
     {
-        Dictionary<DBMessageContentType, byte[][]> groups = segments
-            .GroupBy(x => x.ContentType)
-            .ToDictionary(k => k.Key, v => v.Select(x => x.Content).ToArray());
+        Dictionary<DBMessageContentType, MessageContent[]> groups = segments
+            .GroupBy(x => (DBMessageContentType)x.ContentTypeId)
+            .ToDictionary(k => k.Key, v => v.Select(x => x).ToArray());
         foreach (DBMessageContentType ct in Enum.GetValuesAsUnderlyingType<DBMessageContentType>())
         {
             if (!groups.ContainsKey(ct)) groups[ct] = [];
@@ -108,13 +101,13 @@ public record MessageContentResponse
 
         return new MessageContentResponse()
         {
-            Text = string.Join("\n", groups[DBMessageContentType.Text].Select(MessageContentUtil.ReadText)),
-            FileIds = groups[DBMessageContentType.FileId].Select(MessageContentUtil.ReadFileId).ToArray() switch 
+            Text = string.Join("\n", groups[DBMessageContentType.Text].Select(x => x.ToString())),
+            FileIds = groups[DBMessageContentType.FileId].Select(x => x.FileId).ToArray() switch 
             {
                 [] => null, 
                 var x => await fup.CreateFileDtos(x, cancellationToken)
             },
-            Error = string.Join("\n", groups[DBMessageContentType.Error].Select(MessageContentUtil.ReadError)) switch { "" => null, var x => x }
+            Error = string.Join("\n", groups[DBMessageContentType.Error].Select(x => x.ToString())) switch { "" => null, var x => x }
         };
     }
 }
@@ -131,7 +124,7 @@ public record ChatMessageTemp
     public required long Id { get; init; }
     public required long? ParentId { get; init; }
     public required DBChatRole Role { get; init; }
-    public required DBMessageSegment[] Content { get; init; }
+    public required MessageContent[] Content { get; init; }
     public required int? InputTokens { get; init; }
     public required int? OutputTokens { get; init; }
     public required int? ReasoningTokens { get; init; }
