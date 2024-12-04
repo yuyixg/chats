@@ -67,17 +67,17 @@ public class AccountLoginController(ChatsDB db, ILogger<AccountLoginController> 
         if (dbUser == null)
         {
             logger.LogWarning("User not found: {UserName}", passwordDto.UserName);
-            return BadRequest("用户名或密码错误");
+            return BadRequest("Invalid username or password");
         }
         if (!dbUser.Enabled)
         {
             logger.LogWarning("User disabled: {UserName}", passwordDto.UserName);
-            return BadRequest("用户名或密码错误");
+            return BadRequest("Invalid username or password");
         }
         if (!passwordHasher.VerifyPassword(passwordDto.Password, dbUser.Password))
         {
             logger.LogWarning("Invalid password: {UserName}", passwordDto.UserName);
-            return BadRequest("用户名或密码错误");
+            return BadRequest("Invalid username or password");
         }
 
         return Ok(await sessionManager.GenerateSessionForUser(dbUser, cancellationToken));

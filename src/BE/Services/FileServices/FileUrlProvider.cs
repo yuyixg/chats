@@ -1,14 +1,21 @@
 ﻿using Chats.BE.Controllers.Chats.Messages.Dtos;
+using Chats.BE.DB;
 using Chats.BE.DB.Enums;
 using Chats.BE.Services.UrlEncryption;
+using Microsoft.EntityFrameworkCore;
 using OpenAI.Chat;
 
 namespace Chats.BE.Services.FileServices;
 
-public class FileUrlProvider(FileServiceFactory fileServiceFactory, IUrlEncryptionService urlEncryptionService)
+public class FileUrlProvider(ChatsDB db, FileServiceFactory fileServiceFactory, IUrlEncryptionService urlEncryptionService)
 {
-    public async Task<ChatMessageContentPart> CreateOpenAIPart(DB.File file, CancellationToken cancellationToken)
+    public async Task<ChatMessageContentPart> CreateOpenAIPart(MessageContentFile mcFile, CancellationToken cancellationToken)
     {
+        DB.File file = mcFile.File ?? await db.Files
+                .Include(x => x.FileService)
+                .Include(x => x.FileContentType)
+                .FirstAsync(x => x.Id == mcFile.FileId, cancellationToken);
+
         DBFileServiceType fileServiceType = (DBFileServiceType)file.FileService.FileServiceTypeId;
         IFileService fs = fileServiceFactory.Create(fileServiceType, file.FileService.Configs);
         if (file.FileService.FileServiceTypeId == (byte)DBFileServiceType.Local)
