@@ -6,6 +6,7 @@ import useTranslation from '@/hooks/useTranslation';
 import { PromptVariables } from '@/utils/promptVariable';
 
 import { UserRole } from '@/types/adminApis';
+import { DEFAULT_TEMPERATURE } from '@/types/chat';
 import { Prompt } from '@/types/prompt';
 
 import { TemperatureSlider } from '@/components/Chat/Temperature';
@@ -26,7 +27,6 @@ import FormTextarea from '@/components/ui/form/textarea';
 import { HomeContext } from '@/contexts/Home.context';
 import { zodResolver } from '@hookform/resolvers/zod';
 import { z } from 'zod';
-import { DEFAULT_TEMPERATURE } from '@/types/chat';
 
 interface IProps {
   prompt: Prompt;
@@ -80,7 +80,7 @@ export const PromptModal = (props: IProps) => {
 
   return (
     <Dialog open={true} onOpenChange={onClose}>
-      <DialogContent>
+      <DialogContent className="min-w-[375px] w-2/5">
         <DialogHeader>
           <DialogTitle>{t('Edit Prompt')}</DialogTitle>
         </DialogHeader>
