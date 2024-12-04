@@ -1,7 +1,11 @@
 import { useEffect, useRef } from 'react';
+
 import { checkFileSizeCanUpload, uploadFile } from '@/utils/uploadFile';
-import { ChatModelFileConfig } from '@/types/model';
+
 import { ImageDef } from '@/types/chat';
+import { ChatModelFileConfig } from '@/types/model';
+
+import { Button } from '../ui/button';
 
 interface Props {
   onSuccessful?: (def: ImageDef) => void;
@@ -50,14 +54,14 @@ const UploadButton: React.FunctionComponent<Props> = ({
 
   return (
     <div>
-      <div
+      <Button
         onClick={() => {
           uploadRef.current?.click();
         }}
-        className="absolute right-9 md:top-2.5 top-1.5 rounded-sm p-1 text-neutral-800 opacity-60 hover:bg-accent hover:text-neutral-900 dark:bg-opacity-50 dark:text-neutral-100 dark:hover:text-neutral-200"
+        className="absolute right-9 md:top-2.5 top-1 rounded-sm p-1 m-0 h-auto w-auto bg-transparent hover:bg-muted"
       >
         {children}
-      </div>
+      </Button>
 
       <input
         ref={uploadRef}

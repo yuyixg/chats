@@ -12,35 +12,39 @@ import toast from 'react-hot-toast';
 import useTranslation from '@/hooks/useTranslation';
 
 import { isMobile } from '@/utils/common';
+import { formatPrompt } from '@/utils/promptVariable';
 
+import { AdminModelDto } from '@/types/adminApis';
 import { Content, ImageDef, Message } from '@/types/chat';
 import { Prompt } from '@/types/prompt';
-
-import { HomeContext } from '@/contexts/Home.context';
 
 import UploadButton from '@/components/Button/UploadButton';
 import {
   IconArrowDown,
   IconCircleX,
+  IconLoader,
   IconPaperclip,
   IconSend,
+  IconSquarePlus,
   IconStopFilled,
+  IconTrash,
 } from '@/components/Icons/index';
 import PasteUpload from '@/components/PasteUpload/PasteUpload';
 
+import Spinner from '../Spinner';
+import { Button } from '../ui/button';
 import { PromptList } from './PromptList';
 import { VariableModal } from './VariableModal';
 
 import { defaultFileConfig } from '@/apis/adminApis';
-import { AdminModelDto } from '@/types/adminApis';
-import { formatPrompt } from '@/utils/promptVariable';
 import { getUserPromptDetail } from '@/apis/clientApis';
+import { HomeContext } from '@/contexts/Home.context';
 
 interface Props {
   onSend: (message: Message) => void;
   onScrollDownClick: () => void;
   onChangePrompt: (prompt: Prompt) => void;
-  model: AdminModelDto,
+  model: AdminModelDto;
   stopConversationRef: MutableRefObject<boolean>;
   textareaRef: MutableRefObject<HTMLTextAreaElement | null>;
   showScrollDownButton: boolean;
@@ -181,10 +185,7 @@ export const ChatInput = ({
       setIsModalVisible(true);
     } else {
       setContent((prevContent) => {
-        const updatedContent = prevContent.text?.replace(
-          /\/\w*$/,
-          formatted,
-        );
+        const updatedContent = prevContent.text?.replace(/\/\w*$/, formatted);
         return { ...prevContent, text: updatedContent };
       });
       updatePromptListVisibility(formatted);
@@ -240,7 +241,7 @@ export const ChatInput = ({
     setContent((old) => {
       return {
         ...old,
-        fileIds: old.fileIds!.concat(def)
+        fileIds: old.fileIds!.concat(def),
       };
     });
     setUploading(false);
@@ -254,8 +255,9 @@ export const ChatInput = ({
     if (textareaRef && textareaRef.current) {
       textareaRef.current.style.height = 'inherit';
       textareaRef.current.style.height = `${textareaRef.current?.scrollHeight}px`;
-      textareaRef.current.style.overflow = `${textareaRef?.current?.scrollHeight > 400 ? 'auto' : 'hidden'
-        }`;
+      textareaRef.current.style.overflow = `${
+        textareaRef?.current?.scrollHeight > 400 ? 'auto' : 'hidden'
+      }`;
     }
   }, [content]);
 
@@ -307,10 +309,11 @@ export const ChatInput = ({
                 resize: 'none',
                 bottom: `${textareaRef?.current?.scrollHeight}px`,
                 maxHeight: '400px',
-                overflow: `${textareaRef.current && textareaRef.current.scrollHeight > 400
-                  ? 'auto'
-                  : 'hidden'
-                  }`,
+                overflow: `${
+                  textareaRef.current && textareaRef.current.scrollHeight > 400
+                    ? 'auto'
+                    : 'hidden'
+                }`,
               }}
               placeholder={
                 t('Type a message or type "/" to select a prompt...') || ''
@@ -324,8 +327,8 @@ export const ChatInput = ({
             />
 
             <div className="flex">
-              <button
-                className="absolute right-2 md:top-2.5 top-1.5 rounded-sm p-1 text-neutral-800 opacity-60 hover:bg-accent hover:text-neutral-900 dark:bg-opacity-50 dark:text-neutral-100 dark:hover:text-neutral-200"
+              <Button
+                className="absolute right-2 md:top-2.5 top-1 rounded-sm p-1 text-neutral-800 bg-transparent hover:bg-muted w-auto h-auto"
                 onClick={handleSend}
               >
                 {messageIsStreaming ? (
@@ -334,9 +337,12 @@ export const ChatInput = ({
                     className="h-4 w-4"
                   />
                 ) : (
-                  <IconSend size={18} />
+                  <IconSend />
                 )}
-              </button>
+              </Button>
+              {uploading && (
+                <IconLoader className="absolute right-10 md:top-3.5 top-2 animate-spin" />
+              )}
               {canUploadFile() && (
                 <UploadButton
                   fileServiceId={selectModel?.fileServiceId!}
@@ -345,7 +351,7 @@ export const ChatInput = ({
                   onFailed={handleUploadFailed}
                   onSuccessful={handleUploadSuccessful}
                 >
-                  <IconPaperclip size={18} />
+                  <IconPaperclip />
                 </UploadButton>
               )}
               {canUploadFile() && (
@@ -360,14 +366,12 @@ export const ChatInput = ({
             </div>
 
             {showScrollDownButton && (
-              <div className="absolute bottom-12 right-0 lg:bottom-0 lg:-right-10">
-                <button
-                  className="flex h-7 w-7 items-center justify-center rounded-full bg-neutral-300 text-gray-800 shadow-md hover:shadow-lg focus:outline-none focus:ring-2 focus:ring-blue-500 dark:bg-gray-700 dark:text-neutral-200"
-                  onClick={onScrollDownClick}
-                >
-                  <IconArrowDown size={18} />
-                </button>
-              </div>
+              <Button
+                className="absolute bottom-8 w-auto h-auto -right-1 lg:bottom-0.5 lg:-right-10 rounded-full bg-transparent hover:bg-transparent"
+                onClick={onScrollDownClick}
+              >
+                <IconArrowDown />
+              </Button>
             )}
 
             {showPromptList && filteredPrompts.length > 0 && (
