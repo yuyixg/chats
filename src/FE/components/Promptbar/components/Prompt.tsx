@@ -76,9 +76,9 @@ export const PromptComponent = ({ prompt }: Props) => {
 
   const getPromptColor = (prompt: PromptSlim) => {
     if (prompt.isSystem) {
-      return 'yellow';
+      return '#3b82f6';
     } else if (prompt.isDefault) {
-      return 'white';
+      return '#16a34a';
     } else {
       return 'grey';
     }

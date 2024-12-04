@@ -16,7 +16,7 @@ import { isMobile } from '@/utils/common';
 import { Content, ImageDef, Message } from '@/types/chat';
 import { Prompt } from '@/types/prompt';
 
-import { HomeContext } from '@/pages/home';
+import { HomeContext } from '@/contexts/Home.context';
 
 import UploadButton from '@/components/Button/UploadButton';
 import {

@@ -5,7 +5,7 @@ import useTranslation from '@/hooks/useTranslation';
 import { AdminModelDto } from '@/types/adminApis';
 import { feModelProviders } from '@/types/model';
 
-import { HomeContext } from '@/pages/home';
+import { HomeContext } from '@/contexts/Home.context';
 
 import ChatIcon from '@/components/ChatIcon/ChatIcon';
 import { IconChevronDown } from '@/components/Icons';

@@ -2,12 +2,14 @@ import { FC, useContext, useEffect, useState } from 'react';
 
 import useTranslation from '@/hooks/useTranslation';
 
-import { HomeContext } from '@/pages/home';
-
 import { Slider } from '@/components/ui/slider';
+
+import { HomeContext } from '@/contexts/Home.context';
+import { cn } from '@/lib/utils';
 
 interface Props {
   label: string;
+  labelClassName?: string;
   defaultTemperature: number;
   min: number;
   max: number;
@@ -16,6 +18,7 @@ interface Props {
 
 export const TemperatureSlider: FC<Props> = ({
   label,
+  labelClassName,
   defaultTemperature,
   min,
   max,
@@ -38,7 +41,12 @@ export const TemperatureSlider: FC<Props> = ({
 
   return (
     <div className="flex flex-col">
-      <label className="mb-2 text-left text-neutral-700 dark:text-neutral-400">
+      <label
+        className={cn(
+          'mb-2 text-left text-neutral-700 dark:text-neutral-400',
+          labelClassName,
+        )}
+      >
         {label}
       </label>
       <span className="text-[12px] text-black/50 dark:text-white/50 text-sm">

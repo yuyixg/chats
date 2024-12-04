@@ -6,8 +6,6 @@ import { formatNumberAsMoney } from '@/utils/common';
 
 import { ModelUsageDto } from '@/types/clientApis';
 
-import { HomeContext } from '@/pages/home';
-
 import {
   Select,
   SelectContent,
@@ -17,6 +15,7 @@ import {
 } from '../ui/select';
 
 import { getModelUsage } from '@/apis/clientApis';
+import { HomeContext } from '@/contexts/Home.context';
 
 export const ModelSelect = () => {
   const { t } = useTranslation();
@@ -50,16 +49,16 @@ export const ModelSelect = () => {
       <label className="mb-2 text-left text-neutral-700 dark:text-neutral-400">
         {t('Model')}
       </label>
-      <div className="w-full focus:outline-none active:outline-none rounded-lg border bg-background border-neutral-200 pr-2  dark:border-neutral-600">
+      <div className="w-full focus:outline-none active:outline-none rounded-lg border bg-background border-neutral-200  dark:border-neutral-600">
         <Select
           onValueChange={handleChange}
           value={selectModel?.modelId?.toString()}
           defaultValue={selectModel?.modelId?.toString()}
         >
-          <SelectTrigger className='focus:ring-0 focus:ring-offset-0 border-1'>
+          <SelectTrigger className="border-1">
             <SelectValue placeholder={t('Select a model')} />
           </SelectTrigger>
-          <SelectContent className='w-full'>
+          <SelectContent className="w-full">
             {models.map((model) => (
               <SelectItem key={model.modelId} value={model.modelId.toString()}>
                 {model.name}

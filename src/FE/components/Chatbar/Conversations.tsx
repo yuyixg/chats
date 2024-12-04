@@ -4,7 +4,7 @@ import useTranslation from '@/hooks/useTranslation';
 
 import { ChatResult } from '@/types/clientApis';
 
-import { HomeContext } from '@/pages/home';
+import { HomeContext } from '@/contexts/Home.context';
 
 import { Button } from '@/components/ui/button';
 

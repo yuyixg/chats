@@ -5,7 +5,7 @@ import useTranslation from '@/hooks/useTranslation';
 import { Message } from '@/types/chat';
 import { PropsMessage } from '@/types/components/chat';
 
-import { HomeContext } from '@/pages/home';
+import { HomeContext } from '@/contexts/Home.context';
 
 import { Button } from '@/components/ui/button';
 

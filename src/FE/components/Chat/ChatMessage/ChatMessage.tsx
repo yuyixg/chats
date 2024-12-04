@@ -3,7 +3,7 @@ import { FC, memo, useContext } from 'react';
 import { Message } from '@/types/chat';
 import { PropsMessage } from '@/types/components/chat';
 
-import { HomeContext } from '@/pages/home';
+import { HomeContext } from '@/contexts/Home.context';
 
 import { IconRobot } from '@/components/Icons/index';
 

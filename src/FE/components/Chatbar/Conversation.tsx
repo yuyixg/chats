@@ -12,7 +12,7 @@ import useTranslation from '@/hooks/useTranslation';
 import { ChatResult } from '@/types/clientApis';
 import { DBModelProvider } from '@/types/model';
 
-import { HomeContext } from '@/pages/home';
+import { HomeContext } from '@/contexts/Home.context';
 
 import SidebarActionButton from '@/components/Button/SidebarActionButton';
 import { SharedMessageModal } from '@/components/Chat/SharedMessageModal';
