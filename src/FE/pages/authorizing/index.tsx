@@ -1,8 +1,8 @@
 import { useEffect, useState } from 'react';
-import toast from 'react-hot-toast';
+
+import { useRouter } from 'next/router';
 
 import useTranslation from '@/hooks/useTranslation';
-import { useRouter } from 'next/router';
 
 import { saveUserInfo, setUserSession } from '@/utils/user';
 
@@ -15,11 +15,14 @@ export default function Authorizing() {
   const [everStarted, setEverStarted] = useState(false);
 
   useEffect(() => {
-    const { code, provider } = router.query as { code: string; provider: string };
+    const { code, provider } = router.query as {
+      code: string;
+      provider: string;
+    };
     if (!router.isReady || everStarted) {
       return;
     }
-    
+
     setEverStarted(true);
     setIsClient(true);
     if (!code) {
@@ -29,17 +32,13 @@ export default function Authorizing() {
     singIn({
       code,
       provider,
-    })
-      .then((response) => {
-        setUserSession(response.sessionId);
-        saveUserInfo({
-          ...response,
-        });
-        router.push('/');
-      })
-      .catch(() => {
-        toast.error(t('Authorization failed. Please try again later.'));
+    }).then((response) => {
+      setUserSession(response.sessionId);
+      saveUserInfo({
+        ...response,
       });
+      router.push('/');
+    });
   }, [router.isReady]);
   return (
     <>

@@ -84,28 +84,14 @@ export const InvitationCodeModal = (props: IProps) => {
     p.then(() => {
       onSuccessful();
       toast.success(t('Save successful'));
-    }).catch(() => {
-      toast.error(
-        t(
-          'Operation failed, Please try again later, or contact technical personnel',
-        ),
-      );
     });
   }
 
   const onDelete = () => {
-    deleteInvitationCode(selected!.id)
-      .then(() => {
-        onSuccessful();
-        toast.success(t('Delete successful'));
-      })
-      .catch(() => {
-        toast.error(
-          t(
-            'Operation failed, Please try again later, or contact technical personnel',
-          ),
-        );
-      });
+    deleteInvitationCode(selected!.id).then(() => {
+      onSuccessful();
+      toast.success(t('Delete successful'));
+    });
   };
 
   useEffect(() => {

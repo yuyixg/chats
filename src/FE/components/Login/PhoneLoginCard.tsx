@@ -80,12 +80,6 @@ const PhoneLoginCard = (props: {
           toast.success(t('SMS sent successfully'));
           setIsSendCode(true);
         })
-        .catch(async (response) => {
-          const body = await response.json();
-          toast.error(
-            body.message || t('SMS send failed, please try again later'),
-          );
-        })
         .finally(() => {
           setSending(false);
         });
@@ -105,11 +99,6 @@ const PhoneLoginCard = (props: {
             username: response.username,
           });
           router.push('/');
-        })
-        .catch(async (response) => {
-          closeLoading();
-          const json = await response.json();
-          toast.error(json.message || t('Verification code error'));
         })
         .finally(() => {
           closeLoading();

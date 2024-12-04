@@ -12,13 +12,6 @@ import {
   UpdateModelDto,
 } from '@/types/adminApis';
 
-import FormSelect from '@/components/ui/form/select';
-import {
-  Popover,
-  PopoverContent,
-  PopoverTrigger,
-} from '@/components/ui/popover';
-
 import { Button } from '@/components/ui/button';
 import {
   Dialog,
@@ -29,9 +22,20 @@ import {
 } from '@/components/ui/dialog';
 import { Form, FormField } from '@/components/ui/form';
 import FormInput from '@/components/ui/form/input';
+import FormSelect from '@/components/ui/form/select';
 import FormSwitch from '@/components/ui/form/switch';
+import {
+  Popover,
+  PopoverContent,
+  PopoverTrigger,
+} from '@/components/ui/popover';
 
-import { getFileServices, getModelProviderModels, getModelReference, postModels } from '@/apis/adminApis';
+import {
+  getFileServices,
+  getModelProviderModels,
+  getModelReference,
+  postModels,
+} from '@/apis/adminApis';
 import { zodResolver } from '@hookform/resolvers/zod';
 import { z } from 'zod';
 
@@ -46,7 +50,9 @@ interface IProps {
 export const AddModelModal = (props: IProps) => {
   const { t } = useTranslation();
   const [fileServices, setFileServices] = useState<GetFileServicesResult[]>([]);
-  const [modelVersions, setModelVersions] = useState<SimpleModelReferenceDto[]>([]);
+  const [modelVersions, setModelVersions] = useState<SimpleModelReferenceDto[]>(
+    [],
+  );
   const [modelReference, setModelReference] = useState<ModelReferenceDto>();
   const { isOpen, onClose, onSuccessful, modelKeys } = props;
   const [loading, setLoading] = useState(true);
@@ -58,9 +64,7 @@ export const AddModelModal = (props: IProps) => {
       .min(1, `${t('This field is require')}`)
       .optional(),
     enabled: z.boolean(),
-    deploymentName: z
-      .string()
-      .optional(),
+    deploymentName: z.string().optional(),
     modelKeyId: z
       .string()
       .min(1, `${t('This field is require')}`)
@@ -80,7 +84,7 @@ export const AddModelModal = (props: IProps) => {
       modelKeyId: '',
       fileServiceId: null,
       inputPrice1M: 0,
-      outputPrice1M: 0
+      outputPrice1M: 0,
     },
   });
 
@@ -96,19 +100,11 @@ export const AddModelModal = (props: IProps) => {
       name: values.name!,
       modelReferenceId: +values.modelReferenceId!,
     };
-    postModels(dto)
-      .then(() => {
-        onSuccessful();
-        toast.success(t('Save successful'));
-      })
-      .catch(() => {
-        toast.error(
-          t(
-            'Operation failed, Please try again later, or contact technical personnel',
-          ),
-        );
-      });
-  }
+    postModels(dto).then(() => {
+      onSuccessful();
+      toast.success(t('Save successful'));
+    });
+  };
 
   useEffect(() => {
     if (isOpen) {
@@ -121,18 +117,19 @@ export const AddModelModal = (props: IProps) => {
   }, [isOpen]);
 
   const onModelReferenceChanged = async (modelReferenceId: number) => {
-    getModelReference(modelReferenceId).then(data => {
+    getModelReference(modelReferenceId).then((data) => {
       setModelReference(data);
       form.setValue('inputPrice1M', data.promptTokenPrice1M);
       form.setValue('outputPrice1M', data.responseTokenPrice1M);
     });
-  }
+  };
 
   useEffect(() => {
     const subscription = form.watch(async (value, { name, type }) => {
       if (name === 'modelKeyId' && type === 'change') {
-        const modelKeyId = value.modelKeyId;        
-        const modelProviderId = modelKeys.find((x) => x.id === +modelKeyId!)?.modelProviderId!;
+        const modelKeyId = value.modelKeyId;
+        const modelProviderId = modelKeys.find((x) => x.id === +modelKeyId!)
+          ?.modelProviderId!;
         const possibleModels = await getModelProviderModels(modelProviderId);
         setModelVersions(possibleModels);
       }
@@ -194,9 +191,9 @@ export const AddModelModal = (props: IProps) => {
                     </PopoverTrigger>
                     <PopoverContent className="w-full">
                       {JSON.stringify(
-                        modelKeys.find(
-                          (x) => x.id === +form.getValues('modelKeyId')!,
-                        )?.toConfigs(),
+                        modelKeys
+                          .find((x) => x.id === +form.getValues('modelKeyId')!)
+                          ?.toConfigs(),
                         null,
                         2,
                       )}
@@ -232,10 +229,7 @@ export const AddModelModal = (props: IProps) => {
                 name="deploymentName"
                 render={({ field }) => {
                   return (
-                    <FormInput
-                      label={t('Deployment Name')!}
-                      field={field}
-                    />
+                    <FormInput label={t('Deployment Name')!} field={field} />
                   );
                 }}
               ></FormField>
@@ -249,9 +243,7 @@ export const AddModelModal = (props: IProps) => {
                   return (
                     <FormInput
                       type="number"
-                      label={`${t(
-                        '1M input tokens price',
-                      )}(${t('Yuan')})`}
+                      label={`${t('1M input tokens price')}(${t('Yuan')})`}
                       field={field}
                     />
                   );
@@ -265,9 +257,7 @@ export const AddModelModal = (props: IProps) => {
                   return (
                     <FormInput
                       type="number"
-                      label={`1M ${t(
-                        '1M output tokens price',
-                      )}(${t('Yuan')})`}
+                      label={`1M ${t('1M output tokens price')}(${t('Yuan')})`}
                       field={field}
                     />
                   );

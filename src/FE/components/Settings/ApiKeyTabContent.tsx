@@ -72,37 +72,21 @@ export const ApiKeyTab = () => {
     });
     clearTimeout(timer);
     timer = setTimeout(() => {
-      putUserApiKey(apiKey.id, { [type]: value })
-        .then(() => {
-          toast.success(t('Save successful'));
-        })
-        .catch(() => {
-          toast.error(
-            t(
-              'Operation failed, Please try again later, or contact technical personnel',
-            ),
-          );
-        });
+      putUserApiKey(apiKey.id, { [type]: value }).then(() => {
+        toast.success(t('Save successful'));
+      });
     }, 1000);
   };
 
   const removeApiKey = (id: number) => {
-    deleteUserApiKey(id)
-      .then(() => {
-        setApiKeys((prev) =>
-          prev.filter((x) => {
-            return x.id !== id;
-          }),
-        );
-        toast.success(t('Delete successful'));
-      })
-      .catch(() => {
-        toast.error(
-          t(
-            'Operation failed, Please try again later, or contact technical personnel',
-          ),
-        );
-      });
+    deleteUserApiKey(id).then(() => {
+      setApiKeys((prev) =>
+        prev.filter((x) => {
+          return x.id !== id;
+        }),
+      );
+      toast.success(t('Delete successful'));
+    });
   };
 
   const apiUrl = (getApiUrl() || location.origin) + '/v1';

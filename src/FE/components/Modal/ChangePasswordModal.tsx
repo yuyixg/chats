@@ -2,8 +2,9 @@ import React, { useEffect, useState } from 'react';
 import { useForm } from 'react-hook-form';
 import toast from 'react-hot-toast';
 
-import useTranslation from '@/hooks/useTranslation';
 import { useRouter } from 'next/router';
+
+import useTranslation from '@/hooks/useTranslation';
 
 import { clearUserInfo, clearUserSession, getLoginUrl } from '@/utils/user';
 
@@ -118,24 +119,6 @@ export const ChangePasswordModal = (props: Props) => {
         clearUserInfo();
         router.push(getLoginUrl());
         setLoading(false);
-      })
-      .catch(async (e) => {
-        try {
-          const errorResponse = await e.json();
-          toast.error(
-            t(
-              errorResponse.message ||
-                'Operation failed, Please try again later, or contact technical personnel',
-            ),
-          );
-        } catch (jsonError) {
-          console.log('Error is not in JSON format:', jsonError);
-          toast.error(
-            t(
-              'Operation failed, Please try again later, or contact technical personnel',
-            ),
-          );
-        }
       })
       .finally(() => {
         setLoading(false);

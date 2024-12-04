@@ -7,8 +7,8 @@ import useTranslation from '@/hooks/useTranslation';
 import { termDateString } from '@/utils/common';
 
 import {
-  GetInvitationCodeResult,
   AdminModelDto,
+  GetInvitationCodeResult,
   GetUserInitialConfigResult,
   UserInitialModel,
 } from '@/types/adminApis';
@@ -153,17 +153,9 @@ export const UserInitialConfigModal = (props: IProps) => {
     p.then(() => {
       toast.success(t('Save successful'));
       onSuccessful();
-    })
-      .catch(() => {
-        toast.error(
-          t(
-            'Operation failed, Please try again later, or contact technical personnel',
-          ),
-        );
-      })
-      .finally(() => {
-        setSubmit(false);
-      });
+    }).finally(() => {
+      setSubmit(false);
+    });
   };
 
   const onChangeModel = (
@@ -182,13 +174,6 @@ export const UserInitialConfigModal = (props: IProps) => {
       .then(() => {
         toast.success(t('Delete successful'));
         onSuccessful();
-      })
-      .catch(() => {
-        toast.error(
-          t(
-            'Operation failed, Please try again later, or contact technical personnel',
-          ),
-        );
       })
       .finally(() => {
         setSubmit(false);

@@ -56,7 +56,7 @@ export const ChatMessage: FC<Props> = memo(
             {message.role === 'assistant' && <IconRobot size={28} />}
           </div>
 
-          <div className="prose mt-[2px] w-full dark:prose-invert rounded-r-md">
+          <div className="prose w-full dark:prose-invert rounded-r-md">
             {message.role === 'user' && (
               <UserMessage
                 message={message}

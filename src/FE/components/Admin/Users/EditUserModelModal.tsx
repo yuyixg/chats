@@ -58,22 +58,13 @@ export const EditUserModelModal = (props: IProps) => {
 
   const onSubmit = async () => {
     setSubmit(true);
-    putUserModel({ userId: props.userId, models: models.map(x => x.toUpdateDto()) })
+    putUserModel({
+      userId: props.userId,
+      models: models.map((x) => x.toUpdateDto()),
+    })
       .then(() => {
         toast.success(t('Save successful'));
         onSuccessful();
-      })
-      .catch(async (err) => {
-        try {
-          const resp = await err.json();
-          toast.error(resp.message);
-        } catch {
-          toast.error(
-            t(
-              'Operation failed, Please try again later, or contact technical personnel',
-            ),
-          );
-        }
       })
       .finally(() => {
         setSubmit(false);

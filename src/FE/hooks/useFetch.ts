@@ -1,3 +1,7 @@
+import toast from 'react-hot-toast';
+
+import useTranslation from '@/hooks/useTranslation';
+
 import { getApiUrl } from '@/utils/common';
 import { getLoginUrl, getUserSession } from '@/utils/user';
 
@@ -46,8 +50,8 @@ export const useFetch = () => {
       ...(request?.headers
         ? request.headers
         : request?.body && request.body instanceof FormData
-          ? {}
-          : { 'Content-type': 'application/json' }),
+        ? {}
+        : { 'Content-type': 'application/json' }),
     };
 
     return fetch(requestUrl, {
@@ -63,19 +67,21 @@ export const useFetch = () => {
           throw response;
         }
 
-
         const result = readResponse(response);
         return result;
       })
       .catch(async (err) => {
-        const contentType = err.headers?.get('content-type');
-
-        const errResult =
-          contentType && contentType?.indexOf('application/problem+json') !== -1
-            ? await err.json()
-            : err;
-
-        return errResult;
+        const error = await readResponse(err);
+        const message = error?.message || error.errMessage || error;
+        const { t } = useTranslation();
+        toast.error(
+          t(
+            typeof message === 'string'
+              ? message
+              : 'Operation failed, Please try again later, or contact technical personnel',
+          ),
+        );
+        throw error;
       });
   };
 

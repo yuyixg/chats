@@ -136,6 +136,7 @@ select:focus {
 }
 
 .md-p {
+  padding-left: 8px;
   white-space: pre-wrap;
 }
 

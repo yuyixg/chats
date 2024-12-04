@@ -13,8 +13,6 @@ import {
 } from '@/types/adminApis';
 import { LoginType } from '@/types/user';
 
-import FormSelect from '@/components/ui/form/select';
-
 import { Button } from '@/components/ui/button';
 import {
   Dialog,
@@ -24,6 +22,7 @@ import {
   DialogTitle,
 } from '@/components/ui/dialog';
 import { Form, FormField } from '@/components/ui/form';
+import FormSelect from '@/components/ui/form/select';
 import FormSwitch from '@/components/ui/form/switch';
 import FormTextarea from '@/components/ui/form/textarea';
 import { FormFieldType, IFormFieldOption } from '@/components/ui/form/type';
@@ -112,12 +111,6 @@ export const LoginServiceModal = (props: IProps) => {
     p.then(() => {
       onSuccessful();
       toast.success(t('Save successful'));
-    }).catch(() => {
-      toast.error(
-        t(
-          'Operation failed, Please try again later, or contact technical personnel',
-        ),
-      );
     });
   }
 

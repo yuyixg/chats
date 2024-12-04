@@ -4,7 +4,11 @@ import toast from 'react-hot-toast';
 
 import useTranslation from '@/hooks/useTranslation';
 
-import { GetFileServicesResult, PostFileServicesParams } from '@/types/adminApis';
+import {
+  GetFileServicesResult,
+  PostFileServicesParams,
+} from '@/types/adminApis';
+import { feFileServiceTypes } from '@/types/file';
 
 import { Button } from '@/components/ui/button';
 import {
@@ -21,10 +25,14 @@ import FormSwitch from '@/components/ui/form/switch';
 import FormTextarea from '@/components/ui/form/textarea';
 import { FormFieldType, IFormFieldOption } from '@/components/ui/form/type';
 
-import { deleteFileService, getFileServiceTypeInitialConfig, postFileService, putFileService } from '@/apis/adminApis';
+import {
+  deleteFileService,
+  getFileServiceTypeInitialConfig,
+  postFileService,
+  putFileService,
+} from '@/apis/adminApis';
 import { zodResolver } from '@hookform/resolvers/zod';
 import { z } from 'zod';
-import { feFileServiceTypes } from '@/types/file';
 
 interface IProps {
   selected: GetFileServicesResult | null;
@@ -44,9 +52,9 @@ export const FileServiceModal = (props: IProps) => {
       defaultValue: '',
       render: (options: IFormFieldOption, field: FormFieldType) => (
         <FormSelect
-          items={feFileServiceTypes.map(x => ({
+          items={feFileServiceTypes.map((x) => ({
             name: t(x.name),
-            value: x.id.toString()
+            value: x.id.toString(),
           }))}
           options={options}
           field={field}
@@ -139,12 +147,6 @@ export const FileServiceModal = (props: IProps) => {
     p.then(() => {
       onSuccessful();
       toast.success(t('Save successful'));
-    }).catch(() => {
-      toast.error(
-        t(
-          'Operation failed, Please try again later, or contact technical personnel',
-        ),
-      );
     });
   }
 
@@ -155,7 +157,7 @@ export const FileServiceModal = (props: IProps) => {
     } catch {
       return config;
     }
-  }
+  };
 
   useEffect(() => {
     if (isOpen) {
@@ -163,7 +165,10 @@ export const FileServiceModal = (props: IProps) => {
       form.formState.isValid;
       if (selected) {
         form.setValue('name', selected.name);
-        form.setValue('fileServiceTypeId', selected.fileServiceTypeId.toString());
+        form.setValue(
+          'fileServiceTypeId',
+          selected.fileServiceTypeId.toString(),
+        );
         form.setValue('isDefault', selected.isDefault);
         form.setValue('configs', formatConfigs(selected.configs));
       }

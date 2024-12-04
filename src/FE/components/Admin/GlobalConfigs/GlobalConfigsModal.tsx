@@ -103,12 +103,6 @@ export const GlobalConfigsModal = (props: IProps) => {
     p.then(() => {
       onSuccessful();
       toast.success(t('Save successful'));
-    }).catch(() => {
-      toast.error(
-        t(
-          'Operation failed, Please try again later, or contact technical personnel',
-        ),
-      );
     });
   }
 

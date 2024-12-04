@@ -80,13 +80,6 @@ export const EditUserBalanceModal = (props: IProps) => {
         toast.success(t('Recharged successfully'));
         onSuccessful();
       })
-      .catch(() => {
-        toast.error(
-          t(
-            'Operation failed, Please try again later, or contact technical personnel',
-          ),
-        );
-      })
       .finally(() => {
         setLoading(false);
       });

@@ -1,6 +1,5 @@
 import { useEffect, useState } from 'react';
 import { useForm } from 'react-hook-form';
-import toast from 'react-hot-toast';
 
 import { useRouter } from 'next/router';
 
@@ -107,9 +106,8 @@ const AccountLoginCard = (props: {
         });
         router.push('/');
       })
-      .catch(() => {
+      .finally(() => {
         closeLoading();
-        toast.error(t('Username or password incorrect'));
       });
   }
 

@@ -5,19 +5,11 @@ import toast from 'react-hot-toast';
 import useTranslation from '@/hooks/useTranslation';
 
 import {
+  AdminModelDto,
   GetFileServicesResult,
   GetModelKeysResult,
-  AdminModelDto,
   UpdateModelDto,
 } from '@/types/adminApis';
-
-import FormSelect from '@/components/ui/form/select';
-import {
-  Popover,
-  PopoverContent,
-  PopoverTrigger,
-} from '@/components/ui/popover';
-import { Skeleton } from '@/components/ui/skeleton';
 
 import { Button } from '@/components/ui/button';
 import {
@@ -29,7 +21,14 @@ import {
 } from '@/components/ui/dialog';
 import { Form, FormField } from '@/components/ui/form';
 import FormInput from '@/components/ui/form/input';
+import FormSelect from '@/components/ui/form/select';
 import FormSwitch from '@/components/ui/form/switch';
+import {
+  Popover,
+  PopoverContent,
+  PopoverTrigger,
+} from '@/components/ui/popover';
+import { Skeleton } from '@/components/ui/skeleton';
 
 import { deleteModels, getFileServices, putModels } from '@/apis/adminApis';
 import { zodResolver } from '@hookform/resolvers/zod';
@@ -58,9 +57,7 @@ export const EditModelModal = (props: IProps) => {
       .optional(),
     modelId: z.string().optional(),
     enabled: z.boolean().optional(),
-    deploymentName: z
-      .string()
-      .optional(),
+    deploymentName: z.string().optional(),
     modelKeyId: z.string().nullable().default(null),
     fileServiceId: z.string().nullable().default(null),
     inputPrice1M: z.coerce.number(),
@@ -78,7 +75,7 @@ export const EditModelModal = (props: IProps) => {
       modelKeyId: '',
       fileServiceId: null,
       inputPrice1M: 0,
-      outputPrice1M: 0
+      outputPrice1M: 0,
     },
   });
 
@@ -94,23 +91,10 @@ export const EditModelModal = (props: IProps) => {
       modelReferenceId: selected.modelReferenceId,
       name: values.name!,
     };
-    putModels(values.modelId!, dto)
-      .then(() => {
-        onSuccessful();
-        toast.success(t('Save successful'));
-      })
-      .catch(async (err) => {
-        try {
-          const resp = await err.json();
-          toast.error(resp.message);
-        } catch {
-          toast.error(
-            t(
-              'Operation failed, Please try again later, or contact technical personnel',
-            ),
-          );
-        }
-      })
+    putModels(values.modelId!, dto).then(() => {
+      onSuccessful();
+      toast.success(t('Save successful'));
+    });
   }
 
   async function onDelete() {
@@ -118,13 +102,16 @@ export const EditModelModal = (props: IProps) => {
       await deleteModels(selected!.modelId);
       onSuccessful();
       toast.success(t('Deleted successful'));
-    }
-    catch (err: any) {
+    } catch (err: any) {
       try {
         const resp = await err.json();
         toast.error(t(resp.message));
       } catch {
-        toast.error(t('Operation failed, Please try again later, or contact technical personnel'));
+        toast.error(
+          t(
+            'Operation failed, Please try again later, or contact technical personnel',
+          ),
+        );
       }
     }
   }
@@ -132,11 +119,13 @@ export const EditModelModal = (props: IProps) => {
   useEffect(() => {
     if (isOpen) {
       setLoading(true);
-      getFileServices(true).then((data) => {
-        setFileServices(data);
-      }).finally(() => {
-        setLoading(false);
-      });
+      getFileServices(true)
+        .then((data) => {
+          setFileServices(data);
+        })
+        .finally(() => {
+          setLoading(false);
+        });
       form.reset();
       form.formState.isValid;
       const {
@@ -148,7 +137,7 @@ export const EditModelModal = (props: IProps) => {
         fileServiceId,
         deploymentName,
         inputTokenPrice1M,
-        outputTokenPrice1M
+        outputTokenPrice1M,
       } = selected;
       form.setValue('name', name);
       form.setValue('modelId', modelId.toString());
@@ -205,8 +194,11 @@ export const EditModelModal = (props: IProps) => {
                           field={field}
                           label={t('Model Keys')!}
                           items={modelKeys
-                            .filter(x => x.modelProviderId === selected.modelProviderId)
-                            .map(keys => ({
+                            .filter(
+                              (x) =>
+                                x.modelProviderId === selected.modelProviderId,
+                            )
+                            .map((keys) => ({
                               name: keys.name,
                               value: keys.id.toString(),
                             }))}
@@ -226,7 +218,13 @@ export const EditModelModal = (props: IProps) => {
                       </PopoverTrigger>
                       <PopoverContent className="w-full">
                         {JSON.stringify(
-                          modelKeys.find(x => x.id === parseInt(form.getValues('modelKeyId')!))?.toConfigs(),
+                          modelKeys
+                            .find(
+                              (x) =>
+                                x.id ===
+                                parseInt(form.getValues('modelKeyId')!),
+                            )
+                            ?.toConfigs(),
                           null,
                           2,
                         )}
@@ -256,10 +254,7 @@ export const EditModelModal = (props: IProps) => {
                   name="deploymentName"
                   render={({ field }) => {
                     return (
-                      <FormInput
-                        label={t('Deployment Name')!}
-                        field={field}
-                      />
+                      <FormInput label={t('Deployment Name')!} field={field} />
                     );
                   }}
                 ></FormField>
@@ -273,9 +268,7 @@ export const EditModelModal = (props: IProps) => {
                     return (
                       <FormInput
                         type="number"
-                        label={`${t(
-                          '1M input tokens price',
-                        )}(${t('Yuan')})`}
+                        label={`${t('1M input tokens price')}(${t('Yuan')})`}
                         field={field}
                       />
                     );
@@ -289,9 +282,9 @@ export const EditModelModal = (props: IProps) => {
                     return (
                       <FormInput
                         type="number"
-                        label={`1M ${t(
-                          '1M output tokens price',
-                        )}(${t('Yuan')})`}
+                        label={`1M ${t('1M output tokens price')}(${t(
+                          'Yuan',
+                        )})`}
                         field={field}
                       />
                     );

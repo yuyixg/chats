@@ -6,8 +6,6 @@ import useTranslation from '@/hooks/useTranslation';
 
 import { GetUsersResult } from '@/types/adminApis';
 
-import FormSwitch from '@/components/ui/form/switch';
-
 import { Button } from '@/components/ui/button';
 import {
   Dialog,
@@ -19,6 +17,7 @@ import {
 import { Form, FormField } from '@/components/ui/form';
 import FormInput from '@/components/ui/form/input';
 import FormSelect from '@/components/ui/form/select';
+import FormSwitch from '@/components/ui/form/switch';
 import { FormFieldType, IFormFieldOption } from '@/components/ui/form/type';
 
 import { postUser, putUser } from '@/apis/adminApis';
@@ -174,17 +173,9 @@ export const UserModal = (props: IProps) => {
     p.then(() => {
       toast.success(t('Save successful'));
       onSuccessful();
-    })
-      .catch(() => {
-        toast.error(
-          t(
-            'Operation failed, Please try again later, or contact technical personnel',
-          ),
-        );
-      })
-      .finally(() => {
-        setSubmit(false);
-      });
+    }).finally(() => {
+      setSubmit(false);
+    });
   };
 
   return (
