@@ -8,7 +8,7 @@ import { clearUserInfo, clearUserSession, getLoginUrl } from '@/utils/user';
 
 import { UserRole } from '@/types/adminApis';
 
-import { HomeContext } from '@/pages/home';
+import { HomeContext } from '@/contexts/Home.context';
 
 import {
   IconBulbFilled,

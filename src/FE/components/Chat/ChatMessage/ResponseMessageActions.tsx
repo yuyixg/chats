@@ -2,7 +2,7 @@ import { useContext } from 'react';
 
 import { PropsMessage } from '@/types/components/chat';
 
-import { HomeContext } from '@/pages/home';
+import { HomeContext } from '@/contexts/Home.context';
 
 import ChangeModelAction from './ChangeModelAction';
 import CopyAction from './CopyAction';

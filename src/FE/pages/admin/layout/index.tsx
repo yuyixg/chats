@@ -1,4 +1,6 @@
-import { useEffect, useState } from 'react';
+'use client';
+
+import { useEffect } from 'react';
 
 import { useRouter } from 'next/router';
 
@@ -6,7 +8,6 @@ import useTranslation from '@/hooks/useTranslation';
 
 import { Nav } from '@/components/Admin/Nav/Nav';
 import {
-  IconChartPie,
   IconFiles,
   IconIdBadge,
   IconKey,
@@ -19,8 +20,6 @@ import {
   IconUsers,
 } from '@/components/Icons/index';
 
-import { cn } from '@/lib/utils';
-
 const AdminLayout = ({
   children,
 }: {
@@ -29,7 +28,6 @@ const AdminLayout = ({
 }) => {
   const router = useRouter();
   const { t } = useTranslation();
-  const [isCollapsed, setIsCollapsed] = useState(false);
 
   const menus = [
     // {
@@ -124,36 +122,28 @@ const AdminLayout = ({
 
   return (
     <div className="h-full w-full flex">
-      <div className="min-w-[192px] h-screen" style={{ borderRightWidth: 1 }}>
-        <div className={cn('px-4 py-4 overflow-y-auto', isCollapsed && 'px-2')}>
+      <div className="min-w-[16rem] h-screen" style={{ borderRightWidth: 1 }}>
+        <div className="px-4 py-4 overflow-y-auto">
           <a
             onClick={() => {
               router.push('/');
             }}
-            className={cn(
-              'flex items-center cursor-pointer gap-2',
-              isCollapsed && 'justify-center',
-            )}
+            className="flex items-center cursor-pointer gap-2"
           >
             <img
               className="h-8 w-8 rounded-sm"
               alt="Chats Logo"
               src="/icons/logo.png"
-              width={32}
-              height={32}
             />
-            <span
-              hidden={isCollapsed}
-              className="self-center text-2xl font-medium whitespace-nowrap"
-            >
+            <span className="self-center text-2xl font-medium whitespace-nowrap">
               Chats
             </span>
           </a>
         </div>
-        <Nav isCollapsed={isCollapsed} menus={menus} />
+        <Nav menus={menus} />
       </div>
       <div className="w-full">
-        <div className="p-4">{children}</div>
+        <div className="h-screen overflow-scroll p-4">{children}</div>
       </div>
     </div>
   );
