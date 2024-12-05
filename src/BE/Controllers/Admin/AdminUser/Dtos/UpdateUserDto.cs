@@ -7,7 +7,7 @@ namespace Chats.BE.Controllers.Admin.AdminUser.Dtos;
 public record UpdateUserDto
 {
     [JsonPropertyName("id")]
-    public required Guid UserId { get; init; }
+    public required int UserId { get; init; }
 
     [JsonPropertyName("password")]
     public string? Password { get; init; }
