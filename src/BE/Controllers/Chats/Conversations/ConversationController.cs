@@ -15,6 +15,7 @@ using OpenAI.Chat;
 using Sdcb.DashScope;
 using System.ClientModel;
 using System.Text.Json;
+using TencentCloud.Common;
 using OpenAIChatMessage = OpenAI.Chat.ChatMessage;
 
 namespace Chats.BE.Controllers.Chats.Conversations;
@@ -184,7 +185,7 @@ public class ConversationController(ChatsDB db, CurrentUser currentUser, ILogger
             icc.FinishReason = cse.ErrorCode;
             return this.BadRequestMessage(cse.Message);
         }
-        catch (Exception e) when (e is DashScopeException || e is ClientResultException)
+        catch (Exception e) when (e is DashScopeException or ClientResultException or TencentCloudSDKException)
         {
             icc.FinishReason = DBFinishReason.UpstreamError;
             errorText = e.Message;
