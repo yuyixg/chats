@@ -5,7 +5,7 @@ import useTranslation from '@/hooks/useTranslation';
 import {
   IconLayoutSidebar,
   IconLayoutSidebarRight,
-  IconMistOff,
+  IconSearch,
   IconSquarePlus,
 } from '@/components/Icons/index';
 import Search from '@/components/Search';
@@ -102,8 +102,8 @@ const Sidebar = <T,>({
           {items?.length > 0 ? (
             <div className="pt-2">{itemComponent}</div>
           ) : (
-            <div className="mt-8 select-none text-center opacity-50">
-              <IconMistOff className="mx-auto mb-3" />
+            <div className="select-none text-center flex flex-col justify-center h-56 opacity-50">
+              <IconSearch className="mx-auto mb-3" />
               <span className="text-[14px] leading-normal">{t('No data')}</span>
             </div>
           )}

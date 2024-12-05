@@ -117,7 +117,7 @@ html {
   max-width: 100ch !important;
 }
 
-.prose > pre {
+.prose pre {
   padding: 0;
 }
 

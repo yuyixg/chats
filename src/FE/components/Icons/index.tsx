@@ -628,7 +628,7 @@ const IconBulbFilled = (props: IconProps) => {
   );
 };
 
-const IconMistOff = (props: IconProps) => {
+const IconSearch = (props: IconProps) => {
   const { className, size = 20, strokeWidth = 2, stroke, onClick } = props;
 
   return (
@@ -645,14 +645,8 @@ const IconMistOff = (props: IconProps) => {
       strokeLinecap="round"
       strokeLinejoin="round"
     >
-      <path stroke="none" d="M0 0h24v24H0z" fill="none" />
-      <path d="M12 5h9" />
-      <path d="M3 10h7" />
-      <path d="M18 10h1" />
-      <path d="M5 15h5" />
-      <path d="M14 15h1m4 0h2" />
-      <path d="M3 20h9m4 0h3" />
-      <path d="M3 3l18 18" />
+      <path d="M10 10m-7 0a7 7 0 1 0 14 0a7 7 0 1 0 -14 0" />
+      <path d="M21 21l-6 -6" />
     </svg>
   );
 };
@@ -1473,6 +1467,30 @@ var IconLoader = (props: IconProps) => {
   );
 };
 
+var IconModelSearch = (props: IconProps) => {
+  const { className, size = 20, strokeWidth = 2, stroke, onClick } = props;
+
+  return (
+    <svg
+      xmlns="http://www.w3.org/2000/svg"
+      onClick={onClick}
+      className={className}
+      width={size}
+      height={size}
+      strokeWidth={strokeWidth}
+      stroke={stroke || 'hsl(var(--foreground))'}
+      viewBox="0 0 24 24"
+      fill="none"
+      strokeLinecap="round"
+      strokeLinejoin="round"
+    >
+      <path d="M10 10m-7 0a7 7 0 1 0 14 0a7 7 0 1 0 -14 0" />
+      <path d="M21 21l-6 -6" />
+      <path d="M10 13v.01" />
+      <path d="M10 7v3" />
+    </svg>
+  );
+};
 var Icon = (props: IconProps) => {
   const { className, size = 20, strokeWidth = 2, stroke, onClick } = props;
 
@@ -1516,7 +1534,7 @@ export {
   IconX,
   IconClipboard,
   IconBulbFilled,
-  IconMistOff,
+  IconSearch,
   IconPlus,
   IconSquareRoundedX,
   IconChartPie,
@@ -1547,4 +1565,5 @@ export {
   IconSun,
   IconMoon,
   IconLoader,
+  IconModelSearch,
 };

@@ -356,5 +356,8 @@
   "File Count": "文件数量",
   "File is empty.": "文件为空。",
   "File is too large.": "文件过大。",
-  "Invalid file name.": "无效的文件名。"
+  "Invalid file name.": "无效的文件名。",
+
+  "There's no model here": "这里没有模型",
+  "You can contact the administrator or create one yourself": "你可以联系管理员或者自己创建一个"
 }

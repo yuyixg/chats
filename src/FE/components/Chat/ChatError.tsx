@@ -27,7 +27,7 @@ const ChatError = (props: Props) => {
       className="bg-background my-2 mt-0 border-none p-0 px-1 pt-1"
     >
       <AlertDescription className="flex items-center gap-1">
-        <IconError stroke="#ef4444" />
+        <IconError stroke="#7f1d1d" size={24} />
         {errorMessage()}
       </AlertDescription>
     </Alert>

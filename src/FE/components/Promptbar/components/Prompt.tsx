@@ -6,7 +6,6 @@ import SidebarActionButton from '@/components/Button/SidebarActionButton';
 import {
   IconBulbFilled,
   IconCheck,
-  IconMistOff,
   IconTrash,
   IconX,
 } from '@/components/Icons/index';

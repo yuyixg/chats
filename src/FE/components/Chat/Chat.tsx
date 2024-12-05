@@ -33,6 +33,7 @@ import { HomeContext } from '@/contexts/Home.context';
 import { cn } from '@/lib/utils';
 import Decimal from 'decimal.js';
 import { v4 as uuidv4 } from 'uuid';
+import NoModel from './NoModel';
 
 interface Props {
   stopConversationRef: MutableRefObject<boolean>;
@@ -377,33 +378,31 @@ export const Chat = memo(({ stopConversationRef }: Props) => {
           ref={chatContainerRef}
           onScroll={handleScroll}
         >
-          {selectChat?.id && (
-            <div className="sticky top-0 pt-1 z-10 text-sm bg-background right-0">
-              <div className="flex items-center justify-between h-10">
-                <div
-                  className={cn(
-                    'flex justify-start items-center ml-24',
-                    settings.showChatBar && 'ml-6',
-                  )}
-                >
-                  {hasModel() && (
-                    <ChangeModel
-                      className="font-semibold text-base"
-                      content={selectModel?.name}
-                      onChangeModel={(model) => {
-                        homeDispatch({
-                          field: 'selectModel',
-                          value: model,
-                        });
-                        putUserChatModel(selectChat.id, model.modelId);
-                      }}
-                    />
-                  )}
-                </div>
-                <div className="mr-2 md:mr-4">{<ModeToggle />}</div>
+          <div className="sticky top-0 pt-1 z-10 text-sm bg-background right-0">
+            <div className="flex items-center justify-between h-10">
+              <div
+                className={cn(
+                  'flex justify-start items-center ml-24',
+                  settings.showChatBar && 'ml-6',
+                )}
+              >
+                {hasModel() && (
+                  <ChangeModel
+                    className="font-semibold text-base"
+                    content={selectModel?.name}
+                    onChangeModel={(model) => {
+                      homeDispatch({
+                        field: 'selectModel',
+                        value: model,
+                      });
+                      putUserChatModel(selectChat.id, model.modelId);
+                    }}
+                  />
+                )}
               </div>
+              <div className="mr-2 md:mr-4">{<ModeToggle />}</div>
             </div>
-          )}
+          </div>
           {selectMessages?.length === 0 ? (
             <>
               <div className="mx-auto flex flex-col space-y-5 md:space-y-10 px-3 pt-[52px] sm:max-w-[600px]">
@@ -542,6 +541,7 @@ export const Chat = memo(({ stopConversationRef }: Props) => {
             onChangePrompt={onChangePrompt}
           />
         )}
+        {!hasModel() && <NoModel />}
       </>
     </div>
   );
