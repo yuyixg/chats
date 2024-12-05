@@ -55,7 +55,7 @@ public class UserChatsController(ChatsDB db, CurrentUser currentUser, IUrlEncryp
         IQueryable<Chat> query = db.Chats
             .Include(x => x.Model)
             .Where(x => x.UserId == currentUser.Id && !x.IsDeleted)
-            .OrderByDescending(x => x.CreatedAt);
+            .OrderByDescending(x => x.Id);
         if (!string.IsNullOrWhiteSpace(request.Query))
         {
             query = query.Where(x => x.Title.Contains(request.Query));
