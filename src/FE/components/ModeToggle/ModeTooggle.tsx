@@ -11,16 +11,16 @@ export function ModeToggle() {
   const { setTheme } = useTheme();
 
   return (
-    <Button variant="ghost" size="icon" className="hover:bg-none">
+    <Button className="hover:bg-transparent p-0 m-0 bg-transparent">
       <IconSun
+        size={24}
         onClick={() => setTheme('dark')}
-        className="h-[22px] w-[22px] rotate-0 scale-100 transition-all dark:-rotate-90 dark:scale-0"
-        stroke="#7d7d7d"
+        className="rotate-0 scale-100 transition-all dark:-rotate-90 dark:scale-0"
       />
       <IconMoon
+        size={24}
         onClick={() => setTheme('light')}
-        className="absolute h-[22px] w-[22px] rotate-90 scale-0 transition-all dark:rotate-0 dark:scale-100"
-        stroke="#7d7d7d"
+        className="absolute rotate-90 scale-0 transition-all dark:rotate-0 dark:scale-100"
       />
     </Button>
   );

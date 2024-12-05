@@ -25,7 +25,7 @@ export const RegenerateAction = (props: Props) => {
               onRegenerate && onRegenerate();
             }}
           >
-            <IconRefresh stroke="#7d7d7d" />
+            <IconRefresh />
           </Button>
         }
         content={t('Regenerate')!}

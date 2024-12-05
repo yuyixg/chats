@@ -5,9 +5,11 @@ import useTranslation from '@/hooks/useTranslation';
 const Custom404 = () => {
   const { t } = useTranslation();
   return (
-    <div>
-      <h1>{t('404: Page not found')}</h1>
-      <p>{t("Sorry, we couldn't find the page you were trying to access.")}</p>
+    <div className="flex flex-col text-center gap-y-2 mt-4">
+      <h1 className="text-2xl">{t('404: Page not found')}</h1>
+      <p className="text-gray-500">
+        {t("Sorry, we couldn't find the page you were trying to access.")}
+      </p>
     </div>
   );
 };
@@ -19,9 +21,14 @@ const ErrorPage = ({ statusCode }: { statusCode: number }) => {
   }
 
   return (
-    <div>
-      <h1>{statusCode}{t(': An error has occurred')}</h1>
-      <p>{t('Sorry, there was an unexpected error, please try again later.')}</p>
+    <div className="flex flex-col text-center gap-y-4 mt-4">
+      <h1 className="text-2xl">
+        {statusCode}
+        {t(': An error has occurred')}
+      </h1>
+      <p className="text-gray-500">
+        {t('Sorry, there was an unexpected error, please try again later.')}
+      </p>
     </div>
   );
 };

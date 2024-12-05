@@ -136,9 +136,9 @@ export const ChatMessage: FC<Props> = memo(
                             }
                           }}
                         >
-                          <IconChevronLeft stroke="#7d7d7d" />
+                          <IconChevronLeft />
                         </Button>
-                        <span className="font-bold text-[#7d7d7d]">
+                        <span className="font-bold">
                           {`${currentSelectIndex + 1}/${parentChildrenIds.length
                             }`}
                         </span>
@@ -155,7 +155,7 @@ export const ChatMessage: FC<Props> = memo(
                             }
                           }}
                         >
-                          <IconChevronRight stroke="#7d7d7d" />
+                          <IconChevronRight />
                         </Button>
                       </div>
                     )}
@@ -243,9 +243,9 @@ export const ChatMessage: FC<Props> = memo(
                           }
                         }}
                       >
-                        <IconChevronLeft stroke="#7d7d7d" />
+                        <IconChevronLeft />
                       </Button>
-                      <span className="font-bold text-[#7d7d7d]">
+                      <span className="font-bold">
                         {`${assistantCurrentSelectIndex + 1}/${assistantChildrenIds.length
                           }`}
                       </span>
@@ -263,7 +263,7 @@ export const ChatMessage: FC<Props> = memo(
                           }
                         }}
                       >
-                        <IconChevronRight stroke="#7d7d7d" />
+                        <IconChevronRight />
                       </Button>
                     </div>
                   )}

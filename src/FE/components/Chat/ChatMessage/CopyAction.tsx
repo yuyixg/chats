@@ -34,10 +34,7 @@ const CopyAction = (props: Props) => {
       <>
         {messagedCopied ? (
           <Button variant="ghost" className="p-1 m-0 h-auto">
-            <IconCheck
-              stroke="#7d7d7d"
-              className="text-green-500 dark:text-green-400"
-            />
+            <IconCheck className="text-green-500 dark:text-green-400" />
           </Button>
         ) : (
           <Tips
@@ -48,7 +45,7 @@ const CopyAction = (props: Props) => {
                 className={cn('p-1 m-0 h-auto', triggerClassName)}
                 onClick={() => copyOnClick(text)}
               >
-                <IconCopy stroke="#7d7d7d" />
+                <IconCopy />
               </Button>
             }
             side="bottom"
