@@ -16,7 +16,9 @@ public class PromptsController(ChatsDB db, CurrentUser currentUser) : Controller
     {
         PromptDto[] prompts = await db.Prompts
             .Where(x => x.CreateUserId == currentUser.Id || currentUser.IsAdmin && x.IsSystem)
-            .OrderBy(x => x.UpdatedAt)
+            .OrderBy(x => x.IsSystem)
+            .ThenBy(x => x.IsDefault)
+            .ThenBy(x => x.UpdatedAt)
             .Select(x => new PromptDto()
             {
                 Content = x.Content,
@@ -36,7 +38,9 @@ public class PromptsController(ChatsDB db, CurrentUser currentUser) : Controller
     {
         BriefPromptDto[] prompts = await db.Prompts
             .Where(x => x.CreateUserId == currentUser.Id || currentUser.IsAdmin && x.IsSystem)
-            .OrderBy(x => x.UpdatedAt)
+            .OrderBy(x => x.IsSystem)
+            .ThenBy(x => x.IsDefault)
+            .ThenBy(x => x.UpdatedAt)
             .Select(x => new BriefPromptDto()
             {
                 Id = x.Id,
@@ -78,7 +82,7 @@ public class PromptsController(ChatsDB db, CurrentUser currentUser) : Controller
                 .FirstOrDefaultAsync(cancellationToken);
         Prompt? systemDefault = await db.Prompts
                 .OrderByDescending(x => x.UpdatedAt)
-                .Where(x => x.IsDefault && x.IsSystem)
+                .Where(x => x.IsSystem)
                 .FirstOrDefaultAsync(cancellationToken);
         Prompt? consolidated = userDefault ?? systemDefault;
 
