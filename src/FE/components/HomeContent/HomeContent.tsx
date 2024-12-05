@@ -298,7 +298,7 @@ const HomeContent = () => {
       });
       let chatList = rows;
       if (!modelList) {
-        chatList = rows.concat(chats);
+        chatList = chats.concat(rows);
       }
       dispatch({ field: 'chats', value: chatList });
       if (modelList) {

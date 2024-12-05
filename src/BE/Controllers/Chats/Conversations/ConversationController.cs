@@ -15,6 +15,7 @@ using OpenAI.Chat;
 using Sdcb.DashScope;
 using System.ClientModel;
 using System.Text.Json;
+using TencentCloud.Common;
 using OpenAIChatMessage = OpenAI.Chat.ChatMessage;
 
 namespace Chats.BE.Controllers.Chats.Conversations;
@@ -49,8 +50,7 @@ public class ConversationController(ChatsDB db, CurrentUser currentUser, ILogger
             .Include(x => x.MessageContents).ThenInclude(x => x.MessageContentBlob)
             .Include(x => x.MessageContents).ThenInclude(x => x.MessageContentFile).ThenInclude(x => x!.File).ThenInclude(x => x.FileService)
             .Include(x => x.MessageContents).ThenInclude(x => x.MessageContentFile).ThenInclude(x => x!.File).ThenInclude(x => x.FileImageInfo)
-            .Include(x => x.MessageContents).ThenInclude(x => x.MessageContentUtf16)
-            .Include(x => x.MessageContents).ThenInclude(x => x.MessageContentUtf8)
+            .Include(x => x.MessageContents).ThenInclude(x => x.MessageContentText)
             .Where(x => x.ChatId == chatId && x.Chat.UserId == currentUser.Id)
             .Select(x => new MessageLiteDto()
             {
@@ -184,7 +184,7 @@ public class ConversationController(ChatsDB db, CurrentUser currentUser, ILogger
             icc.FinishReason = cse.ErrorCode;
             return this.BadRequestMessage(cse.Message);
         }
-        catch (Exception e) when (e is DashScopeException || e is ClientResultException)
+        catch (Exception e) when (e is DashScopeException or ClientResultException or TencentCloudSDKException)
         {
             icc.FinishReason = DBFinishReason.UpstreamError;
             errorText = e.Message;

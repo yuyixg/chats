@@ -1351,3 +1351,10 @@ WHERE ContentTypeId = 2;
 
 ALTER TABLE [dbo].[MessageContent]
 DROP COLUMN [Content];
+
+
+-- 20241205
+EXECUTE sp_rename N'dbo.MessageContentUTF16', N'MessageContentText', 'OBJECT';
+INSERT INTO MessageContentText(Id, Content)
+SELECT Id, Content FROM MessageContentUTF8;
+DROP TABLE MessageContentUTF8;
