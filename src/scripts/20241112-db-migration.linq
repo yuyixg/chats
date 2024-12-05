@@ -1,23 +1,4 @@
 <Query Kind="Program">
-  <Connection>
-    <ID>0397d1ca-d774-43d2-965d-8797d2cc52f1</ID>
-    <NamingServiceVersion>2</NamingServiceVersion>
-    <Persist>true</Persist>
-    <Driver Assembly="(internal)" PublicKeyToken="no-strong-name">LINQPad.Drivers.EFCore.DynamicDriver</Driver>
-    <AllowDateOnlyTimeOnly>true</AllowDateOnlyTimeOnly>
-    <Server>home.starworks.cc,37965</Server>
-    <SqlSecurity>true</SqlSecurity>
-    <UserName>sa</UserName>
-    <Password>AQAAANCMnd8BFdERjHoAwE/Cl+sBAAAAVbvrs6Jk5ESNEegA7jfNnwAAAAACAAAAAAAQZgAAAAEAACAAAABBe4Cv13ASn/ipSipWlPY2mowD6zfbngQJ+Z3+KTcGVAAAAAAOgAAAAAIAACAAAABMtXPZtcXWRzq2o3sHXx1+BVuNY62ubQdNn8IrSrXSxiAAAADcCHwb5SZfaPyiOsqcpFEU4/Lnue6fZBOLd4rAOBXt0UAAAADS65U3H6M+54aUZec9Yj/zdoSeT/Jb3S4gVVhk51Sje3lBRb4jCfUa42pVHALQoRPrtMP5lJSaJ/hB6XoT2mV6</Password>
-    <Database>ChatsDEV</Database>
-    <DriverData>
-      <EncryptSqlTraffic>False</EncryptSqlTraffic>
-      <PreserveNumeric1>True</PreserveNumeric1>
-      <EFProvider>Microsoft.EntityFrameworkCore.SqlServer</EFProvider>
-      <NoMARS>True</NoMARS>
-      <TrustServerCertificate>False</TrustServerCertificate>
-    </DriverData>
-  </Connection>
   <NuGetReference>Microsoft.Extensions.Caching.Memory</NuGetReference>
   <Namespace>Microsoft.EntityFrameworkCore.Storage</Namespace>
   <Namespace>Microsoft.Data.SqlClient</Namespace>
