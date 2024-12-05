@@ -157,190 +157,174 @@ export const EditModelModal = (props: IProps) => {
         <DialogHeader>
           <DialogTitle>{t('Edit Model')}</DialogTitle>
         </DialogHeader>
-        {loading ? (
-          <div className="flex flex-col space-y-3">
-            <Skeleton className="h-[125px] w-full rounded-xl" />
-            <div className="space-y-2">
-              <Skeleton className="h-4 w-full" />
-              <Skeleton className="h-4 w-[90%]" />
-            </div>
-          </div>
-        ) : (
-          <Form {...form}>
-            <form onSubmit={form.handleSubmit(onSubmit)}>
-              <div className="grid grid-cols-2 gap-4">
+        <Form {...form}>
+          <form onSubmit={form.handleSubmit(onSubmit)}>
+            <div className="grid grid-cols-2 gap-4">
+              <FormField
+                key="name"
+                control={form.control}
+                name="name"
+                render={({ field }) => {
+                  return (
+                    <FormInput field={field} label={t('Model Display Name')!} />
+                  );
+                }}
+              ></FormField>
+              <div className="flex justify-between">
                 <FormField
-                  key="name"
+                  key="modelKeyId"
                   control={form.control}
-                  name="name"
-                  render={({ field }) => {
-                    return (
-                      <FormInput
-                        field={field}
-                        label={t('Model Display Name')!}
-                      />
-                    );
-                  }}
-                ></FormField>
-                <div className="flex justify-between">
-                  <FormField
-                    key="modelKeyId"
-                    control={form.control}
-                    name="modelKeyId"
-                    render={({ field }) => {
-                      return (
-                        <FormSelect
-                          className="w-full"
-                          field={field}
-                          label={t('Model Keys')!}
-                          items={modelKeys
-                            .filter(
-                              (x) =>
-                                x.modelProviderId === selected.modelProviderId,
-                            )
-                            .map((keys) => ({
-                              name: keys.name,
-                              value: keys.id.toString(),
-                            }))}
-                        />
-                      );
-                    }}
-                  ></FormField>
-                  <div
-                    hidden={!form.getValues('modelKeyId')}
-                    className="text-sm mt-12 w-36 text-right"
-                  >
-                    <Popover>
-                      <PopoverTrigger>
-                        <span className="text-primary">
-                          {t('Click View Configs')}
-                        </span>
-                      </PopoverTrigger>
-                      <PopoverContent className="w-full">
-                        {JSON.stringify(
-                          modelKeys
-                            .find(
-                              (x) =>
-                                x.id ===
-                                parseInt(form.getValues('modelKeyId')!),
-                            )
-                            ?.toConfigs(),
-                          null,
-                          2,
-                        )}
-                      </PopoverContent>
-                    </Popover>
-                  </div>
-                </div>
-              </div>
-              <div className="grid grid-cols-2 gap-4">
-                <FormField
-                  key="modelReferenceName"
-                  control={form.control}
-                  name="modelReferenceName"
-                  render={({ field }) => {
-                    return (
-                      <FormInput
-                        disabled
-                        field={field}
-                        label={t('Model Version')!}
-                      />
-                    );
-                  }}
-                ></FormField>
-                <FormField
-                  key="deploymentName"
-                  control={form.control}
-                  name="deploymentName"
-                  render={({ field }) => {
-                    return (
-                      <FormInput label={t('Deployment Name')!} field={field} />
-                    );
-                  }}
-                ></FormField>
-              </div>
-              <div className="grid grid-cols-2 gap-4">
-                <FormField
-                  key="inputPrice1M"
-                  control={form.control}
-                  name="inputPrice1M"
-                  render={({ field }) => {
-                    return (
-                      <FormInput
-                        type="number"
-                        label={`${t('1M input tokens price')}(${t('Yuan')})`}
-                        field={field}
-                      />
-                    );
-                  }}
-                ></FormField>
-                <FormField
-                  key="outputPrice1M"
-                  control={form.control}
-                  name="outputPrice1M"
-                  render={({ field }) => {
-                    return (
-                      <FormInput
-                        type="number"
-                        label={`1M ${t('1M output tokens price')}(${t(
-                          'Yuan',
-                        )})`}
-                        field={field}
-                      />
-                    );
-                  }}
-                ></FormField>
-              </div>
-              <div>
-                <FormField
-                  key="fileServiceId"
-                  control={form.control}
-                  name="fileServiceId"
+                  name="modelKeyId"
                   render={({ field }) => {
                     return (
                       <FormSelect
+                        className="w-full"
                         field={field}
-                        label={t('File Service Type')!}
-                        hidden={!selected.allowVision}
-                        items={fileServices.map((item) => ({
-                          name: item.name,
-                          value: item.id.toString(),
-                        }))}
+                        label={t('Model Keys')!}
+                        items={modelKeys
+                          .filter(
+                            (x) =>
+                              x.modelProviderId === selected.modelProviderId,
+                          )
+                          .map((keys) => ({
+                            name: keys.name,
+                            value: keys.id.toString(),
+                          }))}
                       />
                     );
                   }}
                 ></FormField>
-              </div>
-              <div className="grid grid-cols-2 gap-4">
-                <div className="flex gap-4">
-                  <FormField
-                    key={'enabled'}
-                    control={form.control}
-                    name={'enabled'}
-                    render={({ field }) => {
-                      return (
-                        <FormSwitch label={t('Is it enabled')!} field={field} />
-                      );
-                    }}
-                  ></FormField>
+                <div
+                  hidden={!form.getValues('modelKeyId')}
+                  className="text-sm mt-12 w-36 text-right"
+                >
+                  <Popover>
+                    <PopoverTrigger>
+                      <span className="text-primary">
+                        {t('Click View Configs')}
+                      </span>
+                    </PopoverTrigger>
+                    <PopoverContent className="w-full">
+                      {JSON.stringify(
+                        modelKeys
+                          .find(
+                            (x) =>
+                              x.id === parseInt(form.getValues('modelKeyId')!),
+                          )
+                          ?.toConfigs(),
+                        null,
+                        2,
+                      )}
+                    </PopoverContent>
+                  </Popover>
                 </div>
               </div>
-              <DialogFooter className="pt-4">
-                <Button
-                  type="button"
-                  variant="destructive"
-                  onClick={(e) => {
-                    onDelete();
-                    e.preventDefault();
+            </div>
+            <div className="grid grid-cols-2 gap-4">
+              <FormField
+                key="modelReferenceName"
+                control={form.control}
+                name="modelReferenceName"
+                render={({ field }) => {
+                  return (
+                    <FormInput
+                      disabled
+                      field={field}
+                      label={t('Model Version')!}
+                    />
+                  );
+                }}
+              ></FormField>
+              <FormField
+                key="deploymentName"
+                control={form.control}
+                name="deploymentName"
+                render={({ field }) => {
+                  return (
+                    <FormInput label={t('Deployment Name')!} field={field} />
+                  );
+                }}
+              ></FormField>
+            </div>
+            <div className="grid grid-cols-2 gap-4">
+              <FormField
+                key="inputPrice1M"
+                control={form.control}
+                name="inputPrice1M"
+                render={({ field }) => {
+                  return (
+                    <FormInput
+                      type="number"
+                      label={`${t('1M input tokens price')}(${t('Yuan')})`}
+                      field={field}
+                    />
+                  );
+                }}
+              ></FormField>
+              <FormField
+                key="outputPrice1M"
+                control={form.control}
+                name="outputPrice1M"
+                render={({ field }) => {
+                  return (
+                    <FormInput
+                      type="number"
+                      label={`1M ${t('1M output tokens price')}(${t('Yuan')})`}
+                      field={field}
+                    />
+                  );
+                }}
+              ></FormField>
+            </div>
+            <div>
+              <FormField
+                key="fileServiceId"
+                control={form.control}
+                name="fileServiceId"
+                render={({ field }) => {
+                  return (
+                    <FormSelect
+                      field={field}
+                      label={t('File Service Type')!}
+                      hidden={!selected.allowVision}
+                      items={fileServices.map((item) => ({
+                        name: item.name,
+                        value: item.id.toString(),
+                      }))}
+                    />
+                  );
+                }}
+              ></FormField>
+            </div>
+            <div className="grid grid-cols-2 gap-4">
+              <div className="flex gap-4">
+                <FormField
+                  key={'enabled'}
+                  control={form.control}
+                  name={'enabled'}
+                  render={({ field }) => {
+                    return (
+                      <FormSwitch label={t('Is it enabled')!} field={field} />
+                    );
                   }}
-                >
-                  {t('Delete')}
-                </Button>
-                <Button type="submit">{t('Save')}</Button>
-              </DialogFooter>
-            </form>
-          </Form>
-        )}
+                ></FormField>
+              </div>
+            </div>
+            <DialogFooter className="pt-4">
+              <Button
+                type="button"
+                variant="destructive"
+                onClick={(e) => {
+                  onDelete();
+                  e.preventDefault();
+                }}
+              >
+                {t('Delete')}
+              </Button>
+              <Button type="submit">{t('Save')}</Button>
+            </DialogFooter>
+          </form>
+        </Form>
       </DialogContent>
     </Dialog>
   );

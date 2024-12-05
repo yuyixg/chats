@@ -44,12 +44,27 @@ export const ModelSelect = () => {
     });
   };
 
+  const getTitle = () => {
+    if (modelUsage) {
+      if (modelUsage.tokens === 0 && modelUsage.counts === 0) {
+        return t('unit-price');
+      } else if (+modelUsage.counts > 0) {
+        return t('Remaining Chat Counts');
+      } else if (+modelUsage.tokens > 0) {
+        return t('Remaining Tokens');
+      } else {
+        return t('unit-price');
+      }
+    }
+    return '';
+  };
+
   return (
     <div className="flex flex-col">
       <label className="mb-2 text-left text-neutral-700 dark:text-neutral-400">
-        {t('Model')}
+        {getTitle()}
       </label>
-      <div className="w-full focus:outline-none active:outline-none rounded-lg border bg-background border-neutral-200  dark:border-neutral-600">
+      {/* <div className="w-full focus:outline-none active:outline-none rounded-lg border bg-background border-neutral-200  dark:border-neutral-600">
         <Select
           onValueChange={handleChange}
           value={selectModel?.modelId?.toString()}
@@ -66,10 +81,10 @@ export const ModelSelect = () => {
             ))}
           </SelectContent>
         </Select>
-      </div>
+      </div> */}
       {modelUsage && modelUsage.tokens === 0 && modelUsage.counts === 0 ? (
         <span className="text-xs pt-2">
-          {t('unit-price')}: ￥{modelUsage.inputTokenPrice1M.toFixed(4)}/
+          ￥{modelUsage.inputTokenPrice1M.toFixed(4)}/
           {modelUsage.outputTokenPrice1M.toFixed(4)} (1M tokens)
         </span>
       ) : (
@@ -78,18 +93,12 @@ export const ModelSelect = () => {
             <div className="flex justify-between text-xs pt-1 text-muted-foreground">
               <div className="flex gap-4">
                 {+modelUsage.counts > 0 ? (
-                  <span>
-                    {t('Remaining Chat Counts')}:&nbsp;{modelUsage.counts}
-                  </span>
+                  <span>{modelUsage.counts}</span>
                 ) : +modelUsage.tokens > 0 ? (
-                  <span>
-                    {t('Remaining Tokens')}:&nbsp;
-                    {formatNumberAsMoney(+modelUsage.tokens)}
-                  </span>
+                  <span>{formatNumberAsMoney(+modelUsage.tokens)}</span>
                 ) : (
                   <span>
-                    {t('unit-price')}: ￥
-                    {modelUsage.inputTokenPrice1M.toFixed(4)}/
+                    ￥{modelUsage.inputTokenPrice1M.toFixed(4)}/
                     {modelUsage.outputTokenPrice1M.toFixed(4)} (1M tokens)
                   </span>
                 )}
@@ -99,7 +108,8 @@ export const ModelSelect = () => {
                   <></>
                 ) : (
                   <>
-                    {modelUsage.expires} {` ${t('become due')}`}
+                    {new Date(modelUsage.expires).toLocaleDateString()}{' '}
+                    {` ${t('become due')}`}
                   </>
                 )}
               </div>

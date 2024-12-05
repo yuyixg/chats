@@ -23,7 +23,7 @@ const EditAction = (props: Props) => {
           className="p-1 m-0 h-auto invisible group-hover:visible focus:visible"
           onClick={onToggleEditing}
         >
-          <IconEdit stroke="#7d7d7d" />
+          <IconEdit />
         </Button>
       }
       content={t('Edit message')!}

@@ -1,8 +1,7 @@
 export enum GlobalConfigKeys {
   tencentSms = 'tencentSms',
-  session = 'session',
   siteInfo = 'siteInfo',
-  logs = 'logs',
+  JwtSecretKey = 'JwtSecretKey',
 }
 
 export interface SiteInfoConfig {
@@ -27,11 +26,5 @@ export const GlobalDefaultConfigs = {
       qqGroup: '',
     },
   },
-  session: {
-    expire: '',
-  },
-  logs: {
-    error: true,
-    success: false,
-  },
+  JwtSecretKey: '',
 };

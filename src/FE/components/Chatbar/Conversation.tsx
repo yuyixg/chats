@@ -174,7 +174,7 @@ export const ConversationComponent = ({ chat }: Props) => {
               disabled={messageIsStreaming}
               className="focus:outline-none"
             >
-              <Button variant="ghost" className="p-[6px] m-0 h-auto">
+              <Button variant="ghost" className="p-[6px] m-0 h-auto hover:opacity-50">
                 <IconDots size={16} />
               </Button>
             </DropdownMenuTrigger>

@@ -8,8 +8,6 @@ import { clearUserInfo, clearUserSession, getLoginUrl } from '@/utils/user';
 
 import { UserRole } from '@/types/adminApis';
 
-import { HomeContext } from '@/contexts/Home.context';
-
 import {
   IconBulbFilled,
   IconKey,
@@ -31,6 +29,7 @@ import {
 import { Separator } from '@/components/ui/separator';
 
 import { getUserBalanceOnly } from '@/apis/clientApis';
+import { HomeContext } from '@/contexts/Home.context';
 
 export const ChatBarSettings = () => {
   const router = useRouter();
@@ -68,7 +67,7 @@ export const ChatBarSettings = () => {
       {user?.role === UserRole.admin && (
         <SidebarButton
           text={t('Admin Panel')}
-          icon={<IconSettingsCog size={18} />}
+          icon={<IconSettingsCog />}
           onClick={() => {
             router.push('/admin');
           }}
@@ -81,7 +80,7 @@ export const ChatBarSettings = () => {
             <SidebarButton
               className="capitalize"
               text={user?.username}
-              icon={<IconUser size={18} />}
+              icon={<IconUser />}
               onClick={handleClickUserMore}
             />
           </PopoverTrigger>
@@ -90,7 +89,7 @@ export const ChatBarSettings = () => {
               text={`${t('Account balance')}￥${(+(userBalance || 0)).toFixed(
                 2,
               )}`}
-              icon={<IconMoneybag size={18} />}
+              icon={<IconMoneybag />}
               onClick={() => {
                 setUserBalanceModalOpen(true);
               }}
@@ -98,14 +97,14 @@ export const ChatBarSettings = () => {
             <Separator className="my-2" />
             <SidebarButton
               text={t('Prompt Management')}
-              icon={<IconBulbFilled size={18} />}
+              icon={<IconBulbFilled />}
               onClick={() => {
                 handleUpdateSettings('showPromptBar', !showPromptBar);
               }}
             />
             <SidebarButton
               text={`${t('API Key Management')}`}
-              icon={<IconKey size={18} />}
+              icon={<IconKey />}
               onClick={() => {
                 setSettingSheetOpen(true);
               }}
@@ -113,14 +112,14 @@ export const ChatBarSettings = () => {
             <Separator className="my-2" />
             <SidebarButton
               text={t('Change Password')}
-              icon={<IconPasswordUser size={18} />}
+              icon={<IconPasswordUser />}
               onClick={() => {
                 setChangePwdModalOpen(true);
               }}
             />
             <SidebarButton
               text={t('Log out')}
-              icon={<IconLogout size={18} />}
+              icon={<IconLogout />}
               onClick={logout}
             />
           </PopoverContent>

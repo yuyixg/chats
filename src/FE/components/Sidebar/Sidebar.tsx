@@ -51,7 +51,7 @@ const Sidebar = <T,>({
       <div
         className={`${
           isOpen ? 'w-[260px]' : 'w-0 hidden'
-        } fixed top-0 ${side}-0 z-40 flex h-full flex-none flex-col text-black bg-[#f9f9f9] dark:bg-[#202123] dark:text-white p-2 text-[14px] sm:relative  sm:top-0`}
+        } fixed top-0 ${side}-0 z-40 flex h-full flex-none flex-col bg-gray-50 dark:bg-[#202123] p-2 text-[14px] sm:relative  sm:top-0`}
       >
         <div
           className={cn(
@@ -67,9 +67,9 @@ const Sidebar = <T,>({
                 onClick={toggleOpen}
               >
                 {side === 'right' ? (
-                  <IconLayoutSidebarRight stroke="#7d7d7d" size={26} />
+                  <IconLayoutSidebarRight size={26} />
                 ) : (
-                  <IconLayoutSidebar stroke="#7d7d7d" size={26} />
+                  <IconLayoutSidebar size={26} />
                 )}
               </Button>
             }
@@ -85,7 +85,7 @@ const Sidebar = <T,>({
                   variant="ghost"
                   className="p-1 m-0 h-auto"
                 >
-                  <IconSquarePlus stroke="#7d7d7d" size={26} />
+                  <IconSquarePlus size={26} />
                 </Button>
               }
               content={addItemButtonTitle}
@@ -124,13 +124,13 @@ const Sidebar = <T,>({
                 {side === 'right' ? (
                   <div className="flex flex-col items-center">
                     <Button variant="ghost">
-                      <IconLayoutSidebarRight stroke="#7d7d7d" size={26} />
+                      <IconLayoutSidebarRight size={26} />
                     </Button>
                   </div>
                 ) : (
                   <div className="flex flex-col items-center">
                     <Button variant="ghost" className="p-1 m-0 h-auto">
-                      <IconLayoutSidebar stroke="#7d7d7d" size={26} />
+                      <IconLayoutSidebar size={26} />
                     </Button>
                   </div>
                 )}
@@ -148,7 +148,7 @@ const Sidebar = <T,>({
                   variant="ghost"
                   className="p-1 m-0 h-auto"
                 >
-                  <IconSquarePlus stroke="#7d7d7d" size={26} />
+                  <IconSquarePlus size={26} />
                 </Button>
               }
               content={addItemButtonTitle}

@@ -51,13 +51,13 @@ export const OpenSidebarButton = ({ onClick, side }: Props) => {
             {side === 'right' ? (
               <div className="flex flex-col items-center">
                 <Button variant="ghost">
-                  <IconLayoutSidebarRight stroke="#7d7d7d" size={26} />
+                  <IconLayoutSidebarRight size={26} />
                 </Button>
               </div>
             ) : (
               <div className="flex flex-col items-center">
                 <Button variant="ghost" className="p-1 m-0 h-auto">
-                  <IconLayoutSidebar stroke="#7d7d7d" size={26} />
+                  <IconLayoutSidebar size={26} />
                 </Button>
               </div>
             )}

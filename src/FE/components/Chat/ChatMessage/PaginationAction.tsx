@@ -34,9 +34,9 @@ export const PaginationAction = (props: Props) => {
             }
           }}
         >
-          <IconChevronLeft stroke="#7d7d7d" />
+          <IconChevronLeft />
         </Button>
-        <span className="font-bold text-[#7d7d7d]">
+        <span className="font-bold">
           {`${currentSelectIndex + 1}/${messageIds.length}`}
         </span>
         <Button
@@ -50,7 +50,7 @@ export const PaginationAction = (props: Props) => {
             }
           }}
         >
-          <IconChevronRight stroke="#7d7d7d" />
+          <IconChevronRight />
         </Button>
       </div>
     );

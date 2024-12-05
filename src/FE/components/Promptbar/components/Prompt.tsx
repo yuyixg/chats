@@ -76,13 +76,13 @@ export const PromptComponent = ({ prompt }: Props) => {
 
   const getPromptColor = (prompt: PromptSlim) => {
     if (prompt.isSystem) {
-      return '#3b82f6';
+      return 'text-green-700';
     } else if (prompt.isDefault) {
-      return '#16a34a';
+      return 'text-blue-700';
     } else {
-      return 'grey';
+      return 'text-gray-600';
     }
-  }
+  };
 
   return (
     <div className="relative flex items-center">
@@ -92,7 +92,7 @@ export const PromptComponent = ({ prompt }: Props) => {
           handlePromptDetail(e);
         }}
       >
-        <IconBulbFilled size={18} style={{ color: getPromptColor(prompt) }} />
+        <IconBulbFilled size={18} className={getPromptColor(prompt)} />
 
         <div className="relative max-h-5 flex-1 overflow-hidden text-ellipsis whitespace-nowrap break-all pr-4 text-left text-[12.5px] leading-3">
           {prompt.name}

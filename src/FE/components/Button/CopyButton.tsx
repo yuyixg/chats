@@ -36,9 +36,9 @@ export default function CopyButton(props: Props) {
       title={t('Copy')}
     >
       {isCopied ? (
-        <IconCheck stroke={'#7d7d7d'} size={18} />
+        <IconCheck size={18} />
       ) : (
-        <IconClipboard stroke={'#7d7d7d'} size={18} />
+        <IconClipboard size={18} />
       )}
     </Button>
   );

@@ -370,37 +370,37 @@ export const Chat = memo(({ stopConversationRef }: Props) => {
   };
 
   return (
-    <div className="relative flex-1 overflow-hidden bg-background">
+    <div className="relative flex-1 overflow-hidden">
       <>
         <div
-          className="max-h-full overflow-x-hidden"
+          className="max-h-full overflow-x-hidden scroll-container"
           ref={chatContainerRef}
           onScroll={handleScroll}
         >
           {selectChat?.id && (
-            <div className="sticky top-0 pt-1 z-10 text-sm bg-background flex items-center justify-between">
-              <div
-                className={cn(
-                  'flex justify-start items-center ml-24',
-                  settings.showChatBar && 'ml-6',
-                )}
-              >
-                {hasModel() && selectMessages?.length != 0 && (
-                  <ChangeModel
-                    className="font-semibold text-base"
-                    content={selectModel?.name}
-                    onChangeModel={(model) => {
-                      homeDispatch({
-                        field: 'selectModel',
-                        value: model,
-                      });
-                      putUserChatModel(selectChat.id, model.modelId);
-                    }}
-                  />
-                )}
-              </div>
-              <div className="pr-2 md:pr-4">
-                {selectMessages?.length === 0 && <ModeToggle />}
+            <div className="sticky top-0 pt-1 z-10 text-sm bg-background right-0">
+              <div className="flex items-center justify-between h-10">
+                <div
+                  className={cn(
+                    'flex justify-start items-center ml-24',
+                    settings.showChatBar && 'ml-6',
+                  )}
+                >
+                  {hasModel() && (
+                    <ChangeModel
+                      className="font-semibold text-base"
+                      content={selectModel?.name}
+                      onChangeModel={(model) => {
+                        homeDispatch({
+                          field: 'selectModel',
+                          value: model,
+                        });
+                        putUserChatModel(selectChat.id, model.modelId);
+                      }}
+                    />
+                  )}
+                </div>
+                <div className="mr-2 md:mr-4">{<ModeToggle />}</div>
               </div>
             </div>
           )}

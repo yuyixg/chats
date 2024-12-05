@@ -17,10 +17,8 @@ export type RequestWithBodyModel = RequestModel & {
 
 const readResponse = async (response: Response) => {
   if (!response.headers) {
-    console.log();
     return response;
   }
-  console.log(response.status, [...response.headers.keys()]);
   const contentType = response.headers.get('content-type');
   const contentDisposition = response.headers.get('content-disposition');
 
@@ -30,7 +28,10 @@ const readResponse = async (response: Response) => {
     return await response.json();
   } else if (contentType.indexOf('text/plain') !== -1) {
     return await response.text();
-  } else if (contentDisposition != null && contentDisposition.indexOf('attachment') !== -1) {
+  } else if (
+    contentDisposition != null &&
+    contentDisposition.indexOf('attachment') !== -1
+  ) {
     return await response.blob();
   } else {
     return null;
@@ -77,13 +78,21 @@ export const useFetch = () => {
         const result = readResponse(response);
         return result;
       })
-      .catch(async (err) => {
-        const error = await readResponse(err);
-        const message = error?.message || error.errMessage || error;
+      .catch(async (err: Response) => {
         const { t } = useTranslation();
+        const error = await readResponse(err);
+        let message = error?.message || error?.errMessage || error;
+
+        if (err.status === 500) {
+          message = 'Internal server error, Please try again later';
+        } else if (err.status === 403) {
+          location.href = '/';
+          return;
+        }
+
         toast.error(
           t(
-            typeof message === 'string'
+            typeof message === 'string' && message !== ''
               ? message
               : 'Operation failed, Please try again later, or contact technical personnel',
           ),
