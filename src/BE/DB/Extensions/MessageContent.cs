@@ -10,7 +10,7 @@ public partial class MessageContent
     {
         return (DBMessageContentType)ContentTypeId switch
         {
-            DBMessageContentType.Text => ChatMessageContentPart.CreateTextPart(MessageContentUtf16!.Content),
+            DBMessageContentType.Text => ChatMessageContentPart.CreateTextPart(MessageContentText!.Content),
             DBMessageContentType.FileId => await fup.CreateOpenAIPart(MessageContentFile!, cancellationToken),
             _ => throw new NotImplementedException()
         };
@@ -20,8 +20,8 @@ public partial class MessageContent
     {
         return (DBMessageContentType)ContentTypeId switch
         {
-            DBMessageContentType.Text => MessageContentUtf16!.Content,
-            DBMessageContentType.Error => MessageContentUtf8!.Content,
+            DBMessageContentType.Text => MessageContentText!.Content,
+            DBMessageContentType.Error => MessageContentText!.Content,
             //DBMessageContentType.FileId => MessageContentUtil.ReadFileId(Content).ToString(), // not supported
             _ => throw new NotSupportedException(),
         };
@@ -29,7 +29,7 @@ public partial class MessageContent
 
     public static MessageContent FromText(string text)
     {
-        return new MessageContent { MessageContentUtf16 = new() { Content = text }, ContentTypeId = (byte)DBMessageContentType.Text };
+        return new MessageContent { MessageContentText = new() { Content = text }, ContentTypeId = (byte)DBMessageContentType.Text };
     }
 
     public static MessageContent FromFileId(int fileId)
@@ -39,6 +39,6 @@ public partial class MessageContent
 
     public static MessageContent FromError(string error)
     {
-        return new MessageContent { MessageContentUtf8 = new() { Content = error }, ContentTypeId = (byte)DBMessageContentType.Error };
+        return new MessageContent { MessageContentText = new() { Content = error }, ContentTypeId = (byte)DBMessageContentType.Error };
     }
 }

@@ -1,5 +1,6 @@
 ﻿using Chats.BE.Controllers.Chats.Messages.Dtos;
 using Chats.BE.DB;
+using Chats.BE.DB.Enums;
 using Chats.BE.Infrastructure;
 using Chats.BE.Services.Conversations;
 using Chats.BE.Services.FileServices;
@@ -19,8 +20,7 @@ public class MessagesController(ChatsDB db, CurrentUser currentUser, IUrlEncrypt
         MessageDto[] messages = await db.Messages
             .Include(x => x.MessageContents).ThenInclude(x => x.MessageContentBlob)
             .Include(x => x.MessageContents).ThenInclude(x => x.MessageContentFile).ThenInclude(x => x!.File).ThenInclude(x => x.FileService)
-            .Include(x => x.MessageContents).ThenInclude(x => x.MessageContentUtf16)
-            .Include(x => x.MessageContents).ThenInclude(x => x.MessageContentUtf8)
+            .Include(x => x.MessageContents).ThenInclude(x => x.MessageContentText)
             .Where(m => m.ChatId == urlEncryption.DecryptChatId(chatId) && m.Chat.UserId == currentUser.Id && m.ChatRoleId != (byte)DBChatRole.System)
             .Select(x => new ChatMessageTemp()
             {
@@ -52,9 +52,9 @@ public class MessagesController(ChatsDB db, CurrentUser currentUser, IUrlEncrypt
     public async Task<ActionResult<string?>> GetChatSystemPrompt(string chatId, CancellationToken cancellationToken)
     {
         MessageContent? content = await db.Messages
-            .Include(x => x.MessageContents).ThenInclude(x => x.MessageContentUtf16)
+            .Include(x => x.MessageContents).ThenInclude(x => x.MessageContentText)
             .Where(m => m.ChatId == urlEncryption.DecryptChatId(chatId) && m.ChatRoleId == (byte)DBChatRole.System)
-            .Select(x => x.MessageContents.First())
+            .Select(x => x.MessageContents.First(x => x.ContentTypeId == (byte)DBMessageContentType.Text))
             .FirstOrDefaultAsync(cancellationToken);
 
         if (content == null)

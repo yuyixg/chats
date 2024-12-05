@@ -6,16 +6,15 @@ using Microsoft.EntityFrameworkCore;
 
 namespace Chats.BE.DB;
 
-[Table("MessageContentUTF8")]
-public partial class MessageContentUtf8
+[Table("MessageContentText")]
+public partial class MessageContentText
 {
     [Key]
     public long Id { get; set; }
 
-    [Unicode(false)]
     public string Content { get; set; } = null!;
 
     [ForeignKey("Id")]
-    [InverseProperty("MessageContentUtf8")]
+    [InverseProperty("MessageContentText")]
     public virtual MessageContent IdNavigation { get; set; } = null!;
 }

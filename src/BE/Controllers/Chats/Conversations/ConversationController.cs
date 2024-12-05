@@ -50,8 +50,7 @@ public class ConversationController(ChatsDB db, CurrentUser currentUser, ILogger
             .Include(x => x.MessageContents).ThenInclude(x => x.MessageContentBlob)
             .Include(x => x.MessageContents).ThenInclude(x => x.MessageContentFile).ThenInclude(x => x!.File).ThenInclude(x => x.FileService)
             .Include(x => x.MessageContents).ThenInclude(x => x.MessageContentFile).ThenInclude(x => x!.File).ThenInclude(x => x.FileImageInfo)
-            .Include(x => x.MessageContents).ThenInclude(x => x.MessageContentUtf16)
-            .Include(x => x.MessageContents).ThenInclude(x => x.MessageContentUtf8)
+            .Include(x => x.MessageContents).ThenInclude(x => x.MessageContentText)
             .Where(x => x.ChatId == chatId && x.Chat.UserId == currentUser.Id)
             .Select(x => new MessageLiteDto()
             {

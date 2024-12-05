@@ -32,8 +32,5 @@ public partial class MessageContent
     public virtual MessageContentFile? MessageContentFile { get; set; }
 
     [InverseProperty("IdNavigation")]
-    public virtual MessageContentUtf16? MessageContentUtf16 { get; set; }
-
-    [InverseProperty("IdNavigation")]
-    public virtual MessageContentUtf8? MessageContentUtf8 { get; set; }
+    public virtual MessageContentText? MessageContentText { get; set; }
 }
