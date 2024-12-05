@@ -25,6 +25,7 @@ import { ChatInput } from './ChatInput';
 import EnableNetworkSearch from './EnableNetworkSearch';
 import { MemoizedChatMessage } from './MemoizedChatMessage';
 import { ModelSelect } from './ModelSelect';
+import NoModel from './NoModel';
 import { SystemPrompt } from './SystemPrompt';
 import { TemperatureSlider } from './Temperature';
 
@@ -33,7 +34,6 @@ import { HomeContext } from '@/contexts/Home.context';
 import { cn } from '@/lib/utils';
 import Decimal from 'decimal.js';
 import { v4 as uuidv4 } from 'uuid';
-import NoModel from './NoModel';
 
 interface Props {
   stopConversationRef: MutableRefObject<boolean>;
@@ -541,7 +541,7 @@ export const Chat = memo(({ stopConversationRef }: Props) => {
             onChangePrompt={onChangePrompt}
           />
         )}
-        {!hasModel() && <NoModel />}
+        {!hasModel() && !selectChat?.id && <NoModel />}
       </>
     </div>
   );
