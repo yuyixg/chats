@@ -21,13 +21,13 @@ public class ConversationFactory(ILogger<ConversationFactory> logger)
         {
             DBModelProvider.Test => new TestConversationService(model),
             DBModelProvider.OpenAI => new OpenAIConversationService(model),
-            DBModelProvider.Azure => new AzureConversationService(model),
-            DBModelProvider.QianFan => new QianFanConversationService(model),
-            DBModelProvider.QianWen => new DashScopeConversationService(model),
+            DBModelProvider.AzureOpenAI => new AzureConversationService(model),
+            DBModelProvider.WenXinQianFan => new QianFanConversationService(model),
+            DBModelProvider.AliyunDashscope => new DashScopeConversationService(model),
             DBModelProvider.ZhiPuAI => new GLMConversationService(model),
             DBModelProvider.Moonshot => new KimiConversationService(model),
             DBModelProvider.HunYuan => new HunyuanConversationService(model),
-            DBModelProvider.Spark => throw new NotImplementedException("Spark model is not implemented"),
+            DBModelProvider.Sparkdesk => throw new NotImplementedException("Spark model is not implemented"),
             DBModelProvider.LingYi => throw new NotImplementedException("LingYi model is not implemented"),
             _ => throw new NotSupportedException($"Unknown model provider: {modelProvider}")
         };

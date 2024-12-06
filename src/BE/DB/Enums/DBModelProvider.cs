@@ -3,13 +3,13 @@
 public enum DBModelProvider
 {
     Test = 0, 
-    Azure = 1,
+    AzureOpenAI = 1,
     HunYuan = 2,
     LingYi = 3, 
     Moonshot = 4,
     OpenAI = 5,
-    QianFan = 6,
-    QianWen = 7,
-    Spark = 8,
+    WenXinQianFan = 6,
+    AliyunDashscope = 7,
+    Sparkdesk = 8,
     ZhiPuAI = 9
 }
