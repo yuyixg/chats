@@ -94,6 +94,8 @@ public class ConversationController(ChatsDB db, CurrentUser currentUser, ILogger
 
             thisChat.Title = request.UserMessage.Text[..Math.Min(50, request.UserMessage.Text.Length)];
             thisChat.ModelId = request.ModelId;
+            thisChat.EnableSearch = request.UserModelConfig.EnableSearch;
+            thisChat.Temperature = request.UserModelConfig.Temperature;
         }
         else
         {
@@ -101,8 +103,8 @@ public class ConversationController(ChatsDB db, CurrentUser currentUser, ILogger
             {
                 UserModelConfig = new JsonUserModelConfig
                 {
-                    EnableSearch = thisChat.EnableSearch,
-                    Temperature = thisChat.Temperature,
+                    EnableSearch = request.UserModelConfig.EnableSearch ?? thisChat.EnableSearch,
+                    Temperature = request.UserModelConfig.Temperature ?? thisChat.Temperature,
                 }
             };
         }
@@ -156,9 +158,7 @@ public class ConversationController(ChatsDB db, CurrentUser currentUser, ILogger
             using ConversationService s = conversationFactory.CreateConversationService(userModel.Model);
             ChatCompletionOptions cco = new()
             {
-                Temperature = request.UserModelConfig.Temperature != null 
-                    ? Math.Clamp(request.UserModelConfig.Temperature.Value, (float)userModel.Model.ModelReference.MinTemperature, (float)userModel.Model.ModelReference.MaxTemperature) 
-                    : null,
+                Temperature = request.UserModelConfig.Temperature,
                 EndUserId = currentUser.Id.ToString(),
             };
             await foreach (InternalChatSegment seg in icc.Run(userBalance.Balance, userModel, s.ChatStreamedFEProcessed(messageToSend, cco, cancellationToken)))

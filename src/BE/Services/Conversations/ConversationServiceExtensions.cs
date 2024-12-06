@@ -74,6 +74,7 @@ public abstract partial class ConversationService
         {
             options.RemoveAllowSearch();
         }
+        options.Temperature = Model.ModelReference.UnnormalizeTemperature(options.Temperature);
 
         return filteredMessage;
     }
