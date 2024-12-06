@@ -384,7 +384,7 @@ export const ChatInput = ({
                   prompts={filteredPrompts}
                   onSelect={handleInitModal}
                   onMouseOver={setActivePromptIndex}
-                  ref={promptListRef}
+                  promptListRef={promptListRef}
                 />
               </div>
             )}
