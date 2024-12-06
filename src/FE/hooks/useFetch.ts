@@ -71,6 +71,7 @@ export const useFetch = () => {
         if (!response.ok) {
           if (response.status === 401) {
             location.href = getLoginUrl();
+            return;
           }
           throw response;
         }
@@ -86,17 +87,19 @@ export const useFetch = () => {
         if (err.status === 500) {
           message = 'Internal server error, Please try again later';
         } else if (err.status === 403) {
-          location.href = '/';
+          message = 'Resource denial of authorized access';
+          setTimeout(() => (location.href = '/'), 1000);
+        } else if (err.status === 401) {
+          location.href = getLoginUrl();
           return;
         }
 
-        toast.error(
-          t(
-            typeof message === 'string' && message !== ''
-              ? message
-              : 'Operation failed, Please try again later, or contact technical personnel',
-          ),
-        );
+        message =
+          typeof message === 'string' && message !== ''
+            ? message
+            : 'Operation failed, Please try again later, or contact technical personnel';
+
+        toast.error(t(message));
         throw error;
       });
   };

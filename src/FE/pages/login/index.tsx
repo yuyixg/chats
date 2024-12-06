@@ -85,7 +85,7 @@ export default function LoginPage() {
   }, []);
 
   const openLoading = () => setLoginLoading(true);
-  const closeLoading = () => setLoginLoading(false);
+  const closeLoading = () => setTimeout(() => setLoginLoading(false), 600);
 
   const hasLoginType = (type: LoginType) =>
     !!loginConfigs.find((x) => x.type === type);
