@@ -11,5 +11,6 @@ public enum DBModelProvider
     WenXinQianFan = 6,
     AliyunDashscope = 7,
     Sparkdesk = 8,
-    ZhiPuAI = 9
+    ZhiPuAI = 9,
+    DeepSeek = 10,
 }

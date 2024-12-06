@@ -103,7 +103,7 @@ const HomeContent = () => {
           data.temperature ??
           userModelConfig?.temperature ??
           DEFAULT_TEMPERATURE,
-        prompt: formatPrompt(data.content, { model }),
+        prompt: data.content,
       });
     });
   };
