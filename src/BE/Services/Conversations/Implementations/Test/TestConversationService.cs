@@ -26,13 +26,14 @@ public class TestConversationService(Model model) : ConversationService(model)
             """;
         string output = outputTemplate.Replace("{outputTokens}", (Tokenizer.CountTokens(outputTemplate) - 3).ToString());
         StringBuilder outputed = new(output.Length);
-        foreach (string c in UnicodeCharacterSplit(output))
+        foreach (string[] c in UnicodeCharacterSplit(output).Chunk(3))
         {
-            outputed.Append(c);
+            string combined = string.Concat(c);
+            outputed.Append(combined);
             int outputTokens = Tokenizer.CountTokens(outputed.ToString());
             yield return new ChatSegment()
             {
-                TextSegment = c.ToString(),
+                TextSegment = combined.ToString(),
                 Usage = new Dtos.ChatTokenUsage()
                 {
                     InputTokens = inputTokens,
