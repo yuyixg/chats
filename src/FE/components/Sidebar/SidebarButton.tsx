@@ -1,7 +1,5 @@
 import { FC } from 'react';
 
-import { Button } from '@/components/ui/button';
-
 interface Props {
   text: string;
   icon?: JSX.Element;
@@ -18,9 +16,8 @@ export const SidebarButton: FC<Props> = ({
   onClick,
 }) => {
   return (
-    <Button
-      variant='ghost'
-      className="flex w-full justify-between select-none items-center gap-2 rounded-md py-3 px-3 pl-[10px] text-[14px] leading-2 text-white transition-colors duration-200"
+    <div
+      className="flex w-full justify-between select-none items-center gap-2 hover:bg-muted rounded-md py-3 px-3 pl-[10px] text-[14px] leading-2 text-white transition-colors duration-200"
       onClick={onClick}
     >
       <div className="flex text-black dark:text-white w-[80%] items-center">
@@ -36,6 +33,6 @@ export const SidebarButton: FC<Props> = ({
         </span>
       </div>
       <div className="text-black dark:text-white">{action}</div>
-    </Button>
+    </div>
   );
 };

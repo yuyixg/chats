@@ -3,6 +3,8 @@ import toast from 'react-hot-toast';
 
 import useTranslation from '@/hooks/useTranslation';
 
+import { DBModelProvider } from '@/types/model';
+
 import { IconInfo } from '@/components/Icons';
 import Spinner from '@/components/Spinner';
 import Tips from '@/components/Tips/Tips';
@@ -14,7 +16,7 @@ import {
   DialogHeader,
   DialogTitle,
 } from '@/components/ui/dialog';
-import { Switch } from '@/components/ui/switch';
+import { Input } from '@/components/ui/input';
 import {
   Table,
   TableBody,
@@ -32,6 +34,7 @@ import {
 
 interface IProps {
   modelKeyId: number;
+  modelProverId: number;
   isOpen: boolean;
   onClose: () => void;
   onSuccessful: () => void;
@@ -43,17 +46,16 @@ export interface PossibleModel {
   isExists: boolean;
   isLegacy: boolean;
   validating: boolean;
-  validated: boolean;
   validateMessage: string | null;
   adding: boolean;
+  deploymentName: string | null;
 }
 
 export const ConfigModelModal = (props: IProps) => {
   const { t } = useTranslation();
-  const { modelKeyId, isOpen, onClose } = props;
+  const { modelKeyId, modelProverId, isOpen, onClose } = props;
   const [models, setModels] = useState<PossibleModel[]>([]);
   const [loading, setLoading] = React.useState(false);
-
   const onSave = async (index: number) => {
     const model = models[index];
     postModelFastCreate({
@@ -68,16 +70,12 @@ export const ConfigModelModal = (props: IProps) => {
       setLoading(true);
       getModelKeyPossibleModels(modelKeyId).then((data) => {
         setModels(
-          data
-            .sort((x) => (x.isLegacy ? -1 : 1))
-            .sort((x) => (x.isExists ? 1 : -1))
-            .map((x) => ({
-              ...x,
-              validating: false,
-              validated: false,
-              adding: false,
-              validateMessage: null,
-            })),
+          data.map((x) => ({
+            ...x,
+            validating: false,
+            adding: false,
+            validateMessage: null,
+          })),
         );
         setLoading(false);
       });
@@ -92,7 +90,7 @@ export const ConfigModelModal = (props: IProps) => {
     postModelFastCreate({
       modelKeyId: modelKeyId,
       modelReferenceId: model.modelReferenceId,
-      deploymentName: model.referenceName,
+      deploymentName: model.deploymentName || null,
     }).then(() => {
       toast.success(t('Added successfully'));
       model.isExists = true;
@@ -109,11 +107,11 @@ export const ConfigModelModal = (props: IProps) => {
     postModelValidate({
       modelKeyId: modelKeyId,
       modelReferenceId: model.modelReferenceId,
-      deploymentName: model.referenceName,
+      deploymentName: model.deploymentName || null,
     }).then((data) => {
       if (data.isSuccess) {
+        model.validateMessage = null;
         toast.success(t('Verified Successfully'));
-        model.validated = true;
       } else {
         toast.error(t('Verified Failed'));
         model.validateMessage = data.errorMessage;
@@ -123,9 +121,16 @@ export const ConfigModelModal = (props: IProps) => {
     });
   }
 
+  function handleChangeDeploymentName(index: number, value: string) {
+    const model = models[index];
+    const modelList = [...models];
+    model.deploymentName = value;
+    setModels(modelList);
+  }
+
   return (
     <Dialog open={isOpen} onOpenChange={onClose}>
-      <DialogContent>
+      <DialogContent className="min-w-[375px] w-3/5">
         <DialogHeader>
           <DialogTitle>{t('Add Model')}</DialogTitle>
         </DialogHeader>
@@ -134,6 +139,9 @@ export const ConfigModelModal = (props: IProps) => {
             <TableHeader>
               <TableRow className="pointer-events-none">
                 <TableHead>{t('Model Display Name')}</TableHead>
+                {modelProverId == DBModelProvider.Azure && (
+                  <TableHead>{t('Deployment Name')}</TableHead>
+                )}
                 <TableHead className="w-20">{t('Actions')}</TableHead>
               </TableRow>
             </TableHeader>
@@ -142,13 +150,30 @@ export const ConfigModelModal = (props: IProps) => {
                 <TableRow key={model.modelReferenceId}>
                   <TableCell>
                     {model.referenceName}
+                    {model.isExists && (
+                      <Badge variant="default" className="ml-2">
+                        {t('Existed')}
+                      </Badge>
+                    )}
                     {model.isLegacy && (
                       <Badge variant="destructive" className="ml-2">
-                        {t('Is Legacy')}
+                        {t('Legacy')}
                       </Badge>
                     )}
                   </TableCell>
-                  <TableCell className="flex gap-x-2">
+                  {modelProverId == DBModelProvider.Azure && (
+                    <TableCell>
+                      <Input
+                        className="max-w-[200px]"
+                        disabled={model.isExists}
+                        value={model.deploymentName || ''}
+                        onChange={(e) => {
+                          handleChangeDeploymentName(index, e.target.value);
+                        }}
+                      />
+                    </TableCell>
+                  )}
+                  <TableCell className="flex gap-x-2 items-center">
                     {!model.isExists && (
                       <Button
                         variant="link"
@@ -161,22 +186,18 @@ export const ConfigModelModal = (props: IProps) => {
                         {t('Add Model')}
                       </Button>
                     )}
-                    {model.validated ? (
-                      <span className="text-green-600">{t('Validated')}</span>
-                    ) : (
-                      <div className="flex gap-x-2">
-                        <Button
-                          variant="link"
-                          disabled={model.validating}
-                          className="p-0"
-                          onClick={() => {
-                            handleValidate(index);
-                          }}
-                        >
-                          {t('Validate Model')}
-                        </Button>
-                      </div>
-                    )}
+                    <div className="flex gap-x-2">
+                      <Button
+                        variant="link"
+                        disabled={model.validating}
+                        className="p-0"
+                        onClick={() => {
+                          handleValidate(index);
+                        }}
+                      >
+                        {t('Validate Model')}
+                      </Button>
+                    </div>
                     {model.validateMessage && (
                       <Tips
                         className="h-[28px]"

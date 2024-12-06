@@ -76,7 +76,7 @@ export const ChatBarSettings = () => {
 
       {user?.username && (
         <Popover>
-          <PopoverTrigger className="w-full">
+          <PopoverTrigger className="w-full hover:bg-muted rounded-md">
             <SidebarButton
               className="capitalize"
               text={user?.username}
