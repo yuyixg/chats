@@ -56,7 +56,6 @@ const HomeContent = () => {
     state: { chats, currentMessages, models, user, userModelConfig, settings },
     dispatch,
   } = contextValue;
-  const stopConversationRef = useRef<boolean>(false);
 
   const calcSelectModel = (chats: ChatResult[], models: AdminModelDto[]) => {
     const model = models.find((x) => x.modelId === chats[0]?.modelId);
@@ -394,7 +393,7 @@ const HomeContent = () => {
         <div className="flex h-full w-full bg-background">
           <Chatbar />
           <div className="flex w-full">
-            <Chat stopConversationRef={stopConversationRef} />
+            <Chat />
           </div>
           {settings.showPromptBar && <PromptBar />}
           <ChatSettingsBar />

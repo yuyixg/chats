@@ -3,7 +3,12 @@ import toast from 'react-hot-toast';
 import useTranslation from '@/hooks/useTranslation';
 
 import { getApiUrl } from '@/utils/common';
-import { getLoginUrl, getUserSession } from '@/utils/user';
+import {
+  getLoginUrl,
+  getUserSession,
+  redirectToHome,
+  redirectToLogin,
+} from '@/utils/user';
 
 export type RequestModel = {
   params?: object;
@@ -38,6 +43,33 @@ const readResponse = async (response: Response) => {
   }
 };
 
+const handleErrorResponse = async (err: Response) => {
+  const { t } = useTranslation();
+  const error = await readResponse(err);
+  let message = error?.message || error?.errMessage || error;
+
+  switch (err.status) {
+    case 500:
+      message = 'Internal server error, Please try again later';
+      break;
+    case 403:
+      message = 'Resource denial of authorized access';
+      redirectToHome(1000);
+      break;
+    case 401:
+      redirectToLogin();
+      return;
+    default:
+      message =
+        typeof message === 'string' && message !== ''
+          ? message
+          : 'Operation failed, Please try again later, or contact technical personnel';
+  }
+
+  toast.error(t(message));
+  throw error;
+};
+
 export const useFetch = () => {
   const handleFetch = async (
     url: string,
@@ -45,62 +77,39 @@ export const useFetch = () => {
     signal?: AbortSignal,
   ) => {
     const apiPrefix = getApiUrl();
-    const apiUrl = `${apiPrefix}${url}`;
-    const requestUrl = request?.params ? `${apiUrl}${request.params}` : apiUrl;
+    const requestUrl = `${apiPrefix}${url}${
+      request?.params ? request.params : ''
+    }`;
 
-    const requestBody = request?.body
+    const body = request?.body
       ? request.body instanceof FormData
         ? { ...request, body: request.body }
         : { ...request, body: JSON.stringify(request.body) }
       : request;
 
     const headers = {
-      ...(request?.headers
-        ? request.headers
-        : request?.body && request.body instanceof FormData
-        ? {}
-        : { 'Content-type': 'application/json' }),
+      ...request?.headers,
+      ...(!request?.body || !(request.body instanceof FormData)
+        ? { 'Content-type': 'application/json' }
+        : {}),
+      Authorization: `Bearer ${getUserSession()}`,
     };
 
     return fetch(requestUrl, {
-      ...requestBody,
-      headers: { ...headers, Authorization: `Bearer ${getUserSession()}` },
+      ...body,
+      headers,
       signal,
     })
-      .then((response) => {
+      .then(async (response) => {
         if (!response.ok) {
-          if (response.status === 401) {
-            location.href = getLoginUrl();
-            return;
-          }
-          throw response;
+          await handleErrorResponse(response);
         }
 
         const result = readResponse(response);
         return result;
       })
       .catch(async (err: Response) => {
-        const { t } = useTranslation();
-        const error = await readResponse(err);
-        let message = error?.message || error?.errMessage || error;
-
-        if (err.status === 500) {
-          message = 'Internal server error, Please try again later';
-        } else if (err.status === 403) {
-          message = 'Resource denial of authorized access';
-          setTimeout(() => (location.href = '/'), 1000);
-        } else if (err.status === 401) {
-          location.href = getLoginUrl();
-          return;
-        }
-
-        message =
-          typeof message === 'string' && message !== ''
-            ? message
-            : 'Operation failed, Please try again later, or contact technical personnel';
-
-        toast.error(t(message));
-        throw error;
+        await handleErrorResponse(err);
       });
   };
 

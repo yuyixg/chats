@@ -5,8 +5,6 @@ import useTranslation from '@/hooks/useTranslation';
 import { AdminModelDto } from '@/types/adminApis';
 import { feModelProviders } from '@/types/model';
 
-import { HomeContext } from '@/contexts/Home.context';
-
 import ChatIcon from '@/components/ChatIcon/ChatIcon';
 import { IconChevronDown } from '@/components/Icons';
 import Search from '@/components/Search';
@@ -23,6 +21,7 @@ import {
   DropdownMenuTrigger,
 } from '@/components/ui/dropdown-menu';
 
+import { HomeContext } from '@/contexts/Home.context';
 import { cn } from '@/lib/utils';
 
 const ChangeModel = ({
@@ -72,15 +71,16 @@ const ChangeModel = ({
 
   return (
     <DropdownMenu onOpenChange={handleOpenMenu}>
-      <DropdownMenuTrigger asChild>
-        <Button variant="ghost" className="p-1 m-0 h-auto" disabled={readonly}>
-          <span className={cn('font-medium', className)}>
+      <DropdownMenuTrigger
+        disabled={readonly}
+        className="focus:outline-none hover:bg-muted rounded-sm p-1 m-0 h-auto flex items-center gap-1"
+      >
+        <>
+          <span className={cn('font-medium px-1', className)}>
             {content && content}
           </span>
-          {!readonly && typeof content === 'string' && (
-            <IconChevronDown />
-          )}
-        </Button>
+          {!readonly && typeof content === 'string' && <IconChevronDown />}
+        </>
       </DropdownMenuTrigger>
       <DropdownMenuContent className="w-40">
         <Search

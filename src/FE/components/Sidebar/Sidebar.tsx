@@ -116,27 +116,26 @@ const Sidebar = <T,>({
           className={`group fixed z-20 ${
             side === 'right' ? 'right-2' : 'left-[14px]'
           }`}
-          style={{ top: '4px' }}
+          style={{ top: '8px' }}
         >
-          <button className="pt-1" onClick={toggleOpen}>
+          <Button
+            className="p-0 m-0 h-auto w-auto bg-transparent hover:bg-muted"
+            onClick={toggleOpen}
+          >
             <span data-state="closed">
               <div className="flex items-center justify-center">
                 {side === 'right' ? (
                   <div className="flex flex-col items-center">
-                    <Button variant="ghost">
-                      <IconLayoutSidebarRight size={26} />
-                    </Button>
+                    <IconLayoutSidebarRight size={26} />
                   </div>
                 ) : (
-                  <div className="flex flex-col items-center">
-                    <Button variant="ghost" className="p-1 m-0 h-auto">
-                      <IconLayoutSidebar size={26} />
-                    </Button>
+                  <div className="flex flex-col items-center p-1 m-0 h-auto">
+                    <IconLayoutSidebar size={26} />
                   </div>
                 )}
               </div>
             </span>
-          </button>
+          </Button>
           {hasModel() && (
             <Tips
               trigger={

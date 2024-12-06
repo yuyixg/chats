@@ -1,5 +1,4 @@
 import {
-  MutableRefObject,
   memo,
   useCallback,
   useContext,
@@ -35,11 +34,7 @@ import { cn } from '@/lib/utils';
 import Decimal from 'decimal.js';
 import { v4 as uuidv4 } from 'uuid';
 
-interface Props {
-  stopConversationRef: MutableRefObject<boolean>;
-}
-
-export const Chat = memo(({ stopConversationRef }: Props) => {
+export const Chat = memo(() => {
   const { t } = useTranslation();
 
   const {
@@ -66,7 +61,7 @@ export const Chat = memo(({ stopConversationRef }: Props) => {
 
   const messagesEndRef = useRef<HTMLDivElement>(null);
   const chatContainerRef = useRef<HTMLDivElement>(null);
-  const textareaRef = useRef<HTMLTextAreaElement>(null);
+  const stopConversationRef = useRef<boolean>(false);
 
   const getSelectMessagesLast = () => {
     const selectMessageLength = selectMessages.length - 1;
@@ -323,7 +318,6 @@ export const Chat = memo(({ stopConversationRef }: Props) => {
   useCallback(() => {
     if (autoScrollEnabled) {
       messagesEndRef.current?.scrollIntoView({ behavior: 'smooth' });
-      textareaRef.current?.focus();
     }
   }, [autoScrollEnabled]);
 
@@ -533,7 +527,6 @@ export const Chat = memo(({ stopConversationRef }: Props) => {
         {hasModel() && (
           <ChatInput
             stopConversationRef={stopConversationRef}
-            textareaRef={textareaRef}
             onSend={(message) => {
               const { lastMessage } = getSelectMessagesLast();
               handleSend(message, lastMessage?.id, false);

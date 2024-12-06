@@ -43,7 +43,7 @@ export const OpenSidebarButton = ({ onClick, side }: Props) => {
         side === 'right' ? 'right-2' : 'left-[14px]'
       }`}
       onClick={onClick}
-      style={{ top: '4px', zIndex: 9999999999999 }}
+      style={{ top: '8px', zIndex: 9999 }}
     >
       <button className="pt-1">
         <span data-state="closed">
