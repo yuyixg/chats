@@ -6,7 +6,6 @@ internal static class BasicData
 {
     public static void InsertAll(ChatsDB db)
     {
-        InsertFileContentTypes(db);
         InsertFileServiceTypes(db);
         InsertChatRoles(db);
         InsertCurrencyRates(db);
@@ -16,23 +15,6 @@ internal static class BasicData
         InsertTransactionTypes(db);
         InsertModelReferences(db);
         InsertModelProviders(db);
-    }
-
-    private static void InsertFileContentTypes(ChatsDB db)
-    {
-        // Generated from data, hash: 6a885ff7888729f8a2c3e3928fd9bc5c1785bc3d8567efd842ff182902eab893
-        db.FileContentTypes.AddRange(
-        [
-            new(){ Id=1, ContentType="image/jpeg",      },
-            new(){ Id=2, ContentType="image/png",       },
-            new(){ Id=3, ContentType="image/gif",       },
-            new(){ Id=4, ContentType="image/bmp",       },
-            new(){ Id=5, ContentType="image/svg+xml",   },
-            new(){ Id=6, ContentType="image/webp",      },
-            new(){ Id=7, ContentType="image/tiff",      },
-            new(){ Id=8, ContentType="image/heic",      },
-            new(){ Id=9, ContentType="application/pdf", }
-        ]);
     }
 
     private static void InsertFileServiceTypes(ChatsDB db)
@@ -125,7 +107,7 @@ internal static class BasicData
 
     private static void InsertModelReferences(ChatsDB db)
     {
-        // Generated from data, hash: 72d3a15e6337fecb401318e7441dd32991aa8e9ad06f972b8cab646526847f00
+        // Generated from data, hash: 402f5ef77477ae6e08aa26ddfb7d4d900742206573e59d985caa51438291c7fd
         db.ModelReferences.AddRange(
         [
             new(){ Id=0,   ProviderId=0, Name="Test",                        ShortName=null,            IsLegacy=false, MinTemperature=0.00M, MaxTemperature=2.00M, AllowSearch=false, AllowVision=false, AllowSystemPrompt=true,  AllowStreaming=true,  ContextWindow=2048,     MaxResponseTokens=2048,   TokenizerId=1,    InputTokenPrice1M=0.00000M,   OutputTokenPrice1M=0.00000M,   CurrencyCode="RMB", },
@@ -185,7 +167,7 @@ internal static class BasicData
             new(){ Id=514, ProviderId=5, Name="gpt-4o-mini-2024-07-18",      ShortName="gpt-4o",        IsLegacy=false, MinTemperature=0.00M, MaxTemperature=2.00M, AllowSearch=false, AllowVision=true,  AllowSystemPrompt=true,  AllowStreaming=true,  ContextWindow=128000,   MaxResponseTokens=16384,  TokenizerId=2,    InputTokenPrice1M=0.15000M,   OutputTokenPrice1M=0.60000M,   CurrencyCode="USD", },
             new(){ Id=515, ProviderId=5, Name="gpt-4o-2024-05-13",           ShortName="gpt-4o",        IsLegacy=true,  MinTemperature=0.00M, MaxTemperature=2.00M, AllowSearch=false, AllowVision=true,  AllowSystemPrompt=true,  AllowStreaming=true,  ContextWindow=128000,   MaxResponseTokens=4096,   TokenizerId=2,    InputTokenPrice1M=5.00000M,   OutputTokenPrice1M=15.00000M,  CurrencyCode="USD", },
             new(){ Id=516, ProviderId=5, Name="gpt-4o-2024-08-06",           ShortName="gpt-4o",        IsLegacy=false, MinTemperature=0.00M, MaxTemperature=2.00M, AllowSearch=false, AllowVision=true,  AllowSystemPrompt=true,  AllowStreaming=true,  ContextWindow=128000,   MaxResponseTokens=16384,  TokenizerId=2,    InputTokenPrice1M=2.50000M,   OutputTokenPrice1M=10.00000M,  CurrencyCode="USD", },
-            new(){ Id=517, ProviderId=1, Name="gpt-4o-2024-11-20",           ShortName="gpt-4o",        IsLegacy=false, MinTemperature=0.00M, MaxTemperature=2.00M, AllowSearch=false, AllowVision=true,  AllowSystemPrompt=true,  AllowStreaming=true,  ContextWindow=128000,   MaxResponseTokens=16384,  TokenizerId=2,    InputTokenPrice1M=2.50000M,   OutputTokenPrice1M=10.00000M,  CurrencyCode="USD", },
+            new(){ Id=517, ProviderId=5, Name="gpt-4o-2024-11-20",           ShortName="gpt-4o",        IsLegacy=false, MinTemperature=0.00M, MaxTemperature=2.00M, AllowSearch=false, AllowVision=true,  AllowSystemPrompt=true,  AllowStreaming=true,  ContextWindow=128000,   MaxResponseTokens=16384,  TokenizerId=2,    InputTokenPrice1M=2.50000M,   OutputTokenPrice1M=10.00000M,  CurrencyCode="USD", },
             new(){ Id=600, ProviderId=6, Name="ERNIE-4.0-Turbo-8K",          ShortName=null,            IsLegacy=false, MinTemperature=0.00M, MaxTemperature=1.00M, AllowSearch=true,  AllowVision=false, AllowSystemPrompt=true,  AllowStreaming=true,  ContextWindow=8192,     MaxResponseTokens=2048,   TokenizerId=null, InputTokenPrice1M=30.00000M,  OutputTokenPrice1M=90.00000M,  CurrencyCode="RMB", },
             new(){ Id=601, ProviderId=6, Name="ERNIE-4.0-8K",                ShortName=null,            IsLegacy=false, MinTemperature=0.00M, MaxTemperature=1.00M, AllowSearch=true,  AllowVision=false, AllowSystemPrompt=true,  AllowStreaming=true,  ContextWindow=8192,     MaxResponseTokens=2048,   TokenizerId=null, InputTokenPrice1M=20.00000M,  OutputTokenPrice1M=60.00000M,  CurrencyCode="RMB", },
             new(){ Id=602, ProviderId=6, Name="ERNIE-3.5-8K",                ShortName=null,            IsLegacy=false, MinTemperature=0.00M, MaxTemperature=1.00M, AllowSearch=true,  AllowVision=false, AllowSystemPrompt=true,  AllowStreaming=true,  ContextWindow=8192,     MaxResponseTokens=2048,   TokenizerId=null, InputTokenPrice1M=0.80000M,   OutputTokenPrice1M=2.00000M,   CurrencyCode="RMB", },

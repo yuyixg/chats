@@ -91,6 +91,15 @@ public class InitService(IServiceScopeFactory scopeFactory)
             IsSystem = true,
             Name = "Default Prompt",
         });
+        db.FileServices.Add(new()
+        {
+            Configs = "./AppData/Files",
+            FileServiceTypeId = (byte)DBFileServiceType.Local,
+            IsDefault = true, 
+            Name = "Local Files",
+            CreatedAt = DateTime.UtcNow,
+            UpdatedAt = DateTime.UtcNow,
+        });
         await db.SaveChangesAsync(cancellationToken);
     }
 }
