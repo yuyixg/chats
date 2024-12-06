@@ -5,6 +5,7 @@ using Chats.BE.Services.ChatServices.Implementations.DashScope;
 using Chats.BE.Services.ChatServices.Implementations.GLM;
 using Chats.BE.Services.ChatServices.Implementations.Hunyuan;
 using Chats.BE.Services.ChatServices.Implementations.Kimi;
+using Chats.BE.Services.ChatServices.Implementations.LingYi;
 using Chats.BE.Services.ChatServices.Implementations.OpenAI;
 using Chats.BE.Services.ChatServices.Implementations.QianFan;
 using Chats.BE.Services.ChatServices.Implementations.Test;
@@ -28,7 +29,7 @@ public class ChatFactory(ILogger<ChatFactory> logger)
             DBModelProvider.Moonshot => new KimiChatService(model),
             DBModelProvider.HunYuan => new HunyuanChatService(model),
             DBModelProvider.Sparkdesk => throw new NotImplementedException("Spark model is not implemented"),
-            DBModelProvider.LingYi => throw new NotImplementedException("LingYi model is not implemented"),
+            DBModelProvider.LingYi => new LingYiChatService(model),
             _ => throw new NotSupportedException($"Unknown model provider: {modelProvider}")
         };
         return cs;

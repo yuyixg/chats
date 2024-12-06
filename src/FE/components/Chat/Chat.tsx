@@ -392,7 +392,9 @@ export const Chat = memo(() => {
                         ...userModelConfig,
                         enableSearch: model.allowSearch,
                       });
-                      putUserChatModel(selectChat.id, model.modelId);
+                      if (selectChat.id) {
+                        putUserChatModel(selectChat.id, model.modelId);
+                      }
                     }}
                   />
                 )}
