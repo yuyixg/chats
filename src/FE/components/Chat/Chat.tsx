@@ -394,6 +394,10 @@ export const Chat = memo(({ stopConversationRef }: Props) => {
                         field: 'selectModel',
                         value: model,
                       });
+                      handleUpdateUserModelConfig({
+                        ...userModelConfig,
+                        enableSearch: model.allowSearch,
+                      });
                       putUserChatModel(selectChat.id, model.modelId);
                     }}
                   />
@@ -408,8 +412,7 @@ export const Chat = memo(({ stopConversationRef }: Props) => {
                 {hasModel() && (
                   <div className="flex h-full flex-col space-y-4 rounded-lg border border-neutral-200 p-4 dark:border-neutral-600">
                     <ModelSelect />
-                    {selectModel &&
-                      selectModel.allowSystemPrompt &&
+                    {selectModel?.allowSystemPrompt &&
                       userModelConfig?.prompt && (
                         <SystemPrompt
                           currentPrompt={userModelConfig?.prompt}
@@ -421,8 +424,8 @@ export const Chat = memo(({ stopConversationRef }: Props) => {
                           onChangePrompt={onChangePrompt}
                         />
                       )}
-                    {userModelConfig?.temperature !== undefined &&
-                      selectModel?.allowTemperature && (
+                    {selectModel?.allowTemperature &&
+                      userModelConfig?.temperature !== undefined && (
                         <TemperatureSlider
                           label={t('Temperature')}
                           min={0}
@@ -435,17 +438,18 @@ export const Chat = memo(({ stopConversationRef }: Props) => {
                           }
                         />
                       )}
-                    {userModelConfig?.enableSearch != undefined && (
-                      <EnableNetworkSearch
-                        label={t('Internet Search')}
-                        enable={userModelConfig.enableSearch}
-                        onChange={(enableSearch) => {
-                          handleUpdateUserModelConfig({
-                            enableSearch,
-                          });
-                        }}
-                      />
-                    )}
+                    {selectModel?.allowSearch &&
+                      userModelConfig?.enableSearch != undefined && (
+                        <EnableNetworkSearch
+                          label={t('Internet Search')}
+                          enable={userModelConfig.enableSearch}
+                          onChange={(enableSearch) => {
+                            handleUpdateUserModelConfig({
+                              enableSearch,
+                            });
+                          }}
+                        />
+                      )}
                     {/* <Button
                       onClick={() => {
                         handleUpdateSettings('showChatSettingBar', true);
