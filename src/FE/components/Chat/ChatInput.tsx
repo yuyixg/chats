@@ -181,10 +181,13 @@ export const ChatInput = ({
     if (parsedVariables.length > 0) {
       setIsModalVisible(true);
     } else {
-      setContent((prevContent) => {
-        const updatedContent = prevContent.text?.replace(/\/\w*$/, formatted);
-        return { ...prevContent, text: updatedContent };
+      const text = content.text?.replace(/\/\w*$/, formatted);
+
+      setContent({
+        ...content,
+        text,
       });
+
       updatePromptListVisibility(formatted);
     }
   };
