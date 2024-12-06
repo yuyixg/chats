@@ -13,6 +13,9 @@ public record PossibleModelDto
     [JsonPropertyName("isExists")]
     public required bool IsExists { get; init; }
 
+    [JsonPropertyName("deploymentName")]
+    public required string? DeploymentName { get; init; }
+
     [JsonPropertyName("isLegacy")]
     public required bool IsLegacy { get; init; }
 }
