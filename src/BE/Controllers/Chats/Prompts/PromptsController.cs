@@ -1,7 +1,7 @@
 ﻿using Chats.BE.Controllers.Chats.Prompts.Dtos;
 using Chats.BE.DB;
 using Chats.BE.Infrastructure;
-using Chats.BE.Services.Conversations;
+using Chats.BE.Services.ChatServices;
 using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Mvc;
 using Microsoft.EntityFrameworkCore;
@@ -97,8 +97,8 @@ public class PromptsController(ChatsDB db, CurrentUser currentUser) : Controller
             IsSystem = consolidated.IsSystem,
         } : new PromptDto()
         {
-            Content = ConversationService.DefaultPrompt,
-            Temperature = ConversationService.DefaultTemperature,
+            Content = ChatService.DefaultPrompt,
+            Temperature = ChatService.DefaultTemperature,
             Id = -1,
             IsDefault = true,
             Name = "Default",
