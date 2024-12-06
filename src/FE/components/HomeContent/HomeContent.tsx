@@ -291,7 +291,7 @@ const HomeContent = () => {
   const getChats = (params: GetChatsParams, modelList?: AdminModelDto[]) => {
     const { page, pageSize } = params;
     getChatsByPaging(params).then((data) => {
-      const { rows, count } = data;
+      const { rows, count } = data || { rows: [], count: 0 };
       dispatch({
         field: 'chatsPaging',
         value: { count, page, pageSize },
