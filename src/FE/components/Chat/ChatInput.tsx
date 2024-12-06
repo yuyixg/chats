@@ -25,13 +25,10 @@ import {
   IconLoader,
   IconPaperclip,
   IconSend,
-  IconSquarePlus,
   IconStopFilled,
-  IconTrash,
 } from '@/components/Icons/index';
 import PasteUpload from '@/components/PasteUpload/PasteUpload';
 
-import Spinner from '../Spinner';
 import { Button } from '../ui/button';
 import { PromptList } from './PromptList';
 import { VariableModal } from './VariableModal';
@@ -283,10 +280,12 @@ export const ChatInput = ({
                       <button
                         onClick={() => {
                           setContent((pre) => {
-                            const image = pre.fileIds?.filter((x) => x !== img);
+                            const fileIds = pre.fileIds?.filter(
+                              (x) => x !== img,
+                            );
                             return {
                               text: pre.text,
-                              image,
+                              fileIds,
                             };
                           });
                         }}
