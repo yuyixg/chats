@@ -30,6 +30,11 @@ internal static class MaskedKeyUtils
             return null;
         }
 
+        if (!IsProbablyValidJson(jsonKey))
+        {
+            return ToMaskedNull(jsonKey);
+        }
+
         try
         {
             using JsonDocument document = JsonDocument.Parse(jsonKey);
@@ -73,6 +78,13 @@ internal static class MaskedKeyUtils
             // 解析失败，可能是无效的 JSON，直接对整个字符串进行处理
             return ToMaskedNull(jsonKey);
         }
+    }
+
+    private static bool IsProbablyValidJson(string json)
+    {
+        json = json.Trim();
+        return (json.StartsWith('{') && json.EndsWith('}')) ||
+               (json.StartsWith('[') && json.EndsWith(']'));
     }
 
     public static bool SeemsMasked(this string? key)

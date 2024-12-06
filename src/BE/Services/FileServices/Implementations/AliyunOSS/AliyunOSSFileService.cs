@@ -1,21 +1,28 @@
-﻿
+﻿using Aliyun.OSS;
 
 namespace Chats.BE.Services.FileServices.Implementations.AliyunOSS;
 
-public class AliyunOSSFileService(AliyunOssConfig aliyunOssConfig) : IFileService
+public class AliyunOSSFileService(AliyunOssConfig config) : IFileService
 {
+    private readonly OssClient _oss = new(config.Endpoint, config.AccessKeyId, config.AccessKeySecret);
+
     public Uri CreateDownloadUrl(CreateDownloadUrlRequest req)
     {
-        throw new NotImplementedException();
+        return _oss.GeneratePresignedUri(config.Bucket, req.StorageKey, req.ValidEnd, SignHttpMethod.Get);
     }
 
     public Task<Stream> Download(string storageKey, CancellationToken cancellationToken)
     {
-        throw new NotImplementedException();
+        cancellationToken.ThrowIfCancellationRequested();
+        OssObject obj = _oss.GetObject(config.Bucket, storageKey);
+        return Task.FromResult(obj.ResponseStream);
     }
 
     public Task<string> Upload(FileUploadRequest request, CancellationToken cancellationToken)
     {
-        throw new NotImplementedException();
+        cancellationToken.ThrowIfCancellationRequested();
+        SuggestedStorageInfo ssi = SuggestedStorageInfo.FromFileName(request.FileName);
+        _ = _oss.PutObject(config.Bucket, ssi.StorageKey, request.Stream);
+        return Task.FromResult(ssi.StorageKey);
     }
 }
