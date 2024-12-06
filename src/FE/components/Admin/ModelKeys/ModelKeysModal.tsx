@@ -171,7 +171,7 @@ export const ModelKeysModal = (props: IProps) => {
 
   return (
     <Dialog open={isOpen} onOpenChange={onClose}>
-      <DialogContent>
+      <DialogContent className="min-w-[375px] w-3/5">
         <DialogHeader>
           <DialogTitle>
             {selected ? t('Edit Model Keys') : t('Add Model Keys')}

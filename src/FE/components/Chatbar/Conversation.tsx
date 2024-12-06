@@ -12,8 +12,6 @@ import useTranslation from '@/hooks/useTranslation';
 import { ChatResult } from '@/types/clientApis';
 import { DBModelProvider } from '@/types/model';
 
-import { HomeContext } from '@/contexts/Home.context';
-
 import SidebarActionButton from '@/components/Button/SidebarActionButton';
 import { SharedMessageModal } from '@/components/Chat/SharedMessageModal';
 import ChatIcon from '@/components/ChatIcon/ChatIcon';
@@ -35,6 +33,7 @@ import {
 } from '@/components/ui/dropdown-menu';
 
 import { deleteChats, putChats } from '@/apis/clientApis';
+import { HomeContext } from '@/contexts/Home.context';
 
 interface Props {
   chat: ChatResult;
@@ -172,11 +171,9 @@ export const ConversationComponent = ({ chat }: Props) => {
           <DropdownMenu>
             <DropdownMenuTrigger
               disabled={messageIsStreaming}
-              className="focus:outline-none"
+              className="focus:outline-none p-[6px]"
             >
-              <Button variant="ghost" className="p-[6px] m-0 h-auto hover:opacity-50">
-                <IconDots size={16} />
-              </Button>
+              <IconDots className="hover:opacity-50" size={16} />
             </DropdownMenuTrigger>
             <DropdownMenuContent className="w-42">
               <DropdownMenuItem

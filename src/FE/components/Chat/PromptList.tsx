@@ -1,4 +1,4 @@
-import { FC, MutableRefObject } from 'react';
+import { ForwardedRef, MutableRefObject, forwardRef } from 'react';
 
 import { Prompt } from '@/types/prompt';
 
@@ -10,13 +10,13 @@ interface Props {
   promptListRef: MutableRefObject<HTMLUListElement | null>;
 }
 
-export const PromptList: FC<Props> = ({
+export const PromptList = ({
   prompts,
   activePromptIndex,
+  promptListRef,
   onSelect,
   onMouseOver,
-  promptListRef,
-}) => {
+}: Props) => {
   return (
     <ul
       ref={promptListRef}

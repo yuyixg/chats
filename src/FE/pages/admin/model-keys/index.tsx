@@ -38,7 +38,6 @@ export default function ModelKeys() {
     getModelKeys().then((data) => {
       setServices(data);
       setIsOpen(false);
-      setSelected(null);
       setLoading(false);
     });
   };
@@ -124,6 +123,7 @@ export default function ModelKeys() {
       }
       <ConfigModelModal
         modelKeyId={modelKeyId!}
+        modelProverId={selected?.modelProviderId!}
         isOpen={isOpenConfigModel}
         onClose={handleClose}
         onSuccessful={init}

@@ -1,6 +1,7 @@
 import {
   KeyboardEvent,
   MutableRefObject,
+  forwardRef,
   useCallback,
   useContext,
   useEffect,
@@ -42,24 +43,25 @@ interface Props {
   onScrollDownClick: () => void;
   onChangePrompt: (prompt: Prompt) => void;
   model: AdminModelDto;
-  stopConversationRef: MutableRefObject<boolean>;
-  textareaRef: MutableRefObject<HTMLTextAreaElement | null>;
   showScrollDownButton: boolean;
+  stopConversationRef: MutableRefObject<boolean>;
 }
 
 export const ChatInput = ({
   onSend,
   onScrollDownClick,
   onChangePrompt,
-  stopConversationRef,
-  textareaRef,
   showScrollDownButton,
+  stopConversationRef,
 }: Props) => {
   const { t } = useTranslation();
 
   const {
     state: { selectModel, messageIsStreaming, prompts, selectChat, chatError },
   } = useContext(HomeContext);
+
+  const textareaRef = useRef<HTMLTextAreaElement>(null);
+  const promptListRef = useRef<HTMLUListElement | null>(null);
 
   const [content, setContent] = useState<Content>({
     text: '',
@@ -72,7 +74,6 @@ export const ChatInput = ({
   const [promptInputValue, setPromptInputValue] = useState('');
   const [variables, setVariables] = useState<string[]>([]);
   const [isModalVisible, setIsModalVisible] = useState(false);
-  const promptListRef = useRef<HTMLUListElement | null>(null);
   const filteredPrompts = prompts.filter((prompt) =>
     prompt.name.toLowerCase().includes(promptInputValue.toLowerCase()),
   );

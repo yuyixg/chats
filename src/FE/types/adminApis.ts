@@ -367,6 +367,8 @@ export interface PossibleModelResult {
   modelReferenceId: number;
   isExists: boolean;
   isLegacy: boolean;
+
+  deploymentName: string | null;
 }
 
 export interface ValidateModelParams {

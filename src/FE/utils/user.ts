@@ -36,6 +36,18 @@ export const getLoginUrl = () => {
   return '/login';
 };
 
+export const redirectToLogin = () => {
+  location.href = getLoginUrl();
+};
+
+export const redirectToHome = (ms?: number) => {
+  const toHome = () => {
+    location.href = '/';
+  };
+
+  ms ? setTimeout(toHome, ms) : toHome();
+};
+
 export const setUserSession = (sessionId: string) => {
   let expires = new Date();
   expires.setMinutes(expires.getMinutes() + 10080);
