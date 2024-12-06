@@ -2,10 +2,30 @@
 
 namespace Chats.BE.Services.FileServices;
 
+/// <summary>
+/// Represents a request to upload a file.
+/// </summary>
+/// <remarks>
+/// The <see cref="Stream"/> property will not be disposed by the file service.
+/// </remarks>
 public record FileUploadRequest
 {
+    /// <summary>
+    /// Gets the name of the file.
+    /// </summary>
     public required string FileName { get; init; }
+
+    /// <summary>
+    /// Gets the content type of the file.
+    /// </summary>
     public required string ContentType { get; init; }
+
+    /// <summary>
+    /// Gets the stream containing the file data.
+    /// </summary>
+    /// <remarks>
+    /// The stream will not be disposed by the file service.
+    /// </remarks>
     public required Stream Stream { get; init; }
 }
 
@@ -13,8 +33,8 @@ public record CreateDownloadUrlRequest
 {
     public required int FileId { get; init; }
     public required string StorageKey { get; init; }
-
     public TimeSpan ValidPeriod { get; init; } = TimeSpan.FromHours(2);
+    public DateTime ValidEnd => DateTime.UtcNow + ValidPeriod;
 
     public static CreateDownloadUrlRequest FromFile(DB.File file)
     {

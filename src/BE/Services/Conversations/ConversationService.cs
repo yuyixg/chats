@@ -10,7 +10,7 @@ namespace Chats.BE.Services.Conversations;
 
 public abstract partial class ConversationService : IDisposable
 {
-    public const float DefaultTemperature = 0.8f;
+    public const float DefaultTemperature = 0.5f;
     public const string DefaultPrompt = "你是{{MODEL_NAME}}，请仔细遵循用户指令并认真回复，当前日期: {{CURRENT_DATE}}";
 
     internal protected Model Model { get; }

@@ -38,7 +38,7 @@ public class AwsS3FileService : IFileService
         {
             BucketName = _config.Bucket,
             Key = req.StorageKey,
-            Expires = DateTime.UtcNow + req.ValidPeriod,
+            Expires = req.ValidEnd,
             Verb = HttpVerb.GET
         });
         return new Uri(url);

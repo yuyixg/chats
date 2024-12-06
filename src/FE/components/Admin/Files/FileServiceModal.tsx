@@ -152,8 +152,8 @@ export const FileServiceModal = (props: IProps) => {
 
   const formatConfigs = (config: string) => {
     try {
-      JSON.parse(config);
-      return config;
+      const parsed = JSON.parse(config);
+      return JSON.stringify(parsed, null, 2);
     } catch {
       return config;
     }
@@ -182,6 +182,7 @@ export const FileServiceModal = (props: IProps) => {
         getFileServiceTypeInitialConfig(fileServiceTypeId).then((res) => {
           form.setValue('configs', formatConfigs(res));
         });
+        form.setValue('name', t(feFileServiceTypes[fileServiceTypeId].name));
       }
     });
     return () => subscription.unsubscribe();
