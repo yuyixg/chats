@@ -1,21 +1,33 @@
-﻿
+﻿using Azure.Storage.Blobs;
+using Azure.Storage.Blobs.Models;
+using Azure.Storage.Sas;
 
 namespace Chats.BE.Services.FileServices.Implementations.AzureBlobStorage;
 
-public class AzureBlobStorageFileService(string azureStorageConnectionString) : IFileService
+public class AzureBlobStorageFileService(AzureBlobStorageConfig config) : IFileService
 {
+    private readonly BlobContainerClient _containerClient = new(config.ConnectionString, config.ContainerName);
+
     public Uri CreateDownloadUrl(CreateDownloadUrlRequest req)
     {
-        throw new NotImplementedException();
+        BlobClient blobClient = _containerClient.GetBlobClient(req.StorageKey);
+        return blobClient.GenerateSasUri(BlobSasPermissions.Read, req.ValidEnd);
     }
 
     public Task<Stream> Download(string storageKey, CancellationToken cancellationToken)
     {
-        throw new NotImplementedException();
+        BlobClient blobClient = _containerClient.GetBlobClient(storageKey);
+        return blobClient.OpenReadAsync(new BlobOpenReadOptions(allowModifications: false), cancellationToken);
     }
 
-    public Task<string> Upload(FileUploadRequest request, CancellationToken cancellationToken)
+    public async Task<string> Upload(FileUploadRequest request, CancellationToken cancellationToken)
     {
-        throw new NotImplementedException();
+        SuggestedStorageInfo suggestedStorageInfo = SuggestedStorageInfo.FromFileName(request.FileName);
+        BlobClient blobClient = _containerClient.GetBlobClient(suggestedStorageInfo.StorageKey);
+        _ = await blobClient.UploadAsync(request.Stream, new BlobUploadOptions
+        {
+            HttpHeaders = new BlobHttpHeaders { ContentType = request.ContentType },
+        }, cancellationToken);
+        return suggestedStorageInfo.StorageKey;
     }
 }

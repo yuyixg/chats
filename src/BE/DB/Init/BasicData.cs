@@ -20,30 +20,31 @@ internal static class BasicData
 
     private static void InsertFileContentTypes(ChatsDB db)
     {
-        // Generated from data, hash: 00da6e3e68293772044e11ac14d834ed6b065e0b3d4df85afbb29a4811ea3a56
+        // Generated from data, hash: 6a885ff7888729f8a2c3e3928fd9bc5c1785bc3d8567efd842ff182902eab893
         db.FileContentTypes.AddRange(
         [
-            new(){ Id=1, ContentType="image/jpeg",    },
-            new(){ Id=2, ContentType="image/png",     },
-            new(){ Id=3, ContentType="image/gif",     },
-            new(){ Id=4, ContentType="image/bmp",     },
-            new(){ Id=5, ContentType="image/svg+xml", },
-            new(){ Id=6, ContentType="image/webp",    },
-            new(){ Id=7, ContentType="image/tiff",    },
-            new(){ Id=8, ContentType="image/heic",    }
+            new(){ Id=1, ContentType="image/jpeg",      },
+            new(){ Id=2, ContentType="image/png",       },
+            new(){ Id=3, ContentType="image/gif",       },
+            new(){ Id=4, ContentType="image/bmp",       },
+            new(){ Id=5, ContentType="image/svg+xml",   },
+            new(){ Id=6, ContentType="image/webp",      },
+            new(){ Id=7, ContentType="image/tiff",      },
+            new(){ Id=8, ContentType="image/heic",      },
+            new(){ Id=9, ContentType="application/pdf", }
         ]);
     }
 
     private static void InsertFileServiceTypes(ChatsDB db)
     {
-        // Generated from data, hash: 9187cf7c6622d5341c31b350377cb545d1fef17d3ecd43401bad0be964e8b043
+        // Generated from data, hash: 639406aab3eda8539e3adcc6be70809c19a4e7e557a309c7d4fcaadb0281a486
         db.FileServiceTypes.AddRange(
         [
-            new(){ Id=0, Name="Local",              InitialConfig="./AppData/Files",                                                                                                                                             },
-            new(){ Id=1, Name="Minio",              InitialConfig="""{"endpoint": "https://minio.example.com", "accessKey": "your-access-key", "secretKey": "your-secret-key", "bucket": "your-bucket", "region": null}""",      },
-            new(){ Id=2, Name="AWS S3",             InitialConfig="""{"region": "ap-southeast-1", "accessKeyId": "your-access-key-id", "secretAccessKey": "your-secret-access-key", "bucket": "your-bucket"}""",                 },
-            new(){ Id=3, Name="Aliyun OSS",         InitialConfig="""{"endpoint": "oss-cn-hangzhou.aliyuncs.com", "accessKeyId": "your-access-key-id", "accessKeySecret": "your-access-key-secret", "bucket": "your-bucket"}""", },
-            new(){ Id=4, Name="Azure Blob Storage", InitialConfig="DefaultEndpointsProtocol=https;AccountName=your-account-name;AccountKey=your-account-key;EndpointSuffix=core.windows.net",                                    }
+            new(){ Id=0, Name="Local",              InitialConfig="./AppData/Files",                                                                                                                                                                            },
+            new(){ Id=1, Name="Minio",              InitialConfig="""{"endpoint": "https://minio.example.com", "accessKey": "your-access-key", "secretKey": "your-secret-key", "bucket": "your-bucket", "region": null}""",                                     },
+            new(){ Id=2, Name="AWS S3",             InitialConfig="""{"region": "ap-southeast-1", "accessKeyId": "your-access-key-id", "secretAccessKey": "your-secret-access-key", "bucket": "your-bucket"}""",                                                },
+            new(){ Id=3, Name="Aliyun OSS",         InitialConfig="""{"endpoint": "oss-cn-hangzhou.aliyuncs.com", "accessKeyId": "your-access-key-id", "accessKeySecret": "your-access-key-secret", "bucket": "your-bucket"}""",                                },
+            new(){ Id=4, Name="Azure Blob Storage", InitialConfig="""{"connectionString": "DefaultEndpointsProtocol=https;AccountName=your-account-name;AccountKey=your-account-key;EndpointSuffix=core.windows.net", "containerName": "YourContainerName"}""", }
         ]);
     }
 

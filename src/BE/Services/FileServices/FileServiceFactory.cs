@@ -34,7 +34,7 @@ public class FileServiceFactory(HostUrlService hostUrlService, IUrlEncryptionSer
             DBFileServiceType.Minio => new MinioFileService(JsonSerializer.Deserialize<MinioConfig>(config)!),
             DBFileServiceType.AwsS3 => new AwsS3FileService(JsonSerializer.Deserialize<AwsS3Config>(config)!),
             DBFileServiceType.AliyunOSS => new AliyunOSSFileService(JsonSerializer.Deserialize<AliyunOssConfig>(config)!),
-            DBFileServiceType.AzureBlobStorage => new AzureBlobStorageFileService(config),
+            DBFileServiceType.AzureBlobStorage => new AzureBlobStorageFileService(JsonSerializer.Deserialize<AzureBlobStorageConfig>(config)!),
             _ => throw new ArgumentException($"Unsupported file service type: {fileServiceType}")
         };
     }

@@ -195,20 +195,19 @@ public class ModelKeysController(ChatsDB db) : ControllerBase
             return NotFound();
         }
 
-        HashSet<short> existingModelRefIds = modelKey.Models
-            .Select(x => x.ModelReferenceId)
-            .ToHashSet();
-
         PossibleModelDto[] readyRefs = await db.ModelReferences
             .Where(x => x.ProviderId == modelKey.ModelProviderId)
             .OrderBy(x => x.Name)
             .Select(x => new PossibleModelDto()
             {
-                IsExists = x.Models.Any(m => m.ModelKeyId == modelKeyId),
+                DeploymentName = x.Models.FirstOrDefault(m => m.ModelKeyId == modelKeyId)!.DeploymentName,
                 ReferenceId = x.Id,
                 ReferenceName = x.Name,
                 IsLegacy = x.IsLegacy,
+                IsExists = x.Models.Any(m => m.ModelKeyId == modelKeyId),
             })
+            .OrderBy(x => (x.IsLegacy ? 1 : 0) + (x.IsExists ? 2 : 0))
+            .ThenByDescending(x => x.ReferenceId)
             .ToArrayAsync(cancellationToken);
 
         return Ok(readyRefs);

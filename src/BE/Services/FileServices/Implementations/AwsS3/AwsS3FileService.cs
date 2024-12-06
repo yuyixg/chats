@@ -1,34 +1,22 @@
-﻿using Amazon;
-using Amazon.S3;
+﻿using Amazon.S3;
 using Amazon.S3.Model;
 
 namespace Chats.BE.Services.FileServices.Implementations.AwsS3;
 
 public class AwsS3FileService : IFileService
 {
-    private readonly IHaveBucket _config;
+    private readonly string _bucketName;
     private readonly AmazonS3Client _s3;
 
     public AwsS3FileService(AwsS3Config config)
     {
-        _config = config;
-        if (config.AccessKeyId == null)
-        {
-            // auto load from default environment profile
-            _s3 = new();
-        }
-        else
-        {
-            _s3 = new(config.AccessKeyId, config.SecretAccessKey, new AmazonS3Config
-            {
-                RegionEndpoint = RegionEndpoint.GetBySystemName(config.Region)
-            });
-        }
+        _bucketName = config.Bucket;
+        _s3 = config.CreateS3();
     }
 
-    public AwsS3FileService(IHaveBucket config, AmazonS3Client s3)
+    public AwsS3FileService(string bucketName, AmazonS3Client s3)
     {
-        _config = config;
+        _bucketName = bucketName;
         _s3 = s3;
     }
 
@@ -36,9 +24,9 @@ public class AwsS3FileService : IFileService
     {
         string url = _s3.GetPreSignedURL(new GetPreSignedUrlRequest
         {
-            BucketName = _config.Bucket,
+            BucketName = _bucketName,
             Key = req.StorageKey,
-            Expires = req.ValidEnd,
+            Expires = req.ValidEnd.UtcDateTime,
             Verb = HttpVerb.GET
         });
         return new Uri(url);
@@ -48,7 +36,7 @@ public class AwsS3FileService : IFileService
     {
         GetObjectResponse resp = await _s3.GetObjectAsync(new GetObjectRequest
         {
-            BucketName = _config.Bucket,
+            BucketName = _bucketName,
             Key = storageKey
         }, cancellationToken);
         return resp.ResponseStream;
@@ -59,7 +47,7 @@ public class AwsS3FileService : IFileService
         SuggestedStorageInfo ssi = SuggestedStorageInfo.FromFileName(request.FileName);
         _ = await _s3.PutObjectAsync(new PutObjectRequest()
         {
-            BucketName = _config.Bucket,
+            BucketName = _bucketName,
             Key = ssi.StorageKey,
             InputStream = request.Stream,
             ContentType = request.ContentType
