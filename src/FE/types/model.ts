@@ -15,6 +15,7 @@ export enum DBModelProvider {
   QianWen = 7,
   Spark = 8,
   ZhiPuAI = 9,
+  DeepSeek = 10,
 }
 
 export type FEModelProvider = {
@@ -34,6 +35,7 @@ export const feModelProviders: FEModelProvider[] = [
   { id: 7, name: 'DashScope', icon: '/logos/qianwen.svg' },
   { id: 8, name: 'Xunfei SparkDesk', icon: '/logos/spark.svg' },
   { id: 9, name: 'Zhipu AI', icon: '/logos/zhipuai.svg' },
+  { id: 10, name: 'DeepSeek', icon: '/logos/deepseek.svg' },
 ];
 
 export interface ChatModelFileConfig {

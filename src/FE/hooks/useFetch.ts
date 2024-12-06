@@ -102,7 +102,7 @@ export const useFetch = () => {
     })
       .then(async (response) => {
         if (!response.ok) {
-          await handleErrorResponse(response);
+          throw response;
         }
 
         const result = readResponse(response);

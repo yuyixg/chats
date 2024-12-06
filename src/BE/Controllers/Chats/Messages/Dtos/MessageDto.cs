@@ -1,6 +1,6 @@
 ﻿using Chats.BE.DB;
 using Chats.BE.DB.Enums;
-using Chats.BE.Services.Conversations;
+using Chats.BE.Services.ChatServices;
 using Chats.BE.Services.FileServices;
 using Chats.BE.Services.UrlEncryption;
 using System.Text.Json.Serialization;

@@ -29,7 +29,7 @@ interface Props {
 export const SystemPrompt: FC<Props> = ({
   currentPrompt,
   prompts,
-  model, 
+  model,
   onChangePromptText,
   onChangePrompt,
 }) => {
@@ -164,8 +164,8 @@ export const SystemPrompt: FC<Props> = ({
   }, [value]);
 
   useEffect(() => {
-    setValue(currentPrompt);
-  }, [currentPrompt]);
+    setValue(formatPrompt(currentPrompt, { model }));
+  }, [currentPrompt, model]);
 
   useEffect(() => {
     const handleOutsideClick = (e: MouseEvent) => {
@@ -196,11 +196,10 @@ export const SystemPrompt: FC<Props> = ({
           resize: 'none',
           bottom: `${textareaRef?.current?.scrollHeight}px`,
           maxHeight: '300px',
-          overflow: `${
-            textareaRef.current && textareaRef.current.scrollHeight > 400
+          overflow: `${textareaRef.current && textareaRef.current.scrollHeight > 400
               ? 'auto'
               : 'hidden'
-          }`,
+            }`,
         }}
         placeholder={
           t(`Enter a prompt or type "/" to select a prompt...`) || ''

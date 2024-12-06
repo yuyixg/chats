@@ -1,7 +1,7 @@
-﻿using Chats.BE.Controllers.Chats.Conversations.Dtos;
+﻿using Chats.BE.Controllers.Chats.Chats.Dtos;
 using Chats.BE.Controllers.Chats.Messages.Dtos;
 using Chats.BE.DB;
-using Chats.BE.Services.Conversations;
+using Chats.BE.Services.ChatServices;
 using Chats.BE.Services.FileServices;
 using Chats.BE.Services.UrlEncryption;
 using System.Text.Json.Serialization;
@@ -39,7 +39,7 @@ public record AdminMessageDtoTemp
         {
             Name = Name,
             ModelName = ModelName,
-            ModelTemperature = Temperature ?? ConversationService.DefaultTemperature,
+            ModelTemperature = Temperature ?? ChatService.DefaultTemperature,
             ModelPrompt = messages.FirstOrDefault(x => x.Role.Equals(DBChatRole.System.ToString(), StringComparison.OrdinalIgnoreCase))?.Content.Text,
             Messages = messages.Where(x => !x.Role.Equals(DBChatRole.System.ToString(), StringComparison.OrdinalIgnoreCase)).ToArray(),
         };

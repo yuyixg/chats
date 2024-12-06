@@ -1,8 +1,8 @@
-﻿using Chats.BE.Controllers.Chats.Conversations;
+﻿using Chats.BE.Controllers.Chats.Chats;
 using Chats.BE.DB;
 using Chats.BE.Services;
-using Chats.BE.Services.Conversations;
-using Chats.BE.Services.Conversations.Dtos;
+using Chats.BE.Services.ChatServices;
+using Chats.BE.Services.ChatServices.Dtos;
 using Chats.BE.Services.OpenAIApiKeySession;
 using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Mvc;
@@ -16,7 +16,7 @@ using Microsoft.EntityFrameworkCore;
 namespace Chats.BE.Controllers.OpenAICompatible;
 
 [Route("v1"), Authorize(AuthenticationSchemes = "OpenAIApiKey")]
-public partial class OpenAICompatibleController(ChatsDB db, CurrentApiKey currentApiKey, ConversationFactory cf, UserModelManager userModelManager, ILogger<OpenAICompatibleController> logger, BalanceService balanceService) : ControllerBase
+public partial class OpenAICompatibleController(ChatsDB db, CurrentApiKey currentApiKey, ChatFactory cf, UserModelManager userModelManager, ILogger<OpenAICompatibleController> logger, BalanceService balanceService) : ControllerBase
 {
     [HttpPost("chat/completions")]
     public async Task<ActionResult> ChatCompletion([FromBody] JsonObject json, [FromServices] ClientInfoManager clientInfoManager, CancellationToken cancellationToken)
@@ -36,7 +36,7 @@ public partial class OpenAICompatibleController(ChatsDB db, CurrentApiKey curren
         if (userModel == null) return InvalidModel(cco.Model);
 
         Model cm = userModel.Model;
-        using ConversationService s = cf.CreateConversationService(cm);
+        using ChatService s = cf.CreateConversationService(cm);
 
         UserBalance userBalance = await db.UserBalances
             .Where(x => x.UserId == currentApiKey.User.Id)

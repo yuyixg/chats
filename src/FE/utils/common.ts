@@ -35,7 +35,6 @@ export const getApiUrl = () =>
     : process.env.API_URL;
 
 export const getQueryId = (router: NextRouter): string => {
-  console.log(router.query);
   const { id } = router.query;
   if (id) {
     if (Array.isArray(id)) {
