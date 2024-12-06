@@ -526,7 +526,7 @@ export const Chat = memo(() => {
         </div>
         {hasModel() && (
           <ChatInput
-            ref={stopConversationRef}
+            stopConversationRef={stopConversationRef}
             onSend={(message) => {
               const { lastMessage } = getSelectMessagesLast();
               handleSend(message, lastMessage?.id, false);
