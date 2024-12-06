@@ -21,10 +21,8 @@ const ChatIcon = (props: Props) => {
         key={`img-${providerId}`}
         src={feModelProviders[providerId].icon}
         alt={t(feModelProviders[providerId].name)}
-        width={18}
-        height={18}
         style={{ background: 'transparent' }}
-        className={cn('h-4 w-4 rounded-md dark:bg-white', className)}
+        className={cn('h-5 w-5 rounded-md dark:bg-white', className)}
       />
       {isShard && (
         <span className="w-2 h-2 absolute top-[22px] left-[21px]">
