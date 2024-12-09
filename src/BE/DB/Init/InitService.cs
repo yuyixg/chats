@@ -47,10 +47,10 @@ public class InitService(IServiceScopeFactory scopeFactory)
 
         User adminUser = new()
         {
-            Account = "admin",
-            Username = "admin",
+            Account = "chats",
+            Username = "chats",
             CreatedAt = DateTime.UtcNow,
-            Password = scope.ServiceProvider.GetRequiredService<PasswordHasher>().HashPassword("please reset your password"),
+            Password = scope.ServiceProvider.GetRequiredService<PasswordHasher>().HashPassword("RESET!!!!"),
             Enabled = true,
             Role = "admin",
             UpdatedAt = DateTime.UtcNow,
