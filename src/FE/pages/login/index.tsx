@@ -191,7 +191,7 @@ export default function LoginPage() {
                       </Tabs>
 
                       {loginConfigs.length > 0 && (
-                        <div className="relative mt-5">
+                        <div className="relative mt-4">
                           <div className="absolute inset-0 flex items-center">
                             <span className="w-full border-t" />
                           </div>

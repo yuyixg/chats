@@ -138,7 +138,7 @@ export default function Users() {
                 {t('Balance')}({t('Yuan')})
               </TableHead>
               <TableHead>{t('Model Count')}</TableHead>
-              <TableHead>{t('Created Time')}</TableHead>
+              <TableHead>{t('Actions')}</TableHead>
             </TableRow>
           </TableHeader>
           <TableBody isLoading={loading} isEmpty={users.rows.length === 0}>
@@ -189,7 +189,16 @@ export default function Users() {
                   </Button>
                 </TableCell>
                 <TableCell>
-                  {new Date(item.createdAt).toLocaleString()}
+                  <Button
+                    type="button"
+                    size="sm"
+                    onClick={(e) => {
+                      handleShowChangeModal(item);
+                      e.stopPropagation();
+                    }}
+                  >
+                    {t('Add User Model')}
+                  </Button>
                 </TableCell>
               </TableRow>
             ))}
