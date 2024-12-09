@@ -230,7 +230,7 @@ export default function LoginPage() {
                   © {new Date().getFullYear()} Chats™ . All Rights Reserved.
                 </div>
                 <div className="flex text-sm justify-center items-center">
-                  {webSiteInfo?.companyName}
+                  {webSiteInfo?.companyName && t(webSiteInfo.companyName)}
                   <Button variant="link" onClick={redirectToGithub}>
                     {t('About Us')}
                   </Button>

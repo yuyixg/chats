@@ -1,6 +1,8 @@
 ﻿using Chats.BE.DB.Enums;
 using Chats.BE.Services;
+using Chats.BE.Services.Configs;
 using Chats.BE.Services.Sessions;
+using System.Text.Json;
 
 namespace Chats.BE.DB.Init;
 
@@ -99,6 +101,15 @@ public class InitService(IServiceScopeFactory scopeFactory)
             Name = "Local Files",
             CreatedAt = DateTime.UtcNow,
             UpdatedAt = DateTime.UtcNow,
+        });
+        db.Configs.Add(new()
+        {
+            Key = DBConfigKey.SiteInfo,
+            Value = JsonSerializer.Serialize(new SiteInfo()
+            {
+                WebsiteRegistrationNumber = null,
+                CompanyName = "Customized Text(Company name, etc)",
+            })
         });
         await db.SaveChangesAsync(cancellationToken);
     }
