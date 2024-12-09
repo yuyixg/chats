@@ -8,5 +8,5 @@ public record SiteInfo
     public required string WebsiteRegistrationNumber { get; init; }
 
     [JsonPropertyName("companyName")]
-    public required string CompanyName { get; init; }
+    public string? CompanyName { get; init; }
 }
