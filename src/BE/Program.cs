@@ -3,7 +3,7 @@ using Chats.BE.DB.Init;
 using Chats.BE.Infrastructure;
 using Chats.BE.Services;
 using Chats.BE.Services.Configs;
-using Chats.BE.Services.Conversations;
+using Chats.BE.Services.ChatServices;
 using Chats.BE.Services.UrlEncryption;
 using Chats.BE.Services.OpenAIApiKeySession;
 using Chats.BE.Services.Sessions;
@@ -50,7 +50,7 @@ public class Program
         builder.Services.AddSingleton<OpenAIApiKeySessionCache>();
         builder.Services.AddScoped<OpenAIApiKeySessionManager>();
         builder.Services.AddSingleton<HostUrlService>();
-        builder.Services.AddSingleton<ConversationFactory>();
+        builder.Services.AddSingleton<ChatFactory>();
         builder.Services.AddSingleton<BalanceService>();
         builder.Services.AddScoped<ClientInfoManager>();
         builder.Services.AddScoped<FileUrlProvider>();

@@ -52,12 +52,14 @@ const handleErrorResponse = async (err: Response) => {
     case 500:
       message = 'Internal server error, Please try again later';
       break;
+    case 401:
+      redirectToLogin();
+      return;
     case 403:
       message = 'Resource denial of authorized access';
       redirectToHome(1000);
       break;
-    case 401:
-      redirectToLogin();
+    case 404:
       return;
     default:
       message =
@@ -102,7 +104,7 @@ export const useFetch = () => {
     })
       .then(async (response) => {
         if (!response.ok) {
-          await handleErrorResponse(response);
+          throw response;
         }
 
         const result = readResponse(response);

@@ -1,7 +1,7 @@
 import { SiteInfoConfig } from '@/types/config';
 
 export const setSiteInfo = (info: SiteInfoConfig) => {
-  localStorage.setItem('siteInfo', JSON.stringify(info));
+  localStorage.setItem('siteInfo', JSON.stringify(info || {}));
 };
 
 export const getSiteInfo = (): SiteInfoConfig => {
@@ -12,9 +12,9 @@ export const getSiteInfo = (): SiteInfoConfig => {
 export const hasContact = (siteInfo?: SiteInfoConfig) => {
   let contact = {} as any;
   if (siteInfo) {
-    contact = siteInfo.contact;
+    contact = siteInfo?.contact;
   } else {
-    contact = getSiteInfo().contact;
+    contact = getSiteInfo()?.contact;
   }
   return !!contact?.qqGroupNumber;
 };

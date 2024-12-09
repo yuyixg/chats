@@ -1,12 +1,12 @@
 ﻿using Chats.BE.Controllers.Admin.AdminMessage.Dtos;
 using Chats.BE.Controllers.Admin.Common;
-using Chats.BE.Controllers.Chats.Conversations.Dtos;
+using Chats.BE.Controllers.Chats.Chats.Dtos;
 using Chats.BE.Controllers.Common.Dtos;
 using Chats.BE.DB;
 using Chats.BE.DB.Enums;
 using Chats.BE.DB.Jsons;
 using Chats.BE.Infrastructure;
-using Chats.BE.Services.Conversations;
+using Chats.BE.Services.ChatServices;
 using Chats.BE.Services.FileServices;
 using Chats.BE.Services.UrlEncryption;
 using Microsoft.AspNetCore.Mvc;

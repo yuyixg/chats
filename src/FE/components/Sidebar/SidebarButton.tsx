@@ -17,7 +17,7 @@ export const SidebarButton: FC<Props> = ({
 }) => {
   return (
     <div
-      className="flex w-full justify-between select-none items-center gap-2 hover:bg-muted rounded-md py-3 px-3 pl-[10px] text-[14px] leading-2 text-white transition-colors duration-200"
+      className="flex w-full justify-between cursor-pointer select-none items-center gap-2 hover:bg-muted rounded-md py-3 px-3 pl-[10px] text-[14px] leading-2 text-white transition-colors duration-200"
       onClick={onClick}
     >
       <div className="flex text-black dark:text-white w-[80%] items-center">

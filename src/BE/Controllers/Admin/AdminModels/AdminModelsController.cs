@@ -5,7 +5,7 @@ using Chats.BE.DB;
 using Chats.BE.DB.Jsons;
 using Chats.BE.Infrastructure;
 using Chats.BE.Services;
-using Chats.BE.Services.Conversations;
+using Chats.BE.Services.ChatServices;
 using Microsoft.AspNetCore.Mvc;
 using Microsoft.AspNetCore.Mvc.ModelBinding;
 using Microsoft.EntityFrameworkCore;
@@ -182,7 +182,7 @@ public class AdminModelsController(ChatsDB db, CurrentUser adminUser) : Controll
     [HttpPost("models/validate")]
     public async Task<ActionResult<ModelValidateResult>> ValidateModel(
         [FromBody] ValidateModelRequest req,
-        [FromServices] ConversationFactory conversationFactory,
+        [FromServices] ChatFactory conversationFactory,
         CancellationToken cancellationToken)
     {
         ModelKey? modelKey = await db.ModelKeys
