@@ -3,7 +3,7 @@ import React, { useEffect, useState } from 'react';
 import { useThrottle } from '@/hooks/useThrottle';
 import useTranslation from '@/hooks/useTranslation';
 
-import { AdminModelDto, GetUsersResult } from '@/types/adminApis';
+import { GetUsersResult } from '@/types/adminApis';
 import { PageResult, Paging } from '@/types/page';
 
 import PaginationContainer from '@/components/Admin/Pagiation/Pagiation';
@@ -138,7 +138,7 @@ export default function Users() {
                 {t('Balance')}({t('Yuan')})
               </TableHead>
               <TableHead>{t('Model Count')}</TableHead>
-              <TableHead>{t('Created Time')}</TableHead>
+              <TableHead>{t('Actions')}</TableHead>
             </TableRow>
           </TableHeader>
           <TableBody isLoading={loading} isEmpty={users.rows.length === 0}>
@@ -189,7 +189,16 @@ export default function Users() {
                   </Button>
                 </TableCell>
                 <TableCell>
-                  {new Date(item.createdAt).toLocaleString()}
+                  <Button
+                    type="button"
+                    size="sm"
+                    onClick={(e) => {
+                      handleShowChangeModal(item);
+                      e.stopPropagation();
+                    }}
+                  >
+                    {t('Add User Model')}
+                  </Button>
                 </TableCell>
               </TableRow>
             ))}
@@ -220,13 +229,14 @@ export default function Users() {
         userBalance={selectedUser?.balance}
         isOpen={isOpenModal.recharge}
       />
-      { selectedUser && <EditUserModelModal
+      {selectedUser && (
+        <EditUserModelModal
           onSuccessful={init}
           onClose={handleClose}
           isOpen={isOpenModal.changeModel}
           userId={selectedUser.id}
         />
-      }
+      )}
     </>
   );
 }

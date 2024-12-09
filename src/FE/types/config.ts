@@ -6,10 +6,7 @@ export enum GlobalConfigKeys {
 
 export interface SiteInfoConfig {
   filingNumber: string;
-  contact: {
-    qqGroupNumber: string;
-    qqGroupQrCodeLink: string;
-  };
+  companyName: string;
 }
 
 export const GlobalDefaultConfigs = {
@@ -22,9 +19,7 @@ export const GlobalDefaultConfigs = {
   },
   siteInfo: {
     filingNumber: '',
-    contact: {
-      qqGroup: '',
-    },
+    companyName: '',
   },
   JwtSecretKey: '',
 };

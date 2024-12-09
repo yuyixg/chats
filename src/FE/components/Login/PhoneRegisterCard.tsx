@@ -9,7 +9,6 @@ import useTranslation from '@/hooks/useTranslation';
 import { PhoneRegExp, SmsExpirationSeconds } from '@/utils/common';
 import { saveUserInfo, setUserSession } from '@/utils/user';
 
-import ContactModal from '@/components/Modal/ContactModal';
 import { Button } from '@/components/ui/button';
 import { Card, CardContent } from '@/components/ui/card';
 import {
@@ -24,21 +23,20 @@ import { Input } from '@/components/ui/input';
 import { registerByPhone, sendRegisterSmsCode } from '@/apis/clientApis';
 import { zodResolver } from '@hookform/resolvers/zod';
 import { z } from 'zod';
+import { redirectToGithub } from '@/utils/website';
 
 const PhoneRegisterCard = (props: {
   loginLoading: boolean;
   openLoading: Function;
   closeLoading: Function;
-  showContact: boolean;
 }) => {
-  const { loginLoading, openLoading, closeLoading, showContact } = props;
+  const { loginLoading, openLoading, closeLoading } = props;
   const { t } = useTranslation();
   const router = useRouter();
   const [seconds, setSeconds] = useState(SmsExpirationSeconds - 1);
   const [isSendCode, setIsSendCode] = useState(false);
   const [smsCode, setSmsCode] = useState('');
   const [sending, setSending] = useState(false);
-  const [isContactModalOpen, setIsContactModal] = useState<boolean>(false);
 
   const formSchema = z.object({
     invitationCode: z
@@ -139,18 +137,14 @@ const PhoneRegisterCard = (props: {
                           className="w-full m-0 border-none outline-none bg-transparent rounded-md"
                           {...field}
                         />
-                        {showContact && (
-                          <Button
-                            type="button"
-                            className="absolute right-10 text-center px-0"
-                            variant="link"
-                            onClick={() => {
-                              setIsContactModal(true);
-                            }}
-                          >
-                            {t('No Invitation Code?')}
-                          </Button>
-                        )}
+                        <Button
+                          type="button"
+                          className="absolute right-10 text-center px-0"
+                          variant="link"
+                          onClick={redirectToGithub}
+                        >
+                          {t('No Invitation Code?')}
+                        </Button>
                       </div>
                     </div>
                   </FormControl>
@@ -222,12 +216,6 @@ const PhoneRegisterCard = (props: {
           </Button>
         </div>
       </CardContent>
-      <ContactModal
-        isOpen={isContactModalOpen}
-        onClose={() => {
-          setIsContactModal(false);
-        }}
-      />
     </Card>
   );
 };

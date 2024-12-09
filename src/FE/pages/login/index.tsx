@@ -2,7 +2,7 @@ import { useEffect, useState } from 'react';
 
 import useTranslation from '@/hooks/useTranslation';
 
-import { hasContact, setSiteInfo } from '@/utils/website';
+import { redirectToGithub, setSiteInfo } from '@/utils/website';
 
 import { LoginConfigsResult } from '@/types/clientApis';
 import { SiteInfoConfig } from '@/types/config';
@@ -13,7 +13,6 @@ import KeyCloakLogin from '@/components/Login/KeyCloakLogin';
 import PhoneLoginCard from '@/components/Login/PhoneLoginCard';
 import PhoneRegisterCard from '@/components/Login/PhoneRegisterCard';
 import WeChatLogin from '@/components/Login/WeChatLogin';
-import ContactModal from '@/components/Modal/ContactModal';
 import { Button } from '@/components/ui/button';
 import { Tabs, TabsContent, TabsList, TabsTrigger } from '@/components/ui/tabs';
 
@@ -31,7 +30,6 @@ type LoginHeader = {
 
 export default function LoginPage() {
   const { t } = useTranslation();
-  const [contactOpenModal, setContactOpenModal] = useState(false);
   const [isClient, setIsClient] = useState(false);
   const [webSiteInfo, setWebSiteInfo] = useState<SiteInfoConfig>();
   const LoginHeaders: LoginHeader = {
@@ -178,7 +176,6 @@ export default function LoginPage() {
                             openLoading={openLoading}
                             closeLoading={closeLoading}
                             loginLoading={loginLoading}
-                            showContact={hasContact(webSiteInfo)}
                           />
                         </TabsContent>
                         <TabsContent
@@ -194,7 +191,7 @@ export default function LoginPage() {
                       </Tabs>
 
                       {loginConfigs.length > 0 && (
-                        <div className="relative mt-5">
+                        <div className="relative mt-4">
                           <div className="absolute inset-0 flex items-center">
                             <span className="w-full border-t" />
                           </div>
@@ -225,30 +222,22 @@ export default function LoginPage() {
                   </div>
                 </div>
               </>
-              <p className="px-8 text-center text-sm text-muted-foreground">
-                <span className="flex text-sm justify-center py-1">
+              <div className="flex flex-col justify-center text-center text-sm text-muted-foreground">
+                <div className="flex text-sm justify-center items-center pb-[2px]">
                   {webSiteInfo?.filingNumber}
-                </span>
-                © 2024 Chats™ . All Rights Reserved.
-                {hasContact() && (
-                  <Button
-                    variant="link"
-                    onClick={() => {
-                      setContactOpenModal(true);
-                    }}
-                  >
-                    {t('Contact')}
+                </div>
+                <div>
+                  © {new Date().getFullYear()} Chats™ . All Rights Reserved.
+                </div>
+                <div className="flex text-sm justify-center items-center">
+                  {webSiteInfo?.companyName && t(webSiteInfo.companyName)}
+                  <Button variant="link" onClick={redirectToGithub}>
+                    {t('About Us')}
                   </Button>
-                )}
-              </p>
+                </div>
+              </div>
             </div>
           </div>
-          <ContactModal
-            isOpen={contactOpenModal}
-            onClose={() => {
-              setContactOpenModal(false);
-            }}
-          />
         </div>
       )}
     </>

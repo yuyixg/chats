@@ -187,6 +187,12 @@ export default function UserInitialConfig() {
             </TableBody>
           ))}
         </Table>
+
+        {configList.length === 0 && (
+          <div className="flex p-4 h-32 justify-center items-center text-sm w-full text-muted-foreground">
+            {t('No data')}
+          </div>
+        )}
       </Card>
       <UserInitialConfigModal
         models={models}

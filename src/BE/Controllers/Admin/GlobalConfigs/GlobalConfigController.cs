@@ -52,4 +52,31 @@ public class GlobalConfigController(ChatsDB db) : ControllerBase
         }
         return NoContent();
     }
+
+    [HttpPost]
+    public async Task<ActionResult> CreateGlobalConfig([FromBody] GlobalConfigDto req, CancellationToken cancellationToken)
+    {
+        Config? config = await db.Configs.FindAsync([req.Key], cancellationToken);
+        if (config != null)
+        {
+            return this.BadRequestMessage("Key already exists");
+        }
+        // ensure value is valid json
+        try
+        {
+            JsonDocument.Parse(req.Value);
+        }
+        catch (JsonException)
+        {
+            return this.BadRequestMessage("Invalid JSON");
+        }
+        await db.Configs.AddAsync(new Config()
+        {
+            Key = req.Key,
+            Value = req.Value,
+            Description = req.Description,
+        }, cancellationToken);
+        await db.SaveChangesAsync(cancellationToken);
+        return NoContent();
+    }
 }

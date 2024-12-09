@@ -109,7 +109,6 @@ export const ChatBarSettings = () => {
                 setSettingSheetOpen(true);
               }}
             />
-            <Separator className="my-2" />
             <SidebarButton
               text={t('Change Password')}
               icon={<IconPasswordUser />}
@@ -117,6 +116,7 @@ export const ChatBarSettings = () => {
                 setChangePwdModalOpen(true);
               }}
             />
+            <Separator className="my-2" />
             <SidebarButton
               text={t('Log out')}
               icon={<IconLogout />}

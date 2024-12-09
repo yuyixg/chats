@@ -38,13 +38,6 @@ const AdminLayout = ({
     //   title: t('Dashboard'),
     // },
     {
-      url: '/admin/users',
-      icon: (stroke?: string) => {
-        return <IconUsers stroke={stroke} />;
-      },
-      title: t('User Management'),
-    },
-    {
       url: '/admin/model-keys',
       icon: (stroke?: string) => {
         return <IconKey stroke={stroke} />;
@@ -57,6 +50,13 @@ const AdminLayout = ({
         return <IconSettingsCog stroke={stroke} />;
       },
       title: t('Model Configs'),
+    },
+    {
+      url: '/admin/users',
+      icon: (stroke?: string) => {
+        return <IconUsers stroke={stroke} />;
+      },
+      title: t('User Management'),
     },
     {
       url: '/admin/messages',

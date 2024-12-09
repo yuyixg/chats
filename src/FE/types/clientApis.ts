@@ -52,10 +52,7 @@ export interface GetLoginProvidersResult {
 
 export interface GetSiteInfoResult {
   filingNumber: string;
-  contact: {
-    qqGroupNumber: string;
-    qqGroupQrCodeLink: string;
-  };
+  companyName: string;
 }
 
 export interface GetChatsParams extends Paging {

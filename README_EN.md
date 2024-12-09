@@ -43,7 +43,7 @@ mkdir ./AppData && chmod 777 ./AppData && docker run --restart unless-stopped --
     docker run --restart unless-stopped --name sdcb-chats -v ./AppData:/app/AppData -p 8080:8080 sdcb/chats:latest
     ```
 
-- **Database initialization**: After the container starts, if the database file does not exist, it will be automatically created and initial data inserted. The initial admin username is `admin`, and the default password is `please reset your password`. It is strongly recommended that you immediately set a new password in the user management interface at the bottom left after logging in for the first time to ensure security.
+- **Database initialization**: After the container starts, if the database file does not exist, it will be automatically created and initial data inserted. The initial admin username is `chats`, and the default password is `RESET!!!`. It is strongly recommended that you immediately set a new password in the user management interface at the bottom left after logging in for the first time to ensure security.
 
 By following the above steps, you will be able to use Docker to successfully deploy and run the application. If you encounter any problems during deployment, feel free to contact us.
 

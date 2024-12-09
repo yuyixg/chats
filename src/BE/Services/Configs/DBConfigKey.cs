@@ -4,7 +4,7 @@ public static class DBConfigKey
 {
     public const string JwtSecretKey = "JwtSecretKey";
 
-    public const string TencentSms = "TencentSms";
+    public const string TencentSms = "tencentSms";
 
-    public const string SiteInfo = "SiteInfo";
+    public const string SiteInfo = "siteInfo";
 }

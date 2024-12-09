@@ -2,7 +2,6 @@
   "Stop Generating": "停止生成",
   "Prompt limit is {{maxLength}} characters": "提示字数限制为 {{maxLength}} 个字符",
   "New Conversation": "新的聊天",
-  "No model data.": "没有模型数据",
   "System Prompt": "系统提示",
   "Enter a prompt": "输入一个提示",
   "Regenerate response": "重新生成回应",
@@ -132,6 +131,7 @@
   "Clear conversations": "清空对话",
   "Account Settings": "用户设置",
   "Contact": "联系我们",
+  "About Us": "关于我们",
   "Export data": "导出对话",
   "Admin Panel": "后台管理",
   "Log out": "退出登录",
@@ -186,7 +186,7 @@
   "Account Login": "账号登录",
   "Welcome to register": "欢迎注册",
   "Please enter your phone number and invitation code below to complete the register": "在下面输入您的手机号码和邀请码以完成注册",
-  "Please enter your account name and password below to complete the login": "在下面输入您的账号和密码已完成登录",
+  "Please enter your account name and password below to complete the login": "在下面输入您的账号和密码以完成登录",
   "Authorization failed. Please try again later.": "授权失败,请稍后再试",
   "Dashboard": "仪表盘",
   "User Models": "用户模型",
@@ -342,12 +342,10 @@
   "Model already exists.": "模型已存在。",
   "Model key is in use": "模型密钥已被使用",
   "Token Price": "Token价格",
-
   "404: Page not found": "404: 页面未找到",
   "Sorry, we couldn't find the page you were trying to access.": "抱歉，我们找不到你要访问的页面。",
   ": An error has occurred": ": 发生错误",
   "Sorry, there was an unexpected error, please try again later.": "抱歉，出现了意外错误，请稍后再试。",
-
   "Local": "本地",
   "Minio": "Minio",
   "AWS S3": "AWS S3",
@@ -360,7 +358,7 @@
   "File is empty.": "文件为空。",
   "File is too large.": "文件过大。",
   "Invalid file name.": "无效的文件名。",
-
   "There's no model here": "这里没有模型",
-  "You can contact the administrator or create one yourself": "你可以联系管理员或者自己创建一个"
+  "You can contact the administrator or create one yourself": "你可以联系管理员或者自己创建一个",
+  "Customized Text(Company name, etc)": "自定义文本（公司名称等）"
 }
