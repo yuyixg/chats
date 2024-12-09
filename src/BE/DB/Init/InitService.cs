@@ -50,7 +50,7 @@ public class InitService(IServiceScopeFactory scopeFactory)
             Account = "chats",
             Username = "chats",
             CreatedAt = DateTime.UtcNow,
-            Password = scope.ServiceProvider.GetRequiredService<PasswordHasher>().HashPassword("RESET!!!!"),
+            Password = scope.ServiceProvider.GetRequiredService<PasswordHasher>().HashPassword("RESET!!!"),
             Enabled = true,
             Role = "admin",
             UpdatedAt = DateTime.UtcNow,
