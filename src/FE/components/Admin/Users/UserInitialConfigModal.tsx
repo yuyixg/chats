@@ -92,6 +92,7 @@ export const UserInitialConfigModal = (props: IProps) => {
       name: '',
       price: 0,
       loginType: '-',
+      invitationCodeId: '-',
     },
   });
 
@@ -243,7 +244,7 @@ export const UserInitialConfigModal = (props: IProps) => {
                           { name: '-', value: '-' },
                           ...invitationCodes.map((x) => ({
                             name: x.value,
-                            value: x.id,
+                            value: x.id.toString(),
                           })),
                         ]}
                       />

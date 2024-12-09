@@ -5,6 +5,8 @@ import { Skeleton } from './skeleton';
 
 import { cn } from '@/lib/utils';
 
+import useTranslation from '@/hooks/useTranslation';
+
 const Table = React.forwardRef<
   HTMLTableElement,
   React.HTMLAttributes<HTMLTableElement>
@@ -48,8 +50,10 @@ const TableBody = React.forwardRef<HTMLTableSectionElement, TableBodyProps>(
       ...props
     },
     ref,
-  ) =>
-    isLoading ? (
+  ) => 
+  {
+    const { t } = useTranslation();
+    return (isLoading ? (
       <tbody>
         <tr>
           <td className="text-center align-middle p-4 h-32" colSpan={100}>
@@ -71,7 +75,7 @@ const TableBody = React.forwardRef<HTMLTableSectionElement, TableBodyProps>(
           <td className="text-center align-middle p-4 h-32" colSpan={100}>
             {emptyContent || (
               <div className="flex flex-col space-y-3 text-muted-foreground">
-                {emptyText || '没有找到相关数据'}
+                {emptyText || t('No data')}
               </div>
             )}
           </td>
@@ -83,7 +87,8 @@ const TableBody = React.forwardRef<HTMLTableSectionElement, TableBodyProps>(
         className={cn('[&_tr:last-child]:border-0', className)}
         {...props}
       />
-    ),
+    ))
+  }
 );
 TableBody.displayName = 'TableBody';
 

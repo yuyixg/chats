@@ -198,7 +198,7 @@ export const ModelKeysModal = (props: IProps) => {
                   field={field}
                   items={feModelProviders.map((p) => ({
                     value: p.id.toString(),
-                    name: p.name,
+                    name: t(p.name),
                   }))}
                 />
               )}

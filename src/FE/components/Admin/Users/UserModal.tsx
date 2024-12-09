@@ -58,6 +58,7 @@ export const UserModal = (props: IProps) => {
     {
       name: 'enabled',
       label: t('Is it enabled'),
+      defaultValue: true,
       render: (options: IFormFieldOption, field: FormFieldType) => (
         <FormSwitch options={options} field={field} />
       ),
