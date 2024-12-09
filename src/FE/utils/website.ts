@@ -9,12 +9,6 @@ export const getSiteInfo = (): SiteInfoConfig => {
   return JSON.parse(siteInfo);
 };
 
-export const hasContact = (siteInfo?: SiteInfoConfig) => {
-  let contact = {} as any;
-  if (siteInfo) {
-    contact = siteInfo?.contact;
-  } else {
-    contact = getSiteInfo()?.contact;
-  }
-  return !!contact?.qqGroupNumber;
+export const redirectToGithub = () => {
+  window.open('https://github.com/sdcb/chats', '_blank');
 };
