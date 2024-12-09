@@ -19,18 +19,11 @@ public abstract partial class ConversationService : IDisposable
     public ConversationService(Model model)
     {
         Model = model;
-        try
+        if (model.ModelReference.Tokenizer is not null)
         {
-            if (model.ModelReference.Tokenizer is not null)
-            {
-                Tokenizer = TiktokenTokenizer.CreateForEncoding(model.ModelReference.Tokenizer.Name);
-            }
-            else
-            {
-                Tokenizer = TiktokenTokenizer.CreateForModel(Model.ModelReference.Name);
-            }
+            Tokenizer = TiktokenTokenizer.CreateForEncoding(model.ModelReference.Tokenizer.Name);
         }
-        catch (NotSupportedException)
+        else
         {
             Tokenizer = TiktokenTokenizer.CreateForEncoding("cl100k_base");
         }
