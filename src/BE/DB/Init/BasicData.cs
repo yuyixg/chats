@@ -107,10 +107,10 @@ internal static class BasicData
 
     private static void InsertModelReferences(ChatsDB db)
     {
-        // Generated from data, hash: c5fc80eafe0435e9a03ed9df3b46fe5755d391047b0f8460d17228b4a10fd886
+        // Generated from data, hash: ebf7fc3a8c4f38d7efc44b0e1b38633c2af4fea6ec8a42ad73d72299dfdbf6d4
         db.ModelReferences.AddRange(
         [
-            new(){ Id=0,    ProviderId=0,  Name="Test",                        ShortName=null,            IsLegacy=false, MinTemperature=0.00M, MaxTemperature=2.00M, AllowSearch=false, AllowVision=false, AllowSystemPrompt=true,  AllowStreaming=true,  ContextWindow=2048,     MaxResponseTokens=2048,   TokenizerId=1,    InputTokenPrice1M=0.00000M,   OutputTokenPrice1M=0.00000M,   CurrencyCode="RMB", },
+            new(){ Id=0,    ProviderId=0,  Name="Test",                        ShortName=null,            IsLegacy=false, MinTemperature=0.00M, MaxTemperature=2.00M, AllowSearch=false, AllowVision=true,  AllowSystemPrompt=true,  AllowStreaming=true,  ContextWindow=2048,     MaxResponseTokens=2048,   TokenizerId=1,    InputTokenPrice1M=0.00000M,   OutputTokenPrice1M=0.00000M,   CurrencyCode="RMB", },
             new(){ Id=100,  ProviderId=1,  Name="gpt-35-turbo-0301",           ShortName="gpt-35-turbo",  IsLegacy=true,  MinTemperature=0.00M, MaxTemperature=2.00M, AllowSearch=false, AllowVision=false, AllowSystemPrompt=true,  AllowStreaming=true,  ContextWindow=4096,     MaxResponseTokens=4096,   TokenizerId=1,    InputTokenPrice1M=1.50000M,   OutputTokenPrice1M=2.00000M,   CurrencyCode="USD", },
             new(){ Id=101,  ProviderId=1,  Name="gpt-35-turbo-16k-0613",       ShortName="gpt-35-turbo",  IsLegacy=true,  MinTemperature=0.00M, MaxTemperature=2.00M, AllowSearch=false, AllowVision=false, AllowSystemPrompt=true,  AllowStreaming=true,  ContextWindow=16385,    MaxResponseTokens=16385,  TokenizerId=1,    InputTokenPrice1M=3.00000M,   OutputTokenPrice1M=4.00000M,   CurrencyCode="USD", },
             new(){ Id=102,  ProviderId=1,  Name="gpt-35-turbo-0613",           ShortName="gpt-35-turbo",  IsLegacy=true,  MinTemperature=0.00M, MaxTemperature=2.00M, AllowSearch=false, AllowVision=false, AllowSystemPrompt=true,  AllowStreaming=true,  ContextWindow=4096,     MaxResponseTokens=4096,   TokenizerId=1,    InputTokenPrice1M=1.50000M,   OutputTokenPrice1M=2.00000M,   CurrencyCode="USD", },
