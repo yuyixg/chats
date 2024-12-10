@@ -6,7 +6,7 @@ import { useRouter } from 'next/router';
 
 import useTranslation from '@/hooks/useTranslation';
 
-import { Nav } from '@/components/Admin/Nav/Nav';
+import { Nav } from '@/pages/admin/_components/Nav/Nav';
 import {
   IconFiles,
   IconIdBadge,

@@ -4,7 +4,7 @@ import useTranslation from '@/hooks/useTranslation';
 
 import { AdminModelDto, GetUserInitialConfigResult } from '@/types/adminApis';
 
-import { UserInitialConfigModal } from '@/components/Admin/Users/UserInitialConfigModal';
+import { UserInitialConfigModal } from '@/pages/admin/_components/Users/UserInitialConfigModal';
 import { Button } from '@/components/ui/button';
 import { Card } from '@/components/ui/card';
 import {

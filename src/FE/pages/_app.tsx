@@ -9,12 +9,11 @@ import { getUserInfo } from '@/utils/user';
 
 import { UserRole } from '@/types/adminApis';
 
-import { ThemeProvider } from '@/components/Theme/ThemeProvider';
-
 import ErrorPage from './_error';
 import AdminLayout from './admin/layout';
 import './globals.css';
 
+import { ThemeProvider } from '@/providers/ThemeProvider';
 import 'katex/dist/katex.min.css';
 
 function App({ Component, pageProps }: AppProps<{}> | any) {
@@ -25,7 +24,7 @@ function App({ Component, pageProps }: AppProps<{}> | any) {
 
   useEffect(() => {
     setIsClient(true);
-    document.title = "Chats";
+    document.title = 'Chats';
   }, []);
 
   const isAdmin = () => {

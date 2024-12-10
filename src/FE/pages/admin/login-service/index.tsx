@@ -6,7 +6,7 @@ import { DEFAULT_LANGUAGE } from '@/utils/settings';
 
 import { GetLoginServicesResult } from '@/types/adminApis';
 
-import { LoginServiceModal } from '@/components/Admin/LoginService/LoginServiceModal';
+import { LoginServiceModal } from '@/pages/admin/_components/LoginService/LoginServiceModal';
 import { Button } from '@/components/ui/button';
 import { Card } from '@/components/ui/card';
 import {

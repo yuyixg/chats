@@ -8,13 +8,16 @@ import { LoginConfigsResult } from '@/types/clientApis';
 import { SiteInfoConfig } from '@/types/config';
 import { LoginType } from '@/types/user';
 
-import AccountLoginCard from '@/components/Login/AccountLoginCard';
-import KeyCloakLogin from '@/components/Login/KeyCloakLogin';
-import PhoneLoginCard from '@/components/Login/PhoneLoginCard';
-import PhoneRegisterCard from '@/components/Login/PhoneRegisterCard';
-import WeChatLogin from '@/components/Login/WeChatLogin';
 import { Button } from '@/components/ui/button';
 import { Tabs, TabsContent, TabsList, TabsTrigger } from '@/components/ui/tabs';
+
+import {
+  AccountLoginCard,
+  KeyCloakLogin,
+  PhoneLoginCard,
+  PhoneRegisterCard,
+  WeChatLogin,
+} from './_components';
 
 import { getLoginProviders, getSiteInfo } from '@/apis/clientApis';
 
