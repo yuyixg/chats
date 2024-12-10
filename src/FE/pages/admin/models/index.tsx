@@ -6,8 +6,8 @@ import { formatNumberAsMoney } from '@/utils/common';
 
 import { AdminModelDto, GetModelKeysResult } from '@/types/adminApis';
 
-import { AddModelModal } from '@/components/Admin/Models/AddModelModal';
-import { EditModelModal } from '@/components/Admin/Models/EditModelModal';
+import { AddModelModal } from '@/pages/admin/_components/Models/AddModelModal';
+import { EditModelModal } from '@/pages/admin/_components/Models/EditModelModal';
 import { Button } from '@/components/ui/button';
 import { Card } from '@/components/ui/card';
 import {

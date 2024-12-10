@@ -7,7 +7,7 @@ import { getSelectMessages } from '@/utils/message';
 import { GetMessageDetailsResult } from '@/types/adminApis';
 import { ChatMessage } from '@/types/chatMessage';
 
-import { ChatMessage as ChatMessageComponent } from '@/components/Admin/Messages/ChatMessage';
+import { ChatMessage as ChatMessageComponent } from '@/pages/admin/_components/Messages/ChatMessage';
 
 import { getMessageDetails } from '@/apis/adminApis';
 import Decimal from 'decimal.js';
@@ -89,7 +89,6 @@ export default function MessageDetails() {
                 (x) => x === current.id,
               )}
               isLastMessage={selectMessages.length - 1 === index}
-              id={current.id!}
               key={current.id + index}
               parentId={current.parentId}
               onChangeMessage={(messageId: string) => {

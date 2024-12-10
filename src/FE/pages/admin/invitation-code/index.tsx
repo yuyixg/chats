@@ -4,7 +4,7 @@ import useTranslation from '@/hooks/useTranslation';
 
 import { GetInvitationCodeResult } from '@/types/adminApis';
 
-import { InvitationCodeModal } from '@/components/Admin/InvitationCode/InvitationCodeModal';
+import { InvitationCodeModal } from '@/pages/admin/_components/InvitationCode/InvitationCodeModal';
 import { Button } from '@/components/ui/button';
 import { Card } from '@/components/ui/card';
 import {

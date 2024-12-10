@@ -6,8 +6,8 @@ import useTranslation from '@/hooks/useTranslation';
 import { GetModelKeysResult } from '@/types/adminApis';
 import { feModelProviders } from '@/types/model';
 
-import { ConfigModelModal } from '@/components/Admin/ModelKeys/ConfigModelModal';
-import { ModelKeysModal } from '@/components/Admin/ModelKeys/ModelKeysModal';
+import { ConfigModelModal } from '@/pages/admin/_components/ModelKeys/ConfigModelModal';
+import { ModelKeysModal } from '@/pages/admin/_components/ModelKeys/ModelKeysModal';
 import { Button } from '@/components/ui/button';
 import { Card } from '@/components/ui/card';
 import {

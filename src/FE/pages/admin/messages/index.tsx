@@ -7,7 +7,7 @@ import { DEFAULT_LANGUAGE } from '@/utils/settings';
 import { GetUserMessageResult } from '@/types/adminApis';
 import { PageResult, Paging } from '@/types/page';
 
-import PaginationContainer from '@/components/Admin/Pagiation/Pagiation';
+import PaginationContainer from '@/pages/admin/_components/Pagiation/Pagiation';
 import { Badge } from '@/components/ui/badge';
 import { Card } from '@/components/ui/card';
 import { Input } from '@/components/ui/input';

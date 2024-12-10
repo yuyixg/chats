@@ -4,7 +4,7 @@ import useTranslation from '@/hooks/useTranslation';
 
 import { GetPayServicesResult } from '@/types/adminApis';
 
-import { PayServiceModal } from '@/components/Admin/PayService/PayServiceModal';
+import { PayServiceModal } from '@/pages/admin/_components/PayService/PayServiceModal';
 import { Button } from '@/components/ui/button';
 import { Card } from '@/components/ui/card';
 import {
