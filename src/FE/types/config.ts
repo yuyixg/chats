@@ -19,6 +19,7 @@ export const GlobalDefaultConfigs = {
   },
   siteInfo: {
     filingNumber: '',
+    companyName: '',
   },
   JwtSecretKey: '',
 };

@@ -45,7 +45,7 @@ mkdir ./AppData && chmod 777 ./AppData && docker run --restart unless-stopped --
     docker run --restart unless-stopped --name sdcb-chats -v ./AppData:/app/AppData -p 8080:8080 sdcb/chats:latest
     ```
 
-- **数据库初始化**：容器启动后，如果数据库文件不存在，将自动创建并插入初始数据。初始管理员用户名为 `admin`，默认密码为 `please reset your password`。强烈建议您在首次登录后立即前往左下角的用户管理界面，设置一个新密码以确保安全。
+- **数据库初始化**：容器启动后，如果数据库文件不存在，将自动创建并插入初始数据。初始管理员用户名为 `chats`，默认密码为 `RESET!!!`。强烈建议您在首次登录后立即前往左下角的用户管理界面，设置一个新密码以确保安全。
 
 通过以上步骤，您将能顺利使用 Docker 部署和运行应用。如果在部署过程中遇到任何问题，可以联系我们。
 
