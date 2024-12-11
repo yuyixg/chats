@@ -8,7 +8,7 @@ export const feFileServiceTypes: FileServiceType[] = [
   { id: 1, name: 'Minio' },
   { id: 2, name: 'AWS S3' },
   { id: 3, name: 'Aliyun OSS' },
-  { id: 4, name: 'Azure Blob Storage' }
+  { id: 4, name: 'Azure Blob Storage' },
 ];
 
 export enum DBFileServiceType {
@@ -16,5 +16,5 @@ export enum DBFileServiceType {
   Minio = 1,
   AWSS3 = 2,
   AliyunOSS = 3,
-  AzureBlobStorage = 4
+  AzureBlobStorage = 4,
 }

@@ -1,8 +1,9 @@
 import React, { useEffect, useRef } from 'react';
 
 import { checkFileSizeCanUpload, uploadFile } from '@/utils/uploadFile';
-import { ChatModelFileConfig } from '@/types/model';
+
 import { ImageDef } from '@/types/chat';
+import { ChatModelFileConfig } from '@/types/model';
 
 interface IPasteUploadProps {
   fileServiceId: number;

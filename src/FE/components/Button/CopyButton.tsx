@@ -35,11 +35,7 @@ export default function CopyButton(props: Props) {
       onClick={handleCopy}
       title={t('Copy')}
     >
-      {isCopied ? (
-        <IconCheck size={18} />
-      ) : (
-        <IconClipboard size={18} />
-      )}
+      {isCopied ? <IconCheck size={18} /> : <IconClipboard size={18} />}
     </Button>
   );
 }
