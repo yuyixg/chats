@@ -5,7 +5,7 @@ import { checkFileSizeCanUpload, uploadFile } from '@/utils/uploadFile';
 import { ImageDef } from '@/types/chat';
 import { ChatModelFileConfig } from '@/types/model';
 
-import { Button } from '../../../../components/ui/button';
+import { Button } from '@/components/ui/button';
 
 interface Props {
   onSuccessful?: (def: ImageDef) => void;

@@ -11,7 +11,7 @@ import {
 } from '@/types/adminApis';
 import { feModelProviders } from '@/types/model';
 
-import Spinner from '@/pages/home/_components/Spinner/Spinner';
+import Spinner from '@/components/Spinner/Spinner';
 import { Button } from '@/components/ui/button';
 import {
   Dialog,
@@ -44,7 +44,7 @@ interface IProps {
   saveLoading?: boolean;
 }
 
-export const ModelKeysModal = (props: IProps) => {
+const ModelKeysModal = (props: IProps) => {
   const { t } = useTranslation();
   const {
     selected,
@@ -266,3 +266,4 @@ export const ModelKeysModal = (props: IProps) => {
     </Dialog>
   );
 };
+export default ModelKeysModal;

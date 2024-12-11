@@ -40,7 +40,7 @@ interface IProps {
   saveLoading?: boolean;
 }
 
-export const LoginServiceModal = (props: IProps) => {
+const LoginServiceModal = (props: IProps) => {
   const { t } = useTranslation();
   const { selected, types, isOpen, onClose, onSuccessful } = props;
   const formFields: IFormFieldOption[] = [
@@ -169,3 +169,4 @@ export const LoginServiceModal = (props: IProps) => {
     </Dialog>
   );
 };
+export default LoginServiceModal;

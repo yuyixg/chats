@@ -10,12 +10,9 @@ import toast from 'react-hot-toast';
 import useTranslation from '@/hooks/useTranslation';
 
 import { ChatResult } from '@/types/clientApis';
-import { DBModelProvider } from '@/types/model';
 
-import SidebarActionButton from '@/pages/home/_components/Button/SidebarActionButton';
-import { SharedMessageModal } from '@/pages/home/_components/Chat/SharedMessageModal';
-import ChatIcon from '@/pages/_components/ChatIcon/ChatIcon';
-import ChatbarContext from '@/pages/home/_components/Chatbar/Chatbar.context';
+import SidebarActionButton from '@/components/Button/SidebarActionButton';
+import ChatIcon from '@/components/ChatIcon/ChatIcon';
 import {
   IconCheck,
   IconDots,
@@ -24,7 +21,6 @@ import {
   IconTrash,
   IconX,
 } from '@/components/Icons/index';
-import { Button } from '@/components/ui/button';
 import {
   DropdownMenu,
   DropdownMenuContent,
@@ -32,14 +28,17 @@ import {
   DropdownMenuTrigger,
 } from '@/components/ui/dropdown-menu';
 
+import HomeContext from '../../_contents/Home.context';
+import SharedMessageModal from '../Chat/SharedMessageModal';
+import ChatbarContext from '../Chatbar/Chatbar.context';
+
 import { deleteChats, putChats } from '@/apis/clientApis';
-import { HomeContext } from '@/pages/home/_contents/Home.context';
 
 interface Props {
   chat: ChatResult;
 }
 
-export const ConversationComponent = ({ chat }: Props) => {
+const ConversationComponent = ({ chat }: Props) => {
   const { t } = useTranslation();
   const {
     state: {
@@ -215,3 +214,5 @@ export const ConversationComponent = ({ chat }: Props) => {
     </div>
   );
 };
+
+export default ConversationComponent;

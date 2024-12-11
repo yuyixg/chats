@@ -7,7 +7,7 @@ import { useTheme } from 'next-themes';
 import { IconMoon, IconSun } from '@/components/Icons';
 import { Button } from '@/components/ui/button';
 
-export function ModeToggle() {
+function ModeToggle() {
   const { setTheme } = useTheme();
 
   return (
@@ -25,3 +25,4 @@ export function ModeToggle() {
     </Button>
   );
 }
+export default ModeToggle;

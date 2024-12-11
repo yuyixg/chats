@@ -3,7 +3,7 @@ import { useState } from 'react';
 import useTranslation from '@/hooks/useTranslation';
 
 import { IconCheck, IconCopy } from '@/components/Icons';
-import Tips from '@/pages/_components/Tips/Tips';
+import Tips from '@/components/Tips/Tips';
 import { Button } from '@/components/ui/button';
 
 import { cn } from '@/lib/utils';

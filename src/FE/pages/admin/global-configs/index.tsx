@@ -4,7 +4,6 @@ import useTranslation from '@/hooks/useTranslation';
 
 import { GetConfigsResult } from '@/types/adminApis';
 
-import { GlobalConfigsModal } from '@/pages/admin/_components/GlobalConfigs/GlobalConfigsModal';
 import { Button } from '@/components/ui/button';
 import { Card } from '@/components/ui/card';
 import {
@@ -15,6 +14,8 @@ import {
   TableHeader,
   TableRow,
 } from '@/components/ui/table';
+
+import GlobalConfigsModal from '../_components/GlobalConfigs/GlobalConfigsModal';
 
 import { getConfigs } from '@/apis/adminApis';
 

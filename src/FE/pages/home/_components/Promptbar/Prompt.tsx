@@ -2,7 +2,7 @@ import { MouseEventHandler, useContext, useEffect, useState } from 'react';
 
 import { Prompt, PromptSlim } from '@/types/prompt';
 
-import SidebarActionButton from '@/pages/home/_components/Button/SidebarActionButton';
+import SidebarActionButton from '@/components/Button/SidebarActionButton';
 import {
   IconBulbFilled,
   IconCheck,
@@ -10,8 +10,8 @@ import {
   IconX,
 } from '@/components/Icons/index';
 
-import PromptbarContext from '../PromptBar.context';
-import { PromptModal } from './PromptModal';
+import PromptbarContext from './PromptBar.context';
+import PromptModal from './PromptModal';
 
 import { getUserPromptDetail } from '@/apis/clientApis';
 
@@ -19,7 +19,7 @@ interface Props {
   prompt: PromptSlim;
 }
 
-export const PromptComponent = ({ prompt }: Props) => {
+const PromptComponent = ({ prompt }: Props) => {
   const {
     dispatch: promptDispatch,
     handleUpdatePrompt,
@@ -128,3 +128,4 @@ export const PromptComponent = ({ prompt }: Props) => {
     </div>
   );
 };
+export default PromptComponent;

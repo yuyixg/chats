@@ -8,8 +8,8 @@ import {
   IconSearch,
   IconSquarePlus,
 } from '@/components/Icons/index';
-import Search from '@/pages/_components/Search/Search';
-import Tips from '@/pages/_components/Tips/Tips';
+import Search from '@/components/Search/Search';
+import Tips from '@/components/Tips/Tips';
 import { Button } from '@/components/ui/button';
 
 import { cn } from '@/lib/utils';

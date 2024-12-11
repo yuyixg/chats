@@ -40,7 +40,7 @@ export interface HomeInitialState {
   searchTerm: string;
 }
 
-const initialState: HomeInitialState = {
+export const initialState: HomeInitialState = {
   user: null,
   loading: false,
   messageIsStreaming: false,
@@ -86,4 +86,4 @@ export interface HomeContextProps {
 
 const HomeContext = createContext<HomeContextProps>(undefined!);
 
-export { initialState, HomeContext };
+export default HomeContext;

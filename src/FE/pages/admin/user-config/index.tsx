@@ -4,7 +4,6 @@ import useTranslation from '@/hooks/useTranslation';
 
 import { AdminModelDto, GetUserInitialConfigResult } from '@/types/adminApis';
 
-import { UserInitialConfigModal } from '@/pages/admin/_components/Users/UserInitialConfigModal';
 import { Button } from '@/components/ui/button';
 import { Card } from '@/components/ui/card';
 import {
@@ -15,6 +14,8 @@ import {
   TableHeader,
   TableRow,
 } from '@/components/ui/table';
+
+import UserInitialConfigModal from '../_components/Users/UserInitialConfigModal';
 
 import { getModels, getUserInitialConfig } from '@/apis/adminApis';
 

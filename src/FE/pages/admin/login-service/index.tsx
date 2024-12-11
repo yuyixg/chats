@@ -2,11 +2,8 @@ import React, { useEffect, useState } from 'react';
 
 import useTranslation from '@/hooks/useTranslation';
 
-import { DEFAULT_LANGUAGE } from '@/utils/settings';
-
 import { GetLoginServicesResult } from '@/types/adminApis';
 
-import { LoginServiceModal } from '@/pages/admin/_components/LoginService/LoginServiceModal';
 import { Button } from '@/components/ui/button';
 import { Card } from '@/components/ui/card';
 import {
@@ -17,6 +14,8 @@ import {
   TableHeader,
   TableRow,
 } from '@/components/ui/table';
+
+import LoginServiceModal from '../_components/LoginService/LoginServiceModal';
 
 import { getLoginServices } from '@/apis/adminApis';
 

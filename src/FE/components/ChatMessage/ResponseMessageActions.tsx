@@ -1,3 +1,4 @@
+import { AdminModelDto } from '@/types/adminApis';
 import { PropsMessage } from '@/types/components/chat';
 
 import ChangeModelAction from './ChangeModelAction';
@@ -9,7 +10,7 @@ import RegenerateAction from './RegenerateAction';
 import { cn } from '@/lib/utils';
 
 interface Props {
-  readonly?: boolean;
+  models: AdminModelDto[];
   message: PropsMessage;
   modelName?: string;
   modelId?: number;
@@ -23,7 +24,7 @@ interface Props {
 
 const ResponseMessageActions = (props: Props) => {
   const {
-    readonly,
+    models,
     message,
     modelName,
     modelId,
@@ -68,7 +69,7 @@ const ResponseMessageActions = (props: Props) => {
               }}
             />
             <ChangeModelAction
-              readonly={readonly}
+              models={models}
               onChangeModel={(modelId: number) => {
                 onRegenerate && onRegenerate(modelId);
               }}

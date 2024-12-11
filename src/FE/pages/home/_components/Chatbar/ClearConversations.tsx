@@ -3,13 +3,14 @@ import { FC, useState } from 'react';
 import useTranslation from '@/hooks/useTranslation';
 
 import { IconCheck, IconTrash, IconX } from '@/components/Icons/index';
-import { SidebarButton } from '@/pages/home/_components/Sidebar/SidebarButton';
+
+import SidebarButton from '../Sidebar/SidebarButton';
 
 interface Props {
   onClearConversations: () => void;
 }
 
-export const ClearConversations: FC<Props> = ({ onClearConversations }) => {
+const ClearConversations: FC<Props> = ({ onClearConversations }) => {
   const [isConfirming, setIsConfirming] = useState<boolean>(false);
 
   const { t } = useTranslation();
@@ -55,3 +56,5 @@ export const ClearConversations: FC<Props> = ({ onClearConversations }) => {
     />
   );
 };
+
+export default ClearConversations;

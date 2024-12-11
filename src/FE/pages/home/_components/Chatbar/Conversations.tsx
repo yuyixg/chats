@@ -4,17 +4,16 @@ import useTranslation from '@/hooks/useTranslation';
 
 import { ChatResult } from '@/types/clientApis';
 
-import { HomeContext } from '@/pages/home/_contents/Home.context';
-
 import { Button } from '@/components/ui/button';
 
-import { ConversationComponent } from './Conversation';
+import HomeContext from '../../_contents/Home.context';
+import ConversationComponent from './Conversation';
 
 interface Props {
   chats: ChatResult[];
 }
 
-export const Conversations = ({ chats }: Props) => {
+const Conversations = ({ chats }: Props) => {
   const { t } = useTranslation();
   const {
     state: { chatsPaging },
@@ -46,3 +45,4 @@ export const Conversations = ({ chats }: Props) => {
     </div>
   );
 };
+export default Conversations;

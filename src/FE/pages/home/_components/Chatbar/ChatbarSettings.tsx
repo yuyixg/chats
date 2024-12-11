@@ -17,10 +17,6 @@ import {
   IconSettingsCog,
   IconUser,
 } from '@/components/Icons/index';
-import { ChangePasswordModal } from '@/pages/home/_components/Modal/ChangePasswordModal';
-import UserBalanceModal from '@/pages/home/_components/Modal/UserBalanceModal';
-import { SettingModal } from '@/pages/home/_components/Settings/SettingModal';
-import { SidebarButton } from '@/pages/home/_components/Sidebar/SidebarButton';
 import {
   Popover,
   PopoverContent,
@@ -28,10 +24,15 @@ import {
 } from '@/components/ui/popover';
 import { Separator } from '@/components/ui/separator';
 
-import { getUserBalanceOnly } from '@/apis/clientApis';
-import { HomeContext } from '@/pages/home/_contents/Home.context';
+import HomeContext from '../../_contents/Home.context';
+import ChangePasswordModal from '../Modal/ChangePasswordModal';
+import UserBalanceModal from '../Modal/UserBalanceModal';
+import SettingModal from '../Settings/SettingModal';
+import SidebarButton from '../Sidebar/SidebarButton';
 
-export const ChatBarSettings = () => {
+import { getUserBalanceOnly } from '@/apis/clientApis';
+
+const ChatBarSettings = () => {
   const router = useRouter();
   const { t } = useTranslation();
   const [changePwdModalOpen, setChangePwdModalOpen] = useState<boolean>(false);
@@ -153,3 +154,4 @@ export const ChatBarSettings = () => {
     </div>
   );
 };
+export default ChatBarSettings;

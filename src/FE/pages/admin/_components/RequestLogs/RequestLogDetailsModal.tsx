@@ -19,7 +19,7 @@ interface IProps {
   onClose: () => void;
 }
 
-export const RequestLogDetailsModal = (props: IProps) => {
+const RequestLogDetailsModal = (props: IProps) => {
   const { t } = useTranslation();
   const { isOpen, onClose } = props;
   const [log, setLog] = useState<GetRequestLogsDetailsResult>();
@@ -111,3 +111,4 @@ export const RequestLogDetailsModal = (props: IProps) => {
     </Dialog>
   );
 };
+export default RequestLogDetailsModal;

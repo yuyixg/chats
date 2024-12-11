@@ -5,7 +5,7 @@ import useTranslation from '@/hooks/useTranslation';
 
 import { termDateString } from '@/utils/common';
 
-import { UserModelDisplay, UserModelDisplayDto } from '@/types/adminApis';
+import { UserModelDisplay } from '@/types/adminApis';
 
 import { IconSquareRoundedX } from '@/components/Icons';
 import { Button } from '@/components/ui/button';
@@ -42,7 +42,7 @@ interface IProps {
   onClose: () => void;
   onSuccessful: () => void;
 }
-export const EditUserModelModal = (props: IProps) => {
+const EditUserModelModal = (props: IProps) => {
   const { t } = useTranslation();
   const { isOpen, onClose, onSuccessful } = props;
   const [submit, setSubmit] = useState(false);
@@ -184,3 +184,4 @@ export const EditUserModelModal = (props: IProps) => {
     </Dialog>
   );
 };
+export default EditUserModelModal;

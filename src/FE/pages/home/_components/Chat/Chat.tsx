@@ -17,28 +17,29 @@ import { getUserSession } from '@/utils/user';
 import { ChatBody, Content, ContentRequest, Message, Role } from '@/types/chat';
 import { Prompt } from '@/types/prompt';
 
-import { ModeToggle } from '@/pages/home/_components/ModeToggle/ModeTooggle';
-import { HomeContext } from '@/pages/home/_contents/Home.context';
+import ChangeModel from '@/components/ChangeModel/ChangeModel';
+import TemperatureSlider from '@/components/TemperatureSlider/TemperatureSlider';
 
-import ChangeModel from '../../../_components/ChangeModel/ChangeModel';
-import { ChatInput } from './ChatInput';
+import HomeContext from '../../_contents/Home.context';
+import ModeToggle from '../ModeToggle/ModeToggle';
+import ChatInput from './ChatInput';
 import EnableNetworkSearch from './EnableNetworkSearch';
-import { MemoizedChatMessage } from './MemoizedChatMessage';
-import { ModelSelect } from './ModelSelect';
+import MemoizedChatMessage from './MemoizedChatMessage';
+import ModelSelect from './ModelSelect';
 import NoModel from './NoModel';
-import { SystemPrompt } from './SystemPrompt';
-import { TemperatureSlider } from './Temperature';
+import SystemPrompt from './SystemPrompt';
 
 import { getChat, postChats, putUserChatModel } from '@/apis/clientApis';
 import { cn } from '@/lib/utils';
 import Decimal from 'decimal.js';
 import { v4 as uuidv4 } from 'uuid';
 
-export const Chat = memo(() => {
+const Chat = memo(() => {
   const { t } = useTranslation();
 
   const {
     state: {
+      models,
       selectChat,
       selectModel,
       selectMessages,
@@ -383,6 +384,7 @@ export const Chat = memo(() => {
               >
                 {hasModel() && (
                   <ChangeModel
+                    models={models}
                     className="font-semibold text-base"
                     content={selectModel?.name}
                     onChangeModel={(model) => {
@@ -476,6 +478,7 @@ export const Chat = memo(() => {
                 }
                 return (
                   <MemoizedChatMessage
+                    models={models}
                     selectChat={selectChat}
                     key={current.id + index}
                     modelName={current.modelName}
@@ -551,3 +554,4 @@ export const Chat = memo(() => {
   );
 });
 Chat.displayName = 'Chat';
+export default Chat;

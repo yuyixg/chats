@@ -1,9 +1,12 @@
 import useTranslation from '@/hooks/useTranslation';
 
-import ChangeModel from '@/pages/_components/ChangeModel/ChangeModel';
-import Tips from '@/pages/_components/Tips/Tips';
+import { AdminModelDto } from '@/types/adminApis';
+
+import ChangeModel from '@/components/ChangeModel/ChangeModel';
+import Tips from '@/components/Tips/Tips';
 
 interface Props {
+  models: AdminModelDto[];
   hidden?: boolean;
   readonly?: boolean;
   onChangeModel: (modelId: number) => void;
@@ -12,13 +15,14 @@ interface Props {
 
 export const ChangeModelAction = (props: Props) => {
   const { t } = useTranslation();
-  const { modelName, readonly, onChangeModel, hidden } = props;
+  const { models, modelName, readonly, onChangeModel, hidden } = props;
 
   const Render = () => {
     return (
       <Tips
         trigger={
           <ChangeModel
+            models={models}
             readonly={readonly}
             onChangeModel={(model) => {
               onChangeModel && onChangeModel(model.modelId);

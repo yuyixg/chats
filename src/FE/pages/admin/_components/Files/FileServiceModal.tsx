@@ -42,7 +42,7 @@ interface IProps {
   saveLoading?: boolean;
 }
 
-export const FileServiceModal = (props: IProps) => {
+const FileServiceModal = (props: IProps) => {
   const { t } = useTranslation();
   const { selected, isOpen, onClose, onSuccessful } = props;
   const formFields: IFormFieldOption[] = [
@@ -220,3 +220,5 @@ export const FileServiceModal = (props: IProps) => {
     </Dialog>
   );
 };
+
+export default FileServiceModal;

@@ -4,7 +4,6 @@ import useTranslation from '@/hooks/useTranslation';
 
 import { GetFileServicesResult } from '@/types/adminApis';
 
-import { FileServiceModal } from '@/pages/admin/_components/Files/FileServiceModal';
 import { Button } from '@/components/ui/button';
 import { Card } from '@/components/ui/card';
 import {
@@ -15,6 +14,8 @@ import {
   TableHeader,
   TableRow,
 } from '@/components/ui/table';
+
+import FileServiceModal from '../_components/Files/FileServiceModal';
 
 import { getFileServices } from '@/apis/adminApis';
 

@@ -23,7 +23,7 @@ interface IProps {
   onShareChange: (isShared: boolean) => void;
 }
 
-export const SharedMessageModal = (props: IProps) => {
+const SharedMessageModal = (props: IProps) => {
   const { t } = useTranslation();
   const { chat, isOpen, onClose, onShareChange } = props;
   const [loading, setLoading] = useState(false);
@@ -104,3 +104,4 @@ export const SharedMessageModal = (props: IProps) => {
     </Dialog>
   );
 };
+export default SharedMessageModal;

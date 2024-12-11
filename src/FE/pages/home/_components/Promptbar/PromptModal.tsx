@@ -9,9 +9,9 @@ import { UserRole } from '@/types/adminApis';
 import { DEFAULT_TEMPERATURE } from '@/types/chat';
 import { Prompt } from '@/types/prompt';
 
-import { TemperatureSlider } from '@/pages/home/_components/Chat/Temperature';
 import { IconInfo } from '@/components/Icons';
-import Tips from '@/pages/_components/Tips/Tips';
+import TemperatureSlider from '@/components/TemperatureSlider/TemperatureSlider';
+import Tips from '@/components/Tips/Tips';
 import { Button } from '@/components/ui/button';
 import {
   Dialog,
@@ -24,7 +24,8 @@ import FormInput from '@/components/ui/form/input';
 import FormSwitch from '@/components/ui/form/switch';
 import FormTextarea from '@/components/ui/form/textarea';
 
-import { HomeContext } from '@/pages/home/_contents/Home.context';
+import HomeContext from '../../_contents/Home.context';
+
 import { zodResolver } from '@hookform/resolvers/zod';
 import { z } from 'zod';
 
@@ -34,7 +35,7 @@ interface IProps {
   onClose: () => void;
 }
 
-export const PromptModal = (props: IProps) => {
+const PromptModal = (props: IProps) => {
   const { t } = useTranslation();
   const { prompt, onUpdatePrompt, onClose } = props;
 
@@ -191,3 +192,4 @@ export const PromptModal = (props: IProps) => {
     </Dialog>
   );
 };
+export default PromptModal;

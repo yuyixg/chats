@@ -62,7 +62,7 @@ interface IProps {
   onSuccessful: () => void;
 }
 let ModelKeyMap = {} as any;
-export const UserInitialConfigModal = (props: IProps) => {
+const UserInitialConfigModal = (props: IProps) => {
   const { t } = useTranslation();
   const { models, isOpen, select, onClose, onSuccessful } = props;
   const [submit, setSubmit] = useState(false);
@@ -371,3 +371,4 @@ export const UserInitialConfigModal = (props: IProps) => {
     </Dialog>
   );
 };
+export default UserInitialConfigModal;

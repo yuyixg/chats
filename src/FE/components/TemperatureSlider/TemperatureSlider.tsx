@@ -1,10 +1,9 @@
-import { FC, useContext, useEffect, useState } from 'react';
+import { FC, useEffect, useState } from 'react';
 
 import useTranslation from '@/hooks/useTranslation';
 
 import { Slider } from '@/components/ui/slider';
 
-import { HomeContext } from '@/pages/home/_contents/Home.context';
 import { cn } from '@/lib/utils';
 
 interface Props {
@@ -16,7 +15,7 @@ interface Props {
   onChangeTemperature: (temperature: number) => void;
 }
 
-export const TemperatureSlider: FC<Props> = ({
+const TemperatureSlider: FC<Props> = ({
   label,
   labelClassName,
   defaultTemperature,
@@ -24,9 +23,6 @@ export const TemperatureSlider: FC<Props> = ({
   max,
   onChangeTemperature,
 }) => {
-  const {
-    state: {},
-  } = useContext(HomeContext);
   const [temperature, setTemperature] = useState(defaultTemperature);
   const { t } = useTranslation();
   const handleChange = (value: number[]) => {
@@ -79,3 +75,5 @@ export const TemperatureSlider: FC<Props> = ({
     </div>
   );
 };
+
+export default TemperatureSlider;

@@ -47,7 +47,7 @@ interface IProps {
   saveLoading?: boolean;
 }
 
-export const AddModelModal = (props: IProps) => {
+const AddModelModal = (props: IProps) => {
   const { t } = useTranslation();
   const [fileServices, setFileServices] = useState<GetFileServicesResult[]>([]);
   const [modelVersions, setModelVersions] = useState<SimpleModelReferenceDto[]>(
@@ -55,7 +55,6 @@ export const AddModelModal = (props: IProps) => {
   );
   const [modelReference, setModelReference] = useState<ModelReferenceDto>();
   const { isOpen, onClose, onSuccessful, modelKeys } = props;
-  const [loading, setLoading] = useState(true);
 
   const formSchema = z.object({
     modelReferenceId: z.string().default('0'),
@@ -307,3 +306,4 @@ export const AddModelModal = (props: IProps) => {
     </Dialog>
   );
 };
+export default AddModelModal;
