@@ -6,7 +6,7 @@
 
 async Task Main()
 {
-	string wwwroot = Path.Combine(new DirectoryInfo(Path.GetDirectoryName(Util.CurrentQueryPath)!).Parent!.ToString(), "BE", "wwwroot");
+	string wwwroot = Path.Combine(new DirectoryInfo(Path.GetDirectoryName(Util.CurrentQueryPath)!).Parent!.Parent!.ToString(), "BE", "wwwroot");
 	Directory.Delete(wwwroot, recursive: true);
 	string latestfeUrl = "https://github.com/sdcb/chats/releases/latest/download/chats-fe.zip";
 	using HttpClient http = new();
