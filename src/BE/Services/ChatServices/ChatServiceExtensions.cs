@@ -66,10 +66,6 @@ public abstract partial class ChatService
         }
 
         ChatMessage[] filteredMessage = messages.Select(m => FilterVision(Model.ModelReference.AllowVision, m)).ToArray();
-        if (Model.ModelReference.AllowVision)
-        {
-            options.MaxOutputTokenCount ??= Model.ModelReference.MaxResponseTokens;
-        }
         if (!Model.ModelReference.AllowSearch)
         {
             options.RemoveAllowSearch();

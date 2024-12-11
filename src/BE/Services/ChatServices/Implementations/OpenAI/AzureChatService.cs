@@ -1,11 +1,10 @@
 ﻿using Azure.AI.OpenAI;
 using Chats.BE.DB;
-using Chats.BE.Services.ChatServices.Implementations.OpenAI;
 using OpenAI;
 using OpenAI.Chat;
 using System.ClientModel;
 
-namespace Chats.BE.Services.ChatServices.Implementations.Azure;
+namespace Chats.BE.Services.ChatServices.Implementations.OpenAI;
 
 public class AzureChatService(Model model) : OpenAIChatService(model, CreateChatClient(model))
 {
