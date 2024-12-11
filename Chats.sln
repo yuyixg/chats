@@ -14,21 +14,12 @@ Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "Chats.BE", "src\BE\Chats.BE
 EndProject
 Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "Chats.BE.Tests", "src\BE.Tests\Chats.BE.Tests.csproj", "{B785B397-23AB-4782-807B-C5D5001C1ECC}"
 EndProject
-Project("{2150E333-8FDC-42A3-9474-1A3956D46DE8}") = "scripts", "scripts", "{04AEF080-BF5C-4CD7-BB7E-3D509A0FD3F6}"
-	ProjectSection(SolutionItems) = preProject
-		src\scripts\20240902-db-migration.linq = src\scripts\20240902-db-migration.linq
-		src\scripts\20241101-model-reference-sql.linq = src\scripts\20241101-model-reference-sql.linq
-		src\scripts\20241112-db-migration.linq = src\scripts\20241112-db-migration.linq
-		src\scripts\20241115-db-migration.sql = src\scripts\20241115-db-migration.sql
-		src\scripts\20241121-int-migration.sql = src\scripts\20241121-int-migration.sql
-		src\scripts\20241127-ref.sql = src\scripts\20241127-ref.sql
-		src\scripts\20241129-file.sql = src\scripts\20241129-file.sql
-	EndProjectSection
-EndProject
 Project("{2150E333-8FDC-42A3-9474-1A3956D46DE8}") = "github-actions", "github-actions", "{29CC0F58-0B4E-4F4F-A084-7C461F7A4E60}"
 	ProjectSection(SolutionItems) = preProject
 		.github\workflows\build-container.yml = .github\workflows\build-container.yml
 	EndProjectSection
+EndProject
+Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "scripts", "src\scripts\scripts.csproj", "{1AE54C98-13A3-408B-B428-1FD975C02AF2}"
 EndProject
 Global
 	GlobalSection(SolutionConfigurationPlatforms) = preSolution
@@ -44,12 +35,15 @@ Global
 		{B785B397-23AB-4782-807B-C5D5001C1ECC}.Debug|Any CPU.Build.0 = Debug|Any CPU
 		{B785B397-23AB-4782-807B-C5D5001C1ECC}.Release|Any CPU.ActiveCfg = Release|Any CPU
 		{B785B397-23AB-4782-807B-C5D5001C1ECC}.Release|Any CPU.Build.0 = Release|Any CPU
+		{1AE54C98-13A3-408B-B428-1FD975C02AF2}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
+		{1AE54C98-13A3-408B-B428-1FD975C02AF2}.Debug|Any CPU.Build.0 = Debug|Any CPU
+		{1AE54C98-13A3-408B-B428-1FD975C02AF2}.Release|Any CPU.ActiveCfg = Release|Any CPU
+		{1AE54C98-13A3-408B-B428-1FD975C02AF2}.Release|Any CPU.Build.0 = Release|Any CPU
 	EndGlobalSection
 	GlobalSection(SolutionProperties) = preSolution
 		HideSolutionNode = FALSE
 	EndGlobalSection
 	GlobalSection(NestedProjects) = preSolution
-		{04AEF080-BF5C-4CD7-BB7E-3D509A0FD3F6} = {6C78A2EB-D01E-4634-BBA7-85F12BF86232}
 		{29CC0F58-0B4E-4F4F-A084-7C461F7A4E60} = {6C78A2EB-D01E-4634-BBA7-85F12BF86232}
 	EndGlobalSection
 	GlobalSection(ExtensibilityGlobals) = postSolution
