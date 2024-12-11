@@ -1,4 +1,4 @@
-import { ForwardedRef, MutableRefObject, forwardRef } from 'react';
+import { MutableRefObject } from 'react';
 
 import { Prompt } from '@/types/prompt';
 
