@@ -6,10 +6,6 @@ import useTranslation from '@/hooks/useTranslation';
 import { GetUsersResult } from '@/types/adminApis';
 import { PageResult, Paging } from '@/types/page';
 
-import PaginationContainer from '@/pages/admin/_components/Pagiation/Pagiation';
-import { EditUserBalanceModal } from '@/pages/admin/_components/Users/EditUserBalanceModel';
-import { EditUserModelModal } from '@/pages/admin/_components/Users/EditUserModelModal';
-import { UserModal } from '@/pages/admin/_components/Users/UserModal';
 import { Badge } from '@/components/ui/badge';
 import { Button } from '@/components/ui/button';
 import { Card } from '@/components/ui/card';
@@ -22,6 +18,11 @@ import {
   TableHeader,
   TableRow,
 } from '@/components/ui/table';
+
+import PaginationContainer from '../_components/Pagiation/Pagiation';
+import EditUserBalanceModal from '../_components/Users/EditUserBalanceModel';
+import EditUserModelModal from '../_components/Users/EditUserModelModal';
+import UserModal from '../_components/Users/UserModal';
 
 import { getUsers } from '@/apis/adminApis';
 

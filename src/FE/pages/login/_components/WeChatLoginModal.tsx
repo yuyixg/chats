@@ -2,7 +2,7 @@ import { useEffect } from 'react';
 
 import useExternal from '@/hooks/useExternal';
 
-import Spinner from '@/pages/home/_components/Spinner/Spinner';
+import Spinner from '@/components/Spinner/Spinner';
 import { Dialog, DialogContent } from '@/components/ui/dialog';
 
 const WeChatLoginModal = (props: {

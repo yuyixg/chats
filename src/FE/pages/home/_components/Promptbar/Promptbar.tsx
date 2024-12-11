@@ -1,19 +1,16 @@
 import { useContext, useEffect } from 'react';
 import toast from 'react-hot-toast';
 
-import useTranslation from '@/hooks/useTranslation';
-
 import { useCreateReducer } from '@/hooks/useCreateReducer';
+import useTranslation from '@/hooks/useTranslation';
 
 import { Prompt, PromptSlim } from '@/types/prompt';
 
-import { HomeContext } from '@/pages/home/_contents/Home.context';
-
-import { Prompts } from './components/Prompts';
-import Sidebar from '@/pages/home/_components/Sidebar';
-
+import HomeContext from '../../_contents/Home.context';
+import Sidebar from '../Sidebar/Sidebar';
 import PromptbarContext from './PromptBar.context';
-import { PromptbarInitialState, initialState } from './Promptbar.state';
+import { PromptbarInitialState, initialState } from './PromptBar.context';
+import Prompts from './Prompts';
 
 import {
   deleteUserPrompts,
@@ -72,7 +69,7 @@ const PromptBar = () => {
 
   const handleUpdatePrompt = (prompt: Prompt) => {
     putUserPrompts(prompt.id, prompt).then(() => {
-      const existingPrompts = prompts.filter(x => x.id !== prompt.id);
+      const existingPrompts = prompts.filter((x) => x.id !== prompt.id);
       homeDispatch({ field: 'prompts', value: [...existingPrompts, prompt] });
       toast.success(t('Updated successful'));
     });

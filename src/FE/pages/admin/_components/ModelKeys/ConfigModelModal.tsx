@@ -6,8 +6,8 @@ import useTranslation from '@/hooks/useTranslation';
 import { DBModelProvider } from '@/types/model';
 
 import { IconInfo } from '@/components/Icons';
-import Spinner from '@/pages/home/_components/Spinner/Spinner';
-import Tips from '@/pages/_components/Tips/Tips';
+import Spinner from '@/components/Spinner/Spinner';
+import Tips from '@/components/Tips/Tips';
 import { Badge } from '@/components/ui/badge';
 import { Button } from '@/components/ui/button';
 import {
@@ -51,7 +51,7 @@ export interface PossibleModel {
   deploymentName: string | null;
 }
 
-export const ConfigModelModal = (props: IProps) => {
+const ConfigModelModal = (props: IProps) => {
   const { t } = useTranslation();
   const { modelKeyId, modelProverId, isOpen, onClose } = props;
   const [models, setModels] = useState<PossibleModel[]>([]);
@@ -235,3 +235,4 @@ export const ConfigModelModal = (props: IProps) => {
     </Dialog>
   );
 };
+export default ConfigModelModal;

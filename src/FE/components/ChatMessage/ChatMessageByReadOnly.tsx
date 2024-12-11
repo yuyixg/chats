@@ -1,14 +1,8 @@
 import { FC, memo } from 'react';
 
-
 import { preprocessLaTeX } from '@/utils/chats';
 
 import { Content, Message, Role } from '@/types/chat';
-
-import CopyAction from '@/pages/_components/ChatMessage/CopyAction';
-import GenerateInformationAction from '@/pages/_components/ChatMessage/GenerateInformationAction';
-import { CodeBlock } from '@/pages/_components/Markdown/CodeBlock';
-import { MemoizedReactMarkdown } from '@/pages/_components/Markdown/MemoizedReactMarkdown';
 
 import {
   IconChevronLeft,
@@ -16,7 +10,12 @@ import {
   IconRobot,
   IconUser,
 } from '@/components/Icons/index';
+import { CodeBlock } from '@/components/Markdown/CodeBlock';
+import { MemoizedReactMarkdown } from '@/components/Markdown/MemoizedReactMarkdown';
 import { Button } from '@/components/ui/button';
+
+import CopyAction from './CopyAction';
+import GenerateInformationAction from './GenerateInformationAction';
 
 import Decimal from 'decimal.js';
 import rehypeKatex from 'rehype-katex';
@@ -36,7 +35,7 @@ interface PropsMessage {
   firstTokenLatency: number;
 }
 
-export interface Props {
+interface Props {
   isLastMessage: boolean;
   parentId: string | null;
   childrenIds: string[];
@@ -51,7 +50,7 @@ export interface Props {
   onRegenerate?: (modelId?: string) => void;
 }
 
-export const ChatMessage: FC<Props> = memo(
+export const ChatMessageByReadOnly: FC<Props> = memo(
   ({
     isLastMessage,
     parentChildrenIds,
@@ -277,3 +276,5 @@ export const ChatMessage: FC<Props> = memo(
     );
   },
 );
+
+ChatMessageByReadOnly.displayName = 'ChatMessageByReadOnly';

@@ -11,9 +11,8 @@ import { getSelectMessages } from '@/utils/message';
 import { GetMessageDetailsResult } from '@/types/adminApis';
 import { ChatMessage } from '@/types/chatMessage';
 
-import { ChatMessage as ChatMessageComponent } from '@/pages/admin/_components/Messages/ChatMessage';
-import PageNotFound from '@/pages/home/_components/PageNotFound/PageNotFound';
-
+import { ChatMessageByReadOnly } from '@/components/ChatMessage/ChatMessageByReadOnly';
+import PageNotFound from '@/components/PageNotFound/PageNotFound';
 import { Button } from '@/components/ui/button';
 
 import { getShareMessage } from '@/apis/adminApis';
@@ -73,7 +72,7 @@ export default function ShareMessage() {
                 parentChildrenIds = [...parentChildrenIds].reverse();
               }
               return (
-                <ChatMessageComponent
+                <ChatMessageByReadOnly
                   currentSelectIndex={parentChildrenIds.findIndex(
                     (x) => x === current.id,
                   )}

@@ -21,11 +21,17 @@ import { DEFAULT_TEMPERATURE, IChat, Role } from '@/types/chat';
 import { ChatMessage } from '@/types/chatMessage';
 import { ChatResult, GetChatsParams } from '@/types/clientApis';
 
-import { Chat } from '@/pages/home/_components/Chat/Chat';
-import ChatSettingsBar from '@/pages/home/_components/ChatSettings/ChatSettingsBar';
-import { Chatbar } from '@/pages/home/_components/Chatbar/Chatbar';
-import PromptBar from '@/pages/home/_components/Promptbar';
-import Spinner from '@/pages/home/_components/Spinner/Spinner';
+import Spinner from '@/components/Spinner/Spinner';
+
+import HomeContext, {
+  HandleUpdateChatParams,
+  HomeInitialState,
+  initialState,
+} from '../../_contents/Home.context';
+import Chat from '../Chat/Chat';
+import ChatSettingsBar from '../ChatSettings/ChatSettingsBar';
+import Chatbar from '../Chatbar/Chatbar';
+import PromptBar from '../Promptbar/Promptbar';
 
 import {
   getChatsByPaging,
@@ -35,12 +41,6 @@ import {
   getUserPromptBrief,
   postChats,
 } from '@/apis/clientApis';
-import {
-  HandleUpdateChatParams,
-  HomeContext,
-  HomeInitialState,
-  initialState,
-} from '@/pages/home/_contents/Home.context';
 import Decimal from 'decimal.js';
 import { v4 as uuidv4 } from 'uuid';
 

@@ -29,7 +29,7 @@ interface Props {
   onClose: () => void;
 }
 
-export const ChangePasswordModal = (props: Props) => {
+const ChangePasswordModal = (props: Props) => {
   const { isOpen, onClose } = props;
   const { t } = useTranslation();
   const router = useRouter();
@@ -159,3 +159,4 @@ export const ChangePasswordModal = (props: Props) => {
     </Dialog>
   );
 };
+export default ChangePasswordModal;

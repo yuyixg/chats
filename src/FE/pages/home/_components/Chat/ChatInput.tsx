@@ -1,7 +1,6 @@
 import {
   KeyboardEvent,
   MutableRefObject,
-  forwardRef,
   useCallback,
   useContext,
   useEffect,
@@ -19,7 +18,6 @@ import { AdminModelDto } from '@/types/adminApis';
 import { Content, ImageDef, Message } from '@/types/chat';
 import { Prompt } from '@/types/prompt';
 
-import UploadButton from '@/pages/home/_components/Button/UploadButton';
 import {
   IconArrowDown,
   IconCircleX,
@@ -28,15 +26,16 @@ import {
   IconSend,
   IconStopFilled,
 } from '@/components/Icons/index';
-import PasteUpload from '@/pages/home/_components/PasteUpload/PasteUpload';
+import { Button } from '@/components/ui/button';
 
-import { Button } from '../../../../components/ui/button';
-import { PromptList } from './PromptList';
-import { VariableModal } from './VariableModal';
+import HomeContext from '../../_contents/Home.context';
+import UploadButton from '../Button/UploadButton';
+import PasteUpload from '../PasteUpload/PasteUpload';
+import PromptList from './PromptList';
+import VariableModal from './VariableModal';
 
 import { defaultFileConfig } from '@/apis/adminApis';
 import { getUserPromptDetail } from '@/apis/clientApis';
-import { HomeContext } from '@/pages/home/_contents/Home.context';
 
 interface Props {
   onSend: (message: Message) => void;
@@ -47,7 +46,7 @@ interface Props {
   stopConversationRef: MutableRefObject<boolean>;
 }
 
-export const ChatInput = ({
+const ChatInput = ({
   onSend,
   onScrollDownClick,
   onChangePrompt,
@@ -410,3 +409,4 @@ export const ChatInput = ({
     </div>
   );
 };
+export default ChatInput;

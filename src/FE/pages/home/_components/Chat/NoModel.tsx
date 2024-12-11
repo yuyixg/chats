@@ -1,6 +1,6 @@
 import useTranslation from '@/hooks/useTranslation';
 
-import { IconModelSearch } from '../../../../components/Icons';
+import { IconModelSearch } from '@/components/Icons';
 
 const NoModel = () => {
   const { t } = useTranslation();

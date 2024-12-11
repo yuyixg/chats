@@ -43,7 +43,7 @@ interface IProps {
   saveLoading?: boolean;
 }
 
-export const EditModelModal = (props: IProps) => {
+const EditModelModal = (props: IProps) => {
   const { t } = useTranslation();
   const { isOpen, onClose, selected, onSuccessful, modelKeys } = props;
   const [fileServices, setFileServices] = useState<GetFileServicesResult[]>([]);
@@ -329,3 +329,4 @@ export const EditModelModal = (props: IProps) => {
     </Dialog>
   );
 };
+export default EditModelModal;

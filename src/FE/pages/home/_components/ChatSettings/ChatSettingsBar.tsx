@@ -1,9 +1,8 @@
-import { useContext, useEffect, useState } from 'react';
+import { useContext, useState } from 'react';
 
-import { HomeContext } from '@/pages/home/_contents/Home.context';
+import { IconX } from '@/components/Icons';
 
-import { IconX } from '../../../../components/Icons';
-import ChatSettings from './ChatSettings';
+import HomeContext from '../../_contents/Home.context';
 import SliderSetting from './SliderSetting';
 
 const ChatSettingsBar = () => {

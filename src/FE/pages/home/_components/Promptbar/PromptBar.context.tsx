@@ -2,9 +2,8 @@ import { Dispatch, createContext } from 'react';
 
 import { ActionType } from '@/hooks/useCreateReducer';
 
-import { Prompt, PromptSlim } from '@/types/prompt';
-
-import { PromptbarInitialState } from './Promptbar.state';
+import { Prompt } from '@/types/prompt';
+import { PromptSlim } from '@/types/prompt';
 
 export interface PromptbarContextProps {
   state: PromptbarInitialState;
@@ -13,6 +12,16 @@ export interface PromptbarContextProps {
   handleDeletePrompt: (prompt: PromptSlim) => void;
   handleUpdatePrompt: (prompt: Prompt) => void;
 }
+
+export interface PromptbarInitialState {
+  searchTerm: string;
+  filteredPrompts: PromptSlim[];
+}
+
+export const initialState: PromptbarInitialState = {
+  searchTerm: '',
+  filteredPrompts: [],
+};
 
 const PromptbarContext = createContext<PromptbarContextProps>(undefined!);
 

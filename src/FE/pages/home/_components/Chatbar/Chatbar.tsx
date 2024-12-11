@@ -7,16 +7,14 @@ import { removeSelectChatId, saveSelectChatId } from '@/utils/chats';
 
 import { ChatResult } from '@/types/clientApis';
 
-import Sidebar from '@/pages/home/_components/Sidebar';
-
+import HomeContext from '../../_contents/Home.context';
+import Sidebar from '../Sidebar/Sidebar';
 import ChatbarContext from './Chatbar.context';
-import { ChatbarInitialState, initialState } from './Chatbar.state';
-import { ChatBarSettings } from './ChatbarSettings';
-import { Conversations } from './Conversations';
+import { ChatbarInitialState, initialState } from './Chatbar.context';
+import ChatBarSettings from './ChatbarSettings';
+import Conversations from './Conversations';
 
-import { HomeContext } from '@/pages/home/_contents/Home.context';
-
-export const Chatbar = () => {
+const Chatbar = () => {
   const { t } = useTranslation();
 
   const chatBarContextValue = useCreateReducer<ChatbarInitialState>({
@@ -102,3 +100,4 @@ export const Chatbar = () => {
     </ChatbarContext.Provider>
   );
 };
+export default Chatbar;

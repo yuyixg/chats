@@ -29,7 +29,7 @@ interface IProps {
   onSuccessful: () => void;
 }
 
-export const EditUserBalanceModal = (props: IProps) => {
+const EditUserBalanceModal = (props: IProps) => {
   const { t } = useTranslation();
   const { userId, userBalance, isOpen, onClose, onSuccessful } = props;
   const [loading, setLoading] = useState(false);
@@ -117,3 +117,5 @@ export const EditUserBalanceModal = (props: IProps) => {
     </Dialog>
   );
 };
+
+export default EditUserBalanceModal;

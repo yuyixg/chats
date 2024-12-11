@@ -1,8 +1,7 @@
 import useTranslation from '@/hooks/useTranslation';
 
-import Tips from '@/pages/_components/Tips/Tips';
-
 import { IconEdit } from '@/components/Icons';
+import Tips from '@/components/Tips/Tips';
 import { Button } from '@/components/ui/button';
 
 interface Props {

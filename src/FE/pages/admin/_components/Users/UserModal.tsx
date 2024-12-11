@@ -42,7 +42,7 @@ const ROLES = [
   },
 ];
 
-export const UserModal = (props: IProps) => {
+const UserModal = (props: IProps) => {
   const { t } = useTranslation();
   const { user, isOpen, onClose, onSuccessful } = props;
   const [submit, setSubmit] = useState(false);
@@ -206,3 +206,4 @@ export const UserModal = (props: IProps) => {
     </Dialog>
   );
 };
+export default UserModal;

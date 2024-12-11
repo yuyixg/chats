@@ -33,7 +33,7 @@ interface IProps {
   saveLoading?: boolean;
 }
 
-export const GlobalConfigsModal = (props: IProps) => {
+const GlobalConfigsModal = (props: IProps) => {
   const { t } = useTranslation();
   const { configKeys = [], selected, isOpen, onClose, onSuccessful } = props;
   const formFields: IFormFieldOption[] = [
@@ -158,3 +158,4 @@ export const GlobalConfigsModal = (props: IProps) => {
     </Dialog>
   );
 };
+export default GlobalConfigsModal;

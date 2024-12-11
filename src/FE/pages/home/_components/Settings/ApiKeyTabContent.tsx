@@ -9,9 +9,7 @@ import { getApiUrl } from '@/utils/common';
 
 import { GetUserApiKeyResult } from '@/types/clientApis';
 
-import CopyButton from '@/pages/home/_components/Button/CopyButton';
-import DateTimePopover from '@/pages/home/_components/Popover/DateTimePopover';
-import DeletePopover from '@/pages/home/_components/Popover/DeletePopover';
+import CopyButton from '@/components/Button/CopyButton';
 import { Button } from '@/components/ui/button';
 import { Card, CardContent } from '@/components/ui/card';
 import { Input } from '@/components/ui/input';
@@ -24,6 +22,9 @@ import {
   TableRow,
 } from '@/components/ui/table';
 
+import DateTimePopover from '../Popover/DateTimePopover';
+import DeletePopover from '../Popover/DeletePopover';
+
 import {
   deleteUserApiKey,
   getUserApiKey,
@@ -32,7 +33,7 @@ import {
 } from '@/apis/clientApis';
 
 let timer: NodeJS.Timeout;
-export const ApiKeyTab = () => {
+const ApiKeyTab = () => {
   const { t } = useTranslation();
   const [loading, setLoading] = useState(false);
   const [apiKeys, setApiKeys] = useState<GetUserApiKeyResult[]>([]);
@@ -178,3 +179,4 @@ export const ApiKeyTab = () => {
     </div>
   );
 };
+export default ApiKeyTab;

@@ -10,7 +10,7 @@ interface Props {
   promptListRef: MutableRefObject<HTMLUListElement | null>;
 }
 
-export const PromptList = ({
+const PromptList = ({
   prompts,
   activePromptIndex,
   promptListRef,
@@ -43,3 +43,5 @@ export const PromptList = ({
     </ul>
   );
 };
+
+export default PromptList;

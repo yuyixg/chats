@@ -4,9 +4,8 @@ import { formatNumberAsMoney } from '@/utils/common';
 
 import { PropsMessage } from '@/types/components/chat';
 
-import Tips from '@/pages/_components/Tips/Tips';
-
 import { IconInfo } from '@/components/Icons';
+import Tips from '@/components/Tips/Tips';
 import { Button } from '@/components/ui/button';
 import { Label } from '@/components/ui/label';
 

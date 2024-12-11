@@ -8,7 +8,7 @@ interface Props {
   onClick: () => void;
 }
 
-export const SidebarButton: FC<Props> = ({
+const SidebarButton: FC<Props> = ({
   text,
   icon,
   className,
@@ -36,3 +36,4 @@ export const SidebarButton: FC<Props> = ({
     </div>
   );
 };
+export default SidebarButton;

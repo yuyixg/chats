@@ -6,8 +6,6 @@ import { GetRequestLogsListResult } from '@/types/adminApis';
 import { PageResult, Paging } from '@/types/page';
 import { StatusCodeColor } from '@/types/statusCode';
 
-import PaginationContainer from '@/pages/admin/_components/Pagiation/Pagiation';
-import { RequestLogDetailsModal } from '@/pages/admin/_components/RequestLogs/RequestLogDetailsModal';
 import { Card } from '@/components/ui/card';
 import { Input } from '@/components/ui/input';
 import {
@@ -18,6 +16,9 @@ import {
   TableHeader,
   TableRow,
 } from '@/components/ui/table';
+
+import PaginationContainer from '../_components/Pagiation/Pagiation';
+import RequestLogDetailsModal from '../_components/RequestLogs/RequestLogDetailsModal';
 
 import { getRequestLogs } from '@/apis/adminApis';
 

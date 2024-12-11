@@ -9,14 +9,14 @@ import {
   DialogTitle,
 } from '@/components/ui/dialog';
 
-import { ApiKeyTab } from './ApiKeyTabContent';
+import ApiKeyTab from './ApiKeyTabContent';
 
 interface Props {
   isOpen: boolean;
   onClose: () => void;
 }
 
-export const SettingModal = (props: Props) => {
+const SettingModal = (props: Props) => {
   const { isOpen, onClose } = props;
   const { t } = useTranslation();
 
@@ -33,3 +33,4 @@ export const SettingModal = (props: Props) => {
     </Dialog>
   );
 };
+export default SettingModal;

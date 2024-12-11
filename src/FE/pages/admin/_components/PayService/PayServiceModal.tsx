@@ -41,7 +41,7 @@ interface IProps {
   saveLoading?: boolean;
 }
 
-export const PayServiceModal = (props: IProps) => {
+const PayServiceModal = (props: IProps) => {
   const { t } = useTranslation();
   const { selected, types, isOpen, onClose, onSuccessful } = props;
   const formFields: IFormFieldOption[] = [
@@ -181,3 +181,4 @@ export const PayServiceModal = (props: IProps) => {
     </Dialog>
   );
 };
+export default PayServiceModal;

@@ -5,9 +5,8 @@ import useTranslation from '@/hooks/useTranslation';
 import { formatNumberAsMoney } from '@/utils/common';
 
 import { AdminModelDto, GetModelKeysResult } from '@/types/adminApis';
+import { feModelProviders } from '@/types/model';
 
-import { AddModelModal } from '@/pages/admin/_components/Models/AddModelModal';
-import { EditModelModal } from '@/pages/admin/_components/Models/EditModelModal';
 import { Button } from '@/components/ui/button';
 import { Card } from '@/components/ui/card';
 import {
@@ -19,8 +18,10 @@ import {
   TableRow,
 } from '@/components/ui/table';
 
+import AddModelModal from '../_components/Models/AddModelModal';
+import EditModelModal from '../_components/Models/EditModelModal';
+
 import { getModelKeys, getModels } from '@/apis/adminApis';
-import { feModelProviders } from '@/types/model';
 
 export default function Models() {
   const { t } = useTranslation();
@@ -65,7 +66,9 @@ export default function Models() {
       <div className="flex flex-col gap-4 mb-4">
         <div className="flex justify-end gap-3 items-center">
           <Button
-            onClick={() => { showCreateDialog(); }}
+            onClick={() => {
+              showCreateDialog();
+            }}
             color="primary"
           >
             {t('Add Model')}
@@ -94,14 +97,15 @@ export default function Models() {
                 <TableCell>
                   <div className="flex items-center gap-1 ">
                     <div
-                      className={`w-2 h-2 rounded-full ${item.enabled ? 'bg-green-400' : 'bg-gray-400'
-                        }`}
+                      className={`w-2 h-2 rounded-full ${
+                        item.enabled ? 'bg-green-400' : 'bg-gray-400'
+                      }`}
                     ></div>
                     {item.name}
                   </div>
                 </TableCell>
                 <TableCell>
-                  {modelKeys.find(k => k.id === item.modelKeyId)?.name}
+                  {modelKeys.find((k) => k.id === item.modelKeyId)?.name}
                 </TableCell>
                 <TableCell>{item.modelReferenceName}</TableCell>
                 <TableCell>

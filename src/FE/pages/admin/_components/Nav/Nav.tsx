@@ -17,7 +17,7 @@ interface NavProps {
   menus: IMenu[];
 }
 
-export function Nav({ menus }: NavProps) {
+function Nav({ menus }: NavProps) {
   const router = useRouter();
   const active = (link: IMenu) => {
     const { url } = link;
@@ -52,3 +52,4 @@ export function Nav({ menus }: NavProps) {
     </div>
   );
 }
+export default Nav;

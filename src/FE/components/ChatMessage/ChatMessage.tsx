@@ -1,17 +1,18 @@
 import { FC, memo } from 'react';
 
+import { AdminModelDto } from '@/types/adminApis';
 import { IChat, Message } from '@/types/chat';
 import { PropsMessage } from '@/types/components/chat';
 
+import ChatError from '@/components/ChatError/ChatError';
 import { IconRobot } from '@/components/Icons/index';
 
-import ChatError from '../ChatError/ChatError';
 import ResponseMessage from './ResponseMessage';
 import ResponseMessageActions from './ResponseMessageActions';
 import UserMessage from './UserMessage';
 
 export interface Props {
-  readonly?: boolean;
+  models: AdminModelDto[];
   parentId: string | null;
   childrenIds: string[];
   assistantChildrenIds: string[];
@@ -33,7 +34,7 @@ export interface Props {
 
 export const ChatMessage: FC<Props> = memo(
   ({
-    readonly = false,
+    models,
     parentChildrenIds,
     assistantChildrenIds,
     currentSelectIndex,
@@ -90,8 +91,8 @@ export const ChatMessage: FC<Props> = memo(
 
             {message.role === 'assistant' && (
               <ResponseMessageActions
+                models={models}
                 messageIsStreaming={messageIsStreaming}
-                readonly={readonly}
                 message={message}
                 lastMessageId={lastMessageId}
                 modelName={modelName}

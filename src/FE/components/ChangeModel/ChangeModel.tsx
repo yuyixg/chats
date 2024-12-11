@@ -1,13 +1,13 @@
-import { useContext, useState } from 'react';
+import { useState } from 'react';
 
 import useTranslation from '@/hooks/useTranslation';
 
 import { AdminModelDto } from '@/types/adminApis';
 import { feModelProviders } from '@/types/model';
 
-import ChatIcon from '@/pages/_components/ChatIcon/ChatIcon';
+import ChatIcon from '@/components/ChatIcon/ChatIcon';
 import { IconChevronDown } from '@/components/Icons';
-import Search from '@/pages/_components/Search/Search';
+import Search from '@/components/Search/Search';
 import {
   DropdownMenu,
   DropdownMenuContent,
@@ -20,24 +20,23 @@ import {
   DropdownMenuTrigger,
 } from '@/components/ui/dropdown-menu';
 
-import { HomeContext } from '@/pages/home/_contents/Home.context';
 import { cn } from '@/lib/utils';
 
 const ChangeModel = ({
+  models,
+
   readonly,
   content,
   className,
   onChangeModel,
 }: {
+  models: AdminModelDto[];
   readonly?: boolean;
   content?: string | React.JSX.Element;
   className?: string;
   onChangeModel: (model: AdminModelDto) => void;
 }) => {
   const { t } = useTranslation();
-  const {
-    state: { models },
-  } = useContext(HomeContext);
   const [searchTerm, setSearchTerm] = useState('');
 
   let modelGroup = [] as { providerId: number; child: AdminModelDto[] }[];

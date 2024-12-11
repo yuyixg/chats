@@ -2,8 +2,8 @@ import { preprocessLaTeX } from '@/utils/chats';
 
 import { PropsMessage } from '@/types/components/chat';
 
-import { CodeBlock } from '@/pages/_components/Markdown/CodeBlock';
-import { MemoizedReactMarkdown } from '@/pages/_components/Markdown/MemoizedReactMarkdown';
+import { CodeBlock } from '@/components/Markdown/CodeBlock';
+import { MemoizedReactMarkdown } from '@/components/Markdown/MemoizedReactMarkdown';
 
 import rehypeKatex from 'rehype-katex';
 import remarkGfm from 'remark-gfm';

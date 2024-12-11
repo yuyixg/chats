@@ -2,12 +2,9 @@ import React, { useEffect, useState } from 'react';
 
 import useTranslation from '@/hooks/useTranslation';
 
-import { DEFAULT_LANGUAGE } from '@/utils/settings';
-
 import { GetUserMessageResult } from '@/types/adminApis';
 import { PageResult, Paging } from '@/types/page';
 
-import PaginationContainer from '@/pages/admin/_components/Pagiation/Pagiation';
 import { Badge } from '@/components/ui/badge';
 import { Card } from '@/components/ui/card';
 import { Input } from '@/components/ui/input';
@@ -19,6 +16,8 @@ import {
   TableHeader,
   TableRow,
 } from '@/components/ui/table';
+
+import PaginationContainer from '../_components/Pagiation/Pagiation';
 
 import { getMessages } from '@/apis/adminApis';
 

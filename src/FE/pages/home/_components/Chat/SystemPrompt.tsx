@@ -9,24 +9,25 @@ import {
 
 import useTranslation from '@/hooks/useTranslation';
 
+import { formatPrompt } from '@/utils/promptVariable';
+
+import { AdminModelDto } from '@/types/adminApis';
 import { Prompt } from '@/types/prompt';
 
-import { PromptList } from './PromptList';
-import { VariableModal } from './VariableModal';
+import PromptList from './PromptList';
+import VariableModal from './VariableModal';
 
 import { getUserPromptDetail } from '@/apis/clientApis';
-import { formatPrompt } from '@/utils/promptVariable';
-import { AdminModelDto } from '@/types/adminApis';
 
 interface Props {
   currentPrompt: string;
   prompts: Prompt[];
-  model: AdminModelDto,
+  model: AdminModelDto;
   onChangePromptText: (prompt: string) => void;
   onChangePrompt: (prompt: Prompt) => void;
 }
 
-export const SystemPrompt: FC<Props> = ({
+const SystemPrompt: FC<Props> = ({
   currentPrompt,
   prompts,
   model,
@@ -196,10 +197,11 @@ export const SystemPrompt: FC<Props> = ({
           resize: 'none',
           bottom: `${textareaRef?.current?.scrollHeight}px`,
           maxHeight: '300px',
-          overflow: `${textareaRef.current && textareaRef.current.scrollHeight > 400
+          overflow: `${
+            textareaRef.current && textareaRef.current.scrollHeight > 400
               ? 'auto'
               : 'hidden'
-            }`,
+          }`,
         }}
         placeholder={
           t(`Enter a prompt or type "/" to select a prompt...`) || ''
@@ -233,3 +235,5 @@ export const SystemPrompt: FC<Props> = ({
     </div>
   );
 };
+
+export default SystemPrompt;

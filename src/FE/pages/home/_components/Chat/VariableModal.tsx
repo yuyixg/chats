@@ -21,12 +21,7 @@ interface Props {
   onClose: () => void;
 }
 
-export const VariableModal: FC<Props> = ({
-  prompt,
-  variables,
-  onSubmit,
-  onClose,
-}) => {
+const VariableModal: FC<Props> = ({ prompt, variables, onSubmit, onClose }) => {
   const { t } = useTranslation();
   const [updatedVariables, setUpdatedVariables] = useState<
     { key: string; value: string }[]
@@ -112,3 +107,5 @@ export const VariableModal: FC<Props> = ({
     </Dialog>
   );
 };
+
+export default VariableModal;

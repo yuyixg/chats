@@ -34,7 +34,7 @@ interface IProps {
   saveLoading?: boolean;
 }
 
-export const InvitationCodeModal = (props: IProps) => {
+const InvitationCodeModal = (props: IProps) => {
   const { t } = useTranslation();
   const { selected, isOpen, onClose, onSuccessful } = props;
   const formFields: IFormFieldOption[] = [
@@ -137,3 +137,4 @@ export const InvitationCodeModal = (props: IProps) => {
     </Dialog>
   );
 };
+export default InvitationCodeModal;

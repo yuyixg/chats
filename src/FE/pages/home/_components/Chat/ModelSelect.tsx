@@ -6,23 +6,15 @@ import { formatNumberAsMoney } from '@/utils/common';
 
 import { ModelUsageDto } from '@/types/clientApis';
 
-import {
-  Select,
-  SelectContent,
-  SelectItem,
-  SelectTrigger,
-  SelectValue,
-} from '../../../../components/ui/select';
+import HomeContext from '../../_contents/Home.context';
 
 import { getModelUsage } from '@/apis/clientApis';
-import { HomeContext } from '@/pages/home/_contents/Home.context';
 
-export const ModelSelect = () => {
+const ModelSelect = () => {
   const { t } = useTranslation();
 
   const {
-    state: { selectModel, models },
-    handleSelectModel,
+    state: { selectModel },
   } = useContext(HomeContext);
   const [modelUsage, setModelUsage] = useState<ModelUsageDto>();
 
@@ -33,16 +25,6 @@ export const ModelSelect = () => {
       });
     }
   }, [selectModel]);
-
-  const handleChange = (value: string) => {
-    const model = models.find((m) => m.modelId.toString() == value);
-    if (!model) return;
-
-    handleSelectModel(model);
-    getModelUsage(model.modelId).then((res) => {
-      setModelUsage(res);
-    });
-  };
 
   const getTitle = () => {
     if (modelUsage) {
@@ -64,24 +46,6 @@ export const ModelSelect = () => {
       <label className="mb-2 text-left text-neutral-700 dark:text-neutral-400">
         {getTitle()}
       </label>
-      {/* <div className="w-full focus:outline-none active:outline-none rounded-lg border bg-background border-neutral-200  dark:border-neutral-600">
-        <Select
-          onValueChange={handleChange}
-          value={selectModel?.modelId?.toString()}
-          defaultValue={selectModel?.modelId?.toString()}
-        >
-          <SelectTrigger className="border-1">
-            <SelectValue placeholder={t('Select a model')} />
-          </SelectTrigger>
-          <SelectContent className="w-full">
-            {models.map((model) => (
-              <SelectItem key={model.modelId} value={model.modelId.toString()}>
-                {model.name}
-              </SelectItem>
-            ))}
-          </SelectContent>
-        </Select>
-      </div> */}
       {modelUsage && modelUsage.tokens === 0 && modelUsage.counts === 0 ? (
         <span className="text-xs pt-2">
           ￥{modelUsage.inputTokenPrice1M.toFixed(4)}/
@@ -120,3 +84,5 @@ export const ModelSelect = () => {
     </div>
   );
 };
+
+export default ModelSelect;
