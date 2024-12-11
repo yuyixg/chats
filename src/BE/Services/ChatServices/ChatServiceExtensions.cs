@@ -9,7 +9,7 @@ public abstract partial class ChatService
 {
     public async IAsyncEnumerable<InternalChatSegment> ChatStreamedFEProcessed(IReadOnlyList<ChatMessage> messages, ChatCompletionOptions options, [EnumeratorCancellation] CancellationToken cancellationToken)
     {
-        ChatMessage[] filteredMessage = FEProcessMessages(messages, options);
+        ChatMessage[] filteredMessage = FEPreprocess(messages, options);
 
         await foreach (InternalChatSegment seg in ChatStreamedSimulated(suggestedStreaming: true, filteredMessage, options, cancellationToken))
         {
@@ -48,7 +48,7 @@ public abstract partial class ChatService
         }
     }
 
-    private ChatMessage[] FEProcessMessages(IReadOnlyList<ChatMessage> messages, ChatCompletionOptions options)
+    protected virtual ChatMessage[] FEPreprocess(IReadOnlyList<ChatMessage> messages, ChatCompletionOptions options)
     {
         if (!Model.ModelReference.AllowSystemPrompt)
         {

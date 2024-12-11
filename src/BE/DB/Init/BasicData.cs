@@ -247,22 +247,22 @@ internal static class BasicData
 
     private static void InsertModelProviders(ChatsDB db)
     {
-        // Generated from data, hash: 918110f3f52c51c8fdebe00ca4e2e9dac5d2f2e7f892ed5c7197be6a7fbcfbdf
+        // Generated from data, hash: 615290985867eb3467e7889a31c4edf5dcdbd113930d67df8e19b6cd27c955ca
         db.ModelProviders.AddRange(
         [
-            new(){ Id=0,  Name="Test",             InitialHost=null,                                        InitialSecret=null,                                          },
-            new(){ Id=1,  Name="Azure OpenAI",     InitialHost="https://<resource-name>.openai.azure.com/", InitialSecret="",                                            },
-            new(){ Id=2,  Name="Tencent Hunyuan",  InitialHost="hunyuan.tencentcloudapi.com",               InitialSecret="""{"secretId":"", "secretKey":""}""",         },
-            new(){ Id=3,  Name="01.ai",            InitialHost=null,                                        InitialSecret="",                                            },
-            new(){ Id=4,  Name="Moonshot",         InitialHost=null,                                        InitialSecret="",                                            },
-            new(){ Id=5,  Name="OpenAI",           InitialHost="https://api.openai.com/v1",                 InitialSecret="",                                            },
-            new(){ Id=6,  Name="Wenxin Qianfan",   InitialHost=null,                                        InitialSecret="""{"apiKey":"", "secret":""}""",              },
-            new(){ Id=7,  Name="DashScope",        InitialHost=null,                                        InitialSecret="",                                            },
-            new(){ Id=8,  Name="Xunfei SparkDesk", InitialHost=null,                                        InitialSecret="""{"appId": "", "apiKey":"", "secret":""}""", },
-            new(){ Id=9,  Name="Zhipu AI",         InitialHost=null,                                        InitialSecret="",                                            },
-            new(){ Id=10, Name="DeepSeek",         InitialHost=null,                                        InitialSecret="",                                            },
-            new(){ Id=11, Name="x.ai",             InitialHost=null,                                        InitialSecret="xai-yourkey",                                 },
-            new(){ Id=12, Name="Github Models",    InitialHost=null,                                        InitialSecret="ghp_yourkey",                                 }
+            new(){ Id=0,  Name="Test",             InitialHost=null,                                        InitialSecret=null,                                  },
+            new(){ Id=1,  Name="Azure OpenAI",     InitialHost="https://<resource-name>.openai.azure.com/", InitialSecret="",                                    },
+            new(){ Id=2,  Name="Tencent Hunyuan",  InitialHost="hunyuan.tencentcloudapi.com",               InitialSecret="""{"secretId":"", "secretKey":""}""", },
+            new(){ Id=3,  Name="01.ai",            InitialHost=null,                                        InitialSecret="",                                    },
+            new(){ Id=4,  Name="Moonshot",         InitialHost=null,                                        InitialSecret="",                                    },
+            new(){ Id=5,  Name="OpenAI",           InitialHost="https://api.openai.com/v1",                 InitialSecret="",                                    },
+            new(){ Id=6,  Name="Wenxin Qianfan",   InitialHost=null,                                        InitialSecret="""{"apiKey":"", "secret":""}""",      },
+            new(){ Id=7,  Name="DashScope",        InitialHost=null,                                        InitialSecret="",                                    },
+            new(){ Id=8,  Name="Xunfei SparkDesk", InitialHost=null,                                        InitialSecret="",                                    },
+            new(){ Id=9,  Name="Zhipu AI",         InitialHost=null,                                        InitialSecret="",                                    },
+            new(){ Id=10, Name="DeepSeek",         InitialHost=null,                                        InitialSecret="",                                    },
+            new(){ Id=11, Name="x.ai",             InitialHost=null,                                        InitialSecret="xai-yourkey",                         },
+            new(){ Id=12, Name="Github Models",    InitialHost=null,                                        InitialSecret="ghp_yourkey",                         }
         ]);
     }
 };

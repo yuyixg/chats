@@ -24,7 +24,7 @@ public class ChatFactory(ILogger<ChatFactory> logger)
             DBModelProvider.ZhiPuAI => new GLMChatService(model),
             DBModelProvider.Moonshot => new KimiChatService(model),
             DBModelProvider.HunYuan => new HunyuanChatService(model),
-            DBModelProvider.Sparkdesk => throw new NotImplementedException("Spark model is not implemented"),
+            DBModelProvider.Sparkdesk => new SparkDeskChatService(model),
             DBModelProvider.LingYi => new LingYiChatService(model),
             DBModelProvider.DeepSeek => new DeepSeekChatService(model),
             DBModelProvider.xAI => new XAIChatService(model),
