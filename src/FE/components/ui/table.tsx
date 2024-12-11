@@ -1,11 +1,11 @@
 import * as React from 'react';
 import { ReactElement } from 'react-markdown/lib/react-markdown';
 
+import useTranslation from '@/hooks/useTranslation';
+
 import { Skeleton } from './skeleton';
 
 import { cn } from '@/lib/utils';
-
-import useTranslation from '@/hooks/useTranslation';
 
 const Table = React.forwardRef<
   HTMLTableElement,
@@ -50,10 +50,9 @@ const TableBody = React.forwardRef<HTMLTableSectionElement, TableBodyProps>(
       ...props
     },
     ref,
-  ) => 
-  {
+  ) => {
     const { t } = useTranslation();
-    return (isLoading ? (
+    return isLoading ? (
       <tbody>
         <tr>
           <td className="text-center align-middle p-4 h-32" colSpan={100}>
@@ -87,8 +86,8 @@ const TableBody = React.forwardRef<HTMLTableSectionElement, TableBodyProps>(
         className={cn('[&_tr:last-child]:border-0', className)}
         {...props}
       />
-    ))
-  }
+    );
+  },
 );
 TableBody.displayName = 'TableBody';
 

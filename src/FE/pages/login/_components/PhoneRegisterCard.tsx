@@ -8,6 +8,7 @@ import useTranslation from '@/hooks/useTranslation';
 
 import { PhoneRegExp, SmsExpirationSeconds } from '@/utils/common';
 import { saveUserInfo, setUserSession } from '@/utils/user';
+import { redirectToGithub } from '@/utils/website';
 
 import { Button } from '@/components/ui/button';
 import { Card, CardContent } from '@/components/ui/card';
@@ -23,7 +24,6 @@ import { Input } from '@/components/ui/input';
 import { registerByPhone, sendRegisterSmsCode } from '@/apis/clientApis';
 import { zodResolver } from '@hookform/resolvers/zod';
 import { z } from 'zod';
-import { redirectToGithub } from '@/utils/website';
 
 const PhoneRegisterCard = (props: {
   loginLoading: boolean;

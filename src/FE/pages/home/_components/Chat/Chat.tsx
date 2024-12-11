@@ -425,7 +425,9 @@ const Chat = memo(() => {
                         />
                       )}
                     {selectModel?.allowTemperature &&
-                      userModelConfig && userModelConfig.temperature !== null && userModelConfig.temperature !== undefined && (
+                      userModelConfig &&
+                      userModelConfig.temperature !== null &&
+                      userModelConfig.temperature !== undefined && (
                         <TemperatureSlider
                           label={t('Temperature')}
                           min={0}

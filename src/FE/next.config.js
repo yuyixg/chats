@@ -1,13 +1,13 @@
 const isDev = process.env?.NODE_ENV === 'development';
-console.log("NODE_ENV", process.env?.NODE_ENV);
-console.log("-------------------");
+console.log('NODE_ENV', process.env?.NODE_ENV);
+console.log('-------------------');
 
 const withPWA = require('next-pwa')({
   dest: 'public',
   register: !isDev,
   skipWaiting: !isDev,
   disable: isDev,
-})
+});
 
 /** @type {import('next').NextConfig} */
 const nextConfig = {
@@ -22,8 +22,8 @@ const nextConfig = {
   },
   publicRuntimeConfig: {
     chattingIds: {},
-    globalConfigs: {}
-  }
+    globalConfigs: {},
+  },
 };
 
 module.exports = withPWA(nextConfig);

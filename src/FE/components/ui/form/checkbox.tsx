@@ -8,7 +8,6 @@ const FormCheckbox = ({
   options,
   field,
 }: {
-  
   label?: string;
   disabled?: boolean;
   options?: IFormFieldOption;
@@ -17,7 +16,11 @@ const FormCheckbox = ({
   return (
     <FormItem className="py-2 flex items-center gap-2">
       <FormControl className="flex">
-        <Checkbox checked={field.value} disabled={disabled} onCheckedChange={field.onChange} />
+        <Checkbox
+          checked={field.value}
+          disabled={disabled}
+          onCheckedChange={field.onChange}
+        />
       </FormControl>
       <FormLabel style={{ marginTop: 0 }}>{label}</FormLabel>
       <FormMessage />
