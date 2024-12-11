@@ -1,12 +1,7 @@
 ﻿using Chats.BE.DB;
 using Chats.BE.DB.Enums;
-using Chats.BE.Services.ChatServices.Implementations.Azure;
 using Chats.BE.Services.ChatServices.Implementations.DashScope;
-using Chats.BE.Services.ChatServices.Implementations.DeepSeek;
-using Chats.BE.Services.ChatServices.Implementations.GLM;
 using Chats.BE.Services.ChatServices.Implementations.Hunyuan;
-using Chats.BE.Services.ChatServices.Implementations.Kimi;
-using Chats.BE.Services.ChatServices.Implementations.LingYi;
 using Chats.BE.Services.ChatServices.Implementations.OpenAI;
 using Chats.BE.Services.ChatServices.Implementations.QianFan;
 using Chats.BE.Services.ChatServices.Implementations.Test;
@@ -29,9 +24,11 @@ public class ChatFactory(ILogger<ChatFactory> logger)
             DBModelProvider.ZhiPuAI => new GLMChatService(model),
             DBModelProvider.Moonshot => new KimiChatService(model),
             DBModelProvider.HunYuan => new HunyuanChatService(model),
-            DBModelProvider.Sparkdesk => throw new NotImplementedException("Spark model is not implemented"),
+            DBModelProvider.Sparkdesk => new SparkDeskChatService(model),
             DBModelProvider.LingYi => new LingYiChatService(model),
             DBModelProvider.DeepSeek => new DeepSeekChatService(model),
+            DBModelProvider.xAI => new XAIChatService(model),
+            DBModelProvider.GithubModels => new GithubModelsChatService(model),
             _ => throw new NotSupportedException($"Unknown model provider: {modelProvider}")
         };
         return cs;

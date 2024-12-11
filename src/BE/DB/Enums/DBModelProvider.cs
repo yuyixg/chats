@@ -13,4 +13,6 @@ public enum DBModelProvider
     Sparkdesk = 8,
     ZhiPuAI = 9,
     DeepSeek = 10,
+    xAI = 11, 
+    GithubModels = 12,
 }

@@ -1,5 +1,6 @@
 insert into ModelProvider values(11, 'x.ai', NULL, 'xai-yourkey');
 insert into ModelProvider values(12, 'Github Models', NULL, 'ghp_yourkey');
+update ModelProvider set InitialSecret = '' where id = 8;
 
 insert into ModelReference values
 (1100, 11, 'grok-beta',        'grok', 0, 0, 2, 0, 0, 1, 1, 131072, 4096, NULL, 5, 15, 'USD'),
