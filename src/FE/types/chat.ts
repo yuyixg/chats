@@ -1,3 +1,5 @@
+import { UserModelConfig } from "./model";
+
 export type Role = 'assistant' | 'user' | 'system';
 export const DEFAULT_TEMPERATURE = 0.5;
 
@@ -35,7 +37,6 @@ export interface IChat {
   title: string;
   chatModelId?: string;
   modelName: string;
-  modelConfig: any;
-  userModelConfig: any;
+  userModelConfig: UserModelConfig;
   isShared: boolean;
 }

@@ -76,6 +76,12 @@ public class UserChatsController(ChatsDB db, CurrentUser currentUser, IUrlEncryp
                 {
                     EnableSearch = x.EnableSearch, 
                     Temperature = x.Temperature,
+                    Prompt = x.Messages
+                        .FirstOrDefault(x => x.ChatRoleId == (byte)DBChatRole.System)
+                        !.MessageContents
+                        .FirstOrDefault()
+                        !.MessageContentText
+                        !.Content
                 },
             }),
             request,

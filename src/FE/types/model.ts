@@ -1,8 +1,8 @@
-export interface ModelConfig {
+export interface UserModelConfig {
   prompt: string | null;
-  maxLength: number;
-  temperature?: number;
-  enableSearch?: boolean;
+  maxLength: number | null;
+  temperature: number | null;
+  enableSearch: boolean | null;
 }
 
 export enum DBModelProvider {
@@ -47,5 +47,3 @@ export interface ChatModelPriceConfig {
   input: number;
   out: number;
 }
-
-export interface UserModelConfig extends ModelConfig { }
