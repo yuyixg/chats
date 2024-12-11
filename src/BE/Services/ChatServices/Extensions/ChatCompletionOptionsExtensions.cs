@@ -16,6 +16,18 @@ public static class ChatCompletionOptionsExtensions
         return false;
     }
 
+    public static void SetAllowSearch(this ChatCompletionOptions options, bool value)
+    {
+        IDictionary<string, BinaryData>? rawData = GetSerializedAdditionalRawData(options);
+        if (rawData == null)
+        {
+            rawData = new Dictionary<string, BinaryData>();
+            SetSerializedAdditionalRawData(options, rawData);
+        }
+
+        rawData["enable_search"] = BinaryData.FromObjectAsJson(value);
+    }
+
     public static void RemoveAllowSearch(this ChatCompletionOptions options)
     {
         IDictionary<string, BinaryData>? rawData = GetSerializedAdditionalRawData(options);
@@ -44,4 +56,7 @@ public static class ChatCompletionOptionsExtensions
 
     [UnsafeAccessor(UnsafeAccessorKind.Method, Name = "get_SerializedAdditionalRawData")]
     private extern static IDictionary<string, BinaryData>? GetSerializedAdditionalRawData(ChatCompletionOptions @this);
+
+    [UnsafeAccessor(UnsafeAccessorKind.Method, Name = "set_SerializedAdditionalRawData")]
+    private extern static void SetSerializedAdditionalRawData(ChatCompletionOptions @this, IDictionary<string, BinaryData>? value);
 }

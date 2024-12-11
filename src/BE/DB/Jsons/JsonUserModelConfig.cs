@@ -1,29 +1,32 @@
-﻿using System.Text.Json.Serialization;
+﻿using Azure.Core;
+using Chats.BE.Services.ChatServices.Extensions;
+using OpenAI.Chat;
+using System.Text.Json.Serialization;
 
 namespace Chats.BE.DB.Jsons;
 
 public record JsonUserModelConfig
 {
-    [JsonPropertyName("prompt"), JsonIgnore(Condition = JsonIgnoreCondition.WhenWritingNull)]
+    [JsonPropertyName("prompt")]
     public string? Prompt { get; init; }
 
-    [JsonPropertyName("temperature"), JsonIgnore(Condition = JsonIgnoreCondition.WhenWritingNull)]
+    [JsonPropertyName("temperature")]
     public float? Temperature { get; init; }
 
-    [JsonPropertyName("enableSearch"), JsonIgnore(Condition = JsonIgnoreCondition.WhenWritingNull)]
+    [JsonPropertyName("enableSearch")]
     public bool? EnableSearch { get; init; }
 
-    [JsonPropertyName("maxLength"), JsonIgnore(Condition = JsonIgnoreCondition.WhenWritingNull)]
+    [JsonPropertyName("maxLength")]
     public int? MaxLength { get; init; }
 
-    public static JsonUserModelConfig FromJson(JsonModelConfig modelConfig)
+    public ChatCompletionOptions ToChatCompletionOptions(int userId)
     {
-        return new JsonUserModelConfig
+        ChatCompletionOptions cco = new()
         {
-            Prompt = modelConfig.Prompt,
-            Temperature = modelConfig.Temperature,
-            EnableSearch = modelConfig.EnableSearch,
-            MaxLength = modelConfig.MaxLength
+            Temperature = Temperature,
+            EndUserId = userId.ToString(),
         };
+        cco.SetAllowSearch(EnableSearch ?? false);
+        return cco;
     }
 }

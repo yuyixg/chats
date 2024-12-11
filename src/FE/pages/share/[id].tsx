@@ -1,22 +1,22 @@
 import { useEffect, useState } from 'react';
 
 import Link from 'next/link';
-import { NextRouter, useRouter } from 'next/router';
+import { useRouter } from 'next/router';
 
 import useTranslation from '@/hooks/useTranslation';
 
+import { getQueryId } from '@/utils/common';
 import { getSelectMessages } from '@/utils/message';
 
 import { GetMessageDetailsResult } from '@/types/adminApis';
 import { ChatMessage } from '@/types/chatMessage';
 
-import { ChatMessage as ChatMessageComponent } from '@/components/Admin/Messages/ChatMessage';
+import { ChatMessageByReadOnly } from '@/components/ChatMessage/ChatMessageByReadOnly';
 import PageNotFound from '@/components/PageNotFound/PageNotFound';
 import { Button } from '@/components/ui/button';
 
 import { getShareMessage } from '@/apis/adminApis';
 import Decimal from 'decimal.js';
-import { getQueryId } from '@/utils/common';
 
 export default function ShareMessage() {
   const { t } = useTranslation();
@@ -25,8 +25,6 @@ export default function ShareMessage() {
   const [selectMessages, setSelectMessages] = useState<ChatMessage[]>([]);
   const [loading, setLoading] = useState(true);
   const [currentMessages, setCurrentMessages] = useState<ChatMessage[]>([]);
-
-
 
   useEffect(() => {
     setLoading(true);
@@ -74,12 +72,11 @@ export default function ShareMessage() {
                 parentChildrenIds = [...parentChildrenIds].reverse();
               }
               return (
-                <ChatMessageComponent
+                <ChatMessageByReadOnly
                   currentSelectIndex={parentChildrenIds.findIndex(
                     (x) => x === current.id,
                   )}
                   isLastMessage={selectMessages.length - 1 === index}
-                  id={current.id!}
                   key={current.id + index}
                   parentId={current.parentId}
                   onChangeMessage={(messageId: string) => {

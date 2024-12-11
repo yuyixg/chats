@@ -6,7 +6,6 @@ import { useRouter } from 'next/router';
 
 import useTranslation from '@/hooks/useTranslation';
 
-import { Nav } from '@/components/Admin/Nav/Nav';
 import {
   IconFiles,
   IconIdBadge,
@@ -19,6 +18,8 @@ import {
   IconUserCog,
   IconUsers,
 } from '@/components/Icons/index';
+
+import Nav from '../_components/Nav/Nav';
 
 const AdminLayout = ({
   children,

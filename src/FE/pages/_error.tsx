@@ -22,10 +22,7 @@ const ErrorPage = ({ statusCode }: { statusCode: number }) => {
 
   return (
     <div className="flex flex-col text-center gap-y-4 mt-4">
-      <h1 className="text-2xl">
-        {statusCode}
-        {t(': An error has occurred')}
-      </h1>
+      <h1 className="text-2xl">{t('An error has occurred')}</h1>
       <p className="text-gray-500">
         {t('Sorry, there was an unexpected error, please try again later.')}
       </p>

@@ -1,7 +1,6 @@
 ﻿using Chats.BE.DB;
 using Chats.BE.DB.Enums;
 using Chats.BE.DB.Jsons;
-using Chats.BE.Services.ChatServices;
 using Chats.BE.Services.UrlEncryption;
 using System.Text.Json.Serialization;
 
@@ -21,9 +20,6 @@ public record ChatsResponse
     [JsonPropertyName("modelName")]
     public required string ModelName { get; init; }
 
-    [JsonPropertyName("modelConfig")]
-    public required JsonModelConfig ModelConfig { get; init; }
-
     [JsonPropertyName("userModelConfig")]
     public required JsonUserModelConfig UserModelConfig { get; init; }
 
@@ -41,16 +37,11 @@ public record ChatsResponse
             Title = chat.Title,
             ModelId = chat.ModelId,
             ModelName = chat.Model.Name,
-            ModelConfig = new JsonModelConfig
-            {
-                DeploymentName = chat.Model.DeploymentName,
-                EnableSearch = chat.Model.ModelReference.AllowSearch,
-                MaxLength = chat.Model.ModelReference.MaxResponseTokens,
-                Temperature = ChatService.DefaultTemperature,
-                Version = chat.Model.ModelKey.ModelProvider.Name,
-                Prompt = ChatService.DefaultPrompt,
+            UserModelConfig = new JsonUserModelConfig 
+            { 
+                EnableSearch = chat.EnableSearch, 
+                Temperature = chat.Temperature,
             },
-            UserModelConfig = new JsonUserModelConfig { EnableSearch = chat.EnableSearch, Temperature = chat.Temperature },
             IsShared = chat.IsShared,
             ModelProviderId = (DBModelProvider)chat.Model.ModelKey.ModelProviderId, 
         };
@@ -85,11 +76,6 @@ public record ChatsResponseTemp
             Title = Title,
             ModelId = ChatModelId,
             ModelName = ModelName,
-            ModelConfig = new JsonModelConfig
-            {
-                Prompt = ChatService.DefaultPrompt,
-                Temperature = Temperature ?? ChatService.DefaultTemperature,
-            },
             UserModelConfig = UserModelConfig,
             IsShared = IsShared, 
             ModelProviderId = ModelProvider,

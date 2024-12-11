@@ -2,16 +2,16 @@ import { useEffect, useState } from 'react';
 
 import { useRouter } from 'next/router';
 
+import { getQueryId } from '@/utils/common';
 import { getSelectMessages } from '@/utils/message';
 
 import { GetMessageDetailsResult } from '@/types/adminApis';
 import { ChatMessage } from '@/types/chatMessage';
 
-import { ChatMessage as ChatMessageComponent } from '@/components/Admin/Messages/ChatMessage';
+import { ChatMessageByReadOnly } from '@/components/ChatMessage/ChatMessageByReadOnly';
 
 import { getMessageDetails } from '@/apis/adminApis';
 import Decimal from 'decimal.js';
-import { getQueryId } from '@/utils/common';
 
 export default function MessageDetails() {
   const router = useRouter();
@@ -84,12 +84,11 @@ export default function MessageDetails() {
             parentChildrenIds = [...parentChildrenIds].reverse();
           }
           return (
-            <ChatMessageComponent
+            <ChatMessageByReadOnly
               currentSelectIndex={parentChildrenIds.findIndex(
                 (x) => x === current.id,
               )}
               isLastMessage={selectMessages.length - 1 === index}
-              id={current.id!}
               key={current.id + index}
               parentId={current.parentId}
               onChangeMessage={(messageId: string) => {

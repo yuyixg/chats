@@ -1,9 +1,10 @@
-
-import { IconShare } from '@/components/Icons';
 import useTranslation from '@/hooks/useTranslation';
 
-import { cn } from '@/lib/utils';
 import { feModelProviders } from '@/types/model';
+
+import { IconShare } from '@/components/Icons';
+
+import { cn } from '@/lib/utils';
 
 interface Props {
   providerId: number;

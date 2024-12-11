@@ -95,7 +95,8 @@ export const getUsers = (
 ): Promise<PageResult<GetUsersResult[]>> => {
   const fetchService = useFetch();
   return fetchService.get(
-    `/api/admin/users?page=${params.page}&pageSize=${params.pageSize}&query=${params?.query || ''
+    `/api/admin/users?page=${params.page}&pageSize=${params.pageSize}&query=${
+      params?.query || ''
     }`,
   );
 };
@@ -164,12 +165,14 @@ export const putFileService = (id: number, params: PostFileServicesParams) => {
 export const deleteFileService = (id: number) => {
   const fetchService = useFetch();
   return fetchService.delete(`/api/admin/file-service/${id}`);
-}
+};
 
 export const getFileServiceTypeInitialConfig = (fileServiceTypeId: number) => {
   const fetchService = useFetch();
-  return fetchService.get<string>(`/api/admin/file-service-type/${fileServiceTypeId}/initial-config`);
-}
+  return fetchService.get<string>(
+    `/api/admin/file-service-type/${fileServiceTypeId}/initial-config`,
+  );
+};
 
 export const getShareMessage = (
   chatId: string,

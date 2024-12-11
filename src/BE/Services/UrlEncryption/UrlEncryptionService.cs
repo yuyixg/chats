@@ -1,4 +1,5 @@
 ﻿using Chats.BE.Infrastructure.Functional;
+using System.Security.Cryptography;
 
 namespace Chats.BE.Services.UrlEncryption;
 
@@ -32,7 +33,15 @@ public class UrlEncryptionService : IUrlEncryptionService
 
     public Result<int> DecodeSignedPathAsInt32(string path, long validBefore, string hash, EncryptionPurpose purpose)
     {
-        int id = DecryptAsInt32(path, purpose);
+        int id;
+        try
+        {
+            id = DecryptAsInt32(path, purpose);
+        }
+        catch (CryptographicException)
+        {
+            return Result.Fail<int>("Invalid encrypted ID.");
+        }
         DateTimeOffset validBeforeTime = DateTimeOffset.FromUnixTimeMilliseconds(validBefore);
         if (validBeforeTime < DateTimeOffset.UtcNow)
         {

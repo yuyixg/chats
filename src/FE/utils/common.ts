@@ -1,4 +1,4 @@
-import { NextRouter } from "next/router";
+import { NextRouter } from 'next/router';
 
 export const isMobile = () => {
   const userAgent =
@@ -23,7 +23,9 @@ export function formatNumberAsMoney(amount: number, maximumFractionDigits = 5) {
 }
 
 export function termDateString() {
-  return new Date(new Date().getTime() + 10 * 365 * 24 * 60 * 60 * 1000).toISOString(); // 10 years
+  return new Date(
+    new Date().getTime() + 10 * 365 * 24 * 60 * 60 * 1000,
+  ).toISOString(); // 10 years
 }
 
 export const PhoneRegExp = /^[1][3,4,5,6,7,8,9][0-9]{9}$/;
@@ -47,4 +49,4 @@ export const getQueryId = (router: NextRouter): string => {
   const asPath = router.asPath.split('?')[0]; // 移除查询参数
   const pathSegments = asPath.split('/');
   return pathSegments[pathSegments.length - 1] || '';
-}
+};

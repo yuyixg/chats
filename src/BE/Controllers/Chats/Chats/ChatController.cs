@@ -6,6 +6,7 @@ using Chats.BE.Infrastructure;
 using Chats.BE.Services;
 using Chats.BE.Services.ChatServices;
 using Chats.BE.Services.ChatServices.Dtos;
+using Chats.BE.Services.ChatServices.Extensions;
 using Chats.BE.Services.FileServices;
 using Chats.BE.Services.UrlEncryption;
 using Microsoft.AspNetCore.Authorization;
@@ -155,12 +156,8 @@ public class ChatController(ChatsDB db, CurrentUser currentUser, ILogger<ChatCon
                 throw new InvalidModelException(request.ModelId.ToString());
             }
 
+            ChatCompletionOptions cco = request.UserModelConfig.ToChatCompletionOptions(currentUser.Id);
             using ChatService s = conversationFactory.CreateConversationService(userModel.Model);
-            ChatCompletionOptions cco = new()
-            {
-                Temperature = request.UserModelConfig.Temperature,
-                EndUserId = currentUser.Id.ToString(),
-            };
             await foreach (InternalChatSegment seg in icc.Run(userBalance.Balance, userModel, s.ChatStreamedFEProcessed(messageToSend, cco, cancellationToken)))
             {
                 if (seg.TextSegment == string.Empty) continue;

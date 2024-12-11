@@ -8,13 +8,14 @@ import { LoginConfigsResult } from '@/types/clientApis';
 import { SiteInfoConfig } from '@/types/config';
 import { LoginType } from '@/types/user';
 
-import AccountLoginCard from '@/components/Login/AccountLoginCard';
-import KeyCloakLogin from '@/components/Login/KeyCloakLogin';
-import PhoneLoginCard from '@/components/Login/PhoneLoginCard';
-import PhoneRegisterCard from '@/components/Login/PhoneRegisterCard';
-import WeChatLogin from '@/components/Login/WeChatLogin';
 import { Button } from '@/components/ui/button';
 import { Tabs, TabsContent, TabsList, TabsTrigger } from '@/components/ui/tabs';
+
+import AccountLoginCard from './_components/AccountLoginCard';
+import KeyCloakLogin from './_components/KeyCloakLogin';
+import PhoneLoginCard from './_components/PhoneLoginCard';
+import PhoneRegisterCard from './_components/PhoneRegisterCard';
+import WeChatLogin from './_components/WeChatLogin';
 
 import { getLoginProviders, getSiteInfo } from '@/apis/clientApis';
 
@@ -136,8 +137,8 @@ export default function LoginPage() {
               Chats
             </div>
           </div>
-          <div className="lg:p-8">
-            <div className="mx-auto flex w-full flex-col justify-center space-y-6">
+          <div className="lg:px-8 lg:pt-8 pb-4 h-screen">
+            <div className="mx-auto flex h-5/6 h- w-full flex-col justify-center space-y-6">
               <div
                 className="flex flex-col space-y-2 text-center mt-12 md:mt-0 lg:mt-0"
                 key={currentTab}
@@ -226,16 +227,22 @@ export default function LoginPage() {
                 <div className="flex text-sm justify-center items-center pb-[2px]">
                   {webSiteInfo?.filingNumber}
                 </div>
-                <div>
-                  © {new Date().getFullYear()} Chats™ . All Rights Reserved.
-                </div>
                 <div className="flex text-sm justify-center items-center">
-                  {webSiteInfo?.companyName && t(webSiteInfo.companyName)}
-                  <Button variant="link" onClick={redirectToGithub}>
-                    {t('About Us')}
-                  </Button>
+                  {webSiteInfo?.companyName}
                 </div>
               </div>
+            </div>
+
+            <div className="flex justify-center h-1/6 items-end text-sm text-muted-foreground">
+              © {new Date().getFullYear()}&nbsp;
+              <Button
+                className="p-0 m-0 h-auto font-semibold text-sm text-muted-foreground"
+                variant="link"
+                onClick={redirectToGithub}
+              >
+                Chats
+              </Button>
+              ™ . All Rights Reserved.
             </div>
           </div>
         </div>

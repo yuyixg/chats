@@ -4,7 +4,6 @@ import useTranslation from '@/hooks/useTranslation';
 
 import { GetPayServicesResult } from '@/types/adminApis';
 
-import { PayServiceModal } from '@/components/Admin/PayService/PayServiceModal';
 import { Button } from '@/components/ui/button';
 import { Card } from '@/components/ui/card';
 import {
@@ -15,6 +14,8 @@ import {
   TableHeader,
   TableRow,
 } from '@/components/ui/table';
+
+import PayServiceModal from '../_components/PayService/PayServiceModal';
 
 import { getPayServices } from '@/apis/adminApis';
 

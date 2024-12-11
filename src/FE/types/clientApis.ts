@@ -1,4 +1,4 @@
-import { DBModelProvider } from './model';
+import { DBModelProvider, UserModelConfig } from './model';
 import { Paging } from './page';
 import { LoginType } from './user';
 
@@ -64,8 +64,7 @@ export interface ChatResult {
   title: string;
   modelId: number;
   modelName: string;
-  modelConfig: any;
-  userModelConfig: any;
+  userModelConfig: UserModelConfig;
   isShared: boolean;
   modelProviderId: DBModelProvider;
 }
