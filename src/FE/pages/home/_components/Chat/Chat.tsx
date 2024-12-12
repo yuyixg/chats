@@ -166,7 +166,6 @@ const Chat = memo(() => {
         field: 'selectMessages',
         value: [...selectMessageList],
       });
-      homeDispatch({ field: 'loading', value: true });
       homeDispatch({ field: 'messageIsStreaming', value: true });
       const messageContent: ContentRequest = {
         text: message.content.text!,
@@ -201,7 +200,6 @@ const Chat = memo(() => {
       });
 
       if (!response.ok) {
-        homeDispatch({ field: 'loading', value: false });
         homeDispatch({ field: 'messageIsStreaming', value: false });
         homeDispatch({ field: 'chatError', value: true });
         const result = await response.json();
@@ -210,7 +208,6 @@ const Chat = memo(() => {
       }
       const data = response.body;
       if (!data) {
-        homeDispatch({ field: 'loading', value: false });
         homeDispatch({ field: 'messageIsStreaming', value: false });
         homeDispatch({ field: 'chatError', value: true });
         return;
@@ -298,7 +295,6 @@ const Chat = memo(() => {
         }, 100);
       }
 
-      homeDispatch({ field: 'loading', value: false });
       homeDispatch({ field: 'messageIsStreaming', value: false });
       !errorChat &&
         setTimeout(() => {

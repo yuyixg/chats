@@ -1,4 +1,4 @@
-import { useEffect } from 'react';
+import { useEffect, useReducer } from 'react';
 
 import { useRouter } from 'next/router';
 
@@ -29,6 +29,10 @@ import HomeContext, {
   HomeInitialState,
   initialState,
 } from '../../_contents/Home.context';
+import chatReducer, {
+  ChatActionTypes,
+  chatInitialState,
+} from '../../_contents/chat.reducer';
 import Chat from '../Chat/Chat';
 import ChatSettingsBar from '../ChatSettings/ChatSettingsBar';
 import Chatbar from '../Chatbar/Chatbar';
@@ -48,10 +52,11 @@ import { v4 as uuidv4 } from 'uuid';
 const HomeContent = () => {
   const router = useRouter();
   const { t } = useTranslation();
+  const [chatState, dp] = useReducer(chatReducer, chatInitialState);
+
   const contextValue = useCreateReducer<HomeInitialState>({
     initialState,
   });
-
   const {
     state: { chats, currentMessages, models, user, userModelConfig, settings },
     dispatch,
@@ -309,6 +314,7 @@ const HomeContent = () => {
 
   useEffect(() => {
     const settings = getSettings();
+    dp({ type: ChatActionTypes.SET_CHATS, payload: [1, 2, 3, 4, 5] as any[] });
     dispatch({
       field: 'settings',
       value: settings,
@@ -316,6 +322,7 @@ const HomeContent = () => {
   }, []);
 
   useEffect(() => {
+    console.log('chatState.chats', chatState.chats);
     const session = getUserInfo();
     const sessionId = getUserSession();
     if (session && sessionId) {
