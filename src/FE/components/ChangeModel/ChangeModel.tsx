@@ -24,7 +24,6 @@ import { cn } from '@/lib/utils';
 
 const ChangeModel = ({
   models,
-
   readonly,
   content,
   className,

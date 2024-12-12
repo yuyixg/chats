@@ -9,7 +9,7 @@
     "start": "next start",
     "lint": "next lint",
     "format": "prettier --write .",
-    "prepare": "husky"
+    "prepare": "husky && git config --local core.hooksPath src/FE/.husky"
   },
   "dependencies": {
     "@hookform/resolvers": "^3.3.4",

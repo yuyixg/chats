@@ -45,7 +45,6 @@ export interface UpdateModelDto {
   enabled: boolean;
   deploymentName: string | null;
   modelKeyId: number;
-  fileServiceId: string | null;
   inputTokenPrice1M: number;
   outputTokenPrice1M: number;
 }

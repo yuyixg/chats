@@ -1,4 +1,4 @@
-import React, { useEffect, useState } from 'react';
+import React, { useEffect } from 'react';
 import { useForm } from 'react-hook-form';
 import toast from 'react-hot-toast';
 
@@ -6,7 +6,6 @@ import useTranslation from '@/hooks/useTranslation';
 
 import {
   AdminModelDto,
-  GetFileServicesResult,
   GetModelKeysResult,
   UpdateModelDto,
 } from '@/types/adminApis';
@@ -28,9 +27,8 @@ import {
   PopoverContent,
   PopoverTrigger,
 } from '@/components/ui/popover';
-import { Skeleton } from '@/components/ui/skeleton';
 
-import { deleteModels, getFileServices, putModels } from '@/apis/adminApis';
+import { deleteModels, putModels } from '@/apis/adminApis';
 import { zodResolver } from '@hookform/resolvers/zod';
 import { z } from 'zod';
 
@@ -46,8 +44,6 @@ interface IProps {
 const EditModelModal = (props: IProps) => {
   const { t } = useTranslation();
   const { isOpen, onClose, selected, onSuccessful, modelKeys } = props;
-  const [fileServices, setFileServices] = useState<GetFileServicesResult[]>([]);
-  const [loading, setLoading] = useState(false);
 
   const formSchema = z.object({
     modelReferenceName: z.string(),
@@ -59,7 +55,6 @@ const EditModelModal = (props: IProps) => {
     enabled: z.boolean().optional(),
     deploymentName: z.string().optional(),
     modelKeyId: z.string().nullable().default(null),
-    fileServiceId: z.string().nullable().default(null),
     inputPrice1M: z.coerce.number(),
     outputPrice1M: z.coerce.number(),
   });
@@ -73,7 +68,6 @@ const EditModelModal = (props: IProps) => {
       enabled: true,
       deploymentName: '',
       modelKeyId: '',
-      fileServiceId: null,
       inputPrice1M: 0,
       outputPrice1M: 0,
     },
@@ -84,7 +78,6 @@ const EditModelModal = (props: IProps) => {
     const dto: UpdateModelDto = {
       deploymentName: values.deploymentName || null,
       enabled: values.enabled!,
-      fileServiceId: values.fileServiceId,
       inputTokenPrice1M: values.inputPrice1M,
       outputTokenPrice1M: values.outputPrice1M,
       modelKeyId: parseInt(values.modelKeyId!),
@@ -118,14 +111,6 @@ const EditModelModal = (props: IProps) => {
 
   useEffect(() => {
     if (isOpen) {
-      setLoading(true);
-      getFileServices(true)
-        .then((data) => {
-          setFileServices(data);
-        })
-        .finally(() => {
-          setLoading(false);
-        });
       form.reset();
       form.formState.isValid;
       const {
@@ -134,7 +119,6 @@ const EditModelModal = (props: IProps) => {
         modelReferenceName,
         enabled,
         modelKeyId,
-        fileServiceId,
         deploymentName,
         inputTokenPrice1M,
         outputTokenPrice1M,
@@ -142,7 +126,6 @@ const EditModelModal = (props: IProps) => {
       form.setValue('name', name);
       form.setValue('modelId', modelId.toString());
       form.setValue('enabled', enabled);
-      form.setValue('fileServiceId', fileServiceId?.toString() || null);
       form.setValue('modelKeyId', modelKeyId.toString());
       form.setValue('deploymentName', deploymentName || '');
       form.setValue('inputPrice1M', inputTokenPrice1M);
@@ -271,26 +254,6 @@ const EditModelModal = (props: IProps) => {
                       type="number"
                       label={`1M ${t('1M output tokens price')}(${t('Yuan')})`}
                       field={field}
-                    />
-                  );
-                }}
-              ></FormField>
-            </div>
-            <div>
-              <FormField
-                key="fileServiceId"
-                control={form.control}
-                name="fileServiceId"
-                render={({ field }) => {
-                  return (
-                    <FormSelect
-                      field={field}
-                      label={t('File Service Type')!}
-                      hidden={!selected.allowVision}
-                      items={fileServices.map((item) => ({
-                        name: item.name,
-                        value: item.id.toString(),
-                      }))}
                     />
                   );
                 }}
