@@ -86,13 +86,13 @@ export const GenerateInformationAction = (props: Props) => {
                       : '-'
                   }
                 />
-                {!message.inputPrice.isZero() && (
+                {!message.inputPrice && (
                   <GenerateInformation
                     name={'prompt_price'}
                     value={'￥' + formatNumberAsMoney(+message.inputPrice, 6)}
                   />
                 )}
-                {!message.outputPrice.isZero() && (
+                {!message.outputPrice && (
                   <GenerateInformation
                     name={'response_price'}
                     value={'￥' + formatNumberAsMoney(+message.outputPrice, 6)}

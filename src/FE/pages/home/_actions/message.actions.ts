@@ -32,3 +32,5 @@ export const setCurrentMessageId = (
   type: MessageActionTypes.SET_CURRENT_MESSAGE_ID,
   payload: currentMessageId,
 });
+
+export default {};

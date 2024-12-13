@@ -39,3 +39,5 @@ export const setMessageIsStreaming = (
   type: ChatActionTypes.SET_MESSAGE_IS_STREAMING,
   payload: paging,
 });
+
+export default {};
