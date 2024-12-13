@@ -78,7 +78,7 @@ export interface HomeContextProps {
   dispatch: Dispatch<ActionType<HomeInitialState>>;
 
   chatDispatch: Dispatch<ChatAction>;
-  messageDispatch: Dispatch<MessageAction>,
+  messageDispatch: Dispatch<MessageAction>;
 
   handleNewChat: () => void;
   handleStartChat: (
