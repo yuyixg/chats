@@ -3,11 +3,11 @@ import { useContext, useEffect } from 'react';
 import { useCreateReducer } from '@/hooks/useCreateReducer';
 import useTranslation from '@/hooks/useTranslation';
 
-import { removeSelectChatId, saveSelectChatId } from '@/utils/chats';
+import { removeStorageChatId, setStorageChatId } from '@/utils/chats';
 
 import { ChatResult } from '@/types/clientApis';
 
-import HomeContext from '../../_contents/Home.context';
+import HomeContext from '../../_reducers/Home.context';
 import Sidebar from '../Sidebar/Sidebar';
 import ChatbarContext from './Chatbar.context';
 import { ChatbarInitialState, initialState } from './Chatbar.context';
@@ -44,10 +44,10 @@ const Chatbar = () => {
     if (chatList.length > 0) {
       const chat = chatList[chatList.length - 1];
       handleSelectChat(chat);
-      saveSelectChatId(chat.id);
+      setStorageChatId(chat.id);
     } else {
       handleSelectModel(selectModel!);
-      removeSelectChatId();
+      removeStorageChatId();
     }
   };
 

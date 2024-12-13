@@ -1,12 +1,12 @@
-export const saveSelectChatId = (chatId: string) => {
+export const setStorageChatId = (chatId: string) => {
   localStorage.setItem('selectedChatId', chatId);
 };
 
-export const getSelectChatId = () => {
+export const getStorageChatId = () => {
   return localStorage.getItem('selectedChatId');
 };
 
-export const removeSelectChatId = () => {
+export const removeStorageChatId = () => {
   localStorage.removeItem('selectedChatId');
 };
 

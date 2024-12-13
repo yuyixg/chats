@@ -24,7 +24,7 @@ import FormInput from '@/components/ui/form/input';
 import FormSwitch from '@/components/ui/form/switch';
 import FormTextarea from '@/components/ui/form/textarea';
 
-import HomeContext from '../../_contents/Home.context';
+import HomeContext from '../../_reducers/Home.context';
 
 import { zodResolver } from '@hookform/resolvers/zod';
 import { z } from 'zod';

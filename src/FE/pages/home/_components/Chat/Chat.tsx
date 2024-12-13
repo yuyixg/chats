@@ -20,7 +20,12 @@ import { Prompt } from '@/types/prompt';
 import ChangeModel from '@/components/ChangeModel/ChangeModel';
 import TemperatureSlider from '@/components/TemperatureSlider/TemperatureSlider';
 
-import HomeContext from '../../_contents/Home.context';
+import { setMessageIsStreaming } from '../../_actions/chat.actions';
+import {
+  setCurrentMessages,
+  setMessages,
+} from '../../_actions/message.actions';
+import HomeContext from '../../_reducers/Home.context';
 import ModeToggle from '../ModeToggle/ModeToggle';
 import ChatInput from './ChatInput';
 import EnableNetworkSearch from './EnableNetworkSearch';
@@ -29,33 +34,42 @@ import ModelSelect from './ModelSelect';
 import NoModel from './NoModel';
 import SystemPrompt from './SystemPrompt';
 
-import { getChat, postChats, putUserChatModel } from '@/apis/clientApis';
+import { getChat, putUserChatModel } from '@/apis/clientApis';
 import { cn } from '@/lib/utils';
-import Decimal from 'decimal.js';
-import { v4 as uuidv4 } from 'uuid';
 
 const Chat = memo(() => {
   const { t } = useTranslation();
 
   const {
     state: {
-      models,
-      selectChat,
-      selectModel,
-      selectMessages,
-      currentMessages,
       chats,
-      prompts,
-      userModelConfig,
-      settings,
-      messageIsStreaming,
-      currentChatMessageId,
+      selectChat,
       chatError,
+      messageIsStreaming,
+
+      selectMessages,
+      currentChatMessageId,
+      currentMessages,
+
+      models,
+      selectModel,
+      userModelConfig,
+
+      prompts,
+      settings,
     },
+    handleCreateNewChat,
+    handleStartChat,
+    handleChatIsError,
+    handleUpdateChatStatus,
+    handleUpdateChats,
+
     handleUpdateSelectMessage,
     handleUpdateCurrentMessage,
     handleUpdateUserModelConfig,
     hasModel,
+    chatDispatch,
+    messageDispatch,
     dispatch: homeDispatch,
   } = useContext(HomeContext);
   const [autoScrollEnabled, setAutoScrollEnabled] = useState<boolean>(true);
@@ -80,37 +94,31 @@ const Chat = memo(() => {
       modelId?: number,
     ) => {
       const isChatEmpty = selectMessages.length === 0;
-      homeDispatch({ field: 'chatError', value: false });
+      handleUpdateChatStatus(false);
       let selectChatId = selectChat?.id;
       let selectMessageList = [...selectMessages];
-      let chatList = chats;
       let assistantParentId = messageId;
       if (!selectChatId) {
-        const newChat = await postChats({ title: t('New Conversation') });
+        const newChat = await handleCreateNewChat();
         selectChatId = newChat.id;
-        chats.unshift(newChat);
-        homeDispatch({ field: 'selectChat', value: newChat });
-        homeDispatch({ field: 'currentMessages', value: [] });
-        homeDispatch({ field: 'selectMessages', value: [] });
-        homeDispatch({ field: 'chats', value: [...chatList] });
       }
+      let selectedMessageId = messageId;
       if (messageId && isRegenerate) {
         const messageIndex = selectMessageList.findIndex(
           (x) => x.id === messageId,
         );
-        homeDispatch({ field: 'selectMessageLastId', value: messageId });
         selectMessageList.splice(messageIndex + 1, selectMessageList.length);
       } else {
-        const userTempId = uuidv4();
-        assistantParentId = userTempId;
-        homeDispatch({ field: 'selectMessageLastId', value: userTempId });
+        const messageTempId = 'userMessageTempId';
+        assistantParentId = messageTempId;
+        selectedMessageId = messageTempId;
         const parentMessage = selectMessageList.find((x) => x.id == messageId);
-        parentMessage && parentMessage?.childrenIds.unshift(userTempId);
+        parentMessage && parentMessage?.childrenIds.unshift(messageTempId);
         const parentMessageIndex = selectMessageList.findIndex(
           (x) => x.id == messageId,
         );
         const newUserMessage = {
-          id: userTempId,
+          id: messageTempId,
           role: 'user' as Role,
           parentId: messageId,
           childrenIds: [],
@@ -118,18 +126,17 @@ const Chat = memo(() => {
           content: message.content,
           inputTokens: 0,
           outputTokens: 0,
-          inputPrice: new Decimal(0),
-          outputPrice: new Decimal(0),
+          inputPrice: 0,
+          outputPrice: 0,
         };
         let removeCount = -1;
         if (parentMessageIndex !== -1)
           removeCount = selectMessageList.length - 1;
         if (!messageId) {
           removeCount = selectMessageList.length;
-          homeDispatch({
-            field: 'currentMessages',
-            value: [...currentMessages, newUserMessage],
-          });
+          messageDispatch(
+            setCurrentMessages([...currentMessages, newUserMessage]),
+          );
         }
 
         selectMessageList.splice(
@@ -139,9 +146,9 @@ const Chat = memo(() => {
         );
       }
 
-      const assistantTempId = uuidv4();
+      const assistantMessageTempId = 'assistantMessageTempId';
       const newAssistantMessage = {
-        id: assistantTempId,
+        id: assistantMessageTempId,
         role: 'assistant' as Role,
         parentId: assistantParentId,
         childrenIds: [],
@@ -152,21 +159,17 @@ const Chat = memo(() => {
         },
         inputTokens: 0,
         outputTokens: 0,
-        inputPrice: new Decimal(0),
-        outputPrice: new Decimal(0),
+        inputPrice: 0,
+        outputPrice: 0,
       };
 
-      homeDispatch({
-        field: 'currentChatMessageId',
-        value: assistantTempId,
-      });
       selectMessageList.push(newAssistantMessage);
+      handleStartChat(
+        selectMessageList,
+        selectedMessageId,
+        assistantMessageTempId,
+      );
 
-      homeDispatch({
-        field: 'selectMessages',
-        value: [...selectMessageList],
-      });
-      homeDispatch({ field: 'messageIsStreaming', value: true });
       const messageContent: ContentRequest = {
         text: message.content.text!,
         fileIds: message.content.fileIds?.map((x) => x.id) || null,
@@ -199,17 +202,15 @@ const Chat = memo(() => {
         body,
       });
 
+      const data = response.body;
       if (!response.ok) {
-        homeDispatch({ field: 'messageIsStreaming', value: false });
-        homeDispatch({ field: 'chatError', value: true });
+        handleChatIsError();
         const result = await response.json();
         toast.error(t(result?.message) || response.statusText);
         return;
       }
-      const data = response.body;
       if (!data) {
-        homeDispatch({ field: 'messageIsStreaming', value: false });
-        homeDispatch({ field: 'chatError', value: true });
+        handleChatIsError();
         return;
       }
 
@@ -228,10 +229,7 @@ const Chat = memo(() => {
 
         selectMessageList.splice(-1, 1, lastMessages);
 
-        homeDispatch({
-          field: 'selectMessages',
-          value: [...selectMessageList],
-        });
+        messageDispatch(setMessages([...selectMessageList]));
       }
       async function* processBuffer() {
         while (true) {
@@ -262,10 +260,7 @@ const Chat = memo(() => {
         let value = JSON.parse(message);
         if (!value.success) {
           errorChat = true;
-          homeDispatch({
-            field: 'chatError',
-            value: errorChat,
-          });
+          handleUpdateChatStatus(errorChat);
           controller.abort();
           setSelectMessages({ text, error: value.result });
           break;
@@ -291,11 +286,11 @@ const Chat = memo(() => {
             field: 'userModelConfig',
             value: data.userModelConfig,
           });
-          homeDispatch({ field: 'chats', value: _chats });
+          handleUpdateChats(_chats);
         }, 100);
       }
 
-      homeDispatch({ field: 'messageIsStreaming', value: false });
+      chatDispatch(setMessageIsStreaming(false));
       !errorChat &&
         setTimeout(() => {
           handleUpdateCurrentMessage(selectChatId);
@@ -501,8 +496,8 @@ const Chat = memo(() => {
                       inputTokens: current.inputTokens || 0,
                       outputTokens: current.outputTokens || 0,
                       reasoningTokens: current.reasoningTokens || 0,
-                      inputPrice: new Decimal(current.inputPrice || 0),
-                      outputPrice: new Decimal(current.outputPrice || 0),
+                      inputPrice: current.inputPrice || 0,
+                      outputPrice: current.outputPrice || 0,
                     }}
                     messageIsStreaming={messageIsStreaming}
                     currentChatMessageId={currentChatMessageId}

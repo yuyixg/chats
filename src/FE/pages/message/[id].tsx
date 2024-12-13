@@ -11,7 +11,6 @@ import { ChatMessage } from '@/types/chatMessage';
 import { ChatMessageByReadOnly } from '@/components/ChatMessage/ChatMessageByReadOnly';
 
 import { getMessageDetails } from '@/apis/adminApis';
-import Decimal from 'decimal.js';
 
 export default function MessageDetails() {
   const router = useRouter();
@@ -20,10 +19,10 @@ export default function MessageDetails() {
   const [currentMessages, setCurrentMessages] = useState<ChatMessage[]>([]);
   const [chatSummary, setChatSummary] = useState<{
     tokenUsed: number;
-    calculatedPrice: Decimal;
+    calculatedPrice: number;
   }>({
     tokenUsed: 0,
-    calculatedPrice: new Decimal(0),
+    calculatedPrice: 0,
   });
 
   useEffect(() => {
@@ -35,13 +34,11 @@ export default function MessageDetails() {
         setChat(data);
         setCurrentMessages(data.messages);
         let tokenUsed = 0;
-        let calculatedPrice = new Decimal(0);
+        let calculatedPrice = 0;
         data.messages.forEach((x) => {
-          x.inputPrice = new Decimal(x.inputPrice || 0);
+          x.inputPrice = x.inputPrice || 0;
           tokenUsed += ((x.inputTokens || 0) + (x.outputTokens || 0))!;
-          calculatedPrice = calculatedPrice.plus(
-            x.inputPrice.plus(x.outputPrice || 0),
-          );
+          calculatedPrice += x.inputPrice + (x.outputPrice || 0);
         });
         setChatSummary({ tokenUsed, calculatedPrice });
         const lastMessage = data.messages[data.messages.length - 1];
@@ -110,8 +107,8 @@ export default function MessageDetails() {
                 inputTokens: current.inputTokens || 0,
                 outputTokens: current.outputTokens || 0,
                 reasoningTokens: current.reasoningTokens || 0,
-                inputPrice: new Decimal(current.inputPrice || 0),
-                outputPrice: new Decimal(current.outputPrice || 0),
+                inputPrice: current.inputPrice || 0,
+                outputPrice: current.outputPrice || 0,
               }}
             />
           );

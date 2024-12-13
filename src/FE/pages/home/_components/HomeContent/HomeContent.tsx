@@ -7,8 +7,8 @@ import useTranslation from '@/hooks/useTranslation';
 
 import {
   getPathChatId,
-  getSelectChatId,
-  saveSelectChatId,
+  getStorageChatId,
+  setStorageChatId,
 } from '@/utils/chats';
 import { getSelectMessages } from '@/utils/message';
 import { getStorageModelId, setStorageModelId } from '@/utils/model';
@@ -24,15 +24,29 @@ import { ChatResult, GetChatsParams } from '@/types/clientApis';
 
 import Spinner from '@/components/Spinner/Spinner';
 
+import {
+  setChatPaging,
+  setChatStatus,
+  setChats,
+  setChatsIncr,
+  setMessageIsStreaming,
+  setSelectedChat,
+} from '../../_actions/chat.actions';
+import {
+  setCurrentMessageId,
+  setCurrentMessages,
+  setLastMessageId,
+  setMessages,
+} from '../../_actions/message.actions';
 import HomeContext, {
   HandleUpdateChatParams,
   HomeInitialState,
   initialState,
-} from '../../_contents/Home.context';
-import chatReducer, {
-  ChatActionTypes,
-  chatInitialState,
-} from '../../_contents/chat.reducer';
+} from '../../_reducers/Home.context';
+import chatReducer, { chatInitialState } from '../../_reducers/chat.reducer';
+import messageReducer, {
+  messageInitialState,
+} from '../../_reducers/message.reducer';
 import Chat from '../Chat/Chat';
 import ChatSettingsBar from '../ChatSettings/ChatSettingsBar';
 import Chatbar from '../Chatbar/Chatbar';
@@ -46,19 +60,24 @@ import {
   getUserPromptBrief,
   postChats,
 } from '@/apis/clientApis';
-import Decimal from 'decimal.js';
-import { v4 as uuidv4 } from 'uuid';
 
 const HomeContent = () => {
   const router = useRouter();
   const { t } = useTranslation();
-  const [chatState, dp] = useReducer(chatReducer, chatInitialState);
+  const [chatState, chatDispatch] = useReducer(chatReducer, chatInitialState);
+  const [messageState, messageDispatch] = useReducer(
+    messageReducer,
+    messageInitialState,
+  );
+  const { chats } = chatState;
+  const { currentMessages } = messageState;
 
   const contextValue = useCreateReducer<HomeInitialState>({
     initialState,
   });
+
   const {
-    state: { chats, currentMessages, models, user, userModelConfig, settings },
+    state: { models, user, userModelConfig, settings },
     dispatch,
   } = contextValue;
 
@@ -80,7 +99,7 @@ const HomeContent = () => {
 
   const chatErrorMessage = (messageId: string): ChatMessage => {
     return {
-      id: uuidv4(),
+      id: 'errorMessageTempId',
       parentId: messageId,
       childrenIds: [],
       assistantChildrenIds: [],
@@ -88,8 +107,8 @@ const HomeContent = () => {
       content: { text: '', fileIds: [] },
       inputTokens: 0,
       outputTokens: 0,
-      inputPrice: new Decimal(0),
-      outputPrice: new Decimal(0),
+      inputPrice: 0,
+      outputPrice: 0,
     };
   };
 
@@ -113,15 +132,46 @@ const HomeContent = () => {
     });
   };
 
+  const handleCreateNewChat = async () => {
+    const chat = await postChats({ title: t('New Conversation') });
+    chats.unshift(chat);
+    chatDispatch(setChats([...chats]));
+    chatDispatch(setSelectedChat(chat));
+    messageDispatch(setMessages([]));
+    messageDispatch(setCurrentMessages([]));
+    return chat;
+  };
+
+  const handleUpdateChatStatus = (status: boolean) => {
+    chatDispatch(setChatStatus(status));
+  };
+
+  const handleChatIsError = () => {
+    chatDispatch(setChatStatus(true));
+    chatDispatch(setMessageIsStreaming(false));
+  };
+
+  const handleStartChat = (
+    selectedMessages: ChatMessage[],
+    selectedMessageId: string,
+    currentMessageId: string,
+  ) => {
+    chatDispatch(setMessageIsStreaming(true));
+    messageDispatch(setMessages(selectedMessages));
+    messageDispatch(setLastMessageId(selectedMessageId));
+    messageDispatch(setCurrentMessageId(currentMessageId));
+  };
+
   const handleNewChat = () => {
     postChats({ title: t('New Conversation') }).then((data) => {
       const model = calcSelectModel(chats, models);
-      dispatch({ field: 'selectChat', value: data });
-      dispatch({ field: 'selectMessageLastId', value: '' });
-      dispatch({ field: 'currentMessages', value: [] });
-      dispatch({ field: 'selectMessages', value: [] });
-      dispatch({ field: 'chatError', value: false });
-      dispatch({ field: 'chats', value: [data, ...chats] });
+      chatDispatch(setChats([data, ...chats]));
+      chatDispatch(setSelectedChat(data));
+      chatDispatch(setChatStatus(false));
+
+      messageDispatch(setLastMessageId(''));
+      messageDispatch(setMessages([]));
+      messageDispatch(setCurrentMessages([]));
       handleSelectModel(model!);
       router.push('#/' + data.id);
     });
@@ -130,51 +180,37 @@ const HomeContent = () => {
   const handleUpdateCurrentMessage = (chatId: string) => {
     getUserMessages(chatId).then((data) => {
       if (data.length > 0) {
-        dispatch({ field: 'currentMessages', value: data });
+        messageDispatch(setCurrentMessages(data));
         const lastMessage = data[data.length - 1];
         const selectMessageList = getSelectMessages(data, lastMessage.id);
-        dispatch({
-          field: 'selectMessages',
-          value: selectMessageList,
-        });
-        dispatch({ field: 'selectMessageLastId', value: lastMessage.id });
+        messageDispatch(setMessages(selectMessageList));
+        messageDispatch(setLastMessageId(lastMessage.id));
       } else {
-        dispatch({ field: 'currentMessages', value: [] });
-        dispatch({
-          field: 'selectMessages',
-          value: [],
-        });
+        messageDispatch(setMessages([]));
+        messageDispatch(setCurrentMessages([]));
       }
     });
   };
 
   const handleSelectChat = (chat: IChat) => {
-    dispatch({
-      field: 'chatError',
-      value: false,
-    });
-    dispatch({ field: 'selectChat', value: chat });
+    chatDispatch(setChatStatus(false));
+    chatDispatch(setSelectedChat(chat));
     const selectModel =
       getChatModel(chats, chat.id, models) || calcSelectModel(chats, models);
     selectModel && setStorageModelId(selectModel.modelId);
     getUserMessages(chat.id).then((data) => {
       if (data.length > 0) {
-        dispatch({ field: 'currentMessages', value: data });
+        messageDispatch(setCurrentMessages(data));
         const lastMessage = data[data.length - 1];
         const selectMessageList = getSelectMessages(data, lastMessage.id);
         if (lastMessage.role !== 'assistant') {
-          dispatch({
-            field: 'chatError',
-            value: true,
-          });
+          chatDispatch(setChatStatus(true));
           selectMessageList.push(chatErrorMessage(lastMessage.id));
         }
 
-        dispatch({
-          field: 'selectMessages',
-          value: selectMessageList,
-        });
-        dispatch({ field: 'selectMessageLastId', value: lastMessage.id });
+        messageDispatch(setMessages(selectMessageList));
+        messageDispatch(setLastMessageId(lastMessage.id));
+
         dispatch({ field: 'userModelConfig', value: chat.userModelConfig });
         dispatch({
           field: 'selectModel',
@@ -182,23 +218,17 @@ const HomeContent = () => {
         });
       } else {
         handleSelectModel(selectModel!);
-        dispatch({ field: 'currentMessages', value: [] });
-        dispatch({
-          field: 'selectMessages',
-          value: [],
-        });
+        messageDispatch(setMessages([]));
+        messageDispatch(setCurrentMessages([]));
       }
     });
     router.push('#/' + chat.id);
-    saveSelectChatId(chat.id);
+    setStorageChatId(chat.id);
   };
 
   const handleUpdateSelectMessage = (messageId: string) => {
     const selectMessageList = getSelectMessages(currentMessages, messageId);
-    dispatch({
-      field: 'selectMessages',
-      value: selectMessageList,
-    });
+    messageDispatch(setMessages(selectMessageList));
   };
 
   const handleUpdateUserModelConfig = (value: any) => {
@@ -217,20 +247,25 @@ const HomeContent = () => {
       if (x.id === id) return { ...x, ...params };
       return x;
     });
+    chatDispatch(setChats(chatList));
+  };
 
-    dispatch({ field: 'chats', value: chatList });
+  const handleUpdateChats = (chats: IChat[]) => {
+    chatDispatch(setChats(chats));
   };
 
   const handleDeleteChat = (id: string) => {
     const chatList = chats.filter((x) => {
       return x.id !== id;
     });
-    dispatch({ field: 'chats', value: chatList });
-    dispatch({ field: 'selectChat', value: undefined });
-    dispatch({ field: 'selectMessageLastId', value: '' });
-    dispatch({ field: 'currentMessages', value: [] });
-    dispatch({ field: 'selectMessages', value: [] });
-    dispatch({ field: 'chatError', value: false });
+    chatDispatch(setChatsIncr(chatList));
+    chatDispatch(setSelectedChat(undefined));
+    chatDispatch(setChatStatus(false));
+
+    messageDispatch(setLastMessageId(''));
+    messageDispatch(setMessages([]));
+    messageDispatch(setCurrentMessages([]));
+
     dispatch({
       field: 'selectModel',
       value: calcSelectModel(chats, models),
@@ -258,31 +293,22 @@ const HomeContent = () => {
   ) => {
     const chat = chatList.find((x) => x.id === chatId);
     if (chat) {
-      dispatch({ field: 'selectChat', value: chat });
+      chatDispatch(setSelectedChat(chat));
 
       getUserMessages(chat.id).then((data) => {
         if (data.length > 0) {
-          dispatch({ field: 'currentMessages', value: data });
+          messageDispatch(setCurrentMessages(data));
           const lastMessage = data[data.length - 1];
           const selectMessageList = getSelectMessages(data, lastMessage.id);
           if (lastMessage.role !== 'assistant') {
-            dispatch({
-              field: 'chatError',
-              value: true,
-            });
+            chatDispatch(setChatStatus(true));
             selectMessageList.push(chatErrorMessage(lastMessage.id));
           }
-          dispatch({
-            field: 'selectMessages',
-            value: selectMessageList,
-          });
-          dispatch({ field: 'selectMessageLastId', value: lastMessage.id });
+          messageDispatch(setMessages(selectMessageList));
+          messageDispatch(setLastMessageId(lastMessage.id));
         } else {
-          dispatch({ field: 'currentMessages', value: [] });
-          dispatch({
-            field: 'selectMessages',
-            value: [],
-          });
+          messageDispatch(setCurrentMessages([]));
+          messageDispatch(setMessages([]));
         }
         const model =
           getChatModel(chatList, chat?.id, models) ||
@@ -292,21 +318,23 @@ const HomeContent = () => {
     }
   };
 
+  const getSelectedChat = (chatList: ChatResult[]) => {
+    let chatId = getPathChatId(router.asPath) || getStorageChatId();
+    if (chatList.length > 0)
+      return chatList.find((x) => x.id === chatId) || chatList[0];
+    return {} as IChat;
+  };
+
   const getChats = (params: GetChatsParams, modelList?: AdminModelDto[]) => {
     const { page, pageSize } = params;
     getChatsByPaging(params).then((data) => {
       const { rows, count } = data || { rows: [], count: 0 };
-      dispatch({
-        field: 'chatsPaging',
-        value: { count, page, pageSize },
-      });
-      let chatList = rows;
       if (!modelList) {
-        chatList = chats.concat(rows);
+        chatDispatch(setChatsIncr(rows));
+        chatDispatch(setChatPaging({ count, page, pageSize }));
       }
-      dispatch({ field: 'chats', value: chatList });
       if (modelList) {
-        const selectChatId = getPathChatId(router.asPath) || getSelectChatId();
+        const selectChatId = getPathChatId(router.asPath) || getStorageChatId();
         selectChat(rows, selectChatId, modelList || models);
       }
     });
@@ -314,7 +342,6 @@ const HomeContent = () => {
 
   useEffect(() => {
     const settings = getSettings();
-    dp({ type: ChatActionTypes.SET_CHATS, payload: [1, 2, 3, 4, 5] as any[] });
     dispatch({
       field: 'settings',
       value: settings,
@@ -322,7 +349,6 @@ const HomeContent = () => {
   }, []);
 
   useEffect(() => {
-    console.log('chatState.chats', chatState.chats);
     const session = getUserInfo();
     const sessionId = getUserSession();
     if (session && sessionId) {
@@ -372,7 +398,17 @@ const HomeContent = () => {
     <HomeContext.Provider
       value={{
         ...contextValue,
+        state: { ...contextValue.state, ...chatState, ...messageState },
+        chatDispatch: chatDispatch,
+        messageDispatch: messageDispatch,
+
         handleNewChat,
+        handleStartChat,
+        handleChatIsError,
+        handleUpdateChatStatus,
+        handleUpdateChats,
+
+        handleCreateNewChat,
         handleSelectChat,
         handleUpdateChat,
         handleDeleteChat,

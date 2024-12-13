@@ -28,7 +28,7 @@ import {
 } from '@/components/Icons/index';
 import { Button } from '@/components/ui/button';
 
-import HomeContext from '../../_contents/Home.context';
+import HomeContext from '../../_reducers/Home.context';
 import UploadButton from '../Button/UploadButton';
 import PasteUpload from '../PasteUpload/PasteUpload';
 import PromptList from './PromptList';

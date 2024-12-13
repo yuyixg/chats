@@ -13,6 +13,9 @@ import { ChatResult, GetChatsParams } from '@/types/clientApis';
 import { UserModelConfig } from '@/types/model';
 import { Prompt } from '@/types/prompt';
 
+import { ChatAction } from './chat.reducer';
+import { MessageAction } from './message.reducer';
+
 export interface HandleUpdateChatParams {
   isShared?: boolean;
   title?: string;
@@ -21,22 +24,27 @@ export interface HandleUpdateChatParams {
 
 export interface HomeInitialState {
   user: UserSession | null;
-  messageIsStreaming: boolean;
-  models: AdminModelDto[];
-  chats: ChatResult[];
-  chatsPaging: { count: number; page: number; pageSize: number };
-  selectChat: IChat;
-  selectModel: AdminModelDto | undefined;
-  selectModels: AdminModelDto[];
-  currentMessages: ChatMessage[];
+  userModelConfig: UserModelConfig | undefined;
+
   selectMessages: ChatMessage[];
+  currentMessages: ChatMessage[];
   selectMessageLastId: string;
   currentChatMessageId: string;
-  userModelConfig: UserModelConfig | undefined;
+
+  chats: ChatResult[];
+  selectChat: IChat;
+  chatsPaging: { count: number; page: number; pageSize: number };
   chatError: boolean;
+  messageIsStreaming: boolean;
+
+  models: AdminModelDto[];
+  selectModel: AdminModelDto | undefined;
+  selectModels: AdminModelDto[];
+
   prompts: Prompt[];
-  settings: Settings;
   searchTerm: string;
+
+  settings: Settings;
 }
 
 export const initialState: HomeInitialState = {
@@ -44,28 +52,44 @@ export const initialState: HomeInitialState = {
 
   userModelConfig: undefined,
 
-  messageIsStreaming: false,
   selectMessages: [],
   selectMessageLastId: '',
   currentMessages: [],
   currentChatMessageId: '',
-  models: [],
+
   chats: [],
+  selectChat: {} as IChat,
+  chatsPaging: { count: 0, page: 1, pageSize: 50 },
+  chatError: false,
+  messageIsStreaming: false,
+
+  models: [],
   selectModel: undefined,
   selectModels: [],
-  selectChat: {} as IChat,
-  chatError: false,
-  prompts: [],
 
-  chatsPaging: { count: 0, page: 1, pageSize: 50 },
-  settings: DEFAULT_SETTINGS,
+  prompts: [],
   searchTerm: '',
+
+  settings: DEFAULT_SETTINGS,
 };
 
 export interface HomeContextProps {
   state: HomeInitialState;
   dispatch: Dispatch<ActionType<HomeInitialState>>;
+
+  chatDispatch: Dispatch<ChatAction>;
+  messageDispatch: Dispatch<MessageAction>,
+
   handleNewChat: () => void;
+  handleStartChat: (
+    selectedMessages: ChatMessage[],
+    selectedMessageId: string,
+    currentMessageId: string,
+  ) => void;
+  handleUpdateChatStatus: (status: boolean) => void;
+  handleUpdateChats: (chats: IChat[]) => void;
+  handleCreateNewChat: () => Promise<ChatResult>;
+  handleChatIsError: () => void;
   handleSelectChat: (chat: IChat) => void;
   handleUpdateChat: (
     chats: ChatResult[],

@@ -64,8 +64,8 @@ export interface ChatResult {
   title: string;
   modelId: number;
   modelName: string;
-  userModelConfig: UserModelConfig;
   isShared: boolean;
+  userModelConfig: UserModelConfig;
   modelProviderId: DBModelProvider;
 }
 

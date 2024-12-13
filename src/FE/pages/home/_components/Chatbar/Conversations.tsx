@@ -6,7 +6,7 @@ import { ChatResult } from '@/types/clientApis';
 
 import { Button } from '@/components/ui/button';
 
-import HomeContext from '../../_contents/Home.context';
+import HomeContext from '../../_reducers/Home.context';
 import ConversationComponent from './Conversation';
 
 interface Props {

@@ -6,8 +6,6 @@ import { PayServiceType } from './pay';
 import { StatusCode } from './statusCode';
 import { LoginType } from './user';
 
-import Decimal from 'decimal.js';
-
 export const enum UserRole {
   'admin' = 'admin',
 }
@@ -76,7 +74,7 @@ export interface GetUsersResult {
   role: string;
   email: string;
   phone: string;
-  balance: Decimal;
+  balance: number;
   provider: string;
   createdAt: string;
   updatedAt: string;
@@ -256,7 +254,7 @@ export interface GetUserInitialConfigResult {
   id: string;
   name: string;
   loginType: string;
-  price: Decimal;
+  price: number;
   invitationCodeId: string;
   invitationCode: string;
   models: UserInitialModel[];
@@ -264,7 +262,7 @@ export interface GetUserInitialConfigResult {
 
 export interface PostUserInitialConfigParams {
   name: string;
-  price: Decimal;
+  price: number;
   loginType: string;
   invitationCodeId: string | null;
   models: UserInitialModel[];
@@ -273,7 +271,7 @@ export interface PostUserInitialConfigParams {
 export interface PutUserInitialConfigParams {
   id: string;
   name: string;
-  price: Decimal;
+  price: number;
   loginType: string;
   invitationCodeId: string | null;
   models: UserInitialModel[];
