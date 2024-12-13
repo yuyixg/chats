@@ -40,4 +40,4 @@ export const setMessageIsStreaming = (
   payload: paging,
 });
 
-export default {};
+export default function () {}

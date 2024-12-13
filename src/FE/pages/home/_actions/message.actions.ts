@@ -33,4 +33,4 @@ export const setCurrentMessageId = (
   payload: currentMessageId,
 });
 
-export default {};
+export default function () {}
