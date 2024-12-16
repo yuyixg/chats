@@ -19,6 +19,10 @@ Sdcb Chats is a powerful and flexible frontend for large language models that su
 
 ## Quick Start
 
+### Development Documentation
+
+Chats is developed using `C#`/`TypeScript`. For information on how to compile Chats, please refer to the [development documentation link](./doc/en-US/build.md).
+
 ### Docker Deployment
 
 For most users, Docker provides the simplest and fastest way to deploy. Here is an all-in-one deployment command:
