@@ -24,7 +24,7 @@ import {
 } from '@/components/ui/popover';
 import { Separator } from '@/components/ui/separator';
 
-import HomeContext from '../../_reducers/Home.context';
+import HomeContext from '../../_contexts/home.context';
 import ChangePasswordModal from '../Modal/ChangePasswordModal';
 import UserBalanceModal from '../Modal/UserBalanceModal';
 import SettingModal from '../Settings/SettingModal';

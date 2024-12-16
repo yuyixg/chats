@@ -55,8 +55,6 @@ export default function chatReducer(
   switch (action.type) {
     case ChatActionTypes.SET_CHATS:
       return { ...state, chats: action.payload };
-    case ChatActionTypes.SET_CHATS_INCR:
-      return { ...state, chats: [...state.chats, ...action.payload] };
     case ChatActionTypes.SET_SELECTED_CHAT:
       return { ...state, selectChat: action.payload };
     case ChatActionTypes.SET_CHAT_STATUS:

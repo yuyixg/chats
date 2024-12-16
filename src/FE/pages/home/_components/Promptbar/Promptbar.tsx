@@ -6,7 +6,7 @@ import useTranslation from '@/hooks/useTranslation';
 
 import { Prompt, PromptSlim } from '@/types/prompt';
 
-import HomeContext from '../../_reducers/Home.context';
+import HomeContext from '../../_contexts/home.context';
 import Sidebar from '../Sidebar/Sidebar';
 import PromptbarContext from './PromptBar.context';
 import { PromptbarInitialState, initialState } from './PromptBar.context';

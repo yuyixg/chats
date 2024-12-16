@@ -28,7 +28,6 @@ import {
   setChatPaging,
   setChatStatus,
   setChats,
-  setChatsIncr,
   setMessageIsStreaming,
   setSelectedChat,
 } from '../../_actions/chat.actions';
@@ -42,7 +41,7 @@ import HomeContext, {
   HandleUpdateChatParams,
   HomeInitialState,
   initialState,
-} from '../../_reducers/Home.context';
+} from '../../_contexts/home.context';
 import chatReducer, { chatInitialState } from '../../_reducers/chat.reducer';
 import messageReducer, {
   messageInitialState,
@@ -238,41 +237,6 @@ const HomeContent = () => {
     });
   };
 
-  const handleUpdateChat = (
-    chats: ChatResult[],
-    id: string,
-    params: HandleUpdateChatParams,
-  ) => {
-    const chatList = chats.map((x) => {
-      if (x.id === id) return { ...x, ...params };
-      return x;
-    });
-    chatDispatch(setChats(chatList));
-  };
-
-  const handleUpdateChats = (chats: IChat[]) => {
-    chatDispatch(setChats(chats));
-  };
-
-  const handleDeleteChat = (id: string) => {
-    const chatList = chats.filter((x) => {
-      return x.id !== id;
-    });
-    chatDispatch(setChatsIncr(chatList));
-    chatDispatch(setSelectedChat(undefined));
-    chatDispatch(setChatStatus(false));
-
-    messageDispatch(setLastMessageId(''));
-    messageDispatch(setMessages([]));
-    messageDispatch(setCurrentMessages([]));
-
-    dispatch({
-      field: 'selectModel',
-      value: calcSelectModel(chats, models),
-    });
-    dispatch({ field: 'userModelConfig', value: {} });
-  };
-
   const handleUpdateSettings = <K extends keyof Settings>(
     key: K,
     value: Settings[K],
@@ -325,14 +289,51 @@ const HomeContent = () => {
     return {} as IChat;
   };
 
+  const handleUpdateChat = (
+    chats: ChatResult[],
+    id: string,
+    params: HandleUpdateChatParams,
+  ) => {
+    const chatList = chats.map((x) => {
+      if (x.id === id) return { ...x, ...params };
+      return x;
+    });
+    chatDispatch(setChats(chatList));
+  };
+
+  const handleUpdateChats = (chats: IChat[]) => {
+    chatDispatch(setChats(chats));
+  };
+
+  const handleDeleteChat = (id: string) => {
+    const chatList = chats.filter((x) => {
+      return x.id !== id;
+    });
+    chatDispatch(setChats(chatList));
+    chatDispatch(setSelectedChat(undefined));
+    chatDispatch(setChatStatus(false));
+
+    messageDispatch(setLastMessageId(''));
+    messageDispatch(setMessages([]));
+    messageDispatch(setCurrentMessages([]));
+
+    dispatch({
+      field: 'selectModel',
+      value: calcSelectModel(chats, models),
+    });
+    dispatch({ field: 'userModelConfig', value: {} });
+  };
+
   const getChats = (params: GetChatsParams, modelList?: AdminModelDto[]) => {
     const { page, pageSize } = params;
     getChatsByPaging(params).then((data) => {
       const { rows, count } = data || { rows: [], count: 0 };
+      let chatList = rows;
       if (!modelList) {
-        chatDispatch(setChatsIncr(rows));
-        chatDispatch(setChatPaging({ count, page, pageSize }));
+        chatList = chats.concat(rows);
       }
+      chatDispatch(setChats(chatList));
+      chatDispatch(setChatPaging({ count, page, pageSize }));
       if (modelList) {
         const selectChatId = getPathChatId(router.asPath) || getStorageChatId();
         selectChat(rows, selectChatId, modelList || models);

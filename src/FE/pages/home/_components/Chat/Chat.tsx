@@ -25,7 +25,7 @@ import {
   setCurrentMessages,
   setMessages,
 } from '../../_actions/message.actions';
-import HomeContext from '../../_reducers/Home.context';
+import HomeContext from '../../_contexts/home.context';
 import ModeToggle from '../ModeToggle/ModeToggle';
 import ChatInput from './ChatInput';
 import EnableNetworkSearch from './EnableNetworkSearch';

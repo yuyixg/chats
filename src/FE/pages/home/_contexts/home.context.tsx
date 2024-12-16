@@ -13,8 +13,8 @@ import { ChatResult, GetChatsParams } from '@/types/clientApis';
 import { UserModelConfig } from '@/types/model';
 import { Prompt } from '@/types/prompt';
 
-import { ChatAction } from './chat.reducer';
-import { MessageAction } from './message.reducer';
+import { ChatAction } from '../_reducers/chat.reducer';
+import { MessageAction } from '../_reducers/message.reducer';
 
 export interface HandleUpdateChatParams {
   isShared?: boolean;

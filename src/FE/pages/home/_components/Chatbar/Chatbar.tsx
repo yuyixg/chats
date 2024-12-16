@@ -7,7 +7,7 @@ import { removeStorageChatId, setStorageChatId } from '@/utils/chats';
 
 import { ChatResult } from '@/types/clientApis';
 
-import HomeContext from '../../_reducers/Home.context';
+import HomeContext from '../../_contexts/home.context';
 import Sidebar from '../Sidebar/Sidebar';
 import ChatbarContext from './Chatbar.context';
 import { ChatbarInitialState, initialState } from './Chatbar.context';

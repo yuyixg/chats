@@ -2,7 +2,7 @@ import { useContext, useState } from 'react';
 
 import { IconX } from '@/components/Icons';
 
-import HomeContext from '../../_reducers/Home.context';
+import HomeContext from '../../_contexts/home.context';
 import SliderSetting from './SliderSetting';
 
 const ChatSettingsBar = () => {

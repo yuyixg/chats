@@ -13,11 +13,6 @@ export const setChats = (chats: SetChatsType): ChatAction => ({
   payload: chats,
 });
 
-export const setChatsIncr = (chats: SetChatsType): ChatAction => ({
-  type: ChatActionTypes.SET_CHATS_INCR,
-  payload: chats,
-});
-
 export const setSelectedChat = (chat?: SetSelectedChatType): ChatAction => ({
   type: ChatActionTypes.SET_SELECTED_CHAT,
   payload: chat,

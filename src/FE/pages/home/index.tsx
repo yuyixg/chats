@@ -1,6 +1,6 @@
 import Head from 'next/head';
 
-import HomeContent from './_components/HomeContent/HomeContent';
+import HomeContent from './_components/Home/HomeContent';
 
 const Home = () => {
   return (
