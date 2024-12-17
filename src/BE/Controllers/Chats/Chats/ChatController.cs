@@ -6,7 +6,6 @@ using Chats.BE.Infrastructure;
 using Chats.BE.Services;
 using Chats.BE.Services.ChatServices;
 using Chats.BE.Services.ChatServices.Dtos;
-using Chats.BE.Services.ChatServices.Extensions;
 using Chats.BE.Services.FileServices;
 using Chats.BE.Services.UrlEncryption;
 using Microsoft.AspNetCore.Authorization;
