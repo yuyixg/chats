@@ -13,8 +13,6 @@ public class OpenAIApiKeyAuthenticationHandler(
     OpenAIApiKeySessionManager sessionManager,
     UrlEncoder encoder) : AuthenticationHandler<AuthenticationSchemeOptions>(options, loggerFactory, encoder)
 {
-    private readonly ILogger<SessionAuthenticationHandler> _logger = loggerFactory.CreateLogger<SessionAuthenticationHandler>();
-
     protected override async Task<AuthenticateResult> HandleAuthenticateAsync()
     {
         if (!Request.Headers.TryGetValue("Authorization", out Microsoft.Extensions.Primitives.StringValues authorizationHeader))
@@ -25,7 +23,7 @@ public class OpenAIApiKeyAuthenticationHandler(
         string authorizationHeaderString = authorizationHeader.ToString();
         string apiKey = authorizationHeaderString.Split(' ').Last();
 
-        ApiKeyEntry? apiKeyInfo = await sessionManager.GetCachedUserInfoByApiKey(apiKey);
+        ApiKeyEntry? apiKeyInfo = await sessionManager.GetUserInfoByOpenAIApiKey(apiKey);
 
         if (apiKeyInfo == null)
         {

@@ -11,6 +11,7 @@ export type SetChatPagingType = {
 };
 
 export type SetMessageIsStreamingType = boolean;
+export type SetIsChatsLoadingType = boolean;
 
 interface ChatInitialState {
   chats: SetChatsType;
@@ -18,6 +19,7 @@ interface ChatInitialState {
   chatError: SetChatStatusType;
   chatsPaging: SetChatPagingType;
   messageIsStreaming: SetMessageIsStreamingType;
+  isChatsLoading: SetIsChatsLoadingType;
 }
 
 export const chatInitialState: ChatInitialState = {
@@ -26,6 +28,7 @@ export const chatInitialState: ChatInitialState = {
   chatError: false,
   chatsPaging: { count: 0, page: 1, pageSize: 50 },
   messageIsStreaming: false,
+  isChatsLoading: false,
 };
 
 export enum ChatActionTypes {
@@ -35,6 +38,7 @@ export enum ChatActionTypes {
   SET_CHAT_STATUS = 'SET_CHAT_STATUS',
   SET_CHAT_PAGING = 'SET_CHAT_PAGING',
   SET_MESSAGE_IS_STREAMING = 'SET_MESSAGE_IS_STREAMING',
+  SET_IS_CHATS_LOADING = 'SET_IS_CHATS_LOADING',
 }
 
 export type ChatAction =
@@ -46,6 +50,10 @@ export type ChatAction =
   | {
       type: ChatActionTypes.SET_MESSAGE_IS_STREAMING;
       payload: SetMessageIsStreamingType;
+    }
+  | {
+      type: ChatActionTypes.SET_IS_CHATS_LOADING;
+      payload: SetIsChatsLoadingType;
     };
 
 export default function chatReducer(
@@ -63,6 +71,8 @@ export default function chatReducer(
       return { ...state, chatsPaging: action.payload };
     case ChatActionTypes.SET_MESSAGE_IS_STREAMING:
       return { ...state, messageIsStreaming: action.payload };
+    case ChatActionTypes.SET_IS_CHATS_LOADING:
+      return { ...state, isChatsLoading: action.payload };
     default:
       return state;
   }

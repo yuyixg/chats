@@ -31,15 +31,18 @@ public class MessagesController(ChatsDB db, CurrentUser currentUser, IUrlEncrypt
                     .OrderBy(x => x.Id)
                     .ToArray(),
                 CreatedAt = x.CreatedAt,
-                InputTokens = x.Usage!.InputTokens,
-                OutputTokens = x.Usage.OutputTokens,
-                InputPrice = x.Usage.InputCost,
-                OutputPrice = x.Usage.OutputCost,
-                ReasoningTokens = x.Usage.ReasoningTokens,
-                Duration = x.Usage.TotalDurationMs - x.Usage.PreprocessDurationMs,
-                FirstTokenLatency = x.Usage.FirstResponseDurationMs,
-                ModelId = x.Usage.UserModel.ModelId,
-                ModelName = x.Usage.UserModel.Model.Name
+                Usage = x.Usage == null ? null : new ChatMessageTempUsage()
+                {
+                    InputTokens = x.Usage.InputTokens,
+                    OutputTokens = x.Usage.OutputTokens,
+                    InputPrice = x.Usage.InputCost,
+                    OutputPrice = x.Usage.OutputCost,
+                    ReasoningTokens = x.Usage.ReasoningTokens,
+                    Duration = x.Usage.TotalDurationMs - x.Usage.PreprocessDurationMs,
+                    FirstTokenLatency = x.Usage.FirstResponseDurationMs,
+                    ModelId = x.Usage.UserModel.ModelId,
+                    ModelName = x.Usage.UserModel.Model.Name
+                },
             })
             .OrderBy(x => x.CreatedAt)
             .Select(x => x.ToDto(urlEncryption, fup))

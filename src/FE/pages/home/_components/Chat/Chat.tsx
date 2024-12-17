@@ -43,6 +43,7 @@ import SystemPrompt from './SystemPrompt';
 
 import { getChat, putUserChatModel } from '@/apis/clientApis';
 import { cn } from '@/lib/utils';
+import { SseResponseKind, SseResponseLine } from '@/types/chatMessage';
 
 const Chat = memo(() => {
   const { t } = useTranslation();
@@ -251,12 +252,12 @@ const Chat = memo(() => {
           buffer += decoder.decode(value, { stream: true });
 
           let newlineIndex;
-          while ((newlineIndex = buffer.indexOf('\n')) >= 0) {
+          while ((newlineIndex = buffer.indexOf('\r\n\r\n')) >= 0) {
             const line = buffer.slice(0, newlineIndex + 1).trim();
             buffer = buffer.slice(newlineIndex + 1);
 
-            if (line.startsWith('data:')) {
-              yield line.slice(5).trim();
+            if (line.startsWith('data: ')) {
+              yield line.slice(6);
             }
 
             if (line === '') {
@@ -267,20 +268,30 @@ const Chat = memo(() => {
       }
 
       for await (const message of processBuffer()) {
-        let value = JSON.parse(message);
-        if (!value.success) {
+        const value: SseResponseLine = JSON.parse(message);
+
+        if (value.k === SseResponseKind.StopId) {
+          const stopId = value.r;
+          console.log('stopId', stopId);
+        }
+        else if (value.k === SseResponseKind.Segment) {
+          text += value.r;
+          setSelectMessages({ text });
+        }
+        else if (value.k === SseResponseKind.Error) { // error
           errorChat = true;
           handleUpdateChatStatus(errorChat);
           controller.abort();
-          setSelectMessages({ text, error: value.result });
+          setSelectMessages({ text, error: value.r });
           break;
+        }
+        else if (value.k === SseResponseKind.End) {
+          console.log('End', value.r);
         }
         if (stopConversationRef.current === true) {
           controller.abort();
           break;
         }
-        text += value.result;
-        setSelectMessages({ text });
       }
 
       if (isChatEmpty) {

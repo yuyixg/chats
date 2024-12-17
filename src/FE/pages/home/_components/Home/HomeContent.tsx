@@ -25,6 +25,7 @@ import {
   setChatPaging,
   setChatStatus,
   setChats,
+  setIsChatsLoading,
   setMessageIsStreaming,
   setSelectedChat,
 } from '../../_actions/chat.actions';
@@ -337,7 +338,10 @@ const HomeContent = () => {
     clearUserModelConfig();
   };
 
-  const getChats = (params: GetChatsParams, modelList?: AdminModelDto[]) => {
+  const getChats = async (
+    params: GetChatsParams,
+    modelList?: AdminModelDto[],
+  ) => {
     const { page, pageSize } = params;
     getChatsByPaging(params).then((data) => {
       const { rows, count } = data || { rows: [], count: 0 };
@@ -362,8 +366,9 @@ const HomeContent = () => {
 
   useEffect(() => {
     const sessionId = getUserSession();
+    chatDispatch(setIsChatsLoading(true));
     if (sessionId) {
-      getUserModels().then((modelList) => {
+      getUserModels().then(async (modelList) => {
         modelDispatch(setModels(modelList));
         if (modelList && modelList.length > 0) {
           const selectModelId = getStorageModelId();
@@ -376,7 +381,8 @@ const HomeContent = () => {
           }
         }
 
-        getChats({ page: 1, pageSize: 50 }, modelList);
+        await getChats({ page: 1, pageSize: 50 }, modelList);
+        // chatDispatch(setIsChatsLoading(false));
       });
 
       getUserPromptBrief().then((data) => {

@@ -43,6 +43,7 @@ export interface HomeInitialState {
   chatsPaging: { count: number; page: number; pageSize: number };
   chatError: boolean;
   messageIsStreaming: boolean;
+  isChatsLoading: boolean;
 
   models: AdminModelDto[];
   selectModel: AdminModelDto | undefined;
@@ -69,6 +70,7 @@ export const initialState: HomeInitialState = {
   chatsPaging: { count: 0, page: 1, pageSize: 50 },
   chatError: false,
   messageIsStreaming: false,
+  isChatsLoading: false,
 
   models: [],
   selectModel: undefined,

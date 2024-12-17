@@ -23,7 +23,13 @@ const Chatbar = () => {
   });
 
   const {
-    state: { chats, selectModel, showChatBar, messageIsStreaming },
+    state: {
+      chats,
+      selectModel,
+      showChatBar,
+      messageIsStreaming,
+      isChatsLoading,
+    },
     settingDispatch,
     handleDeleteChat: homeHandleDeleteChat,
     handleSelectChat,
@@ -80,6 +86,7 @@ const Chatbar = () => {
       }}
     >
       <Sidebar<ChatResult>
+        isLoading={isChatsLoading}
         messageIsStreaming={messageIsStreaming}
         side={'left'}
         isOpen={showChatBar}

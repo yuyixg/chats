@@ -1,6 +1,5 @@
 ﻿using Chats.BE.DB;
 using Chats.BE.DB.Enums;
-using Chats.BE.DB.Extensions;
 using Chats.BE.Services.ChatServices;
 using Chats.BE.Services.FileServices;
 using OpenAI.Chat;
