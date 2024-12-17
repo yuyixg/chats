@@ -3,13 +3,12 @@ using Microsoft.EntityFrameworkCore;
 
 namespace Chats.BE.Services.OpenAIApiKeySession;
 
-public class OpenAIApiKeySessionManager(ChatsDB db, OpenAIApiKeySessionCache sessionCache)
+public class OpenAIApiKeySessionManager(ChatsDB db)
 {
     public async Task<ApiKeyEntry?> GetUserInfoByOpenAIApiKey(string apiKey, CancellationToken cancellationToken = default)
     {
         ApiKeyEntry? sessionEntry = await db.UserApiKeys
             .Include(x => x.User)
-            .Include(x => x.Models)
             .Where(x => x.Key == apiKey && !x.IsDeleted)
             .Select(x => new ApiKeyEntry()
             {
@@ -23,23 +22,6 @@ public class OpenAIApiKeySessionManager(ChatsDB db, OpenAIApiKeySessionCache ses
                 Expires = x.Expires
             })
             .FirstOrDefaultAsync(cancellationToken);
-        return sessionEntry;
-    }
-
-    public async Task<ApiKeyEntry?> GetCachedUserInfoByApiKey(string apiKey, CancellationToken cancellationToken = default)
-    {
-        ApiKeyEntry? cached = sessionCache.Get(apiKey);
-        if (cached != null)
-        {
-            return cached;
-        }
-
-        ApiKeyEntry? sessionEntry = await GetUserInfoByOpenAIApiKey(apiKey, cancellationToken);
-        if (sessionEntry != null)
-        {
-            sessionCache.Set(apiKey, sessionEntry);
-        }
-
         return sessionEntry;
     }
 }
