@@ -47,7 +47,6 @@ public class Program
         builder.Services.AddScoped<JwtKeyManager>();
         builder.Services.AddScoped<SessionManager>();
         builder.Services.AddScoped<UserModelManager>();
-        builder.Services.AddSingleton<OpenAIApiKeySessionCache>();
         builder.Services.AddScoped<OpenAIApiKeySessionManager>();
         builder.Services.AddSingleton<HostUrlService>();
         builder.Services.AddSingleton<ChatFactory>();
