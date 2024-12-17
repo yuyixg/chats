@@ -3,7 +3,7 @@ import toast from 'react-hot-toast';
 
 import useTranslation from '@/hooks/useTranslation';
 
-import { Prompt } from '@/types/prompt';
+import { PromptSlim } from '@/types/prompt';
 
 import { Button } from '@/components/ui/button';
 import {
@@ -15,7 +15,7 @@ import {
 import { Textarea } from '@/components/ui/textarea';
 
 interface Props {
-  prompt: Prompt;
+  prompt: PromptSlim;
   variables: string[];
   onSubmit: (updatedVariables: string[]) => void;
   onClose: () => void;

@@ -3,6 +3,7 @@
   "rules": {
     "react-hooks/exhaustive-deps": "off",
     "@next/next/no-img-element": "off",
-    "no-anonymous-default-export": "off"
+    "no-anonymous-default-export": "off",
+    "import/no-anonymous-default-export": "off"
   }
 }

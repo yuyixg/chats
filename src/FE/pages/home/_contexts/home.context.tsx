@@ -4,17 +4,23 @@ import { ActionType } from '@/hooks/useCreateReducer';
 
 import { DEFAULT_SETTINGS } from '@/utils/settings';
 import { Settings } from '@/utils/settings';
-import { UserSession } from '@/utils/user';
+import { UserInfo } from '@/utils/user';
 
 import { AdminModelDto } from '@/types/adminApis';
 import { IChat } from '@/types/chat';
 import { ChatMessage } from '@/types/chatMessage';
 import { ChatResult, GetChatsParams } from '@/types/clientApis';
 import { UserModelConfig } from '@/types/model';
-import { Prompt } from '@/types/prompt';
+import { Prompt, PromptSlim } from '@/types/prompt';
 
 import { ChatAction } from '../_reducers/chat.reducer';
 import { MessageAction } from '../_reducers/message.reducer';
+import { ModelAction } from '../_reducers/model.reducer';
+import { PromptAction } from '../_reducers/prompt.reducer';
+import { SettingsAction } from '../_reducers/setting.reducer';
+import { UserModelConfigAction } from '../_reducers/userModelConfig.reducer';
+
+import { boolean } from 'zod';
 
 export interface HandleUpdateChatParams {
   isShared?: boolean;
@@ -23,8 +29,9 @@ export interface HandleUpdateChatParams {
 }
 
 export interface HomeInitialState {
-  user: UserSession | null;
-  userModelConfig: UserModelConfig | undefined;
+  prompt: string | null;
+  temperature: number | null;
+  enableSearch: boolean | null;
 
   selectMessages: ChatMessage[];
   currentMessages: ChatMessage[];
@@ -41,16 +48,16 @@ export interface HomeInitialState {
   selectModel: AdminModelDto | undefined;
   selectModels: AdminModelDto[];
 
-  prompts: Prompt[];
-  searchTerm: string;
+  prompts: PromptSlim[];
 
-  settings: Settings;
+  showChatBar: boolean;
+  showPromptBar: boolean;
 }
 
 export const initialState: HomeInitialState = {
-  user: null,
-
-  userModelConfig: undefined,
+  prompt: null,
+  temperature: null,
+  enableSearch: null,
 
   selectMessages: [],
   selectMessageLastId: '',
@@ -68,9 +75,9 @@ export const initialState: HomeInitialState = {
   selectModels: [],
 
   prompts: [],
-  searchTerm: '',
 
-  settings: DEFAULT_SETTINGS,
+  showChatBar: true,
+  showPromptBar: false,
 };
 
 export interface HomeContextProps {
@@ -79,7 +86,15 @@ export interface HomeContextProps {
 
   chatDispatch: Dispatch<ChatAction>;
   messageDispatch: Dispatch<MessageAction>;
+  modelDispatch: Dispatch<ModelAction>;
+  userModelConfigDispatch: Dispatch<UserModelConfigAction>;
+  settingDispatch: Dispatch<SettingsAction>;
+  promptDispatch: Dispatch<PromptAction>;
 
+  handleUpdateSelectMessage: (lastLeafId: string) => void;
+  handleUpdateCurrentMessage: (chatId: string) => void;
+  handleSelectModel: (model: AdminModelDto) => void;
+  hasModel: () => boolean;
   handleNewChat: () => void;
   handleStartChat: (
     selectedMessages: ChatMessage[],
@@ -90,22 +105,13 @@ export interface HomeContextProps {
   handleUpdateChats: (chats: IChat[]) => void;
   handleCreateNewChat: () => Promise<ChatResult>;
   handleChatIsError: () => void;
+  handleDeleteChat: (id: string) => void;
   handleSelectChat: (chat: IChat) => void;
   handleUpdateChat: (
     chats: ChatResult[],
     id: string,
     params: HandleUpdateChatParams,
   ) => void;
-  handleUpdateSelectMessage: (lastLeafId: string) => void;
-  handleUpdateCurrentMessage: (chatId: string) => void;
-  handleDeleteChat: (id: string) => void;
-  handleSelectModel: (model: AdminModelDto) => void;
-  handleUpdateUserModelConfig: (value: any) => void;
-  handleUpdateSettings: <K extends keyof Settings>(
-    key: K,
-    value: Settings[K],
-  ) => void;
-  hasModel: () => boolean;
   getChats: (params: GetChatsParams, models?: AdminModelDto[]) => void;
 }
 

@@ -1,9 +1,9 @@
 import { MutableRefObject } from 'react';
 
-import { Prompt } from '@/types/prompt';
+import { PromptSlim } from '@/types/prompt';
 
 interface Props {
-  prompts: Prompt[];
+  prompts: PromptSlim[];
   activePromptIndex: number;
   onSelect: () => void;
   onMouseOver: (index: number) => void;

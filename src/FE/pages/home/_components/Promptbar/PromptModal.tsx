@@ -26,6 +26,7 @@ import FormTextarea from '@/components/ui/form/textarea';
 
 import HomeContext from '../../_contexts/home.context';
 
+import { useUserInfo } from '@/providers/UserProvider';
 import { zodResolver } from '@hookform/resolvers/zod';
 import { z } from 'zod';
 
@@ -38,10 +39,7 @@ interface IProps {
 const PromptModal = (props: IProps) => {
   const { t } = useTranslation();
   const { prompt, onUpdatePrompt, onClose } = props;
-
-  const {
-    state: { user },
-  } = useContext(HomeContext);
+  const user = useUserInfo();
 
   const formSchema = z.object({
     name: z.string().min(1, t('This field is require')),

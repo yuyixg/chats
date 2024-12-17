@@ -24,6 +24,7 @@ import {
 } from '@/components/ui/popover';
 import { Separator } from '@/components/ui/separator';
 
+import { setShowPromptBar } from '../../_actions/setting.actions';
 import HomeContext from '../../_contexts/home.context';
 import ChangePasswordModal from '../Modal/ChangePasswordModal';
 import UserBalanceModal from '../Modal/UserBalanceModal';
@@ -31,6 +32,7 @@ import SettingModal from '../Settings/SettingModal';
 import SidebarButton from '../Sidebar/SidebarButton';
 
 import { getUserBalanceOnly } from '@/apis/clientApis';
+import { useUserInfo } from '@/providers/UserProvider';
 
 const ChatBarSettings = () => {
   const router = useRouter();
@@ -41,12 +43,10 @@ const ChatBarSettings = () => {
   const [settingSheetOpen, setSettingSheetOpen] = useState<boolean>(false);
 
   const {
-    state: {
-      user,
-      settings: { showPromptBar },
-    },
-    handleUpdateSettings,
+    state: { showPromptBar },
+    settingDispatch,
   } = useContext(HomeContext);
+  const user = useUserInfo();
 
   const [userBalance, setUserBalance] = useState<number>(0);
   const logout = () => {
@@ -100,7 +100,7 @@ const ChatBarSettings = () => {
               text={t('Prompt Management')}
               icon={<IconBulbFilled />}
               onClick={() => {
-                handleUpdateSettings('showPromptBar', !showPromptBar);
+                settingDispatch(setShowPromptBar(!showPromptBar));
               }}
             />
             <SidebarButton

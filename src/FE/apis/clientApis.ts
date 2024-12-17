@@ -21,7 +21,7 @@ import {
   SingInResult,
 } from '@/types/clientApis';
 import { PageResult } from '@/types/page';
-import { IdName, Prompt } from '@/types/prompt';
+import { IdName, Prompt, PromptSlim } from '@/types/prompt';
 import { SmsType } from '@/types/user';
 
 export const changeUserPassword = (params: PostUserPassword) => {
@@ -112,7 +112,7 @@ export const getUserPrompts = () => {
 
 export const getUserPromptBrief = () => {
   const fetchServer = useFetch();
-  return fetchServer.get<IdName[]>('/api/prompts/brief');
+  return fetchServer.get<PromptSlim[]>('/api/prompts/brief');
 };
 
 export const getUserPromptDetail = (id: number) => {

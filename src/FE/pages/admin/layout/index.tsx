@@ -80,13 +80,6 @@ const AdminLayout = ({
       },
       title: t('Login Service'),
     },
-    // {
-    //   url: '/admin/pay-service',
-    //   icon: (stroke?: string) => {
-    //     return <IconCreditCard stroke={stroke} />;
-    //   },
-    //   title: t('Pay Service'),
-    // },
     {
       url: '/admin/request-logs',
       icon: (stroke?: string) => {

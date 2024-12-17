@@ -3,12 +3,7 @@ import toast from 'react-hot-toast';
 import useTranslation from '@/hooks/useTranslation';
 
 import { getApiUrl } from '@/utils/common';
-import {
-  getLoginUrl,
-  getUserSession,
-  redirectToHome,
-  redirectToLogin,
-} from '@/utils/user';
+import { getUserSession, redirectToHome, redirectToLogin } from '@/utils/user';
 
 export type RequestModel = {
   params?: object;

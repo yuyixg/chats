@@ -25,6 +25,13 @@ import {
   setCurrentMessages,
   setMessages,
 } from '../../_actions/message.actions';
+import { setSelectedModel } from '../../_actions/model.actions';
+import {
+  setEnableSearch,
+  setPrompt,
+  setTemperature,
+  setUserModelConfig,
+} from '../../_actions/userModelConfig.actions';
 import HomeContext from '../../_contexts/home.context';
 import ModeToggle from '../ModeToggle/ModeToggle';
 import ChatInput from './ChatInput';
@@ -42,6 +49,10 @@ const Chat = memo(() => {
 
   const {
     state: {
+      prompt,
+      temperature,
+      enableSearch,
+
       chats,
       selectChat,
       chatError,
@@ -53,10 +64,9 @@ const Chat = memo(() => {
 
       models,
       selectModel,
-      userModelConfig,
 
       prompts,
-      settings,
+      showChatBar,
     },
     handleCreateNewChat,
     handleStartChat,
@@ -66,11 +76,11 @@ const Chat = memo(() => {
 
     handleUpdateSelectMessage,
     handleUpdateCurrentMessage,
-    handleUpdateUserModelConfig,
     hasModel,
     chatDispatch,
     messageDispatch,
-    dispatch: homeDispatch,
+    userModelConfigDispatch,
+    modelDispatch,
   } = useContext(HomeContext);
   const [autoScrollEnabled, setAutoScrollEnabled] = useState<boolean>(true);
   const [showScrollDownButton, setShowScrollDownButton] =
@@ -174,20 +184,20 @@ const Chat = memo(() => {
         text: message.content.text!,
         fileIds: message.content.fileIds?.map((x) => x.id) || null,
       };
-      if (
-        selectModel &&
-        !selectModel.allowSystemPrompt &&
-        userModelConfig &&
-        userModelConfig.prompt
-      ) {
-        userModelConfig.prompt = null;
-      }
+
       const chatBody: ChatBody = {
         modelId: modelId || selectModel?.modelId!,
         chatId: selectChatId,
         messageId: messageId || null,
         userMessage: messageContent,
-        userModelConfig,
+        userModelConfig: {
+          prompt:
+            selectModel && !selectModel.allowSystemPrompt && prompt
+              ? null
+              : prompt,
+          temperature,
+          enableSearch,
+        },
       };
       let body = JSON.stringify(chatBody);
 
@@ -282,10 +292,7 @@ const Chat = memo(() => {
             }
             return x;
           });
-          homeDispatch({
-            field: 'userModelConfig',
-            value: data.userModelConfig,
-          });
+          userModelConfigDispatch(setUserModelConfig(data.userModelConfig));
           handleUpdateChats(_chats);
         }, 100);
       }
@@ -298,7 +305,9 @@ const Chat = memo(() => {
       stopConversationRef.current = false;
     },
     [
-      userModelConfig,
+      prompt,
+      temperature,
+      enableSearch,
       chats,
       selectChat,
       chatError,
@@ -349,11 +358,11 @@ const Chat = memo(() => {
     throttledScrollDown();
   }, [selectMessages, throttledScrollDown]);
 
-  useEffect(() => {}, [userModelConfig]);
+  useEffect(() => {}, [prompt, temperature, enableSearch]);
 
   const onChangePrompt = (prompt: Prompt) => {
     if (prompt.temperature !== null) {
-      handleUpdateUserModelConfig({ temperature: prompt.temperature });
+      userModelConfigDispatch(setTemperature(prompt.temperature));
     }
   };
 
@@ -370,7 +379,7 @@ const Chat = memo(() => {
               <div
                 className={cn(
                   'flex justify-start items-center ml-24',
-                  settings.showChatBar && 'ml-6',
+                  showChatBar && 'ml-6',
                 )}
               >
                 {hasModel() && (
@@ -379,14 +388,10 @@ const Chat = memo(() => {
                     className="font-semibold text-base"
                     content={selectModel?.name}
                     onChangeModel={(model) => {
-                      homeDispatch({
-                        field: 'selectModel',
-                        value: model,
-                      });
-                      handleUpdateUserModelConfig({
-                        ...userModelConfig,
-                        enableSearch: model.allowSearch,
-                      });
+                      modelDispatch(setSelectedModel(model));
+                      userModelConfigDispatch(
+                        setEnableSearch(model.allowSearch),
+                      );
                       if (selectChat.id) {
                         putUserChatModel(selectChat.id, model.modelId);
                       }
@@ -398,62 +403,46 @@ const Chat = memo(() => {
             </div>
           </div>
           {selectMessages?.length === 0 ? (
-            <>
-              <div className="mx-auto flex flex-col space-y-5 md:space-y-10 px-3 pt-[52px] sm:max-w-[600px]">
-                {hasModel() && (
-                  <div className="flex h-full flex-col space-y-4 rounded-lg border border-neutral-200 p-4 dark:border-neutral-600">
-                    <ModelSelect />
-                    {selectModel?.allowSystemPrompt &&
-                      userModelConfig?.prompt && (
-                        <SystemPrompt
-                          currentPrompt={userModelConfig?.prompt}
-                          prompts={prompts}
-                          model={selectModel}
-                          onChangePromptText={(prompt) => {
-                            handleUpdateUserModelConfig({ prompt });
-                          }}
-                          onChangePrompt={onChangePrompt}
-                        />
-                      )}
-                    {selectModel?.allowTemperature &&
-                      userModelConfig &&
-                      userModelConfig.temperature !== null &&
-                      userModelConfig.temperature !== undefined && (
-                        <TemperatureSlider
-                          label={t('Temperature')}
-                          min={0}
-                          max={1}
-                          defaultTemperature={userModelConfig.temperature}
-                          onChangeTemperature={(temperature) =>
-                            handleUpdateUserModelConfig({
-                              temperature,
-                            })
-                          }
-                        />
-                      )}
-                    {selectModel?.allowSearch &&
-                      userModelConfig?.enableSearch != undefined && (
-                        <EnableNetworkSearch
-                          label={t('Internet Search')}
-                          enable={userModelConfig.enableSearch}
-                          onChange={(enableSearch) => {
-                            handleUpdateUserModelConfig({
-                              enableSearch,
-                            });
-                          }}
-                        />
-                      )}
-                    {/* <Button
-                      onClick={() => {
-                        handleUpdateSettings('showChatSettingBar', true);
+            <div className="mx-auto flex flex-col space-y-5 md:space-y-10 px-3 pt-[52px] sm:max-w-[600px]">
+              {hasModel() && (
+                <div className="flex h-full flex-col space-y-4 rounded-lg border border-neutral-200 p-4 dark:border-neutral-600">
+                  <ModelSelect />
+                  {selectModel?.allowSystemPrompt && prompt && (
+                    <SystemPrompt
+                      currentPrompt={prompt}
+                      prompts={prompts}
+                      model={selectModel}
+                      onChangePromptText={(value) => {
+                        userModelConfigDispatch(setPrompt(value));
                       }}
-                    >
-                      Settings
-                    </Button> */}
-                  </div>
-                )}
-              </div>
-            </>
+                      onChangePrompt={onChangePrompt}
+                    />
+                  )}
+                  {selectModel?.allowTemperature &&
+                    temperature !== null &&
+                    temperature !== undefined && (
+                      <TemperatureSlider
+                        label={t('Temperature')}
+                        min={0}
+                        max={1}
+                        defaultTemperature={temperature}
+                        onChangeTemperature={(value) =>
+                          userModelConfigDispatch(setTemperature(value))
+                        }
+                      />
+                    )}
+                  {selectModel?.allowSearch && enableSearch != undefined && (
+                    <EnableNetworkSearch
+                      label={t('Internet Search')}
+                      enable={enableSearch}
+                      onChange={(value) => {
+                        userModelConfigDispatch(setEnableSearch(value));
+                      }}
+                    />
+                  )}
+                </div>
+              )}
+            </div>
           ) : (
             <>
               {selectMessages.map((current, index) => {
