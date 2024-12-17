@@ -34,12 +34,12 @@ public class BalanceService(IServiceScopeFactory serviceScopeFactory)
             using ChatsDB db = scope.ServiceProvider.GetRequiredService<ChatsDB>();
             foreach (int userModelId in userModelIds)
             {
-                await UpdateUserModelUsage(db, userModelId, cancellationToken);
+                await UpdateUsage(db, userModelId, cancellationToken);
             }
         }, cancellationToken);
     }
 
-    public async Task UpdateUserModelUsage(ChatsDB db, int userModelId, CancellationToken cancellationToken)
+    public async Task UpdateUsage(ChatsDB db, int userModelId, CancellationToken cancellationToken)
     {
         await db.UserModels
             .Where(x => x.Id == userModelId)

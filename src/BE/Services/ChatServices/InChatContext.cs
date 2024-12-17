@@ -81,6 +81,7 @@ public class InChatContext()
         UserModelUsage usage = new()
         {
             UserModelId = _userModel.Id,
+            UserModel = _userModel,
             CreatedAt = DateTime.UtcNow,
             FinishReasonId = (byte)FinishReason,
             SegmentCount = _segmentCount,

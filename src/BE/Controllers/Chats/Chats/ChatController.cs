@@ -21,7 +21,12 @@ using OpenAIChatMessage = OpenAI.Chat.ChatMessage;
 namespace Chats.BE.Controllers.Chats.Chats;
 
 [Route("api/chats"), Authorize]
-public class ChatController(ChatsDB db, CurrentUser currentUser, ILogger<ChatController> logger, IUrlEncryptionService idEncryption) : ControllerBase
+public class ChatController(
+    ChatsDB db, 
+    CurrentUser currentUser, 
+    ILogger<ChatController> logger, 
+    IUrlEncryptionService idEncryption,
+    ChatStopService stopService) : ControllerBase
 {
     [HttpPost]
     public async Task<IActionResult> StartConversationStreamed(
@@ -30,7 +35,7 @@ public class ChatController(ChatsDB db, CurrentUser currentUser, ILogger<ChatCon
         [FromServices] ChatFactory conversationFactory,
         [FromServices] UserModelManager userModelManager,
         [FromServices] ClientInfoManager clientInfoManager,
-        [FromServices] FileUrlProvider fileDownloadUrlProvider,
+        [FromServices] FileUrlProvider fup,
         CancellationToken cancellationToken)
     {
         InChatContext icc = new();
@@ -112,20 +117,21 @@ public class ChatController(ChatsDB db, CurrentUser currentUser, ILogger<ChatCon
         List<OpenAIChatMessage> messageToSend =
         [
             ..(systemMessage != null ? [new SystemChatMessage(systemMessage.Content[0].ToString())] : Array.Empty<OpenAIChatMessage>()),
-            ..await GetMessageTree(existingMessages, messageId).ToAsyncEnumerable().SelectAwait(async x => await x.ToOpenAI(fileDownloadUrlProvider, cancellationToken)).ToArrayAsync(cancellationToken),
+            ..await GetMessageTree(existingMessages, messageId).ToAsyncEnumerable().SelectAwait(async x => await x.ToOpenAI(fup, cancellationToken)).ToArrayAsync(cancellationToken),
         ];
 
         // new user message
-        MessageLiteDto userMessage;
+        MessageLiteDto userMessageLite;
+        Message? dbUserMessage = null;
         if (messageId != null && existingMessages.TryGetValue(messageId.Value, out MessageLiteDto? parentMessage) && parentMessage.Role == DBChatRole.User)
         {
             // existing user message
-            userMessage = existingMessages[messageId!.Value];
+            userMessageLite = existingMessages[messageId!.Value];
         }
         else
         {
             // insert new user message
-            Message dbUserMessage = new()
+            dbUserMessage = new()
             {
                 ChatId = chatId,
                 ChatRoleId = (byte)DBChatRole.User,
@@ -135,18 +141,19 @@ public class ChatController(ChatsDB db, CurrentUser currentUser, ILogger<ChatCon
             };
             db.Messages.Add(dbUserMessage);
             await db.SaveChangesAsync(cancellationToken);
-            userMessage = new()
+            userMessageLite = new()
             {
                 Id = dbUserMessage.Id,
                 Content = request.UserMessage.ToMessageContents(idEncryption),
                 Role = (DBChatRole)dbUserMessage.ChatRoleId,
                 ParentId = dbUserMessage.ParentId,
             };
-            messageToSend.Add(await userMessage.ToOpenAI(fileDownloadUrlProvider, cancellationToken));
+            messageToSend.Add(await userMessageLite.ToOpenAI(fup, cancellationToken));
         }
 
         string? errorText = null;
         bool everYield = false;
+        string? stopId = null;
         try
         {
             if (userModel == null)
@@ -165,9 +172,11 @@ public class ChatController(ChatsDB db, CurrentUser currentUser, ILogger<ChatCon
                     Response.Headers.ContentType = "text/event-stream";
                     Response.Headers.CacheControl = "no-cache";
                     Response.Headers.Connection = "keep-alive";
+                    stopId = stopService.CreateAndCombineCancellationToken(ref cancellationToken);
+                    await YieldResponse(SseResponseLine.CreateStopId(stopId));
                     everYield = true;
                 }
-                await YieldResponse(new() { Result = seg.TextSegment, Success = true });
+                await YieldResponse(SseResponseLine.CreateSegment(seg.TextSegment));
 
                 if (cancellationToken.IsCancellationRequested)
                 {
@@ -184,7 +193,7 @@ public class ChatController(ChatsDB db, CurrentUser currentUser, ILogger<ChatCon
         {
             icc.FinishReason = DBFinishReason.UpstreamError;
             errorText = e.Message;
-            logger.LogError(e, "Upstream error: {userMessageId}", userMessage.Id);
+            logger.LogError(e, "Upstream error: {userMessageId}", userMessageLite.Id);
         }
         catch (TaskCanceledException)
         {
@@ -196,18 +205,22 @@ public class ChatController(ChatsDB db, CurrentUser currentUser, ILogger<ChatCon
         {
             icc.FinishReason = DBFinishReason.UnknownError;
             errorText = "Unknown Error";
-            logger.LogError(e, "Error in conversation for message: {userMessageId}", userMessage.Id);
+            logger.LogError(e, "Error in conversation for message: {userMessageId}", userMessageLite.Id);
         }
         finally
         {
             // cancel the conversation because following code is credit deduction related
             cancellationToken = CancellationToken.None;
+            if (stopId != null)
+            {
+                stopService.Remove(stopId);
+            }
         }
 
         // success
         // insert new assistant message
         InternalChatSegment fullResponse = icc.FullResponse;
-        Message assistantMessage = new()
+        Message dbAssistantMessage = new()
         {
             ChatId = chatId,
             ChatRoleId = (byte)DBChatRole.Assistant,
@@ -216,34 +229,35 @@ public class ChatController(ChatsDB db, CurrentUser currentUser, ILogger<ChatCon
                 MessageContent.FromText(fullResponse.TextSegment),
             ],
             CreatedAt = DateTime.UtcNow,
-            ParentId = userMessage.Id,
+            ParentId = userMessageLite.Id,
         };
 
         if (errorText != null)
         {
-            assistantMessage.MessageContents.Add(MessageContent.FromError(errorText));
-            await YieldResponse(new() { Result = errorText, Success = false });
+            dbAssistantMessage.MessageContents.Add(MessageContent.FromError(errorText));
+            await YieldResponse(SseResponseLine.CreateError(errorText));
         }
-        assistantMessage.Usage = icc.ToUserModelUsage(currentUser.Id, await clientInfoManager.GetClientInfo(cancellationToken), isApi: false);
-        db.Messages.Add(assistantMessage);
+        dbAssistantMessage.Usage = icc.ToUserModelUsage(currentUser.Id, await clientInfoManager.GetClientInfo(cancellationToken), isApi: false);
+        db.Messages.Add(dbAssistantMessage);
 
         await db.SaveChangesAsync(cancellationToken);
         if (icc.Cost.CostBalance > 0)
         {
-            _ = balanceService.AsyncUpdateBalance(currentUser.Id, CancellationToken.None);
+            await balanceService.UpdateBalance(db, currentUser.Id, CancellationToken.None);
         }
         if (icc.Cost.CostUsage)
         {
-            _ = balanceService.AsyncUpdateUsage([userModel!.Id], CancellationToken.None);
+            await balanceService.UpdateUsage(db, userModel!.Id, CancellationToken.None);
         }
 
+        await YieldResponse(SseResponseLine.CreateEnd(dbUserMessage, dbAssistantMessage, idEncryption, fup));
         return new EmptyResult();
     }
 
-    private readonly static ReadOnlyMemory<byte> dataU8 = "data:"u8.ToArray();
-    private readonly static ReadOnlyMemory<byte> lfu8 = "\n"u8.ToArray();
+    private readonly static ReadOnlyMemory<byte> dataU8 = "data: "u8.ToArray();
+    private readonly static ReadOnlyMemory<byte> lfu8 = "\r\n\r\n"u8.ToArray();
 
-    private async Task YieldResponse(SseResponseLine line)
+    private async Task YieldResponse<T>(SseResponseLine<T> line)
     {
         await Response.Body.WriteAsync(dataU8);
         await Response.Body.WriteAsync(JsonSerializer.SerializeToUtf8Bytes(line, JSON.JsonSerializerOptions));
@@ -265,5 +279,18 @@ public class ChatController(ChatsDB db, CurrentUser currentUser, ILogger<ChatCon
             currentParentId = existingMessages[currentParentId.Value].ParentId;
         }
         return line;
+    }
+
+    [HttpPost("stop/{stopId}")]
+    public IActionResult StopChat(string stopId)
+    {
+        if (stopService.TryCancel(stopId))
+        {
+            return Ok();
+        }
+        else
+        {
+            return NotFound();
+        }
     }
 }
