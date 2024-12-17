@@ -2,11 +2,8 @@
 using Chats.BE.Controllers.Common;
 using Chats.BE.Controllers.Common.Dtos;
 using Chats.BE.DB;
-using Chats.BE.DB.Enums;
-using Chats.BE.DB.Jsons;
 using Chats.BE.Infrastructure;
 using Chats.BE.Services;
-using Chats.BE.Services.Common;
 using Chats.BE.Services.ChatServices;
 using Chats.BE.Services.UrlEncryption;
 using Microsoft.AspNetCore.Authorization;
@@ -21,39 +18,36 @@ public class UserChatsController(ChatsDB db, CurrentUser currentUser, IUrlEncryp
     [HttpGet("{encryptedChatId}")]
     public async Task<ActionResult<ChatsResponse>> GetOneChat(string encryptedChatId, CancellationToken cancellationToken)
     {
-        ChatsResponseTemp? temp = await db.Chats
+        ChatsResponse? result = await db.Chats
             .Where(x => x.Id == idEncryption.DecryptChatId(encryptedChatId) && x.UserId == currentUser.Id && !x.IsDeleted)
-            .Select(x => new ChatsResponseTemp()
+            .Select(x => new ChatsResponse()
             {
-                Id = x.Id,
+                Id = idEncryption.EncryptChatId(x.Id),
                 Title = x.Title,
-                ChatModelId = x.ModelId,
-                ModelName = x.Model.Name,
-                EnableSearch = x.EnableSearch,
-                Temperature = x.Temperature,
                 IsShared = x.IsShared,
-                UserModelConfig = new JsonUserModelConfig
+                Spans = x.ChatSpans.Select(s => new ChatSpanDto
                 {
-                    Temperature = x.Temperature, 
-                    EnableSearch = x.EnableSearch, 
-                },
-                ModelProvider = (DBModelProvider)x.Model.ModelKey.ModelProviderId,
+                    SpanId = s.SpanId,
+                    ModelId = s.ModelId,
+                    Temperature = s.Temperature,
+                    EnableSearch = s.EnableSearch,
+                }).ToArray(),
+                MessageCount = x.Messages.Count,
             })
             .FirstOrDefaultAsync(cancellationToken);
 
-        if (temp == null)
+        if (result == null)
         {
             return NotFound();
         }
 
-        return Ok(temp.ToResponse(idEncryption));
+        return Ok(result);
     }
 
     [HttpGet]
     public async Task<ActionResult<PagedResult<ChatsResponse>>> GetChats([FromQuery] PagingRequest request, CancellationToken cancellationToken)
     {
         IQueryable<Chat> query = db.Chats
-            .Include(x => x.Model)
             .Where(x => x.UserId == currentUser.Id && !x.IsDeleted)
             .OrderByDescending(x => x.Id);
         if (!string.IsNullOrWhiteSpace(request.Query))
@@ -61,39 +55,32 @@ public class UserChatsController(ChatsDB db, CurrentUser currentUser, IUrlEncryp
             query = query.Where(x => x.Title.Contains(request.Query));
         }
 
-        PagedResult<ChatsResponse> result = await PagedResult.FromTempQuery(query
-            .Select(x => new ChatsResponseTemp()
+        PagedResult<ChatsResponse> result = await PagedResult.FromQuery(query
+            .Select(x => new ChatsResponse()
             {
-                Id = x.Id,
+                Id = idEncryption.EncryptChatId(x.Id),
                 Title = x.Title,
-                ChatModelId = x.ModelId,
-                ModelName = x.Model!.Name,
-                EnableSearch = x.EnableSearch,
-                Temperature = ChatService.DefaultTemperature,
                 IsShared = x.IsShared,
-                ModelProvider = (DBModelProvider)x.Model.ModelKey.ModelProviderId,
-                UserModelConfig = new JsonUserModelConfig
+                Spans = x.ChatSpans.Select(s => new ChatSpanDto
                 {
-                    EnableSearch = x.EnableSearch, 
-                    Temperature = x.Temperature,
-                    Prompt = x.Messages
-                        .FirstOrDefault(x => x.ChatRoleId == (byte)DBChatRole.System)
-                        !.MessageContents
-                        .FirstOrDefault()
-                        !.MessageContentText
-                        !.Content
-                },
+                    SpanId = s.SpanId,
+                    ModelId = s.ModelId,
+                    Temperature = s.Temperature,
+                    EnableSearch = s.EnableSearch,
+                }).ToArray(),
+                MessageCount = x.Messages.Count,
             }),
             request,
-            x => x.ToResponse(idEncryption), cancellationToken);
+            cancellationToken);
         return Ok(result);
     }
 
     [HttpPost]
-    public async Task<ActionResult<ChatsResponse>> CreateChats([FromBody] CreateChatsRequest request, [FromServices] UserModelManager userModelManager, CancellationToken cancellationToken)
+    public async Task<ActionResult<ChatsResponse>> CreateChat([FromBody] CreateChatRequest request, [FromServices] UserModelManager userModelManager, CancellationToken cancellationToken)
     {
-        UserModel[] validModels = await userModelManager.GetValidModelsByUserId(currentUser.Id, cancellationToken);
-        if (validModels.Length == 0)
+        Dictionary<short, UserModel> validModels = (await userModelManager.GetValidModelsByUserId(currentUser.Id, cancellationToken))
+            .ToDictionary(k => k.ModelId, v => v);
+        if (validModels.Count == 0)
         {
             return this.BadRequestMessage("No model available.");
         }
@@ -105,30 +92,52 @@ public class UserChatsController(ChatsDB db, CurrentUser currentUser, IUrlEncryp
             IsShared = false,
             CreatedAt = DateTime.UtcNow,
             IsDeleted = false,
-            Temperature = null, 
-            EnableSearch = null, 
         };
 
         Chat? lastChat = await db.Chats
-            .Where(x => x.UserId == currentUser.Id && !x.IsDeleted)
+            .Where(x => x.UserId == currentUser.Id && !x.IsDeleted && x.ChatSpans.Any())
             .OrderByDescending(x => x.CreatedAt)
             .FirstOrDefaultAsync(cancellationToken);
-        if (lastChat?.ModelId != null && validModels.Any(m => m.ModelId == lastChat.ModelId))
+        if (lastChat != null && lastChat.ChatSpans.All(cs => validModels.ContainsKey(cs.ModelId)))
         {
-            chat.ModelId = lastChat.ModelId;
+            chat.ChatSpans = lastChat.ChatSpans.Select(cs => new ChatSpan()
+            {
+                ModelId = cs.ModelId,
+                Model = validModels[cs.ModelId].Model,
+                EnableSearch = cs.EnableSearch,
+                Temperature = cs.Temperature,
+            }).ToList();
         }
         else
         {
-            chat.ModelId = (validModels.FirstOrDefault(x => !x.ExpiresAt.IsExpired()) ?? validModels.First()).ModelId;
+            chat.ChatSpans =
+            [
+                new ChatSpan()
+                {
+                    ModelId = validModels.Values.First().ModelId,
+                    Model = validModels.Values.First().Model,
+                    EnableSearch = false,
+                    Temperature = ChatService.DefaultTemperature,
+                }
+            ];
         }
         db.Chats.Add(chat);
         await db.SaveChangesAsync(cancellationToken);
 
-        // load ChatModel Provider here
-        chat.Model = await db.Models
-            .Where(x => x.Id == chat.ModelId)
-            .SingleAsync(cancellationToken);
-        return Ok(ChatsResponse.FromDB(chat, idEncryption));
+        return Created(default(string), new ChatsResponse()
+        {
+            Id = idEncryption.EncryptChatId(chat.Id),
+            Title = chat.Title,
+            IsShared = chat.IsShared,
+            Spans = chat.ChatSpans.Select(s => new ChatSpanDto
+            {
+                SpanId = s.SpanId,
+                ModelId = s.ModelId,
+                Temperature = s.Temperature,
+                EnableSearch = s.EnableSearch,
+            }).ToArray(),
+            MessageCount = chat.Messages.Count,
+        });
     }
 
     [HttpDelete("{encryptedChatId}")]

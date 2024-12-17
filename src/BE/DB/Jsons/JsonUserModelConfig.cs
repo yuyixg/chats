@@ -1,5 +1,4 @@
-﻿using Azure.Core;
-using Chats.BE.Services.ChatServices.Extensions;
+﻿using Chats.BE.Services.ChatServices.Extensions;
 using OpenAI.Chat;
 using System.Text.Json.Serialization;
 
