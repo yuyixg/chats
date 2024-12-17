@@ -54,11 +54,11 @@ public record UpdateUserDto
         }
         if (UserName != null)
         {
-            user.Username = UserName;
+            user.DisplayName = UserName;
         }
         if (!string.IsNullOrEmpty(Password))
         {
-            user.Password = passwordHasher.HashPassword(Password);
+            user.PasswordHash = passwordHasher.HashPassword(Password);
         }
     }
 }

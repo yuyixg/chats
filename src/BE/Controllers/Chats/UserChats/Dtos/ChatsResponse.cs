@@ -28,6 +28,9 @@ public record ChatSpanDto
     [JsonPropertyName("modelId")]
     public required int ModelId { get; init; }
 
+    [JsonPropertyName("modelName")]
+    public required string ModelName { get; init; }
+
     [JsonPropertyName("temperature")]
     public required float? Temperature { get; init; }
 

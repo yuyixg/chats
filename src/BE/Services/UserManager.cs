@@ -24,9 +24,9 @@ public class UserManager(ChatsDB db)
             {
                 Provider = KnownLoginProviders.Keycloak,
                 Sub = token.Sub,
-                Account = token.GetSuggestedUserName(),
-                Username = token.GetSuggestedUserName(),
-                Password = null,
+                UserName = token.GetSuggestedUserName(),
+                DisplayName = token.GetSuggestedUserName(),
+                PasswordHash = null,
                 Role = "-",
                 Email = token.Email,
                 Enabled = true, 

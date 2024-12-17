@@ -29,6 +29,7 @@ public class UserChatsController(ChatsDB db, CurrentUser currentUser, IUrlEncryp
                 {
                     SpanId = s.SpanId,
                     ModelId = s.ModelId,
+                    ModelName = s.Model.Name,
                     Temperature = s.Temperature,
                     EnableSearch = s.EnableSearch,
                 }).ToArray(),
@@ -65,6 +66,7 @@ public class UserChatsController(ChatsDB db, CurrentUser currentUser, IUrlEncryp
                 {
                     SpanId = s.SpanId,
                     ModelId = s.ModelId,
+                    ModelName = s.Model.Name,
                     Temperature = s.Temperature,
                     EnableSearch = s.EnableSearch,
                 }).ToArray(),
@@ -133,6 +135,7 @@ public class UserChatsController(ChatsDB db, CurrentUser currentUser, IUrlEncryp
             {
                 SpanId = s.SpanId,
                 ModelId = s.ModelId,
+                ModelName = s.Model.Name,
                 Temperature = s.Temperature,
                 EnableSearch = s.EnableSearch,
             }).ToArray(),
@@ -170,6 +173,11 @@ public class UserChatsController(ChatsDB db, CurrentUser currentUser, IUrlEncryp
     [HttpPut("{encryptedChatId}")]
     public async Task<IActionResult> UpdateChats(string encryptedChatId, [FromBody] UpdateChatsRequest request, CancellationToken cancellationToken)
     {
+        if (request.ModelId != null)
+        {
+            return BadRequest("ModelId is not allowed to be updated anymore, please use ChatSpan update API.");
+        }
+
         Chat? chat = await db.Chats
             .Where(x => x.Id == idEncryption.DecryptChatId(encryptedChatId) && x.UserId == currentUser.Id)
             .FirstOrDefaultAsync(cancellationToken);

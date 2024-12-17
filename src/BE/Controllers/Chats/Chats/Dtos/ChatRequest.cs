@@ -12,6 +12,9 @@ public record ChatRequest
     [JsonPropertyName("chatId")]
     public required string EncryptedChatId { get; init; }
 
+    [JsonPropertyName("spanId")]
+    public required byte SpanId { get; init; }
+
     [JsonPropertyName("messageId")]
     public string? EncryptedMessageId { get; init; }
 

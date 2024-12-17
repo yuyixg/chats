@@ -45,8 +45,11 @@ public class ChatController(
         UserModel? userModel = await userModelManager.GetUserModel(currentUser.Id, request.ModelId, cancellationToken);
 
         UserBalance userBalance = await db.UserBalances.Where(x => x.UserId == currentUser.Id).SingleAsync(cancellationToken);
-        Chat? thisChat = await db.Chats.SingleOrDefaultAsync(x => x.Id == chatId && x.UserId == currentUser.Id, cancellationToken);
-        if (thisChat == null)
+        ChatSpan? chatSpan = await db.ChatSpans.SingleOrDefaultAsync(x => 
+            x.ChatId == chatId && 
+            x.Chat.UserId == currentUser.Id &&
+            x.SpanId == request.SpanId, cancellationToken);
+        if (chatSpan == null)
         {
             return this.BadRequestMessage("Chat not found");
         }
@@ -97,10 +100,10 @@ public class ChatController(
                 };
             }
 
-            thisChat.Title = request.UserMessage.Text[..Math.Min(50, request.UserMessage.Text.Length)];
-            thisChat.ModelId = request.ModelId;
-            thisChat.EnableSearch = request.UserModelConfig.EnableSearch;
-            thisChat.Temperature = request.UserModelConfig.Temperature;
+            chatSpan.Chat.Title = request.UserMessage.Text[..Math.Min(50, request.UserMessage.Text.Length)];
+            chatSpan.ModelId = request.ModelId;
+            chatSpan.EnableSearch = request.UserModelConfig.EnableSearch ?? false;
+            chatSpan.Temperature = request.UserModelConfig.Temperature;
         }
         else
         {
@@ -108,8 +111,8 @@ public class ChatController(
             {
                 UserModelConfig = new JsonUserModelConfig
                 {
-                    EnableSearch = request.UserModelConfig.EnableSearch ?? thisChat.EnableSearch,
-                    Temperature = request.UserModelConfig.Temperature ?? thisChat.Temperature,
+                    EnableSearch = request.UserModelConfig.EnableSearch ?? chatSpan.EnableSearch,
+                    Temperature = request.UserModelConfig.Temperature ?? chatSpan.Temperature,
                 }
             };
         }
