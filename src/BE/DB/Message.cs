@@ -7,8 +7,8 @@ using Microsoft.EntityFrameworkCore;
 namespace Chats.BE.DB;
 
 [Table("Message")]
-[Index("ChatId", Name = "IX_Message2_Conversation")]
-[Index("UsageId", Name = "IX_Message2_Usage", IsUnique = true)]
+[Index("ChatId", "SpanId", Name = "IX_Message_ChatSpan")]
+[Index("UsageId", Name = "IX_Message_Usage", IsUnique = true)]
 public partial class Message
 {
     [Key]
@@ -16,13 +16,15 @@ public partial class Message
 
     public int ChatId { get; set; }
 
+    public byte SpanId { get; set; }
+
     public long? ParentId { get; set; }
 
     public byte ChatRoleId { get; set; }
 
-    public DateTime CreatedAt { get; set; }
-
     public long? UsageId { get; set; }
+
+    public DateTime CreatedAt { get; set; }
 
     [ForeignKey("ChatId")]
     [InverseProperty("Messages")]
@@ -31,6 +33,10 @@ public partial class Message
     [ForeignKey("ChatRoleId")]
     [InverseProperty("Messages")]
     public virtual ChatRole ChatRole { get; set; } = null!;
+
+    [ForeignKey("ChatId, SpanId")]
+    [InverseProperty("Messages")]
+    public virtual ChatSpan ChatSpan { get; set; } = null!;
 
     [InverseProperty("Parent")]
     public virtual ICollection<Message> InverseParent { get; set; } = new List<Message>();

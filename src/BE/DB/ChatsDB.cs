@@ -17,6 +17,8 @@ public partial class ChatsDB : DbContext
 
     public virtual DbSet<ChatRole> ChatRoles { get; set; }
 
+    public virtual DbSet<ChatSpan> ChatSpans { get; set; }
+
     public virtual DbSet<ClientInfo> ClientInfos { get; set; }
 
     public virtual DbSet<ClientIp> ClientIps { get; set; }
@@ -116,13 +118,18 @@ public partial class ChatsDB : DbContext
         {
             entity.HasKey(e => e.Id).HasName("PK_Conversation2");
 
-            entity.HasOne(d => d.Model).WithMany(p => p.Chats)
-                .OnDelete(DeleteBehavior.ClientSetNull)
-                .HasConstraintName("FK_Conversation2_Model");
-
             entity.HasOne(d => d.User).WithMany(p => p.Chats)
                 .OnDelete(DeleteBehavior.ClientSetNull)
                 .HasConstraintName("FK_Chat_UserId");
+        });
+
+        modelBuilder.Entity<ChatSpan>(entity =>
+        {
+            entity.HasOne(d => d.Chat).WithMany(p => p.ChatSpans).HasConstraintName("FK_ChatSpan_Chat");
+
+            entity.HasOne(d => d.Model).WithMany(p => p.ChatSpans)
+                .OnDelete(DeleteBehavior.ClientSetNull)
+                .HasConstraintName("FK_ChatSpan_Model");
         });
 
         modelBuilder.Entity<ClientInfo>(entity =>
@@ -167,8 +174,6 @@ public partial class ChatsDB : DbContext
 
         modelBuilder.Entity<FileImageInfo>(entity =>
         {
-            entity.HasKey(e => e.FileId).HasName("PK__FileImag__6F0F98BF53BA668D");
-
             entity.Property(e => e.FileId).ValueGeneratedNever();
 
             entity.HasOne(d => d.File).WithOne(p => p.FileImageInfo).HasConstraintName("FK_FileImageInfo_File");
@@ -183,11 +188,6 @@ public partial class ChatsDB : DbContext
                 .HasConstraintName("FK_FileService_FileServiceType");
         });
 
-        modelBuilder.Entity<FileServiceType>(entity =>
-        {
-            entity.HasKey(e => e.Id).HasName("PK__FileServ__3214EC0777BE06D3");
-        });
-
         modelBuilder.Entity<InvitationCode>(entity =>
         {
             entity.HasKey(e => e.Id).HasName("InvitationCode2_pkey");
@@ -200,8 +200,6 @@ public partial class ChatsDB : DbContext
 
         modelBuilder.Entity<Message>(entity =>
         {
-            entity.HasKey(e => e.Id).HasName("PK_Message2");
-
             entity.HasOne(d => d.Chat).WithMany(p => p.Messages).HasConstraintName("FK_Message_Chat");
 
             entity.HasOne(d => d.ChatRole).WithMany(p => p.Messages)
@@ -211,6 +209,10 @@ public partial class ChatsDB : DbContext
             entity.HasOne(d => d.Parent).WithMany(p => p.InverseParent).HasConstraintName("FK_Message_ParentMessage");
 
             entity.HasOne(d => d.Usage).WithOne(p => p.Message).HasConstraintName("FK_Message_UserModelUsage");
+
+            entity.HasOne(d => d.ChatSpan).WithMany(p => p.Messages)
+                .OnDelete(DeleteBehavior.ClientSetNull)
+                .HasConstraintName("FK_Message_ChatSpan");
         });
 
         modelBuilder.Entity<MessageContent>(entity =>
@@ -226,8 +228,6 @@ public partial class ChatsDB : DbContext
 
         modelBuilder.Entity<MessageContentBlob>(entity =>
         {
-            entity.HasKey(e => e.Id).HasName("PK__MessageC__3214EC073F90F69C");
-
             entity.Property(e => e.Id).ValueGeneratedNever();
 
             entity.HasOne(d => d.IdNavigation).WithOne(p => p.MessageContentBlob).HasConstraintName("FK_MessageContentBlob_MessageContent");
@@ -235,8 +235,6 @@ public partial class ChatsDB : DbContext
 
         modelBuilder.Entity<MessageContentFile>(entity =>
         {
-            entity.HasKey(e => e.Id).HasName("PK__MessageC__3214EC0725A12791");
-
             entity.Property(e => e.Id).ValueGeneratedNever();
 
             entity.HasOne(d => d.File).WithMany(p => p.MessageContentFiles).HasConstraintName("FK_MessageContentFile_File");
@@ -246,8 +244,6 @@ public partial class ChatsDB : DbContext
 
         modelBuilder.Entity<MessageContentText>(entity =>
         {
-            entity.HasKey(e => e.Id).HasName("PK__MessageC__3214EC0778761FFD");
-
             entity.Property(e => e.Id).ValueGeneratedNever();
 
             entity.HasOne(d => d.IdNavigation).WithOne(p => p.MessageContentText).HasConstraintName("FK_MessageContentUTF16_MessageContent");
