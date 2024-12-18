@@ -400,16 +400,17 @@ jobs:
         run: |
           ssh -o StrictHostKeyChecking=no -p 22 ${{ secrets.SSH_TARGET }} << 'EOF'
             docker pull ${{ vars.DOCKER_REGISTRY }}/${{ vars.DOCKER_NAMESPACE }}/chats:r${{ github.run_number }}-linux-x64
+            cd chats
       
             if [[ "${{ github.ref_name }}" == feature/* ]]; then
               echo "Deploying feature branch: ${{ github.ref_name }}"
               sed -i "s/^TAG=.*/TAG=r${{ github.run_number }}-linux-x64/" ~/chats/feature.env
-              ./feature.sh
+              docker compose --env-file=./feature.env --project-name chats-feature up -d --remove-orphans
             else
               echo "Deploying non-feature branch: ${{ github.ref_name }}"
               sed -i "s/^TAG=.*/TAG=r${{ github.run_number }}-linux-x64/" ~/chats/dev.env
               sed -i "s/^TAG=.*/TAG=r${{ github.run_number }}-linux-x64/" ~/chats/stg.env
-              ./dev.sh
-              ./stg.sh
+              docker compose --env-file=./dev.env --project-name chats-dev up -d --remove-orphans
+              docker compose --env-file=./stg.env --project-name chats-stg up -d --remove-orphans
             fi
           EOF
