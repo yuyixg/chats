@@ -1,4 +1,11 @@
 #!/usr/bin/env sh
 . "$(dirname "$0")/_/husky.sh"
 
-npm run format
+if git diff --cached --name-only | grep '^src/FE/' >/dev/null; 
+then
+    cd src/FE
+    npm run format
+fi
+
+exit 0
+

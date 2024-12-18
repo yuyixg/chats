@@ -121,26 +121,31 @@ public record FileDto
     public required Uri Url { get; init; }
 }
 
+public record ChatMessageTempUsage
+{
+    public required int Duration { get; init; }
+    public required int FirstTokenLatency { get; init; }
+    public required decimal InputPrice { get; init; }
+    public required int InputTokens { get; init; }
+    public required short ModelId { get; init; }
+    public required string ModelName { get; init; }
+    public required decimal OutputPrice { get; init; }
+    public required int OutputTokens { get; init; }
+    public required int ReasoningTokens { get; init; }
+}
+
 public record ChatMessageTemp
 {
     public required long Id { get; init; }
     public required long? ParentId { get; init; }
     public required DBChatRole Role { get; init; }
     public required MessageContent[] Content { get; init; }
-    public required int? InputTokens { get; init; }
-    public required int? OutputTokens { get; init; }
-    public required int? ReasoningTokens { get; init; }
-    public required decimal? InputPrice { get; init; }
-    public required decimal? OutputPrice { get; init; }
     public required DateTime CreatedAt { get; init; }
-    public required int? Duration { get; init; }
-    public required int? FirstTokenLatency { get; init; }
-    public required short? ModelId { get; init; }
-    public required string? ModelName { get; init; }
+    public required ChatMessageTempUsage? Usage { get; init; }
 
     public MessageDto ToDto(IUrlEncryptionService urlEncryption, FileUrlProvider fup)
     {
-        if (ModelId == null)
+        if (Usage == null)
         {
             return new RequestMessageDto()
             {
@@ -160,15 +165,16 @@ public record ChatMessageTemp
                 Role = Role.ToString().ToLowerInvariant(),
                 Content = MessageContentResponse.FromSegments(Content, fup),
                 CreatedAt = CreatedAt,
-                InputTokens = InputTokens!.Value,
-                OutputTokens = OutputTokens!.Value,
-                InputPrice = InputPrice!.Value,
-                OutputPrice = OutputPrice!.Value,
-                ReasoningTokens = ReasoningTokens!.Value,
-                Duration = Duration!.Value,
-                FirstTokenLatency = FirstTokenLatency!.Value,
-                ModelId = ModelId!.Value,
-                ModelName = ModelName
+
+                InputTokens = Usage.InputTokens,
+                OutputTokens = Usage.OutputTokens,
+                InputPrice = Usage.InputPrice,
+                OutputPrice = Usage.OutputPrice,
+                ReasoningTokens = Usage.ReasoningTokens,
+                Duration = Usage.Duration,
+                FirstTokenLatency = Usage.FirstTokenLatency,
+                ModelId = Usage.ModelId,
+                ModelName = Usage.ModelName,
             };
         }
     }

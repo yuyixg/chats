@@ -16,10 +16,3 @@ export const LoginDefaultTemplates = {
   },
   [LoginType.Phone]: {},
 };
-
-export interface LoginTemplateAllProperty {
-  appId: string;
-  secret: string;
-  wellKnown: string;
-  clientId: string;
-}

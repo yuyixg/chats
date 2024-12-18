@@ -1,10 +1,12 @@
 import Head from 'next/head';
 
-import HomeContent from './_components/HomeContent/HomeContent';
+import HomeContent from './_components/Home/HomeContent';
+
+import { UserProvider } from '@/providers/UserProvider';
 
 const Home = () => {
   return (
-    <>
+    <UserProvider>
       <Head>
         <title>Chats</title>
         <meta name="description" content="" />
@@ -17,7 +19,7 @@ const Home = () => {
       <main>
         <HomeContent />
       </main>
-    </>
+    </UserProvider>
   );
 };
 

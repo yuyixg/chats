@@ -15,57 +15,9 @@ using Microsoft.Net.Http.Headers;
 
 namespace Chats.BE.Controllers.Chats.Files;
 
-[Route("api")]
+[Route("api"), Authorize]
 public class FileController(ChatsDB db, FileServiceFactory fileServiceFactory, IUrlEncryptionService urlEncryption, ILogger<FileController> logger) : ControllerBase
 {
-    //[Route("{fileServiceId:int}"), HttpPost]
-    //public async Task<ActionResult<FileUrlsDto>> GetFileUrls(
-    //    int fileServiceId, 
-    //    [FromBody] GetFileUrlsRequest fileInfo, 
-    //    CancellationToken cancellationToken)
-    //{
-    //    FileService? fileService = await db.FileServices
-    //        .FindAsync([fileServiceId], cancellationToken);
-    //    if (fileService == null)
-    //    {
-    //        return NotFound("File server config not found.");
-    //    }
-
-    //    if (fileService.FileServiceTypeId != (byte)DBFileServiceType.Minio)
-    //    {
-    //        return this.BadRequestMessage("Unsupported file service type: " + fileService.FileServiceTypeId);
-    //    }
-
-    //    JsonMinioConfig config = JsonMinioConfig.Parse(fileService.Configs);
-    //    using AmazonS3Client s3 = new(config.AccessKey, config.AccessSecret, new AmazonS3Config
-    //    {
-    //        ForcePathStyle = true, 
-    //        ServiceURL = config.Endpoint
-    //    });
-
-    //    string key = $"{DateTime.Now:yyyy/MM/dd}/{fileInfo}";
-    //    string putUrl = await s3.GetPreSignedURLAsync(new GetPreSignedUrlRequest
-    //    {
-    //        BucketName = config.BucketName,
-    //        Key = key,
-    //        Expires = DateTime.UtcNow.AddMinutes(5),
-    //        Verb = HttpVerb.PUT
-    //    });
-    //    string getUrl = await s3.GetPreSignedURLAsync(new GetPreSignedUrlRequest
-    //    {
-    //        BucketName = config.BucketName,
-    //        Key = key,
-    //        Expires = DateTime.UtcNow.AddDays(7),
-    //        Verb = HttpVerb.GET
-    //    });
-
-    //    return Ok(new FileUrlsDto
-    //    { 
-    //        GetUrl = getUrl,
-    //        PutUrl = putUrl,
-    //    });
-    //}
-
     [Route("file-service/{fileServiceId:int}/upload"), HttpPut]
     public async Task<ActionResult<FileDto>> Upload(int fileServiceId, IFormFile file,
         [FromServices] ClientInfoManager clientInfoManager,

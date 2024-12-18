@@ -28,7 +28,7 @@ import {
 } from '@/components/Icons/index';
 import { Button } from '@/components/ui/button';
 
-import HomeContext from '../../_contents/Home.context';
+import HomeContext from '../../_contexts/home.context';
 import UploadButton from '../Button/UploadButton';
 import PasteUpload from '../PasteUpload/PasteUpload';
 import PromptList from './PromptList';
@@ -43,7 +43,6 @@ interface Props {
   onChangePrompt: (prompt: Prompt) => void;
   model: AdminModelDto;
   showScrollDownButton: boolean;
-  stopConversationRef: MutableRefObject<boolean>;
 }
 
 const ChatInput = ({
@@ -51,12 +50,18 @@ const ChatInput = ({
   onScrollDownClick,
   onChangePrompt,
   showScrollDownButton,
-  stopConversationRef,
 }: Props) => {
   const { t } = useTranslation();
 
   const {
-    state: { selectModel, messageIsStreaming, prompts, selectChat, chatError },
+    state: {
+      selectModel,
+      messageIsStreaming,
+      prompts,
+      selectedChat,
+      chatError,
+    },
+    handleStopChats,
   } = useContext(HomeContext);
 
   const textareaRef = useRef<HTMLTextAreaElement>(null);
@@ -122,10 +127,6 @@ const ChatInput = ({
     if (window.innerWidth < 640 && textareaRef && textareaRef.current) {
       textareaRef.current.blur();
     }
-  };
-
-  const handleStopChat = () => {
-    stopConversationRef.current = true;
   };
 
   const handleKeyDown = (e: KeyboardEvent<HTMLTextAreaElement>) => {
@@ -263,7 +264,7 @@ const ChatInput = ({
 
   useEffect(() => {
     setContent({ ...content, fileIds: [] });
-  }, [selectModel, selectChat]);
+  }, [selectModel, selectedChat]);
 
   return (
     <div className="absolute bottom-0 left-0 w-full border-transparent bg-gradient-to-b from-transparent via-white to-white pt-6 dark:border-white/20 dark:via-[#262630] dark:to-[#262630] md:pt-2">
@@ -335,7 +336,7 @@ const ChatInput = ({
               >
                 {messageIsStreaming ? (
                   <IconStopFilled
-                    onClick={handleStopChat}
+                    onClick={handleStopChats}
                     className="h-4 w-4"
                   />
                 ) : (

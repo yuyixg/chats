@@ -5,7 +5,6 @@ import toast from 'react-hot-toast';
 import useTranslation from '@/hooks/useTranslation';
 
 import {
-  GetFileServicesResult,
   GetModelKeysResult,
   ModelReferenceDto,
   SimpleModelReferenceDto,
@@ -31,7 +30,6 @@ import {
 } from '@/components/ui/popover';
 
 import {
-  getFileServices,
   getModelProviderModels,
   getModelReference,
   postModels,
@@ -49,7 +47,6 @@ interface IProps {
 
 const AddModelModal = (props: IProps) => {
   const { t } = useTranslation();
-  const [fileServices, setFileServices] = useState<GetFileServicesResult[]>([]);
   const [modelVersions, setModelVersions] = useState<SimpleModelReferenceDto[]>(
     [],
   );
@@ -68,7 +65,6 @@ const AddModelModal = (props: IProps) => {
       .string()
       .min(1, `${t('This field is require')}`)
       .default('0'),
-    fileServiceId: z.string().nullable().default(null),
     inputPrice1M: z.coerce.number(),
     outputPrice1M: z.coerce.number(),
   });
@@ -81,7 +77,6 @@ const AddModelModal = (props: IProps) => {
       enabled: true,
       deploymentName: '',
       modelKeyId: '',
-      fileServiceId: null,
       inputPrice1M: 0,
       outputPrice1M: 0,
     },
@@ -92,7 +87,6 @@ const AddModelModal = (props: IProps) => {
     const dto: UpdateModelDto = {
       deploymentName: values.deploymentName || null,
       enabled: values.enabled!,
-      fileServiceId: values.fileServiceId,
       inputTokenPrice1M: values.inputPrice1M,
       outputTokenPrice1M: values.outputPrice1M,
       modelKeyId: parseInt(values.modelKeyId!),
@@ -107,9 +101,6 @@ const AddModelModal = (props: IProps) => {
 
   useEffect(() => {
     if (isOpen) {
-      getFileServices(true).then((data) => {
-        setFileServices(data);
-      });
       form.reset();
       form.formState.isValid;
     }
@@ -258,26 +249,6 @@ const AddModelModal = (props: IProps) => {
                       type="number"
                       label={`1M ${t('1M output tokens price')}(${t('Yuan')})`}
                       field={field}
-                    />
-                  );
-                }}
-              ></FormField>
-            </div>
-            <div>
-              <FormField
-                key="fileServiceId"
-                control={form.control}
-                name="fileServiceId"
-                render={({ field }) => {
-                  return (
-                    <FormSelect
-                      field={field}
-                      label={t('File Service Type')!}
-                      hidden={!modelReference?.allowVision}
-                      items={fileServices.map((item) => ({
-                        name: item.name,
-                        value: item.id.toString(),
-                      }))}
                     />
                   );
                 }}

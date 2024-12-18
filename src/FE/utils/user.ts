@@ -1,10 +1,3 @@
-export interface UserSession {
-  sessionId: string;
-  username: string;
-  password: string;
-  role: string;
-}
-
 export interface UserInfo {
   username: string;
   role: string;

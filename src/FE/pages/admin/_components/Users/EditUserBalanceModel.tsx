@@ -18,12 +18,11 @@ import { FormFieldType, IFormFieldOption } from '@/components/ui/form/type';
 
 import { putUserBalance } from '@/apis/adminApis';
 import { zodResolver } from '@hookform/resolvers/zod';
-import Decimal from 'decimal.js';
 import { z } from 'zod';
 
 interface IProps {
   userId?: string;
-  userBalance?: Decimal;
+  userBalance?: number;
   isOpen: boolean;
   onClose: () => void;
   onSuccessful: () => void;

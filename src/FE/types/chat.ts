@@ -1,7 +1,13 @@
-import { UserModelConfig } from './model';
+import { DBModelProvider, UserModelConfig } from './model';
 
 export type Role = 'assistant' | 'user' | 'system';
 export const DEFAULT_TEMPERATURE = 0.5;
+
+export enum ChatStatus {
+  None = 1,
+  Running = 2,
+  Failed = 3,
+}
 
 export interface Message {
   role: Role;
@@ -33,10 +39,18 @@ export interface ChatBody {
 }
 
 export interface IChat {
+  // id: string;
+  // title: string;
+  // chatModelId?: string;
+  // modelName: string;
+  // userModelConfig: UserModelConfig;
+  // isShared: boolean;
+
   id: string;
   title: string;
-  chatModelId?: string;
+  modelId: number;
   modelName: string;
-  userModelConfig: UserModelConfig;
   isShared: boolean;
+  userModelConfig: UserModelConfig;
+  modelProviderId: DBModelProvider;
 }

@@ -1,6 +1,5 @@
 export interface UserModelConfig {
   prompt: string | null;
-  maxLength: number | null;
   temperature: number | null;
   enableSearch: boolean | null;
 }

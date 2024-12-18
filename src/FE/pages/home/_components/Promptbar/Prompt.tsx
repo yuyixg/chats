@@ -20,11 +20,8 @@ interface Props {
 }
 
 const PromptComponent = ({ prompt }: Props) => {
-  const {
-    dispatch: promptDispatch,
-    handleUpdatePrompt,
-    handleDeletePrompt,
-  } = useContext(PromptbarContext);
+  const { handleUpdatePrompt, handleDeletePrompt } =
+    useContext(PromptbarContext);
 
   const [showModal, setShowModal] = useState<boolean>(false);
   const [isDeleting, setIsDeleting] = useState(false);
@@ -33,7 +30,6 @@ const PromptComponent = ({ prompt }: Props) => {
 
   const handleUpdate = (prompt: Prompt) => {
     handleUpdatePrompt(prompt);
-    promptDispatch({ field: 'searchTerm', value: '' });
   };
 
   const handleDelete: MouseEventHandler<HTMLButtonElement> = (e) => {
@@ -41,7 +37,6 @@ const PromptComponent = ({ prompt }: Props) => {
 
     if (isDeleting) {
       handleDeletePrompt(prompt);
-      promptDispatch({ field: 'searchTerm', value: '' });
     }
 
     setIsDeleting(false);

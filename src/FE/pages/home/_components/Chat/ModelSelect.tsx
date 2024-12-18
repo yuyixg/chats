@@ -6,7 +6,7 @@ import { formatNumberAsMoney } from '@/utils/common';
 
 import { ModelUsageDto } from '@/types/clientApis';
 
-import HomeContext from '../../_contents/Home.context';
+import HomeContext from '../../_contexts/home.context';
 
 import { getModelUsage } from '@/apis/clientApis';
 

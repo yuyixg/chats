@@ -1,4 +1,4 @@
-import { useContext, useEffect } from 'react';
+import { useContext, useEffect, useState } from 'react';
 import toast from 'react-hot-toast';
 
 import { useCreateReducer } from '@/hooks/useCreateReducer';
@@ -6,7 +6,8 @@ import useTranslation from '@/hooks/useTranslation';
 
 import { Prompt, PromptSlim } from '@/types/prompt';
 
-import HomeContext from '../../_contents/Home.context';
+import { setShowPromptBar } from '../../_actions/setting.actions';
+import HomeContext from '../../_contexts/home.context';
 import Sidebar from '../Sidebar/Sidebar';
 import PromptbarContext from './PromptBar.context';
 import { PromptbarInitialState, initialState } from './PromptBar.context';
@@ -26,20 +27,21 @@ const PromptBar = () => {
   });
 
   const {
-    state: { prompts, settings },
+    state: { prompts, showPromptBar },
     dispatch: homeDispatch,
-    handleUpdateSettings,
+    settingDispatch,
     hasModel,
   } = useContext(HomeContext);
 
   const {
-    state: { searchTerm, filteredPrompts },
-    dispatch: promptDispatch,
+    state: { filteredPrompts },
+    dispatch,
   } = promptBarContextValue;
 
+  const [searchTerm, setSearchTerm] = useState('');
+
   const handleTogglePromptBar = () => {
-    const promptBar = !settings.showPromptBar;
-    handleUpdateSettings('showPromptBar', promptBar);
+    settingDispatch(setShowPromptBar(!showPromptBar));
   };
 
   const handleCreatePrompt = () => {
@@ -77,7 +79,7 @@ const PromptBar = () => {
 
   useEffect(() => {
     if (searchTerm) {
-      promptDispatch({
+      dispatch({
         field: 'filteredPrompts',
         value: prompts.filter((prompt) => {
           const searchable = prompt.name.toLowerCase();
@@ -85,7 +87,7 @@ const PromptBar = () => {
         }),
       });
     } else {
-      promptDispatch({ field: 'filteredPrompts', value: prompts });
+      dispatch({ field: 'filteredPrompts', value: prompts });
     }
   }, [searchTerm, prompts]);
 
@@ -102,14 +104,12 @@ const PromptBar = () => {
         hasModel={hasModel}
         side={'right'}
         showOpenButton={false}
-        isOpen={settings.showPromptBar}
+        isOpen={showPromptBar}
         addItemButtonTitle={t('New prompt')}
         itemComponent={<Prompts prompts={filteredPrompts} />}
         items={filteredPrompts}
         searchTerm={searchTerm}
-        handleSearchTerm={(searchTerm: string) =>
-          promptDispatch({ field: 'searchTerm', value: searchTerm })
-        }
+        handleSearchTerm={(value: string) => setSearchTerm(value)}
         toggleOpen={handleTogglePromptBar}
         handleCreateItem={handleCreatePrompt}
       />

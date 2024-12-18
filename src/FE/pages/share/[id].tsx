@@ -16,7 +16,6 @@ import PageNotFound from '@/components/PageNotFound/PageNotFound';
 import { Button } from '@/components/ui/button';
 
 import { getShareMessage } from '@/apis/adminApis';
-import Decimal from 'decimal.js';
 
 export default function ShareMessage() {
   const { t } = useTranslation();
@@ -82,10 +81,10 @@ export default function ShareMessage() {
                   onChangeMessage={(messageId: string) => {
                     onMessageChange(messageId);
                   }}
-                  childrenIds={current.childrenIds}
+                  childrenIds={current.childrenIds!}
                   parentChildrenIds={parentChildrenIds}
-                  assistantChildrenIds={current.assistantChildrenIds}
-                  assistantCurrentSelectIndex={current.assistantChildrenIds.findIndex(
+                  assistantChildrenIds={current.assistantChildrenIds!}
+                  assistantCurrentSelectIndex={current.assistantChildrenIds!.findIndex(
                     (x) => x === current.id,
                   )}
                   modelName={current.modelName}
@@ -98,8 +97,8 @@ export default function ShareMessage() {
                     inputTokens: current.inputTokens || 0,
                     outputTokens: current.outputTokens || 0,
                     reasoningTokens: current.reasoningTokens || 0,
-                    inputPrice: new Decimal(current.inputPrice || 0),
-                    outputPrice: new Decimal(current.outputPrice || 0),
+                    inputPrice: current.inputPrice || 0,
+                    outputPrice: current.outputPrice || 0,
                   }}
                 />
               );

@@ -11,16 +11,36 @@ import toast from 'react-hot-toast';
 import useTranslation from '@/hooks/useTranslation';
 
 import { getApiUrl } from '@/utils/common';
+import { formatMessages, getSelectMessages } from '@/utils/message';
 import { throttle } from '@/utils/throttle';
 import { getUserSession } from '@/utils/user';
 
 import { ChatBody, Content, ContentRequest, Message, Role } from '@/types/chat';
+import { SseResponseKind, SseResponseLine } from '@/types/chatMessage';
 import { Prompt } from '@/types/prompt';
 
 import ChangeModel from '@/components/ChangeModel/ChangeModel';
 import TemperatureSlider from '@/components/TemperatureSlider/TemperatureSlider';
 
-import HomeContext from '../../_contents/Home.context';
+import {
+  setChatStatus,
+  setChats,
+  setMessageIsStreaming,
+  setStopIds,
+} from '../../_actions/chat.actions';
+import {
+  setCurrentMessages,
+  setLastMessageId,
+  setMessages,
+  setSelectedMessages,
+} from '../../_actions/message.actions';
+import { setSelectedModel } from '../../_actions/model.actions';
+import {
+  setEnableSearch,
+  setPrompt,
+  setTemperature,
+} from '../../_actions/userModelConfig.actions';
+import HomeContext from '../../_contexts/home.context';
 import ModeToggle from '../ModeToggle/ModeToggle';
 import ChatInput from './ChatInput';
 import EnableNetworkSearch from './EnableNetworkSearch';
@@ -29,34 +49,44 @@ import ModelSelect from './ModelSelect';
 import NoModel from './NoModel';
 import SystemPrompt from './SystemPrompt';
 
-import { getChat, postChats, putUserChatModel } from '@/apis/clientApis';
+import { putUserChatModel } from '@/apis/clientApis';
 import { cn } from '@/lib/utils';
-import Decimal from 'decimal.js';
-import { v4 as uuidv4 } from 'uuid';
 
 const Chat = memo(() => {
   const { t } = useTranslation();
 
   const {
     state: {
-      models,
-      selectChat,
-      selectModel,
-      selectMessages,
-      currentMessages,
+      prompt,
+      temperature,
+      enableSearch,
+
       chats,
-      prompts,
-      userModelConfig,
-      settings,
-      messageIsStreaming,
-      currentChatMessageId,
+      selectedChat,
       chatError,
+      messageIsStreaming,
+
+      messages,
+      selectedMessages,
+      currentChatMessageId,
+      currentMessages,
+
+      models,
+      selectModel,
+
+      prompts,
+      showChatBar,
     },
-    handleUpdateSelectMessage,
-    handleUpdateCurrentMessage,
-    handleUpdateUserModelConfig,
+    handleCreateNewChat,
+    handleStartChat,
+    handleChatIsError,
+    handleStopChats,
+
     hasModel,
-    dispatch: homeDispatch,
+    chatDispatch,
+    messageDispatch,
+    userModelConfigDispatch,
+    modelDispatch,
   } = useContext(HomeContext);
   const [autoScrollEnabled, setAutoScrollEnabled] = useState<boolean>(true);
   const [showScrollDownButton, setShowScrollDownButton] =
@@ -64,12 +94,29 @@ const Chat = memo(() => {
 
   const messagesEndRef = useRef<HTMLDivElement>(null);
   const chatContainerRef = useRef<HTMLDivElement>(null);
-  const stopConversationRef = useRef<boolean>(false);
+  const getSelectedMessagesLast = () => {
+    const selectedMessageLength = selectedMessages.length - 1;
+    const lastMessage = { ...selectedMessages[selectedMessageLength] };
+    return { lastMessage, selectedMessageLength };
+  };
 
-  const getSelectMessagesLast = () => {
-    const selectMessageLength = selectMessages.length - 1;
-    const lastMessage = { ...selectMessages[selectMessageLength] };
-    return { lastMessage, selectMessageLength };
+  const updateChatTitle = (title: string, append: boolean = false) => {
+    const newChats = chats.map((chat) => {
+      if (chat.id === selectedChat.id) {
+        append ? (chat.title += title) : (chat.title = title);
+      }
+      return chat;
+    });
+    chatDispatch(setChats(newChats));
+  };
+
+  const updateChatStatus = (status: boolean) => {
+    chatDispatch(setChatStatus(status));
+  };
+
+  const updateSelectedMessage = (messageId: string) => {
+    const selectMessageList = getSelectMessages(currentMessages, messageId);
+    messageDispatch(setSelectedMessages(selectMessageList));
   };
 
   const handleSend = useCallback(
@@ -79,38 +126,37 @@ const Chat = memo(() => {
       isRegenerate: boolean,
       modelId?: number,
     ) => {
-      const isChatEmpty = selectMessages.length === 0;
-      homeDispatch({ field: 'chatError', value: false });
-      let selectChatId = selectChat?.id;
-      let selectMessageList = [...selectMessages];
-      let chatList = chats;
+      updateChatStatus(false);
+      let selectChatId = selectedChat?.id;
+      let newMessages = [...messages];
+      let newSelectedMessages = [...selectedMessages];
       let assistantParentId = messageId;
       if (!selectChatId) {
-        const newChat = await postChats({ title: t('New Conversation') });
+        const newChat = await handleCreateNewChat();
         selectChatId = newChat.id;
-        chats.unshift(newChat);
-        homeDispatch({ field: 'selectChat', value: newChat });
-        homeDispatch({ field: 'currentMessages', value: [] });
-        homeDispatch({ field: 'selectMessages', value: [] });
-        homeDispatch({ field: 'chats', value: [...chatList] });
       }
+      let selectedMessageId = messageId;
+      const MESSAGE_TEMP_ID = 'userMessageTempId';
       if (messageId && isRegenerate) {
-        const messageIndex = selectMessageList.findIndex(
+        const messageIndex = newSelectedMessages.findIndex(
           (x) => x.id === messageId,
         );
-        homeDispatch({ field: 'selectMessageLastId', value: messageId });
-        selectMessageList.splice(messageIndex + 1, selectMessageList.length);
+        newSelectedMessages.splice(
+          messageIndex + 1,
+          newSelectedMessages.length,
+        );
       } else {
-        const userTempId = uuidv4();
-        assistantParentId = userTempId;
-        homeDispatch({ field: 'selectMessageLastId', value: userTempId });
-        const parentMessage = selectMessageList.find((x) => x.id == messageId);
-        parentMessage && parentMessage?.childrenIds.unshift(userTempId);
-        const parentMessageIndex = selectMessageList.findIndex(
+        assistantParentId = MESSAGE_TEMP_ID;
+        selectedMessageId = MESSAGE_TEMP_ID;
+        const parentMessage = newSelectedMessages.find(
+          (x) => x.id == messageId,
+        );
+        parentMessage && parentMessage?.childrenIds?.unshift(MESSAGE_TEMP_ID);
+        const parentMessageIndex = newSelectedMessages.findIndex(
           (x) => x.id == messageId,
         );
         const newUserMessage = {
-          id: userTempId,
+          id: MESSAGE_TEMP_ID,
           role: 'user' as Role,
           parentId: messageId,
           childrenIds: [],
@@ -118,30 +164,30 @@ const Chat = memo(() => {
           content: message.content,
           inputTokens: 0,
           outputTokens: 0,
-          inputPrice: new Decimal(0),
-          outputPrice: new Decimal(0),
+          inputPrice: 0,
+          outputPrice: 0,
         };
         let removeCount = -1;
         if (parentMessageIndex !== -1)
-          removeCount = selectMessageList.length - 1;
+          removeCount = newSelectedMessages.length - 1;
         if (!messageId) {
-          removeCount = selectMessageList.length;
-          homeDispatch({
-            field: 'currentMessages',
-            value: [...currentMessages, newUserMessage],
-          });
+          removeCount = newSelectedMessages.length;
+          messageDispatch(
+            setCurrentMessages([...currentMessages, newUserMessage]),
+          );
         }
 
-        selectMessageList.splice(
+        newSelectedMessages.splice(
           parentMessageIndex + 1,
           removeCount,
           newUserMessage,
         );
+        newMessages.push(newUserMessage);
       }
 
-      const assistantTempId = uuidv4();
+      const ASSISTANT_MESSAGE_TEMP_ID = 'assistantMessageTempId';
       const newAssistantMessage = {
-        id: assistantTempId,
+        id: ASSISTANT_MESSAGE_TEMP_ID,
         role: 'assistant' as Role,
         parentId: assistantParentId,
         childrenIds: [],
@@ -152,89 +198,76 @@ const Chat = memo(() => {
         },
         inputTokens: 0,
         outputTokens: 0,
-        inputPrice: new Decimal(0),
-        outputPrice: new Decimal(0),
+        inputPrice: 0,
+        outputPrice: 0,
       };
 
-      homeDispatch({
-        field: 'currentChatMessageId',
-        value: assistantTempId,
-      });
-      selectMessageList.push(newAssistantMessage);
+      newSelectedMessages.push(newAssistantMessage);
+      newMessages.push(newAssistantMessage);
+      handleStartChat(
+        newSelectedMessages,
+        selectedMessageId,
+        ASSISTANT_MESSAGE_TEMP_ID,
+      );
 
-      homeDispatch({
-        field: 'selectMessages',
-        value: [...selectMessageList],
-      });
-      homeDispatch({ field: 'loading', value: true });
-      homeDispatch({ field: 'messageIsStreaming', value: true });
       const messageContent: ContentRequest = {
         text: message.content.text!,
         fileIds: message.content.fileIds?.map((x) => x.id) || null,
       };
-      if (
-        selectModel &&
-        !selectModel.allowSystemPrompt &&
-        userModelConfig &&
-        userModelConfig.prompt
-      ) {
-        userModelConfig.prompt = null;
-      }
+
       const chatBody: ChatBody = {
         modelId: modelId || selectModel?.modelId!,
         chatId: selectChatId,
         messageId: messageId || null,
         userMessage: messageContent,
-        userModelConfig,
+        userModelConfig: {
+          prompt:
+            selectModel && !selectModel.allowSystemPrompt && prompt
+              ? null
+              : prompt,
+          temperature,
+          enableSearch,
+        },
       };
       let body = JSON.stringify(chatBody);
 
-      const controller = new AbortController();
       const response = await fetch(`${getApiUrl()}/api/chats`, {
         method: 'POST',
         headers: {
           'Content-Type': 'application/json',
           Authorization: `Bearer ${getUserSession()}`,
         },
-        signal: controller.signal,
         body,
       });
 
+      const data = response.body;
       if (!response.ok) {
-        homeDispatch({ field: 'loading', value: false });
-        homeDispatch({ field: 'messageIsStreaming', value: false });
-        homeDispatch({ field: 'chatError', value: true });
+        handleChatIsError();
         const result = await response.json();
         toast.error(t(result?.message) || response.statusText);
         return;
       }
-      const data = response.body;
       if (!data) {
-        homeDispatch({ field: 'loading', value: false });
-        homeDispatch({ field: 'messageIsStreaming', value: false });
-        homeDispatch({ field: 'chatError', value: true });
+        handleChatIsError();
         return;
       }
 
-      let errorChat = false;
+      let isErrorChat = false;
       let text = '';
       const reader = data.getReader();
       const decoder = new TextDecoder();
       let buffer = '';
 
       function setSelectMessages(content: Content) {
-        let lastMessages = selectMessageList[selectMessageList.length - 1];
+        let lastMessages = newSelectedMessages[newSelectedMessages.length - 1];
         lastMessages = {
           ...lastMessages,
           content,
         };
 
-        selectMessageList.splice(-1, 1, lastMessages);
+        newSelectedMessages.splice(-1, 1, lastMessages);
 
-        homeDispatch({
-          field: 'selectMessages',
-          value: [...selectMessageList],
-        });
+        messageDispatch(setSelectedMessages([...newSelectedMessages]));
       }
       async function* processBuffer() {
         while (true) {
@@ -246,12 +279,12 @@ const Chat = memo(() => {
           buffer += decoder.decode(value, { stream: true });
 
           let newlineIndex;
-          while ((newlineIndex = buffer.indexOf('\n')) >= 0) {
+          while ((newlineIndex = buffer.indexOf('\r\n\r\n')) >= 0) {
             const line = buffer.slice(0, newlineIndex + 1).trim();
             buffer = buffer.slice(newlineIndex + 1);
 
-            if (line.startsWith('data:')) {
-              yield line.slice(5).trim();
+            if (line.startsWith('data: ')) {
+              yield line.slice(6);
             }
 
             if (line === '') {
@@ -262,59 +295,58 @@ const Chat = memo(() => {
       }
 
       for await (const message of processBuffer()) {
-        let value = JSON.parse(message);
-        if (!value.success) {
-          errorChat = true;
-          homeDispatch({
-            field: 'chatError',
-            value: errorChat,
-          });
-          controller.abort();
-          setSelectMessages({ text, error: value.result });
-          break;
-        }
-        if (stopConversationRef.current === true) {
-          controller.abort();
-          break;
-        }
-        text += value.result;
-        setSelectMessages({ text });
-      }
+        const value: SseResponseLine = JSON.parse(message);
 
-      if (isChatEmpty) {
-        setTimeout(async () => {
-          const data = await getChat(selectChatId);
-          const _chats = chats.map((x) => {
-            if (x.id === data.id) {
-              return data;
+        if (value.k === SseResponseKind.StopId) {
+          chatDispatch(setStopIds([value.r]));
+        } else if (value.k === SseResponseKind.Segment) {
+          text += value.r;
+          setSelectMessages({ text });
+        } else if (value.k === SseResponseKind.Error) {
+          isErrorChat = true;
+          updateChatStatus(isErrorChat);
+          handleStopChats();
+          setSelectMessages({ text, error: value.r });
+        } else if (value.k === SseResponseKind.PostMessage) {
+          const { requestMessage, responseMessage } = value.r;
+          newMessages = newMessages.map((m) => {
+            if (requestMessage && m.id === MESSAGE_TEMP_ID) {
+              m = { ...m, ...requestMessage };
             }
-            return x;
+            if (m.id === ASSISTANT_MESSAGE_TEMP_ID) {
+              m = { ...m, ...responseMessage };
+            }
+            return m;
           });
-          homeDispatch({
-            field: 'userModelConfig',
-            value: data.userModelConfig,
-          });
-          homeDispatch({ field: 'chats', value: _chats });
-        }, 100);
+          const messageList = formatMessages(newMessages);
+          messageDispatch(setMessages(newMessages));
+          messageDispatch(setCurrentMessages(messageList));
+          const lastMessage = messageList[messageList.length - 1];
+          const selectedMessageList = getSelectMessages(
+            messageList,
+            lastMessage.id,
+          );
+          messageDispatch(setSelectedMessages(selectedMessageList));
+          messageDispatch(setLastMessageId(lastMessage.id));
+        } else if (value.k === SseResponseKind.UpdateTitle) {
+          updateChatTitle(value.r);
+        } else if (value.k === SseResponseKind.TitleSegment) {
+          updateChatTitle(value.r, true);
+        }
       }
 
-      homeDispatch({ field: 'loading', value: false });
-      homeDispatch({ field: 'messageIsStreaming', value: false });
-      !errorChat &&
-        setTimeout(() => {
-          handleUpdateCurrentMessage(selectChatId);
-        }, 200);
-      stopConversationRef.current = false;
+      chatDispatch(setMessageIsStreaming(false));
     },
     [
-      userModelConfig,
+      prompt,
+      temperature,
+      enableSearch,
       chats,
-      selectChat,
+      selectedChat,
       chatError,
       currentMessages,
-      selectMessages,
+      selectedMessages,
       selectModel,
-      stopConversationRef,
     ],
   );
 
@@ -356,13 +388,13 @@ const Chat = memo(() => {
 
   useEffect(() => {
     throttledScrollDown();
-  }, [selectMessages, throttledScrollDown]);
+  }, [selectedMessages, throttledScrollDown]);
 
-  useEffect(() => {}, [userModelConfig]);
+  useEffect(() => {}, [prompt, temperature, enableSearch]);
 
   const onChangePrompt = (prompt: Prompt) => {
     if (prompt.temperature !== null) {
-      handleUpdateUserModelConfig({ temperature: prompt.temperature });
+      userModelConfigDispatch(setTemperature(prompt.temperature));
     }
   };
 
@@ -379,7 +411,7 @@ const Chat = memo(() => {
               <div
                 className={cn(
                   'flex justify-start items-center ml-24',
-                  settings.showChatBar && 'ml-6',
+                  showChatBar && 'ml-6',
                 )}
               >
                 {hasModel() && (
@@ -388,16 +420,12 @@ const Chat = memo(() => {
                     className="font-semibold text-base"
                     content={selectModel?.name}
                     onChangeModel={(model) => {
-                      homeDispatch({
-                        field: 'selectModel',
-                        value: model,
-                      });
-                      handleUpdateUserModelConfig({
-                        ...userModelConfig,
-                        enableSearch: model.allowSearch,
-                      });
-                      if (selectChat.id) {
-                        putUserChatModel(selectChat.id, model.modelId);
+                      modelDispatch(setSelectedModel(model));
+                      userModelConfigDispatch(
+                        setEnableSearch(model.allowSearch),
+                      );
+                      if (selectedChat.id) {
+                        putUserChatModel(selectedChat.id, model.modelId);
                       }
                     }}
                   />
@@ -406,67 +434,51 @@ const Chat = memo(() => {
               <div className="mr-2 md:mr-4">{<ModeToggle />}</div>
             </div>
           </div>
-          {selectMessages?.length === 0 ? (
-            <>
-              <div className="mx-auto flex flex-col space-y-5 md:space-y-10 px-3 pt-[52px] sm:max-w-[600px]">
-                {hasModel() && (
-                  <div className="flex h-full flex-col space-y-4 rounded-lg border border-neutral-200 p-4 dark:border-neutral-600">
-                    <ModelSelect />
-                    {selectModel?.allowSystemPrompt &&
-                      userModelConfig?.prompt && (
-                        <SystemPrompt
-                          currentPrompt={userModelConfig?.prompt}
-                          prompts={prompts}
-                          model={selectModel}
-                          onChangePromptText={(prompt) => {
-                            handleUpdateUserModelConfig({ prompt });
-                          }}
-                          onChangePrompt={onChangePrompt}
-                        />
-                      )}
-                    {selectModel?.allowTemperature &&
-                      userModelConfig &&
-                      userModelConfig.temperature !== null &&
-                      userModelConfig.temperature !== undefined && (
-                        <TemperatureSlider
-                          label={t('Temperature')}
-                          min={0}
-                          max={1}
-                          defaultTemperature={userModelConfig.temperature}
-                          onChangeTemperature={(temperature) =>
-                            handleUpdateUserModelConfig({
-                              temperature,
-                            })
-                          }
-                        />
-                      )}
-                    {selectModel?.allowSearch &&
-                      userModelConfig?.enableSearch != undefined && (
-                        <EnableNetworkSearch
-                          label={t('Internet Search')}
-                          enable={userModelConfig.enableSearch}
-                          onChange={(enableSearch) => {
-                            handleUpdateUserModelConfig({
-                              enableSearch,
-                            });
-                          }}
-                        />
-                      )}
-                    {/* <Button
-                      onClick={() => {
-                        handleUpdateSettings('showChatSettingBar', true);
+          {selectedMessages?.length === 0 ? (
+            <div className="mx-auto flex flex-col space-y-5 md:space-y-10 px-3 pt-[52px] sm:max-w-[600px]">
+              {hasModel() && (
+                <div className="flex h-full flex-col space-y-4 rounded-lg border border-neutral-200 p-4 dark:border-neutral-600">
+                  <ModelSelect />
+                  {selectModel?.allowSystemPrompt && prompt && (
+                    <SystemPrompt
+                      currentPrompt={prompt}
+                      prompts={prompts}
+                      model={selectModel}
+                      onChangePromptText={(value) => {
+                        userModelConfigDispatch(setPrompt(value));
                       }}
-                    >
-                      Settings
-                    </Button> */}
-                  </div>
-                )}
-              </div>
-            </>
+                      onChangePrompt={onChangePrompt}
+                    />
+                  )}
+                  {selectModel?.allowTemperature &&
+                    temperature !== null &&
+                    temperature !== undefined && (
+                      <TemperatureSlider
+                        label={t('Temperature')}
+                        min={0}
+                        max={1}
+                        defaultTemperature={temperature}
+                        onChangeTemperature={(value) =>
+                          userModelConfigDispatch(setTemperature(value))
+                        }
+                      />
+                    )}
+                  {selectModel?.allowSearch && enableSearch != undefined && (
+                    <EnableNetworkSearch
+                      label={t('Internet Search')}
+                      enable={enableSearch}
+                      onChange={(value) => {
+                        userModelConfigDispatch(setEnableSearch(value));
+                      }}
+                    />
+                  )}
+                </div>
+              )}
+            </div>
           ) : (
             <>
-              {selectMessages.map((current, index) => {
-                let lastMessage = selectMessages[selectMessages.length - 1];
+              {selectedMessages.map((current, index) => {
+                let lastMessage = selectedMessages[selectedMessages.length - 1];
                 let parentChildrenIds: string[] = [];
                 if (!current.parentId) {
                   parentChildrenIds = currentMessages
@@ -481,7 +493,7 @@ const Chat = memo(() => {
                 return (
                   <MemoizedChatMessage
                     models={models}
-                    selectChat={selectChat}
+                    selectedChat={selectedChat}
                     key={current.id + index}
                     modelName={current.modelName}
                     modelId={current.modelId}
@@ -489,10 +501,10 @@ const Chat = memo(() => {
                       (x) => x === current.id,
                     )}
                     parentId={current.parentId}
-                    childrenIds={current.childrenIds}
+                    childrenIds={current.childrenIds!}
                     parentChildrenIds={parentChildrenIds}
-                    assistantChildrenIds={current.assistantChildrenIds}
-                    assistantCurrentSelectIndex={current.assistantChildrenIds.findIndex(
+                    assistantChildrenIds={current.assistantChildrenIds!}
+                    assistantCurrentSelectIndex={current.assistantChildrenIds!.findIndex(
                       (x) => x === current.id,
                     )}
                     lastMessageId={lastMessage.id}
@@ -505,14 +517,14 @@ const Chat = memo(() => {
                       inputTokens: current.inputTokens || 0,
                       outputTokens: current.outputTokens || 0,
                       reasoningTokens: current.reasoningTokens || 0,
-                      inputPrice: new Decimal(current.inputPrice || 0),
-                      outputPrice: new Decimal(current.outputPrice || 0),
+                      inputPrice: current.inputPrice || 0,
+                      outputPrice: current.outputPrice || 0,
                     }}
                     messageIsStreaming={messageIsStreaming}
                     currentChatMessageId={currentChatMessageId}
                     chatError={chatError}
                     onChangeMessage={(messageId) => {
-                      handleUpdateSelectMessage(messageId);
+                      updateSelectedMessage(messageId);
                     }}
                     onRegenerate={(modelId?: number) => {
                       const message = currentMessages.find(
@@ -539,9 +551,8 @@ const Chat = memo(() => {
         </div>
         {hasModel() && (
           <ChatInput
-            stopConversationRef={stopConversationRef}
             onSend={(message) => {
-              const { lastMessage } = getSelectMessagesLast();
+              const { lastMessage } = getSelectedMessagesLast();
               handleSend(message, lastMessage?.id, false);
             }}
             model={selectModel!}
@@ -550,7 +561,7 @@ const Chat = memo(() => {
             onChangePrompt={onChangePrompt}
           />
         )}
-        {!hasModel() && !selectChat?.id && <NoModel />}
+        {!hasModel() && !selectedChat?.id && <NoModel />}
       </>
     </div>
   );

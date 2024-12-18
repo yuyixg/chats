@@ -51,7 +51,6 @@ import {
 } from '@/apis/adminApis';
 import { cn } from '@/lib/utils';
 import { zodResolver } from '@hookform/resolvers/zod';
-import Decimal from 'decimal.js';
 import { z } from 'zod';
 
 interface IProps {
@@ -138,7 +137,7 @@ const UserInitialConfigModal = (props: IProps) => {
         id: select.id,
         name: name!,
         loginType: loginType!,
-        price: new Decimal(price || 0),
+        price: Number(price || 0),
         models: editModels.filter((x) => x.enabled),
         invitationCodeId: invitationCodeId === '-' ? null : invitationCodeId!,
       });
@@ -146,7 +145,7 @@ const UserInitialConfigModal = (props: IProps) => {
       p = postUserInitialConfig({
         name: name!,
         loginType: loginType!,
-        price: new Decimal(price || 0),
+        price: Number(price || 0),
         models: editModels.filter((x) => x.enabled),
         invitationCodeId: invitationCodeId === '-' ? null : invitationCodeId!,
       });

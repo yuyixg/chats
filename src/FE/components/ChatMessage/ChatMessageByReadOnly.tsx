@@ -17,7 +17,6 @@ import { Button } from '@/components/ui/button';
 import CopyAction from './CopyAction';
 import GenerateInformationAction from './GenerateInformationAction';
 
-import Decimal from 'decimal.js';
 import rehypeKatex from 'rehype-katex';
 import remarkGfm from 'remark-gfm';
 import remarkMath from 'remark-math';
@@ -29,8 +28,8 @@ interface PropsMessage {
   inputTokens: number;
   outputTokens: number;
   reasoningTokens: number;
-  inputPrice: Decimal;
-  outputPrice: Decimal;
+  inputPrice: number;
+  outputPrice: number;
   duration: number;
   firstTokenLatency: number;
 }

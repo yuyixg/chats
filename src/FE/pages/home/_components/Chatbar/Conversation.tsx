@@ -28,7 +28,7 @@ import {
   DropdownMenuTrigger,
 } from '@/components/ui/dropdown-menu';
 
-import HomeContext from '../../_contents/Home.context';
+import HomeContext from '../../_contexts/home.context';
 import SharedMessageModal from '../Chat/SharedMessageModal';
 import ChatbarContext from '../Chatbar/Chatbar.context';
 
@@ -42,7 +42,7 @@ const ConversationComponent = ({ chat }: Props) => {
   const { t } = useTranslation();
   const {
     state: {
-      selectChat: { id: selectChatId } = { id: undefined },
+      selectedChat: { id: selectChatId } = { id: undefined },
       messageIsStreaming,
       chats,
     },

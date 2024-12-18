@@ -43,7 +43,7 @@ const KeyCloakLogin = (props: { loading?: boolean }) => {
                 alt="Keycloak"
                 width={32}
                 height={32}
-                className="h-8 w-8 rounded-md dark:bg-white"
+                className="h-8 w-8 rounded-md"
               />
             </Button>
           </TooltipTrigger>

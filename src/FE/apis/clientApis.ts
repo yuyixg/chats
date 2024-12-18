@@ -1,6 +1,6 @@
 import { useFetch } from '@/hooks/useFetch';
 
-import { calculateMessages } from '@/utils/message';
+import { formatMessages } from '@/utils/message';
 
 import { AdminModelDto, PostPromptParams } from '@/types/adminApis';
 import { ChatMessage } from '@/types/chatMessage';
@@ -21,7 +21,7 @@ import {
   SingInResult,
 } from '@/types/clientApis';
 import { PageResult } from '@/types/page';
-import { IdName, Prompt } from '@/types/prompt';
+import { IdName, Prompt, PromptSlim } from '@/types/prompt';
 import { SmsType } from '@/types/user';
 
 export const changeUserPassword = (params: PostUserPassword) => {
@@ -33,9 +33,7 @@ export const changeUserPassword = (params: PostUserPassword) => {
 
 export const getUserMessages = (chatId: string): Promise<ChatMessage[]> => {
   const fetchService = useFetch();
-  return fetchService.get(`/api/messages/${chatId}`).then((data: any) => {
-    return calculateMessages(data) as any;
-  });
+  return fetchService.get(`/api/messages/${chatId}`);
 };
 
 export const getChatsByPaging = (
@@ -66,6 +64,11 @@ export const putChats = (chatId: string, params: PutChatParams) => {
 export const deleteChats = (id: string) => {
   const fetchService = useFetch();
   return fetchService.delete(`/api/user/chats/${id}`);
+};
+
+export const stopChat = (id: string) => {
+  const fetchService = useFetch();
+  return fetchService.post(`/api/chats/stop/${id}`);
 };
 
 export const getCsrfToken = (): Promise<{ csrfToken: string }> => {
@@ -112,7 +115,7 @@ export const getUserPrompts = () => {
 
 export const getUserPromptBrief = () => {
   const fetchServer = useFetch();
-  return fetchServer.get<IdName[]>('/api/prompts/brief');
+  return fetchServer.get<PromptSlim[]>('/api/prompts/brief');
 };
 
 export const getUserPromptDetail = (id: number) => {

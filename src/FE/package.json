@@ -9,7 +9,7 @@
     "start": "next start",
     "lint": "next lint",
     "format": "prettier --write .",
-    "prepare": "husky"
+    "prepare": "husky && git config --local core.hooksPath src/FE/.husky"
   },
   "dependencies": {
     "@hookform/resolvers": "^3.3.4",
@@ -32,7 +32,6 @@
     "@radix-ui/react-tooltip": "^1.0.7",
     "class-variance-authority": "^0.7.0",
     "clsx": "^2.1.0",
-    "decimal.js": "^10.4.3",
     "lucide-react": "^0.359.0",
     "next": "^15.0.3",
     "next-pwa": "^5.6.0",
@@ -50,18 +49,15 @@
     "remark-math": "^5.1.1",
     "tailwind-merge": "^2.2.1",
     "tailwindcss": "3.3.3",
-    "uuid": "^9.0.1",
     "zod": "^3.22.4"
   },
   "devDependencies": {
     "@tailwindcss/typography": "^0.5.13",
     "@trivago/prettier-plugin-sort-imports": "^4.1.1",
-    "@types/decimal.js": "^7.4.0",
     "@types/node": "20.6.2",
     "@types/react": "18.2.21",
     "@types/react-dom": "18.2.7",
     "@types/react-syntax-highlighter": "^15.5.11",
-    "@types/uuid": "^9.0.4",
     "autoprefixer": "10.4.15",
     "cross-env": "^7.0.3",
     "eslint": "8.49.0",

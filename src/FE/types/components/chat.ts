@@ -1,7 +1,5 @@
 import { Content, Role } from '../chat';
 
-import Decimal from 'decimal.js';
-
 export interface PropsMessage {
   id: string;
   role: Role;
@@ -9,8 +7,8 @@ export interface PropsMessage {
   inputTokens: number;
   outputTokens: number;
   reasoningTokens: number;
-  inputPrice: Decimal;
-  outputPrice: Decimal;
+  inputPrice: number;
+  outputPrice: number;
   duration: number;
   firstTokenLatency: number;
 }

@@ -12,6 +12,7 @@ const withPWA = require('next-pwa')({
 /** @type {import('next').NextConfig} */
 const nextConfig = {
   output: 'export',
+  reactStrictMode: false,
   webpack(config) {
     config.experiments = {
       asyncWebAssembly: true,

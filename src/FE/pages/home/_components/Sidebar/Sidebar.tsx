@@ -11,10 +11,12 @@ import {
 import Search from '@/components/Search/Search';
 import Tips from '@/components/Tips/Tips';
 import { Button } from '@/components/ui/button';
+import { Skeleton } from '@/components/ui/skeleton';
 
 import { cn } from '@/lib/utils';
 
 interface Props<T> {
+  isLoading?: boolean;
   showOpenButton?: boolean;
   isOpen: boolean;
   addItemButtonTitle: string;
@@ -31,6 +33,7 @@ interface Props<T> {
 }
 
 const Sidebar = <T,>({
+  isLoading = false,
   showOpenButton = true,
   isOpen,
   addItemButtonTitle,
@@ -46,6 +49,19 @@ const Sidebar = <T,>({
   hasModel,
 }: Props<T>) => {
   const { t } = useTranslation();
+
+  const IsNoDataRender = () => {
+    const isNoData = isLoading === false && items.length === 0;
+    return isNoData ? (
+      <div className="select-none text-center flex flex-col justify-center h-56 opacity-50">
+        <IconSearch className="mx-auto mb-3" />
+        <span className="text-[14px] leading-normal">{t('No data')}</span>
+      </div>
+    ) : (
+      <></>
+    );
+  };
+
   return (
     <>
       <div
@@ -98,15 +114,18 @@ const Sidebar = <T,>({
           searchTerm={searchTerm}
           onSearch={handleSearchTerm}
         />
+        {isLoading && (
+          <div className="h-screen flex flex-col space-y-2 py-2">
+            <Skeleton className="h-11 w-full" />
+            <Skeleton className="h-11 w-full" />
+            <Skeleton className="h-11 w-full" />
+          </div>
+        )}
         <div className="flex-grow overflow-auto scroll-container">
-          {items?.length > 0 ? (
+          {items?.length > 0 && !isLoading && (
             <div className="pt-2">{itemComponent}</div>
-          ) : (
-            <div className="select-none text-center flex flex-col justify-center h-56 opacity-50">
-              <IconSearch className="mx-auto mb-3" />
-              <span className="text-[14px] leading-normal">{t('No data')}</span>
-            </div>
           )}
+          {IsNoDataRender()}
         </div>
         {footerComponent}
       </div>

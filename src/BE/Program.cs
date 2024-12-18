@@ -11,6 +11,7 @@ using Microsoft.AspNetCore.Authentication;
 using Microsoft.AspNetCore.Mvc;
 using System.Runtime.CompilerServices;
 using Chats.BE.Services.FileServices;
+using Microsoft.AspNetCore.StaticFiles;
 
 [assembly: InternalsVisibleTo("Chats.BE.Tests")]
 
@@ -47,7 +48,6 @@ public class Program
         builder.Services.AddScoped<JwtKeyManager>();
         builder.Services.AddScoped<SessionManager>();
         builder.Services.AddScoped<UserModelManager>();
-        builder.Services.AddSingleton<OpenAIApiKeySessionCache>();
         builder.Services.AddScoped<OpenAIApiKeySessionManager>();
         builder.Services.AddSingleton<HostUrlService>();
         builder.Services.AddSingleton<ChatFactory>();
@@ -55,6 +55,7 @@ public class Program
         builder.Services.AddScoped<ClientInfoManager>();
         builder.Services.AddScoped<FileUrlProvider>();
         builder.Services.AddSingleton<FileServiceFactory>();
+        builder.Services.AddSingleton<ChatStopService>();
         builder.Services.AddUrlEncryption();
         builder.Services.AddHttpContextAccessor();
 
@@ -81,6 +82,13 @@ public class Program
         app.MapControllers();
         app.UseMiddleware<FrontendMiddleware>();
         app.UseStaticFiles();
+        app.UseStaticFiles(new StaticFileOptions()
+        {
+            ContentTypeProvider = new FileExtensionContentTypeProvider(new Dictionary<string, string>
+            {
+                [".avif"] = "image/avif",
+            })
+        });
 
         // before run:
         await app.Services.GetRequiredService<InitService>().Init();
