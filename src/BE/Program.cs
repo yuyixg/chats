@@ -11,6 +11,7 @@ using Microsoft.AspNetCore.Authentication;
 using Microsoft.AspNetCore.Mvc;
 using System.Runtime.CompilerServices;
 using Chats.BE.Services.FileServices;
+using Microsoft.AspNetCore.StaticFiles;
 
 [assembly: InternalsVisibleTo("Chats.BE.Tests")]
 
@@ -81,6 +82,13 @@ public class Program
         app.MapControllers();
         app.UseMiddleware<FrontendMiddleware>();
         app.UseStaticFiles();
+        app.UseStaticFiles(new StaticFileOptions()
+        {
+            ContentTypeProvider = new FileExtensionContentTypeProvider(new Dictionary<string, string>
+            {
+                [".avif"] = "image/avif",
+            })
+        });
 
         // before run:
         await app.Services.GetRequiredService<InitService>().Init();
