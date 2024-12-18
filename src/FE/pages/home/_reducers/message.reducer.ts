@@ -1,18 +1,21 @@
 import { ChatMessage } from '@/types/chatMessage';
 
 export type SetMessagesType = ChatMessage[];
+export type SetSelectedMessagesType = ChatMessage[];
 export type SetCurrentMessagesType = ChatMessage[];
 export type SetLastMessageIdType = string;
 export type SetCurrentMessageIdType = string;
 
 interface MessageInitialState {
-  selectMessages: SetMessagesType;
+  messages: SetMessagesType;
+  selectMessages: SetSelectedMessagesType;
   currentMessages: SetCurrentMessagesType;
   selectMessageLastId: SetLastMessageIdType;
   currentChatMessageId: SetCurrentMessageIdType;
 }
 
 export const messageInitialState: MessageInitialState = {
+  messages: [],
   selectMessages: [],
   currentMessages: [],
   selectMessageLastId: '',
@@ -21,13 +24,21 @@ export const messageInitialState: MessageInitialState = {
 
 export enum MessageActionTypes {
   SET_MESSAGES = 'SET_MESSAGES',
+  SET_SELECTED_MESSAGES = 'SET_SELECTED_MESSAGES',
   SET_CURRENT_MESSAGES = 'SET_CURRENT_MESSAGES',
   SET_LAST_MESSAGE_ID = 'SET_LAST_MESSAGE_ID',
   SET_CURRENT_MESSAGE_ID = 'SET_CURRENT_MESSAGE_ID',
 }
 
 export type MessageAction =
-  | { type: MessageActionTypes.SET_MESSAGES; payload: SetMessagesType }
+  | {
+      type: MessageActionTypes.SET_MESSAGES;
+      payload: SetMessagesType;
+    }
+  | {
+      type: MessageActionTypes.SET_SELECTED_MESSAGES;
+      payload: SetSelectedMessagesType;
+    }
   | {
       type: MessageActionTypes.SET_CURRENT_MESSAGES;
       payload: SetCurrentMessagesType;
@@ -47,6 +58,8 @@ export default function messageReducer(
 ): MessageInitialState {
   switch (action.type) {
     case MessageActionTypes.SET_MESSAGES:
+      return { ...state, messages: action.payload };
+    case MessageActionTypes.SET_SELECTED_MESSAGES:
       return { ...state, selectMessages: action.payload };
     case MessageActionTypes.SET_CURRENT_MESSAGES:
       return { ...state, currentMessages: action.payload };

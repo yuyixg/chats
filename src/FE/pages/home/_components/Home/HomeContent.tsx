@@ -10,7 +10,7 @@ import {
   getStorageChatId,
   setStorageChatId,
 } from '@/utils/chats';
-import { getSelectMessages } from '@/utils/message';
+import { formatMessages, getSelectMessages } from '@/utils/message';
 import { getStorageModelId, setStorageModelId } from '@/utils/model';
 import { formatPrompt } from '@/utils/promptVariable';
 import { getSettings } from '@/utils/settings';
@@ -28,12 +28,14 @@ import {
   setIsChatsLoading,
   setMessageIsStreaming,
   setSelectedChat,
+  setStopIds,
 } from '../../_actions/chat.actions';
 import {
   setCurrentMessageId,
   setCurrentMessages,
   setLastMessageId,
   setMessages,
+  setSelectedMessages,
 } from '../../_actions/message.actions';
 import { setModels, setSelectedModel } from '../../_actions/model.actions';
 import { setPrompts } from '../../_actions/prompt.actions';
@@ -72,6 +74,7 @@ import {
   getUserModels,
   getUserPromptBrief,
   postChats,
+  stopChat,
 } from '@/apis/clientApis';
 
 const HomeContent = () => {
@@ -99,7 +102,7 @@ const HomeContent = () => {
     promptInitialState,
   );
 
-  const { chats } = chatState;
+  const { chats, stopIds } = chatState;
   const { currentMessages } = messageState;
   const { models } = modelState;
   const { temperature } = userModelConfigState;
@@ -164,6 +167,7 @@ const HomeContent = () => {
     chatDispatch(setChats([...chats]));
     chatDispatch(setSelectedChat(chat));
     messageDispatch(setMessages([]));
+    messageDispatch(setSelectedMessages([]));
     messageDispatch(setCurrentMessages([]));
     return chat;
   };
@@ -183,7 +187,7 @@ const HomeContent = () => {
     currentMessageId: string,
   ) => {
     chatDispatch(setMessageIsStreaming(true));
-    messageDispatch(setMessages(selectedMessages));
+    messageDispatch(setSelectedMessages(selectedMessages));
     messageDispatch(setLastMessageId(selectedMessageId));
     messageDispatch(setCurrentMessageId(currentMessageId));
   };
@@ -195,8 +199,9 @@ const HomeContent = () => {
       chatDispatch(setSelectedChat(data));
       chatDispatch(setChatStatus(false));
 
-      messageDispatch(setLastMessageId(''));
       messageDispatch(setMessages([]));
+      messageDispatch(setLastMessageId(''));
+      messageDispatch(setSelectedMessages([]));
       messageDispatch(setCurrentMessages([]));
       handleSelectModel(model!);
       router.push('#/' + data.id);
@@ -206,13 +211,15 @@ const HomeContent = () => {
   const handleUpdateCurrentMessage = (chatId: string) => {
     getUserMessages(chatId).then((data) => {
       if (data.length > 0) {
-        messageDispatch(setCurrentMessages(data));
-        const lastMessage = data[data.length - 1];
-        const selectMessageList = getSelectMessages(data, lastMessage.id);
-        messageDispatch(setMessages(selectMessageList));
+        messageDispatch(setMessages(data));
+        const messages = formatMessages(data);
+        messageDispatch(setCurrentMessages(messages));
+        const lastMessage = messages[messages.length - 1];
+        const selectMessageList = getSelectMessages(messages, lastMessage.id);
+        messageDispatch(setSelectedMessages(selectMessageList));
         messageDispatch(setLastMessageId(lastMessage.id));
       } else {
-        messageDispatch(setMessages([]));
+        messageDispatch(setSelectedMessages([]));
         messageDispatch(setCurrentMessages([]));
       }
     });
@@ -236,21 +243,23 @@ const HomeContent = () => {
     selectModel && setStorageModelId(selectModel.modelId);
     getUserMessages(chat.id).then((data) => {
       if (data.length > 0) {
-        messageDispatch(setCurrentMessages(data));
-        const lastMessage = data[data.length - 1];
-        const selectMessageList = getSelectMessages(data, lastMessage.id);
+        messageDispatch(setMessages(data));
+        const messages = formatMessages(data);
+        messageDispatch(setCurrentMessages(messages));
+        const lastMessage = messages[messages.length - 1];
+        const selectMessageList = getSelectMessages(messages, lastMessage.id);
         if (lastMessage.role !== 'assistant') {
           chatDispatch(setChatStatus(true));
           selectMessageList.push(chatErrorMessage(lastMessage.id));
         }
 
-        messageDispatch(setMessages(selectMessageList));
+        messageDispatch(setSelectedMessages(selectMessageList));
         messageDispatch(setLastMessageId(lastMessage.id));
         clearUserModelConfig();
         modelDispatch(setSelectedModel(selectModel));
       } else {
         handleSelectModel(selectModel!);
-        messageDispatch(setMessages([]));
+        messageDispatch(setSelectedMessages([]));
         messageDispatch(setCurrentMessages([]));
       }
     });
@@ -260,7 +269,7 @@ const HomeContent = () => {
 
   const handleUpdateSelectMessage = (messageId: string) => {
     const selectMessageList = getSelectMessages(currentMessages, messageId);
-    messageDispatch(setMessages(selectMessageList));
+    messageDispatch(setSelectedMessages(selectMessageList));
   };
 
   const hasModel = () => {
@@ -278,18 +287,20 @@ const HomeContent = () => {
 
       getUserMessages(chat.id).then((data) => {
         if (data.length > 0) {
-          messageDispatch(setCurrentMessages(data));
-          const lastMessage = data[data.length - 1];
-          const selectMessageList = getSelectMessages(data, lastMessage.id);
+          messageDispatch(setMessages(data));
+          const messages = formatMessages(data);
+          messageDispatch(setCurrentMessages(messages));
+          const lastMessage = messages[messages.length - 1];
+          const selectMessageList = getSelectMessages(messages, lastMessage.id);
           if (lastMessage.role !== 'assistant') {
             chatDispatch(setChatStatus(true));
             selectMessageList.push(chatErrorMessage(lastMessage.id));
           }
-          messageDispatch(setMessages(selectMessageList));
+          messageDispatch(setSelectedMessages(selectMessageList));
           messageDispatch(setLastMessageId(lastMessage.id));
         } else {
           messageDispatch(setCurrentMessages([]));
-          messageDispatch(setMessages([]));
+          messageDispatch(setSelectedMessages([]));
         }
         const model =
           getChatModel(chatList, chat?.id, models) ||
@@ -331,11 +342,22 @@ const HomeContent = () => {
     chatDispatch(setChatStatus(false));
 
     messageDispatch(setLastMessageId(''));
-    messageDispatch(setMessages([]));
+    messageDispatch(setSelectedMessages([]));
     messageDispatch(setCurrentMessages([]));
 
     modelDispatch(setSelectedModel(calcSelectModel(chats, models)));
     clearUserModelConfig();
+  };
+
+  const handleStopChats = () => {
+    let p = [] as any[];
+    stopIds.forEach((id) => {
+      p.push(stopChat(id));
+    });
+    Promise.all(p).then(() => {
+      chatDispatch(setChatStatus(false));
+      chatDispatch(setStopIds([]));
+    });
   };
 
   const getChats = async (
@@ -382,7 +404,7 @@ const HomeContent = () => {
         }
 
         await getChats({ page: 1, pageSize: 50 }, modelList);
-        // chatDispatch(setIsChatsLoading(false));
+        chatDispatch(setIsChatsLoading(false));
       });
 
       getUserPromptBrief().then((data) => {
@@ -429,6 +451,7 @@ const HomeContent = () => {
         handleChatIsError,
         handleUpdateChatStatus,
         handleUpdateChats,
+        handleStopChats,
 
         handleCreateNewChat,
         handleSelectChat,

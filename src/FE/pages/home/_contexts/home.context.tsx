@@ -33,6 +33,7 @@ export interface HomeInitialState {
   temperature: number | null;
   enableSearch: boolean | null;
 
+  messages: ChatMessage[];
   selectMessages: ChatMessage[];
   currentMessages: ChatMessage[];
   selectMessageLastId: string;
@@ -60,6 +61,7 @@ export const initialState: HomeInitialState = {
   temperature: null,
   enableSearch: null,
 
+  messages: [],
   selectMessages: [],
   selectMessageLastId: '',
   currentMessages: [],
@@ -115,6 +117,7 @@ export interface HomeContextProps {
     params: HandleUpdateChatParams,
   ) => void;
   getChats: (params: GetChatsParams, models?: AdminModelDto[]) => void;
+  handleStopChats: () => void;
 }
 
 const HomeContext = createContext<HomeContextProps>(undefined!);

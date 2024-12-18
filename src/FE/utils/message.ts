@@ -70,7 +70,7 @@ const findResponseMessageChildren = (
     .map((node) => node.id);
 };
 
-export const calculateMessages = (nodes: MessageNode[]): MessageNode[] => {
+export const formatMessages = (nodes: MessageNode[]): MessageNode[] => {
   return nodes.map((node) => ({
     ...node,
     childrenIds: findUserMessageChildren(nodes, node.id).reverse(),

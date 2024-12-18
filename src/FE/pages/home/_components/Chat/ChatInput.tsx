@@ -43,7 +43,6 @@ interface Props {
   onChangePrompt: (prompt: Prompt) => void;
   model: AdminModelDto;
   showScrollDownButton: boolean;
-  stopConversationRef: MutableRefObject<boolean>;
 }
 
 const ChatInput = ({
@@ -51,12 +50,12 @@ const ChatInput = ({
   onScrollDownClick,
   onChangePrompt,
   showScrollDownButton,
-  stopConversationRef,
 }: Props) => {
   const { t } = useTranslation();
 
   const {
     state: { selectModel, messageIsStreaming, prompts, selectChat, chatError },
+    handleStopChats,
   } = useContext(HomeContext);
 
   const textareaRef = useRef<HTMLTextAreaElement>(null);
@@ -122,10 +121,6 @@ const ChatInput = ({
     if (window.innerWidth < 640 && textareaRef && textareaRef.current) {
       textareaRef.current.blur();
     }
-  };
-
-  const handleStopChat = () => {
-    stopConversationRef.current = true;
   };
 
   const handleKeyDown = (e: KeyboardEvent<HTMLTextAreaElement>) => {
@@ -335,7 +330,7 @@ const ChatInput = ({
               >
                 {messageIsStreaming ? (
                   <IconStopFilled
-                    onClick={handleStopChat}
+                    onClick={handleStopChats}
                     className="h-4 w-4"
                   />
                 ) : (

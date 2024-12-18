@@ -122,7 +122,9 @@ const Sidebar = <T,>({
           </div>
         )}
         <div className="flex-grow overflow-auto scroll-container">
-          {items?.length > 0 && <div className="pt-2">{itemComponent}</div>}
+          {items?.length > 0 && !isLoading && (
+            <div className="pt-2">{itemComponent}</div>
+          )}
           {IsNoDataRender()}
         </div>
         {footerComponent}
