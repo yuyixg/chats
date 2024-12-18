@@ -257,7 +257,7 @@ public class ChatController(
         await YieldResponse(SseResponseLine.PostMessage(dbUserMessage, dbAssistantMessage, idEncryption, fup));
         if (existingMessages.Count == 0)
         {
-            await YieldTitle(thisChat.Title);
+            await YieldTitle(chatSpan.Chat.Title);
         }
         return new EmptyResult();
     }
