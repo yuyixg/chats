@@ -99,6 +99,7 @@ public class UserChatsController(ChatsDB db, CurrentUser currentUser, IUrlEncryp
         };
 
         Chat? lastChat = await db.Chats
+            .Include(x => x.ChatSpans)
             .Where(x => x.UserId == currentUser.Id && !x.IsDeleted && x.ChatSpans.Any())
             .OrderByDescending(x => x.CreatedAt)
             .FirstOrDefaultAsync(cancellationToken);
