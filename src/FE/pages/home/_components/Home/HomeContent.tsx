@@ -1,4 +1,4 @@
-import { useEffect, useReducer } from 'react';
+import { useEffect, useReducer, useState } from 'react';
 
 import { useRouter } from 'next/router';
 
@@ -20,6 +20,8 @@ import { AdminModelDto } from '@/types/adminApis';
 import { DEFAULT_TEMPERATURE, IChat, Role } from '@/types/chat';
 import { ChatMessage } from '@/types/chatMessage';
 import { ChatResult, GetChatsParams } from '@/types/clientApis';
+
+import Spinner from '@/components/Spinner/Spinner';
 
 import {
   setChatPaging,
@@ -103,10 +105,10 @@ const HomeContent = () => {
   );
 
   const { chats, stopIds } = chatState;
-  const { currentMessages } = messageState;
   const { models } = modelState;
   const { temperature } = userModelConfigState;
   const { showPromptBar } = settingState;
+  const [isPageLoading, setIsPageLoading] = useState(true);
 
   const contextValue = useCreateReducer<HomeInitialState>({
     initialState,
@@ -355,6 +357,7 @@ const HomeContent = () => {
   };
 
   useEffect(() => {
+    setIsPageLoading(true);
     const { showChatBar, showPromptBar } = getSettings();
     settingDispatch(setShowChatBar(showChatBar));
     settingDispatch(setShowPromptBar(showPromptBar));
@@ -384,6 +387,7 @@ const HomeContent = () => {
       getUserPromptBrief().then((data) => {
         promptDispatch(setPrompts(data));
       });
+      setTimeout(() => setIsPageLoading(false), 500);
     }
   }, []);
 
@@ -435,15 +439,28 @@ const HomeContent = () => {
         getChats,
       }}
     >
-      <div className={'flex h-screen w-screen flex-col text-sm'}>
-        <div className="flex h-full w-full bg-background">
-          <Chatbar />
-          <div className="flex w-full">
-            <Chat />
+      {isPageLoading && (
+        <div
+          className={`fixed top-0 left-0 bottom-0 right-0 bg-background z-50 text-center text-[12.5px]`}
+        >
+          <div className="fixed w-screen h-screen top-1/2">
+            <div className="flex justify-center">
+              <Spinner className="text-gray-500 dark:text-gray-50" />
+            </div>
           </div>
-          {showPromptBar && <PromptBar />}
         </div>
-      </div>
+      )}
+      {!isPageLoading && (
+        <div className={'flex h-screen w-screen flex-col text-sm'}>
+          <div className="flex h-full w-full bg-background">
+            <Chatbar />
+            <div className="flex w-full">
+              <Chat />
+            </div>
+            {showPromptBar && <PromptBar />}
+          </div>
+        </div>
+      )}
     </HomeContext.Provider>
   );
 };
