@@ -82,8 +82,8 @@ public class UserChatsController(ChatsDB db, CurrentUser currentUser, IUrlEncryp
     [HttpPost]
     public async Task<ActionResult<ChatsResponse>> CreateChat([FromBody] CreateChatRequest request, [FromServices] UserModelManager userModelManager, CancellationToken cancellationToken)
     {
-        Dictionary<short, UserModel> validModels = (await userModelManager.GetValidModelsByUserId(currentUser.Id, cancellationToken))
-            .ToDictionary(k => k.ModelId, v => v);
+        Dictionary<short, UserModel> validModels = await userModelManager.GetValidModelsByUserId(currentUser.Id)
+            .ToDictionaryAsync(k => k.ModelId, v => v, cancellationToken);
         if (validModels.Count == 0)
         {
             return this.BadRequestMessage("No model available.");
@@ -99,6 +99,7 @@ public class UserChatsController(ChatsDB db, CurrentUser currentUser, IUrlEncryp
         };
 
         Chat? lastChat = await db.Chats
+            .Include(x => x.ChatSpans)
             .Where(x => x.UserId == currentUser.Id && !x.IsDeleted && x.ChatSpans.Any())
             .OrderByDescending(x => x.CreatedAt)
             .FirstOrDefaultAsync(cancellationToken);

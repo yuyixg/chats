@@ -31,6 +31,7 @@ public class MessagesController(ChatsDB db, CurrentUser currentUser, IUrlEncrypt
                     .OrderBy(x => x.Id)
                     .ToArray(),
                 CreatedAt = x.CreatedAt,
+                SpanId = x.SpanId,
                 Usage = x.Usage == null ? null : new ChatMessageTempUsage()
                 {
                     InputTokens = x.Usage.InputTokens,

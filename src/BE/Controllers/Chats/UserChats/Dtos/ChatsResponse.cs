@@ -1,4 +1,5 @@
-﻿using System.Text.Json.Serialization;
+﻿using Chats.BE.DB;
+using System.Text.Json.Serialization;
 
 namespace Chats.BE.Controllers.Chats.UserChats.Dtos;
 
@@ -39,4 +40,14 @@ public record ChatSpanDto
 
     [JsonPropertyName("enableSearch")]
     public required bool EnableSearch { get; init; }
+
+    public static ChatSpanDto FromDB(ChatSpan span) => new()
+    {
+        SpanId = span.SpanId,
+        ModelId = span.ModelId,
+        ModelName = span.Model.Name,
+        ModelProviderId = span.Model.ModelKey.ModelProviderId,
+        Temperature = span.Temperature,
+        EnableSearch = span.EnableSearch,
+    };
 }

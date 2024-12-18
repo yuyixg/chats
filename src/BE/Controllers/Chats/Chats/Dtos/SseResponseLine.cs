@@ -49,6 +49,7 @@ public static class SseResponseLine
             Id = userMessage.Id,
             ParentId = userMessage.ParentId,
             Role = (DBChatRole)userMessage.ChatRoleId,
+            SpanId = userMessage.SpanId,
             Usage = null,
         };
         ChatMessageTemp assistantMessageTemp = new()
@@ -58,6 +59,7 @@ public static class SseResponseLine
             Id = assistantMessage.Id,
             ParentId = assistantMessage.ParentId,
             Role = (DBChatRole)assistantMessage.ChatRoleId,
+            SpanId = assistantMessage.SpanId,
             Usage = assistantMessage.Usage == null ? null : new ChatMessageTempUsage()
             {
                 Duration = assistantMessage.Usage.TotalDurationMs - assistantMessage.Usage.PreprocessDurationMs,

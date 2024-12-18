@@ -26,6 +26,9 @@ public abstract record MessageDto
 
     [JsonPropertyName("createdAt")]
     public required DateTime CreatedAt { get; init; }
+
+    [JsonPropertyName("spanId")]
+    public required byte SpanId { get; init; }
 }
 
 public record RequestMessageDto : MessageDto;
@@ -141,6 +144,7 @@ public record ChatMessageTemp
     public required DBChatRole Role { get; init; }
     public required MessageContent[] Content { get; init; }
     public required DateTime CreatedAt { get; init; }
+    public required byte SpanId { get; init; }
     public required ChatMessageTempUsage? Usage { get; init; }
 
     public MessageDto ToDto(IUrlEncryptionService urlEncryption, FileUrlProvider fup)
@@ -153,7 +157,8 @@ public record ChatMessageTemp
                 ParentId = ParentId != null ? urlEncryption.EncryptMessageId(ParentId.Value) : null, 
                 Role = Role.ToString().ToLowerInvariant(),
                 Content = MessageContentResponse.FromSegments(Content, fup),
-                CreatedAt = CreatedAt
+                CreatedAt = CreatedAt,
+                SpanId = SpanId,
             };
         }
         else
@@ -165,6 +170,7 @@ public record ChatMessageTemp
                 Role = Role.ToString().ToLowerInvariant(),
                 Content = MessageContentResponse.FromSegments(Content, fup),
                 CreatedAt = CreatedAt,
+                SpanId = SpanId,
 
                 InputTokens = Usage.InputTokens,
                 OutputTokens = Usage.OutputTokens,
