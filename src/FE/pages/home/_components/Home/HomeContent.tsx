@@ -364,31 +364,28 @@ const HomeContent = () => {
   }, []);
 
   useEffect(() => {
-    const sessionId = getUserSession();
     chatDispatch(setIsChatsLoading(true));
-    if (sessionId) {
-      getUserModels().then(async (modelList) => {
-        modelDispatch(setModels(modelList));
-        if (modelList && modelList.length > 0) {
-          const selectModelId = getStorageModelId();
-          const model =
-            modelList.find((x) => x.modelId.toString() === selectModelId) ??
-            modelList[0];
-          if (model) {
-            setStorageModelId(model.modelId);
-            handleSelectModel(model);
-          }
+    getUserModels().then(async (modelList) => {
+      modelDispatch(setModels(modelList));
+      if (modelList && modelList.length > 0) {
+        const selectModelId = getStorageModelId();
+        const model =
+          modelList.find((x) => x.modelId.toString() === selectModelId) ??
+          modelList[0];
+        if (model) {
+          setStorageModelId(model.modelId);
+          handleSelectModel(model);
         }
+      }
 
-        await getChats({ page: 1, pageSize: 50 }, modelList);
-        chatDispatch(setIsChatsLoading(false));
-      });
+      await getChats({ page: 1, pageSize: 50 }, modelList);
+      chatDispatch(setIsChatsLoading(false));
+    });
 
-      getUserPromptBrief().then((data) => {
-        promptDispatch(setPrompts(data));
-      });
-      setTimeout(() => setIsPageLoading(false), 500);
-    }
+    getUserPromptBrief().then((data) => {
+      promptDispatch(setPrompts(data));
+    });
+    setTimeout(() => setIsPageLoading(false), 500);
   }, []);
 
   useEffect(() => {
