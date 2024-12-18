@@ -22,7 +22,11 @@ import { Prompt } from '@/types/prompt';
 import ChangeModel from '@/components/ChangeModel/ChangeModel';
 import TemperatureSlider from '@/components/TemperatureSlider/TemperatureSlider';
 
-import { setMessageIsStreaming, setStopIds } from '../../_actions/chat.actions';
+import {
+  setChats,
+  setMessageIsStreaming,
+  setStopIds,
+} from '../../_actions/chat.actions';
 import {
   setCurrentMessages,
   setLastMessageId,
@@ -95,6 +99,15 @@ const Chat = memo(() => {
     const selectMessageLength = selectMessages.length - 1;
     const lastMessage = { ...selectMessages[selectMessageLength] };
     return { lastMessage, selectMessageLength };
+  };
+
+  const updateChatTitle = (title: string, append: boolean = false) => {
+    const newChats = chats.map((chat) =>
+      chat.id === selectChat.id
+        ? { ...chat, title: append ? chat.title + title : title }
+        : chat,
+    );
+    chatDispatch(setChats(newChats));
   };
 
   const handleSend = useCallback(
@@ -307,11 +320,9 @@ const Chat = memo(() => {
           messageDispatch(setSelectedMessages(selectMessageList));
           messageDispatch(setLastMessageId(lastMessage.id));
         } else if (value.k === SseResponseKind.UpdateTitle) {
-          console.log('UpdateTitle', value.r);
-          // setTitle(value.r);
+          updateChatTitle(value.r);
         } else if (value.k === SseResponseKind.TitleSegment) {
-          console.log('TitleSegment', value.r);
-          // setTitle(getTitle() + value.r);
+          updateChatTitle(value.r, true);
         }
       }
 
