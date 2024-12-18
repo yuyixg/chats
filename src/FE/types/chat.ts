@@ -1,3 +1,4 @@
+import { ChatSpanDto } from './clientApis';
 import { DBModelProvider, UserModelConfig } from './model';
 
 export type Role = 'assistant' | 'user' | 'system';
@@ -39,18 +40,8 @@ export interface ChatBody {
 }
 
 export interface IChat {
-  // id: string;
-  // title: string;
-  // chatModelId?: string;
-  // modelName: string;
-  // userModelConfig: UserModelConfig;
-  // isShared: boolean;
-
   id: string;
   title: string;
-  modelId: number;
-  modelName: string;
   isShared: boolean;
-  userModelConfig: UserModelConfig;
-  modelProviderId: DBModelProvider;
+  spans: ChatSpanDto[];
 }

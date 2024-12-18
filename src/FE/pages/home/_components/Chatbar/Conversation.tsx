@@ -125,7 +125,7 @@ const ConversationComponent = ({ chat }: Props) => {
     <div className="relative flex items-center">
       {isChanging && selectChatId === chat.id ? (
         <div className="flex w-full items-center gap-2 rounded-lg bg-background p-3">
-          <ChatIcon isShard={chat.isShared} providerId={chat.modelProviderId} />
+          <ChatIcon isShard={chat.isShared} providerId={chat.spans[0].modelProviderId} />
           <input
             className="mr-12 flex-1 overflow-hidden overflow-ellipsis border-neutral-400 bg-transparent text-left text-[12.5px] leading-3 outline-none text-black dark:text-white"
             type="text"
@@ -143,7 +143,7 @@ const ConversationComponent = ({ chat }: Props) => {
           onClick={() => handleSelectChat(chat)}
           disabled={messageIsStreaming}
         >
-          <ChatIcon isShard={chat.isShared} providerId={chat.modelProviderId} />
+          <ChatIcon isShard={chat.isShared} providerId={chat.spans[0].modelProviderId} />
           <div
             className={`relative max-h-5 flex-1 overflow-hidden text-ellipsis whitespace-nowrap break-all text-left text-[12.5px] leading-4 ${
               selectChatId === chat.id ? 'pr-12' : 'pr-1'

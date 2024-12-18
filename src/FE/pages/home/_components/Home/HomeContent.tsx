@@ -113,7 +113,7 @@ const HomeContent = () => {
   });
 
   const calcSelectModel = (chats: ChatResult[], models: AdminModelDto[]) => {
-    const model = models.find((x) => x.modelId === chats[0]?.modelId);
+    const model = models.find((x) => x.modelId === chats[0]?.spans[0].modelId); // todo
     if (model) return model;
     else return models.length > 0 ? models[0] : undefined;
   };
@@ -123,7 +123,7 @@ const HomeContent = () => {
     chatId: string,
     models: AdminModelDto[],
   ) => {
-    const chatModelId = chats.find((x) => x.id === chatId)?.modelId;
+    const chatModelId = chats.find((x) => x.id === chatId)?.spans[0].modelId; // todo
     const model = models.find((x) => x.modelId === chatModelId);
     return model;
   };

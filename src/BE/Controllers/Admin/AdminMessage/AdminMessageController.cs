@@ -43,6 +43,7 @@ public class AdminMessageController(ChatsDB db, CurrentUser currentUser, IUrlEnc
                     SpanId = s.SpanId,
                     ModelId = s.ModelId,
                     ModelName = s.Model.Name,
+                    ModelProviderId = s.Model.ModelKey.ModelProviderId,
                     Temperature = s.Temperature,
                     EnableSearch = s.EnableSearch,
                 }).ToArray(),
@@ -72,6 +73,7 @@ public class AdminMessageController(ChatsDB db, CurrentUser currentUser, IUrlEnc
                             SpanId = s.SpanId,
                             ModelId = s.ModelId,
                             ModelName = s.Model.Name,
+                            ModelProviderId = s.Model.ModelKey.ModelProviderId,
                             Temperature = s.Temperature,
                             EnableSearch = s.EnableSearch,
                         }).ToArray()

@@ -62,11 +62,17 @@ export interface GetChatsParams extends Paging {
 export interface ChatResult {
   id: string;
   title: string;
+  isShared: boolean;
+  spans: ChatSpanDto[];
+}
+
+export interface ChatSpanDto {
+  spanId: number;
   modelId: number;
   modelName: string;
-  isShared: boolean;
-  userModelConfig: UserModelConfig;
   modelProviderId: DBModelProvider;
+  temperature: number | null;
+  enableSearch: boolean;
 }
 
 export interface PostChatParams {
