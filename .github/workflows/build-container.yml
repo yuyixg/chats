@@ -379,7 +379,7 @@ jobs:
 
   upload-minio-latest:
     if: github.ref == 'refs/heads/main'
-    needs: build-binaries
+    needs: [build-binaries, upload-fe-to-minio]
     runs-on: ubuntu-latest
     steps:
       - name: Configure MINIO Credentials
