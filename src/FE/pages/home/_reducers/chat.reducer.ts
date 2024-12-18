@@ -16,7 +16,7 @@ export type SetStopIdsType = string[];
 
 interface ChatInitialState {
   chats: SetChatsType;
-  selectChat?: SetSelectedChatType;
+  selectedChat?: SetSelectedChatType;
   chatError: SetChatStatusType;
   chatsPaging: SetChatPagingType;
   messageIsStreaming: SetMessageIsStreamingType;
@@ -26,7 +26,7 @@ interface ChatInitialState {
 
 export const chatInitialState: ChatInitialState = {
   chats: [],
-  selectChat: {} as any,
+  selectedChat: {} as any,
   chatError: false,
   chatsPaging: { count: 0, page: 1, pageSize: 50 },
   messageIsStreaming: false,
@@ -72,7 +72,7 @@ export default function chatReducer(
     case ChatActionTypes.SET_CHATS:
       return { ...state, chats: action.payload };
     case ChatActionTypes.SET_SELECTED_CHAT:
-      return { ...state, selectChat: action.payload };
+      return { ...state, selectedChat: action.payload };
     case ChatActionTypes.SET_CHAT_STATUS:
       return { ...state, chatError: action.payload };
     case ChatActionTypes.SET_CHAT_PAGING:

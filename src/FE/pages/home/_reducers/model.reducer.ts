@@ -7,13 +7,13 @@ export type SetSelectModelsType = AdminModelDto[];
 interface ModelInitialState {
   models: SetModelsType;
   selectModel: SetSelectModelType;
-  selectModels: SetSelectModelsType;
+  selectedModels: SetSelectModelsType;
 }
 
 export const modelInitialState: ModelInitialState = {
   models: [],
   selectModel: undefined,
-  selectModels: [],
+  selectedModels: [],
 };
 
 export enum ModelActionTypes {
@@ -40,7 +40,7 @@ export default function modelReducer(
     case ModelActionTypes.SET_SELECTED_MODEL:
       return { ...state, selectModel: action.payload };
     case ModelActionTypes.SET_SELECTED_MODELS:
-      return { ...state, selectModels: action.payload };
+      return { ...state, selectedModels: action.payload };
     default:
       return state;
   }

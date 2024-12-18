@@ -54,7 +54,13 @@ const ChatInput = ({
   const { t } = useTranslation();
 
   const {
-    state: { selectModel, messageIsStreaming, prompts, selectChat, chatError },
+    state: {
+      selectModel,
+      messageIsStreaming,
+      prompts,
+      selectedChat,
+      chatError,
+    },
     handleStopChats,
   } = useContext(HomeContext);
 
@@ -258,7 +264,7 @@ const ChatInput = ({
 
   useEffect(() => {
     setContent({ ...content, fileIds: [] });
-  }, [selectModel, selectChat]);
+  }, [selectModel, selectedChat]);
 
   return (
     <div className="absolute bottom-0 left-0 w-full border-transparent bg-gradient-to-b from-transparent via-white to-white pt-6 dark:border-white/20 dark:via-[#262630] dark:to-[#262630] md:pt-2">

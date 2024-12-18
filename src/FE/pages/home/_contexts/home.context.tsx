@@ -2,16 +2,11 @@ import { Dispatch, createContext } from 'react';
 
 import { ActionType } from '@/hooks/useCreateReducer';
 
-import { DEFAULT_SETTINGS } from '@/utils/settings';
-import { Settings } from '@/utils/settings';
-import { UserInfo } from '@/utils/user';
-
 import { AdminModelDto } from '@/types/adminApis';
 import { IChat } from '@/types/chat';
 import { ChatMessage } from '@/types/chatMessage';
 import { ChatResult, GetChatsParams } from '@/types/clientApis';
-import { UserModelConfig } from '@/types/model';
-import { Prompt, PromptSlim } from '@/types/prompt';
+import { PromptSlim } from '@/types/prompt';
 
 import { ChatAction } from '../_reducers/chat.reducer';
 import { MessageAction } from '../_reducers/message.reducer';
@@ -19,8 +14,6 @@ import { ModelAction } from '../_reducers/model.reducer';
 import { PromptAction } from '../_reducers/prompt.reducer';
 import { SettingsAction } from '../_reducers/setting.reducer';
 import { UserModelConfigAction } from '../_reducers/userModelConfig.reducer';
-
-import { boolean } from 'zod';
 
 export interface HandleUpdateChatParams {
   isShared?: boolean;
@@ -34,13 +27,13 @@ export interface HomeInitialState {
   enableSearch: boolean | null;
 
   messages: ChatMessage[];
-  selectMessages: ChatMessage[];
+  selectedMessages: ChatMessage[];
   currentMessages: ChatMessage[];
-  selectMessageLastId: string;
+  selectedMessageLastId: string;
   currentChatMessageId: string;
 
   chats: ChatResult[];
-  selectChat: IChat;
+  selectedChat: IChat;
   chatsPaging: { count: number; page: number; pageSize: number };
   chatError: boolean;
   messageIsStreaming: boolean;
@@ -48,7 +41,7 @@ export interface HomeInitialState {
 
   models: AdminModelDto[];
   selectModel: AdminModelDto | undefined;
-  selectModels: AdminModelDto[];
+  selectedModels: AdminModelDto[];
 
   prompts: PromptSlim[];
 
@@ -62,13 +55,13 @@ export const initialState: HomeInitialState = {
   enableSearch: null,
 
   messages: [],
-  selectMessages: [],
-  selectMessageLastId: '',
+  selectedMessages: [],
+  selectedMessageLastId: '',
   currentMessages: [],
   currentChatMessageId: '',
 
   chats: [],
-  selectChat: {} as IChat,
+  selectedChat: {} as IChat,
   chatsPaging: { count: 0, page: 1, pageSize: 50 },
   chatError: false,
   messageIsStreaming: false,
@@ -76,7 +69,7 @@ export const initialState: HomeInitialState = {
 
   models: [],
   selectModel: undefined,
-  selectModels: [],
+  selectedModels: [],
 
   prompts: [],
 
@@ -95,8 +88,6 @@ export interface HomeContextProps {
   settingDispatch: Dispatch<SettingsAction>;
   promptDispatch: Dispatch<PromptAction>;
 
-  handleUpdateSelectMessage: (lastLeafId: string) => void;
-  handleUpdateCurrentMessage: (chatId: string) => void;
   handleSelectModel: (model: AdminModelDto) => void;
   hasModel: () => boolean;
   handleNewChat: () => void;
@@ -105,7 +96,6 @@ export interface HomeContextProps {
     selectedMessageId: string,
     currentMessageId: string,
   ) => void;
-  handleUpdateChatStatus: (status: boolean) => void;
   handleUpdateChats: (chats: IChat[]) => void;
   handleCreateNewChat: () => Promise<ChatResult>;
   handleChatIsError: () => void;

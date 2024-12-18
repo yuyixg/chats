@@ -172,10 +172,6 @@ const HomeContent = () => {
     return chat;
   };
 
-  const handleUpdateChatStatus = (status: boolean) => {
-    chatDispatch(setChatStatus(status));
-  };
-
   const handleChatIsError = () => {
     chatDispatch(setChatStatus(true));
     chatDispatch(setMessageIsStreaming(false));
@@ -205,23 +201,6 @@ const HomeContent = () => {
       messageDispatch(setCurrentMessages([]));
       handleSelectModel(model!);
       router.push('#/' + data.id);
-    });
-  };
-
-  const handleUpdateCurrentMessage = (chatId: string) => {
-    getUserMessages(chatId).then((data) => {
-      if (data.length > 0) {
-        messageDispatch(setMessages(data));
-        const messages = formatMessages(data);
-        messageDispatch(setCurrentMessages(messages));
-        const lastMessage = messages[messages.length - 1];
-        const selectMessageList = getSelectMessages(messages, lastMessage.id);
-        messageDispatch(setSelectedMessages(selectMessageList));
-        messageDispatch(setLastMessageId(lastMessage.id));
-      } else {
-        messageDispatch(setSelectedMessages([]));
-        messageDispatch(setCurrentMessages([]));
-      }
     });
   };
 
@@ -265,11 +244,6 @@ const HomeContent = () => {
     });
     router.push('#/' + chat.id);
     setStorageChatId(chat.id);
-  };
-
-  const handleUpdateSelectMessage = (messageId: string) => {
-    const selectMessageList = getSelectMessages(currentMessages, messageId);
-    messageDispatch(setSelectedMessages(selectMessageList));
   };
 
   const hasModel = () => {
@@ -449,7 +423,6 @@ const HomeContent = () => {
         handleNewChat,
         handleStartChat,
         handleChatIsError,
-        handleUpdateChatStatus,
         handleUpdateChats,
         handleStopChats,
 
@@ -458,8 +431,6 @@ const HomeContent = () => {
         handleUpdateChat,
         handleDeleteChat,
         handleSelectModel,
-        handleUpdateSelectMessage,
-        handleUpdateCurrentMessage,
         hasModel,
         getChats,
       }}
