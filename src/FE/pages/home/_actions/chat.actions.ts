@@ -1,3 +1,7 @@
+import { AdminModelDto } from '@/types/adminApis';
+import { IChat } from '@/types/chat';
+import { ChatSpanDto } from '@/types/clientApis';
+
 import {
   ChatAction,
   ChatActionTypes,
@@ -19,6 +23,29 @@ export const setSelectedChat = (chat?: SetSelectedChatType): ChatAction => ({
   type: ChatActionTypes.SET_SELECTED_CHAT,
   payload: chat,
 });
+
+export const setChangeSelectedChatSpan = (
+  chat: IChat,
+  span: ChatSpanDto,
+  model: AdminModelDto,
+): ChatAction => {
+  chat.spans = chat.spans.map((s) => {
+    if (s.spanId === span.spanId) {
+      s = {
+        ...s,
+        ...span,
+        modelId: model.modelId,
+        modelName: model.name,
+        modelProviderId: model.modelProviderId,
+      };
+    }
+    return s;
+  });
+  return {
+    type: ChatActionTypes.SET_SELECTED_CHAT,
+    payload: chat,
+  };
+};
 
 export const setChatStatus = (status: SetChatStatusType): ChatAction => ({
   type: ChatActionTypes.SET_CHAT_STATUS,

@@ -2,7 +2,7 @@ import useTranslation from '@/hooks/useTranslation';
 
 import { AdminModelDto } from '@/types/adminApis';
 
-import ChangeModel from '@/components/ChangeModel/ChangeModel';
+import ChangeChatModelDropdownMenu from '@/components/ChangeModel/ChangeModel';
 import Tips from '@/components/Tips/Tips';
 
 interface Props {
@@ -19,7 +19,7 @@ export const ChangeModelAction = (props: Props) => {
   return (
     <Tips
       trigger={
-        <ChangeModel
+        <ChangeChatModelDropdownMenu
           models={models}
           readonly={readonly}
           onChangeModel={(model) => {

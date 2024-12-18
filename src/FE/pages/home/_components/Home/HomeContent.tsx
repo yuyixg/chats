@@ -115,9 +115,10 @@ const HomeContent = () => {
   });
 
   const calcSelectModel = (chats: ChatResult[], models: AdminModelDto[]) => {
-    const model = models.find((x) => x.modelId === chats[0]?.spans[0].modelId); // todo
-    if (model) return model;
-    else return models.length > 0 ? models[0] : undefined;
+    // const model = models.find((x) => x.modelId === chats[0]?.spans[0].modelId); // todo
+    // if (model) return model;
+    // else
+    return models.length > 0 ? models[0] : undefined;
   };
 
   const getChatModel = (
@@ -192,7 +193,7 @@ const HomeContent = () => {
 
   const handleNewChat = () => {
     postChats({ title: t('New Conversation') }).then((data) => {
-      const model = calcSelectModel(chats, models);
+      // const model = calcSelectModel(chats, models);
       chatDispatch(setChats([data, ...chats]));
       chatDispatch(setSelectedChat(data));
       chatDispatch(setChatStatus(false));
@@ -201,7 +202,7 @@ const HomeContent = () => {
       messageDispatch(setLastMessageId(''));
       messageDispatch(setSelectedMessages([]));
       messageDispatch(setCurrentMessages([]));
-      handleSelectModel(model!);
+      // handleSelectModel(model!);
       router.push('#/' + data.id);
     });
   };
@@ -219,9 +220,9 @@ const HomeContent = () => {
   const handleSelectChat = (chat: IChat) => {
     chatDispatch(setChatStatus(false));
     chatDispatch(setSelectedChat(chat));
-    const selectModel =
-      getChatModel(chats, chat.id, models) || calcSelectModel(chats, models);
-    selectModel && setStorageModelId(selectModel.modelId);
+    // const selectModel =
+    //   getChatModel(chats, chat.id, models) || calcSelectModel(chats, models);
+    // selectModel && setStorageModelId(selectModel.modelId);
     getUserMessages(chat.id).then((data) => {
       if (data.length > 0) {
         messageDispatch(setMessages(data));
@@ -237,9 +238,9 @@ const HomeContent = () => {
         messageDispatch(setSelectedMessages(selectMessageList));
         messageDispatch(setLastMessageId(lastMessage.id));
         clearUserModelConfig();
-        modelDispatch(setSelectedModel(selectModel));
+        // modelDispatch(setSelectedModel(selectModel));
       } else {
-        handleSelectModel(selectModel!);
+        // handleSelectModel(selectModel!);
         messageDispatch(setSelectedMessages([]));
         messageDispatch(setCurrentMessages([]));
       }
@@ -278,10 +279,9 @@ const HomeContent = () => {
           messageDispatch(setCurrentMessages([]));
           messageDispatch(setSelectedMessages([]));
         }
-        const model =
-          getChatModel(chatList, chat?.id, models) ||
-          calcSelectModel(chatList, models);
-        handleSelectModel(model!);
+        // const model = getChatModel(chatList, chat?.id, models);
+        // calcSelectModel(chatList, models);
+        // handleSelectModel(model!);
       });
     }
   };
@@ -321,7 +321,7 @@ const HomeContent = () => {
     messageDispatch(setSelectedMessages([]));
     messageDispatch(setCurrentMessages([]));
 
-    modelDispatch(setSelectedModel(calcSelectModel(chats, models)));
+    // modelDispatch(setSelectedModel(calcSelectModel(chats, models)));
     clearUserModelConfig();
   };
 
@@ -350,7 +350,8 @@ const HomeContent = () => {
       chatDispatch(setChats(chatList));
       chatDispatch(setChatPaging({ count, page, pageSize }));
       if (modelList) {
-        const selectChatId = getPathChatId(router.asPath) || getStorageChatId();
+        const selectChatId =
+          getPathChatId(router.asPath) || getStorageChatId() || rows[0].id;
         selectChat(rows, selectChatId, modelList || models);
       }
     });
@@ -364,31 +365,28 @@ const HomeContent = () => {
   }, []);
 
   useEffect(() => {
-    const sessionId = getUserSession();
     chatDispatch(setIsChatsLoading(true));
-    if (sessionId) {
-      getUserModels().then(async (modelList) => {
-        modelDispatch(setModels(modelList));
-        if (modelList && modelList.length > 0) {
-          const selectModelId = getStorageModelId();
-          const model =
-            modelList.find((x) => x.modelId.toString() === selectModelId) ??
-            modelList[0];
-          if (model) {
-            setStorageModelId(model.modelId);
-            handleSelectModel(model);
-          }
+    getUserModels().then(async (modelList) => {
+      modelDispatch(setModels(modelList));
+      if (modelList && modelList.length > 0) {
+        const selectModelId = getStorageModelId();
+        const model =
+          modelList.find((x) => x.modelId.toString() === selectModelId) ??
+          modelList[0];
+        if (model) {
+          setStorageModelId(model.modelId);
+          handleSelectModel(model);
         }
+      }
 
-        await getChats({ page: 1, pageSize: 50 }, modelList);
-        chatDispatch(setIsChatsLoading(false));
-      });
+      await getChats({ page: 1, pageSize: 50 }, modelList);
+      chatDispatch(setIsChatsLoading(false));
+    });
 
-      getUserPromptBrief().then((data) => {
-        promptDispatch(setPrompts(data));
-      });
-      setTimeout(() => setIsPageLoading(false), 500);
-    }
+    getUserPromptBrief().then((data) => {
+      promptDispatch(setPrompts(data));
+    });
+    setTimeout(() => setIsPageLoading(false), 500);
   }, []);
 
   useEffect(() => {

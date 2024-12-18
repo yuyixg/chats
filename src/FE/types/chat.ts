@@ -1,5 +1,4 @@
 import { ChatSpanDto } from './clientApis';
-import { DBModelProvider, UserModelConfig } from './model';
 
 export type Role = 'assistant' | 'user' | 'system';
 export const DEFAULT_TEMPERATURE = 0.5;

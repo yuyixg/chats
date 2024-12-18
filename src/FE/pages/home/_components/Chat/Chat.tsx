@@ -19,13 +19,18 @@ import { ChatBody, Content, ContentRequest, Message, Role } from '@/types/chat';
 import { SseResponseKind, SseResponseLine } from '@/types/chatMessage';
 import { Prompt } from '@/types/prompt';
 
-import ChangeModel from '@/components/ChangeModel/ChangeModel';
+import ChangeChatModelDropdownMenu from '@/components/ChangeModel/ChangeModel';
+import { IconMinus } from '@/components/Icons';
 import TemperatureSlider from '@/components/TemperatureSlider/TemperatureSlider';
+import Tips from '@/components/Tips/Tips';
+import { Button } from '@/components/ui/button';
 
 import {
+  setChangeSelectedChatSpan,
   setChatStatus,
   setChats,
   setMessageIsStreaming,
+  setSelectedChat,
   setStopIds,
 } from '../../_actions/chat.actions';
 import {
@@ -49,12 +54,17 @@ import ModelSelect from './ModelSelect';
 import NoModel from './NoModel';
 import SystemPrompt from './SystemPrompt';
 
-import { putUserChatModel } from '@/apis/clientApis';
+import {
+  deleteUserChatSpan,
+  postUserChatSpan,
+  putUserChatModel,
+  putUserChatSpan,
+} from '@/apis/clientApis';
 import { cn } from '@/lib/utils';
 
 const Chat = memo(() => {
   const { t } = useTranslation();
-
+  const MAX_SELECT_MODEL_COUNT = 2;
   const {
     state: {
       prompt,
@@ -398,6 +408,48 @@ const Chat = memo(() => {
     }
   };
 
+  const handleAddChatModel = async (modelId: number) => {
+    await postUserChatSpan(selectedChat.id, { modelId }).then((data) => {
+      selectedChat.spans.push({
+        spanId: data.spanId,
+        modelId: data.modelId,
+        modelName: data.modelName,
+        modelProviderId: data.modelProviderId,
+        temperature: data.temperature,
+        enableSearch: data.enableSearch,
+      });
+      chatDispatch(setSelectedChat(selectedChat));
+    });
+  };
+
+  const handleRemoveChatModel = async (spanId: number) => {
+    await deleteUserChatSpan(selectedChat.id, spanId).then(() => {
+      selectedChat.spans = selectedChat.spans.filter(
+        (s) => s.spanId !== spanId,
+      );
+      chatDispatch(setSelectedChat(selectedChat));
+    });
+  };
+
+  const handleUpdateChatModel = async (spanId: number, modelId: number) => {
+    await putUserChatSpan(selectedChat.id, spanId, { modelId }).then((data) => {
+      selectedChat.spans = selectedChat.spans.map((s) => {
+        if (s.spanId === spanId) {
+          return {
+            ...s,
+            modelId: data.modelId,
+            modelName: data.modelName,
+            modelProviderId: data.modelProviderId,
+            temperature: data.temperature,
+            enableSearch: data.enableSearch,
+          };
+        }
+        return s;
+      });
+      chatDispatch(setSelectedChat(selectedChat));
+    });
+  };
+
   return (
     <div className="relative flex-1 overflow-hidden">
       <>
@@ -414,29 +466,60 @@ const Chat = memo(() => {
                   showChatBar && 'ml-6',
                 )}
               >
-                {hasModel() && (
-                  <ChangeModel
-                    models={models}
-                    className="font-semibold text-base"
-                    content={selectModel?.name}
-                    onChangeModel={(model) => {
-                      modelDispatch(setSelectedModel(model));
-                      userModelConfigDispatch(
-                        setEnableSearch(model.allowSearch),
-                      );
-                      if (selectedChat.id) {
-                        putUserChatModel(selectedChat.id, model.modelId);
-                      }
-                    }}
-                  />
-                )}
+                <div className="flex flex-col gap-y-1 h-16 mt-8">
+                  <div className="flex flex-col gap-x-1">
+                    {selectedChat.spans.map((span) => (
+                      <div className="flex">
+                        <ChangeChatModelDropdownMenu
+                          key={'change-model-' + span.modelId}
+                          models={models}
+                          className="font-semibold text-base"
+                          content={span?.modelName}
+                          onChangeModel={(model) => {
+                            handleUpdateChatModel(span.spanId, model.modelId);
+                          }}
+                        />
+
+                        <div>
+                          <Tips
+                            trigger={
+                              <Button
+                                onClick={() => {
+                                  handleRemoveChatModel(span.spanId);
+                                }}
+                                variant="ghost"
+                                className="p-1 m-0 h-auto"
+                              >
+                                <IconMinus />
+                              </Button>
+                            }
+                            content={t('Remove')}
+                          />
+                        </div>
+                      </div>
+                    ))}
+                  </div>
+                  <div>
+                    {selectedChat.spans.length < MAX_SELECT_MODEL_COUNT && (
+                      <ChangeChatModelDropdownMenu
+                        models={models}
+                        className="font-semibold text-base"
+                        content={t('Add another model')}
+                        onChangeModel={(model) => {
+                          handleAddChatModel(model.modelId);
+                        }}
+                      />
+                    )}
+                  </div>
+                </div>
               </div>
               <div className="mr-2 md:mr-4">{<ModeToggle />}</div>
             </div>
           </div>
+
           {selectedMessages?.length === 0 ? (
             <div className="mx-auto flex flex-col space-y-5 md:space-y-10 px-3 pt-[52px] sm:max-w-[600px]">
-              {hasModel() && (
+              {hasModel() && selectedChat.spans.length === 1 && (
                 <div className="flex h-full flex-col space-y-4 rounded-lg border border-neutral-200 p-4 dark:border-neutral-600">
                   <ModelSelect />
                   {selectModel?.allowSystemPrompt && prompt && (

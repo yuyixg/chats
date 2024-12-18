@@ -22,7 +22,7 @@ import {
 
 import { cn } from '@/lib/utils';
 
-const ChangeModel = ({
+const ChangeChatModelDropdownMenu = ({
   models,
   readonly,
   content,
@@ -73,13 +73,13 @@ const ChangeModel = ({
         className="focus:outline-none hover:bg-muted rounded-sm p-1 m-0 h-auto flex items-center gap-1"
       >
         <>
-          <span className={cn('font-medium px-1', className)}>
+          <span className={cn('font-medium px-1 w-44 md:w-full text-nowrap overflow-hidden text-ellipsis whitespace-nowrap', className)}>
             {content && content}
           </span>
           {!readonly && typeof content === 'string' && <IconChevronDown />}
         </>
       </DropdownMenuTrigger>
-      <DropdownMenuContent className="w-40">
+      <DropdownMenuContent className="w-40 md:w-48">
         <Search
           className="p-2 mx-1"
           containerClassName="pt-1 pb-1"
@@ -121,4 +121,4 @@ const ChangeModel = ({
   );
 };
 
-export default ChangeModel;
+export default ChangeChatModelDropdownMenu;

@@ -1,4 +1,4 @@
-import { DBModelProvider, UserModelConfig } from './model';
+import { DBModelProvider } from './model';
 import { Paging } from './page';
 import { LoginType } from './user';
 
@@ -108,4 +108,20 @@ export interface GetUserApiKeyResult {
   updatedAt: string;
   lastUsedAt: string;
   modelCount: number;
+}
+
+export interface PostUserChatSpanParams {
+  modelId?: number;
+  setTemperature?: boolean;
+  temperature?: number | null;
+  enableSearch?: boolean;
+}
+
+export interface PostUserChatSpanResult {
+  spanId: number;
+  modelId: number;
+  modelName: string;
+  modelProviderId: number;
+  temperature: number;
+  enableSearch: boolean;
 }
