@@ -23,6 +23,7 @@ import ChangeModel from '@/components/ChangeModel/ChangeModel';
 import TemperatureSlider from '@/components/TemperatureSlider/TemperatureSlider';
 
 import {
+  setChatStatus,
   setChats,
   setMessageIsStreaming,
   setStopIds,
@@ -79,10 +80,8 @@ const Chat = memo(() => {
     handleCreateNewChat,
     handleStartChat,
     handleChatIsError,
-    handleUpdateChatStatus,
     handleStopChats,
 
-    handleUpdateSelectMessage,
     hasModel,
     chatDispatch,
     messageDispatch,
@@ -95,19 +94,29 @@ const Chat = memo(() => {
 
   const messagesEndRef = useRef<HTMLDivElement>(null);
   const chatContainerRef = useRef<HTMLDivElement>(null);
-  const getSelectMessagesLast = () => {
+  const getSelectedMessagesLast = () => {
     const selectMessageLength = selectMessages.length - 1;
     const lastMessage = { ...selectMessages[selectMessageLength] };
     return { lastMessage, selectMessageLength };
   };
 
   const updateChatTitle = (title: string, append: boolean = false) => {
-    const newChats = chats.map((chat) =>
-      chat.id === selectChat.id
-        ? { ...chat, title: append ? chat.title + title : title }
-        : chat,
-    );
+    const newChats = chats.map((chat) => {
+      if (chat.id === selectChat.id) {
+        append ? (chat.title += title) : (chat.title = title);
+      }
+      return chat;
+    });
     chatDispatch(setChats(newChats));
+  };
+
+  const updateChatStatus = (status: boolean) => {
+    chatDispatch(setChatStatus(status));
+  };
+
+  const updateSelectMessage = (messageId: string) => {
+    const selectMessageList = getSelectMessages(currentMessages, messageId);
+    messageDispatch(setSelectedMessages(selectMessageList));
   };
 
   const handleSend = useCallback(
@@ -117,7 +126,7 @@ const Chat = memo(() => {
       isRegenerate: boolean,
       modelId?: number,
     ) => {
-      handleUpdateChatStatus(false);
+      updateChatStatus(false);
       let selectChatId = selectChat?.id;
       let newMessages = [...messages];
       let newSelectedMessages = [...selectMessages];
@@ -295,7 +304,7 @@ const Chat = memo(() => {
           setSelectMessages({ text });
         } else if (value.k === SseResponseKind.Error) {
           isErrorChat = true;
-          handleUpdateChatStatus(isErrorChat);
+          updateChatStatus(isErrorChat);
           handleStopChats();
           setSelectMessages({ text, error: value.r });
         } else if (value.k === SseResponseKind.PostMessage) {
@@ -515,7 +524,7 @@ const Chat = memo(() => {
                     currentChatMessageId={currentChatMessageId}
                     chatError={chatError}
                     onChangeMessage={(messageId) => {
-                      handleUpdateSelectMessage(messageId);
+                      updateSelectMessage(messageId);
                     }}
                     onRegenerate={(modelId?: number) => {
                       const message = currentMessages.find(
@@ -543,7 +552,7 @@ const Chat = memo(() => {
         {hasModel() && (
           <ChatInput
             onSend={(message) => {
-              const { lastMessage } = getSelectMessagesLast();
+              const { lastMessage } = getSelectedMessagesLast();
               handleSend(message, lastMessage?.id, false);
             }}
             model={selectModel!}
