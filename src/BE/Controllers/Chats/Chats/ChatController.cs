@@ -265,6 +265,7 @@ public class ChatController(
         foreach (string segment in TestChatService.UnicodeCharacterSplit(title))
         {
             await YieldResponse(SseResponseLine.TitleSegment(segment));
+            await Task.Delay(1);
         }
     }
 
