@@ -54,9 +54,9 @@ public class UserModelManager(ChatsDB db)
         }
     }
 
-    public async Task<UserModel[]> GetValidModelsByUserId(int userId, CancellationToken cancellationToken)
+    public IOrderedQueryable<UserModel> GetValidModelsByUserId(int userId)
     {
-        UserModel[] balances = await db.UserModels
+        return db.UserModels
             .Include(x => x.Model)
             .Include(x => x.Model.ModelReference)
             .Include(x => x.Model.ModelReference.Tokenizer)
@@ -64,10 +64,7 @@ public class UserModelManager(ChatsDB db)
             .Include(x => x.Model.ModelKey.ModelProvider)
             .Include(x => x.Model.ModelReference.CurrencyCodeNavigation)
             .Where(x => x.UserId == userId && !x.IsDeleted && !x.Model.IsDeleted)
-            .OrderBy(x => x.Model.Order)
-            .ToArrayAsync(cancellationToken);
-
-        return balances;
+            .OrderBy(x => x.Model.Order);
     }
 
     public async Task<UserModel[]> GetValidModelsByApiKey(string apiKey, CancellationToken cancellationToken)
@@ -78,7 +75,7 @@ public class UserModelManager(ChatsDB db)
             .FirstOrDefaultAsync(cancellationToken);
         if (key == null) return [];
 
-        UserModel[] allPossibleModels = await GetValidModelsByUserId(key.UserId, cancellationToken);
+        UserModel[] allPossibleModels = await GetValidModelsByUserId(key.UserId).ToArrayAsync(cancellationToken);
         if (key.AllowAllModels)
         {
             return allPossibleModels;
