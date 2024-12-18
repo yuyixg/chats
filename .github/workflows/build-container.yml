@@ -52,6 +52,35 @@ jobs:
           name: chats-fe
           path: ./src/FE/out
 
+  upload-fe-to-minio:
+    strategy:
+      matrix:
+        include:
+          - asset: chats-fe
+    needs: build-fe
+    runs-on: ubuntu-latest
+    steps:
+      - name: Download build artifacts
+        uses: actions/download-artifact@v4
+        with:
+          name: ${{ matrix.asset }}
+          path: ${{ matrix.asset }}
+  
+      - name: Compress artifacts into ZIP
+        run: |
+          zip -r ${{ matrix.asset }}.zip ${{ matrix.asset }}
+        shell: bash
+
+      - name: Configure MINIO Credentials
+        run: |
+          echo "AWS_ACCESS_KEY_ID=${{ secrets.MINIO_KEY }}" >> $GITHUB_ENV
+          echo "AWS_SECRET_ACCESS_KEY=${{ secrets.MINIO_SECRET }}" >> $GITHUB_ENV
+          echo "AWS_DEFAULT_REGION=us-east-1" >> $GITHUB_ENV
+
+      - name: Upload to Minio
+        run: |
+          aws --endpoint-url ${{ vars.MINIO_URL }} s3 cp ${{ matrix.asset }}.zip s3://chats/r${{ github.run_number }}/${{ matrix.asset }}.zip
+
   build-primary-container:
     needs: build-fe
     runs-on: ubuntu-latest
@@ -202,12 +231,26 @@ jobs:
       - name: build binary
         run: |
           dotnet publish ./src/BE/Chats.BE.csproj -c Release -o ./Publish ${{ matrix.args }} /p:DeleteExistingFiles=True
-
+  
       - name: Upload artifacts
         uses: actions/upload-artifact@v4
         with:
           name: ${{ matrix.id }}
           path: ./Publish
+
+      - name: Compress artifacts into ZIP
+        run: |
+          zip -r ${{ matrix.id }}.zip ./Publish
+
+      - name: Configure MINIO Credentials
+        run: |
+          echo "AWS_ACCESS_KEY_ID=${{ secrets.MINIO_KEY }}" >> $GITHUB_ENV
+          echo "AWS_SECRET_ACCESS_KEY=${{ secrets.MINIO_SECRET }}" >> $GITHUB_ENV
+          echo "AWS_DEFAULT_REGION=us-east-1" >> $GITHUB_ENV
+
+      - name: Upload to Minio
+        run: |
+          aws --endpoint-url ${{ vars.MINIO_URL }} s3 cp ${{ matrix.id }}.zip s3://chats/r${{ github.run_number }}/${{ matrix.id }}.zip
 
   create-release:
     if: github.ref == 'refs/heads/main'
@@ -334,47 +377,9 @@ jobs:
         with:
             name: ${{ matrix.asset }}
 
-  upload-minio:
-    if: github.ref == 'refs/heads/main'
-    strategy:
-      matrix:
-        include:
-          - asset: chats
-          - asset: chats-fe
-          - asset: chats-win-x64
-          - asset: chats-linux-x64
-          - asset: chats-linux-arm64
-          - asset: chats-linux-musl-x64
-          - asset: chats-linux-musl-arm64
-          - asset: chats-osx-arm64
-          - asset: chats-osx-x64
-    needs: build-binaries
-    runs-on: ubuntu-latest
-    steps:
-      - name: Download build artifacts
-        uses: actions/download-artifact@v4
-        with:
-          name: ${{ matrix.asset }}
-          path: ${{ matrix.asset }}
-  
-      - name: Compress artifacts into ZIP
-        run: |
-          zip -r ${{ matrix.asset }}.zip ${{ matrix.asset }}
-        shell: bash
-
-      - name: Configure MINIO Credentials
-        run: |
-          echo "AWS_ACCESS_KEY_ID=${{ secrets.MINIO_KEY }}" >> $GITHUB_ENV
-          echo "AWS_SECRET_ACCESS_KEY=${{ secrets.MINIO_SECRET }}" >> $GITHUB_ENV
-          echo "AWS_DEFAULT_REGION=us-east-1" >> $GITHUB_ENV
-
-      - name: Upload to Minio
-        run: |
-          aws --endpoint-url ${{ vars.MINIO_URL }} s3 cp ${{ matrix.asset }}.zip s3://chats/r${{ github.run_number }}/${{ matrix.asset }}.zip
-
   upload-minio-latest:
     if: github.ref == 'refs/heads/main'
-    needs: upload-minio
+    needs: [build-binaries, upload-fe-to-minio]
     runs-on: ubuntu-latest
     steps:
       - name: Configure MINIO Credentials
@@ -388,7 +393,7 @@ jobs:
           aws --endpoint-url ${{ vars.MINIO_URL }} s3 rm s3://chats/latest --recursive
           aws --endpoint-url ${{ vars.MINIO_URL }} s3 cp s3://chats/r${{ github.run_number }} s3://chats/latest --recursive
       
-  deploy-dev-stg:
+  deploy:
     runs-on: ubuntu-latest
     needs: build-primary-container
     steps:
