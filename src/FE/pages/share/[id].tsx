@@ -81,10 +81,10 @@ export default function ShareMessage() {
                   onChangeMessage={(messageId: string) => {
                     onMessageChange(messageId);
                   }}
-                  childrenIds={current.childrenIds}
+                  childrenIds={current.childrenIds!}
                   parentChildrenIds={parentChildrenIds}
-                  assistantChildrenIds={current.assistantChildrenIds}
-                  assistantCurrentSelectIndex={current.assistantChildrenIds.findIndex(
+                  assistantChildrenIds={current.assistantChildrenIds!}
+                  assistantCurrentSelectIndex={current.assistantChildrenIds!.findIndex(
                     (x) => x === current.id,
                   )}
                   modelName={current.modelName}
