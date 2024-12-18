@@ -285,7 +285,7 @@ const Chat = memo(() => {
           handleUpdateChatStatus(isErrorChat);
           handleStopChats();
           setSelectMessages({ text, error: value.r });
-        } else if (value.k === SseResponseKind.End) {
+        } else if (value.k === SseResponseKind.PostMessage) {
           const { requestMessage, responseMessage } = value.r;
           newMessages = newMessages.map((m) => {
             if (requestMessage && m.id === MESSAGE_TEMP_ID) {
@@ -306,6 +306,12 @@ const Chat = memo(() => {
           );
           messageDispatch(setSelectedMessages(selectMessageList));
           messageDispatch(setLastMessageId(lastMessage.id));
+        } else if (value.k === SseResponseKind.UpdateTitle) {
+          console.log('UpdateTitle', value.r);
+          // setTitle(value.r);
+        } else if (value.k === SseResponseKind.TitleSegment) {
+          console.log('TitleSegment', value.r);
+          // setTitle(getTitle() + value.r);
         }
       }
 

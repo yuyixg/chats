@@ -45,7 +45,7 @@ public class TestChatService(Model model) : ChatService(model)
         }
     }
 
-    static IEnumerable<string> UnicodeCharacterSplit(string input)
+    internal static IEnumerable<string> UnicodeCharacterSplit(string input)
     {
         for (var i = 0; i < input.Length; ++i)
         {

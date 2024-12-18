@@ -36,10 +36,10 @@ public static class SseResponseLine
         };
     }
 
-    public static SseResponseLine<SseEndMessage> CreateEnd(
-        Message? userMessage, 
-        Message assistantMessage, 
-        IUrlEncryptionService urlEncryptionService, 
+    public static SseResponseLine<SseEndMessage> PostMessage(
+        Message? userMessage,
+        Message assistantMessage,
+        IUrlEncryptionService urlEncryptionService,
         FileUrlProvider fup)
     {
         ChatMessageTemp? userMessageTemp = userMessage == null ? null : new ChatMessageTemp()
@@ -80,7 +80,7 @@ public static class SseResponseLine
                 RequestMessage = userMessageDto,
                 ResponseMessage = assistantMessageDto
             },
-            Kind = SseResponseKind.End,
+            Kind = SseResponseKind.PostMessage,
         };
     }
 
@@ -90,6 +90,24 @@ public static class SseResponseLine
         {
             Result = stopId,
             Kind = SseResponseKind.StopId,
+        };
+    }
+
+    public static SseResponseLine<string> UpdateTitle(string title)
+    {
+        return new SseResponseLine<string>
+        {
+            Result = title,
+            Kind = SseResponseKind.UpdateTitle,
+        };
+    }
+
+    public static SseResponseLine<string> TitleSegment(string titleSegment)
+    {
+        return new SseResponseLine<string>
+        {
+            Result = titleSegment,
+            Kind = SseResponseKind.TitleSegment,
         };
     }
 }

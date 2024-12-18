@@ -5,7 +5,9 @@ export enum SseResponseKind {
   StopId = 0,
   Segment = 1,
   Error = 2,
-  End = 3,
+  PostMessage = 3,
+  UpdateTitle = 4,
+  TitleSegment = 5,
 }
 
 // Discriminated unions for SseResponseLine
@@ -24,9 +26,19 @@ interface SseResponseLineError {
   r: string; // Result is a string
 }
 
-interface SseResponseLineEnd {
-  k: SseResponseKind.End; // Kind is End
+interface SseResponseLinePostMessage {
+  k: SseResponseKind.PostMessage; // Kind is End
   r: SseEndMessage; // Result is SseEndMessage
+}
+
+interface SseResponseLineUpdateTitle {
+  k: SseResponseKind.UpdateTitle;
+  r: string;
+}
+
+interface SseResponseLineTitleSegment {
+  k: SseResponseKind.TitleSegment;
+  r: string;
 }
 
 // Definition of SseEndMessage
@@ -40,7 +52,9 @@ export type SseResponseLine =
   | SseResponseLineStopId
   | SseResponseLineSegment
   | SseResponseLineError
-  | SseResponseLineEnd;
+  | SseResponseLinePostMessage
+  | SseResponseLineUpdateTitle
+  | SseResponseLineTitleSegment;
 
 export interface ChatMessage {
   id: string;

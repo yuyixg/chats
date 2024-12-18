@@ -6,6 +6,7 @@ using Chats.BE.Infrastructure;
 using Chats.BE.Services;
 using Chats.BE.Services.ChatServices;
 using Chats.BE.Services.ChatServices.Dtos;
+using Chats.BE.Services.ChatServices.Implementations.Test;
 using Chats.BE.Services.FileServices;
 using Chats.BE.Services.UrlEncryption;
 using Microsoft.AspNetCore.Authorization;
@@ -250,8 +251,21 @@ public class ChatController(
             await balanceService.UpdateUsage(db, userModel!.Id, CancellationToken.None);
         }
 
-        await YieldResponse(SseResponseLine.CreateEnd(dbUserMessage, dbAssistantMessage, idEncryption, fup));
+        await YieldResponse(SseResponseLine.PostMessage(dbUserMessage, dbAssistantMessage, idEncryption, fup));
+        if (existingMessages.Count == 0)
+        {
+            await YieldTitle(thisChat.Title);
+        }
         return new EmptyResult();
+    }
+
+    private async Task YieldTitle(string title)
+    {
+        await YieldResponse(SseResponseLine.UpdateTitle(""));
+        foreach (string segment in TestChatService.UnicodeCharacterSplit(title))
+        {
+            await YieldResponse(SseResponseLine.CreateSegment(segment));
+        }
     }
 
     private readonly static ReadOnlyMemory<byte> dataU8 = "data: "u8.ToArray();
