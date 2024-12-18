@@ -15,7 +15,7 @@ interface Props {
 const ChatIcon = (props: Props) => {
   const { providerId, isShard, className } = props;
   const { t } = useTranslation();
-  
+
   if (providerId === undefined) return null;
 
   return (

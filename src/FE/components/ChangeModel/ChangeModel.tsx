@@ -73,7 +73,12 @@ const ChangeChatModelDropdownMenu = ({
         className="focus:outline-none hover:bg-muted rounded-sm p-1 m-0 h-auto flex items-center gap-1"
       >
         <>
-          <span className={cn('font-medium px-1 w-44 md:w-full text-nowrap overflow-hidden text-ellipsis whitespace-nowrap', className)}>
+          <span
+            className={cn(
+              'font-medium px-1 w-44 md:w-full text-nowrap overflow-hidden text-ellipsis whitespace-nowrap',
+              className,
+            )}
+          >
             {content && content}
           </span>
           {!readonly && typeof content === 'string' && <IconChevronDown />}
