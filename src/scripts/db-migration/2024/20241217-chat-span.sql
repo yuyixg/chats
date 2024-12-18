@@ -1,4 +1,4 @@
-/* н╙ак╥юж╧хн╨н©идэЁЖож╣дйЩ╬щ╤╙й╖нйлБё╛дЗс╕╦цохвпо╦╪Л╡И╢к╫е╠╬ё╛х╩╨СтытзйЩ╬щ©БиХ╪ффВ╣диообндж╝мБткпп╢к╫е╠╬║ё*/
+О╩©/* Д╦╨Д╨├И≤╡Ф╜╒Д╩╩Д╫∙Е▐╞Х┐╫Е┤╨Г▌╟Г └Ф∙╟Ф█╝Д╦╒Е╓╠И≈╝И╒≤О╪▄Ф┌╗Е╨■Х╞╔Е┘┬Д╩■Г╩├Фё─Ф÷╔Ф╜╓Х└ Ф°╛О╪▄Г└╤Е░▌Е├█Е°╗Ф∙╟Ф█╝Е╨⌠Х╝╬Х╝║Е≥╗Г └Д╦┼Д╦▀Ф√┤Д╧▀Е╓√Х©░Х║▄Ф╜╓Х└ Ф°╛Ц─┌*/
 BEGIN TRANSACTION
 SET QUOTED_IDENTIFIER ON
 SET ARITHABORT ON
@@ -69,19 +69,19 @@ GO
 COMMIT
 
 
--- ╫╚йЩ╬щ╢с Chat ╠Мг╗рф╣╫ ChatSpan ╠М
+-- Е╟├Ф∙╟Ф█╝Д╩▌ Chat Х║╗Х©│Г╖╩Е┬╟ ChatSpan Х║╗
 INSERT INTO dbo.ChatSpan (ChatId, SpanId, ModelId, Temperature, EnableSearch)
 SELECT
     Id AS ChatId,
-    0 AS SpanId, -- кЫсп╪гб╪╣д SpanId ╤╪лН 0
+    0 AS SpanId, -- Ф┴─Ф°┴Х╝╟Е╫∙Г └ SpanId И┐╫Е║╚ 0
     ModelId,
     Temperature,
-    ISNULL(EnableSearch, 0) AS EnableSearch -- х╥╠ё EnableSearch ╡╩н╙ NULLё╛д╛хон╙ 0
+    ISNULL(EnableSearch, 0) AS EnableSearch -- Г║╝Д©² EnableSearch Д╦█Д╦╨ NULLО╪▄И╩≤Х╝╓Д╦╨ 0
 FROM
     dbo.Chat;
 
 
-/* н╙ак╥юж╧хн╨н©идэЁЖож╣дйЩ╬щ╤╙й╖нйлБё╛дЗс╕╦цохвпо╦╪Л╡И╢к╫е╠╬ё╛х╩╨СтытзйЩ╬щ©БиХ╪ффВ╣диообндж╝мБткпп╢к╫е╠╬║ё*/
+/* Д╦╨Д╨├И≤╡Ф╜╒Д╩╩Д╫∙Е▐╞Х┐╫Е┤╨Г▌╟Г └Ф∙╟Ф█╝Д╦╒Е╓╠И≈╝И╒≤О╪▄Ф┌╗Е╨■Х╞╔Е┘┬Д╩■Г╩├Фё─Ф÷╔Ф╜╓Х└ Ф°╛О╪▄Г└╤Е░▌Е├█Е°╗Ф∙╟Ф█╝Е╨⌠Х╝╬Х╝║Е≥╗Г └Д╦┼Д╦▀Ф√┤Д╧▀Е╓√Х©░Х║▄Ф╜╓Х└ Ф°╛Ц─┌*/
 BEGIN TRANSACTION
 SET QUOTED_IDENTIFIER ON
 SET ARITHABORT ON
@@ -112,7 +112,7 @@ COMMIT
 
 
 
-/* н╙ак╥юж╧хн╨н©идэЁЖож╣дйЩ╬щ╤╙й╖нйлБё╛дЗс╕╦цохвпо╦╪Л╡И╢к╫е╠╬ё╛х╩╨СтытзйЩ╬щ©БиХ╪ффВ╣диообндж╝мБткпп╢к╫е╠╬║ё*/
+/* Д╦╨Д╨├И≤╡Ф╜╒Д╩╩Д╫∙Е▐╞Х┐╫Е┤╨Г▌╟Г └Ф∙╟Ф█╝Д╦╒Е╓╠И≈╝И╒≤О╪▄Ф┌╗Е╨■Х╞╔Е┘┬Д╩■Г╩├Фё─Ф÷╔Ф╜╓Х└ Ф°╛О╪▄Г└╤Е░▌Е├█Е°╗Ф∙╟Ф█╝Е╨⌠Х╝╬Х╝║Е≥╗Г └Д╦┼Д╦▀Ф√┤Д╧▀Е╓√Х©░Х║▄Ф╜╓Х└ Ф°╛Ц─┌*/
 BEGIN TRANSACTION
 SET QUOTED_IDENTIFIER ON
 SET ARITHABORT ON
@@ -290,7 +290,7 @@ ALTER TABLE dbo.FileImageInfo ADD CONSTRAINT
 	FileId
 	) WITH( STATISTICS_NORECOMPUTE = OFF, IGNORE_DUP_KEY = OFF, ALLOW_ROW_LOCKS = ON, ALLOW_PAGE_LOCKS = ON) ON [PRIMARY]
 
-/* н╙ак╥юж╧хн╨н©идэЁЖож╣дйЩ╬щ╤╙й╖нйлБё╛дЗс╕╦цохвпо╦╪Л╡И╢к╫е╠╬ё╛х╩╨СтытзйЩ╬щ©БиХ╪ффВ╣диообндж╝мБткпп╢к╫е╠╬║ё*/
+/* Д╦╨Д╨├И≤╡Ф╜╒Д╩╩Д╫∙Е▐╞Х┐╫Е┤╨Г▌╟Г └Ф∙╟Ф█╝Д╦╒Е╓╠И≈╝И╒≤О╪▄Ф┌╗Е╨■Х╞╔Е┘┬Д╩■Г╩├Фё─Ф÷╔Ф╜╓Х└ Ф°╛О╪▄Г└╤Е░▌Е├█Е°╗Ф∙╟Ф█╝Е╨⌠Х╝╬Х╝║Е≥╗Г └Д╦┼Д╦▀Ф√┤Д╧▀Е╓√Х©░Х║▄Ф╜╓Х└ Ф°╛Ц─┌*/
 BEGIN TRANSACTION
 SET QUOTED_IDENTIFIER ON
 SET ARITHABORT ON
@@ -336,7 +336,7 @@ GO
 COMMIT
 
 
-/* н╙ак╥юж╧хн╨н©идэЁЖож╣дйЩ╬щ╤╙й╖нйлБё╛дЗс╕╦цохвпо╦╪Л╡И╢к╫е╠╬ё╛х╩╨СтытзйЩ╬щ©БиХ╪ффВ╣диообндж╝мБткпп╢к╫е╠╬║ё*/
+/* Д╦╨Д╨├И≤╡Ф╜╒Д╩╩Д╫∙Е▐╞Х┐╫Е┤╨Г▌╟Г └Ф∙╟Ф█╝Д╦╒Е╓╠И≈╝И╒≤О╪▄Ф┌╗Е╨■Х╞╔Е┘┬Д╩■Г╩├Фё─Ф÷╔Ф╜╓Х└ Ф°╛О╪▄Г└╤Е░▌Е├█Е°╗Ф∙╟Ф█╝Е╨⌠Х╝╬Х╝║Е≥╗Г └Д╦┼Д╦▀Ф√┤Д╧▀Е╓√Х©░Х║▄Ф╜╓Х└ Ф°╛Ц─┌*/
 BEGIN TRANSACTION
 SET QUOTED_IDENTIFIER ON
 SET ARITHABORT ON
@@ -363,7 +363,7 @@ GO
 COMMIT
 
 
-/* н╙ак╥юж╧хн╨н©идэЁЖож╣дйЩ╬щ╤╙й╖нйлБё╛дЗс╕╦цохвпо╦╪Л╡И╢к╫е╠╬ё╛х╩╨СтытзйЩ╬щ©БиХ╪ффВ╣диообндж╝мБткпп╢к╫е╠╬║ё*/
+/* Д╦╨Д╨├И≤╡Ф╜╒Д╩╩Д╫∙Е▐╞Х┐╫Е┤╨Г▌╟Г └Ф∙╟Ф█╝Д╦╒Е╓╠И≈╝И╒≤О╪▄Ф┌╗Е╨■Х╞╔Е┘┬Д╩■Г╩├Фё─Ф÷╔Ф╜╓Х└ Ф°╛О╪▄Г└╤Е░▌Е├█Е°╗Ф∙╟Ф█╝Е╨⌠Х╝╬Х╝║Е≥╗Г └Д╦┼Д╦▀Ф√┤Д╧▀Е╓√Х©░Х║▄Ф╜╓Х└ Ф°╛Ц─┌*/
 BEGIN TRANSACTION
 SET QUOTED_IDENTIFIER ON
 SET ARITHABORT ON
@@ -389,7 +389,7 @@ ALTER TABLE dbo.MessageContentFile SET (LOCK_ESCALATION = TABLE)
 GO
 COMMIT
 
-/* н╙ак╥юж╧хн╨н©идэЁЖож╣дйЩ╬щ╤╙й╖нйлБё╛дЗс╕╦цохвпо╦╪Л╡И╢к╫е╠╬ё╛х╩╨СтытзйЩ╬щ©БиХ╪ффВ╣диообндж╝мБткпп╢к╫е╠╬║ё*/
+/* Д╦╨Д╨├И≤╡Ф╜╒Д╩╩Д╫∙Е▐╞Х┐╫Е┤╨Г▌╟Г └Ф∙╟Ф█╝Д╦╒Е╓╠И≈╝И╒≤О╪▄Ф┌╗Е╨■Х╞╔Е┘┬Д╩■Г╩├Фё─Ф÷╔Ф╜╓Х└ Ф°╛О╪▄Г└╤Е░▌Е├█Е°╗Ф∙╟Ф█╝Е╨⌠Х╝╬Х╝║Е≥╗Г └Д╦┼Д╦▀Ф√┤Д╧▀Е╓√Х©░Х║▄Ф╜╓Х└ Ф°╛Ц─┌*/
 BEGIN TRANSACTION
 SET QUOTED_IDENTIFIER ON
 SET ARITHABORT ON
@@ -417,7 +417,7 @@ COMMIT
 
 
 
-/* н╙ак╥юж╧хн╨н©идэЁЖож╣дйЩ╬щ╤╙й╖нйлБё╛дЗс╕╦цохвпо╦╪Л╡И╢к╫е╠╬ё╛х╩╨СтытзйЩ╬щ©БиХ╪ффВ╣диообндж╝мБткпп╢к╫е╠╬║ё*/
+/* Д╦╨Д╨├И≤╡Ф╜╒Д╩╩Д╫∙Е▐╞Х┐╫Е┤╨Г▌╟Г └Ф∙╟Ф█╝Д╦╒Е╓╠И≈╝И╒≤О╪▄Ф┌╗Е╨■Х╞╔Е┘┬Д╩■Г╩├Фё─Ф÷╔Ф╜╓Х└ Ф°╛О╪▄Г└╤Е░▌Е├█Е°╗Ф∙╟Ф█╝Е╨⌠Х╝╬Х╝║Е≥╗Г └Д╦┼Д╦▀Ф√┤Д╧▀Е╓√Х©░Х║▄Ф╜╓Х└ Ф°╛Ц─┌*/
 BEGIN TRANSACTION
 SET QUOTED_IDENTIFIER ON
 SET ARITHABORT ON
@@ -688,5 +688,179 @@ ALTER TABLE dbo.BalanceTransaction ADD CONSTRAINT
 	
 GO
 ALTER TABLE dbo.BalanceTransaction SET (LOCK_ESCALATION = TABLE)
+GO
+COMMIT
+
+
+
+/* Д╦╨Д╨├И≤╡Ф╜╒Д╩╩Д╫∙Е▐╞Х┐╫Е┤╨Г▌╟Г └Ф∙╟Ф█╝Д╦╒Е╓╠И≈╝И╒≤О╪▄Ф┌╗Е╨■Х╞╔Е┘┬Д╩■Г╩├Фё─Ф÷╔Ф╜╓Х└ Ф°╛О╪▄Г└╤Е░▌Е├█Е°╗Ф∙╟Ф█╝Е╨⌠Х╝╬Х╝║Е≥╗Г └Д╦┼Д╦▀Ф√┤Д╧▀Е╓√Х©░Х║▄Ф╜╓Х└ Ф°╛Ц─┌*/
+BEGIN TRANSACTION
+SET QUOTED_IDENTIFIER ON
+SET ARITHABORT ON
+SET NUMERIC_ROUNDABORT OFF
+SET CONCAT_NULL_YIELDS_NULL ON
+SET ANSI_NULLS ON
+SET ANSI_PADDING ON
+SET ANSI_WARNINGS ON
+COMMIT
+BEGIN TRANSACTION
+GO
+ALTER TABLE dbo.Message
+	DROP CONSTRAINT FK_Message_ChatSpan
+GO
+ALTER TABLE dbo.ChatSpan SET (LOCK_ESCALATION = TABLE)
+GO
+COMMIT
+BEGIN TRANSACTION
+GO
+ALTER TABLE dbo.Message
+	DROP CONSTRAINT FK_Message_Chat
+GO
+ALTER TABLE dbo.Chat SET (LOCK_ESCALATION = TABLE)
+GO
+COMMIT
+BEGIN TRANSACTION
+GO
+ALTER TABLE dbo.Message
+	DROP CONSTRAINT FK_Message_ChatRole
+GO
+ALTER TABLE dbo.ChatRole SET (LOCK_ESCALATION = TABLE)
+GO
+COMMIT
+BEGIN TRANSACTION
+GO
+ALTER TABLE dbo.Message
+	DROP CONSTRAINT FK_Message_UserModelUsage
+GO
+ALTER TABLE dbo.UserModelUsage SET (LOCK_ESCALATION = TABLE)
+GO
+COMMIT
+BEGIN TRANSACTION
+GO
+ALTER TABLE dbo.Message
+	DROP CONSTRAINT DF_Message_SpanId
+GO
+CREATE TABLE dbo.Tmp_Message
+	(
+	Id bigint NOT NULL IDENTITY (1, 1),
+	ChatId int NOT NULL,
+	SpanId tinyint NULL,
+	ParentId bigint NULL,
+	ChatRoleId tinyint NOT NULL,
+	UsageId bigint NULL,
+	CreatedAt datetime2(7) NOT NULL
+	)  ON [PRIMARY]
+GO
+ALTER TABLE dbo.Tmp_Message SET (LOCK_ESCALATION = TABLE)
+GO
+SET IDENTITY_INSERT dbo.Tmp_Message ON
+GO
+IF EXISTS(SELECT * FROM dbo.Message)
+	 EXEC('INSERT INTO dbo.Tmp_Message (Id, ChatId, SpanId, ParentId, ChatRoleId, UsageId, CreatedAt)
+		SELECT Id, ChatId, SpanId, ParentId, ChatRoleId, UsageId, CreatedAt FROM dbo.Message WITH (HOLDLOCK TABLOCKX)')
+GO
+SET IDENTITY_INSERT dbo.Tmp_Message OFF
+GO
+ALTER TABLE dbo.Message
+	DROP CONSTRAINT FK_Message_ParentMessage
+GO
+ALTER TABLE dbo.MessageContent
+	DROP CONSTRAINT FK_MessageContent_Message
+GO
+DROP TABLE dbo.Message
+GO
+EXECUTE sp_rename N'dbo.Tmp_Message', N'Message', 'OBJECT' 
+GO
+ALTER TABLE dbo.Message ADD CONSTRAINT
+	PK_Message PRIMARY KEY CLUSTERED 
+	(
+	Id
+	) WITH( STATISTICS_NORECOMPUTE = OFF, IGNORE_DUP_KEY = OFF, ALLOW_ROW_LOCKS = ON, ALLOW_PAGE_LOCKS = ON) ON [PRIMARY]
+
+GO
+CREATE NONCLUSTERED INDEX IX_Message_ChatSpan ON dbo.Message
+	(
+	ChatId,
+	SpanId
+	) WITH( STATISTICS_NORECOMPUTE = OFF, IGNORE_DUP_KEY = OFF, ALLOW_ROW_LOCKS = ON, ALLOW_PAGE_LOCKS = ON) ON [PRIMARY]
+GO
+CREATE UNIQUE NONCLUSTERED INDEX IX_Message_Usage ON dbo.Message
+	(
+	UsageId
+	) WHERE ([UsageId] IS NOT NULL)
+ WITH( STATISTICS_NORECOMPUTE = OFF, IGNORE_DUP_KEY = OFF, ALLOW_ROW_LOCKS = ON, ALLOW_PAGE_LOCKS = ON) ON [PRIMARY]
+GO
+ALTER TABLE dbo.Message ADD CONSTRAINT
+	FK_Message_UserModelUsage FOREIGN KEY
+	(
+	UsageId
+	) REFERENCES dbo.UserModelUsage
+	(
+	Id
+	) ON UPDATE  NO ACTION 
+	 ON DELETE  NO ACTION 
+	
+GO
+ALTER TABLE dbo.Message ADD CONSTRAINT
+	FK_Message_ChatRole FOREIGN KEY
+	(
+	ChatRoleId
+	) REFERENCES dbo.ChatRole
+	(
+	Id
+	) ON UPDATE  NO ACTION 
+	 ON DELETE  NO ACTION 
+	
+GO
+ALTER TABLE dbo.Message ADD CONSTRAINT
+	FK_Message_Chat FOREIGN KEY
+	(
+	ChatId
+	) REFERENCES dbo.Chat
+	(
+	Id
+	) ON UPDATE  CASCADE 
+	 ON DELETE  CASCADE 
+	
+GO
+ALTER TABLE dbo.Message ADD CONSTRAINT
+	FK_Message_ParentMessage FOREIGN KEY
+	(
+	ParentId
+	) REFERENCES dbo.Message
+	(
+	Id
+	) ON UPDATE  NO ACTION 
+	 ON DELETE  NO ACTION 
+	
+GO
+ALTER TABLE dbo.Message ADD CONSTRAINT
+	FK_Message_ChatSpan FOREIGN KEY
+	(
+	ChatId,
+	SpanId
+	) REFERENCES dbo.ChatSpan
+	(
+	ChatId,
+	SpanId
+	) ON UPDATE  NO ACTION 
+	 ON DELETE  NO ACTION 
+	
+GO
+COMMIT
+BEGIN TRANSACTION
+GO
+ALTER TABLE dbo.MessageContent ADD CONSTRAINT
+	FK_MessageContent_Message FOREIGN KEY
+	(
+	MessageId
+	) REFERENCES dbo.Message
+	(
+	Id
+	) ON UPDATE  CASCADE 
+	 ON DELETE  CASCADE 
+	
+GO
+ALTER TABLE dbo.MessageContent SET (LOCK_ESCALATION = TABLE)
 GO
 COMMIT
