@@ -8,17 +8,17 @@ export type SetCurrentMessageIdType = string;
 
 interface MessageInitialState {
   messages: SetMessagesType;
-  selectMessages: SetSelectedMessagesType;
+  selectedMessages: SetSelectedMessagesType;
   currentMessages: SetCurrentMessagesType;
-  selectMessageLastId: SetLastMessageIdType;
+  selectedMessageLastId: SetLastMessageIdType;
   currentChatMessageId: SetCurrentMessageIdType;
 }
 
 export const messageInitialState: MessageInitialState = {
   messages: [],
-  selectMessages: [],
+  selectedMessages: [],
   currentMessages: [],
-  selectMessageLastId: '',
+  selectedMessageLastId: '',
   currentChatMessageId: '',
 };
 
@@ -60,11 +60,11 @@ export default function messageReducer(
     case MessageActionTypes.SET_MESSAGES:
       return { ...state, messages: action.payload };
     case MessageActionTypes.SET_SELECTED_MESSAGES:
-      return { ...state, selectMessages: action.payload };
+      return { ...state, selectedMessages: action.payload };
     case MessageActionTypes.SET_CURRENT_MESSAGES:
       return { ...state, currentMessages: action.payload };
     case MessageActionTypes.SET_LAST_MESSAGE_ID:
-      return { ...state, selectMessageLastId: action.payload };
+      return { ...state, selectedMessageLastId: action.payload };
     case MessageActionTypes.SET_CURRENT_MESSAGE_ID:
       return { ...state, currentChatMessageId: action.payload };
     default:

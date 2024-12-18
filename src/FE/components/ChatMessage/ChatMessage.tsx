@@ -26,7 +26,7 @@ export interface Props {
   message: PropsMessage;
   messageIsStreaming: boolean;
   chatError: boolean;
-  selectChat: IChat;
+  selectedChat: IChat;
   onChangeMessage?: (messageId: string) => void;
   onEdit?: (editedMessage: Message, parentId: string | null) => void;
   onRegenerate?: (modelId?: number) => void;
@@ -47,7 +47,7 @@ export const ChatMessage: FC<Props> = memo(
     messageIsStreaming,
     currentChatMessageId,
     chatError,
-    selectChat,
+    selectedChat,
     onEdit,
     onChangeMessage,
     onRegenerate,
@@ -62,7 +62,7 @@ export const ChatMessage: FC<Props> = memo(
           <div className="prose w-full dark:prose-invert rounded-r-md">
             {message.role === 'user' && (
               <UserMessage
-                selectChat={selectChat}
+                selectedChat={selectedChat}
                 messageIsStreaming={messageIsStreaming}
                 message={message}
                 parentId={parentId}

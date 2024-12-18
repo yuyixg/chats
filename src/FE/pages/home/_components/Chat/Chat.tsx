@@ -62,12 +62,12 @@ const Chat = memo(() => {
       enableSearch,
 
       chats,
-      selectChat,
+      selectedChat,
       chatError,
       messageIsStreaming,
 
       messages,
-      selectMessages,
+      selectedMessages,
       currentChatMessageId,
       currentMessages,
 
@@ -95,14 +95,14 @@ const Chat = memo(() => {
   const messagesEndRef = useRef<HTMLDivElement>(null);
   const chatContainerRef = useRef<HTMLDivElement>(null);
   const getSelectedMessagesLast = () => {
-    const selectMessageLength = selectMessages.length - 1;
-    const lastMessage = { ...selectMessages[selectMessageLength] };
-    return { lastMessage, selectMessageLength };
+    const selectedMessageLength = selectedMessages.length - 1;
+    const lastMessage = { ...selectedMessages[selectedMessageLength] };
+    return { lastMessage, selectedMessageLength };
   };
 
   const updateChatTitle = (title: string, append: boolean = false) => {
     const newChats = chats.map((chat) => {
-      if (chat.id === selectChat.id) {
+      if (chat.id === selectedChat.id) {
         append ? (chat.title += title) : (chat.title = title);
       }
       return chat;
@@ -114,7 +114,7 @@ const Chat = memo(() => {
     chatDispatch(setChatStatus(status));
   };
 
-  const updateSelectMessage = (messageId: string) => {
+  const updateSelectedMessage = (messageId: string) => {
     const selectMessageList = getSelectMessages(currentMessages, messageId);
     messageDispatch(setSelectedMessages(selectMessageList));
   };
@@ -127,9 +127,9 @@ const Chat = memo(() => {
       modelId?: number,
     ) => {
       updateChatStatus(false);
-      let selectChatId = selectChat?.id;
+      let selectChatId = selectedChat?.id;
       let newMessages = [...messages];
-      let newSelectedMessages = [...selectMessages];
+      let newSelectedMessages = [...selectedMessages];
       let assistantParentId = messageId;
       if (!selectChatId) {
         const newChat = await handleCreateNewChat();
@@ -322,11 +322,11 @@ const Chat = memo(() => {
           messageDispatch(setMessages(newMessages));
           messageDispatch(setCurrentMessages(messageList));
           const lastMessage = messageList[messageList.length - 1];
-          const selectMessageList = getSelectMessages(
+          const selectedMessageList = getSelectMessages(
             messageList,
             lastMessage.id,
           );
-          messageDispatch(setSelectedMessages(selectMessageList));
+          messageDispatch(setSelectedMessages(selectedMessageList));
           messageDispatch(setLastMessageId(lastMessage.id));
         } else if (value.k === SseResponseKind.UpdateTitle) {
           updateChatTitle(value.r);
@@ -342,10 +342,10 @@ const Chat = memo(() => {
       temperature,
       enableSearch,
       chats,
-      selectChat,
+      selectedChat,
       chatError,
       currentMessages,
-      selectMessages,
+      selectedMessages,
       selectModel,
     ],
   );
@@ -388,7 +388,7 @@ const Chat = memo(() => {
 
   useEffect(() => {
     throttledScrollDown();
-  }, [selectMessages, throttledScrollDown]);
+  }, [selectedMessages, throttledScrollDown]);
 
   useEffect(() => {}, [prompt, temperature, enableSearch]);
 
@@ -424,8 +424,8 @@ const Chat = memo(() => {
                       userModelConfigDispatch(
                         setEnableSearch(model.allowSearch),
                       );
-                      if (selectChat.id) {
-                        putUserChatModel(selectChat.id, model.modelId);
+                      if (selectedChat.id) {
+                        putUserChatModel(selectedChat.id, model.modelId);
                       }
                     }}
                   />
@@ -434,7 +434,7 @@ const Chat = memo(() => {
               <div className="mr-2 md:mr-4">{<ModeToggle />}</div>
             </div>
           </div>
-          {selectMessages?.length === 0 ? (
+          {selectedMessages?.length === 0 ? (
             <div className="mx-auto flex flex-col space-y-5 md:space-y-10 px-3 pt-[52px] sm:max-w-[600px]">
               {hasModel() && (
                 <div className="flex h-full flex-col space-y-4 rounded-lg border border-neutral-200 p-4 dark:border-neutral-600">
@@ -477,8 +477,8 @@ const Chat = memo(() => {
             </div>
           ) : (
             <>
-              {selectMessages.map((current, index) => {
-                let lastMessage = selectMessages[selectMessages.length - 1];
+              {selectedMessages.map((current, index) => {
+                let lastMessage = selectedMessages[selectedMessages.length - 1];
                 let parentChildrenIds: string[] = [];
                 if (!current.parentId) {
                   parentChildrenIds = currentMessages
@@ -493,7 +493,7 @@ const Chat = memo(() => {
                 return (
                   <MemoizedChatMessage
                     models={models}
-                    selectChat={selectChat}
+                    selectedChat={selectedChat}
                     key={current.id + index}
                     modelName={current.modelName}
                     modelId={current.modelId}
@@ -524,7 +524,7 @@ const Chat = memo(() => {
                     currentChatMessageId={currentChatMessageId}
                     chatError={chatError}
                     onChangeMessage={(messageId) => {
-                      updateSelectMessage(messageId);
+                      updateSelectedMessage(messageId);
                     }}
                     onRegenerate={(modelId?: number) => {
                       const message = currentMessages.find(
@@ -561,7 +561,7 @@ const Chat = memo(() => {
             onChangePrompt={onChangePrompt}
           />
         )}
-        {!hasModel() && !selectChat?.id && <NoModel />}
+        {!hasModel() && !selectedChat?.id && <NoModel />}
       </>
     </div>
   );
