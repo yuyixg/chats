@@ -5,7 +5,8 @@ public enum SseResponseKind
     StopId = 0,
     Segment = 1,
     Error = 2,
-    PostMessage = 3,
+    UserMessage = 3,
     UpdateTitle = 4,
     TitleSegment = 5,
+    ResponseMessage = 6,
 }
