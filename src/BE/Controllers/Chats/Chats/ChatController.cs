@@ -174,10 +174,10 @@ public class ChatController(
                     Response.Headers.CacheControl = "no-cache";
                     Response.Headers.Connection = "keep-alive";
                     stopId = stopService.CreateAndCombineCancellationToken(ref cancellationToken);
-                    await YieldResponse(SseResponseLine.CreateStopId(stopId));
+                    await YieldResponse(SseResponseLine.StopId(stopId));
                     everYield = true;
                 }
-                await YieldResponse(SseResponseLine.CreateSegment(seg.TextSegment));
+                await YieldResponse(SseResponseLine.Segment(seg.TextSegment));
 
                 if (cancellationToken.IsCancellationRequested)
                 {
@@ -236,7 +236,7 @@ public class ChatController(
         if (errorText != null)
         {
             dbAssistantMessage.MessageContents.Add(MessageContent.FromError(errorText));
-            await YieldResponse(SseResponseLine.CreateError(errorText));
+            await YieldResponse(SseResponseLine.Error(errorText));
         }
         dbAssistantMessage.Usage = icc.ToUserModelUsage(currentUser.Id, await clientInfoManager.GetClientInfo(cancellationToken), isApi: false);
         db.Messages.Add(dbAssistantMessage);
@@ -264,7 +264,7 @@ public class ChatController(
         await YieldResponse(SseResponseLine.UpdateTitle(""));
         foreach (string segment in TestChatService.UnicodeCharacterSplit(title))
         {
-            await YieldResponse(SseResponseLine.CreateSegment(segment));
+            await YieldResponse(SseResponseLine.TitleSegment(segment));
         }
     }
 

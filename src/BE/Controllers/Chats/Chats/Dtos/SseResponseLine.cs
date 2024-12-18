@@ -18,7 +18,7 @@ public record SseResponseLine<T>
 
 public static class SseResponseLine
 {
-    public static SseResponseLine<string> CreateSegment(string segment)
+    public static SseResponseLine<string> Segment(string segment)
     {
         return new SseResponseLine<string>
         {
@@ -27,7 +27,7 @@ public static class SseResponseLine
         };
     }
 
-    public static SseResponseLine<string> CreateError(string error)
+    public static SseResponseLine<string> Error(string error)
     {
         return new SseResponseLine<string>
         {
@@ -84,7 +84,7 @@ public static class SseResponseLine
         };
     }
 
-    public static SseResponseLine<string> CreateStopId(string stopId)
+    public static SseResponseLine<string> StopId(string stopId)
     {
         return new SseResponseLine<string>
         {
