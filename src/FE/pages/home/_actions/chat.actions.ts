@@ -4,8 +4,10 @@ import {
   SetChatPagingType,
   SetChatStatusType,
   SetChatsType,
+  SetIsChatsLoadingType,
   SetMessageIsStreamingType,
   SetSelectedChatType,
+  SetStopIdsType,
 } from '../_reducers/chat.reducer';
 
 export const setChats = (chats: SetChatsType): ChatAction => ({
@@ -33,6 +35,18 @@ export const setMessageIsStreaming = (
 ): ChatAction => ({
   type: ChatActionTypes.SET_MESSAGE_IS_STREAMING,
   payload: paging,
+});
+
+export const setIsChatsLoading = (
+  isChatsLoading: SetIsChatsLoadingType,
+): ChatAction => ({
+  type: ChatActionTypes.SET_IS_CHATS_LOADING,
+  payload: isChatsLoading,
+});
+
+export const setStopIds = (stopIds: SetStopIdsType): ChatAction => ({
+  type: ChatActionTypes.SET_STOP_IDS,
+  payload: stopIds,
 });
 
 export default function () {}

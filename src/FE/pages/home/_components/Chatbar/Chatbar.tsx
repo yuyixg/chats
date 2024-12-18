@@ -1,4 +1,4 @@
-import { useContext, useEffect } from 'react';
+import { useContext, useEffect, useState } from 'react';
 
 import { useCreateReducer } from '@/hooks/useCreateReducer';
 import useTranslation from '@/hooks/useTranslation';
@@ -7,6 +7,7 @@ import { removeStorageChatId, setStorageChatId } from '@/utils/chats';
 
 import { ChatResult } from '@/types/clientApis';
 
+import { setShowChatBar } from '../../_actions/setting.actions';
 import HomeContext from '../../_contexts/home.context';
 import Sidebar from '../Sidebar/Sidebar';
 import ChatbarContext from './Chatbar.context';
@@ -22,9 +23,15 @@ const Chatbar = () => {
   });
 
   const {
-    state: { chats, selectModel, settings, messageIsStreaming },
+    state: {
+      chats,
+      selectModel,
+      showChatBar,
+      messageIsStreaming,
+      isChatsLoading,
+    },
+    settingDispatch,
     handleDeleteChat: homeHandleDeleteChat,
-    handleUpdateSettings,
     handleSelectChat,
     handleSelectModel,
     handleNewChat,
@@ -33,13 +40,12 @@ const Chatbar = () => {
   } = useContext(HomeContext);
 
   const {
-    state: { searchTerm, filteredChats },
-    dispatch: chatDispatch,
+    state: { filteredChats },
+    dispatch,
   } = chatBarContextValue;
-
+  const [searchTerm, setSearchTerm] = useState('');
   const handleDeleteChat = (chatId: string) => {
     const chatList = chats.filter((x) => x.id !== chatId);
-    chatDispatch({ field: 'searchTerm', value: '' });
     homeHandleDeleteChat(chatId);
     if (chatList.length > 0) {
       const chat = chatList[chatList.length - 1];
@@ -52,13 +58,12 @@ const Chatbar = () => {
   };
 
   const handleToggleChatbar = () => {
-    const showChatBar = !settings.showChatBar;
-    handleUpdateSettings('showChatBar', showChatBar);
+    settingDispatch(setShowChatBar(!showChatBar));
   };
 
   useEffect(() => {
     if (searchTerm) {
-      chatDispatch({
+      dispatch({
         field: 'filteredChats',
         value: chats.filter((chat) => {
           const searchable = chat.title.toLocaleLowerCase();
@@ -66,7 +71,7 @@ const Chatbar = () => {
         }),
       });
     } else {
-      chatDispatch({
+      dispatch({
         field: 'filteredChats',
         value: chats,
       });
@@ -81,17 +86,18 @@ const Chatbar = () => {
       }}
     >
       <Sidebar<ChatResult>
+        isLoading={isChatsLoading}
         messageIsStreaming={messageIsStreaming}
         side={'left'}
-        isOpen={settings.showChatBar}
+        isOpen={showChatBar}
         addItemButtonTitle={t('New chat')}
         hasModel={hasModel}
         itemComponent={<Conversations chats={filteredChats} />}
         items={filteredChats}
         searchTerm={searchTerm}
-        handleSearchTerm={(searchTerm: string) => {
-          chatDispatch({ field: 'searchTerm', value: searchTerm });
-          getChats({ query: searchTerm, page: 1, pageSize: 50 }, []);
+        handleSearchTerm={(value: string) => {
+          setSearchTerm(value);
+          getChats({ query: value, page: 1, pageSize: 50 }, []);
         }}
         toggleOpen={handleToggleChatbar}
         handleCreateItem={handleNewChat}

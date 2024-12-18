@@ -1,7 +1,7 @@
 export interface Prompt extends IdName {
   content: string;
-  temperature: number | null;
   isDefault: boolean;
+  temperature: number | null;
   isSystem: boolean;
 }
 

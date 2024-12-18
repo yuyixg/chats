@@ -2,7 +2,7 @@ import { useEffect, useState } from 'react';
 
 import useTranslation from '@/hooks/useTranslation';
 
-import { redirectToGithub, setSiteInfo } from '@/utils/website';
+import { redirectToGithub } from '@/utils/website';
 
 import { LoginConfigsResult } from '@/types/clientApis';
 import { SiteInfoConfig } from '@/types/config';
@@ -78,7 +78,6 @@ export default function LoginPage() {
       setLoading(false);
     });
     getSiteInfo().then((data) => {
-      setSiteInfo(data);
       setWebSiteInfo(data);
     });
   }, []);

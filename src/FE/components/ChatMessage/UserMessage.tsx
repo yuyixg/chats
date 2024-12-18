@@ -16,7 +16,7 @@ interface Props {
   parentId: string | null;
   currentSelectIndex: number;
   parentChildrenIds: string[];
-  selectChat: IChat;
+  selectedChat: IChat;
   messageIsStreaming: boolean;
   onChangeMessage?: (messageId: string) => void;
   onEdit?: (editedMessage: Message, parentId: string | null) => void;
@@ -30,7 +30,7 @@ const UserMessage = (props: Props) => {
     parentId,
     currentSelectIndex,
     parentChildrenIds,
-    selectChat,
+    selectedChat,
     messageIsStreaming,
     onChangeMessage,
     onEdit,
@@ -42,7 +42,7 @@ const UserMessage = (props: Props) => {
 
   const handleEditMessage = () => {
     if (message.content != messageContent) {
-      if (selectChat.id && onEdit) {
+      if (selectedChat.id && onEdit) {
         onEdit({ ...message, content: messageContent }, parentId);
       }
     }

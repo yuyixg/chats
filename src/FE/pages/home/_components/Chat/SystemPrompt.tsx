@@ -12,7 +12,7 @@ import useTranslation from '@/hooks/useTranslation';
 import { formatPrompt } from '@/utils/promptVariable';
 
 import { AdminModelDto } from '@/types/adminApis';
-import { Prompt } from '@/types/prompt';
+import { Prompt, PromptSlim } from '@/types/prompt';
 
 import PromptList from './PromptList';
 import VariableModal from './VariableModal';
@@ -21,7 +21,7 @@ import { getUserPromptDetail } from '@/apis/clientApis';
 
 interface Props {
   currentPrompt: string;
-  prompts: Prompt[];
+  prompts: PromptSlim[];
   model: AdminModelDto;
   onChangePromptText: (prompt: string) => void;
   onChangePrompt: (prompt: Prompt) => void;

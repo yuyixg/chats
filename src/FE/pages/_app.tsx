@@ -14,6 +14,7 @@ import AdminLayout from './admin/layout';
 import './globals.css';
 
 import { ThemeProvider } from '@/providers/ThemeProvider';
+import { UserProvider } from '@/providers/UserProvider';
 import 'katex/dist/katex.min.css';
 
 function App({ Component, pageProps }: AppProps<{}> | any) {
