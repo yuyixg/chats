@@ -1,4 +1,5 @@
-﻿using Chats.BE.Controllers.Chats.Chats.Dtos;
+﻿using Azure.Core;
+using Chats.BE.Controllers.Chats.Chats.Dtos;
 using Chats.BE.Controllers.Common;
 using Chats.BE.DB;
 using Chats.BE.DB.Jsons;
@@ -15,8 +16,11 @@ using Microsoft.EntityFrameworkCore;
 using OpenAI.Chat;
 using Sdcb.DashScope;
 using System.ClientModel;
+using System.Runtime.CompilerServices;
 using System.Text.Json;
+using System.Threading;
 using TencentCloud.Common;
+using static System.Net.WebRequestMethods;
 using OpenAIChatMessage = OpenAI.Chat.ChatMessage;
 
 namespace Chats.BE.Controllers.Chats.Chats;
@@ -39,20 +43,13 @@ public class ChatController(
         [FromServices] FileUrlProvider fup,
         CancellationToken cancellationToken)
     {
-        InChatContext icc = new();
         int chatId = idEncryption.DecryptChatId(request.EncryptedChatId);
         long? messageId = request.EncryptedMessageId != null ? idEncryption.DecryptMessageId(request.EncryptedMessageId) : null;
-
-        UserModel? userModel = await userModelManager.GetUserModel(currentUser.Id, request.ModelId, cancellationToken);
-
-        UserBalance userBalance = await db.UserBalances.Where(x => x.UserId == currentUser.Id).SingleAsync(cancellationToken);
-        ChatSpan? chatSpan = await db.ChatSpans.SingleOrDefaultAsync(x => 
-            x.ChatId == chatId && 
-            x.Chat.UserId == currentUser.Id &&
-            x.SpanId == request.SpanId, cancellationToken);
-        if (chatSpan == null)
+        
+        Chat? chat = await db.Chats.FindAsync([chatId], cancellationToken);
+        if (chat == null || chat.UserId != currentUser.Id)
         {
-            return this.BadRequestMessage("Chat not found");
+            return NotFound();
         }
 
         Dictionary<long, MessageLiteDto> existingMessages = await db.Messages
@@ -69,16 +66,53 @@ public class ChatController(
                     .ToArray(),
                 Role = (DBChatRole)x.ChatRoleId,
                 ParentId = x.ParentId,
+                SpanId = x.SpanId,
             })
             .ToDictionaryAsync(x => x.Id, x => x, cancellationToken);
-        MessageLiteDto? systemMessage = existingMessages
-            .Values
-            .Where(x => x.Role == DBChatRole.System)
-            .FirstOrDefault();
+
+        Response.Headers.ContentType = "text/event-stream";
+        Response.Headers.CacheControl = "no-cache";
+        Response.Headers.Connection = "keep-alive";
+        string stopId = stopService.CreateAndCombineCancellationToken(ref cancellationToken);
+        await YieldResponse(SseResponseLine.StopId(stopId));
+        // ChatAsLine...
+
+        if (existingMessages.Count == 0)
+        {
+            chat.Title = request.UserMessage.Text[..Math.Min(50, request.UserMessage.Text.Length)];
+            await YieldTitle(chat.Title);
+        }
+        return new EmptyResult();
+    }
+
+    private async IAsyncEnumerable<SseResponseLine> ChatAsLine(
+        UserModelManager userModelManager, 
+        short modelId, 
+        int chatId,
+        ChatSpanRequest span,
+        Dictionary<long, MessageLiteDto> existingMessages,
+        [EnumeratorCancellation] CancellationToken cancellationToken)
+    {
+        InChatContext icc = new();
+        
+        UserModel? userModel = await userModelManager.GetUserModel(currentUser.Id, modelId, cancellationToken);
+
+        UserBalance userBalance = await db.UserBalances.Where(x => x.UserId == currentUser.Id).SingleAsync(cancellationToken);
+        ChatSpan? chatSpan = await db.ChatSpans.SingleOrDefaultAsync(x =>
+            x.ChatId == chatId &&
+            x.Chat.UserId == currentUser.Id &&
+            x.SpanId == span.SpanId, cancellationToken);
+        if (chatSpan == null)
+        {
+            yield return SseResponseLine.Error(span.SpanId, "Chat not found");
+            yield break;
+        }
+
+        MessageLiteDto? systemMessage = existingMessages.Values.Where(x => x.Role == DBChatRole.System && x.SpanId == span.SpanId).FirstOrDefault();
         // insert system message if it doesn't exist
         if (existingMessages.Count == 0)
         {
-            if (!string.IsNullOrWhiteSpace(request.UserModelConfig.Prompt))
+            if (!string.IsNullOrWhiteSpace(span.Prompt))
             {
                 Message toBeInsert = new()
                 {
@@ -86,7 +120,7 @@ public class ChatController(
                     ChatRoleId = (byte)DBChatRole.System,
                     MessageContents =
                     [
-                        MessageContent.FromText(request.UserModelConfig.Prompt)
+                        MessageContent.FromText(span.Prompt)
                     ],
                     CreatedAt = DateTime.UtcNow,
                 };
@@ -98,6 +132,7 @@ public class ChatController(
                     Content = [toBeInsert.MessageContents.First()],
                     Role = DBChatRole.System,
                     ParentId = null,
+                    SpanId = span.SpanId,
                 };
             }
 
@@ -171,15 +206,6 @@ public class ChatController(
             await foreach (InternalChatSegment seg in icc.Run(userBalance.Balance, userModel, s.ChatStreamedFEProcessed(messageToSend, cco, cancellationToken)))
             {
                 if (seg.TextSegment == string.Empty) continue;
-                if (!everYield)
-                {
-                    Response.Headers.ContentType = "text/event-stream";
-                    Response.Headers.CacheControl = "no-cache";
-                    Response.Headers.Connection = "keep-alive";
-                    stopId = stopService.CreateAndCombineCancellationToken(ref cancellationToken);
-                    await YieldResponse(SseResponseLine.StopId(stopId));
-                    everYield = true;
-                }
                 await YieldResponse(SseResponseLine.Segment(seg.TextSegment));
 
                 if (cancellationToken.IsCancellationRequested)
@@ -254,12 +280,7 @@ public class ChatController(
             await balanceService.UpdateUsage(db, userModel!.Id, CancellationToken.None);
         }
 
-        await YieldResponse(SseResponseLine.PostMessage(dbUserMessage, dbAssistantMessage, idEncryption, fup));
-        if (existingMessages.Count == 0)
-        {
-            await YieldTitle(chatSpan.Chat.Title);
-        }
-        return new EmptyResult();
+        await YieldResponse(SseResponseLine.PostMessage(dbUserMessage, dbAssistantMessage, idEncryption, fup));   
     }
 
     private async Task YieldTitle(string title)

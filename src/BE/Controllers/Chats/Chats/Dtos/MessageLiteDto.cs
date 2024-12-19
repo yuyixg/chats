@@ -11,6 +11,7 @@ public record MessageLiteDto
     public required long Id { get; init; }
     public required long? ParentId { get; init; }
     public required DBChatRole Role { get; init; }
+    public required byte SpanId { get; init; }
     public required MessageContent[] Content { get; init; }
 
     public async Task<ChatMessage> ToOpenAI(FileUrlProvider fup, CancellationToken cancellationToken)
