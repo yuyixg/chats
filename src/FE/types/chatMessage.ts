@@ -5,9 +5,10 @@ export enum SseResponseKind {
   StopId = 0,
   Segment = 1,
   Error = 2,
-  PostMessage = 3,
+  UserMessage = 3,
   UpdateTitle = 4,
   TitleSegment = 5,
+  ResponseMessage = 6,
 }
 
 // Discriminated unions for SseResponseLine
@@ -17,34 +18,36 @@ interface SseResponseLineStopId {
 }
 
 interface SseResponseLineSegment {
+  i: number; // SpanId is required for Segment
   k: SseResponseKind.Segment; // Kind is Segment
   r: string; // Result is a string
 }
 
 interface SseResponseLineError {
+  i: number; // SpanId is required for Error
   k: SseResponseKind.Error; // Kind is Error
   r: string; // Result is a string
 }
 
-interface SseResponseLinePostMessage {
-  k: SseResponseKind.PostMessage; // Kind is End
-  r: SseEndMessage; // Result is SseEndMessage
+interface SseResponseLineUserMessage {
+  k: SseResponseKind.UserMessage; // Kind is UserMessage
+  r: ChatMessage; // Result is ChatMessage
+}
+
+interface SseResponseLineResponseMessage {
+  i: number; // SpanId is required for ResponseMessage
+  k: SseResponseKind.ResponseMessage; // Kind is ResponseMessage
+  r: ChatMessage; // Result is ChatMessage
 }
 
 interface SseResponseLineUpdateTitle {
-  k: SseResponseKind.UpdateTitle;
-  r: string;
+  k: SseResponseKind.UpdateTitle; // Kind is UpdateTitle
+  r: string; // Result is a string
 }
 
 interface SseResponseLineTitleSegment {
-  k: SseResponseKind.TitleSegment;
-  r: string;
-}
-
-// Definition of SseEndMessage
-interface SseEndMessage {
-  requestMessage: ChatMessage | null; // May be null
-  responseMessage: ChatMessage; // Required
+  k: SseResponseKind.TitleSegment; // Kind is TitleSegment
+  r: string; // Result is a string
 }
 
 // Combined type for SseResponseLine
@@ -52,7 +55,8 @@ export type SseResponseLine =
   | SseResponseLineStopId
   | SseResponseLineSegment
   | SseResponseLineError
-  | SseResponseLinePostMessage
+  | SseResponseLineUserMessage
+  | SseResponseLineResponseMessage
   | SseResponseLineUpdateTitle
   | SseResponseLineTitleSegment;
 
