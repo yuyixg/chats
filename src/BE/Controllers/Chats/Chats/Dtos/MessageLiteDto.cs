@@ -11,8 +11,20 @@ public record MessageLiteDto
     public required long Id { get; init; }
     public required long? ParentId { get; init; }
     public required DBChatRole Role { get; init; }
-    public required byte SpanId { get; init; }
+    public required byte? SpanId { get; init; }
     public required MessageContent[] Content { get; init; }
+
+    public static MessageLiteDto FromDB(Message message)
+    {
+        return new MessageLiteDto
+        {
+            Id = message.Id,
+            ParentId = message.ParentId,
+            Role = (DBChatRole)message.ChatRoleId,
+            SpanId = message.SpanId,
+            Content = [.. message.MessageContents]
+        };
+    }
 
     public async Task<ChatMessage> ToOpenAI(FileUrlProvider fup, CancellationToken cancellationToken)
     {
