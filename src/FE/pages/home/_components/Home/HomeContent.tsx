@@ -10,7 +10,7 @@ import {
   getStorageChatId,
   setStorageChatId,
 } from '@/utils/chats';
-import { formatMessages, getSelectMessages } from '@/utils/message';
+import { formatMessages, getSelectedMessages } from '@/utils/message';
 import { getStorageModelId, setStorageModelId } from '@/utils/model';
 import { formatPrompt } from '@/utils/promptVariable';
 import { getSettings } from '@/utils/settings';
@@ -229,7 +229,7 @@ const HomeContent = () => {
         const messages = formatMessages(data);
         messageDispatch(setCurrentMessages(messages));
         const lastMessage = messages[messages.length - 1];
-        const selectMessageList = getSelectMessages(messages, lastMessage.id);
+        const selectMessageList = getSelectedMessages(messages, lastMessage.id);
         if (lastMessage.role !== 'assistant') {
           chatDispatch(setChatStatus(true));
           selectMessageList.push(chatErrorMessage(lastMessage.id));
@@ -268,7 +268,7 @@ const HomeContent = () => {
           const messages = formatMessages(data);
           messageDispatch(setCurrentMessages(messages));
           const lastMessage = messages[messages.length - 1];
-          const selectMessageList = getSelectMessages(messages, lastMessage.id);
+          const selectMessageList = getSelectedMessages(messages, lastMessage.id);
           if (lastMessage.role !== 'assistant') {
             chatDispatch(setChatStatus(true));
             selectMessageList.push(chatErrorMessage(lastMessage.id));

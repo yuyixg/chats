@@ -11,7 +11,7 @@ import toast from 'react-hot-toast';
 import useTranslation from '@/hooks/useTranslation';
 
 import { getApiUrl } from '@/utils/common';
-import { formatMessages, getSelectMessages } from '@/utils/message';
+import { formatMessages, getSelectedMessages } from '@/utils/message';
 import { throttle } from '@/utils/throttle';
 import { getUserSession } from '@/utils/user';
 
@@ -19,18 +19,10 @@ import { ChatBody, Content, ContentRequest, Message, Role } from '@/types/chat';
 import { SseResponseKind, SseResponseLine } from '@/types/chatMessage';
 import { Prompt } from '@/types/prompt';
 
-import ChangeChatModelDropdownMenu from '@/components/ChangeModel/ChangeModel';
-import { IconMinus } from '@/components/Icons';
-import TemperatureSlider from '@/components/TemperatureSlider/TemperatureSlider';
-import Tips from '@/components/Tips/Tips';
-import { Button } from '@/components/ui/button';
-
 import {
-  setChangeSelectedChatSpan,
   setChatStatus,
   setChats,
   setMessageIsStreaming,
-  setSelectedChat,
   setStopIds,
 } from '../../_actions/chat.actions';
 import {
@@ -39,32 +31,16 @@ import {
   setMessages,
   setSelectedMessages,
 } from '../../_actions/message.actions';
-import { setSelectedModel } from '../../_actions/model.actions';
-import {
-  setEnableSearch,
-  setPrompt,
-  setTemperature,
-} from '../../_actions/userModelConfig.actions';
+import { setTemperature } from '../../_actions/userModelConfig.actions';
 import HomeContext from '../../_contexts/home.context';
-import ModeToggle from '../ModeToggle/ModeToggle';
+import ChatHeader from './ChatHeader';
 import ChatInput from './ChatInput';
-import EnableNetworkSearch from './EnableNetworkSearch';
+import ChatModelSetting from './ChatModelSetting';
 import MemoizedChatMessage from './MemoizedChatMessage';
-import ModelSelect from './ModelSelect';
 import NoModel from './NoModel';
-import SystemPrompt from './SystemPrompt';
-
-import {
-  deleteUserChatSpan,
-  postUserChatSpan,
-  putUserChatModel,
-  putUserChatSpan,
-} from '@/apis/clientApis';
-import { cn } from '@/lib/utils';
 
 const Chat = memo(() => {
   const { t } = useTranslation();
-  const MAX_SELECT_MODEL_COUNT = 2;
   const {
     state: {
       prompt,
@@ -83,9 +59,6 @@ const Chat = memo(() => {
 
       models,
       selectModel,
-
-      prompts,
-      showChatBar,
     },
     handleCreateNewChat,
     handleStartChat,
@@ -96,7 +69,6 @@ const Chat = memo(() => {
     chatDispatch,
     messageDispatch,
     userModelConfigDispatch,
-    modelDispatch,
   } = useContext(HomeContext);
   const [autoScrollEnabled, setAutoScrollEnabled] = useState<boolean>(true);
   const [showScrollDownButton, setShowScrollDownButton] =
@@ -104,6 +76,7 @@ const Chat = memo(() => {
 
   const messagesEndRef = useRef<HTMLDivElement>(null);
   const chatContainerRef = useRef<HTMLDivElement>(null);
+
   const getSelectedMessagesLast = () => {
     const selectedMessageLength = selectedMessages.length - 1;
     const lastMessage = { ...selectedMessages[selectedMessageLength] };
@@ -125,7 +98,7 @@ const Chat = memo(() => {
   };
 
   const updateSelectedMessage = (messageId: string) => {
-    const selectMessageList = getSelectMessages(currentMessages, messageId);
+    const selectMessageList = getSelectedMessages(currentMessages, messageId);
     messageDispatch(setSelectedMessages(selectMessageList));
   };
 
@@ -317,12 +290,17 @@ const Chat = memo(() => {
           updateChatStatus(isErrorChat);
           handleStopChats();
           setSelectMessages({ text, error: value.r });
-        } else if (value.k === SseResponseKind.PostMessage) {
-          const { requestMessage, responseMessage } = value.r;
+        } else if (value.k === SseResponseKind.UserMessage) {
+          const requestMessage = value.r;
           newMessages = newMessages.map((m) => {
             if (requestMessage && m.id === MESSAGE_TEMP_ID) {
               m = { ...m, ...requestMessage };
             }
+            return m;
+          });
+        } else if (value.k === SseResponseKind.ResponseMessage) {
+          const responseMessage = value.r;
+          newMessages = newMessages.map((m) => {
             if (m.id === ASSISTANT_MESSAGE_TEMP_ID) {
               m = { ...m, ...responseMessage };
             }
@@ -332,7 +310,7 @@ const Chat = memo(() => {
           messageDispatch(setMessages(newMessages));
           messageDispatch(setCurrentMessages(messageList));
           const lastMessage = messageList[messageList.length - 1];
-          const selectedMessageList = getSelectMessages(
+          const selectedMessageList = getSelectedMessages(
             messageList,
             lastMessage.id,
           );
@@ -408,48 +386,6 @@ const Chat = memo(() => {
     }
   };
 
-  const handleAddChatModel = async (modelId: number) => {
-    await postUserChatSpan(selectedChat.id, { modelId }).then((data) => {
-      selectedChat.spans.push({
-        spanId: data.spanId,
-        modelId: data.modelId,
-        modelName: data.modelName,
-        modelProviderId: data.modelProviderId,
-        temperature: data.temperature,
-        enableSearch: data.enableSearch,
-      });
-      chatDispatch(setSelectedChat(selectedChat));
-    });
-  };
-
-  const handleRemoveChatModel = async (spanId: number) => {
-    await deleteUserChatSpan(selectedChat.id, spanId).then(() => {
-      selectedChat.spans = selectedChat.spans.filter(
-        (s) => s.spanId !== spanId,
-      );
-      chatDispatch(setSelectedChat(selectedChat));
-    });
-  };
-
-  const handleUpdateChatModel = async (spanId: number, modelId: number) => {
-    await putUserChatSpan(selectedChat.id, spanId, { modelId }).then((data) => {
-      selectedChat.spans = selectedChat.spans.map((s) => {
-        if (s.spanId === spanId) {
-          return {
-            ...s,
-            modelId: data.modelId,
-            modelName: data.modelName,
-            modelProviderId: data.modelProviderId,
-            temperature: data.temperature,
-            enableSearch: data.enableSearch,
-          };
-        }
-        return s;
-      });
-      chatDispatch(setSelectedChat(selectedChat));
-    });
-  };
-
   return (
     <div className="relative flex-1 overflow-hidden">
       <>
@@ -458,106 +394,10 @@ const Chat = memo(() => {
           ref={chatContainerRef}
           onScroll={handleScroll}
         >
-          <div className="sticky top-0 pt-1 z-10 text-sm bg-background right-0">
-            <div className="flex items-center justify-between h-10">
-              <div
-                className={cn(
-                  'flex justify-start items-center ml-24',
-                  showChatBar && 'ml-6',
-                )}
-              >
-                <div className="flex flex-col gap-y-1 h-16 mt-8">
-                  <div className="flex flex-col gap-x-1">
-                    {selectedChat.spans.map((span) => (
-                      <div className="flex">
-                        <ChangeChatModelDropdownMenu
-                          key={'change-model-' + span.modelId}
-                          models={models}
-                          className="font-semibold text-base"
-                          content={span?.modelName}
-                          onChangeModel={(model) => {
-                            handleUpdateChatModel(span.spanId, model.modelId);
-                          }}
-                        />
-
-                        <div>
-                          <Tips
-                            trigger={
-                              <Button
-                                onClick={() => {
-                                  handleRemoveChatModel(span.spanId);
-                                }}
-                                variant="ghost"
-                                className="p-1 m-0 h-auto"
-                              >
-                                <IconMinus />
-                              </Button>
-                            }
-                            content={t('Remove')}
-                          />
-                        </div>
-                      </div>
-                    ))}
-                  </div>
-                  <div>
-                    {selectedChat.spans.length < MAX_SELECT_MODEL_COUNT && (
-                      <ChangeChatModelDropdownMenu
-                        models={models}
-                        className="font-semibold text-base"
-                        content={t('Add another model')}
-                        onChangeModel={(model) => {
-                          handleAddChatModel(model.modelId);
-                        }}
-                      />
-                    )}
-                  </div>
-                </div>
-              </div>
-              <div className="mr-2 md:mr-4">{<ModeToggle />}</div>
-            </div>
-          </div>
+          <ChatHeader />
 
           {selectedMessages?.length === 0 ? (
-            <div className="mx-auto flex flex-col space-y-5 md:space-y-10 px-3 pt-[52px] sm:max-w-[600px]">
-              {hasModel() && selectedChat.spans.length === 1 && (
-                <div className="flex h-full flex-col space-y-4 rounded-lg border border-neutral-200 p-4 dark:border-neutral-600">
-                  <ModelSelect />
-                  {selectModel?.allowSystemPrompt && prompt && (
-                    <SystemPrompt
-                      currentPrompt={prompt}
-                      prompts={prompts}
-                      model={selectModel}
-                      onChangePromptText={(value) => {
-                        userModelConfigDispatch(setPrompt(value));
-                      }}
-                      onChangePrompt={onChangePrompt}
-                    />
-                  )}
-                  {selectModel?.allowTemperature &&
-                    temperature !== null &&
-                    temperature !== undefined && (
-                      <TemperatureSlider
-                        label={t('Temperature')}
-                        min={0}
-                        max={1}
-                        defaultTemperature={temperature}
-                        onChangeTemperature={(value) =>
-                          userModelConfigDispatch(setTemperature(value))
-                        }
-                      />
-                    )}
-                  {selectModel?.allowSearch && enableSearch != undefined && (
-                    <EnableNetworkSearch
-                      label={t('Internet Search')}
-                      enable={enableSearch}
-                      onChange={(value) => {
-                        userModelConfigDispatch(setEnableSearch(value));
-                      }}
-                    />
-                  )}
-                </div>
-              )}
-            </div>
+            <ChatModelSetting />
           ) : (
             <>
               {selectedMessages.map((current, index) => {

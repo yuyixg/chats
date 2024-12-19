@@ -3,7 +3,7 @@ import { useEffect, useState } from 'react';
 import { useRouter } from 'next/router';
 
 import { getQueryId } from '@/utils/common';
-import { getSelectMessages } from '@/utils/message';
+import { getSelectedMessages } from '@/utils/message';
 
 import { GetMessageDetailsResult } from '@/types/adminApis';
 import { ChatMessage } from '@/types/chatMessage';
@@ -42,7 +42,7 @@ export default function MessageDetails() {
         });
         setChatSummary({ tokenUsed, calculatedPrice });
         const lastMessage = data.messages[data.messages.length - 1];
-        const _selectMessages = getSelectMessages(
+        const _selectMessages = getSelectedMessages(
           data.messages,
           lastMessage.id,
         );
@@ -52,7 +52,7 @@ export default function MessageDetails() {
   }, [router.isReady]);
 
   const onMessageChange = (messageId: string) => {
-    const _selectMessages = getSelectMessages(currentMessages, messageId);
+    const _selectMessages = getSelectedMessages(currentMessages, messageId);
     setSelectMessages(_selectMessages);
   };
 

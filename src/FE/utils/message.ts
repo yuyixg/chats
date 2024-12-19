@@ -27,7 +27,7 @@ function findMessageParent(
   return messages.reverse();
 }
 
-export function getSelectMessages(
+export function getSelectedMessages(
   conversations: ChatMessage[],
   nodeId: string,
 ): ChatMessage[] {
