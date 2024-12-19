@@ -864,3 +864,5 @@ GO
 ALTER TABLE dbo.MessageContent SET (LOCK_ESCALATION = TABLE)
 GO
 COMMIT
+
+update [Message] set [SpanId] = null where ChatRoleId = 2;
