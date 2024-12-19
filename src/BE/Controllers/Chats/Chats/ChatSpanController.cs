@@ -65,7 +65,7 @@ public class ChatSpanController(ChatsDB db, IUrlEncryptionService idEncryption, 
             toAdd = new ChatSpan()
             {
                 ChatId = chat.Id,
-                SpanId = (byte)(refSpan.SpanId + 1),
+                SpanId = FindAvailableSpanId(chat.ChatSpans),
                 ModelId = request.ModelId ?? refSpan.ModelId,
                 Model = um.Model,
                 Temperature = request.SetTemperature ? request.Temperature : refSpan.Temperature,
@@ -76,6 +76,16 @@ public class ChatSpanController(ChatsDB db, IUrlEncryptionService idEncryption, 
         chat.ChatSpans.Add(toAdd);
         await db.SaveChangesAsync(cancellationToken);
         return Created(default(string), ChatSpanDto.FromDB(toAdd));
+
+        static byte FindAvailableSpanId(ICollection<ChatSpan> spans)
+        {
+            byte spanId = 0;
+            while (spans.Any(x => x.SpanId == spanId))
+            {
+                spanId++;
+            }
+            return spanId;
+        }
     }
 
     [HttpPut("{spanId}")]
