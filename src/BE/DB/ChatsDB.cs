@@ -210,9 +210,7 @@ public partial class ChatsDB : DbContext
 
             entity.HasOne(d => d.Usage).WithOne(p => p.Message).HasConstraintName("FK_Message_UserModelUsage");
 
-            entity.HasOne(d => d.ChatSpan).WithMany(p => p.Messages)
-                .OnDelete(DeleteBehavior.ClientSetNull)
-                .HasConstraintName("FK_Message_ChatSpan");
+            entity.HasOne(d => d.ChatSpan).WithMany(p => p.Messages).HasConstraintName("FK_Message_ChatSpan");
         });
 
         modelBuilder.Entity<MessageContent>(entity =>

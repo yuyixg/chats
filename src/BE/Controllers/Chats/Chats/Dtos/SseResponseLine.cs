@@ -7,51 +7,49 @@ using System.Text.Json.Serialization;
 
 namespace Chats.BE.Controllers.Chats.Chats.Dtos;
 
-public record SseResponseLine<T>
+public record SseResponseLine<T> : SseResponseLine
 {
     [JsonPropertyName("r")]
     public required T Result { get; init; }
+}
+
+[JsonPolymorphic]
+[JsonDerivedType(typeof(SseResponseLine<string>))]
+[JsonDerivedType(typeof(SseResponseLine<MessageDto>))]
+public record SseResponseLine
+{
+    [JsonPropertyName("i"), JsonIgnore(Condition = JsonIgnoreCondition.WhenWritingNull)]
+    public byte? SpanId { get; init; }
 
     [JsonPropertyName("k")]
     public required SseResponseKind Kind { get; init; }
-}
 
-public static class SseResponseLine
-{
-    public static SseResponseLine<string> Segment(string segment)
+    public static SseResponseLine<string> Segment(byte spanId, string segment)
     {
         return new SseResponseLine<string>
         {
+            SpanId = spanId,
             Result = segment,
             Kind = SseResponseKind.Segment,
         };
     }
 
-    public static SseResponseLine<string> Error(string error)
+    public static SseResponseLine<string> Error(byte spanId, string error)
     {
         return new SseResponseLine<string>
         {
             Result = error,
+            SpanId = spanId,
             Kind = SseResponseKind.Error,
         };
     }
 
-    public static SseResponseLine<SseEndMessage> PostMessage(
-        Message? userMessage,
+    public static SseResponseLine<MessageDto> ResponseMessage(
+        byte spanId,
         Message assistantMessage,
         IUrlEncryptionService urlEncryptionService,
         FileUrlProvider fup)
     {
-        ChatMessageTemp? userMessageTemp = userMessage == null ? null : new ChatMessageTemp()
-        {
-            Content = [.. userMessage.MessageContents],
-            CreatedAt = userMessage.CreatedAt,
-            Id = userMessage.Id,
-            ParentId = userMessage.ParentId,
-            Role = (DBChatRole)userMessage.ChatRoleId,
-            SpanId = userMessage.SpanId,
-            Usage = null,
-        };
         ChatMessageTemp assistantMessageTemp = new()
         {
             Content = [.. assistantMessage.MessageContents],
@@ -73,16 +71,35 @@ public static class SseResponseLine
                 ReasoningTokens = assistantMessage.Usage.ReasoningTokens,
             },
         };
-        MessageDto? userMessageDto = userMessageTemp?.ToDto(urlEncryptionService, fup);
         MessageDto assistantMessageDto = assistantMessageTemp.ToDto(urlEncryptionService, fup);
-        return new SseResponseLine<SseEndMessage>
+        return new SseResponseLine<MessageDto>
         {
-            Result = new SseEndMessage
-            {
-                RequestMessage = userMessageDto,
-                ResponseMessage = assistantMessageDto
-            },
-            Kind = SseResponseKind.PostMessage,
+            SpanId = spanId,
+            Result = assistantMessageDto,
+            Kind = SseResponseKind.ResponseMessage,
+        };
+    }
+
+    public static SseResponseLine<MessageDto> UserMessage(
+        Message userMessage,
+        IUrlEncryptionService urlEncryptionService,
+        FileUrlProvider fup)
+    {
+        ChatMessageTemp userMessageTemp = new()
+        {
+            Content = [.. userMessage.MessageContents],
+            CreatedAt = userMessage.CreatedAt,
+            Id = userMessage.Id,
+            ParentId = userMessage.ParentId,
+            Role = (DBChatRole)userMessage.ChatRoleId,
+            SpanId = userMessage.SpanId,
+            Usage = null,
+        };
+        MessageDto userMessageDto = userMessageTemp.ToDto(urlEncryptionService, fup);
+        return new SseResponseLine<MessageDto>
+        {
+            Result = userMessageDto,
+            Kind = SseResponseKind.UserMessage,
         };
     }
 

@@ -13,21 +13,14 @@ public record UserModelBalanceCost(int Counts, int Tokens, decimal Balance, int 
 
     public static UserModelBalanceCost Empty => new(0, 0, 0, 0, 0, 0, 0);
 
-    public JsonTokenBalance ToJsonUserModel(JsonTokenBalance existing)
-    {
-        return existing with
-        {
-            Counts = RemainingCounts,
-            Tokens = RemainingTokens,
-        };
-    }
-
     public bool IsSufficient => 
         RemainingCounts >= 0 &&
         RemainingTokens >= 0 &&
         RemainingBalance >= 0;
-
 }
+
+public record BalanceInitialInfo(int Counts, int Tokens, decimal Balance);
+public record BalanceCostInfo(int CostCount, int CostTokens, decimal InputTokenPrice, decimal OutputTokenPrice);
 
 public record UserModelBalanceCalculator(int Counts, int Tokens, decimal Balance)
 {

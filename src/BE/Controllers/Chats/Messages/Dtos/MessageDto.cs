@@ -28,7 +28,7 @@ public abstract record MessageDto
     public required DateTime CreatedAt { get; init; }
 
     [JsonPropertyName("spanId")]
-    public required byte SpanId { get; init; }
+    public required byte? SpanId { get; init; }
 }
 
 public record RequestMessageDto : MessageDto;
@@ -144,7 +144,7 @@ public record ChatMessageTemp
     public required DBChatRole Role { get; init; }
     public required MessageContent[] Content { get; init; }
     public required DateTime CreatedAt { get; init; }
-    public required byte SpanId { get; init; }
+    public required byte? SpanId { get; init; }
     public required ChatMessageTempUsage? Usage { get; init; }
 
     public MessageDto ToDto(IUrlEncryptionService urlEncryption, FileUrlProvider fup)

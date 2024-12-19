@@ -16,7 +16,7 @@ public partial class Message
 
     public int ChatId { get; set; }
 
-    public byte SpanId { get; set; }
+    public byte? SpanId { get; set; }
 
     public long? ParentId { get; set; }
 
@@ -36,7 +36,7 @@ public partial class Message
 
     [ForeignKey("ChatId, SpanId")]
     [InverseProperty("Messages")]
-    public virtual ChatSpan ChatSpan { get; set; } = null!;
+    public virtual ChatSpan? ChatSpan { get; set; }
 
     [InverseProperty("Parent")]
     public virtual ICollection<Message> InverseParent { get; set; } = new List<Message>();

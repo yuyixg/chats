@@ -9,9 +9,8 @@ using System.Text;
 
 namespace Chats.BE.Services.ChatServices;
 
-public class InChatContext()
+public class InChatContext(long firstTick)
 {
-    private readonly long _firstTick = Stopwatch.GetTimestamp();
     private long _preprocessTick, _firstResponseTick, _endResponseTick, _finishTick;
     private short _segmentCount;
     public UserModelBalanceCost Cost { get; private set; } = UserModelBalanceCost.Empty;
@@ -85,10 +84,10 @@ public class InChatContext()
             CreatedAt = DateTime.UtcNow,
             FinishReasonId = (byte)FinishReason,
             SegmentCount = _segmentCount,
-            PreprocessDurationMs = (int)Stopwatch.GetElapsedTime(_firstTick, _preprocessTick).TotalMilliseconds,
+            PreprocessDurationMs = (int)Stopwatch.GetElapsedTime(firstTick, _preprocessTick).TotalMilliseconds,
             FirstResponseDurationMs = (int)Stopwatch.GetElapsedTime(_preprocessTick, _firstResponseTick).TotalMilliseconds,
             PostprocessDurationMs = (int)Stopwatch.GetElapsedTime(_endResponseTick, _finishTick).TotalMilliseconds,
-            TotalDurationMs = (int)Stopwatch.GetElapsedTime(_firstTick, _finishTick).TotalMilliseconds,
+            TotalDurationMs = (int)Stopwatch.GetElapsedTime(firstTick, _finishTick).TotalMilliseconds,
             InputTokens = _lastSegment.Usage.InputTokens,
             OutputTokens = _lastSegment.Usage.OutputTokens,
             ReasoningTokens = _lastSegment.Usage.ReasoningTokens,

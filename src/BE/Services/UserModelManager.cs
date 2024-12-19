@@ -20,6 +20,21 @@ public class UserModelManager(ChatsDB db)
         return balances;
     }
 
+    public async Task<Dictionary<short, UserModel>> GetUserModels(int userId, HashSet<short> modelIds, CancellationToken cancellationToken)
+    {
+        Dictionary<short, UserModel> balances = await db.UserModels
+            .Include(x => x.Model)
+            .Include(x => x.Model.ModelReference)
+            .Include(x => x.Model.ModelReference.Tokenizer)
+            .Include(x => x.Model.ModelKey)
+            .Include(x => x.Model.ModelKey.ModelProvider)
+            .Include(x => x.Model.ModelReference.CurrencyCodeNavigation)
+            .Where(x => x.UserId == userId && !x.IsDeleted && !x.Model.IsDeleted && modelIds.Contains(x.ModelId))
+            .ToDictionaryAsync(k => k.ModelId, v => v, cancellationToken);
+
+        return balances;
+    }
+
     private async Task<UserModel?> GetUserModel(int userId, string modelName, CancellationToken cancellationToken)
     {
         UserModel? balances = await db.UserModels
