@@ -58,3 +58,5 @@ WHERE Name = 'ERNIE-Lite-Pro-128K';
 -- 删除指定的记录
 DELETE FROM ModelReference
 WHERE Name = 'ERNIE-Lite-128K';
+
+DELETE FROM ModelReference where Name in ('ernie-func-8k', 'ernie-char-fiction-8k', 'ernie-tiny-128k');
