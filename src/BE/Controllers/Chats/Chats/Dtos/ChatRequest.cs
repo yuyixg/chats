@@ -1,6 +1,8 @@
 ﻿using Chats.BE.Controllers.Chats.Messages.Dtos;
 using Chats.BE.DB;
+using Chats.BE.Services.ChatServices.Extensions;
 using Chats.BE.Services.UrlEncryption;
+using OpenAI.Chat;
 using System.Text.Json.Serialization;
 
 namespace Chats.BE.Controllers.Chats.Chats.Dtos;
@@ -53,10 +55,21 @@ public record DecryptedChatRequest
 public record ChatSpanRequest
 {
     [JsonPropertyName("spanId")]
-    public required byte SpanId { get; init; }
+    public required byte Id { get; init; }
 
     [JsonPropertyName("prompt")]
     public required string? SystemPrompt { get; init; }
 
     public bool SystemPromptValid => !string.IsNullOrEmpty(SystemPrompt);
+
+    public ChatCompletionOptions ToChatCompletionOptions(int userId, ChatSpan span)
+    {
+        ChatCompletionOptions cco = new()
+        {
+            Temperature = span.Temperature,
+            EndUserId = userId.ToString(),
+        };
+        cco.SetAllowSearch(span.EnableSearch);
+        return cco;
+    }
 }
