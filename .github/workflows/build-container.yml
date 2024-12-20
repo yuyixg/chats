@@ -66,7 +66,7 @@ jobs:
           name: ${{ matrix.asset }}
           path: ${{ matrix.asset }}
   
-      - name: Compress artifacts into 7-zip
+      - name: Compress artifacts into 7z
         run: |
           7z a ${{ matrix.asset }}.7z ${{ matrix.asset }}
         shell: bash
@@ -203,19 +203,19 @@ jobs:
         include:
           - id: chats
           - id: chats-win-x64
-            args: -r win-x64 --self-contained true /p:PublishSingleFile=true /p:PublishReadyToRun=true /p:EnableCompressionInSingleFile=true
+            args: -r win-x64 --self-contained true /p:PublishReadyToRun=true
           - id: chats-linux-x64
-            args: -r linux-x64 --self-contained true /p:PublishSingleFile=true /p:PublishReadyToRun=true /p:EnableCompressionInSingleFile=true
+            args: -r linux-x64 --self-contained true /p:PublishReadyToRun=true
           - id: chats-linux-arm64
-            args: -r linux-arm64 --self-contained true /p:PublishSingleFile=true /p:PublishReadyToRun=true /p:EnableCompressionInSingleFile=true
+            args: -r linux-arm64 --self-contained true /p:PublishReadyToRun=true
           - id: chats-linux-musl-x64
-            args: -r linux-musl-x64 --self-contained true /p:PublishSingleFile=true /p:PublishReadyToRun=true /p:EnableCompressionInSingleFile=true
+            args: -r linux-musl-x64 --self-contained true /p:PublishReadyToRun=true
           - id: chats-linux-musl-arm64
-            args: -r linux-musl-arm64 --self-contained true /p:PublishSingleFile=true /p:PublishReadyToRun=true /p:EnableCompressionInSingleFile=true
+            args: -r linux-musl-arm64 --self-contained true /p:PublishReadyToRun=true
           - id: chats-osx-arm64
-            args: -r osx-arm64 --self-contained true /p:PublishSingleFile=true /p:PublishReadyToRun=true /p:EnableCompressionInSingleFile=true
+            args: -r osx-arm64 --self-contained true /p:PublishReadyToRun=true
           - id: chats-osx-x64
-            args: -r osx-x64 --self-contained true /p:PublishSingleFile=true /p:PublishReadyToRun=true /p:EnableCompressionInSingleFile=true
+            args: -r osx-x64 --self-contained true /p:PublishReadyToRun=true
 
     runs-on: ubuntu-latest
     steps:
@@ -238,7 +238,7 @@ jobs:
           name: ${{ matrix.id }}
           path: ./Publish
 
-      - name: Compress artifacts into ZIP
+      - name: Compress artifacts into 7z
         run: |
           7z a ${{ matrix.id }}.7z ./Publish
 
@@ -316,7 +316,7 @@ jobs:
             | chats.7z                  | ${{ vars.MINIO_URL }}/chats/r${{ github.run_number }}/chats.7z                  |
     
             **NOTE**: 
-            Replace \`r${{ github.run_number }}\` with \`latest\` in the download link to get the latest version, for example: \`${{ vars.MINIO_URL }}/chats/latest/chats-win-x64.zip\`
+            Replace \`r${{ github.run_number }}\` with \`latest\` in the download link to get the latest version, for example: \`${{ vars.MINIO_URL }}/chats/latest/chats-win-x64.7z\`
             `,
               draft: false,
               prerelease: false,
@@ -348,9 +348,9 @@ jobs:
           name: ${{ matrix.asset }}
           path: ${{ matrix.asset }}
   
-      - name: Compress artifacts into ZIP
+      - name: Compress artifacts into 7z
         run: |
-          zip -r ${{ matrix.asset }}.zip ${{ matrix.asset }}
+          7z a ${{ matrix.asset }}.7z ${{ matrix.asset }}
         shell: bash
   
       - name: Upload Asset
@@ -358,7 +358,7 @@ jobs:
         with:
           script: |
             const fs = require('fs');
-            const assetPath = './${{ matrix.asset }}.zip';
+            const assetPath = './${{ matrix.asset }}.7z';
             const releaseId = "${{ needs.create-release.outputs.release_id }}";
             const asset = fs.readFileSync(assetPath);
 
@@ -366,7 +366,7 @@ jobs:
               owner: context.repo.owner,
               repo: context.repo.repo,
               release_id: releaseId,
-              name: '${{ matrix.asset }}.zip',
+              name: '${{ matrix.asset }}.7z',
               data: asset,
             });
         env:
