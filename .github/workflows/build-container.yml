@@ -66,9 +66,9 @@ jobs:
           name: ${{ matrix.asset }}
           path: ${{ matrix.asset }}
   
-      - name: Compress artifacts into ZIP
+      - name: Compress artifacts into 7z
         run: |
-          zip -r ${{ matrix.asset }}.zip ${{ matrix.asset }}
+          7z a ${{ matrix.asset }}.7z ${{ matrix.asset }}
         shell: bash
 
       - name: Configure MINIO Credentials
@@ -79,7 +79,7 @@ jobs:
 
       - name: Upload to Minio
         run: |
-          aws --endpoint-url ${{ vars.MINIO_URL }} s3 cp ${{ matrix.asset }}.zip s3://chats/r${{ github.run_number }}/${{ matrix.asset }}.zip
+          aws --endpoint-url ${{ vars.MINIO_URL }} s3 cp ${{ matrix.asset }}.7z s3://chats/r${{ github.run_number }}/${{ matrix.asset }}.7z
 
   build-primary-container:
     needs: build-fe
@@ -203,19 +203,19 @@ jobs:
         include:
           - id: chats
           - id: chats-win-x64
-            args: -r win-x64 --self-contained true /p:PublishSingleFile=true /p:PublishReadyToRun=true /p:EnableCompressionInSingleFile=true
+            args: -r win-x64 --self-contained true /p:PublishReadyToRun=true /p:PublishSingleFile=true
           - id: chats-linux-x64
-            args: -r linux-x64 --self-contained true /p:PublishSingleFile=true /p:PublishReadyToRun=true /p:EnableCompressionInSingleFile=true
+            args: -r linux-x64 --self-contained true /p:PublishReadyToRun=true /p:PublishSingleFile=true
           - id: chats-linux-arm64
-            args: -r linux-arm64 --self-contained true /p:PublishSingleFile=true /p:PublishReadyToRun=true /p:EnableCompressionInSingleFile=true
+            args: -r linux-arm64 --self-contained true /p:PublishReadyToRun=true /p:PublishSingleFile=true
           - id: chats-linux-musl-x64
-            args: -r linux-musl-x64 --self-contained true /p:PublishSingleFile=true /p:PublishReadyToRun=true /p:EnableCompressionInSingleFile=true
+            args: -r linux-musl-x64 --self-contained true /p:PublishReadyToRun=true /p:PublishSingleFile=true
           - id: chats-linux-musl-arm64
-            args: -r linux-musl-arm64 --self-contained true /p:PublishSingleFile=true /p:PublishReadyToRun=true /p:EnableCompressionInSingleFile=true
+            args: -r linux-musl-arm64 --self-contained true /p:PublishReadyToRun=true /p:PublishSingleFile=true
           - id: chats-osx-arm64
-            args: -r osx-arm64 --self-contained true /p:PublishSingleFile=true /p:PublishReadyToRun=true /p:EnableCompressionInSingleFile=true
+            args: -r osx-arm64 --self-contained true /p:PublishReadyToRun=true /p:PublishSingleFile=true
           - id: chats-osx-x64
-            args: -r osx-x64 --self-contained true /p:PublishSingleFile=true /p:PublishReadyToRun=true /p:EnableCompressionInSingleFile=true
+            args: -r osx-x64 --self-contained true /p:PublishReadyToRun=true /p:PublishSingleFile=true
 
     runs-on: ubuntu-latest
     steps:
@@ -238,9 +238,9 @@ jobs:
           name: ${{ matrix.id }}
           path: ./Publish
 
-      - name: Compress artifacts into ZIP
+      - name: Compress artifacts into 7z
         run: |
-          zip -r ${{ matrix.id }}.zip ./Publish
+          7z a ${{ matrix.id }}.7z ./Publish
 
       - name: Configure MINIO Credentials
         run: |
@@ -250,7 +250,7 @@ jobs:
 
       - name: Upload to Minio
         run: |
-          aws --endpoint-url ${{ vars.MINIO_URL }} s3 cp ${{ matrix.id }}.zip s3://chats/r${{ github.run_number }}/${{ matrix.id }}.zip
+          aws --endpoint-url ${{ vars.MINIO_URL }} s3 cp ${{ matrix.id }}.7z s3://chats/r${{ github.run_number }}/${{ matrix.id }}.7z
 
   create-release:
     if: github.ref == 'refs/heads/main'
@@ -303,20 +303,20 @@ jobs:
             | Latest                        | ${{ vars.DOCKER_REGISTRY }}/${{ vars.DOCKER_NAMESPACE }}/chats:latest                                        |
     
             ### Alternative binaries download links that may faster than GitHub(for China users)
-            | Artifact                   | Download Link                                                       |
-            | -------------------------- | -------------------------------------------------------------------------------- |
-            | chats-win-x64.zip          | ${{ vars.MINIO_URL }}/chats/r${{ github.run_number }}/chats-win-x64.zip          |
-            | chats-linux-x64.zip        | ${{ vars.MINIO_URL }}/chats/r${{ github.run_number }}/chats-linux-x64.zip        |
-            | chats-linux-arm64.zip      | ${{ vars.MINIO_URL }}/chats/r${{ github.run_number }}/chats-linux-arm64.zip      |
-            | chats-linux-musl-x64.zip   | ${{ vars.MINIO_URL }}/chats/r${{ github.run_number }}/chats-linux-musl-x64.zip   |
-            | chats-linux-musl-arm64.zip | ${{ vars.MINIO_URL }}/chats/r${{ github.run_number }}/chats-linux-musl-arm64.zip |
-            | chats-osx-arm64.zip        | ${{ vars.MINIO_URL }}/chats/r${{ github.run_number }}/chats-osx-arm64.zip        |
-            | chats-osx-x64.zip          | ${{ vars.MINIO_URL }}/chats/r${{ github.run_number }}/chats-osx-x64.zip          |
-            | chats-fe.zip               | ${{ vars.MINIO_URL }}/chats/r${{ github.run_number }}/chats-fe.zip               |
-            | chats                      | ${{ vars.MINIO_URL }}/chats/r${{ github.run_number }}/chats                      |
+            | Artifact                  | Download Link                                                                   |
+            | ------------------------- | ------------------------------------------------------------------------------- |
+            | chats-win-x64.7z          | ${{ vars.MINIO_URL }}/chats/r${{ github.run_number }}/chats-win-x64.7z          |
+            | chats-linux-x64.7z        | ${{ vars.MINIO_URL }}/chats/r${{ github.run_number }}/chats-linux-x64.7z        |
+            | chats-linux-arm64.7z      | ${{ vars.MINIO_URL }}/chats/r${{ github.run_number }}/chats-linux-arm64.7z      |
+            | chats-linux-musl-x64.7z   | ${{ vars.MINIO_URL }}/chats/r${{ github.run_number }}/chats-linux-musl-x64.7z   |
+            | chats-linux-musl-arm64.7z | ${{ vars.MINIO_URL }}/chats/r${{ github.run_number }}/chats-linux-musl-arm64.7z |
+            | chats-osx-arm64.7z        | ${{ vars.MINIO_URL }}/chats/r${{ github.run_number }}/chats-osx-arm64.7z        |
+            | chats-osx-x64.7z          | ${{ vars.MINIO_URL }}/chats/r${{ github.run_number }}/chats-osx-x64.7z          |
+            | chats-fe.7z               | ${{ vars.MINIO_URL }}/chats/r${{ github.run_number }}/chats-fe.7z               |
+            | chats.7z                  | ${{ vars.MINIO_URL }}/chats/r${{ github.run_number }}/chats.7z                  |
     
             **NOTE**: 
-            Replace \`r${{ github.run_number }}\` with \`latest\` in the download link to get the latest version, for example: \`${{ vars.MINIO_URL }}/chats/latest/chats-win-x64.zip\`
+            Replace \`r${{ github.run_number }}\` with \`latest\` in the download link to get the latest version, for example: \`${{ vars.MINIO_URL }}/chats/latest/chats-win-x64.7z\`
             `,
               draft: false,
               prerelease: false,
@@ -348,8 +348,9 @@ jobs:
           name: ${{ matrix.asset }}
           path: ${{ matrix.asset }}
   
-      - name: Compress artifacts into ZIP
+      - name: Compress artifacts
         run: |
+          7z a ${{ matrix.asset }}.7z ${{ matrix.asset }}
           zip -r ${{ matrix.asset }}.zip ${{ matrix.asset }}
         shell: bash
   
@@ -358,17 +359,20 @@ jobs:
         with:
           script: |
             const fs = require('fs');
-            const assetPath = './${{ matrix.asset }}.zip';
+            const assetNames = [ '${{ matrix.asset }}.7z', '${{ matrix.asset }}.zip' ];
             const releaseId = "${{ needs.create-release.outputs.release_id }}";
-            const asset = fs.readFileSync(assetPath);
 
-            await github.rest.repos.uploadReleaseAsset({
-              owner: context.repo.owner,
-              repo: context.repo.repo,
-              release_id: releaseId,
-              name: '${{ matrix.asset }}.zip',
-              data: asset,
+            const promises = assetNames.map(assetName => {
+              const asset = fs.readFileSync('./' + assetName);
+              return github.rest.repos.uploadReleaseAsset({
+                owner: context.repo.owner,
+                repo: context.repo.repo,
+                release_id: releaseId,
+                name: assetName,
+                data: asset,
+              });
             });
+            await Promise.all(promises);
         env:
           GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
 

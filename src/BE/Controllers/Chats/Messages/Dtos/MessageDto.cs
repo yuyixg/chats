@@ -19,7 +19,7 @@ public abstract record MessageDto
     public required string? ParentId { get; init; }
 
     [JsonPropertyName("role")]
-    public required string Role { get; init; }
+    public required DBChatRole Role { get; init; }
 
     [JsonPropertyName("content")]
     public required MessageContentResponse Content { get; init; }
@@ -155,7 +155,7 @@ public record ChatMessageTemp
             {
                 Id = urlEncryption.EncryptMessageId(Id),
                 ParentId = ParentId != null ? urlEncryption.EncryptMessageId(ParentId.Value) : null, 
-                Role = Role.ToString().ToLowerInvariant(),
+                Role = Role,
                 Content = MessageContentResponse.FromSegments(Content, fup),
                 CreatedAt = CreatedAt,
                 SpanId = SpanId,
@@ -167,7 +167,7 @@ public record ChatMessageTemp
             {
                 Id = urlEncryption.EncryptMessageId(Id),
                 ParentId = ParentId != null ? urlEncryption.EncryptMessageId(ParentId.Value) : null, 
-                Role = Role.ToString().ToLowerInvariant(),
+                Role = Role,
                 Content = MessageContentResponse.FromSegments(Content, fup),
                 CreatedAt = CreatedAt,
                 SpanId = SpanId,

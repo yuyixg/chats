@@ -38,7 +38,7 @@ public class QianFanChatService : ChatService
             MaxOutputTokens = options.MaxOutputTokenCount,
             UserId = options.EndUserId,
             DisableSearch = !options.IsSearchEnabled(),
-            System = messages.OfType<SystemChatMessage>().Single().Content.Single(x => x.Kind == ChatMessageContentPartKind.Text).Text
+            System = messages.OfType<SystemChatMessage>().FirstOrDefault()?.Content.Single(x => x.Kind == ChatMessageContentPartKind.Text).Text
         };
 
         await foreach (ChatResponse chatResponse in ChatClient.ChatAsStreamAsync(model, qianFanMessages, chatRequestParameters, cancellationToken))

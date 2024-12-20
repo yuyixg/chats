@@ -9,9 +9,6 @@ namespace Chats.BE.Controllers.Chats.Chats.Dtos;
 
 public record ChatRequest
 {
-    [JsonPropertyName("modelId")]
-    public required short ModelId { get; init; }
-
     [JsonPropertyName("chatId")]
     public required string EncryptedChatId { get; init; }
 
@@ -28,7 +25,6 @@ public record ChatRequest
     {
         return new DecryptedChatRequest
         {
-            ModelId = ModelId,
             ChatId = idEncryption.DecryptChatId(EncryptedChatId),
             Spans = Spans,
             MessageId = EncryptedMessageId == null ? null : idEncryption.DecryptMessageId(EncryptedMessageId),
@@ -39,8 +35,6 @@ public record ChatRequest
 
 public record DecryptedChatRequest
 {
-    public required short ModelId { get; init; }
-
     public required int ChatId { get; init; }
 
     public required ChatSpanRequest[] Spans { get; init; }

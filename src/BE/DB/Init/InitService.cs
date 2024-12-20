@@ -88,7 +88,7 @@ public class InitService(IServiceScopeFactory scopeFactory)
             CreateUser = adminUser,
             UpdatedAt = DateTime.UtcNow,
             CreatedAt = DateTime.UtcNow,
-            Content = "You are {{MODEL_NAME}}, please follow user instructions carefully and respond thoughtfully. Current date: {{CURRENT_DATE}}.",
+            Content = "You're an AI intelligent assistant, Sdcb Chats. Please follow user instructions carefully and respond. Current date: {{CURRENT_DATE}}",
             IsDefault = true,
             IsSystem = true,
             Name = "Default Prompt",
