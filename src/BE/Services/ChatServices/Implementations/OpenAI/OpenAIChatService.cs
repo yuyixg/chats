@@ -31,11 +31,11 @@ public partial class OpenAIChatService : ChatService
     {
         await foreach (StreamingChatCompletionUpdate delta in _chatClient.CompleteChatStreamingAsync(messages, options, cancellationToken))
         {
-            if (delta.ContentUpdate.Count == 0) continue;
+            if (delta.ContentUpdate.Count == 0 && delta.Usage == null) continue;
 
             yield return new ChatSegment
             {
-                TextSegment = delta.ContentUpdate[0].Text,
+                TextSegment = delta.ContentUpdate.FirstOrDefault()?.Text ?? "",
                 FinishReason = delta.FinishReason,
                 Usage = delta.Usage != null ? new Dtos.ChatTokenUsage()
                 {
