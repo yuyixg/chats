@@ -348,9 +348,10 @@ jobs:
           name: ${{ matrix.asset }}
           path: ${{ matrix.asset }}
   
-      - name: Compress artifacts into 7z
+      - name: Compress artifacts
         run: |
           7z a ${{ matrix.asset }}.7z ${{ matrix.asset }}
+          zip -r ${{ matrix.asset }}.zip ${{ matrix.asset }}
         shell: bash
   
       - name: Upload Asset
@@ -358,17 +359,20 @@ jobs:
         with:
           script: |
             const fs = require('fs');
-            const assetPath = './${{ matrix.asset }}.7z';
+            const assetNames = [ '${{ matrix.asset }}.7z', '${{ matrix.asset }}.zip' ];
             const releaseId = "${{ needs.create-release.outputs.release_id }}";
-            const asset = fs.readFileSync(assetPath);
 
-            await github.rest.repos.uploadReleaseAsset({
-              owner: context.repo.owner,
-              repo: context.repo.repo,
-              release_id: releaseId,
-              name: '${{ matrix.asset }}.7z',
-              data: asset,
+            const promises = assetNames.map(assetName => {
+              const asset = fs.readFileSync('./' + assetName);
+              return github.rest.repos.uploadReleaseAsset({
+                owner: context.repo.owner,
+                repo: context.repo.repo,
+                release_id: releaseId,
+                name: assetName,
+                data: asset,
+              });
             });
+            await Promise.all(promises);
         env:
           GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
 
