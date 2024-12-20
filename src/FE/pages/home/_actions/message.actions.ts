@@ -4,12 +4,11 @@ import {
   SetCurrentMessageIdType,
   SetCurrentMessagesType,
   SetLastMessageIdType,
+  SetMessagesType,
   SetSelectedMessagesType,
 } from '../_reducers/message.reducer';
 
-export const setMessages = (
-  messages: SetSelectedMessagesType,
-): MessageAction => ({
+export const setMessages = (messages: SetMessagesType): MessageAction => ({
   type: MessageActionTypes.SET_MESSAGES,
   payload: messages,
 });

@@ -1,5 +1,6 @@
 import { preprocessLaTeX } from '@/utils/chats';
 
+import { ChatRole, Content } from '@/types/chat';
 import { PropsMessage } from '@/types/components/chat';
 
 import { CodeBlock } from '@/components/Markdown/CodeBlock';
@@ -9,20 +10,29 @@ import rehypeKatex from 'rehype-katex';
 import remarkGfm from 'remark-gfm';
 import remarkMath from 'remark-math';
 
+export interface ResponseMessage {
+  id: string;
+  content: Content;
+}
+
 interface Props {
   messageIsStreaming: boolean;
   currentChatMessageId: string;
-  message: PropsMessage;
-  parentId: string | null;
-  currentSelectIndex: number;
-  parentChildrenIds: string[];
+  message: ResponseMessage;
+  onActiveMessage: (messageId: string) => void;
 }
 
 const ResponseMessage = (props: Props) => {
-  const { messageIsStreaming, message, currentChatMessageId } = props;
+  const { messageIsStreaming, message, currentChatMessageId, onActiveMessage } =
+    props;
 
   return (
-    <div className="pr-0">
+    <div
+      className="pr-0"
+      onClick={() => {
+        onActiveMessage(message.id);
+      }}
+    >
       <MemoizedReactMarkdown
         className="prose dark:prose-invert flex-1"
         remarkPlugins={[remarkMath, remarkGfm]}

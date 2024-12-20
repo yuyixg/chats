@@ -27,7 +27,7 @@ export interface HomeInitialState {
   enableSearch: boolean | null;
 
   messages: ChatMessage[];
-  selectedMessages: ChatMessage[];
+  selectedMessages: ChatMessage[][];
   currentMessages: ChatMessage[];
   selectedMessageLastId: string;
   currentChatMessageId: string;
@@ -92,7 +92,7 @@ export interface HomeContextProps {
   hasModel: () => boolean;
   handleNewChat: () => void;
   handleStartChat: (
-    selectedMessages: ChatMessage[],
+    selectedMessages: ChatMessage[][],
     selectedMessageId: string,
     currentMessageId: string,
   ) => void;

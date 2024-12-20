@@ -1,7 +1,7 @@
 import { ChatMessage } from '@/types/chatMessage';
 
 export type SetMessagesType = ChatMessage[];
-export type SetSelectedMessagesType = ChatMessage[];
+export type SetSelectedMessagesType = ChatMessage[][];
 export type SetCurrentMessagesType = ChatMessage[];
 export type SetLastMessageIdType = string;
 export type SetCurrentMessageIdType = string;

@@ -1,4 +1,5 @@
-import { ChatMessage, MessageNode } from '@/types/chatMessage';
+import { ChatRole } from '@/types/chat';
+import { ChatMessage, ChatMessageNode, MessageNode } from '@/types/chatMessage';
 
 function findMessageChildren(
   conversations: ChatMessage[],
@@ -77,3 +78,97 @@ export const formatMessages = (nodes: MessageNode[]): MessageNode[] => {
     assistantChildrenIds: findResponseMessageChildren(nodes, node.parentId),
   }));
 };
+
+export function findLastLeafId(
+  messages: ChatMessageNode[],
+  id: string,
+): string | null {
+  const childrenMap: Record<string, ChatMessageNode[]> = {};
+  for (const message of messages) {
+    if (message.parentId) {
+      if (!childrenMap[message.parentId]) {
+        childrenMap[message.parentId] = [];
+      }
+      childrenMap[message.parentId].push(message);
+    }
+  }
+
+  function dfs(nodeId: string): string {
+    const children = childrenMap[nodeId];
+    if (!children || children.length === 0) {
+      return nodeId;
+    }
+    return dfs(children[children.length - 1].id);
+  }
+
+  return dfs(id);
+}
+
+export function findSelectedMessageByLeafId(
+  messages: ChatMessageNode[],
+  leafId: string,
+): ChatMessageNode[][] {
+  const messageMap = new Map<string, ChatMessageNode>();
+  messages.forEach((m) => messageMap.set(m.id, m));
+
+  const path: ChatMessageNode[][] = [];
+  let currentMessage = messageMap.get(leafId);
+
+  if (!currentMessage) return path;
+
+  while (currentMessage) {
+    const parentId: string | null = currentMessage.parentId;
+
+    if (currentMessage.role === ChatRole.User) {
+      const siblingIds = messages
+        .filter((m) => m.parentId === parentId && m.role === ChatRole.User)
+        .map((x) => x.id);
+
+      const currentOutputMessage: ChatMessageNode = {
+        ...currentMessage,
+        siblingIds,
+      };
+      path.unshift([currentOutputMessage]);
+    } else if (currentMessage.role === ChatRole.Assistant) {
+      const assistantSiblings = messages.filter(
+        (m) => m.parentId === parentId && m.role === ChatRole.Assistant,
+      );
+      const groupedSiblings = groupBy(assistantSiblings, 'spanId');
+
+      const group: ChatMessageNode[] = [];
+      groupedSiblings.forEach((siblingGroup) => {
+        const siblingIds = siblingGroup.map((x) => x.id);
+        let selectedMessage: ChatMessageNode | null = null;
+
+        siblingGroup.forEach((x) => {
+          if (x.id === currentMessage!.id) {
+            selectedMessage = { ...x, siblingIds, isActive: true };
+          }
+        });
+
+        if (!selectedMessage) {
+          const lastMessage = siblingGroup[siblingGroup.length - 1];
+          selectedMessage = { ...lastMessage, siblingIds };
+        }
+
+        group.push(selectedMessage);
+      });
+
+      path.unshift(group);
+    }
+
+    currentMessage = parentId ? messageMap.get(parentId) : undefined;
+  }
+
+  return path;
+}
+
+function groupBy<T>(array: T[], key: keyof T): T[][] {
+  const groups: { [key: string]: T[] } = {};
+  for (const item of array) {
+    const groupKey = String(item[key]);
+    groups[groupKey] = groups[groupKey] || [];
+    groups[groupKey].push(item);
+  }
+  return Object.values(groups);
+}

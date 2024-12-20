@@ -1,6 +1,11 @@
 import { ChatSpanDto } from './clientApis';
 
 export type Role = 'assistant' | 'user' | 'system';
+export enum ChatRole {
+  'System' = 1,
+  'User' = 2,
+  'Assistant' = 3,
+}
 export const DEFAULT_TEMPERATURE = 0.5;
 
 export enum ChatStatus {
@@ -10,7 +15,7 @@ export enum ChatStatus {
 }
 
 export interface Message {
-  role: Role;
+  role: ChatRole;
   content: Content;
 }
 

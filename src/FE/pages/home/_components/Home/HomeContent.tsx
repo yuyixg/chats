@@ -10,14 +10,18 @@ import {
   getStorageChatId,
   setStorageChatId,
 } from '@/utils/chats';
-import { formatMessages, getSelectedMessages } from '@/utils/message';
+import {
+  findSelectedMessageByLeafId,
+  formatMessages,
+  getSelectedMessages,
+} from '@/utils/message';
 import { getStorageModelId, setStorageModelId } from '@/utils/model';
 import { formatPrompt } from '@/utils/promptVariable';
 import { getSettings } from '@/utils/settings';
 import { getUserSession } from '@/utils/user';
 
 import { AdminModelDto } from '@/types/adminApis';
-import { DEFAULT_TEMPERATURE, IChat, Role } from '@/types/chat';
+import { ChatRole, DEFAULT_TEMPERATURE, IChat, Role } from '@/types/chat';
 import { ChatMessage } from '@/types/chatMessage';
 import { ChatResult, GetChatsParams } from '@/types/clientApis';
 
@@ -131,19 +135,21 @@ const HomeContent = () => {
     return model;
   };
 
-  const chatErrorMessage = (messageId: string): ChatMessage => {
-    return {
-      id: 'errorMessageTempId',
-      parentId: messageId,
-      childrenIds: [],
-      assistantChildrenIds: [],
-      role: 'assistant' as Role,
-      content: { text: '', fileIds: [] },
-      inputTokens: 0,
-      outputTokens: 0,
-      inputPrice: 0,
-      outputPrice: 0,
-    };
+  const chatErrorMessage = (messageId: string): ChatMessage[] => {
+    return [
+      {
+        id: 'errorMessageTempId',
+        spanId: 0,
+        parentId: messageId,
+        siblingIds: [],
+        role: ChatRole.Assistant,
+        content: { text: '', fileIds: [] },
+        inputTokens: 0,
+        outputTokens: 0,
+        inputPrice: 0,
+        outputPrice: 0,
+      },
+    ];
   };
 
   const handleSelectModel = (model: AdminModelDto) => {
@@ -181,7 +187,7 @@ const HomeContent = () => {
   };
 
   const handleStartChat = (
-    selectedMessages: ChatMessage[],
+    selectedMessages: ChatMessage[][],
     selectedMessageId: string,
     currentMessageId: string,
   ) => {
@@ -217,6 +223,22 @@ const HomeContent = () => {
     );
   };
 
+  const selectChatMessage = (messages: ChatMessage[]) => {
+    messageDispatch(setMessages(messages));
+    const messageCount = messages.length - 1;
+    const lastMessage = messages[messageCount];
+    const selectedMessageList = findSelectedMessageByLeafId(
+      messages,
+      lastMessage.id,
+    );
+    if (lastMessage.role !== ChatRole.Assistant) {
+      chatDispatch(setChatStatus(true));
+      selectedMessageList.push(chatErrorMessage(lastMessage.id));
+    }
+    messageDispatch(setSelectedMessages(selectedMessageList));
+
+    // messageDispatch(setLastMessageId(lastMessage.id));
+  };
   const handleSelectChat = (chat: IChat) => {
     chatDispatch(setChatStatus(false));
     chatDispatch(setSelectedChat(chat));
@@ -225,18 +247,24 @@ const HomeContent = () => {
     // selectModel && setStorageModelId(selectModel.modelId);
     getUserMessages(chat.id).then((data) => {
       if (data.length > 0) {
-        messageDispatch(setMessages(data));
-        const messages = formatMessages(data);
-        messageDispatch(setCurrentMessages(messages));
-        const lastMessage = messages[messages.length - 1];
-        const selectMessageList = getSelectedMessages(messages, lastMessage.id);
-        if (lastMessage.role !== 'assistant') {
-          chatDispatch(setChatStatus(true));
-          selectMessageList.push(chatErrorMessage(lastMessage.id));
-        }
+        selectChatMessage(data);
+        // messageDispatch(setMessages(data));
+        // const messages = formatMessages(data);
+        // const messageCount = data.length;
+        // const lastMessage = data[messageCount];
+        // const selectedMessageList = findSelectedMessageByLeafId(
+        //   data,
+        //   lastMessage.id,
+        // );
+        // messageDispatch(setCurrentMessages(messages));
+        // const selectMessageList = getSelectedMessages(messages, lastMessage.id);
+        // if (lastMessage.role !== ChatRole.Assistant) {
+        //   chatDispatch(setChatStatus(true));
+        //   selectMessageList.push(chatErrorMessage(lastMessage.id));
+        // }
 
-        messageDispatch(setSelectedMessages(selectMessageList));
-        messageDispatch(setLastMessageId(lastMessage.id));
+        // messageDispatch(setSelectedMessages(selectedMessageList));
+        // messageDispatch(setLastMessageId(lastMessage.id));
         clearUserModelConfig();
         // modelDispatch(setSelectedModel(selectModel));
       } else {
@@ -264,17 +292,21 @@ const HomeContent = () => {
 
       getUserMessages(chat.id).then((data) => {
         if (data.length > 0) {
-          messageDispatch(setMessages(data));
-          const messages = formatMessages(data);
-          messageDispatch(setCurrentMessages(messages));
-          const lastMessage = messages[messages.length - 1];
-          const selectMessageList = getSelectedMessages(messages, lastMessage.id);
-          if (lastMessage.role !== 'assistant') {
-            chatDispatch(setChatStatus(true));
-            selectMessageList.push(chatErrorMessage(lastMessage.id));
-          }
-          messageDispatch(setSelectedMessages(selectMessageList));
-          messageDispatch(setLastMessageId(lastMessage.id));
+          selectChatMessage(data);
+          // messageDispatch(setMessages(data));
+          // const messages = formatMessages(data);
+          // messageDispatch(setCurrentMessages(messages));
+          // const lastMessage = messages[messages.length - 1];
+          // const selectMessageList = getSelectedMessages(
+          //   messages,
+          //   lastMessage.id,
+          // );
+          // if (lastMessage.role !== 'assistant') {
+          //   chatDispatch(setChatStatus(true));
+          //   selectMessageList.push(chatErrorMessage(lastMessage.id));
+          // }
+          // messageDispatch(setSelectedMessages(selectMessageList));
+          // messageDispatch(setLastMessageId(lastMessage.id));
         } else {
           messageDispatch(setCurrentMessages([]));
           messageDispatch(setSelectedMessages([]));

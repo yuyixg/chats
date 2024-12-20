@@ -1,4 +1,5 @@
 import { AdminModelDto } from '@/types/adminApis';
+import { ChatRole, Content } from '@/types/chat';
 import { PropsMessage } from '@/types/components/chat';
 
 import ChangeModelAction from './ChangeModelAction';
@@ -9,14 +10,26 @@ import RegenerateAction from './RegenerateAction';
 
 import { cn } from '@/lib/utils';
 
+export interface ResponseMessage {
+  id: string;
+  siblingIds: string[];
+  parentId: string | null;
+  role: ChatRole;
+  content: Content;
+  inputTokens: number;
+  outputTokens: number;
+  reasoningTokens: number;
+  inputPrice: number;
+  outputPrice: number;
+  duration: number;
+  firstTokenLatency: number;
+}
+
 interface Props {
   models: AdminModelDto[];
-  message: PropsMessage;
+  message: ResponseMessage;
   modelName?: string;
   modelId?: number;
-  lastMessageId: string | null;
-  assistantCurrentSelectIndex: number;
-  assistantChildrenIds: string[];
   messageIsStreaming: boolean;
   onChangeMessage?: (messageId: string) => void;
   onRegenerate?: (modelId?: number) => void;
@@ -28,13 +41,12 @@ const ResponseMessageActions = (props: Props) => {
     message,
     modelName,
     modelId,
-    lastMessageId,
-    assistantCurrentSelectIndex,
-    assistantChildrenIds,
     onChangeMessage,
     onRegenerate,
     messageIsStreaming,
   } = props;
+  const { id: messageId, siblingIds, parentId, content } = message;
+  const currentMessageIndex = siblingIds.findIndex((x) => x === messageId);
 
   return (
     <>
@@ -43,22 +55,20 @@ const ResponseMessageActions = (props: Props) => {
       ) : (
         <div className="flex gap-1 flex-wrap mt-1">
           <PaginationAction
-            hidden={assistantChildrenIds.length <= 1}
-            disabledPrev={
-              assistantCurrentSelectIndex === 0 || messageIsStreaming
-            }
+            hidden={siblingIds.length <= 1}
+            disabledPrev={currentMessageIndex === 0 || messageIsStreaming}
             disabledNext={
-              assistantCurrentSelectIndex === assistantChildrenIds.length - 1 ||
+              currentMessageIndex === siblingIds.length - 1 ||
               messageIsStreaming
             }
-            messageIds={assistantChildrenIds}
-            currentSelectIndex={assistantCurrentSelectIndex}
+            messageIds={siblingIds}
+            currentSelectIndex={currentMessageIndex}
             onChangeMessage={onChangeMessage}
           />
           <div
             className={cn(
-              lastMessageId === message.id ? 'visible' : 'invisible',
-              'flex gap-0 items-center group-hover:visible focus:visible',
+              // lastMessageId === message.id ? 'visible' : 'invisible',
+              'visible flex gap-0 items-center group-hover:visible focus:visible',
             )}
           >
             <CopyAction text={message.content.text} />

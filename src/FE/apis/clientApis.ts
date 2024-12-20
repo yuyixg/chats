@@ -1,7 +1,5 @@
 import { useFetch } from '@/hooks/useFetch';
 
-import { formatMessages } from '@/utils/message';
-
 import { AdminModelDto, PostPromptParams } from '@/types/adminApis';
 import { ChatMessage } from '@/types/chatMessage';
 import {
