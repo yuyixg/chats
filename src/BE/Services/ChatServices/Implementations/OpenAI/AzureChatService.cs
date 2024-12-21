@@ -26,7 +26,7 @@ public class AzureChatService(Model model) : OpenAIChatService(model, CreateChat
         
         OpenAIClient api = new AzureOpenAIClient(
             new Uri(model.ModelKey.Host), 
-            new ApiKeyCredential(model.ModelKey.Secret), );
+            new ApiKeyCredential(model.ModelKey.Secret), options);
         return api.GetChatClient(model.ApiModelId);
     }
 }
