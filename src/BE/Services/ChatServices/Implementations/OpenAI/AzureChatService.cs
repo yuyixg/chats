@@ -3,6 +3,7 @@ using Chats.BE.DB;
 using OpenAI;
 using OpenAI.Chat;
 using System.ClientModel;
+using System.Reflection;
 
 namespace Chats.BE.Services.ChatServices.Implementations.OpenAI;
 
@@ -13,7 +14,19 @@ public class AzureChatService(Model model) : OpenAIChatService(model, CreateChat
         ArgumentException.ThrowIfNullOrWhiteSpace(model.ModelKey.Host, nameof(model.ModelKey.Host));
         ArgumentException.ThrowIfNullOrWhiteSpace(model.ModelKey.Secret, nameof(model.ModelKey.Secret));
 
-        OpenAIClient api = new AzureOpenAIClient(new Uri(model.ModelKey.Host), new ApiKeyCredential(model.ModelKey.Secret));
+        AzureOpenAIClientOptions options = new();
+        if (model.ModelReference.Name == "o1")
+        {
+            // o1 only supports api version: 2024-12-01-preview
+            options
+                .GetType()
+                .GetField("<Version>k__BackingField", BindingFlags.NonPublic | BindingFlags.Instance)
+                !.SetValue(options, "2024-12-01-preview");
+        }
+        
+        OpenAIClient api = new AzureOpenAIClient(
+            new Uri(model.ModelKey.Host), 
+            new ApiKeyCredential(model.ModelKey.Secret), );
         return api.GetChatClient(model.ApiModelId);
     }
 }
