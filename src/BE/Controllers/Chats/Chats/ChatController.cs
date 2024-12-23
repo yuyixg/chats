@@ -174,7 +174,8 @@ public class ChatController(
                 chat,
                 userModels[spanModelMapping[span.Id]],
                 existingMessages, 
-                systemMessages, 
+                systemMessages,
+                dbUserMessage,
                 userBalance, 
                 clientInfoTask,
                 channels[index].Writer, 
@@ -237,6 +238,7 @@ public class ChatController(
         UserModel userModel, 
         Dictionary<long, MessageLiteDto> existingMessages, 
         List<MessageLiteDto> systemMessages, 
+        Message? dbUserMessage,
         UserBalance userBalance, 
         Task<ClientInfo> clientInfoTask,
         ChannelWriter<SseResponseLine> writer, 
@@ -315,7 +317,8 @@ public class ChatController(
             ],
             SpanId = span.Id,
             CreatedAt = DateTime.UtcNow,
-            ParentId = req.MessageId,
+            Parent = dbUserMessage,  // only one of parent and parent id will be set
+            ParentId = req.MessageId,// only one of parent and parent id will be set
         };
 
         if (errorText != null)
