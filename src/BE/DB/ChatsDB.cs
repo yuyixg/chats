@@ -209,8 +209,6 @@ public partial class ChatsDB : DbContext
             entity.HasOne(d => d.Parent).WithMany(p => p.InverseParent).HasConstraintName("FK_Message_ParentMessage");
 
             entity.HasOne(d => d.Usage).WithOne(p => p.Message).HasConstraintName("FK_Message_UserModelUsage");
-
-            entity.HasOne(d => d.ChatSpan).WithMany(p => p.Messages).HasConstraintName("FK_Message_ChatSpan");
         });
 
         modelBuilder.Entity<MessageContent>(entity =>

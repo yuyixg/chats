@@ -27,9 +27,6 @@ public partial class ChatSpan
     [InverseProperty("ChatSpans")]
     public virtual Chat Chat { get; set; } = null!;
 
-    [InverseProperty("ChatSpan")]
-    public virtual ICollection<Message> Messages { get; set; } = new List<Message>();
-
     [ForeignKey("ModelId")]
     [InverseProperty("ChatSpans")]
     public virtual Model Model { get; set; } = null!;

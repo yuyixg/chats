@@ -67,17 +67,20 @@ public class ChatController(
         }
 
         // ensure chat.ChatSpan contains all span ids that in request, otherwise return error
-        if (req.Spans.Any(x => !chat.ChatSpans.Any(y => y.SpanId == x.Id)))
+        if (req.MessageId == null)
         {
-            return BadRequest("Invalid span id");
+            if (req.Spans.Any(x => !chat.ChatSpans.Any(y => y.SpanId == x.Id)))
+            {
+                return BadRequest("Invalid span id");
+            }
         }
 
         // get span id -> model id mapping but request only contains span id, so we need to get model id from chat.ChatSpan
         Dictionary<byte, short> spanModelMapping = req.Spans.ToDictionary(x => x.Id, x => chat.ChatSpans.First(y => y.SpanId == x.Id).ModelId);
         Dictionary<short, UserModel> userModels = await userModelManager.GetUserModels(currentUser.Id, [.. spanModelMapping.Values], cancellationToken);
 
-        // ensure all model ids are valid
-        if (userModels.Count != spanModelMapping.Count)
+        // ensure spanModelMapping contains all userModels
+        if (spanModelMapping.Values.Any(x => !userModels.ContainsKey(x)))
         {
             return BadRequest("Invalid span model");
         }
@@ -310,6 +313,7 @@ public class ChatController(
             [
                 MessageContent.FromText(icc.FullResponse.TextSegment),
             ],
+            SpanId = span.Id,
             CreatedAt = DateTime.UtcNow,
             ParentId = req.MessageId,
         };

@@ -866,3 +866,4 @@ GO
 COMMIT
 
 update [Message] set [SpanId] = null where ChatRoleId = 2;
+ALTER TABLE dbo.Message DROP CONSTRAINT FK_Message_ChatSpan;

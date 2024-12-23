@@ -34,10 +34,6 @@ public partial class Message
     [InverseProperty("Messages")]
     public virtual ChatRole ChatRole { get; set; } = null!;
 
-    [ForeignKey("ChatId, SpanId")]
-    [InverseProperty("Messages")]
-    public virtual ChatSpan? ChatSpan { get; set; }
-
     [InverseProperty("Parent")]
     public virtual ICollection<Message> InverseParent { get; set; } = new List<Message>();
 

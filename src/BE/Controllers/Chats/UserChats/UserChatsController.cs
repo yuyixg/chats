@@ -99,18 +99,19 @@ public class UserChatsController(ChatsDB db, CurrentUser currentUser, IUrlEncryp
         };
 
         Chat? lastChat = await db.Chats
-            .Include(x => x.ChatSpans)
+            .Include(x => x.ChatSpans.OrderBy(x => x.SpanId))
             .Where(x => x.UserId == currentUser.Id && !x.IsDeleted && x.ChatSpans.Any())
             .OrderByDescending(x => x.CreatedAt)
             .FirstOrDefaultAsync(cancellationToken);
         if (lastChat != null && lastChat.ChatSpans.All(cs => validModels.ContainsKey(cs.ModelId)))
         {
-            chat.ChatSpans = lastChat.ChatSpans.Select(cs => new ChatSpan()
+            chat.ChatSpans = lastChat.ChatSpans.Select((cs, i) => new ChatSpan()
             {
                 ModelId = cs.ModelId,
                 Model = validModels[cs.ModelId].Model,
                 EnableSearch = cs.EnableSearch,
                 Temperature = cs.Temperature,
+                SpanId = (byte)i,
             }).ToList();
         }
         else
