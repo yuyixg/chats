@@ -108,7 +108,6 @@ public class UserChatsController(ChatsDB db, CurrentUser currentUser, IUrlEncryp
             chat.ChatSpans = lastChat.ChatSpans.Select(cs => new ChatSpan()
             {
                 ModelId = cs.ModelId,
-                Model = validModels[cs.ModelId].Model,
                 EnableSearch = cs.EnableSearch,
                 Temperature = cs.Temperature,
             }).ToList();
@@ -120,7 +119,6 @@ public class UserChatsController(ChatsDB db, CurrentUser currentUser, IUrlEncryp
                 new ChatSpan()
                 {
                     ModelId = validModels.Values.First().ModelId,
-                    Model = validModels.Values.First().Model,
                     EnableSearch = false,
                     Temperature = ChatService.DefaultTemperature,
                 }
@@ -129,6 +127,11 @@ public class UserChatsController(ChatsDB db, CurrentUser currentUser, IUrlEncryp
         db.Chats.Add(chat);
         await db.SaveChangesAsync(cancellationToken);
 
+        // fill model because it's needed next
+        foreach (ChatSpan span in chat.ChatSpans)
+        {
+            span.Model = validModels[span.ModelId].Model;
+        }
         return Created(default(string), new ChatsResponse()
         {
             Id = idEncryption.EncryptChatId(chat.Id),
