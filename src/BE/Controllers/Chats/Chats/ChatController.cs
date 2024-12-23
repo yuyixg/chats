@@ -149,7 +149,7 @@ public class ChatController(
                 ParentId = req.MessageId,
             };
             db.Messages.Add(dbUserMessage);
-            existingMessages.Add(dbUserMessage.Id, MessageLiteDto.FromDB(dbUserMessage));
+            existingMessages.Add(-1, MessageLiteDto.FromDB(dbUserMessage));
         }
 
         Response.Headers.ContentType = "text/event-stream";
@@ -249,7 +249,7 @@ public class ChatController(
         OpenAIChatMessage[] messageToSend = await ((MessageLiteDto[])
         [
             ..systemMessages.Where(x => x.Role == DBChatRole.System && x.SpanId == span.Id || x.SpanId == null),
-            ..GetMessageTree(existingMessages, req.MessageId),
+            ..GetMessageTree(filteredMessages, req.MessageId ?? -1),
         ])
         .ToAsyncEnumerable()
         .SelectAwait(async x => await x.ToOpenAI(fup, cancellationToken))
