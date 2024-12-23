@@ -38,6 +38,11 @@ public class ChatController(
         [FromServices] FileUrlProvider fup,
         CancellationToken cancellationToken)
     {
+        if (!ModelState.IsValid)
+        {
+            return BadRequest(ModelState);
+        }
+
         long firstTick = Stopwatch.GetTimestamp();
         DecryptedChatRequest req = request.Decrypt(idEncryption);
 

@@ -51,7 +51,7 @@ public record ChatSpanRequest
     [JsonPropertyName("spanId")]
     public required byte Id { get; init; }
 
-    [JsonPropertyName("prompt")]
+    [JsonPropertyName("systemPrompt")]
     public required string? SystemPrompt { get; init; }
 
     public bool SystemPromptValid => !string.IsNullOrEmpty(SystemPrompt);
