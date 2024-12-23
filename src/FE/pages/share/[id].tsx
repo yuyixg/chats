@@ -56,7 +56,7 @@ export default function ShareMessage() {
   const showChat = () => {
     return chat ? (
       <>
-        <div className="w-full">
+        {/* <div className="w-full">
           {chat &&
             selectMessages.map((current, index) => {
               let parentChildrenIds: string[] = [];
@@ -103,7 +103,7 @@ export default function ShareMessage() {
                 />
               );
             })}
-        </div>
+        </div> */}
         <div className="h-32"></div>
         <div className="fixed bottom-0 py-4 w-full bg-white dark:bg-black dark:text-white">
           <div className="flex justify-center pb-2">

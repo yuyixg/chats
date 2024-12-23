@@ -15,7 +15,7 @@ import { isMobile } from '@/utils/common';
 import { formatPrompt } from '@/utils/promptVariable';
 
 import { AdminModelDto } from '@/types/adminApis';
-import { Content, ImageDef, Message } from '@/types/chat';
+import { ChatRole, Content, ImageDef, Message } from '@/types/chat';
 import { Prompt } from '@/types/prompt';
 
 import {
@@ -121,7 +121,7 @@ const ChatInput = ({
       toast.error(t('Please enter a message'));
       return;
     }
-    onSend({ role: 'user', content });
+    onSend({ role: ChatRole.User, content });
     setContent({ text: '', fileIds: [] });
 
     if (window.innerWidth < 640 && textareaRef && textareaRef.current) {

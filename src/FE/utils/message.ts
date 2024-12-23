@@ -82,7 +82,7 @@ export const formatMessages = (nodes: MessageNode[]): MessageNode[] => {
 export function findLastLeafId(
   messages: ChatMessageNode[],
   id: string,
-): string | null {
+): string {
   const childrenMap: Record<string, ChatMessageNode[]> = {};
   for (const message of messages) {
     if (message.parentId) {
@@ -118,6 +118,7 @@ export function findSelectedMessageByLeafId(
 
   while (currentMessage) {
     const parentId: string | null = currentMessage.parentId;
+    let prevUserMessage: ChatMessageNode | null = null;
 
     if (currentMessage.role === ChatRole.User) {
       const siblingIds = messages
@@ -128,6 +129,7 @@ export function findSelectedMessageByLeafId(
         ...currentMessage,
         siblingIds,
       };
+      prevUserMessage = currentOutputMessage;
       path.unshift([currentOutputMessage]);
     } else if (currentMessage.role === ChatRole.Assistant) {
       const assistantSiblings = messages.filter(
@@ -143,12 +145,14 @@ export function findSelectedMessageByLeafId(
         siblingGroup.forEach((x) => {
           if (x.id === currentMessage!.id) {
             selectedMessage = { ...x, siblingIds, isActive: true };
+          } else if (prevUserMessage && prevUserMessage.parentId === x.id) {
+            selectedMessage = { ...x, siblingIds, isActive: true };
           }
         });
 
         if (!selectedMessage) {
           const lastMessage = siblingGroup[siblingGroup.length - 1];
-          selectedMessage = { ...lastMessage, siblingIds };
+          selectedMessage = { ...lastMessage, siblingIds, isActive: false };
         }
 
         group.push(selectedMessage);

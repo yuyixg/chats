@@ -231,6 +231,7 @@ const HomeContent = () => {
       messages,
       lastMessage.id,
     );
+    console.log('selectedMessageList', selectedMessageList);
     if (lastMessage.role !== ChatRole.Assistant) {
       chatDispatch(setChatStatus(true));
       selectedMessageList.push(chatErrorMessage(lastMessage.id));

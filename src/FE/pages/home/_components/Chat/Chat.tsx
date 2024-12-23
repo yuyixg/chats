@@ -11,7 +11,12 @@ import toast from 'react-hot-toast';
 import useTranslation from '@/hooks/useTranslation';
 
 import { getApiUrl } from '@/utils/common';
-import { formatMessages, getSelectedMessages } from '@/utils/message';
+import {
+  findLastLeafId,
+  findSelectedMessageByLeafId,
+  formatMessages,
+  getSelectedMessages,
+} from '@/utils/message';
 import { throttle } from '@/utils/throttle';
 import { getUserSession } from '@/utils/user';
 
@@ -23,7 +28,11 @@ import {
   Message,
   Role,
 } from '@/types/chat';
-import { SseResponseKind, SseResponseLine } from '@/types/chatMessage';
+import {
+  ChatMessage,
+  SseResponseKind,
+  SseResponseLine,
+} from '@/types/chatMessage';
 import { Prompt } from '@/types/prompt';
 
 import ResponseMessage from '@/components/ChatMessage/ResponseMessage';
@@ -91,9 +100,12 @@ const Chat = memo(() => {
   const messagesEndRef = useRef<HTMLDivElement>(null);
   const chatContainerRef = useRef<HTMLDivElement>(null);
 
-  const getSelectedMessagesLast = () => {
+  const getSelectedMessagesLastActiveMessage = () => {
     const selectedMessageLength = selectedMessages.length - 1;
-    const lastMessage = selectedMessages[selectedMessageLength][0];
+    if (selectedMessageLength === -1) return null;
+    const lastMessage = selectedMessages[selectedMessageLength].find(
+      (x) => x.isActive,
+    );
     return lastMessage;
   };
 
@@ -115,10 +127,189 @@ const Chat = memo(() => {
   //   const selectMessageList = getSelectedMessages(currentMessages, messageId);
   //   messageDispatch(setSelectedMessages(selectMessageList));
   // };
+  const ResponseMessageTempId = 'RESPONSE_MESSAGE_TEMP_ID';
+  const UserMessageTempId = 'USER_MESSAGE_TEMP_ID';
+  const generateResponseMessages = (parentId?: string) => {
+    return selectedChat.spans.map((x) => {
+      return {
+        spanId: x.spanId,
+        id: `${ResponseMessageTempId}-${x.spanId}`,
+        role: ChatRole.Assistant,
+        parentId: parentId,
+        siblingIds: [],
+        isActive: false,
+        content: { text: '' },
+        inputTokens: 0,
+        outputTokens: 0,
+        inputPrice: 0,
+        outputPrice: 0,
+        modelName: x?.modelName,
+        modelId: x?.modelId,
+        reasoningTokens: 0,
+        duration: 0,
+        firstTokenLatency: 0,
+      } as ChatMessage;
+    });
+  };
+
+  const generateUserMessage = (content: Content, parentId?: string) => {
+    return {
+      spanId: null,
+      id: UserMessageTempId,
+      role: ChatRole.User,
+      parentId,
+      siblingIds: [],
+      isActive: false,
+      content,
+    } as ChatMessage;
+  };
+
+  const updateSelectedResponseMessageText = (
+    messages: ChatMessage[][],
+    messageId: string,
+    text: string,
+  ) => {
+    const messageCount = messages.length - 1;
+    let messageList = messages[messageCount];
+    messageList.map((x) => {
+      if (x.id === messageId) {
+        x.content.text += text;
+      }
+      return x;
+    });
+    messages.splice(messageCount, 1, messageList);
+    messageDispatch(setSelectedMessages(messages));
+  };
+
+  const updateSelectedUserMessage = (
+    messages: ChatMessage[][],
+    message: ChatMessage,
+  ) => {
+    const index = messages.findIndex((x) =>
+      x.find((m) => m.id === UserMessageTempId),
+    );
+    messages.splice(index, 1, [message]);
+    messageDispatch(setSelectedMessages(messages));
+  };
 
   const handleSend = useCallback(
-    async (messageId: string, message: Message, isRegenerate: boolean) => {
+    async (
+      message: Message,
+      messageId?: string,
+      isRegenerate: boolean = false,
+    ) => {
       updateChatStatus(false);
+      let { id: chatId, spans: chatSpans } = selectedChat;
+      let userMessage = generateUserMessage(message.content, messageId);
+      let responseMessages = generateResponseMessages(messageId);
+      let selectedMessageList = [...selectedMessages];
+      selectedMessageList.push([userMessage]);
+      selectedMessageList.push(responseMessages);
+      messageDispatch(setSelectedMessages(selectedMessageList));
+
+      let chatBody = {
+        chatId,
+        spans: chatSpans.map((x) => ({
+          spanId: x.spanId,
+          systemPrompt: '你是AI智能助手Sdcb Chats，请仔细遵循用户指令并回复，当前日期: 2024/12/23',
+        })),
+        messageId: messageId || null,
+        userMessage: message,
+      };
+
+      const response = await fetch(`${getApiUrl()}/api/chats`, {
+        method: 'POST',
+        headers: {
+          'Content-Type': 'application/json',
+          Authorization: `Bearer ${getUserSession()}`,
+        },
+        body: JSON.stringify(chatBody),
+      });
+
+      const data = response.body;
+      if (!response.ok) {
+        handleChatIsError();
+        const result = await response.json();
+        toast.error(t(result?.message) || response.statusText);
+        return;
+      }
+      if (!data) {
+        handleChatIsError();
+        return;
+      }
+      let isErrorChat = false;
+      const reader = data.getReader();
+      const decoder = new TextDecoder();
+      let buffer = '';
+      async function* processBuffer() {
+        while (true) {
+          const { done, value } = await reader.read();
+          if (done) {
+            break;
+          }
+          buffer += decoder.decode(value, { stream: true });
+          let newlineIndex;
+          while ((newlineIndex = buffer.indexOf('\r\n\r\n')) >= 0) {
+            const line = buffer.slice(0, newlineIndex + 1).trim();
+            buffer = buffer.slice(newlineIndex + 1);
+            if (line.startsWith('data: ')) {
+              yield line.slice(6);
+            }
+            if (line === '') {
+              continue;
+            }
+          }
+        }
+      }
+      for await (const message of processBuffer()) {
+        const value: SseResponseLine = JSON.parse(message);
+        if (value.k === SseResponseKind.StopId) {
+          chatDispatch(setStopIds([value.r]));
+        } else if (value.k === SseResponseKind.Segment) {
+          const messageId = `${ResponseMessageTempId}-${value.i}`;
+          updateSelectedResponseMessageText(
+            selectedMessages,
+            messageId,
+            value.r,
+          );
+        } else if (value.k === SseResponseKind.Error) {
+          isErrorChat = true;
+          updateChatStatus(isErrorChat);
+          // setSelectMessages({ text, error: value.r });
+        } else if (value.k === SseResponseKind.UserMessage) {
+          const message = value.r;
+          message && updateSelectedUserMessage(selectedMessages, message);
+          // newMessages = newMessages.map((m) => {
+          //   if (requestMessage && m.id === MESSAGE_TEMP_ID) {
+          //     m = { ...m, ...requestMessage };
+          //   }
+          //   return m;
+          // });
+        } else if (value.k === SseResponseKind.ResponseMessage) {
+          const message = value.r;
+          // newMessages = newMessages.map((m) => {
+          //   if (m.id === ASSISTANT_MESSAGE_TEMP_ID) {
+          //     m = { ...m, ...responseMessage };
+          //   }
+          //   return m;
+          // });
+          // const messageList = formatMessages(newMessages);
+          // messageDispatch(setMessages(newMessages));
+          // messageDispatch(setCurrentMessages(messageList));
+          // const lastMessage = messageList[messageList.length - 1];
+          // const selectedMessageList = getSelectedMessages(
+          //   messageList,
+          //   lastMessage.id,
+          // );
+          // messageDispatch(setSelectedMessages(selectedMessageList));
+          // messageDispatch(setLastMessageId(lastMessage.id));
+        } else if (value.k === SseResponseKind.UpdateTitle) {
+          updateChatTitle(value.r);
+        } else if (value.k === SseResponseKind.TitleSegment) {
+          updateChatTitle(value.r, true);
+        }
+      }
+      chatDispatch(setMessageIsStreaming(false));
 
       // let selectChatId = selectedChat?.id;
       // let newMessages = [...messages];
@@ -378,15 +569,10 @@ const Chat = memo(() => {
     }
   };
 
-  const handelMessageActive = (messageId: string, spanId: number) => {
-    selectedMessages.forEach((messages) => {
-      messages.map((x) => {
-        if (x.id === messageId && x.spanId === spanId) {
-          x.isActive = true;
-        }
-        return x;
-      });
-    });
+  const handelMessageActive = (messageId: string) => {
+    const leafId = findLastLeafId(messages, messageId);
+    const selectedMessageList = findSelectedMessageByLeafId(messages, leafId);
+    messageDispatch(setSelectedMessages(selectedMessageList));
   };
 
   return (
@@ -403,9 +589,10 @@ const Chat = memo(() => {
             <ChatModelSetting />
           ) : (
             <div className="w-4/5 m-auto p-4">
-              {selectedMessages.map((messages) => {
+              {selectedMessages.map((messages, index) => {
                 return (
                   <div
+                    key={'message-group-' + index}
                     className={cn(
                       messages.find((x) => x.role === ChatRole.User)
                         ? 'flex w-full justify-end'
@@ -419,7 +606,10 @@ const Chat = memo(() => {
                       return (
                         <>
                           {message.role === ChatRole.User && (
-                            <div className="prose w-full dark:prose-invert rounded-r-md">
+                            <div
+                              key={'user-message-' + message.id}
+                              className="prose w-full dark:prose-invert rounded-r-md"
+                            >
                               <UserMessage
                                 selectedChat={selectedChat}
                                 messageIsStreaming={messageIsStreaming}
@@ -431,6 +621,7 @@ const Chat = memo(() => {
                           )}
                           {message.role === ChatRole.Assistant && (
                             <div
+                              key={'response-message-' + message.id}
                               className={cn(
                                 'border-[0.1px] rounded-md p-4',
                                 message.isActive && 'border-[1.6px]',
@@ -441,7 +632,9 @@ const Chat = memo(() => {
                                   messageIsStreaming={messageIsStreaming}
                                   currentChatMessageId={message.id}
                                   message={message}
-                                  onActiveMessage={() => {}}
+                                  onActiveMessage={(messageId: string) => {
+                                    handelMessageActive(messageId);
+                                  }}
                                 />
                                 <ResponseMessageActions
                                   models={models}
@@ -531,7 +724,6 @@ const Chat = memo(() => {
                 //   />
                 // );
               })}
-
               <div className="h-[162px] bg-background" ref={messagesEndRef} />
             </div>
           )}
@@ -539,8 +731,8 @@ const Chat = memo(() => {
         {hasModel() && (
           <ChatInput
             onSend={(message) => {
-              const { id } = getSelectedMessagesLast();
-              // handleSend(message, id, false);
+              const lastMessage = getSelectedMessagesLastActiveMessage();
+              handleSend(message, lastMessage?.id);
             }}
             model={selectModel!}
             onScrollDownClick={handleScrollDown}

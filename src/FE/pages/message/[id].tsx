@@ -67,7 +67,7 @@ export default function MessageDetails() {
           </div>
         </div>
       )}
-      {chat &&
+      {/* {chat &&
         selectMessages.map((current, index) => {
           let parentChildrenIds: string[] = [];
           if (!current.parentId) {
@@ -76,8 +76,7 @@ export default function MessageDetails() {
               .map((x) => x.id);
           } else {
             parentChildrenIds =
-              currentMessages.find((x) => x.id === current.parentId)
-                ?.childrenIds || [];
+              currentMessages.find((x) => x.id === current.parentId) || [];
             parentChildrenIds = [...parentChildrenIds].reverse();
           }
           return (
@@ -112,7 +111,7 @@ export default function MessageDetails() {
               }}
             />
           );
-        })}
+        })} */}
     </>
   );
 }

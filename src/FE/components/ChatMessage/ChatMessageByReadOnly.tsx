@@ -260,7 +260,7 @@ export const ChatMessageByReadOnly: FC<Props> = memo(
                     } group-hover:visible focus:visible`}
                   >
                     <CopyAction text={message.content.text} />
-                    <GenerateInformationAction message={message} />
+                    {/* <GenerateInformationAction message={message} /> */}
 
                     <Button variant="ghost" className="p-1 m-0 h-auto">
                       {modelName}
