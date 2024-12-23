@@ -10,7 +10,7 @@ export const DEFAULT_TEMPERATURE = 0.5;
 
 export enum ChatStatus {
   None = 1,
-  Running = 2,
+  Chatting = 2,
   Failed = 3,
 }
 

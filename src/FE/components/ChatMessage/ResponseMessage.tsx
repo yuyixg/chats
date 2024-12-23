@@ -1,6 +1,6 @@
 import { preprocessLaTeX } from '@/utils/chats';
 
-import { ChatRole, Content } from '@/types/chat';
+import { ChatRole, ChatStatus, Content } from '@/types/chat';
 import { PropsMessage } from '@/types/components/chat';
 
 import { CodeBlock } from '@/components/Markdown/CodeBlock';
@@ -16,15 +16,14 @@ export interface ResponseMessage {
 }
 
 interface Props {
-  messageIsStreaming: boolean;
+  chatStatus: ChatStatus;
   currentChatMessageId: string;
   message: ResponseMessage;
   onActiveMessage: (messageId: string) => void;
 }
 
 const ResponseMessage = (props: Props) => {
-  const { messageIsStreaming, message, currentChatMessageId, onActiveMessage } =
-    props;
+  const { chatStatus, message, onActiveMessage } = props;
 
   return (
     <div
@@ -91,7 +90,7 @@ const ResponseMessage = (props: Props) => {
         }}
       >
         {`${preprocessLaTeX(message.content.text!)}${
-          messageIsStreaming && message.id == currentChatMessageId ? '`▍`' : ''
+          chatStatus === ChatStatus.Chatting ? '`▍`' : ''
         }`}
       </MemoizedReactMarkdown>
     </div>

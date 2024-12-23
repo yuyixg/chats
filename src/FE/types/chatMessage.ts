@@ -1,4 +1,4 @@
-import { ChatRole, Content, Role } from './chat';
+import { ChatRole, ChatStatus, Content, Role } from './chat';
 
 // Enum equivalent to SseResponseKind
 export enum SseResponseKind {
@@ -67,6 +67,7 @@ export interface ChatMessage {
   siblingIds: string[];
   role: ChatRole;
   content: Content;
+  status: ChatStatus;
   isActive?: boolean;
   modelName?: string;
   modelId?: number;
@@ -99,6 +100,7 @@ export interface ChatMessageNode {
   content: Content;
   siblingIds: string[];
   isActive?: boolean;
+  status: ChatStatus;
   spanId: number | null;
   role: ChatRole;
   modelName?: string;

@@ -32,7 +32,7 @@ interface Props {
   modelId?: number;
   messageIsStreaming: boolean;
   onChangeMessage?: (messageId: string) => void;
-  onRegenerate?: (modelId?: number) => void;
+  onRegenerate?: (messageId: string, modelId?: number) => void;
 }
 
 const ResponseMessageActions = (props: Props) => {
@@ -45,7 +45,7 @@ const ResponseMessageActions = (props: Props) => {
     onRegenerate,
     messageIsStreaming,
   } = props;
-  const { id: messageId, siblingIds, parentId, content } = message;
+  const { id: messageId, siblingIds } = message;
   const currentMessageIndex = siblingIds.findIndex((x) => x === messageId);
 
   return (
@@ -75,13 +75,13 @@ const ResponseMessageActions = (props: Props) => {
             <GenerateInformationAction message={message} />
             <RegenerateAction
               onRegenerate={() => {
-                onRegenerate && onRegenerate(modelId);
+                onRegenerate && onRegenerate(message.parentId!);
               }}
             />
             <ChangeModelAction
               models={models}
               onChangeModel={(modelId: number) => {
-                onRegenerate && onRegenerate(modelId);
+                onRegenerate && onRegenerate(message.parentId!, modelId);
               }}
               modelName={modelName!}
             />

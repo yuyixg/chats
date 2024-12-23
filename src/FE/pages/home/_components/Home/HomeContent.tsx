@@ -135,23 +135,6 @@ const HomeContent = () => {
     return model;
   };
 
-  const chatErrorMessage = (messageId: string): ChatMessage[] => {
-    return [
-      {
-        id: 'errorMessageTempId',
-        spanId: 0,
-        parentId: messageId,
-        siblingIds: [],
-        role: ChatRole.Assistant,
-        content: { text: '', fileIds: [] },
-        inputTokens: 0,
-        outputTokens: 0,
-        inputPrice: 0,
-        outputPrice: 0,
-      },
-    ];
-  };
-
   const handleSelectModel = (model: AdminModelDto) => {
     if (!model) return;
     modelDispatch(setSelectedModel(model));
@@ -231,11 +214,6 @@ const HomeContent = () => {
       messages,
       lastMessage.id,
     );
-    console.log('selectedMessageList', selectedMessageList);
-    if (lastMessage.role !== ChatRole.Assistant) {
-      chatDispatch(setChatStatus(true));
-      selectedMessageList.push(chatErrorMessage(lastMessage.id));
-    }
     messageDispatch(setSelectedMessages(selectedMessageList));
 
     // messageDispatch(setLastMessageId(lastMessage.id));

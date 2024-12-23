@@ -1,4 +1,4 @@
-import { ChatRole } from '@/types/chat';
+import { ChatRole, ChatStatus } from '@/types/chat';
 import { ChatMessage, ChatMessageNode, MessageNode } from '@/types/chatMessage';
 
 function findMessageChildren(
@@ -144,15 +144,32 @@ export function findSelectedMessageByLeafId(
 
         siblingGroup.forEach((x) => {
           if (x.id === currentMessage!.id) {
-            selectedMessage = { ...x, siblingIds, isActive: true };
+            selectedMessage = {
+              ...x,
+              siblingIds,
+              isActive: true,
+              status: x.content?.error ? ChatStatus.Failed : ChatStatus.None,
+            };
           } else if (prevUserMessage && prevUserMessage.parentId === x.id) {
-            selectedMessage = { ...x, siblingIds, isActive: true };
+            selectedMessage = {
+              ...x,
+              siblingIds,
+              isActive: true,
+              status: x.content?.error ? ChatStatus.Failed : ChatStatus.None,
+            };
           }
         });
 
         if (!selectedMessage) {
           const lastMessage = siblingGroup[siblingGroup.length - 1];
-          selectedMessage = { ...lastMessage, siblingIds, isActive: false };
+          selectedMessage = {
+            ...lastMessage,
+            siblingIds,
+            isActive: false,
+            status: lastMessage.content?.error
+              ? ChatStatus.Failed
+              : ChatStatus.None,
+          };
         }
 
         group.push(selectedMessage);

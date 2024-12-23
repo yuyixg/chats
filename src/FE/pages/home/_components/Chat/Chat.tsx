@@ -23,6 +23,7 @@ import { getUserSession } from '@/utils/user';
 import {
   ChatBody,
   ChatRole,
+  ChatStatus,
   Content,
   ContentRequest,
   Message,
@@ -136,9 +137,10 @@ const Chat = memo(() => {
         id: `${ResponseMessageTempId}-${x.spanId}`,
         role: ChatRole.Assistant,
         parentId: parentId,
+        status: ChatStatus.Chatting,
         siblingIds: [],
         isActive: false,
-        content: { text: '' },
+        content: { text: '', error: undefined, fileIds: [] },
         inputTokens: 0,
         outputTokens: 0,
         inputPrice: 0,
@@ -157,6 +159,7 @@ const Chat = memo(() => {
       spanId: null,
       id: UserMessageTempId,
       role: ChatRole.User,
+      status: ChatStatus.None,
       parentId,
       siblingIds: [],
       isActive: false,
@@ -164,16 +167,18 @@ const Chat = memo(() => {
     } as ChatMessage;
   };
 
-  const updateSelectedResponseMessageText = (
+  const updateSelectedResponseMessage = (
     messages: ChatMessage[][],
     messageId: string,
     text: string,
+    error?: string,
   ) => {
     const messageCount = messages.length - 1;
     let messageList = messages[messageCount];
     messageList.map((x) => {
       if (x.id === messageId) {
         x.content.text += text;
+        x.content.error = error;
       }
       return x;
     });
@@ -198,12 +203,13 @@ const Chat = memo(() => {
       messageId?: string,
       isRegenerate: boolean = false,
     ) => {
-      updateChatStatus(false);
       let { id: chatId, spans: chatSpans } = selectedChat;
-      let userMessage = generateUserMessage(message.content, messageId);
-      let responseMessages = generateResponseMessages(messageId);
       let selectedMessageList = [...selectedMessages];
-      selectedMessageList.push([userMessage]);
+      if (!isRegenerate) {
+        let userMessage = generateUserMessage(message.content, messageId);
+        selectedMessageList.push([userMessage]);
+      }
+      let responseMessages = generateResponseMessages(messageId);
       selectedMessageList.push(responseMessages);
       messageDispatch(setSelectedMessages(selectedMessageList));
 
@@ -211,10 +217,11 @@ const Chat = memo(() => {
         chatId,
         spans: chatSpans.map((x) => ({
           spanId: x.spanId,
-          systemPrompt: '你是AI智能助手Sdcb Chats，请仔细遵循用户指令并回复，当前日期: 2024/12/23',
+          systemPrompt:
+            '你是AI智能助手Sdcb Chats，请仔细遵循用户指令并回复，当前日期: 2024/12/23',
         })),
         messageId: messageId || null,
-        userMessage: message,
+        userMessage: message.content,
       };
 
       const response = await fetch(`${getApiUrl()}/api/chats`, {
@@ -237,7 +244,6 @@ const Chat = memo(() => {
         handleChatIsError();
         return;
       }
-      let isErrorChat = false;
       const reader = data.getReader();
       const decoder = new TextDecoder();
       let buffer = '';
@@ -266,43 +272,25 @@ const Chat = memo(() => {
         if (value.k === SseResponseKind.StopId) {
           chatDispatch(setStopIds([value.r]));
         } else if (value.k === SseResponseKind.Segment) {
-          const messageId = `${ResponseMessageTempId}-${value.i}`;
-          updateSelectedResponseMessageText(
-            selectedMessages,
-            messageId,
+          const msgId = `${ResponseMessageTempId}-${value.i}`;
+          updateSelectedResponseMessage(selectedMessageList, msgId, value.r);
+        } else if (value.k === SseResponseKind.Error) {
+          const msgId = `${ResponseMessageTempId}-${value.i}`;
+          updateSelectedResponseMessage(
+            selectedMessageList,
+            msgId,
+            value.r,
             value.r,
           );
-        } else if (value.k === SseResponseKind.Error) {
-          isErrorChat = true;
-          updateChatStatus(isErrorChat);
-          // setSelectMessages({ text, error: value.r });
         } else if (value.k === SseResponseKind.UserMessage) {
-          const message = value.r;
-          message && updateSelectedUserMessage(selectedMessages, message);
-          // newMessages = newMessages.map((m) => {
-          //   if (requestMessage && m.id === MESSAGE_TEMP_ID) {
-          //     m = { ...m, ...requestMessage };
-          //   }
-          //   return m;
-          // });
+          const msg = value.r;
+          msg && messageDispatch(setMessages([...messages, msg]));
         } else if (value.k === SseResponseKind.ResponseMessage) {
-          const message = value.r;
-          // newMessages = newMessages.map((m) => {
-          //   if (m.id === ASSISTANT_MESSAGE_TEMP_ID) {
-          //     m = { ...m, ...responseMessage };
-          //   }
-          //   return m;
-          // });
-          // const messageList = formatMessages(newMessages);
-          // messageDispatch(setMessages(newMessages));
-          // messageDispatch(setCurrentMessages(messageList));
-          // const lastMessage = messageList[messageList.length - 1];
-          // const selectedMessageList = getSelectedMessages(
-          //   messageList,
-          //   lastMessage.id,
-          // );
-          // messageDispatch(setSelectedMessages(selectedMessageList));
-          // messageDispatch(setLastMessageId(lastMessage.id));
+          const msg = value.r;
+          // const msgs = [...messages, msg];
+          // messageDispatch(setMessages(msgs));
+          // const selectedMsgs = findSelectedMessageByLeafId(msgs, msg.id);
+          // messageDispatch(setSelectedMessages(selectedMsgs));
         } else if (value.k === SseResponseKind.UpdateTitle) {
           updateChatTitle(value.r);
         } else if (value.k === SseResponseKind.TitleSegment) {
@@ -629,7 +617,7 @@ const Chat = memo(() => {
                             >
                               <div className="prose dark:prose-invert rounded-r-md">
                                 <ResponseMessage
-                                  messageIsStreaming={messageIsStreaming}
+                                  chatStatus={message.status}
                                   currentChatMessageId={message.id}
                                   message={message}
                                   onActiveMessage={(messageId: string) => {
