@@ -94,6 +94,7 @@ const Chat = memo(() => {
     messageDispatch,
     userModelConfigDispatch,
   } = useContext(HomeContext);
+  console.log('selectedMessages', selectedMessages);
   const [autoScrollEnabled, setAutoScrollEnabled] = useState<boolean>(true);
   const [showScrollDownButton, setShowScrollDownButton] =
     useState<boolean>(false);
@@ -204,7 +205,9 @@ const Chat = memo(() => {
       isRegenerate: boolean = false,
     ) => {
       let { id: chatId, spans: chatSpans } = selectedChat;
+      const chatSpansCount = chatSpans.length;
       let selectedMessageList = [...selectedMessages];
+      let messageList: ChatMessage[] = [];
       if (!isRegenerate) {
         let userMessage = generateUserMessage(message.content, messageId);
         selectedMessageList.push([userMessage]);
@@ -247,9 +250,11 @@ const Chat = memo(() => {
       const reader = data.getReader();
       const decoder = new TextDecoder();
       let buffer = '';
+      let chatDoneCount = 0;
       async function* processBuffer() {
         while (true) {
           const { done, value } = await reader.read();
+          console.log(done, value);
           if (done) {
             break;
           }
@@ -284,20 +289,24 @@ const Chat = memo(() => {
           );
         } else if (value.k === SseResponseKind.UserMessage) {
           const msg = value.r;
-          msg && messageDispatch(setMessages([...messages, msg]));
+          messageDispatch(setMessages([...messages, msg]));
         } else if (value.k === SseResponseKind.ResponseMessage) {
           const msg = value.r;
-          // const msgs = [...messages, msg];
-          // messageDispatch(setMessages(msgs));
-          // const selectedMsgs = findSelectedMessageByLeafId(msgs, msg.id);
-          // messageDispatch(setSelectedMessages(selectedMsgs));
+          const msgs = [...messages, msg];
+          messageList = msgs;
+          messageDispatch(setMessages(msgs));
         } else if (value.k === SseResponseKind.UpdateTitle) {
           updateChatTitle(value.r);
         } else if (value.k === SseResponseKind.TitleSegment) {
           updateChatTitle(value.r, true);
         }
       }
-      chatDispatch(setMessageIsStreaming(false));
+
+      const selectedMsgs = findSelectedMessageByLeafId(
+        messageList,
+        messages[messageList.length - 1].id,
+      );
+      messageDispatch(setSelectedMessages(selectedMsgs));
 
       // let selectChatId = selectedChat?.id;
       // let newMessages = [...messages];
@@ -600,7 +609,7 @@ const Chat = memo(() => {
                             >
                               <UserMessage
                                 selectedChat={selectedChat}
-                                messageIsStreaming={messageIsStreaming}
+                                chatStatus={message.status}
                                 message={message}
                                 onChangeMessage={() => {}}
                                 onEdit={() => {}}
