@@ -310,6 +310,7 @@ public class ChatController(
             [
                 MessageContent.FromText(icc.FullResponse.TextSegment),
             ],
+            SpanId = span.Id,
             CreatedAt = DateTime.UtcNow,
             ParentId = req.MessageId,
         };
