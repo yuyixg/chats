@@ -2,7 +2,7 @@ import { useEffect, useRef, useState } from 'react';
 
 import useTranslation from '@/hooks/useTranslation';
 
-import { ChatRole, Content, IChat, Message } from '@/types/chat';
+import { ChatRole, ChatStatus, Content, IChat, Message } from '@/types/chat';
 import { PropsMessage } from '@/types/components/chat';
 
 import { Button } from '@/components/ui/button';
@@ -22,7 +22,7 @@ export interface UserMessage {
 interface Props {
   message: UserMessage;
   selectedChat: IChat;
-  messageIsStreaming: boolean;
+  chatStatus: ChatStatus;
   onChangeMessage?: (messageId: string) => void;
   onEdit?: (editedMessage: Message, parentId: string | null) => void;
 }
@@ -30,8 +30,7 @@ interface Props {
 const UserMessage = (props: Props) => {
   const { t } = useTranslation();
 
-  const { message, selectedChat, messageIsStreaming, onChangeMessage, onEdit } =
-    props;
+  const { message, selectedChat, chatStatus, onChangeMessage, onEdit } = props;
   const [isTyping, setIsTyping] = useState<boolean>(false);
   const [isEditing, setIsEditing] = useState<boolean>(false);
   const textareaRef = useRef<HTMLTextAreaElement>(null);
@@ -155,7 +154,7 @@ const UserMessage = (props: Props) => {
         {!isEditing && (
           <>
             <EditAction
-              disabled={messageIsStreaming}
+              disabled={chatStatus === ChatStatus.Chatting}
               onToggleEditing={handleToggleEditing}
             />
             <CopyAction
@@ -164,10 +163,12 @@ const UserMessage = (props: Props) => {
             />
             <PaginationAction
               hidden={siblingIds.length <= 1}
-              disabledPrev={currentMessageIndex === 0 || messageIsStreaming}
+              disabledPrev={
+                currentMessageIndex === 0 || chatStatus === ChatStatus.Chatting
+              }
               disabledNext={
                 currentMessageIndex === siblingIds.length - 1 ||
-                messageIsStreaming
+                chatStatus === ChatStatus.Chatting
               }
               currentSelectIndex={currentMessageIndex}
               messageIds={siblingIds}
