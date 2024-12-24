@@ -80,15 +80,15 @@ For environments where using Docker is inconvenient, Chats provides direct deplo
 
 | Platform              | GitHub Download Link                                                                                              | Alternative Download Link                                                                                   |
 | --------------------- | ---------------------------------------------------------------------------------------------------------------- | ----------------------------------------------------------------------------------------------------------- |
-| Windows 64-bit        | [chats-win-x64.zip](https://github.com/sdcb/chats/releases/latest/download/chats-win-x64.zip)                     | [chats-win-x64.zip](https://io.starworks.cc:88/chats/latest/chats-win-x64.zip)                             |
-| Linux 64-bit          | [chats-linux-x64.zip](https://github.com/sdcb/chats/releases/latest/download/chats-linux-x64.zip)                 | [chats-linux-x64.zip](https://io.starworks.cc:88/chats/latest/chats-linux-x64.zip)                         |
-| Linux ARM64           | [chats-linux-arm64.zip](https://github.com/sdcb/chats/releases/latest/download/chats-linux-arm64.zip)             | [chats-linux-arm64.zip](https://io.starworks.cc:88/chats/latest/chats-linux-arm64.zip)                     |
-| Linux musl x64        | [chats-linux-musl-x64.zip](https://github.com/sdcb/chats/releases/latest/download/chats-linux-musl-x64.zip)       | [chats-linux-musl-x64.zip](https://io.starworks.cc:88/chats/latest/chats-linux-musl-x64.zip)               |
-| Linux musl ARM64      | [chats-linux-musl-arm64.zip](https://github.com/sdcb/chats/releases/latest/download/chats-linux-musl-arm64.zip)   | [chats-linux-musl-arm64.zip](https://io.starworks.cc:88/chats/latest/chats-linux-musl-arm64.zip)           |
-| macOS ARM64           | [chats-osx-arm64.zip](https://github.com/sdcb/chats/releases/latest/download/chats-osx-arm64.zip)                 | [chats-osx-arm64.zip](https://io.starworks.cc:88/chats/latest/chats-osx-arm64.zip)                         |
-| macOS x64             | [chats-osx-x64.zip](https://github.com/sdcb/chats/releases/latest/download/chats-osx-x64.zip)                     | [chats-osx-x64.zip](https://io.starworks.cc:88/chats/latest/chats-osx-x64.zip)                             |
-| Generic package dependent on .NET | [chats.zip](https://github.com/sdcb/chats/releases/latest/download/chats.zip)                                      | [chats.zip](https://io.starworks.cc:88/chats/latest/chats.zip)                                             |
-| Pure front-end files  | [chats-fe.zip](https://github.com/sdcb/chats/releases/latest/download/chats-fe.zip)                               | [chats-fe.zip](https://io.starworks.cc:88/chats/latest/chats-fe.zip)                                       |
+| Windows 64-bit        | [chats-win-x64.zip](https://github.com/sdcb/chats/releases/latest/download/chats-win-x64.zip)                     | [chats-win-x64.7z](https://io.starworks.cc:88/chats/latest/chats-win-x64.7z)                               |
+| Linux 64-bit          | [chats-linux-x64.zip](https://github.com/sdcb/chats/releases/latest/download/chats-linux-x64.zip)                 | [chats-linux-x64.7z](https://io.starworks.cc:88/chats/latest/chats-linux-x64.7z)                           |
+| Linux ARM64           | [chats-linux-arm64.zip](https://github.com/sdcb/chats/releases/latest/download/chats-linux-arm64.zip)             | [chats-linux-arm64.7z](https://io.starworks.cc:88/chats/latest/chats-linux-arm64.7z)                       |
+| Linux musl x64        | [chats-linux-musl-x64.zip](https://github.com/sdcb/chats/releases/latest/download/chats-linux-musl-x64.zip)       | [chats-linux-musl-x64.7z](https://io.starworks.cc:88/chats/latest/chats-linux-musl-x64.7z)                 |
+| Linux musl ARM64      | [chats-linux-musl-arm64.zip](https://github.com/sdcb/chats/releases/latest/download/chats-linux-musl-arm64.zip)   | [chats-linux-musl-arm64.7z](https://io.starworks.cc:88/chats/latest/chats-linux-musl-arm64.7z)             |
+| macOS ARM64           | [chats-osx-arm64.zip](https://github.com/sdcb/chats/releases/latest/download/chats-osx-arm64.zip)                 | [chats-osx-arm64.7z](https://io.starworks.cc:88/chats/latest/chats-osx-arm64.7z)                           |
+| macOS x64             | [chats-osx-x64.zip](https://github.com/sdcb/chats/releases/latest/download/chats-osx-x64.zip)                     | [chats-osx-x64.7z](https://io.starworks.cc:88/chats/latest/chats-osx-x64.7z)                               |
+| Generic package dependent on .NET | [chats.zip](https://github.com/sdcb/chats/releases/latest/download/chats.zip)                                      | [chats.7z](https://io.starworks.cc:88/chats/latest/chats.7z)                                  |
+| Pure front-end files  | [chats-fe.zip](https://github.com/sdcb/chats/releases/latest/download/chats-fe.zip)                               | [chats-fe.7z](https://io.starworks.cc:88/chats/latest/chats-fe.7z)                                         |
 
 ### Version and Download Instructions
 
@@ -105,7 +105,7 @@ For environments where using Docker is inconvenient, Chats provides direct deplo
      ```
    - For example, to directly download the latest Windows 64-bit version via the alternative download:
      ```
-     https://io.starworks.cc:88/chats/latest/chats-win-x64.zip
+     https://io.starworks.cc:88/chats/latest/chats-win-x64.7z
      ```
 
 ### Executable Directory Structure and Running Instructions
@@ -141,10 +141,14 @@ C:\Users\ZhouJie\Downloads\chats-win-x64>dir
 
 ### Supported LLMs
 
-- OpenAI OpenAI
-- Azure(or OpenAI API compatible APIs, like ollama)
-- Aliyun Dashscope(通义千问)
-- Moonshot(月之暗面)
-- Wenxin Qianfan(文心千帆大模型平台)
-- Zhipu AI(智谱清言)
-- ...
+- Azure OpenAI
+- Tencent HunYuan
+- 01.ai
+- Moonshot
+- OpenAI (or OpenAI API compatible APIs, like ollama)
+- Wenxin Qianfan
+- Aliyun DashScope
+- Xunfei Sparkdesk
+- DeepSeek
+- x.AI
+- GitHub Models
