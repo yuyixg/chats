@@ -23,9 +23,9 @@ namespace Chats.BE.Controllers.Chats.Chats;
 [Route("api/chats"), Authorize]
 public class ChatController(ChatStopService stopService) : ControllerBase
 {
-    [HttpPost("new-message")]
-    public async Task<IActionResult> NewMessage(
-        [FromBody] NewMessageRequest req,
+    [HttpPost("fresh-chat-message")]
+    public async Task<IActionResult> FreshChat(
+        [FromBody] FreshChatRequest req,
         [FromServices] ChatsDB db,
         [FromServices] CurrentUser currentUser,
         [FromServices] ILogger<ChatController> logger,
@@ -54,7 +54,7 @@ public class ChatController(ChatStopService stopService) : ControllerBase
             cancellationToken);
     }
 
-    [HttpPut("regenerate-assistant-message")]
+    [HttpPost("regenerate-assistant-message")]
     public async Task<IActionResult> RegenerateMessage(
         [FromBody] RegenerateAssistantMessageRequest req,
         [FromServices] ChatsDB db,
@@ -79,9 +79,9 @@ public class ChatController(ChatStopService stopService) : ControllerBase
             cancellationToken);
     }
 
-    [HttpPut("edit-user-message")]
-    public async Task<IActionResult> EditUserMessage(
-        [FromBody] EditUserMessageRequest req,
+    [HttpPost("general-chat")]
+    public async Task<IActionResult> GeneralChat(
+        [FromBody] GeneralChatRequest req,
         [FromServices] ChatsDB db,
         [FromServices] CurrentUser currentUser,
         [FromServices] ILogger<ChatController> logger,
@@ -99,7 +99,7 @@ public class ChatController(ChatStopService stopService) : ControllerBase
         }
 
         // ensure request span id is unique
-        if (req.Spans.Select(x => x.Id).Distinct().Count() != req.Spans.Length)
+        if (req.SpanIds.Distinct().Count() != req.SpanIds.Length)
         {
             return BadRequest("Duplicate span id");
         }

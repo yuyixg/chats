@@ -11,7 +11,7 @@ public abstract record BaseChatRequest
     public abstract ChatRequest ToChatRequest();
 }
 
-public record NewMessageRequest : BaseChatRequest
+public record FreshChatRequest : BaseChatRequest
 {
     [JsonPropertyName("spans")]
     public required ChatSpanRequest[] Spans { get; init; }
@@ -19,13 +19,17 @@ public record NewMessageRequest : BaseChatRequest
     [JsonPropertyName("userMessage")]
     public required MessageContentRequest UserMessage { get; init; }
 
+    [JsonPropertyName("parentAssistantMessageId")]
+    public required string? ParentAssistantMessageId { get; init; }
+
     public override ChatRequest ToChatRequest()
     {
         return new ChatRequest
         {
             EncryptedChatId = EncryptedChatId,
             Spans = Spans.Select(x => x.ToInternalChatSpanRequest()).ToArray(),
-            UserMessage = UserMessage
+            UserMessage = UserMessage,
+            EncryptedMessageId = ParentAssistantMessageId,
         };
     }
 }
@@ -59,10 +63,16 @@ public record RegenerateAssistantMessageRequest : BaseChatRequest
     }
 }
 
-public record EditUserMessageRequest : NewMessageRequest
+public record GeneralChatRequest : BaseChatRequest
 {
+    [JsonPropertyName("spanIds")]
+    public required byte[] SpanIds { get; init; }
+
+    [JsonPropertyName("userMessage")]
+    public required MessageContentRequest UserMessage { get; init; }
+
     [JsonPropertyName("parentAssistantMessageId")]
-    public required string ParentAssistantMessageId { get; init; }
+    public required string? ParentAssistantMessageId { get; init; }
 
     public override ChatRequest ToChatRequest()
     {
@@ -70,7 +80,7 @@ public record EditUserMessageRequest : NewMessageRequest
         {
             EncryptedChatId = EncryptedChatId,
             EncryptedMessageId = ParentAssistantMessageId,
-            Spans = Spans.Select(x => x.ToInternalChatSpanRequest()).ToArray(),
+            Spans = SpanIds.Select(x => new InternalChatSpanRequest() { Id = x }).ToArray(),
             UserMessage = UserMessage
         };
     }
