@@ -66,7 +66,7 @@ public record RegenerateAssistantMessageRequest : BaseChatRequest
 public record GeneralChatRequest : BaseChatRequest
 {
     [JsonPropertyName("spanIds")]
-    public required byte[] SpanIds { get; init; }
+    public required int[] SpanIds { get; init; }
 
     [JsonPropertyName("userMessage")]
     public required MessageContentRequest UserMessage { get; init; }
@@ -80,7 +80,7 @@ public record GeneralChatRequest : BaseChatRequest
         {
             EncryptedChatId = EncryptedChatId,
             EncryptedMessageId = ParentAssistantMessageId,
-            Spans = SpanIds.Select(x => new InternalChatSpanRequest() { Id = x }).ToArray(),
+            Spans = SpanIds.Select(x => new InternalChatSpanRequest() { Id = (byte)x }).ToArray(),
             UserMessage = UserMessage
         };
     }

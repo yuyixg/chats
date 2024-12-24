@@ -98,6 +98,20 @@ public class ChatController(ChatStopService stopService) : ControllerBase
             return BadRequest(ModelState);
         }
 
+        if (req.SpanIds.Length == 0)
+        {
+            return BadRequest("Spans must be provided");
+        }
+
+        foreach (int spanId in req.SpanIds)
+        {
+            if (spanId >= byte.MinValue && spanId <= byte.MaxValue)
+            {
+                continue;
+            }
+            return BadRequest("Invalid span id");
+        }
+
         // ensure request span id is unique
         if (req.SpanIds.Distinct().Count() != req.SpanIds.Length)
         {
