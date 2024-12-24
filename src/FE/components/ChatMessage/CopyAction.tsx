@@ -43,7 +43,10 @@ const CopyAction = (props: Props) => {
               <Button
                 variant="ghost"
                 className={cn('p-1 m-0 h-auto', triggerClassName)}
-                onClick={() => copyOnClick(text)}
+                onClick={(e) => {
+                  copyOnClick(text);
+                  e.stopPropagation();
+                }}
               >
                 <IconCopy />
               </Button>

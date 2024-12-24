@@ -27,10 +27,11 @@ export const PaginationAction = (props: Props) => {
           variant="ghost"
           className="p-1 m-0 h-auto disabled:opacity-50"
           disabled={disabledPrev}
-          onClick={() => {
+          onClick={(e) => {
             if (onChangeMessage) {
               const index = currentSelectIndex - 1;
               onChangeMessage(messageIds[index]);
+              e.stopPropagation();
             }
           }}
         >
@@ -43,11 +44,12 @@ export const PaginationAction = (props: Props) => {
           variant="ghost"
           className="p-1 m-0 h-auto"
           disabled={disabledNext}
-          onClick={() => {
+          onClick={(e) => {
             if (onChangeMessage) {
               const index = currentSelectIndex + 1;
               onChangeMessage(messageIds[index]);
             }
+            e.stopPropagation();
           }}
         >
           <IconChevronRight />

@@ -35,7 +35,13 @@ export const GenerateInformationAction = (props: Props) => {
         className="h-[28px]"
         side="bottom"
         trigger={
-          <Button variant="ghost" className="p-1 m-0 h-auto">
+          <Button
+            variant="ghost"
+            className="p-1 m-0 h-auto"
+            onClick={(e) => {
+              e.stopPropagation();
+            }}
+          >
             <IconInfo />
           </Button>
         }

@@ -19,19 +19,13 @@ interface Props {
   chatStatus: ChatStatus;
   currentChatMessageId: string;
   message: ResponseMessage;
-  onActiveMessage: (messageId: string) => void;
 }
 
 const ResponseMessage = (props: Props) => {
-  const { chatStatus, message, onActiveMessage } = props;
+  const { chatStatus, message } = props;
 
   return (
-    <div
-      className="pr-0"
-      onClick={() => {
-        onActiveMessage(message.id);
-      }}
-    >
+    <div className="pr-0">
       <MemoizedReactMarkdown
         className="prose dark:prose-invert flex-1"
         remarkPlugins={[remarkMath, remarkGfm]}

@@ -205,9 +205,8 @@ const Chat = memo(() => {
       isRegenerate: boolean = false,
     ) => {
       let { id: chatId, spans: chatSpans } = selectedChat;
-      const chatSpansCount = chatSpans.length;
       let selectedMessageList = [...selectedMessages];
-      let messageList: ChatMessage[] = [];
+      let messageList = [...messages];
       if (!isRegenerate) {
         let userMessage = generateUserMessage(message.content, messageId);
         selectedMessageList.push([userMessage]);
@@ -289,12 +288,12 @@ const Chat = memo(() => {
           );
         } else if (value.k === SseResponseKind.UserMessage) {
           const msg = value.r;
+          messageList.push(msg);
           messageDispatch(setMessages([...messages, msg]));
         } else if (value.k === SseResponseKind.ResponseMessage) {
           const msg = value.r;
-          const msgs = [...messages, msg];
-          messageList = msgs;
-          messageDispatch(setMessages(msgs));
+          messageList.push(msg);
+          messageDispatch(setMessages([...messages, msg]));
         } else if (value.k === SseResponseKind.UpdateTitle) {
           updateChatTitle(value.r);
         } else if (value.k === SseResponseKind.TitleSegment) {
@@ -304,7 +303,7 @@ const Chat = memo(() => {
 
       const selectedMsgs = findSelectedMessageByLeafId(
         messageList,
-        messages[messageList.length - 1].id,
+        messageList[messageList.length - 1].id,
       );
       messageDispatch(setSelectedMessages(selectedMsgs));
 
@@ -568,6 +567,7 @@ const Chat = memo(() => {
 
   const handelMessageActive = (messageId: string) => {
     const leafId = findLastLeafId(messages, messageId);
+    console.log(leafId);
     const selectedMessageList = findSelectedMessageByLeafId(messages, leafId);
     messageDispatch(setSelectedMessages(selectedMessageList));
   };
@@ -618,6 +618,7 @@ const Chat = memo(() => {
                           )}
                           {message.role === ChatRole.Assistant && (
                             <div
+                              onClick={() => handelMessageActive(message.id)}
                               key={'response-message-' + message.id}
                               className={cn(
                                 'border-[0.1px] rounded-md p-4',
@@ -629,9 +630,6 @@ const Chat = memo(() => {
                                   chatStatus={message.status}
                                   currentChatMessageId={message.id}
                                   message={message}
-                                  onActiveMessage={(messageId: string) => {
-                                    handelMessageActive(messageId);
-                                  }}
                                 />
                                 <ResponseMessageActions
                                   models={models}

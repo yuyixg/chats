@@ -21,8 +21,9 @@ export const RegenerateAction = (props: Props) => {
           <Button
             variant="ghost"
             className="p-1 m-0 h-auto"
-            onClick={() => {
+            onClick={(e) => {
               onRegenerate && onRegenerate();
+              e.stopPropagation();
             }}
           >
             <IconRefresh />
