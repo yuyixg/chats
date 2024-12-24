@@ -13,7 +13,7 @@ public record ChatRequest
     public required string EncryptedChatId { get; init; }
 
     [JsonPropertyName("spans")]
-    public required ChatSpanRequest[] Spans { get; init; }
+    public required InternalChatSpanRequest[] Spans { get; init; }
 
     [JsonPropertyName("messageId")]
     public string? EncryptedMessageId { get; init; }
@@ -28,7 +28,25 @@ public record ChatRequest
             ChatId = idEncryption.DecryptChatId(EncryptedChatId),
             Spans = Spans,
             MessageId = EncryptedMessageId == null ? null : idEncryption.DecryptMessageId(EncryptedMessageId),
-            UserMessage = UserMessage
+            UserMessage = UserMessage,
+        };
+    }
+}
+
+public record ChatSpanRequest
+{
+    [JsonPropertyName("id")]
+    public required byte Id { get; init; }
+
+    [JsonPropertyName("systemPrompt")]
+    public string? SystemPrompt { get; init; }
+
+    public InternalChatSpanRequest ToInternalChatSpanRequest()
+    {
+        return new InternalChatSpanRequest
+        {
+            Id = Id,
+            SystemPrompt = SystemPrompt,
         };
     }
 }
@@ -37,22 +55,23 @@ public record DecryptedChatRequest
 {
     public required int ChatId { get; init; }
 
-    public required ChatSpanRequest[] Spans { get; init; }
+    public required InternalChatSpanRequest[] Spans { get; init; }
 
     public required long? MessageId { get; init; }
 
     public required MessageContentRequest? UserMessage { get; init; }
-
-    public bool AllSystemPromptSame => Spans.Select(x => x.SystemPrompt).Distinct().Count() == 1;
 }
 
-public record ChatSpanRequest
+public record InternalChatSpanRequest
 {
     [JsonPropertyName("spanId")]
     public required byte Id { get; init; }
 
     [JsonPropertyName("systemPrompt")]
-    public required string? SystemPrompt { get; init; }
+    public string? SystemPrompt { get; init; }
+
+    [JsonPropertyName("modelId")]
+    public short? ModelId { get; init; }
 
     public bool SystemPromptValid => !string.IsNullOrEmpty(SystemPrompt);
 
