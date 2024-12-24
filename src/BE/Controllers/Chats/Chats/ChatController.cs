@@ -131,11 +131,6 @@ public class ChatController(
             {
                 return BadRequest("Invalid message id");
             }
-
-            if (parentMessage.Role != DBChatRole.User)
-            {
-                return BadRequest("Parent message is not user message");
-            }
         }
         else
         {
