@@ -214,7 +214,6 @@ public class ChatController(ChatStopService stopService) : ControllerBase
             else if (parentMessage.Role == DBChatRole.User)
             {
                 // kind: RegenerateAssistantMessageRequest
-                // do nothing
             }
             else if (parentMessage.Role == DBChatRole.Assistant)
             {
@@ -432,13 +431,13 @@ public class ChatController(ChatStopService stopService) : ControllerBase
             SpanId = span.Id,
             CreatedAt = DateTime.UtcNow,
         };
-        if (req.MessageId != null)
+        if (dbUserMessage != null)
         {
-            dbAssistantMessage.ParentId = req.MessageId;
+            dbAssistantMessage.Parent = dbUserMessage;
         }
         else
         {
-            dbAssistantMessage.Parent = dbUserMessage;
+            dbAssistantMessage.ParentId = req.MessageId;
         }
 
         if (errorText != null)
