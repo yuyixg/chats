@@ -131,11 +131,6 @@ public class ChatController(
             {
                 return BadRequest("Invalid message id");
             }
-
-            if (parentMessage.Role != DBChatRole.User)
-            {
-                return BadRequest("Parent message is not user message");
-            }
         }
         else
         {
@@ -174,7 +169,8 @@ public class ChatController(
                 chat,
                 userModels[spanModelMapping[span.Id]],
                 existingMessages, 
-                systemMessages, 
+                systemMessages,
+                dbUserMessage,
                 userBalance, 
                 clientInfoTask,
                 channels[index].Writer, 
@@ -237,6 +233,7 @@ public class ChatController(
         UserModel userModel, 
         Dictionary<long, MessageLiteDto> existingMessages, 
         List<MessageLiteDto> systemMessages, 
+        Message? dbUserMessage,
         UserBalance userBalance, 
         Task<ClientInfo> clientInfoTask,
         ChannelWriter<SseResponseLine> writer, 
@@ -315,8 +312,15 @@ public class ChatController(
             ],
             SpanId = span.Id,
             CreatedAt = DateTime.UtcNow,
-            ParentId = req.MessageId,
         };
+        if (req.MessageId != null)
+        {
+            dbAssistantMessage.ParentId = req.MessageId;
+        }
+        else
+        {
+            dbAssistantMessage.Parent = dbUserMessage;
+        }
 
         if (errorText != null)
         {
