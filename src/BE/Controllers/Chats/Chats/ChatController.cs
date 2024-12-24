@@ -54,8 +54,15 @@ public class ChatController(
 
         Chat? chat = await db.Chats
             .Include(x => x.ChatSpans)
+            .Include(x => x.Messages).ThenInclude(x => x.MessageContents).ThenInclude(x => x.MessageContentBlob)
+            .Include(x => x.Messages).ThenInclude(x => x.MessageContents).ThenInclude(x => x.MessageContentFile)
+                .ThenInclude(x => x!.File).ThenInclude(x => x.FileService)
+            .Include(x => x.Messages).ThenInclude(x => x.MessageContents).ThenInclude(x => x.MessageContentFile)
+                .ThenInclude(x => x!.File).ThenInclude(x => x.FileImageInfo)
+            .Include(x => x.Messages).ThenInclude(x => x.MessageContents).ThenInclude(x => x.MessageContentText)
+            .AsSplitQuery()
             .FirstOrDefaultAsync(x => x.Id == req.ChatId && x.UserId == currentUser.Id, cancellationToken);
-        if (chat == null || chat.UserId != currentUser.Id)
+        if (chat == null)
         {
             return NotFound();
         }
@@ -85,45 +92,20 @@ public class ChatController(
             return BadRequest("Invalid span model");
         }
 
-        Dictionary<long, MessageLiteDto> existingMessages = await db.Messages
-            .Include(x => x.MessageContents).ThenInclude(x => x.MessageContentBlob)
-            .Include(x => x.MessageContents).ThenInclude(x => x.MessageContentFile).ThenInclude(x => x!.File).ThenInclude(x => x.FileService)
-            .Include(x => x.MessageContents).ThenInclude(x => x.MessageContentFile).ThenInclude(x => x!.File).ThenInclude(x => x.FileImageInfo)
-            .Include(x => x.MessageContents).ThenInclude(x => x.MessageContentText)
-            .Where(x => x.ChatId == req.ChatId && x.Chat.UserId == currentUser.Id)
+        Dictionary<long, MessageLiteDto> existingMessages = chat.Messages
             .Select(x => new MessageLiteDto()
             {
                 Id = x.Id,
-                Content = x.MessageContents
-                    .OrderBy(x => x.Id)
-                    .ToArray(),
+                Content = [.. x.MessageContents.OrderBy(x => x.Id)],
                 Role = (DBChatRole)x.ChatRoleId,
                 ParentId = x.ParentId,
                 SpanId = x.SpanId,
             })
-            .ToDictionaryAsync(x => x.Id, x => x, cancellationToken);
+            .ToDictionary(x => x.Id, x => x);
 
         // insert system message if it doesn't exist
-        List<MessageLiteDto> systemMessages = new(capacity: req.Spans.Length + 1);
         bool isEmptyChat = existingMessages.Count == 0;
-        if (isEmptyChat)
-        {
-            if (req.AllSystemPromptSame && req.Spans[0].SystemPromptValid)
-            {
-                // only insert null spaned system message if all prompts are the same
-                systemMessages.Add(MakeSystemMessage(null, db, req));
-            }
-            else
-            {
-                foreach (ChatSpanRequest span in req.Spans)
-                {
-                    if (!string.IsNullOrWhiteSpace(span.SystemPrompt))
-                    {
-                        systemMessages.Add(MakeSystemMessage(span.Id, db, req));
-                    }
-                }
-            }
-        }
+        MessageLiteDto[] systemMessages = GetSystemMessages(chat, req, existingMessages, isEmptyChat);
         // make user message
         Message? dbUserMessage = null;
         if (req.MessageId != null)
@@ -132,20 +114,14 @@ public class ChatController(
             {
                 return BadRequest("Invalid message id");
             }
+            else if (parentMessage.Role == DBChatRole.Assistant)
+            {
+                dbUserMessage = MakeDbUserMessage(chat, idEncryption, req);
+            }
         }
         else
         {
-            // insert new user message
-            dbUserMessage = new()
-            {
-                ChatId = req.ChatId,
-                ChatRoleId = (byte)DBChatRole.User,
-                MessageContents = request.UserMessage!.ToMessageContents(idEncryption),
-                CreatedAt = DateTime.UtcNow,
-                ParentId = req.MessageId,
-            };
-            db.Messages.Add(dbUserMessage);
-            existingMessages.Add(-1, MessageLiteDto.FromDB(dbUserMessage));
+            dbUserMessage = MakeDbUserMessage(chat, idEncryption, req);
         }
 
         Response.Headers.ContentType = "text/event-stream";
@@ -160,21 +136,21 @@ public class ChatController(
         Channel<SseResponseLine>[] channels = req.Spans.Select(x => Channel.CreateUnbounded<SseResponseLine>()).ToArray();
         Task<ChatSpanResponse>[] streamTasks = req.Spans
             .Select((span, index) => ProcessChatSpan(
-                currentUser, 
-                logger, 
-                chatFactory, 
-                fup, 
-                span, 
-                firstTick, 
-                req, 
+                currentUser,
+                logger,
+                chatFactory,
+                fup,
+                span,
+                firstTick,
+                req,
                 chat,
                 userModels[spanModelMapping[span.Id]],
-                existingMessages, 
-                systemMessages,
+                GetMessageTree(existingMessages, req.MessageId),
+                systemMessages.Where(x => x.Role == DBChatRole.System && x.SpanId == span.Id || x.SpanId == null).ToArray(),
                 dbUserMessage,
-                userBalance, 
+                userBalance,
                 clientInfoTask,
-                channels[index].Writer, 
+                channels[index].Writer,
                 cancellationToken))
             .ToArray();
         await foreach (SseResponseLine line in MergeChannels(channels).Reader.ReadAllAsync(CancellationToken.None))
@@ -186,7 +162,7 @@ public class ChatController(
         ChatSpanResponse[] resps = await Task.WhenAll(streamTasks);
         foreach (ChatSpanResponse resp in resps)
         {
-            db.Messages.Add(resp.AssistantMessage);
+            chat.Messages.Add(resp.AssistantMessage);
         }
         if (isEmptyChat) chat.Title = request.UserMessage!.Text[..Math.Min(50, request.UserMessage.Text.Length)];
         await db.SaveChangesAsync(cancellationToken);
@@ -219,32 +195,68 @@ public class ChatController(
         return new EmptyResult();
     }
 
+    private static MessageLiteDto[] GetSystemMessages(Chat chat, DecryptedChatRequest req, Dictionary<long, MessageLiteDto> existingMessages, bool isEmptyChat)
+    {
+        if (isEmptyChat)
+        {
+            if (req.AllSystemPromptSame && req.Spans[0].SystemPromptValid)
+            {
+                // only insert null spaned system message if all prompts are the same
+                return [MakeSystemMessage(null, chat, req.Spans[0])];
+            }
+            else
+            {
+                return req.Spans
+                    .Where(x => !string.IsNullOrWhiteSpace(x.SystemPrompt))
+                    .Select(x => MakeSystemMessage(x.Id, chat, x))
+                    .ToArray();
+            }
+        }
+        else
+        {
+            return existingMessages.Values
+                .Where(x => x.Role == DBChatRole.System)
+                .ToArray();
+        }
+    }
+
+    private static Message MakeDbUserMessage(Chat chat, IUrlEncryptionService idEncryption, DecryptedChatRequest req)
+    {
+        // insert new user message
+        Message? dbUserMessage = new()
+        {
+            ChatRoleId = (byte)DBChatRole.User,
+            MessageContents = req.UserMessage!.ToMessageContents(idEncryption),
+            CreatedAt = DateTime.UtcNow,
+            ParentId = req.MessageId,
+        };
+        chat.Messages.Add(dbUserMessage);
+        return dbUserMessage;
+    }
+
     private static async Task<ChatSpanResponse> ProcessChatSpan(
-        CurrentUser currentUser, 
-        ILogger<ChatController> logger, 
-        ChatFactory chatFactory, 
-        FileUrlProvider fup, 
-        ChatSpanRequest span, 
-        long firstTick, 
-        DecryptedChatRequest req, 
-        Chat chat, 
-        UserModel userModel, 
-        Dictionary<long, MessageLiteDto> existingMessages, 
-        List<MessageLiteDto> systemMessages, 
+        CurrentUser currentUser,
+        ILogger<ChatController> logger,
+        ChatFactory chatFactory,
+        FileUrlProvider fup,
+        ChatSpanRequest span,
+        long firstTick,
+        DecryptedChatRequest req,
+        Chat chat,
+        UserModel userModel,
+        IEnumerable<MessageLiteDto> messageTree,
+        MessageLiteDto[] systemMessages,
         Message? dbUserMessage,
-        UserBalance userBalance, 
+        UserBalance userBalance,
         Task<ClientInfo> clientInfoTask,
-        ChannelWriter<SseResponseLine> writer, 
+        ChannelWriter<SseResponseLine> writer,
         CancellationToken cancellationToken)
     {
-        Dictionary<long, MessageLiteDto> filteredMessages = existingMessages
-            .Where(x => x.Value.SpanId == span.Id || x.Value.SpanId == null)
-            .ToDictionary(x => x.Key, x => x.Value);
-
-        OpenAIChatMessage[] messageToSend = await ((MessageLiteDto[])
+        OpenAIChatMessage[] messageToSend = await ((IEnumerable<MessageLiteDto>)
         [
-            ..systemMessages.Where(x => x.Role == DBChatRole.System && x.SpanId == span.Id || x.SpanId == null),
-            ..GetMessageTree(filteredMessages, req.MessageId ?? -1),
+            ..systemMessages,
+            ..messageTree,
+            ..(dbUserMessage != null ? [MessageLiteDto.FromDB(dbUserMessage)] : Array.Empty<MessageLiteDto>()),
         ])
         .ToAsyncEnumerable()
         .SelectAwait(async x => await x.ToOpenAI(fup, cancellationToken))
@@ -335,20 +347,24 @@ public class ChatController(
         };
     }
 
-    private static MessageLiteDto MakeSystemMessage(byte? spanId, ChatsDB db, DecryptedChatRequest req)
+    private static MessageLiteDto MakeSystemMessage(byte? specifiedSpanId, Chat chat, ChatSpanRequest span)
     {
+        if (specifiedSpanId != null && specifiedSpanId != span.Id)
+        {
+            throw new ArgumentException("specifiedSpanId must be null or equal to span.Id");
+        }
+
         Message toBeInsert = new()
         {
-            ChatId = req.ChatId,
             ChatRoleId = (byte)DBChatRole.System,
             MessageContents =
             [
-                MessageContent.FromText(req.Spans[0].SystemPrompt!)
+                MessageContent.FromText(span.SystemPrompt!)
             ],
             CreatedAt = DateTime.UtcNow,
-            SpanId = spanId,
+            SpanId = specifiedSpanId,
         };
-        db.Messages.Add(toBeInsert);
+        chat.Messages.Add(toBeInsert);
         return MessageLiteDto.FromDB(toBeInsert);
     }
 
