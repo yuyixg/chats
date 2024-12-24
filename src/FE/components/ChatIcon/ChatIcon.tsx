@@ -27,11 +27,11 @@ const ChatIcon = (props: Props) => {
         style={{ background: 'transparent' }}
         className={cn('h-5 w-5 rounded-md dark:bg-white', className)}
       />
-      {isShard && (
+      {/* {isShard && (
         <span className="w-2 h-2 absolute top-[22px] left-[21px]">
           <IconShare stroke={'hsl(var(--primary))'} className="w-2 h-2" />
         </span>
-      )}
+      )} */}
     </div>
   );
 };

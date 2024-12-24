@@ -70,6 +70,7 @@ export interface ChatSpanDto {
   spanId: number;
   modelId: number;
   modelName: string;
+  prompt: string;
   modelProviderId: DBModelProvider;
   temperature: number | null;
   enableSearch: boolean;

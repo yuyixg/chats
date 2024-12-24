@@ -1,6 +1,6 @@
 interface IconProps {
   className?: string;
-  size?: number;
+  size?: number | string;
   strokeWidth?: number;
   stroke?: string;
   onClick?: (e: React.MouseEvent<SVGSVGElement, MouseEvent>) => void;

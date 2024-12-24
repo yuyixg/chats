@@ -44,7 +44,7 @@ import {
   setSelectedMessages,
 } from '../../_actions/message.actions';
 import { setModels, setSelectedModel } from '../../_actions/model.actions';
-import { setPrompts } from '../../_actions/prompt.actions';
+import { setDefaultPrompt, setPrompts } from '../../_actions/prompt.actions';
 import {
   setShowChatBar,
   setShowPromptBar,
@@ -143,6 +143,7 @@ const HomeContent = () => {
     };
 
     getDefaultPrompt().then((data) => {
+      promptDispatch(setDefaultPrompt(data));
       userModelConfigDispatch(
         setUserModelConfig({
           ...initialConfig,
@@ -272,27 +273,10 @@ const HomeContent = () => {
       getUserMessages(chat.id).then((data) => {
         if (data.length > 0) {
           selectChatMessage(data);
-          // messageDispatch(setMessages(data));
-          // const messages = formatMessages(data);
-          // messageDispatch(setCurrentMessages(messages));
-          // const lastMessage = messages[messages.length - 1];
-          // const selectMessageList = getSelectedMessages(
-          //   messages,
-          //   lastMessage.id,
-          // );
-          // if (lastMessage.role !== 'assistant') {
-          //   chatDispatch(setChatStatus(true));
-          //   selectMessageList.push(chatErrorMessage(lastMessage.id));
-          // }
-          // messageDispatch(setSelectedMessages(selectMessageList));
-          // messageDispatch(setLastMessageId(lastMessage.id));
         } else {
           messageDispatch(setCurrentMessages([]));
           messageDispatch(setSelectedMessages([]));
         }
-        // const model = getChatModel(chatList, chat?.id, models);
-        // calcSelectModel(chatList, models);
-        // handleSelectModel(model!);
       });
     }
   };
@@ -397,7 +381,7 @@ const HomeContent = () => {
     getUserPromptBrief().then((data) => {
       promptDispatch(setPrompts(data));
     });
-    setTimeout(() => setIsPageLoading(false), 500);
+    setTimeout(() => setIsPageLoading(false), 800);
   }, []);
 
   useEffect(() => {

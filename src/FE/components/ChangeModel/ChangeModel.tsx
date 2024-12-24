@@ -20,17 +20,25 @@ import {
   DropdownMenuTrigger,
 } from '@/components/ui/dropdown-menu';
 
+import RegenerateModel from '../ChatMessage/RegenerateModel';
+
 import { cn } from '@/lib/utils';
 
 const ChangeChatModelDropdownMenu = ({
   models,
+  modelId,
+  modelName,
   readonly,
+  showRegenerate,
   content,
   className,
   onChangeModel,
 }: {
   models: AdminModelDto[];
+  modelId?: number;
+  modelName?: string;
   readonly?: boolean;
+  showRegenerate?: boolean;
   content?: string | React.JSX.Element;
   className?: string;
   onChangeModel: (model: AdminModelDto) => void;
@@ -84,7 +92,10 @@ const ChangeChatModelDropdownMenu = ({
           {!readonly && typeof content === 'string' && <IconChevronDown />}
         </>
       </DropdownMenuTrigger>
-      <DropdownMenuContent className="w-40 md:w-48">
+      <DropdownMenuContent
+        className="w-40 md:w-52"
+        onClick={(e) => e.stopPropagation()}
+      >
         <Search
           className="p-2 mx-1"
           containerClassName="pt-1 pb-1"
@@ -106,11 +117,17 @@ const ChangeChatModelDropdownMenu = ({
                   </span>
                 </DropdownMenuSubTrigger>
                 <DropdownMenuPortal>
-                  <DropdownMenuSubContent className="max-w-[64px] md:max-w-[200px]">
+                  <DropdownMenuSubContent
+                    className="max-w-[64px] md:max-w-[200px]"
+                    onClick={(e) => e.stopPropagation()}
+                  >
                     {m.child.map((x) => (
                       <DropdownMenuItem
                         key={x.modelId}
-                        onClick={() => onChangeModel(x)}
+                        onClick={(e) => {
+                          onChangeModel(x);
+                          e.stopPropagation();
+                        }}
                       >
                         {x.name}
                       </DropdownMenuItem>
@@ -121,6 +138,15 @@ const ChangeChatModelDropdownMenu = ({
             );
           })}
         </DropdownMenuGroup>
+        <RegenerateModel
+          hidden={!showRegenerate}
+          onRegenerate={(e) => {
+            const model = models.find((x) => x.modelId === modelId);
+            onChangeModel(model!);
+            e.stopPropagation();
+          }}
+          modelName={modelName}
+        />
       </DropdownMenuContent>
     </DropdownMenu>
   );

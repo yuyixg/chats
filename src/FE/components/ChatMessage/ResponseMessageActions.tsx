@@ -1,12 +1,10 @@
 import { AdminModelDto } from '@/types/adminApis';
-import { ChatRole, Content } from '@/types/chat';
-import { PropsMessage } from '@/types/components/chat';
+import { ChatRole, ChatStatus, Content } from '@/types/chat';
 
 import ChangeModelAction from './ChangeModelAction';
 import CopyAction from './CopyAction';
 import GenerateInformationAction from './GenerateInformationAction';
 import PaginationAction from './PaginationAction';
-import RegenerateAction from './RegenerateAction';
 
 import { cn } from '@/lib/utils';
 
@@ -28,11 +26,11 @@ export interface ResponseMessage {
 interface Props {
   models: AdminModelDto[];
   message: ResponseMessage;
-  modelName?: string;
-  modelId?: number;
-  messageIsStreaming: boolean;
+  modelName: string;
+  modelId: number;
+  chatStatus: ChatStatus;
   onChangeMessage?: (messageId: string) => void;
-  onRegenerate?: (messageId: string, modelId?: number) => void;
+  onRegenerate?: (messageId: string, modelId: number) => void;
 }
 
 const ResponseMessageActions = (props: Props) => {
@@ -43,24 +41,21 @@ const ResponseMessageActions = (props: Props) => {
     modelId,
     onChangeMessage,
     onRegenerate,
-    messageIsStreaming,
+    chatStatus,
   } = props;
   const { id: messageId, siblingIds } = message;
   const currentMessageIndex = siblingIds.findIndex((x) => x === messageId);
 
   return (
     <>
-      {messageIsStreaming ? (
+      {chatStatus === ChatStatus.Chatting ? (
         <div className="h-9"></div>
       ) : (
         <div className="flex gap-1 flex-wrap mt-1">
           <PaginationAction
             hidden={siblingIds.length <= 1}
-            disabledPrev={currentMessageIndex === 0 || messageIsStreaming}
-            disabledNext={
-              currentMessageIndex === siblingIds.length - 1 ||
-              messageIsStreaming
-            }
+            disabledPrev={currentMessageIndex === 0}
+            disabledNext={currentMessageIndex === siblingIds.length - 1}
             messageIds={siblingIds}
             currentSelectIndex={currentMessageIndex}
             onChangeMessage={onChangeMessage}
@@ -73,17 +68,14 @@ const ResponseMessageActions = (props: Props) => {
           >
             <CopyAction text={message.content.text} />
             <GenerateInformationAction message={message} />
-            <RegenerateAction
-              onRegenerate={() => {
-                onRegenerate && onRegenerate(message.parentId!);
-              }}
-            />
             <ChangeModelAction
               models={models}
-              onChangeModel={(modelId: number) => {
-                onRegenerate && onRegenerate(message.parentId!, modelId);
+              onChangeModel={(model) => {
+                onRegenerate && onRegenerate(message.parentId!, model.modelId);
               }}
+              showRegenerate={true}
               modelName={modelName!}
+              modelId={modelId}
             />
           </div>
         </div>
