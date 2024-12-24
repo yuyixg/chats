@@ -35,8 +35,10 @@ public record ChatRequest
 
 public record ChatSpanRequest
 {
+    [JsonPropertyName("id")]
     public required byte Id { get; init; }
 
+    [JsonPropertyName("systemPrompt")]
     public string? SystemPrompt { get; init; }
 
     public InternalChatSpanRequest ToInternalChatSpanRequest()
