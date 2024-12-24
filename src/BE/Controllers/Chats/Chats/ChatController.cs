@@ -312,9 +312,15 @@ public class ChatController(
             ],
             SpanId = span.Id,
             CreatedAt = DateTime.UtcNow,
-            Parent = dbUserMessage,  // only one of parent and parent id will be set
-            ParentId = req.MessageId,// only one of parent and parent id will be set
         };
+        if (req.MessageId != null)
+        {
+            dbAssistantMessage.ParentId = req.MessageId;
+        }
+        else
+        {
+            dbAssistantMessage.Parent = dbUserMessage;
+        }
 
         if (errorText != null)
         {
