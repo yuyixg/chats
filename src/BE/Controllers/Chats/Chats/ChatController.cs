@@ -105,7 +105,8 @@ public class ChatController(
 
         // insert system message if it doesn't exist
         List<MessageLiteDto> systemMessages = new(capacity: req.Spans.Length + 1);
-        if (existingMessages.Count == 0)
+        bool isEmptyChat = existingMessages.Count == 0;
+        if (isEmptyChat)
         {
             if (req.AllSystemPromptSame && req.Spans[0].SystemPromptValid)
             {
@@ -187,6 +188,7 @@ public class ChatController(
         {
             db.Messages.Add(resp.AssistantMessage);
         }
+        if (isEmptyChat) chat.Title = request.UserMessage!.Text[..Math.Min(50, request.UserMessage.Text.Length)];
         await db.SaveChangesAsync(cancellationToken);
 
         // yield end messages
@@ -213,11 +215,7 @@ public class ChatController(
         }
 
         // yield title
-        if (existingMessages.Count == 0)
-        {
-            chat.Title = request.UserMessage!.Text[..Math.Min(50, request.UserMessage.Text.Length)];
-            await YieldTitle(chat.Title);
-        }
+        if (isEmptyChat) await YieldTitle(chat.Title);
         return new EmptyResult();
     }
 
