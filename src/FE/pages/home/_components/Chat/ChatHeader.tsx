@@ -40,7 +40,7 @@ const ChatHeader = () => {
       models,
       selectModel,
 
-      prompts,
+      defaultPrompt,
       showChatBar,
     },
     handleCreateNewChat,
@@ -64,6 +64,7 @@ const ChatHeader = () => {
         modelProviderId: data.modelProviderId,
         temperature: data.temperature,
         enableSearch: data.enableSearch,
+        prompt: defaultPrompt?.content!,
       });
       chatDispatch(setSelectedChat(selectedChat));
     });
@@ -113,6 +114,7 @@ const ChatHeader = () => {
                   <ChangeChatModelDropdownMenu
                     key={'change-model-' + span.modelId}
                     models={models}
+                    modelName={span.modelName}
                     className="font-semibold text-base"
                     content={span?.modelName}
                     onChangeModel={(model) => {

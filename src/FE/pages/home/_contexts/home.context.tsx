@@ -6,7 +6,7 @@ import { AdminModelDto } from '@/types/adminApis';
 import { IChat } from '@/types/chat';
 import { ChatMessage } from '@/types/chatMessage';
 import { ChatResult, GetChatsParams } from '@/types/clientApis';
-import { PromptSlim } from '@/types/prompt';
+import { Prompt, PromptSlim } from '@/types/prompt';
 
 import { ChatAction } from '../_reducers/chat.reducer';
 import { MessageAction } from '../_reducers/message.reducer';
@@ -43,6 +43,7 @@ export interface HomeInitialState {
   selectModel: AdminModelDto | undefined;
   selectedModels: AdminModelDto[];
 
+  defaultPrompt: Prompt | null;
   prompts: PromptSlim[];
 
   showChatBar: boolean;
@@ -71,6 +72,7 @@ export const initialState: HomeInitialState = {
   selectModel: undefined,
   selectedModels: [],
 
+  defaultPrompt: null,
   prompts: [],
 
   showChatBar: true,
