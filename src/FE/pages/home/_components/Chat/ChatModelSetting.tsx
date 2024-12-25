@@ -89,7 +89,7 @@ const ChatModelSetting = () => {
   };
 
   return (
-    <div className="mx-auto flex flex-col items-center space-y-5 md:space-y-10 px-3 pt-[52px] pb-16 md:pb-0">
+    <div className="mx-auto flex flex-col items-center space-y-5 md:space-y-10 px-3 md:pb-0">
       {hasModel() && (
         <div className="grid grid-flow-row md:grid-flow-col gap-6">
           {selectedChat.spans.map((span) => {

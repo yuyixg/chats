@@ -83,7 +83,7 @@ const ChangeChatModelDropdownMenu = ({
         <>
           <span
             className={cn(
-              'font-medium px-1 w-44 md:w-full text-nowrap overflow-hidden text-ellipsis whitespace-nowrap',
+              'font-medium px-1 md:w-full text-nowrap overflow-hidden text-ellipsis whitespace-nowrap w-auto',
               className,
             )}
           >

@@ -82,7 +82,7 @@ const UserMessage = (props: Props) => {
 
   return (
     <>
-      <div className="flex flex-row-reverse relative mb-4">
+      <div className="flex flex-row-reverse relative">
         {isEditing ? (
           <div className="flex w-full flex-col">
             <textarea
@@ -150,7 +150,7 @@ const UserMessage = (props: Props) => {
         )}
       </div>
 
-      <div className="flex justify-end pt-1">
+      <div className="flex justify-end my-2">
         {!isEditing && (
           <>
             <EditAction

@@ -436,7 +436,7 @@ const Chat = memo(() => {
                   className={cn(
                     messages.find((x) => x.role === ChatRole.User)
                       ? 'flex w-full justify-end'
-                      : 'grid grid-flow-row md:grid-flow-col gap-4',
+                      : `grid grid-cols-1 lg:grid-cols-${messages.length} md:grid-cols-${messages.length} gap-4`,
                   )}
                 >
                   {messages.map((message) => {
@@ -464,7 +464,7 @@ const Chat = memo(() => {
                             onClick={() => handelMessageActive(message.id)}
                             key={'response-message-' + message.id}
                             className={cn(
-                              'border-[0.1px] rounded-md p-4',
+                              'border-[1px] rounded-md p-4',
                               message.isActive && 'border-primary/50',
                             )}
                           >
@@ -478,8 +478,6 @@ const Chat = memo(() => {
                                 models={models}
                                 chatStatus={message.status}
                                 message={message as any}
-                                modelName={message?.modelName!}
-                                modelId={message?.modelId!}
                                 onChangeMessage={handleChangeMessage}
                                 onRegenerate={(
                                   messageId: string,

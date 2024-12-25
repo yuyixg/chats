@@ -6,8 +6,6 @@ import CopyAction from './CopyAction';
 import GenerateInformationAction from './GenerateInformationAction';
 import PaginationAction from './PaginationAction';
 
-import { cn } from '@/lib/utils';
-
 export interface ResponseMessage {
   id: string;
   siblingIds: string[];
@@ -21,29 +19,21 @@ export interface ResponseMessage {
   outputPrice: number;
   duration: number;
   firstTokenLatency: number;
+  modelId: number;
+  modelName: string;
 }
 
 interface Props {
   models: AdminModelDto[];
   message: ResponseMessage;
-  modelName: string;
-  modelId: number;
   chatStatus: ChatStatus;
   onChangeMessage?: (messageId: string) => void;
   onRegenerate?: (messageId: string, modelId: number) => void;
 }
 
 const ResponseMessageActions = (props: Props) => {
-  const {
-    models,
-    message,
-    modelName,
-    modelId,
-    onChangeMessage,
-    onRegenerate,
-    chatStatus,
-  } = props;
-  const { id: messageId, siblingIds } = message;
+  const { models, message, onChangeMessage, onRegenerate, chatStatus } = props;
+  const { id: messageId, siblingIds, modelId, modelName } = message;
   const currentMessageIndex = siblingIds.findIndex((x) => x === messageId);
 
   return (
@@ -60,13 +50,7 @@ const ResponseMessageActions = (props: Props) => {
             currentSelectIndex={currentMessageIndex}
             onChangeMessage={onChangeMessage}
           />
-          <div
-            className={cn(
-              // lastMessageId === message.id ? 'visible' : 'invisible',
-              'visible flex gap-0 items-center group-hover:visible focus:visible',
-            )}
-          >
-            {message.id}
+          <div className="visible flex gap-0 items-center">
             <CopyAction text={message.content.text} />
             <GenerateInformationAction message={message} />
             <ChangeModelAction

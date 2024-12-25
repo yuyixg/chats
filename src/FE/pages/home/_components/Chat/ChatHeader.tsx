@@ -20,39 +20,19 @@ import { cn } from '@/lib/utils';
 
 const ChatHeader = () => {
   const { t } = useTranslation();
-  const MAX_SELECT_MODEL_COUNT = 2;
+  const MAX_SELECT_MODEL_COUNT = 4;
   const {
     state: {
-      prompt,
-      temperature,
-      enableSearch,
-
-      chats,
       selectedChat,
-      chatError,
-      messageIsStreaming,
 
       messages,
-      selectedMessages,
-      currentChatMessageId,
-      currentMessages,
 
       models,
-      selectModel,
 
       defaultPrompt,
       showChatBar,
     },
-    handleCreateNewChat,
-    handleStartChat,
-    handleChatIsError,
-    handleStopChats,
-
-    hasModel,
     chatDispatch,
-    messageDispatch,
-    userModelConfigDispatch,
-    modelDispatch,
   } = useContext(HomeContext);
 
   const handleAddChatModel = async (modelId: number) => {
@@ -100,14 +80,9 @@ const ChatHeader = () => {
 
   return (
     <div className="sticky top-0 pt-1 z-10 text-sm bg-background right-0">
-      <div className="flex items-center justify-between h-10">
-        <div
-          className={cn(
-            'flex justify-start items-center ml-24',
-            showChatBar && 'ml-6',
-          )}
-        >
-          <div className="flex flex-col gap-y-1 h-16 mt-8">
+      <div className="flex justify-between h-auto">
+        <div className={cn('flex justify-start ml-24', showChatBar && 'ml-6')}>
+          <div className="flex flex-col gap-y-1">
             <div className="flex flex-col gap-x-1">
               {selectedChat.spans.map((span) => (
                 <div className="flex" key={'chat-header-' + span.spanId}>
@@ -122,7 +97,7 @@ const ChatHeader = () => {
                     }}
                   />
 
-                  <div hidden={selectedChat.spans.length === 1}>
+                  <div hidden={messages.length > 0}>
                     <Tips
                       trigger={
                         <Button
