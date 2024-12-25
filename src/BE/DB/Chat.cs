@@ -7,6 +7,7 @@ using Microsoft.EntityFrameworkCore;
 namespace Chats.BE.DB;
 
 [Table("Chat")]
+[Index("CreatedAt", Name = "IX_Chat_CreateAt")]
 [Index("UserId", Name = "IX_Chat_UserId")]
 public partial class Chat
 {
@@ -20,12 +21,18 @@ public partial class Chat
 
     public bool IsDeleted { get; set; }
 
+    public long? LeafMessageId { get; set; }
+
     public DateTime CreatedAt { get; set; }
 
     public int UserId { get; set; }
 
     [InverseProperty("Chat")]
     public virtual ICollection<ChatSpan> ChatSpans { get; set; } = new List<ChatSpan>();
+
+    [ForeignKey("LeafMessageId")]
+    [InverseProperty("Chats")]
+    public virtual Message? LeafMessage { get; set; }
 
     [InverseProperty("Chat")]
     public virtual ICollection<Message> Messages { get; set; } = new List<Message>();

@@ -34,7 +34,7 @@ public class UserChatsController(ChatsDB db, CurrentUser currentUser, IUrlEncryp
                     Temperature = s.Temperature,
                     EnableSearch = s.EnableSearch,
                 }).ToArray(),
-                MessageCount = x.Messages.Count,
+                LeafMessageId = x.LeafMessageId != null ? idEncryption.EncryptMessageId(x.LeafMessageId.Value) : null,
             })
             .FirstOrDefaultAsync(cancellationToken);
 
@@ -72,7 +72,7 @@ public class UserChatsController(ChatsDB db, CurrentUser currentUser, IUrlEncryp
                     Temperature = s.Temperature,
                     EnableSearch = s.EnableSearch,
                 }).ToArray(),
-                MessageCount = x.Messages.Count,
+                LeafMessageId = x.LeafMessageId != null ? idEncryption.EncryptMessageId(x.LeafMessageId.Value) : null,
             }),
             request,
             cancellationToken);
@@ -144,7 +144,7 @@ public class UserChatsController(ChatsDB db, CurrentUser currentUser, IUrlEncryp
                 Temperature = s.Temperature,
                 EnableSearch = s.EnableSearch,
             }).ToArray(),
-            MessageCount = chat.Messages.Count,
+            LeafMessageId = chat.LeafMessageId != null ? idEncryption.EncryptMessageId(chat.LeafMessageId.Value) : null,
         });
     }
 
@@ -178,10 +178,12 @@ public class UserChatsController(ChatsDB db, CurrentUser currentUser, IUrlEncryp
     [HttpPut("{encryptedChatId}")]
     public async Task<IActionResult> UpdateChats(string encryptedChatId, [FromBody] UpdateChatsRequest request, CancellationToken cancellationToken)
     {
-        if (request.ModelId != null)
+        if (!ModelState.IsValid)
         {
-            return BadRequest("ModelId is not allowed to be updated anymore, please use ChatSpan update API.");
+            return BadRequest(ModelState);
         }
+
+        DecryptedUpdateChatsRequest req = request.Decrypt(idEncryption);
 
         Chat? chat = await db.Chats
             .Where(x => x.Id == idEncryption.DecryptChatId(encryptedChatId) && x.UserId == currentUser.Id)
@@ -191,7 +193,13 @@ public class UserChatsController(ChatsDB db, CurrentUser currentUser, IUrlEncryp
             return NotFound();
         }
 
-        request.ApplyToChats(chat);
+        string? error = await req.Validate(db, chat.Id);
+        if (error != null)
+        {
+            return BadRequest(error);
+        }
+
+        req.ApplyToChats(chat);
         if (db.ChangeTracker.HasChanges())
         {
             await db.SaveChangesAsync(cancellationToken);

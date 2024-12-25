@@ -34,6 +34,9 @@ public partial class Message
     [InverseProperty("Messages")]
     public virtual ChatRole ChatRole { get; set; } = null!;
 
+    [InverseProperty("LeafMessage")]
+    public virtual ICollection<Chat> Chats { get; set; } = new List<Chat>();
+
     [InverseProperty("Parent")]
     public virtual ICollection<Message> InverseParent { get; set; } = new List<Message>();
 

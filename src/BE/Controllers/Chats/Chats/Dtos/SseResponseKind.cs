@@ -9,4 +9,5 @@ public enum SseResponseKind
     UpdateTitle = 4,
     TitleSegment = 5,
     ResponseMessage = 6,
+    ChatLeafMessageId = 7,
 }

@@ -129,4 +129,13 @@ public record SseResponseLine
             Kind = SseResponseKind.TitleSegment,
         };
     }
+
+    public static SseResponseLine<string> ChatLeafMessageId(long leafMessageId, IUrlEncryptionService idEncryption)
+    {
+        return new SseResponseLine<string>
+        {
+            Result = idEncryption.EncryptMessageId(leafMessageId),
+            Kind = SseResponseKind.ChatLeafMessageId,
+        };
+    }
 }
