@@ -24,7 +24,7 @@ interface Props {
   selectedChat: IChat;
   chatStatus: ChatStatus;
   onChangeMessage?: (messageId: string) => void;
-  onEdit?: (editedMessage: Message, parentId: string | null) => void;
+  onEdit?: (editedMessage: Message, parentId?: string) => void;
 }
 
 const UserMessage = (props: Props) => {
@@ -41,7 +41,7 @@ const UserMessage = (props: Props) => {
   const handleEditMessage = () => {
     if (content != messageContent) {
       if (selectedChat.id && onEdit) {
-        onEdit({ ...message, content: messageContent }, parentId);
+        onEdit({ ...message, content: messageContent }, parentId || undefined);
       }
     }
     setIsEditing(false);
@@ -82,7 +82,7 @@ const UserMessage = (props: Props) => {
 
   return (
     <>
-      <div className="flex flex-row-reverse">
+      <div className="flex flex-row-reverse relative mb-4">
         {isEditing ? (
           <div className="flex w-full flex-col">
             <textarea
@@ -104,7 +104,7 @@ const UserMessage = (props: Props) => {
               }}
             />
 
-            <div className="absolute right-10 bottom-6  md:right-20 md:bottom-7 flex justify-end space-x-4">
+            <div className="absolute right-2 bottom-2 flex justify-end space-x-4">
               <Button
                 variant="default"
                 className="rounded-md px-4 py-1 text-sm font-medium"
