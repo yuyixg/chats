@@ -116,7 +116,7 @@ public partial class ChatsDB : DbContext
 
         modelBuilder.Entity<Chat>(entity =>
         {
-            entity.HasKey(e => e.Id).HasName("PK_Conversation2");
+            entity.HasOne(d => d.LeafMessage).WithMany(p => p.Chats).HasConstraintName("FK_Chat_Message");
 
             entity.HasOne(d => d.User).WithMany(p => p.Chats)
                 .OnDelete(DeleteBehavior.ClientSetNull)

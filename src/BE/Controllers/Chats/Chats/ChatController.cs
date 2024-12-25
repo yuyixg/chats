@@ -268,6 +268,7 @@ public class ChatController(ChatStopService stopService) : ControllerBase
             chat.Messages.Add(resp.AssistantMessage);
         }
         if (isEmptyChat) chat.Title = request.UserMessage!.Text[..Math.Min(50, request.UserMessage.Text.Length)];
+        chat.LeafMessage = resps.Last().AssistantMessage;
         await db.SaveChangesAsync(cancellationToken);
 
         // yield end messages
@@ -279,6 +280,7 @@ public class ChatController(ChatStopService stopService) : ControllerBase
         {
             await YieldResponse(SseResponseLine.ResponseMessage(resp.SpanId, resp.AssistantMessage, idEncryption, fup));
         }
+        await YieldResponse(SseResponseLine.ChatLeafMessageId(chat.LeafMessageId!.Value, idEncryption));
 
         // finish costs
         if (resps.Any(x => x.Cost.CostBalance > 0))
