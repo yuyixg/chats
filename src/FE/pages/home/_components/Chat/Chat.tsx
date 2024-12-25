@@ -436,7 +436,7 @@ const Chat = memo(() => {
                   className={cn(
                     messages.find((x) => x.role === ChatRole.User)
                       ? 'flex w-full justify-end'
-                      : `grid grid-cols-1 lg:grid-cols-${messages.length} md:grid-cols-${messages.length} gap-4`,
+                      : 'grid grid-cols-[repeat(auto-fit,minmax(375px,1fr))] gap-4',
                   )}
                 >
                   {messages.map((message) => {

@@ -20,13 +20,10 @@ import { cn } from '@/lib/utils';
 
 const ChatHeader = () => {
   const { t } = useTranslation();
-  const MAX_SELECT_MODEL_COUNT = 4;
+  const MAX_SELECT_MODEL_COUNT = 10;
   const {
     state: {
       selectedChat,
-
-      messages,
-
       models,
 
       defaultPrompt,
@@ -97,7 +94,7 @@ const ChatHeader = () => {
                     }}
                   />
 
-                  <div hidden={messages.length > 0}>
+                  <div hidden={selectedChat.spans.length === 1}>
                     <Tips
                       trigger={
                         <Button
