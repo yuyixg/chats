@@ -83,25 +83,41 @@ export function findLastLeafId(
   messages: ChatMessageNode[],
   id: string,
 ): string {
-  const childrenMap: Record<string, ChatMessageNode[]> = {};
-  for (const message of messages) {
-    if (message.parentId) {
-      if (!childrenMap[message.parentId]) {
-        childrenMap[message.parentId] = [];
+  const currentMessage = messages.find((message) => message.id === id);
+  if (!currentMessage) {
+    return id;
+  }
+  const childMap: Record<string, ChatMessage[]> = {};
+  messages.forEach((node) => {
+    if (node.parentId !== null) {
+      if (!childMap[node.parentId]) {
+        childMap[node.parentId] = [];
       }
-      childrenMap[message.parentId].push(message);
+      childMap[node.parentId].push(node);
     }
+  });
+
+  function findDeepest(
+    message: ChatMessage,
+    depth: number,
+  ): { id: string; depth: number } {
+    if (!childMap[message.id] || childMap[message.id].length === 0) {
+      return { id: message.id, depth };
+    }
+
+    let deepest = { id: message.id, depth };
+    for (const child of childMap[message.id]) {
+      const childDeepest = findDeepest(child, depth + 1);
+      if (childDeepest.depth > deepest.depth) {
+        deepest = childDeepest;
+      }
+    }
+
+    return deepest;
   }
 
-  function dfs(nodeId: string): string {
-    const children = childrenMap[nodeId];
-    if (!children || children.length === 0) {
-      return nodeId;
-    }
-    return dfs(children[children.length - 1].id);
-  }
-
-  return dfs(id);
+  const deepestNode = findDeepest(currentMessage, 0);
+  return deepestNode.id;
 }
 
 export function findSelectedMessageByLeafId(

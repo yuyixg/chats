@@ -96,7 +96,6 @@ const Chat = memo(() => {
     messageDispatch,
     userModelConfigDispatch,
   } = useContext(HomeContext);
-  console.log('selectedMessages', selectedMessages);
   const [autoScrollEnabled, setAutoScrollEnabled] = useState<boolean>(true);
   const [showScrollDownButton, setShowScrollDownButton] =
     useState<boolean>(false);
@@ -235,16 +234,19 @@ const Chat = memo(() => {
         userMessage: message.content,
       };
 
-      const response = await fetch(`${getApiUrl()}/api/chats/fresh-chat-message`, {
-        method: 'POST',
-        headers: {
-          'Content-Type': 'application/json',
-          Authorization: `Bearer ${getUserSession()}`,
+      const response = await fetch(
+        `${getApiUrl()}/api/chats/fresh-chat-message`,
+        {
+          method: 'POST',
+          headers: {
+            'Content-Type': 'application/json',
+            Authorization: `Bearer ${getUserSession()}`,
+          },
+          body: JSON.stringify(chatBody),
         },
-        body: JSON.stringify(chatBody),
-      });
+      );
 
-      await handleChatMessage(response, messageList, selectedMessageList);
+      await handleChatMessage(response, selectedMessageList);
 
       // let selectChatId = selectedChat?.id;
       // let newMessages = [...messages];
@@ -462,12 +464,19 @@ const Chat = memo(() => {
     modelId: number,
   ) => {
     let { id: chatId } = selectedChat;
-    let responseMessages = generateResponseMessage(spanId, messageId);
-    let messageList = [...messages, responseMessages];
-    const selectedMessageList = findSelectedMessageByLeafId(
-      messageList,
-      messageList[messageList.length - 1].id,
+    const selectedMessageList = [...selectedMessages];
+    const responseMessages = generateResponseMessage(spanId, messageId);
+    const index = selectedMessages.findIndex(
+      (x) => x.findIndex((m) => m.parentId === messageId) !== -1,
     );
+    selectedMessageList[index] = selectedMessageList[index].map((m) => {
+      if (m.spanId === spanId) {
+        responseMessages.siblingIds = [responseMessages.id, ...m.siblingIds];
+        return responseMessages;
+      }
+      return m;
+    });
+
     messageDispatch(setSelectedMessages(selectedMessageList));
 
     let chatBody = {
@@ -489,14 +498,14 @@ const Chat = memo(() => {
       },
     );
 
-    await handleChatMessage(response, messageList, selectedMessageList);
+    await handleChatMessage(response, selectedMessageList);
   };
 
   const handleChatMessage = async (
     response: Response,
-    messageList: ChatMessage[],
     selectedMessageList: ChatMessage[][],
   ) => {
+    let messageList = [...messages];
     const data = response.body;
     if (!response.ok) {
       handleChatIsError();
@@ -551,11 +560,9 @@ const Chat = memo(() => {
       } else if (value.k === SseResponseKind.UserMessage) {
         const msg = value.r;
         messageList.push(msg);
-        messageDispatch(setMessages([...messages, msg]));
       } else if (value.k === SseResponseKind.ResponseMessage) {
         const msg = value.r;
         messageList.push(msg);
-        messageDispatch(setMessages([...messages, msg]));
       } else if (value.k === SseResponseKind.UpdateTitle) {
         updateChatTitle(value.r);
       } else if (value.k === SseResponseKind.TitleSegment) {
@@ -567,6 +574,13 @@ const Chat = memo(() => {
       messageList,
       messageList[messageList.length - 1].id,
     );
+    messageDispatch(setMessages(messageList));
+    messageDispatch(setSelectedMessages(selectedMsgs));
+  };
+
+  const handleChangeMessage = (messageId: string) => {
+    const leafId = findLastLeafId(messages, messageId);
+    const selectedMsgs = findSelectedMessageByLeafId(messages, leafId);
     messageDispatch(setSelectedMessages(selectedMsgs));
   };
 
@@ -620,7 +634,8 @@ const Chat = memo(() => {
 
   const handelMessageActive = (messageId: string) => {
     const leafId = findLastLeafId(messages, messageId);
-    console.log(leafId);
+    console.log('messageId', messageId);
+    console.log('leafId', leafId);
     const selectedMessageList = findSelectedMessageByLeafId(messages, leafId);
     messageDispatch(setSelectedMessages(selectedMessageList));
   };
@@ -649,15 +664,15 @@ const Chat = memo(() => {
                   )}
                 >
                   {messages.map((message) => {
-                    const model = selectedChat.spans.find(
-                      (x) => x.spanId === message.spanId,
-                    );
                     return (
                       <>
                         {message.role === ChatRole.User && (
                           <div
                             key={'user-message-' + message.id}
-                            className="prose w-full dark:prose-invert rounded-r-md"
+                            className={cn(
+                              'prose w-full dark:prose-invert rounded-r-md',
+                              index > 0 && 'mt-4',
+                            )}
                           >
                             <UserMessage
                               selectedChat={selectedChat}
@@ -674,7 +689,7 @@ const Chat = memo(() => {
                             key={'response-message-' + message.id}
                             className={cn(
                               'border-[0.1px] rounded-md p-4',
-                              message.isActive && 'border-[1.6px]',
+                              message.isActive && 'border-primary/50',
                             )}
                           >
                             <div className="prose dark:prose-invert rounded-r-md">
@@ -687,9 +702,9 @@ const Chat = memo(() => {
                                 models={models}
                                 chatStatus={message.status}
                                 message={message as any}
-                                modelName={model?.modelName!}
-                                modelId={model?.modelId!}
-                                onChangeMessage={(messageId: string) => {}}
+                                modelName={message?.modelName!}
+                                modelId={message?.modelId!}
+                                onChangeMessage={handleChangeMessage}
                                 onRegenerate={(
                                   messageId: string,
                                   modelId: number,

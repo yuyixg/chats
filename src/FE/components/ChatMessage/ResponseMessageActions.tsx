@@ -66,6 +66,7 @@ const ResponseMessageActions = (props: Props) => {
               'visible flex gap-0 items-center group-hover:visible focus:visible',
             )}
           >
+            {message.id}
             <CopyAction text={message.content.text} />
             <GenerateInformationAction message={message} />
             <ChangeModelAction

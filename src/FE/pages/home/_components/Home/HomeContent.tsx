@@ -215,6 +215,8 @@ const HomeContent = () => {
       messages,
       lastMessage.id,
     );
+    console.log('messages', messages);
+    console.log('selectedMessageList', selectedMessageList);
     messageDispatch(setSelectedMessages(selectedMessageList));
 
     // messageDispatch(setLastMessageId(lastMessage.id));
