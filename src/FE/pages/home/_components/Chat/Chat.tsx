@@ -177,7 +177,11 @@ const Chat = memo(() => {
         spans: chatSpans.map((x) => ({
           id: x.spanId,
           systemPrompt: defaultPrompt?.content,
+          setsTemperature: true,
+          enableSearch: x.enableSearch,
+          temperature: x.temperature,
         })),
+        utcOffset: new Date().getTimezoneOffset(),
         parentAssistantMessageId: messageId || null,
         userMessage: message.content,
       };

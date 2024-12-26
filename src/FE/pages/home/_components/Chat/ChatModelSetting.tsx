@@ -1,4 +1,4 @@
-import { useContext, useEffect } from 'react';
+import { useContext } from 'react';
 
 import useTranslation from '@/hooks/useTranslation';
 
@@ -40,10 +40,19 @@ const ChatModelSetting = () => {
     prompt: Prompt,
     model: AdminModelDto,
   ) => {
-    if (prompt.temperature !== null) {
-      onChangeTemperature(spanId, prompt.temperature);
-    }
-    onChangePromptText(spanId, formatPrompt(prompt.content || '', { model }));
+    const text = formatPrompt(prompt.content || '', { model });
+    const promptTemperature = prompt.temperature;
+    const spans = selectedChat.spans.map((s) =>
+      s.spanId === spanId
+        ? {
+            ...s,
+            prompt: text,
+            temperature:
+              promptTemperature != null ? promptTemperature : s.temperature,
+          }
+        : s,
+    );
+    chatDispatch(setSelectedChat({ ...selectedChat, spans }));
   };
   const onChangePromptText = (spanId: number, value: string) => {
     const spans = selectedChat.spans.map((s) =>
@@ -65,10 +74,6 @@ const ChatModelSetting = () => {
     );
     chatDispatch(setSelectedChat({ ...selectedChat, spans }));
   };
-
-  useEffect(() => {
-    console.log('selectedChat', selectedChat);
-  }, [selectedChat]);
 
   return (
     <div
