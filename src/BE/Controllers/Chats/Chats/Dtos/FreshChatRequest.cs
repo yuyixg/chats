@@ -1,4 +1,5 @@
 ﻿using Chats.BE.Controllers.Chats.Messages.Dtos;
+using Chats.BE.Services.UrlEncryption;
 using System.Text.Json.Serialization;
 
 namespace Chats.BE.Controllers.Chats.Chats.Dtos;
@@ -8,7 +9,7 @@ public abstract record BaseChatRequest
     [JsonPropertyName("chatId")]
     public required string EncryptedChatId { get; init; }
 
-    public abstract ChatRequest ToChatRequest();
+    public abstract ChatRequest ToChatRequest(IUrlEncryptionService idEncryption);
 }
 
 public record FreshChatRequest : BaseChatRequest
@@ -22,14 +23,18 @@ public record FreshChatRequest : BaseChatRequest
     [JsonPropertyName("parentAssistantMessageId")]
     public required string? ParentAssistantMessageId { get; init; }
 
-    public override ChatRequest ToChatRequest()
+    public override ChatRequest ToChatRequest(IUrlEncryptionService idEncryption)
     {
         return new ChatRequest
         {
-            EncryptedChatId = EncryptedChatId,
-            Spans = Spans.Select(x => x.ToInternalChatSpanRequest()).ToArray(),
+            ChatId = idEncryption.DecryptChatId(EncryptedChatId),
+            Spans = Spans,
             UserMessage = UserMessage,
-            EncryptedMessageId = ParentAssistantMessageId,
+            MessageId = ParentAssistantMessageId switch
+            {
+                null => null, 
+                _ => idEncryption.DecryptMessageId(ParentAssistantMessageId)
+            }
         };
     }
 }
@@ -45,20 +50,14 @@ public record RegenerateAssistantMessageRequest : BaseChatRequest
     [JsonPropertyName("modelId")]
     public required short ModelId { get; init; }
 
-    public override ChatRequest ToChatRequest()
+    public override ChatRequest ToChatRequest(IUrlEncryptionService idEncryption)
     {
         return new ChatRequest
         {
-            EncryptedChatId = EncryptedChatId,
-            EncryptedMessageId = ParentUserMessageId, 
-            Spans =
-            [
-                new InternalChatSpanRequest
-                {
-                    Id = SpanId,
-                    ModelId = ModelId
-                }
-            ]
+            ChatId = idEncryption.DecryptChatId(EncryptedChatId),
+            MessageId = idEncryption.DecryptMessageId(ParentUserMessageId),
+            Spans = [new ChatSpanRequest { Id = SpanId, ModelId = ModelId }],
+            UserMessage = null,
         };
     }
 }
@@ -74,13 +73,17 @@ public record GeneralChatRequest : BaseChatRequest
     [JsonPropertyName("parentAssistantMessageId")]
     public required string? ParentAssistantMessageId { get; init; }
 
-    public override ChatRequest ToChatRequest()
+    public override ChatRequest ToChatRequest(IUrlEncryptionService idEncryption)
     {
         return new ChatRequest
         {
-            EncryptedChatId = EncryptedChatId,
-            EncryptedMessageId = ParentAssistantMessageId,
-            Spans = SpanIds.Select(x => new InternalChatSpanRequest() { Id = (byte)x }).ToArray(),
+            ChatId = idEncryption.DecryptChatId(EncryptedChatId),
+            MessageId = ParentAssistantMessageId switch
+            {
+                null => null,
+                _ => idEncryption.DecryptMessageId(ParentAssistantMessageId)
+            },
+            Spans = SpanIds.Select(x => new ChatSpanRequest() { Id = (byte)x }).ToArray(),
             UserMessage = UserMessage
         };
     }

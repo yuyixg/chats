@@ -3,7 +3,6 @@ using Chats.BE.Controllers.Chats.UserChats.Dtos;
 using Chats.BE.DB;
 using Chats.BE.Infrastructure;
 using Chats.BE.Services;
-using Chats.BE.Services.ChatServices;
 using Chats.BE.Services.UrlEncryption;
 using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Mvc;

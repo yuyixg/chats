@@ -7,26 +7,20 @@ using System.Text.Json.Serialization;
 
 namespace Chats.BE.Controllers.Chats.Chats.Dtos;
 
-public record SseResponseLine<T> : SseResponseLine
-{
-    [JsonPropertyName("r")]
-    public required T Result { get; init; }
-}
-
-[JsonPolymorphic]
-[JsonDerivedType(typeof(SseResponseLine<string>))]
-[JsonDerivedType(typeof(SseResponseLine<MessageDto>))]
 public record SseResponseLine
 {
-    [JsonPropertyName("i"), JsonIgnore(Condition = JsonIgnoreCondition.WhenWritingNull)]
-    public byte? SpanId { get; init; }
-
     [JsonPropertyName("k")]
     public required SseResponseKind Kind { get; init; }
 
-    public static SseResponseLine<string> Segment(byte spanId, string segment)
+    [JsonPropertyName("i"), JsonIgnore(Condition = JsonIgnoreCondition.WhenWritingNull)]
+    public byte? SpanId { get; init; }
+
+    [JsonPropertyName("r")]
+    public required object Result { get; init; }
+
+    public static SseResponseLine Segment(byte spanId, string segment)
     {
-        return new SseResponseLine<string>
+        return new SseResponseLine
         {
             SpanId = spanId,
             Result = segment,
@@ -34,9 +28,9 @@ public record SseResponseLine
         };
     }
 
-    public static SseResponseLine<string> Error(byte spanId, string error)
+    public static SseResponseLine Error(byte spanId, string error)
     {
-        return new SseResponseLine<string>
+        return new SseResponseLine
         {
             Result = error,
             SpanId = spanId,
@@ -44,7 +38,7 @@ public record SseResponseLine
         };
     }
 
-    public static SseResponseLine<MessageDto> ResponseMessage(
+    public static SseResponseLine ResponseMessage(
         byte spanId,
         Message assistantMessage,
         IUrlEncryptionService urlEncryptionService,
@@ -72,7 +66,7 @@ public record SseResponseLine
             },
         };
         MessageDto assistantMessageDto = assistantMessageTemp.ToDto(urlEncryptionService, fup);
-        return new SseResponseLine<MessageDto>
+        return new SseResponseLine
         {
             SpanId = spanId,
             Result = assistantMessageDto,
@@ -80,7 +74,7 @@ public record SseResponseLine
         };
     }
 
-    public static SseResponseLine<MessageDto> UserMessage(
+    public static SseResponseLine UserMessage(
         Message userMessage,
         IUrlEncryptionService urlEncryptionService,
         FileUrlProvider fup)
@@ -96,43 +90,43 @@ public record SseResponseLine
             Usage = null,
         };
         MessageDto userMessageDto = userMessageTemp.ToDto(urlEncryptionService, fup);
-        return new SseResponseLine<MessageDto>
+        return new SseResponseLine
         {
             Result = userMessageDto,
             Kind = SseResponseKind.UserMessage,
         };
     }
 
-    public static SseResponseLine<string> StopId(string stopId)
+    public static SseResponseLine StopId(string stopId)
     {
-        return new SseResponseLine<string>
+        return new SseResponseLine
         {
             Result = stopId,
             Kind = SseResponseKind.StopId,
         };
     }
 
-    public static SseResponseLine<string> UpdateTitle(string title)
+    public static SseResponseLine UpdateTitle(string title)
     {
-        return new SseResponseLine<string>
+        return new SseResponseLine
         {
             Result = title,
             Kind = SseResponseKind.UpdateTitle,
         };
     }
 
-    public static SseResponseLine<string> TitleSegment(string titleSegment)
+    public static SseResponseLine TitleSegment(string titleSegment)
     {
-        return new SseResponseLine<string>
+        return new SseResponseLine
         {
             Result = titleSegment,
             Kind = SseResponseKind.TitleSegment,
         };
     }
 
-    public static SseResponseLine<string> ChatLeafMessageId(long leafMessageId, IUrlEncryptionService idEncryption)
+    public static SseResponseLine ChatLeafMessageId(long leafMessageId, IUrlEncryptionService idEncryption)
     {
-        return new SseResponseLine<string>
+        return new SseResponseLine
         {
             Result = idEncryption.EncryptMessageId(leafMessageId),
             Kind = SseResponseKind.ChatLeafMessageId,
