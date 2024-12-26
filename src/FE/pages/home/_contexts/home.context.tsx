@@ -92,17 +92,8 @@ export interface HomeContextProps {
   settingDispatch: Dispatch<SettingsAction>;
   promptDispatch: Dispatch<PromptAction>;
 
-  handleSelectModel: (model: AdminModelDto) => void;
   hasModel: () => boolean;
   handleNewChat: () => void;
-  handleStartChat: (
-    selectedMessages: ChatMessage[][],
-    selectedMessageId: string,
-    currentMessageId: string,
-  ) => void;
-  handleUpdateChats: (chats: IChat[]) => void;
-  handleCreateNewChat: () => Promise<ChatResult>;
-  handleChatIsError: () => void;
   handleDeleteChat: (id: string) => void;
   handleSelectChat: (chat: IChat) => void;
   handleUpdateChat: (
@@ -110,7 +101,7 @@ export interface HomeContextProps {
     id: string,
     params: HandleUpdateChatParams,
   ) => void;
-  getChats: (params: GetChatsParams, models?: AdminModelDto[]) => void;
+  getChats: (params: GetChatsParams, isAppend?: boolean) => void;
   handleStopChats: () => void;
 }
 

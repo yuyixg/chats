@@ -23,6 +23,8 @@ import {
 } from '@/types/chatMessage';
 import { Prompt } from '@/types/prompt';
 
+import ChatError from '@/components/ChatError/ChatError';
+import ChatIcon from '@/components/ChatIcon/ChatIcon';
 import ResponseMessage from '@/components/ChatMessage/ResponseMessage';
 import ResponseMessageActions from '@/components/ChatMessage/ResponseMessageActions';
 import UserMessage from '@/components/ChatMessage/UserMessage';
@@ -55,11 +57,11 @@ const Chat = memo(() => {
       selectedMessages,
 
       models,
+      modelMap,
       selectModel,
 
       defaultPrompt,
     },
-    handleChatIsError,
 
     hasModel,
     chatDispatch,
@@ -144,22 +146,30 @@ const Chat = memo(() => {
   };
 
   const updateSelectedResponseMessage = (
-    messages: ChatMessage[][],
+    selectedMsgs: ChatMessage[][],
     messageId: string,
     text: string,
-    error?: string,
+    status?: ChatStatus,
+    finalMessageId?: string,
   ) => {
-    const messageCount = messages.length - 1;
-    let messageList = messages[messageCount];
+    const messageCount = selectedMsgs.length - 1;
+    let messageList = selectedMsgs[messageCount];
     messageList.map((x) => {
       if (x.id === messageId) {
         x.content.text += text;
-        x.content.error = error;
+        if (status) {
+          x.status = status;
+          status === ChatStatus.Failed && (x.content.error = text);
+          if (status === ChatStatus.None) {
+            x.siblingIds.push(messageId);
+            x.id = finalMessageId!;
+          }
+        }
       }
       return x;
     });
-    messages.splice(messageCount, 1, messageList);
-    messageDispatch(setSelectedMessages(messages));
+    selectedMsgs.splice(messageCount, 1, messageList);
+    messageDispatch(setSelectedMessages(selectedMsgs));
   };
 
   const handleSend = useCallback(
@@ -290,13 +300,13 @@ const Chat = memo(() => {
     let messageList = [...messages];
     const data = response.body;
     if (!response.ok) {
-      handleChatIsError();
+      // handleChatIsError();
       const result = await response.json();
       toast.error(t(result?.message) || response.statusText);
       return;
     }
     if (!data) {
-      handleChatIsError();
+      // handleChatIsError();
       return;
     }
 
@@ -306,7 +316,6 @@ const Chat = memo(() => {
     async function* processBuffer() {
       while (true) {
         const { done, value } = await reader.read();
-        console.log(done, value);
         if (done) {
           break;
         }
@@ -329,21 +338,30 @@ const Chat = memo(() => {
       if (value.k === SseResponseKind.StopId) {
         chatDispatch(setStopIds([value.r]));
       } else if (value.k === SseResponseKind.Segment) {
-        const msgId = `${ResponseMessageTempId}-${value.i}`;
-        updateSelectedResponseMessage(selectedMessageList, msgId, value.r);
+        const { r: msg, i: spanId } = value;
+        const msgId = `${ResponseMessageTempId}-${spanId}`;
+        updateSelectedResponseMessage(selectedMessageList, msgId, msg);
       } else if (value.k === SseResponseKind.Error) {
-        const msgId = `${ResponseMessageTempId}-${value.i}`;
+        const { r: msg, i: spanId } = value;
+        const msgId = `${ResponseMessageTempId}-${spanId}`;
         updateSelectedResponseMessage(
           selectedMessageList,
           msgId,
-          value.r,
-          value.r,
+          msg,
+          ChatStatus.Failed,
         );
       } else if (value.k === SseResponseKind.UserMessage) {
-        const msg = value.r;
-        messageList.push(msg);
+        messageList.push(value.r);
       } else if (value.k === SseResponseKind.ResponseMessage) {
-        const msg = value.r;
+        const { r: msg, i: spanId } = value;
+        const msgId = `${ResponseMessageTempId}-${spanId}`;
+        updateSelectedResponseMessage(
+          selectedMessageList,
+          msgId,
+          '',
+          ChatStatus.None,
+          msg.id,
+        );
         messageList.push(msg);
       } else if (value.k === SseResponseKind.UpdateTitle) {
         updateChatTitle(value.r);
@@ -434,6 +452,7 @@ const Chat = memo(() => {
         ) : (
           <div className="w-4/5 m-auto p-4">
             {selectedMessages.map((messages, index) => {
+              const hasMultipleSpan = selectedChat.spans.length > 1;
               return (
                 <div
                   key={'message-group-' + index}
@@ -465,14 +484,27 @@ const Chat = memo(() => {
                         )}
                         {message.role === ChatRole.Assistant && (
                           <div
-                            onClick={() => handelMessageActive(message.id)}
+                            onClick={() =>
+                              hasMultipleSpan && handelMessageActive(message.id)
+                            }
                             key={'response-message-' + message.id}
                             className={cn(
-                              'border-[1px] rounded-md p-4',
-                              message.isActive && 'border-primary/50',
+                              'border-[1px] rounded-md p-4 flex',
+                              hasMultipleSpan &&
+                                message.isActive &&
+                                'border-primary/50',
                             )}
                           >
+                            {/* <ChatIcon
+                              className="w-7 h-7 mr-1"
+                              providerId={
+                                modelMap[message.modelId!].modelProviderId
+                              }
+                            /> */}
                             <div className="prose dark:prose-invert rounded-r-md">
+                              {message.status === ChatStatus.Failed && (
+                                <ChatError error={message.content.error} />
+                              )}
                               <ResponseMessage
                                 chatStatus={message.status}
                                 currentChatMessageId={message.id}

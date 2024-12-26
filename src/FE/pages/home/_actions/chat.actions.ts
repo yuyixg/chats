@@ -19,10 +19,13 @@ export const setChats = (chats: SetChatsType): ChatAction => ({
   payload: chats,
 });
 
-export const setSelectedChat = (chat?: SetSelectedChatType): ChatAction => ({
-  type: ChatActionTypes.SET_SELECTED_CHAT,
-  payload: chat,
-});
+export const setSelectedChat = (chat?: SetSelectedChatType): ChatAction => {
+  console.log('chat', chat);
+  return {
+    type: ChatActionTypes.SET_SELECTED_CHAT,
+    payload: chat,
+  };
+};
 
 export const setChangeSelectedChatSpan = (
   chat: IChat,

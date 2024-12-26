@@ -5,23 +5,13 @@ import { useRouter } from 'next/router';
 import { useCreateReducer } from '@/hooks/useCreateReducer';
 import useTranslation from '@/hooks/useTranslation';
 
-import {
-  getPathChatId,
-  getStorageChatId,
-  setStorageChatId,
-} from '@/utils/chats';
-import {
-  findSelectedMessageByLeafId,
-  formatMessages,
-  getSelectedMessages,
-} from '@/utils/message';
-import { getStorageModelId, setStorageModelId } from '@/utils/model';
+import { getPathChatId } from '@/utils/chats';
+import { findSelectedMessageByLeafId } from '@/utils/message';
 import { formatPrompt } from '@/utils/promptVariable';
 import { getSettings } from '@/utils/settings';
 import { getUserSession } from '@/utils/user';
 
-import { AdminModelDto } from '@/types/adminApis';
-import { ChatRole, DEFAULT_TEMPERATURE, IChat, Role } from '@/types/chat';
+import { IChat } from '@/types/chat';
 import { ChatMessage } from '@/types/chatMessage';
 import { ChatResult, GetChatsParams } from '@/types/clientApis';
 
@@ -32,28 +22,19 @@ import {
   setChatStatus,
   setChats,
   setIsChatsLoading,
-  setMessageIsStreaming,
   setSelectedChat,
   setStopIds,
 } from '../../_actions/chat.actions';
 import {
-  setCurrentMessageId,
-  setCurrentMessages,
-  setLastMessageId,
   setMessages,
   setSelectedMessages,
 } from '../../_actions/message.actions';
-import {
-  setModelMap,
-  setModels,
-  setSelectedModel,
-} from '../../_actions/model.actions';
+import { setModelMap, setModels } from '../../_actions/model.actions';
 import { setDefaultPrompt, setPrompts } from '../../_actions/prompt.actions';
 import {
   setShowChatBar,
   setShowPromptBar,
 } from '../../_actions/setting.actions';
-import { setUserModelConfig } from '../../_actions/userModelConfig.actions';
 import HomeContext, {
   HandleUpdateChatParams,
   HomeInitialState,
@@ -122,95 +103,6 @@ const HomeContent = () => {
     initialState,
   });
 
-  const calcSelectModel = (chats: ChatResult[], models: AdminModelDto[]) => {
-    // const model = models.find((x) => x.modelId === chats[0]?.spans[0].modelId); // todo
-    // if (model) return model;
-    // else
-    return models.length > 0 ? models[0] : undefined;
-  };
-
-  const getChatModel = (
-    chats: ChatResult[],
-    chatId: string,
-    models: AdminModelDto[],
-  ) => {
-    const chatModelId = chats.find((x) => x.id === chatId)?.spans[0].modelId; // todo
-    const model = models.find((x) => x.modelId === chatModelId);
-    return model;
-  };
-
-  const handleSelectModel = (model: AdminModelDto) => {
-    if (!model) return;
-    modelDispatch(setSelectedModel(model));
-    const initialConfig = {
-      enableSearch: model.allowSearch ? false : null,
-    };
-
-    getDefaultPrompt().then((data) => {
-      promptDispatch(setDefaultPrompt(data));
-      userModelConfigDispatch(
-        setUserModelConfig({
-          ...initialConfig,
-          temperature: data.temperature ?? temperature ?? DEFAULT_TEMPERATURE,
-          prompt: formatPrompt(data?.content || '', { model }),
-        }),
-      );
-    });
-  };
-
-  const handleCreateNewChat = async () => {
-    const chat = await postChats({ title: t('New Conversation') });
-    chats.unshift(chat);
-    chatDispatch(setChats([...chats]));
-    chatDispatch(setSelectedChat(chat));
-    messageDispatch(setMessages([]));
-    messageDispatch(setSelectedMessages([]));
-    messageDispatch(setCurrentMessages([]));
-    return chat;
-  };
-
-  const handleChatIsError = () => {
-    chatDispatch(setChatStatus(true));
-    chatDispatch(setMessageIsStreaming(false));
-  };
-
-  const handleStartChat = (
-    selectedMessages: ChatMessage[][],
-    selectedMessageId: string,
-    currentMessageId: string,
-  ) => {
-    chatDispatch(setMessageIsStreaming(true));
-    messageDispatch(setSelectedMessages(selectedMessages));
-    messageDispatch(setLastMessageId(selectedMessageId));
-    messageDispatch(setCurrentMessageId(currentMessageId));
-  };
-
-  const handleNewChat = () => {
-    postChats({ title: t('New Conversation') }).then((data) => {
-      // const model = calcSelectModel(chats, models);
-      chatDispatch(setChats([data, ...chats]));
-      chatDispatch(setSelectedChat(data));
-      chatDispatch(setChatStatus(false));
-
-      messageDispatch(setMessages([]));
-      messageDispatch(setLastMessageId(''));
-      messageDispatch(setSelectedMessages([]));
-      messageDispatch(setCurrentMessages([]));
-      // handleSelectModel(model!);
-      router.push('#/' + data.id);
-    });
-  };
-
-  const clearUserModelConfig = () => {
-    userModelConfigDispatch(
-      setUserModelConfig({
-        prompt: null,
-        temperature: null,
-        enableSearch: null,
-      }),
-    );
-  };
-
   const selectChatMessage = (messages: ChatMessage[]) => {
     messageDispatch(setMessages(messages));
     const messageCount = messages.length - 1;
@@ -222,57 +114,19 @@ const HomeContent = () => {
     console.log('messages', messages);
     console.log('selectedMessageList', selectedMessageList);
     messageDispatch(setSelectedMessages(selectedMessageList));
-
-    // messageDispatch(setLastMessageId(lastMessage.id));
-  };
-  const handleSelectChat = (chat: IChat) => {
-    chatDispatch(setChatStatus(false));
-    chatDispatch(setSelectedChat(chat));
-    // const selectModel =
-    //   getChatModel(chats, chat.id, models) || calcSelectModel(chats, models);
-    // selectModel && setStorageModelId(selectModel.modelId);
-    getUserMessages(chat.id).then((data) => {
-      if (data.length > 0) {
-        selectChatMessage(data);
-        // messageDispatch(setMessages(data));
-        // const messages = formatMessages(data);
-        // const messageCount = data.length;
-        // const lastMessage = data[messageCount];
-        // const selectedMessageList = findSelectedMessageByLeafId(
-        //   data,
-        //   lastMessage.id,
-        // );
-        // messageDispatch(setCurrentMessages(messages));
-        // const selectMessageList = getSelectedMessages(messages, lastMessage.id);
-        // if (lastMessage.role !== ChatRole.Assistant) {
-        //   chatDispatch(setChatStatus(true));
-        //   selectMessageList.push(chatErrorMessage(lastMessage.id));
-        // }
-
-        // messageDispatch(setSelectedMessages(selectedMessageList));
-        // messageDispatch(setLastMessageId(lastMessage.id));
-        clearUserModelConfig();
-        // modelDispatch(setSelectedModel(selectModel));
-      } else {
-        // handleSelectModel(selectModel!);
-        messageDispatch(setSelectedMessages([]));
-        messageDispatch(setCurrentMessages([]));
-      }
-    });
-    router.push('#/' + chat.id);
-    setStorageChatId(chat.id);
   };
 
-  const hasModel = () => {
-    return models?.length > 0;
+  const prepareChat = (chatList: ChatResult[], selectChatId?: string) => {
+    let chatId = selectChatId || getPathChatId(router.asPath);
+    if (chatList.length > 0) {
+      const foundChat = chatList.find((x) => x.id === chatId) || chatList[0];
+      return foundChat;
+    }
+    return undefined;
   };
 
-  const selectChat = (
-    chatList: ChatResult[],
-    chatId: string | null,
-    models: AdminModelDto[],
-  ) => {
-    const chat = chatList.find((x) => x.id === chatId);
+  const selectChat = (chatList: ChatResult[], chatId?: string) => {
+    const chat = prepareChat(chatList, chatId);
     if (chat) {
       chatDispatch(setSelectedChat(chat));
 
@@ -280,18 +134,40 @@ const HomeContent = () => {
         if (data.length > 0) {
           selectChatMessage(data);
         } else {
-          messageDispatch(setCurrentMessages([]));
+          messageDispatch(setMessages([]));
           messageDispatch(setSelectedMessages([]));
         }
       });
     }
   };
 
-  const getSelectedChat = (chatList: ChatResult[]) => {
-    let chatId = getPathChatId(router.asPath) || getStorageChatId();
-    if (chatList.length > 0)
-      return chatList.find((x) => x.id === chatId) || chatList[0];
-    return {} as IChat;
+  const handleNewChat = () => {
+    postChats({ title: t('New Conversation') }).then((data) => {
+      chatDispatch(setChats([data, ...chats]));
+      chatDispatch(setSelectedChat(data));
+      messageDispatch(setMessages([]));
+      messageDispatch(setSelectedMessages([]));
+
+      const chatId = data.id;
+      router.push('#/' + chatId);
+    });
+  };
+
+  const handleSelectChat = (chat: IChat) => {
+    chatDispatch(setSelectedChat(chat));
+    getUserMessages(chat.id).then((data) => {
+      if (data.length > 0) {
+        selectChatMessage(data);
+      } else {
+        messageDispatch(setMessages([]));
+        messageDispatch(setSelectedMessages([]));
+      }
+    });
+    router.push('#/' + chat.id);
+  };
+
+  const hasModel = () => {
+    return models?.length > 0;
   };
 
   const handleUpdateChat = (
@@ -306,24 +182,17 @@ const HomeContent = () => {
     chatDispatch(setChats(chatList));
   };
 
-  const handleUpdateChats = (chats: IChat[]) => {
-    chatDispatch(setChats(chats));
-  };
-
   const handleDeleteChat = (id: string) => {
     const chatList = chats.filter((x) => {
       return x.id !== id;
     });
     chatDispatch(setChats(chatList));
-    chatDispatch(setSelectedChat(undefined));
-    chatDispatch(setChatStatus(false));
 
-    messageDispatch(setLastMessageId(''));
-    messageDispatch(setSelectedMessages([]));
-    messageDispatch(setCurrentMessages([]));
-
-    // modelDispatch(setSelectedModel(calcSelectModel(chats, models)));
-    clearUserModelConfig();
+    if (chatList.length > 0) {
+      selectChat(chatList, chatList[0].id);
+    } else {
+      chatDispatch(setSelectedChat(undefined));
+    }
   };
 
   const handleStopChats = () => {
@@ -337,24 +206,30 @@ const HomeContent = () => {
     });
   };
 
-  const getChats = async (
-    params: GetChatsParams,
-    modelList?: AdminModelDto[],
-  ) => {
+  const getChats = async (params: GetChatsParams, isAppend = true) => {
     const { page, pageSize } = params;
     getChatsByPaging(params).then((data) => {
       const { rows, count } = data || { rows: [], count: 0 };
       let chatList = rows;
-      if (!modelList) {
+      if (isAppend) {
         chatList = chats.concat(rows);
       }
       chatDispatch(setChats(chatList));
       chatDispatch(setChatPaging({ count, page, pageSize }));
-      if (modelList) {
-        const selectChatId =
-          getPathChatId(router.asPath) || getStorageChatId() || rows[0].id;
-        selectChat(rows, selectChatId, modelList || models);
-      }
+    });
+  };
+
+  const loadFirstChats = async () => {
+    const params = { page: 1, pageSize: 50 };
+    getChatsByPaging(params).then((data) => {
+      const { rows, count } = data || { rows: [], count: 0 };
+      let chatList = rows;
+
+      chatDispatch(setChats(chatList));
+      chatDispatch(
+        setChatPaging({ count, page: params.page, pageSize: params.pageSize }),
+      );
+      selectChat(rows);
     });
   };
 
@@ -370,18 +245,14 @@ const HomeContent = () => {
     getUserModels().then(async (modelList) => {
       modelDispatch(setModels(modelList));
       modelDispatch(setModelMap(modelList));
+
       if (modelList && modelList.length > 0) {
-        const selectModelId = getStorageModelId();
-        const model =
-          modelList.find((x) => x.modelId.toString() === selectModelId) ??
-          modelList[0];
-        if (model) {
-          setStorageModelId(model.modelId);
-          handleSelectModel(model);
-        }
+        getDefaultPrompt().then((data) => {
+          promptDispatch(setDefaultPrompt(data));
+        });
       }
 
-      await getChats({ page: 1, pageSize: 50 }, modelList);
+      await loadFirstChats();
       chatDispatch(setIsChatsLoading(false));
     });
 
@@ -391,18 +262,18 @@ const HomeContent = () => {
     setTimeout(() => setIsPageLoading(false), 800);
   }, []);
 
-  useEffect(() => {
-    const handlePopState = (event: PopStateEvent) => {
-      const chatId = getPathChatId(event.state?.as || '');
-      selectChat(chats, chatId, models);
-    };
+  // useEffect(() => {
+  //   const handlePopState = (event: PopStateEvent) => {
+  //     const chatId = getPathChatId(event.state?.as || '');
+  //     selectChat(chats, chatId);
+  //   };
 
-    window.addEventListener('popstate', handlePopState);
+  //   window.addEventListener('popstate', handlePopState);
 
-    return () => {
-      window.removeEventListener('popstate', handlePopState);
-    };
-  }, [chats]);
+  //   return () => {
+  //     window.removeEventListener('popstate', handlePopState);
+  //   };
+  // }, [chats]);
 
   return (
     <HomeContext.Provider
@@ -425,16 +296,11 @@ const HomeContent = () => {
         promptDispatch: promptDispatch,
 
         handleNewChat,
-        handleStartChat,
-        handleChatIsError,
-        handleUpdateChats,
         handleStopChats,
 
-        handleCreateNewChat,
         handleSelectChat,
         handleUpdateChat,
         handleDeleteChat,
-        handleSelectModel,
         hasModel,
         getChats,
       }}

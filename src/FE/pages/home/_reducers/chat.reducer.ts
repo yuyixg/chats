@@ -26,7 +26,7 @@ interface ChatInitialState {
 
 export const chatInitialState: ChatInitialState = {
   chats: [],
-  selectedChat: {} as any,
+  selectedChat: undefined,
   chatError: false,
   chatsPaging: { count: 0, page: 1, pageSize: 50 },
   messageIsStreaming: false,

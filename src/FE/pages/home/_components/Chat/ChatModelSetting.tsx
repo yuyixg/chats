@@ -84,7 +84,7 @@ const ChatModelSetting = () => {
     >
       {hasModel() && (
         <div className="grid grid-cols-[repeat(auto-fit,minmax(375px,1fr))] gap-4">
-          {selectedChat.spans.map((span) => {
+          {selectedChat?.spans.map((span) => {
             return (
               <div
                 key={'chat-model-' + span.spanId}

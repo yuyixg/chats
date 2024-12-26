@@ -3,8 +3,6 @@ import { useContext, useEffect, useState } from 'react';
 import { useCreateReducer } from '@/hooks/useCreateReducer';
 import useTranslation from '@/hooks/useTranslation';
 
-import { removeStorageChatId, setStorageChatId } from '@/utils/chats';
-
 import { ChatResult } from '@/types/clientApis';
 
 import { setShowChatBar } from '../../_actions/setting.actions';
@@ -33,7 +31,6 @@ const Chatbar = () => {
     settingDispatch,
     handleDeleteChat: homeHandleDeleteChat,
     handleSelectChat,
-    handleSelectModel,
     handleNewChat,
     hasModel,
     getChats,
@@ -45,16 +42,7 @@ const Chatbar = () => {
   } = chatBarContextValue;
   const [searchTerm, setSearchTerm] = useState('');
   const handleDeleteChat = (chatId: string) => {
-    const chatList = chats.filter((x) => x.id !== chatId);
     homeHandleDeleteChat(chatId);
-    if (chatList.length > 0) {
-      const chat = chatList[chatList.length - 1];
-      handleSelectChat(chat);
-      setStorageChatId(chat.id);
-    } else {
-      handleSelectModel(selectModel!);
-      removeStorageChatId();
-    }
   };
 
   const handleToggleChatbar = () => {
@@ -97,7 +85,7 @@ const Chatbar = () => {
         searchTerm={searchTerm}
         handleSearchTerm={(value: string) => {
           setSearchTerm(value);
-          getChats({ query: value, page: 1, pageSize: 50 }, []);
+          getChats({ query: value, page: 1, pageSize: 50 });
         }}
         toggleOpen={handleToggleChatbar}
         handleCreateItem={handleNewChat}
