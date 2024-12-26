@@ -80,6 +80,18 @@ const ChatHeader = () => {
       <div className="flex justify-between h-auto">
         <div className={cn('flex justify-start ml-24', showChatBar && 'ml-6')}>
           <div className="flex flex-col gap-y-1">
+            <div>
+              {selectedChat.spans.length < MAX_SELECT_MODEL_COUNT && (
+                <ChangeChatModelDropdownMenu
+                  models={models}
+                  className="font-semibold text-base"
+                  content={t('Add another model')}
+                  onChangeModel={(model) => {
+                    handleAddChatModel(model.modelId);
+                  }}
+                />
+              )}
+            </div>
             <div className="flex flex-col gap-x-1">
               {selectedChat.spans.map((span) => (
                 <div className="flex" key={'chat-header-' + span.spanId}>
@@ -112,18 +124,6 @@ const ChatHeader = () => {
                   </div>
                 </div>
               ))}
-            </div>
-            <div>
-              {selectedChat.spans.length < MAX_SELECT_MODEL_COUNT && (
-                <ChangeChatModelDropdownMenu
-                  models={models}
-                  className="font-semibold text-base"
-                  content={t('Add another model')}
-                  onChangeModel={(model) => {
-                    handleAddChatModel(model.modelId);
-                  }}
-                />
-              )}
             </div>
           </div>
         </div>
