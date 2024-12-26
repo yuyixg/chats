@@ -139,12 +139,6 @@ public class ChatSpanController(ChatsDB db, IUrlEncryptionService idEncryption, 
             return NotFound();
         }
 
-        bool hasMessages = await db.Messages.AnyAsync(x => x.ChatId == chatId && x.SpanId == spanId, cancellationToken);
-        if (hasMessages)
-        {
-            return BadRequest("Cannot delete span with messages");
-        }
-
         db.ChatSpans.Remove(span);
         await db.SaveChangesAsync(cancellationToken);
         return NoContent();

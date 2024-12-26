@@ -190,7 +190,7 @@ public class ChatController(ChatStopService stopService) : ControllerBase
         MessageLiteDto[] systemMessages = GetSystemMessages(chat, req.Spans, existingMessages, isEmptyChat);
 
         // ensure chat.ChatSpan contains all span ids that in request, otherwise return error
-        if (req.Spans!.Any(x => !chat.ChatSpans.Any(y => y.SpanId == x.Id)))
+        if (req.Spans.Any(x => !chat.ChatSpans.Any(y => y.SpanId == x.Id)))
         {
             return BadRequest("Invalid span id");
         }
