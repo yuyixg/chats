@@ -30,7 +30,14 @@ public class ChatSpanController(ChatsDB db, IUrlEncryptionService idEncryption, 
         ChatSpan toAdd = null!;
         if (chat.ChatSpans.Count == 0)
         {
-            UserModel? um = await userModelManager.GetValidModelsByUserId(currentUser.Id).FirstOrDefaultAsync(cancellationToken);
+            IQueryable<UserModel> query = userModelManager.GetValidModelsByUserId(currentUser.Id);
+
+            if (request.ModelId != null)
+            {
+                query = query.Where(x => x.ModelId == request.ModelId.Value);
+            }
+
+            UserModel? um = await query.FirstOrDefaultAsync(cancellationToken);
             if (um == null)
             {
                 return BadRequest("No models available");
@@ -42,8 +49,8 @@ public class ChatSpanController(ChatsDB db, IUrlEncryptionService idEncryption, 
                 SpanId = 0,
                 ModelId = um.ModelId,
                 Model = um.Model,
-                Temperature = ChatService.DefaultTemperature,
-                EnableSearch = true,
+                Temperature = request.SetsTemperature ? request.Temperature : null,
+                EnableSearch = request.EnableSearch ?? false,
             };
         }
         else
@@ -55,8 +62,7 @@ public class ChatSpanController(ChatsDB db, IUrlEncryptionService idEncryption, 
 
             ChatSpan refSpan = chat.ChatSpans.First();
             short modelId = request.ModelId ?? refSpan.ModelId;
-            UserModel? um = await userModelManager.GetValidModelsByUserId(currentUser.Id)
-                .FirstOrDefaultAsync(x => x.ModelId == modelId, cancellationToken);
+            UserModel? um = await userModelManager.GetValidModelsByUserId(currentUser.Id).FirstOrDefaultAsync(x => x.ModelId == modelId, cancellationToken);
             if (um == null)
             {
                 return BadRequest("Model not available");
@@ -68,7 +74,7 @@ public class ChatSpanController(ChatsDB db, IUrlEncryptionService idEncryption, 
                 SpanId = FindAvailableSpanId(chat.ChatSpans),
                 ModelId = request.ModelId ?? refSpan.ModelId,
                 Model = um.Model,
-                Temperature = request.SetTemperature ? request.Temperature : refSpan.Temperature,
+                Temperature = request.SetsTemperature ? request.Temperature : refSpan.Temperature,
                 EnableSearch = request.EnableSearch ?? refSpan.EnableSearch,
             };
         }
@@ -76,9 +82,25 @@ public class ChatSpanController(ChatsDB db, IUrlEncryptionService idEncryption, 
         chat.ChatSpans.Add(toAdd);
         await db.SaveChangesAsync(cancellationToken);
         return Created(default(string), ChatSpanDto.FromDB(toAdd));
+    }
 
-        static byte FindAvailableSpanId(ICollection<ChatSpan> spans)
+    /// <summary>
+    /// Finds the next available SpanId for a new ChatSpan.
+    /// </summary>
+    /// <param name="spans">The SpanId asc ordered collection of existing ChatSpans.</param>
+    /// <returns>The next available SpanId.</returns>
+    static byte FindAvailableSpanId(ICollection<ChatSpan> spans)
+    {
+        // Suggest the next SpanId based on the last SpanId in the collection
+        byte suggested = spans.Last().SpanId;
+        if (suggested < 255)
         {
+            // If the suggested SpanId is less than 255, increment it by 1
+            return (byte)(suggested + 1);
+        }
+        else
+        {
+            // If the suggested SpanId is 255, find the first available SpanId starting from 0
             byte spanId = 0;
             while (spans.Any(x => x.SpanId == spanId))
             {
@@ -114,7 +136,7 @@ public class ChatSpanController(ChatsDB db, IUrlEncryptionService idEncryption, 
             span.Model = um.Model;
         }
 
-        if (request.SetTemperature)
+        if (request.SetsTemperature)
         {
             span.Temperature = request.Temperature;
         }
@@ -137,12 +159,6 @@ public class ChatSpanController(ChatsDB db, IUrlEncryptionService idEncryption, 
         if (span == null)
         {
             return NotFound();
-        }
-
-        bool hasMessages = await db.Messages.AnyAsync(x => x.ChatId == chatId && x.SpanId == spanId, cancellationToken);
-        if (hasMessages)
-        {
-            return BadRequest("Cannot delete span with messages");
         }
 
         db.ChatSpans.Remove(span);
