@@ -3,12 +3,9 @@ import { useEffect, useState } from 'react';
 import { useRouter } from 'next/router';
 
 import { getQueryId } from '@/utils/common';
-import { getSelectedMessages } from '@/utils/message';
 
 import { GetMessageDetailsResult } from '@/types/adminApis';
 import { ChatMessage } from '@/types/chatMessage';
-
-import { ChatMessageByReadOnly } from '@/components/ChatMessage/ChatMessageByReadOnly';
 
 import { getMessageDetails } from '@/apis/adminApis';
 
@@ -41,20 +38,20 @@ export default function MessageDetails() {
           calculatedPrice += x.inputPrice + (x.outputPrice || 0);
         });
         setChatSummary({ tokenUsed, calculatedPrice });
-        const lastMessage = data.messages[data.messages.length - 1];
-        const _selectMessages = getSelectedMessages(
-          data.messages,
-          lastMessage.id,
-        );
-        setSelectMessages(_selectMessages);
+        // const lastMessage = data.messages[data.messages.length - 1];
+        // const _selectMessages = getSelectedMessages(
+        //   data.messages,
+        //   lastMessage.id,
+        // );
+        // setSelectMessages(_selectMessages);
       }
     });
   }, [router.isReady]);
 
-  const onMessageChange = (messageId: string) => {
-    const _selectMessages = getSelectedMessages(currentMessages, messageId);
-    setSelectMessages(_selectMessages);
-  };
+  // const onMessageChange = (messageId: string) => {
+  //   const _selectMessages = getSelectedMessages(currentMessages, messageId);
+  //   setSelectMessages(_selectMessages);
+  // };
 
   return (
     <>

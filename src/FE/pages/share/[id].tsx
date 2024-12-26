@@ -6,12 +6,10 @@ import { useRouter } from 'next/router';
 import useTranslation from '@/hooks/useTranslation';
 
 import { getQueryId } from '@/utils/common';
-import { getSelectedMessages } from '@/utils/message';
 
 import { GetMessageDetailsResult } from '@/types/adminApis';
 import { ChatMessage } from '@/types/chatMessage';
 
-import { ChatMessageByReadOnly } from '@/components/ChatMessage/ChatMessageByReadOnly';
 import PageNotFound from '@/components/PageNotFound/PageNotFound';
 import { Button } from '@/components/ui/button';
 
@@ -35,12 +33,12 @@ export default function ShareMessage() {
         if (data.messages.length > 0) {
           setChat(data);
           setCurrentMessages(data.messages);
-          const lastMessage = data.messages[data.messages.length - 1];
-          const _selectMessages = getSelectedMessages(
-            data.messages,
-            lastMessage.id,
-          );
-          setSelectMessages(_selectMessages);
+          // const lastMessage = data.messages[data.messages.length - 1];
+          // const _selectMessages = getSelectedMessages(
+          //   data.messages,
+          //   lastMessage.id,
+          // );
+          // setSelectMessages(_selectMessages);
         }
       })
       .finally(() => {
@@ -48,10 +46,10 @@ export default function ShareMessage() {
       });
   }, [router.isReady]);
 
-  const onMessageChange = (messageId: string) => {
-    const _selectMessages = getSelectedMessages(currentMessages, messageId);
-    setSelectMessages(_selectMessages);
-  };
+  // const onMessageChange = (messageId: string) => {
+  //   const _selectMessages = getSelectedMessages(currentMessages, messageId);
+  //   setSelectMessages(_selectMessages);
+  // };
 
   const showChat = () => {
     return chat ? (

@@ -29,7 +29,7 @@ const Conversations = ({ chats }: Props) => {
 
   const handleShowMore = () => {
     const { page, pageSize } = chatsPaging;
-    getChats({ page: page + 1, pageSize: pageSize });
+    getChats({ page: page + 1, pageSize: pageSize }, true);
   };
 
   return (
