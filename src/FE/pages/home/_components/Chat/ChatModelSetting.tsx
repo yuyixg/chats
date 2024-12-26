@@ -1,8 +1,11 @@
-import { useContext } from 'react';
+import { useContext, useEffect } from 'react';
 
 import useTranslation from '@/hooks/useTranslation';
 
-import { ChatSpanDto } from '@/types/clientApis';
+import { formatPrompt } from '@/utils/promptVariable';
+
+import { AdminModelDto } from '@/types/adminApis';
+import { DEFAULT_TEMPERATURE } from '@/types/chat';
 import { Prompt } from '@/types/prompt';
 
 import TemperatureSlider from '@/components/TemperatureSlider/TemperatureSlider';
@@ -13,61 +16,34 @@ import ChatModelInfo from './ChatModelInfo';
 import EnableNetworkSearch from './EnableNetworkSearch';
 import SystemPrompt from './SystemPrompt';
 
-import { putUserChatSpan } from '@/apis/clientApis';
+import { cn } from '@/lib/utils';
 
 const ChatModelSetting = () => {
   const { t } = useTranslation();
   const {
     state: {
-      prompt,
-      temperature,
-      enableSearch,
+      defaultPrompt,
 
       selectedChat,
 
-      selectModel,
+      modelMap,
 
       prompts,
     },
     hasModel,
     chatDispatch,
   } = useContext(HomeContext);
+  const spanCount = selectedChat.spans.length;
 
-  const onChangePrompt = (prompt: Prompt) => {
-    if (prompt.temperature !== null) {
-      // userModelConfigDispatch(setTemperature(prompt.temperature));
-    }
-  };
-
-  type SpanConfig = {
-    prompt: string;
-    temperature: number;
-    enableSearch: boolean;
-  };
-  type SpanConfigHandlers = {
-    [K in keyof SpanConfig]: (spanId: number, value: SpanConfig[K]) => void;
-  };
-
-  const updateSpanField = <T extends keyof SpanConfig>(
+  const onChangePrompt = (
     spanId: number,
-    key: T,
-    value: SpanConfig[T],
+    prompt: Prompt,
+    model: AdminModelDto,
   ) => {
-    const spans = selectedChat.spans.map((s) =>
-      s.spanId === spanId ? { ...s, [key]: value } : s,
-    );
-    // if (key !== 'prompt') {
-    //   await putUserChatSpan(selectedChat.id, spanId, { [key]: value });
-    // }
-    chatDispatch(setSelectedChat({ ...selectedChat, spans }));
-  };
-
-  const spanConfigHandlers: SpanConfigHandlers = {
-    prompt: (spanId, value) => updateSpanField(spanId, 'prompt', value),
-    temperature: (spanId, value) =>
-      updateSpanField(spanId, 'temperature', value),
-    enableSearch: (spanId, value) =>
-      updateSpanField(spanId, 'enableSearch', value),
+    if (prompt.temperature !== null) {
+      onChangeTemperature(spanId, prompt.temperature);
+    }
+    onChangePromptText(spanId, formatPrompt(prompt.content || '', { model }));
   };
   const onChangePromptText = (spanId: number, value: string) => {
     const spans = selectedChat.spans.map((s) =>
@@ -75,12 +51,14 @@ const ChatModelSetting = () => {
     );
     chatDispatch(setSelectedChat({ ...selectedChat, spans }));
   };
+
   const onChangeTemperature = (spanId: number, value: number) => {
     const spans = selectedChat.spans.map((s) =>
       s.spanId === spanId ? { ...s, temperature: value } : s,
     );
     chatDispatch(setSelectedChat({ ...selectedChat, spans }));
   };
+
   const onChangeEnableSearch = (spanId: number, value: boolean) => {
     const spans = selectedChat.spans.map((s) =>
       s.spanId === spanId ? { ...s, enableSearch: value } : s,
@@ -88,8 +66,17 @@ const ChatModelSetting = () => {
     chatDispatch(setSelectedChat({ ...selectedChat, spans }));
   };
 
+  useEffect(() => {
+    console.log('selectedChat', selectedChat);
+  }, [selectedChat]);
+
   return (
-    <div className="mx-auto px-12">
+    <div
+      className={cn(
+        'mx-auto px-0 md:px-8 pt-6 pb-32',
+        spanCount === 1 && 'w-full md:w-1/2',
+      )}
+    >
       {hasModel() && (
         <div className="grid grid-cols-[repeat(auto-fit,minmax(375px,1fr))] gap-4">
           {selectedChat.spans.map((span) => {
@@ -102,36 +89,40 @@ const ChatModelSetting = () => {
                   modelId={span.modelId}
                   modelName={span.modelName}
                 />
-                {selectModel?.allowSystemPrompt && prompt && (
+                {modelMap[span.modelId].allowSystemPrompt && (
                   <SystemPrompt
-                    currentPrompt={prompt}
+                    currentPrompt={defaultPrompt?.content || null}
                     prompts={prompts}
-                    model={selectModel}
+                    model={modelMap[span.modelId]}
                     onChangePromptText={(value) => {
-                      spanConfigHandlers.prompt(span.spanId, value);
+                      onChangePromptText(span.spanId, value);
                     }}
-                    onChangePrompt={onChangePrompt}
+                    onChangePrompt={(prompt) => {
+                      onChangePrompt(
+                        span.spanId,
+                        prompt,
+                        modelMap[span.modelId],
+                      );
+                    }}
                   />
                 )}
-                {selectModel?.allowTemperature &&
-                  temperature !== null &&
-                  temperature !== undefined && (
-                    <TemperatureSlider
-                      label={t('Temperature')}
-                      min={0}
-                      max={1}
-                      defaultTemperature={temperature}
-                      onChangeTemperature={(value) => {
-                        spanConfigHandlers.temperature(span.spanId, value);
-                      }}
-                    />
-                  )}
-                {selectModel?.allowSearch && enableSearch != undefined && (
+                {modelMap[span.modelId].allowTemperature && (
+                  <TemperatureSlider
+                    label={t('Temperature')}
+                    min={0}
+                    max={1}
+                    defaultTemperature={span.temperature || DEFAULT_TEMPERATURE}
+                    onChangeTemperature={(value) => {
+                      onChangeTemperature(span.spanId, value);
+                    }}
+                  />
+                )}
+                {modelMap[span.modelId].allowSearch && (
                   <EnableNetworkSearch
                     label={t('Internet Search')}
-                    enable={enableSearch}
+                    enable={span.enableSearch}
                     onChange={(value) => {
-                      spanConfigHandlers.enableSearch(span.spanId, value);
+                      onChangeEnableSearch(span.spanId, value);
                     }}
                   />
                 )}

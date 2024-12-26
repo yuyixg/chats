@@ -43,7 +43,11 @@ import {
   setMessages,
   setSelectedMessages,
 } from '../../_actions/message.actions';
-import { setModels, setSelectedModel } from '../../_actions/model.actions';
+import {
+  setModelMap,
+  setModels,
+  setSelectedModel,
+} from '../../_actions/model.actions';
 import { setDefaultPrompt, setPrompts } from '../../_actions/prompt.actions';
 import {
   setShowChatBar,
@@ -365,6 +369,7 @@ const HomeContent = () => {
     chatDispatch(setIsChatsLoading(true));
     getUserModels().then(async (modelList) => {
       modelDispatch(setModels(modelList));
+      modelDispatch(setModelMap(modelList));
       if (modelList && modelList.length > 0) {
         const selectModelId = getStorageModelId();
         const model =

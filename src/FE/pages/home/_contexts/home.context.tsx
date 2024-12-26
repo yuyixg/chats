@@ -40,6 +40,7 @@ export interface HomeInitialState {
   isChatsLoading: boolean;
 
   models: AdminModelDto[];
+  modelMap: Record<string, AdminModelDto>;
   selectModel: AdminModelDto | undefined;
   selectedModels: AdminModelDto[];
 
@@ -69,6 +70,7 @@ export const initialState: HomeInitialState = {
   isChatsLoading: false,
 
   models: [],
+  modelMap: {},
   selectModel: undefined,
   selectedModels: [],
 

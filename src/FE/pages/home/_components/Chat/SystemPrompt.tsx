@@ -20,7 +20,7 @@ import VariableModal from './VariableModal';
 import { getUserPromptDetail } from '@/apis/clientApis';
 
 interface Props {
-  currentPrompt: string;
+  currentPrompt: string | null;
   prompts: PromptSlim[];
   model: AdminModelDto;
   onChangePromptText: (prompt: string) => void;
@@ -165,7 +165,7 @@ const SystemPrompt: FC<Props> = ({
   }, [value]);
 
   useEffect(() => {
-    setValue(formatPrompt(currentPrompt, { model }));
+    setValue(formatPrompt(currentPrompt || '', { model }));
   }, [currentPrompt, model]);
 
   useEffect(() => {
