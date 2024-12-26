@@ -63,6 +63,7 @@ public record SseResponseLine
                 OutputPrice = assistantMessage.Usage.OutputCost,
                 OutputTokens = assistantMessage.Usage.OutputTokens,
                 ReasoningTokens = assistantMessage.Usage.ReasoningTokens,
+                ModelProviderId = assistantMessage.Usage.UserModel.Model.ModelKey.ModelProviderId,
             },
         };
         MessageDto assistantMessageDto = assistantMessageTemp.ToDto(urlEncryptionService, fup);
