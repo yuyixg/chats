@@ -353,6 +353,7 @@ const Chat = memo(() => {
       } else if (value.k === SseResponseKind.UserMessage) {
         messageList.push(value.r);
       } else if (value.k === SseResponseKind.ResponseMessage) {
+        console.log('----------');
         const { r: msg, i: spanId } = value;
         const msgId = `${ResponseMessageTempId}-${spanId}`;
         updateSelectedResponseMessage(
@@ -495,12 +496,10 @@ const Chat = memo(() => {
                                 'border-primary/50',
                             )}
                           >
-                            {/* <ChatIcon
+                            <ChatIcon
                               className="w-7 h-7 mr-1"
-                              providerId={
-                                modelMap[message.modelId!].modelProviderId
-                              }
-                            /> */}
+                              providerId={message.modelProviderId!}
+                            />
                             <div className="prose dark:prose-invert rounded-r-md">
                               {message.status === ChatStatus.Failed && (
                                 <ChatError error={message.content.error} />

@@ -71,6 +71,7 @@ export interface ChatMessage {
   isActive?: boolean;
   modelName?: string;
   modelId?: number;
+  modelProviderId?: number;
   inputPrice?: number;
   outputPrice?: number;
   inputTokens?: number;
