@@ -299,12 +299,6 @@ public class ChatController(ChatStopService stopService) : ControllerBase
         // not cancellable from here
         ChatSpanResponse[] resps = await Task.WhenAll(streamTasks);
 
-        // yield user messages
-        if (dbUserMessage != null)
-        {
-            await YieldResponse(SseResponseLine.UserMessage(dbUserMessage, idEncryption, fup));
-        }
-
         // finish costs
         if (resps.Any(x => x.Cost.CostBalance > 0))
         {
