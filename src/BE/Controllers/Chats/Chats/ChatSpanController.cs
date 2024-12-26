@@ -86,12 +86,12 @@ public class ChatSpanController(ChatsDB db, IUrlEncryptionService idEncryption, 
     /// <summary>
     /// Finds the next available SpanId for a new ChatSpan.
     /// </summary>
-    /// <param name="spans">The SpanId asc ordered collection of existing ChatSpans.</param>
+    /// <param name="spans">The SpanId desc ordered collection of existing ChatSpans.</param>
     /// <returns>The next available SpanId.</returns>
     static byte FindAvailableSpanId(ICollection<ChatSpan> spans)
     {
         // Suggest the next SpanId based on the last SpanId in the collection
-        byte suggested = spans.Last().SpanId;
+        byte suggested = spans.First().SpanId;
         if (suggested < 255)
         {
             // If the suggested SpanId is less than 255, increment it by 1
