@@ -24,7 +24,6 @@ export interface AdminModelDto {
   name: string;
   rank: number | null;
   enabled: boolean;
-  fileServiceId: number | null;
   modelKeyId: number;
   deploymentName: string | null;
   inputTokenPrice1M: number;

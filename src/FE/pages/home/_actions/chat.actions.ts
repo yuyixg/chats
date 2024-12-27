@@ -20,7 +20,6 @@ export const setChats = (chats: SetChatsType): ChatAction => ({
 });
 
 export const setSelectedChat = (chat?: SetSelectedChatType): ChatAction => {
-  console.log('chat', chat);
   return {
     type: ChatActionTypes.SET_SELECTED_CHAT,
     payload: chat,

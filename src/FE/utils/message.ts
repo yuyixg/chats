@@ -1,5 +1,5 @@
-import { ChatRole, ChatStatus } from '@/types/chat';
-import { ChatMessage, ChatMessageNode } from '@/types/chatMessage';
+import { ChatRole, ChatSpanStatus, Content, IChat } from '@/types/chat';
+import { ChatMessage, ChatMessageNode, ResponseMessageTempId, UserMessageTempId } from '@/types/chatMessage';
 
 export function findLastLeafId(
   messages: ChatMessageNode[],
@@ -86,14 +86,18 @@ export function findSelectedMessageByLeafId(
               ...x,
               siblingIds,
               isActive: true,
-              status: x.content?.error ? ChatStatus.Failed : ChatStatus.None,
+              status: x.content?.error
+                ? ChatSpanStatus.Failed
+                : ChatSpanStatus.None,
             };
           } else if (prevUserMessage && prevUserMessage.parentId === x.id) {
             selectedMessage = {
               ...x,
               siblingIds,
               isActive: true,
-              status: x.content?.error ? ChatStatus.Failed : ChatStatus.None,
+              status: x.content?.error
+                ? ChatSpanStatus.Failed
+                : ChatSpanStatus.None,
             };
           }
         });
@@ -105,8 +109,8 @@ export function findSelectedMessageByLeafId(
             siblingIds,
             isActive: false,
             status: lastMessage.content?.error
-              ? ChatStatus.Failed
-              : ChatStatus.None,
+              ? ChatSpanStatus.Failed
+              : ChatSpanStatus.None,
           };
         }
 
@@ -130,4 +134,53 @@ function groupBy<T>(array: T[], key: keyof T): T[][] {
     groups[groupKey].push(item);
   }
   return Object.values(groups);
+}
+
+export function generateResponseMessages(
+  selectedChat: IChat,
+  parentId?: string,
+) {
+  return selectedChat.spans.map((x) => {
+    return generateResponseMessage(x.spanId, parentId, x.modelId, x.modelName);
+  });
+}
+
+export function generateResponseMessage(
+  spanId: number,
+  parentId?: string,
+  modelId?: number,
+  modelName?: string,
+) {
+  return {
+    spanId: spanId,
+    id: `${ResponseMessageTempId}-${spanId}`,
+    role: ChatRole.Assistant,
+    parentId: parentId,
+    status: ChatSpanStatus.Chatting,
+    siblingIds: [],
+    isActive: false,
+    content: { text: '', error: undefined, fileIds: [] },
+    inputTokens: 0,
+    outputTokens: 0,
+    inputPrice: 0,
+    outputPrice: 0,
+    modelName: modelName,
+    modelId: modelId,
+    reasoningTokens: 0,
+    duration: 0,
+    firstTokenLatency: 0,
+  } as ChatMessage;
+}
+
+export function generateUserMessage(content: Content, parentId?: string) {
+  return {
+    spanId: null,
+    id: UserMessageTempId,
+    role: ChatRole.User,
+    status: ChatSpanStatus.None,
+    parentId,
+    siblingIds: [],
+    isActive: false,
+    content,
+  } as ChatMessage;
 }

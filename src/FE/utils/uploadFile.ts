@@ -5,7 +5,6 @@ import { getUserSession } from './user';
 
 export async function uploadFile(
   file: File,
-  fileServiceId: number,
   onUploading?: () => void,
   onSuccessful?: (def: ImageDef) => void,
   onFailed?: (reason: string | null) => void,
@@ -16,7 +15,7 @@ export async function uploadFile(
     const form = new FormData();
     form.append('file', file);
     const resp = await fetch(
-      `${getApiUrl()}/api/file-service/${fileServiceId}/upload`,
+      `${getApiUrl()}/api/file-service/upload`,
       {
         method: 'PUT',
         body: form,

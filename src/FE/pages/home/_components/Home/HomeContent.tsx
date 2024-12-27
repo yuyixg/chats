@@ -7,11 +7,9 @@ import useTranslation from '@/hooks/useTranslation';
 
 import { getPathChatId } from '@/utils/chats';
 import { findSelectedMessageByLeafId } from '@/utils/message';
-import { formatPrompt } from '@/utils/promptVariable';
 import { getSettings } from '@/utils/settings';
-import { getUserSession } from '@/utils/user';
 
-import { IChat } from '@/types/chat';
+import { ChatStatus, IChat } from '@/types/chat';
 import { ChatMessage } from '@/types/chatMessage';
 import { ChatResult, GetChatsParams } from '@/types/clientApis';
 
@@ -95,7 +93,6 @@ const HomeContent = () => {
 
   const { chats, stopIds } = chatState;
   const { models } = modelState;
-  const { temperature } = userModelConfigState;
   const { showPromptBar } = settingState;
   const [isPageLoading, setIsPageLoading] = useState(true);
 
@@ -117,8 +114,6 @@ const HomeContent = () => {
       messages,
       leafMsgId,
     );
-    console.log('messages', messages);
-    console.log('selectedMessageList', selectedMessageList);
     messageDispatch(setSelectedMessages(selectedMessageList));
   };
 
@@ -131,10 +126,14 @@ const HomeContent = () => {
     return undefined;
   };
 
+  const supplyChatProperty = (chat: ChatResult): IChat => {
+    return { ...chat, status: ChatStatus.None };
+  };
+
   const selectChat = (chatList: ChatResult[], chatId?: string) => {
     const chat = prepareChat(chatList, chatId);
     if (chat) {
-      chatDispatch(setSelectedChat(chat));
+      chatDispatch(setSelectedChat(supplyChatProperty(chat)));
 
       getUserMessages(chat.id).then((data) => {
         if (data.length > 0) {
@@ -150,7 +149,7 @@ const HomeContent = () => {
   const handleNewChat = () => {
     postChats({ title: t('New Conversation') }).then((data) => {
       chatDispatch(setChats([data, ...chats]));
-      chatDispatch(setSelectedChat(data));
+      chatDispatch(setSelectedChat(supplyChatProperty(data)));
       messageDispatch(setMessages([]));
       messageDispatch(setSelectedMessages([]));
 

@@ -1,5 +1,5 @@
 import { AdminModelDto } from '@/types/adminApis';
-import { ChatRole, ChatStatus, Content } from '@/types/chat';
+import { ChatRole, ChatSpanStatus, Content } from '@/types/chat';
 
 import ChangeModelAction from './ChangeModelAction';
 import CopyAction from './CopyAction';
@@ -27,7 +27,7 @@ export interface ResponseMessage {
 interface Props {
   models: AdminModelDto[];
   message: ResponseMessage;
-  chatStatus: ChatStatus;
+  chatStatus: ChatSpanStatus;
   onChangeMessage?: (messageId: string) => void;
   onRegenerate?: (messageId: string, modelId: number) => void;
 }
@@ -45,7 +45,7 @@ const ResponseMessageActions = (props: Props) => {
 
   return (
     <>
-      {chatStatus === ChatStatus.Chatting ? (
+      {chatStatus === ChatSpanStatus.Chatting ? (
         <div className="h-9"></div>
       ) : (
         <div className="flex gap-1 flex-wrap mt-1">

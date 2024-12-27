@@ -8,6 +8,12 @@ export enum ChatRole {
 }
 export const DEFAULT_TEMPERATURE = 0.5;
 
+export enum ChatSpanStatus {
+  None = 1,
+  Chatting = 2,
+  Failed = 3,
+}
+
 export enum ChatStatus {
   None = 1,
   Chatting = 2,
@@ -47,6 +53,7 @@ export interface IChat {
   id: string;
   title: string;
   isShared: boolean;
+  status: ChatStatus;
   spans: ChatSpanDto[];
   leafMessageId?: string;
 }

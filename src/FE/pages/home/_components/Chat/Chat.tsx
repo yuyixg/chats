@@ -11,20 +11,26 @@ import toast from 'react-hot-toast';
 import useTranslation from '@/hooks/useTranslation';
 
 import { getApiUrl } from '@/utils/common';
-import { findLastLeafId, findSelectedMessageByLeafId } from '@/utils/message';
+import {
+  findLastLeafId,
+  findSelectedMessageByLeafId,
+  generateResponseMessage,
+  generateResponseMessages,
+  generateUserMessage,
+} from '@/utils/message';
 import { throttle } from '@/utils/throttle';
 import { getUserSession } from '@/utils/user';
 
-import { ChatRole, ChatStatus, Content, Message } from '@/types/chat';
+import { ChatRole, ChatSpanStatus, ChatStatus, Message } from '@/types/chat';
 import {
   ChatMessage,
+  ResponseMessageTempId,
   SseResponseKind,
   SseResponseLine,
 } from '@/types/chatMessage';
 import { Prompt } from '@/types/prompt';
 
 import ChatError from '@/components/ChatError/ChatError';
-import ChatIcon from '@/components/ChatIcon/ChatIcon';
 import ResponseMessage from '@/components/ChatMessage/ResponseMessage';
 import ResponseMessageActions from '@/components/ChatMessage/ResponseMessageActions';
 import UserMessage from '@/components/ChatMessage/UserMessage';
@@ -48,9 +54,6 @@ import NoModel from './NoModel';
 import { putChats } from '@/apis/clientApis';
 import { cn } from '@/lib/utils';
 
-const ResponseMessageTempId = 'RESPONSE_MESSAGE_TEMP_ID';
-const UserMessageTempId = 'USER_MESSAGE_TEMP_ID';
-
 const Chat = memo(() => {
   const { t } = useTranslation();
   const {
@@ -62,8 +65,6 @@ const Chat = memo(() => {
       selectedMessages,
 
       models,
-      modelMap,
-      selectModel,
 
       defaultPrompt,
     },
@@ -76,6 +77,7 @@ const Chat = memo(() => {
   const [autoScrollEnabled, setAutoScrollEnabled] = useState<boolean>(true);
   const [showScrollDownButton, setShowScrollDownButton] =
     useState<boolean>(false);
+  const hasMultipleSpan = selectedMessages.find((x) => x.length > 1);
 
   const messagesEndRef = useRef<HTMLDivElement>(null);
   const chatContainerRef = useRef<HTMLDivElement>(null);
@@ -89,7 +91,7 @@ const Chat = memo(() => {
     return lastMessage;
   };
 
-  const updateChatTitle = (title: string, append: boolean = false) => {
+  const changeChatTitle = (title: string, append: boolean = false) => {
     const newChats = chats.map((chat) => {
       if (chat.id === selectedChat.id) {
         append ? (chat.title += title) : (chat.title = title);
@@ -99,62 +101,23 @@ const Chat = memo(() => {
     chatDispatch(setChats(newChats));
   };
 
-  const generateResponseMessages = (parentId?: string) => {
-    return selectedChat.spans.map((x) => {
-      return generateResponseMessage(
-        x.spanId,
-        parentId,
-        x.modelId,
-        x.modelName,
-      );
-    });
+  const changeSelectedChatStatus = (status: ChatStatus) => {
+    chatDispatch(setSelectedChat({ ...selectedChat, status }));
   };
 
-  const generateResponseMessage = (
-    spanId: number,
-    parentId?: string,
-    modelId?: number,
-    modelName?: string,
-  ) => {
-    return {
-      spanId: spanId,
-      id: `${ResponseMessageTempId}-${spanId}`,
-      role: ChatRole.Assistant,
-      parentId: parentId,
-      status: ChatStatus.Chatting,
-      siblingIds: [],
-      isActive: false,
-      content: { text: '', error: undefined, fileIds: [] },
-      inputTokens: 0,
-      outputTokens: 0,
-      inputPrice: 0,
-      outputPrice: 0,
-      modelName: modelName,
-      modelId: modelId,
-      reasoningTokens: 0,
-      duration: 0,
-      firstTokenLatency: 0,
-    } as ChatMessage;
+  const startChat = () => {
+    changeSelectedChatStatus(ChatStatus.Chatting);
   };
 
-  const generateUserMessage = (content: Content, parentId?: string) => {
-    return {
-      spanId: null,
-      id: UserMessageTempId,
-      role: ChatRole.User,
-      status: ChatStatus.None,
-      parentId,
-      siblingIds: [],
-      isActive: false,
-      content,
-    } as ChatMessage;
+  const handleChatError = () => {
+    changeSelectedChatStatus(ChatStatus.Failed);
   };
 
-  const updateSelectedResponseMessage = (
+  const changeSelectedResponseMessage = (
     selectedMsgs: ChatMessage[][],
     messageId: string,
     text: string,
-    status?: ChatStatus,
+    status?: ChatSpanStatus,
     finalMessageId?: string,
   ) => {
     const messageCount = selectedMsgs.length - 1;
@@ -164,8 +127,8 @@ const Chat = memo(() => {
         x.content.text += text;
         if (status) {
           x.status = status;
-          status === ChatStatus.Failed && (x.content.error = text);
-          if (status === ChatStatus.None) {
+          status === ChatSpanStatus.Failed && (x.content.error = text);
+          if (status === ChatSpanStatus.None) {
             x.siblingIds.push(messageId);
             x.id = finalMessageId!;
           }
@@ -179,14 +142,15 @@ const Chat = memo(() => {
 
   const handleSend = useCallback(
     async (message: Message, messageId?: string) => {
+      startChat();
       let { id: chatId, spans: chatSpans } = selectedChat;
       let selectedMessageList = [...selectedMessages];
       let userMessage = generateUserMessage(message.content, messageId);
       selectedMessageList.push([userMessage]);
-      let responseMessages = generateResponseMessages(messageId);
+      let responseMessages = generateResponseMessages(selectedChat, messageId);
       selectedMessageList.push(responseMessages);
       messageDispatch(setSelectedMessages(selectedMessageList));
-
+      const { text: contentText, fileIds } = message.content;
       let chatBody = {
         chatId,
         spans: chatSpans.map((x) => ({
@@ -198,7 +162,10 @@ const Chat = memo(() => {
         })),
         utcOffset: new Date().getTimezoneOffset(),
         parentAssistantMessageId: messageId || null,
-        userMessage: message.content,
+        userMessage: {
+          text: contentText,
+          fileIds: fileIds?.map((x) => x.id),
+        },
       };
 
       const response = await fetch(
@@ -215,7 +182,7 @@ const Chat = memo(() => {
 
       await handleChatMessage(response, selectedMessageList);
     },
-    [chats, selectedChat, selectedMessages, selectModel],
+    [chats, selectedChat, selectedMessages],
   );
 
   const handleRegenerate = async (
@@ -223,6 +190,7 @@ const Chat = memo(() => {
     messageId: string,
     modelId: number,
   ) => {
+    startChat();
     let { id: chatId } = selectedChat;
     let selectedMessageList = [...selectedMessages];
     const responseMessages = generateResponseMessage(spanId, messageId);
@@ -267,6 +235,7 @@ const Chat = memo(() => {
     message: Message,
     messageId?: string,
   ) => {
+    startChat();
     let { id: chatId, spans: chatSpans } = selectedChat;
     let index = selectedMessages.findIndex(
       (x) => x.findIndex((m) => m.id === messageId) !== -1,
@@ -275,7 +244,7 @@ const Chat = memo(() => {
     let selectedMessageList = selectedMessages.slice(0, index);
     let userMessage = generateUserMessage(message.content, messageId);
     selectedMessageList.push([userMessage]);
-    let responseMessages = generateResponseMessages(messageId);
+    let responseMessages = generateResponseMessages(selectedChat, messageId);
     selectedMessageList.push(responseMessages);
     messageDispatch(setSelectedMessages(selectedMessageList));
 
@@ -305,13 +274,13 @@ const Chat = memo(() => {
     let messageList = [...messages];
     const data = response.body;
     if (!response.ok) {
-      // handleChatIsError();
+      handleChatError();
       const result = await response.json();
       toast.error(t(result?.message) || response.statusText);
       return;
     }
     if (!data) {
-      // handleChatIsError();
+      handleChatError();
       return;
     }
 
@@ -345,34 +314,32 @@ const Chat = memo(() => {
       } else if (value.k === SseResponseKind.Segment) {
         const { r: msg, i: spanId } = value;
         const msgId = `${ResponseMessageTempId}-${spanId}`;
-        updateSelectedResponseMessage(selectedMessageList, msgId, msg);
+        changeSelectedResponseMessage(selectedMessageList, msgId, msg);
       } else if (value.k === SseResponseKind.Error) {
         const { r: msg, i: spanId } = value;
         const msgId = `${ResponseMessageTempId}-${spanId}`;
-        updateSelectedResponseMessage(
+        changeSelectedResponseMessage(
           selectedMessageList,
           msgId,
           msg,
-          ChatStatus.Failed,
+          ChatSpanStatus.Failed,
         );
       } else if (value.k === SseResponseKind.UserMessage) {
         messageList.push(value.r);
       } else if (value.k === SseResponseKind.ResponseMessage) {
-        console.log('----------');
         const { r: msg, i: spanId } = value;
         const msgId = `${ResponseMessageTempId}-${spanId}`;
-        updateSelectedResponseMessage(
+        changeSelectedResponseMessage(
           selectedMessageList,
           msgId,
           '',
-          ChatStatus.None,
-          msg.id,
+          ChatSpanStatus.None,
         );
         messageList.push(msg);
       } else if (value.k === SseResponseKind.UpdateTitle) {
-        updateChatTitle(value.r);
+        changeChatTitle(value.r);
       } else if (value.k === SseResponseKind.TitleSegment) {
-        updateChatTitle(value.r, true);
+        changeChatTitle(value.r, true);
       }
     }
 
@@ -380,8 +347,9 @@ const Chat = memo(() => {
       messageList,
       messageList[messageList.length - 1].id,
     );
-    messageDispatch(setMessages(messageList));
     messageDispatch(setSelectedMessages(selectedMsgs));
+    messageDispatch(setMessages(messageList));
+    changeSelectedChatStatus(ChatStatus.None);
   };
 
   useCallback(() => {
@@ -432,8 +400,8 @@ const Chat = memo(() => {
   };
 
   const handleChangeChatLeafMessageId = (messageId: string) => {
-    if (messageId === selectedChat.leafMessageId) return;
     const leafId = findLastLeafId(messages, messageId);
+    if (leafId === selectedChat.leafMessageId) return;
     const selectedMsgs = findSelectedMessageByLeafId(messages, leafId);
     messageDispatch(setSelectedMessages(selectedMsgs));
     chatDispatch(
@@ -441,7 +409,7 @@ const Chat = memo(() => {
     );
     putChats(selectedChat.id, {
       setsLeafMessageId: true,
-      leafMessageId: messageId,
+      leafMessageId: leafId,
     });
   };
 
@@ -454,95 +422,88 @@ const Chat = memo(() => {
       >
         <ChatHeader />
 
-        {selectedMessages?.length === 0 ? (
-          <ChatModelSetting />
-        ) : (
-          <div className="w-4/5 m-auto p-4">
-            {selectedMessages.map((messages, index) => {
-              const hasMultipleSpan = selectedChat.spans.length > 1;
-              return (
-                <div
-                  key={'message-group-' + index}
-                  className={cn(
-                    messages.find((x) => x.role === ChatRole.User)
-                      ? 'flex w-full justify-end'
-                      : 'grid grid-cols-[repeat(auto-fit,minmax(375px,1fr))] gap-4',
-                  )}
-                >
-                  {messages.map((message) => {
-                    return (
-                      <>
-                        {message.role === ChatRole.User && (
-                          <div
-                            key={'user-message-' + message.id}
-                            className={cn(
-                              'prose w-full dark:prose-invert rounded-r-md group',
-                              index > 0 && 'mt-6',
-                            )}
-                          >
-                            <UserMessage
-                              selectedChat={selectedChat}
-                              chatStatus={message.status}
-                              message={message}
-                              onChangeMessage={handleChangeChatLeafMessageId}
-                              onEdit={handleEditMessageSend}
-                            />
-                          </div>
-                        )}
-                        {message.role === ChatRole.Assistant && (
-                          <div
-                            onClick={() =>
-                              hasMultipleSpan && handleChangeChatLeafMessageId(message.id)
-                            }
-                            key={'response-message-' + message.id}
-                            className={cn(
-                              'border-[1px] rounded-md p-4 flex',
-                              hasMultipleSpan &&
-                                message.isActive &&
-                                'border-primary/50',
-                            )}
-                          >
-                            {/* <ChatIcon
+        {selectedMessages.length === 0 && <ChatModelSetting />}
+
+        <div className="w-4/5 m-auto p-4">
+          {selectedMessages.map((messages, index) => {
+            return (
+              <div
+                key={'message-group-' + index}
+                className={cn(
+                  messages.find((x) => x.role === ChatRole.User)
+                    ? 'flex w-full justify-end'
+                    : 'grid grid-cols-[repeat(auto-fit,minmax(375px,1fr))] gap-4',
+                )}
+              >
+                {messages.map((message) => {
+                  return (
+                    <>
+                      {message.role === ChatRole.User && (
+                        <div
+                          key={'user-message-' + message.id}
+                          className={cn(
+                            'prose w-full dark:prose-invert rounded-r-md group',
+                            index > 0 && 'mt-6',
+                          )}
+                        >
+                          <UserMessage
+                            selectedChat={selectedChat}
+                            message={message}
+                            onChangeMessage={handleChangeChatLeafMessageId}
+                            onEdit={handleEditMessageSend}
+                          />
+                        </div>
+                      )}
+                      {message.role === ChatRole.Assistant && (
+                        <div
+                          onClick={() =>
+                            hasMultipleSpan &&
+                            handleChangeChatLeafMessageId(message.id)
+                          }
+                          key={'response-message-' + message.id}
+                          className={cn(
+                            'border-[1px] rounded-md p-4 flex w-full',
+                            hasMultipleSpan &&
+                              message.isActive &&
+                              'border-primary/50',
+                          )}
+                        >
+                          {/* <ChatIcon
                               className="w-7 h-7 mr-1"
                               providerId={message.modelProviderId!}
                             /> */}
-                            <div className="prose dark:prose-invert rounded-r-md">
-                              {message.status === ChatStatus.Failed && (
-                                <ChatError error={message.content.error} />
-                              )}
-                              <ResponseMessage
-                                chatStatus={message.status}
-                                currentChatMessageId={message.id}
-                                message={message}
-                              />
-                              <ResponseMessageActions
-                                models={models}
-                                chatStatus={message.status}
-                                message={message as any}
-                                onChangeMessage={handleChangeChatLeafMessageId}
-                                onRegenerate={(
-                                  messageId: string,
-                                  modelId: number,
-                                ) => {
-                                  handleRegenerate(
-                                    message.spanId!,
-                                    messageId,
-                                    modelId,
-                                  );
-                                }}
-                              />
-                            </div>
+                          <div className="prose dark:prose-invert rounded-r-md">
+                            {message.status === ChatSpanStatus.Failed && (
+                              <ChatError error={message.content.error} />
+                            )}
+                            <ResponseMessage message={message} />
+                            <ResponseMessageActions
+                              models={models}
+                              chatStatus={message.status}
+                              message={message as any}
+                              onChangeMessage={handleChangeChatLeafMessageId}
+                              onRegenerate={(
+                                messageId: string,
+                                modelId: number,
+                              ) => {
+                                handleRegenerate(
+                                  message.spanId!,
+                                  messageId,
+                                  modelId,
+                                );
+                              }}
+                            />
                           </div>
-                        )}
-                      </>
-                    );
-                  })}
-                </div>
-              );
-            })}
-            <div className="h-[162px] bg-background" ref={messagesEndRef} />
-          </div>
-        )}
+                        </div>
+                      )}
+                    </>
+                  );
+                })}
+              </div>
+            );
+          })}
+          <div className="h-[162px] bg-background" ref={messagesEndRef} />
+        </div>
       </div>
       {hasModel() && (
         <ChatInput
@@ -550,7 +511,6 @@ const Chat = memo(() => {
             const lastMessage = getSelectedMessagesLastActiveMessage();
             handleSend(message, lastMessage?.id);
           }}
-          model={selectModel!}
           onScrollDownClick={handleScrollDown}
           showScrollDownButton={showScrollDownButton}
           onChangePrompt={onChangePrompt}

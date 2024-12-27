@@ -2,8 +2,13 @@ import { useEffect, useRef, useState } from 'react';
 
 import useTranslation from '@/hooks/useTranslation';
 
-import { ChatRole, ChatStatus, Content, IChat, Message } from '@/types/chat';
-import { PropsMessage } from '@/types/components/chat';
+import {
+  ChatRole,
+  ChatSpanStatus,
+  Content,
+  IChat,
+  Message,
+} from '@/types/chat';
 
 import { Button } from '@/components/ui/button';
 
@@ -15,6 +20,7 @@ export interface UserMessage {
   id: string;
   role: ChatRole;
   content: Content;
+  status: ChatSpanStatus;
   parentId: string | null;
   siblingIds: string[];
 }
@@ -22,7 +28,6 @@ export interface UserMessage {
 interface Props {
   message: UserMessage;
   selectedChat: IChat;
-  chatStatus: ChatStatus;
   onChangeMessage?: (messageId: string) => void;
   onEdit?: (editedMessage: Message, parentId?: string) => void;
 }
@@ -30,12 +35,18 @@ interface Props {
 const UserMessage = (props: Props) => {
   const { t } = useTranslation();
 
-  const { message, selectedChat, chatStatus, onChangeMessage, onEdit } = props;
+  const { message, selectedChat, onChangeMessage, onEdit } = props;
   const [isTyping, setIsTyping] = useState<boolean>(false);
   const [isEditing, setIsEditing] = useState<boolean>(false);
   const textareaRef = useRef<HTMLTextAreaElement>(null);
   const [messageContent, setMessageContent] = useState(message.content);
-  const { id: messageId, siblingIds, parentId, content } = message;
+  const {
+    id: messageId,
+    siblingIds,
+    parentId,
+    content,
+    status: chatStatus,
+  } = message;
   const currentMessageIndex = siblingIds.findIndex((x) => x === messageId);
 
   const handleEditMessage = () => {
@@ -154,7 +165,7 @@ const UserMessage = (props: Props) => {
         {!isEditing && (
           <>
             <EditAction
-              disabled={chatStatus === ChatStatus.Chatting}
+              disabled={chatStatus === ChatSpanStatus.Chatting}
               onToggleEditing={handleToggleEditing}
             />
             <CopyAction
@@ -164,11 +175,12 @@ const UserMessage = (props: Props) => {
             <PaginationAction
               hidden={siblingIds.length <= 1}
               disabledPrev={
-                currentMessageIndex === 0 || chatStatus === ChatStatus.Chatting
+                currentMessageIndex === 0 ||
+                chatStatus === ChatSpanStatus.Chatting
               }
               disabledNext={
                 currentMessageIndex === siblingIds.length - 1 ||
-                chatStatus === ChatStatus.Chatting
+                chatStatus === ChatSpanStatus.Chatting
               }
               currentSelectIndex={currentMessageIndex}
               messageIds={siblingIds}
