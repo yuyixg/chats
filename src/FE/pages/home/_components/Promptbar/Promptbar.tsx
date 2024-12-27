@@ -6,6 +6,7 @@ import useTranslation from '@/hooks/useTranslation';
 
 import { Prompt, PromptSlim } from '@/types/prompt';
 
+import { setPrompts } from '../../_actions/prompt.actions';
 import { setShowPromptBar } from '../../_actions/setting.actions';
 import HomeContext from '../../_contexts/home.context';
 import Sidebar from '../Sidebar/Sidebar';
@@ -28,16 +29,12 @@ const PromptBar = () => {
 
   const {
     state: { prompts, showPromptBar },
-    dispatch: homeDispatch,
     settingDispatch,
+    promptDispatch,
     hasModel,
   } = useContext(HomeContext);
 
-  const {
-    state: { filteredPrompts },
-    dispatch,
-  } = promptBarContextValue;
-
+  const [filteredPrompts, setFilteredPrompts] = useState<PromptSlim[]>([]);
   const [searchTerm, setSearchTerm] = useState('');
 
   const handleTogglePromptBar = () => {
@@ -55,16 +52,18 @@ const PromptBar = () => {
     };
 
     postUserPrompts(newPrompt).then((data) => {
-      const updatedPrompts = [...prompts, data];
-      homeDispatch({ field: 'prompts', value: updatedPrompts });
+      const newPrompts = [...prompts, data];
+      promptDispatch(setPrompts(newPrompts));
+      changeFilteredPrompts(newPrompts);
       toast.success(t('Created successful'));
     });
   };
 
   const handleDeletePrompt = (prompt: PromptSlim) => {
     deleteUserPrompts(prompt.id).then(() => {
-      const updatedPrompts = prompts.filter((p) => p.id !== prompt.id);
-      homeDispatch({ field: 'prompts', value: updatedPrompts });
+      const newPrompts = prompts.filter((p) => p.id !== prompt.id);
+      promptDispatch(setPrompts(newPrompts));
+      changeFilteredPrompts(newPrompts);
       toast.success(t('Deleted successful'));
     });
   };
@@ -72,24 +71,29 @@ const PromptBar = () => {
   const handleUpdatePrompt = (prompt: Prompt) => {
     putUserPrompts(prompt.id, prompt).then(() => {
       const existingPrompts = prompts.filter((x) => x.id !== prompt.id);
-      homeDispatch({ field: 'prompts', value: [...existingPrompts, prompt] });
+      const newPrompts = [...existingPrompts, prompt];
+      promptDispatch(setPrompts(newPrompts));
+      changeFilteredPrompts(newPrompts);
       toast.success(t('Updated successful'));
     });
   };
 
+  const changeFilteredPrompts = (promptList: PromptSlim[]) => {
+    setFilteredPrompts(
+      promptList.filter((prompt) => {
+        const searchable = prompt.name.toLowerCase();
+        return searchable.includes(searchTerm.toLowerCase());
+      }),
+    );
+  };
+
   useEffect(() => {
     if (searchTerm) {
-      dispatch({
-        field: 'filteredPrompts',
-        value: prompts.filter((prompt) => {
-          const searchable = prompt.name.toLowerCase();
-          return searchable.includes(searchTerm.toLowerCase());
-        }),
-      });
+      changeFilteredPrompts(prompts);
     } else {
-      dispatch({ field: 'filteredPrompts', value: prompts });
+      setFilteredPrompts(prompts);
     }
-  }, [searchTerm, prompts]);
+  }, [searchTerm]);
 
   return (
     <PromptbarContext.Provider

@@ -1,6 +1,5 @@
 import { useEffect, useState } from 'react';
 
-import Link from 'next/link';
 import { useRouter } from 'next/router';
 
 import useTranslation from '@/hooks/useTranslation';
@@ -13,7 +12,6 @@ import { IChatMessage } from '@/types/chatMessage';
 
 import { ChatMessage } from '@/components/ChatMessage';
 import PageNotFound from '@/components/PageNotFound/PageNotFound';
-import { Button } from '@/components/ui/button';
 
 import { getChat, getUserMessages } from '@/apis/clientApis';
 

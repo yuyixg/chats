@@ -130,7 +130,7 @@ export const getDefaultPrompt = () => {
 
 export const postUserPrompts = (params: PostPromptParams) => {
   const fetchServer = useFetch();
-  return fetchServer.post('/api/prompts', { body: params });
+  return fetchServer.post<Prompt>('/api/prompts', { body: params });
 };
 
 export const putUserPrompts = (promptId: number, params: PostPromptParams) => {
