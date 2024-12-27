@@ -9,7 +9,7 @@ import toast from 'react-hot-toast';
 
 import useTranslation from '@/hooks/useTranslation';
 
-import { IChat } from '@/types/chat';
+import { ChatStatus, IChat } from '@/types/chat';
 
 import SidebarActionButton from '@/components/Button/SidebarActionButton';
 import ChatIcon from '@/components/ChatIcon/ChatIcon';
@@ -43,13 +43,14 @@ const ConversationComponent = ({ chat }: Props) => {
   const { t } = useTranslation();
   const {
     state: {
-      selectedChat: { id: selectChatId } = { id: undefined },
-      messageIsStreaming,
+      selectedChat: { id: selectChatId, status },
       chats,
     },
     handleSelectChat,
     handleUpdateChat,
   } = useContext(HomeContext);
+
+  const chatting = status === ChatStatus.Chatting;
 
   const { handleDeleteChat } = useContext(ChatbarContext);
 
@@ -138,10 +139,10 @@ const ConversationComponent = ({ chat }: Props) => {
       ) : (
         <button
           className={`flex w-full cursor-pointer items-center gap-2 rounded-lg p-3 text-sm transition-colors duration-200 hover:bg-muted ${
-            messageIsStreaming ? 'disabled:cursor-not-allowed' : ''
+            chatting ? 'disabled:cursor-not-allowed' : ''
           } ${selectChatId === chat.id ? 'bg-muted' : ''}`}
           onClick={() => handleSelectChat(chat)}
-          disabled={messageIsStreaming}
+          disabled={chatting}
         >
           <div
             className={cn(
@@ -184,7 +185,7 @@ const ConversationComponent = ({ chat }: Props) => {
         <div className="absolute right-[0.6rem] z-10 flex text-gray-300">
           <DropdownMenu>
             <DropdownMenuTrigger
-              disabled={messageIsStreaming}
+              disabled={chatting}
               className="focus:outline-none p-[6px]"
             >
               <IconDots className="hover:opacity-50" size={16} />

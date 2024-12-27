@@ -49,20 +49,8 @@ export const setChangeSelectedChatSpan = (
   };
 };
 
-export const setChatStatus = (status: SetChatStatusType): ChatAction => ({
-  type: ChatActionTypes.SET_CHAT_STATUS,
-  payload: status,
-});
-
 export const setChatPaging = (paging: SetChatPagingType): ChatAction => ({
   type: ChatActionTypes.SET_CHAT_PAGING,
-  payload: paging,
-});
-
-export const setMessageIsStreaming = (
-  paging: SetMessageIsStreamingType,
-): ChatAction => ({
-  type: ChatActionTypes.SET_MESSAGE_IS_STREAMING,
   payload: paging,
 });
 

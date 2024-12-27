@@ -44,7 +44,6 @@ import {
   setMessages,
   setSelectedMessages,
 } from '../../_actions/message.actions';
-import { setTemperature } from '../../_actions/userModelConfig.actions';
 import HomeContext from '../../_contexts/home.context';
 import ChatHeader from './ChatHeader';
 import ChatInput from './ChatInput';
@@ -73,7 +72,6 @@ const Chat = memo(() => {
     hasModel,
     chatDispatch,
     messageDispatch,
-    userModelConfigDispatch,
   } = useContext(HomeContext);
   const [autoScrollEnabled, setAutoScrollEnabled] = useState<boolean>(true);
   const [showScrollDownButton, setShowScrollDownButton] =
@@ -394,10 +392,8 @@ const Chat = memo(() => {
     throttledScrollDown();
   }, [selectedMessages, throttledScrollDown]);
 
-  const onChangePrompt = (prompt: Prompt) => {
-    if (prompt.temperature !== null) {
-      userModelConfigDispatch(setTemperature(prompt.temperature));
-    }
+  const handleChangePrompt = (prompt: Prompt) => {
+    // to do
   };
 
   const handleChangeChatLeafMessageId = (messageId: string) => {
@@ -443,7 +439,7 @@ const Chat = memo(() => {
           }}
           onScrollDownClick={handleScrollDown}
           showScrollDownButton={showScrollDownButton}
-          onChangePrompt={onChangePrompt}
+          onChangePrompt={handleChangePrompt}
         />
       )}
       {!hasModel() && !selectedChat?.id && <NoModel />}

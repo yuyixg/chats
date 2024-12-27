@@ -1,12 +1,10 @@
-import { useContext, useEffect, useState } from 'react';
+import { useEffect, useState } from 'react';
 
 import useTranslation from '@/hooks/useTranslation';
 
 import { formatNumberAsMoney } from '@/utils/common';
 
 import { ModelUsageDto } from '@/types/clientApis';
-
-import HomeContext from '../../_contexts/home.context';
 
 import { getModelUsage } from '@/apis/clientApis';
 

@@ -21,15 +21,7 @@ import { cn } from '@/lib/utils';
 const ChatModelSetting = () => {
   const { t } = useTranslation();
   const {
-    state: {
-      defaultPrompt,
-
-      selectedChat,
-
-      modelMap,
-
-      prompts,
-    },
+    state: { defaultPrompt, selectedChat, modelMap, prompts },
     hasModel,
     chatDispatch,
   } = useContext(HomeContext);

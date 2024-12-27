@@ -17,7 +17,6 @@ import Spinner from '@/components/Spinner/Spinner';
 
 import {
   setChatPaging,
-  setChatStatus,
   setChats,
   setIsChatsLoading,
   setSelectedChat,
@@ -49,9 +48,6 @@ import promptReducer, {
 import settingReducer, {
   settingInitialState,
 } from '../../_reducers/setting.reducer';
-import userModelConfigReducer, {
-  userModelConfigInitialState,
-} from '../../_reducers/userModelConfig.reducer';
 import Chat from '../Chat/Chat';
 import Chatbar from '../Chatbar/Chatbar';
 import PromptBar from '../Promptbar/Promptbar';
@@ -78,10 +74,6 @@ const HomeContent = () => {
     modelReducer,
     modelInitialState,
   );
-  const [userModelConfigState, userModelConfigDispatch] = useReducer(
-    userModelConfigReducer,
-    userModelConfigInitialState,
-  );
   const [settingState, settingDispatch] = useReducer(
     settingReducer,
     settingInitialState,
@@ -91,7 +83,7 @@ const HomeContent = () => {
     promptInitialState,
   );
 
-  const { chats, stopIds } = chatState;
+  const { chats, stopIds, selectedChat } = chatState;
   const { models } = modelState;
   const { showPromptBar } = settingState;
   const [isPageLoading, setIsPageLoading] = useState(true);
@@ -206,7 +198,6 @@ const HomeContent = () => {
       p.push(stopChat(id));
     });
     Promise.all(p).then(() => {
-      chatDispatch(setChatStatus(false));
       chatDispatch(setStopIds([]));
     });
   };
@@ -289,14 +280,12 @@ const HomeContent = () => {
           ...chatState,
           ...messageState,
           ...modelState,
-          ...userModelConfigState,
           ...settingState,
           ...promptState,
         },
         chatDispatch: chatDispatch,
         messageDispatch: messageDispatch,
         modelDispatch: modelDispatch,
-        userModelConfigDispatch: userModelConfigDispatch,
         settingDispatch: settingDispatch,
         promptDispatch: promptDispatch,
 

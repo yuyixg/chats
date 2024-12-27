@@ -3,6 +3,7 @@ import { useContext, useEffect, useState } from 'react';
 import { useCreateReducer } from '@/hooks/useCreateReducer';
 import useTranslation from '@/hooks/useTranslation';
 
+import { ChatStatus } from '@/types/chat';
 import { ChatResult } from '@/types/clientApis';
 
 import { setShowChatBar } from '../../_actions/setting.actions';
@@ -21,9 +22,9 @@ const Chatbar = () => {
   });
 
   const {
-    state: { chats, showChatBar, messageIsStreaming, isChatsLoading },
+    state: { chats, showChatBar, selectedChat, isChatsLoading },
     settingDispatch,
-    handleDeleteChat: homeHandleDeleteChat,
+    handleDeleteChat,
     handleNewChat,
     hasModel,
     getChats,
@@ -34,9 +35,6 @@ const Chatbar = () => {
     dispatch,
   } = chatBarContextValue;
   const [searchTerm, setSearchTerm] = useState('');
-  const handleDeleteChat = (chatId: string) => {
-    homeHandleDeleteChat(chatId);
-  };
 
   const handleToggleChatbar = () => {
     settingDispatch(setShowChatBar(!showChatBar));
@@ -68,7 +66,7 @@ const Chatbar = () => {
     >
       <Sidebar<ChatResult>
         isLoading={isChatsLoading}
-        messageIsStreaming={messageIsStreaming}
+        messageIsStreaming={selectedChat.status === ChatStatus.Chatting}
         side={'left'}
         isOpen={showChatBar}
         addItemButtonTitle={t('New chat')}

@@ -13,7 +13,6 @@ import { MessageAction } from '../_reducers/message.reducer';
 import { ModelAction } from '../_reducers/model.reducer';
 import { PromptAction } from '../_reducers/prompt.reducer';
 import { SettingsAction } from '../_reducers/setting.reducer';
-import { UserModelConfigAction } from '../_reducers/userModelConfig.reducer';
 
 export interface HandleUpdateChatParams {
   isShared?: boolean;
@@ -22,27 +21,16 @@ export interface HandleUpdateChatParams {
 }
 
 export interface HomeInitialState {
-  prompt: string | null;
-  temperature: number | null;
-  enableSearch: boolean | null;
-
   messages: IChatMessage[];
   selectedMessages: IChatMessage[][];
-  currentMessages: IChatMessage[];
-  selectedMessageLastId: string;
-  currentChatMessageId: string;
 
   chats: ChatResult[];
   selectedChat: IChat;
   chatsPaging: { count: number; page: number; pageSize: number };
-  chatError: boolean;
-  messageIsStreaming: boolean;
   isChatsLoading: boolean;
 
   models: AdminModelDto[];
   modelMap: Record<string, AdminModelDto>;
-  selectModel: AdminModelDto | undefined;
-  selectedModels: AdminModelDto[];
 
   defaultPrompt: Prompt | null;
   prompts: PromptSlim[];
@@ -52,27 +40,16 @@ export interface HomeInitialState {
 }
 
 export const initialState: HomeInitialState = {
-  prompt: null,
-  temperature: null,
-  enableSearch: null,
-
   messages: [],
   selectedMessages: [],
-  selectedMessageLastId: '',
-  currentMessages: [],
-  currentChatMessageId: '',
 
   chats: [],
   selectedChat: {} as IChat,
   chatsPaging: { count: 0, page: 1, pageSize: 50 },
-  chatError: false,
-  messageIsStreaming: false,
   isChatsLoading: false,
 
   models: [],
   modelMap: {},
-  selectModel: undefined,
-  selectedModels: [],
 
   defaultPrompt: null,
   prompts: [],
@@ -88,7 +65,6 @@ export interface HomeContextProps {
   chatDispatch: Dispatch<ChatAction>;
   messageDispatch: Dispatch<MessageAction>;
   modelDispatch: Dispatch<ModelAction>;
-  userModelConfigDispatch: Dispatch<UserModelConfigAction>;
   settingDispatch: Dispatch<SettingsAction>;
   promptDispatch: Dispatch<PromptAction>;
 
