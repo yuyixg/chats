@@ -1,7 +1,7 @@
 import { ChatRole, ChatSpanStatus, Content, IChat } from '@/types/chat';
 import {
-  IChatMessage,
   ChatMessageNode,
+  IChatMessage,
   ResponseMessageTempId,
   UserMessageTempId,
 } from '@/types/chatMessage';

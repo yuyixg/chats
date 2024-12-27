@@ -21,16 +21,9 @@ const Chatbar = () => {
   });
 
   const {
-    state: {
-      chats,
-      selectModel,
-      showChatBar,
-      messageIsStreaming,
-      isChatsLoading,
-    },
+    state: { chats, showChatBar, messageIsStreaming, isChatsLoading },
     settingDispatch,
     handleDeleteChat: homeHandleDeleteChat,
-    handleSelectChat,
     handleNewChat,
     hasModel,
     getChats,

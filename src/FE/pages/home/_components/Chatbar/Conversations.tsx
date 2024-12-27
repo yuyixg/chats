@@ -2,7 +2,7 @@ import { useContext, useEffect, useState } from 'react';
 
 import useTranslation from '@/hooks/useTranslation';
 
-import { ChatResult } from '@/types/clientApis';
+import { IChat } from '@/types/chat';
 
 import { Button } from '@/components/ui/button';
 
@@ -10,7 +10,7 @@ import HomeContext from '../../_contexts/home.context';
 import ConversationComponent from './Conversation';
 
 interface Props {
-  chats: ChatResult[];
+  chats: IChat[];
 }
 
 const Conversations = ({ chats }: Props) => {

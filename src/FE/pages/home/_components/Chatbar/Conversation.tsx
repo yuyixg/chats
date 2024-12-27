@@ -9,7 +9,7 @@ import toast from 'react-hot-toast';
 
 import useTranslation from '@/hooks/useTranslation';
 
-import { ChatResult } from '@/types/clientApis';
+import { IChat } from '@/types/chat';
 
 import SidebarActionButton from '@/components/Button/SidebarActionButton';
 import ChatIcon from '@/components/ChatIcon/ChatIcon';
@@ -36,7 +36,7 @@ import { deleteChats, putChats } from '@/apis/clientApis';
 import { cn } from '@/lib/utils';
 
 interface Props {
-  chat: ChatResult;
+  chat: IChat;
 }
 
 const ConversationComponent = ({ chat }: Props) => {
