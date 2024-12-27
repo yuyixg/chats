@@ -89,10 +89,10 @@ export const ChatMessage: FC<Props> = memo(
                       providerId={message.modelProviderId!}
                     /> */}
                         <div className="prose dark:prose-invert rounded-r-md flex-1 overflow-auto">
+                          <ResponseMessage message={message} />
                           {message.status === ChatSpanStatus.Failed && (
                             <ChatError error={message.content.error} />
                           )}
-                          <ResponseMessage message={message} />
                           <ResponseMessageActions
                             readonly={readonly}
                             models={models}

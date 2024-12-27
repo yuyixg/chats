@@ -83,7 +83,7 @@ const HomeContent = () => {
     promptInitialState,
   );
 
-  const { chats, stopIds, selectedChat } = chatState;
+  const { chats, stopIds } = chatState;
   const { models } = modelState;
   const { showPromptBar } = settingState;
   const [isPageLoading, setIsPageLoading] = useState(true);
