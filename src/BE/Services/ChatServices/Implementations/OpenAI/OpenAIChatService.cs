@@ -4,6 +4,8 @@ using OpenAI;
 using System.Runtime.CompilerServices;
 using System.ClientModel;
 using Chats.BE.DB;
+using System.ClientModel.Primitives;
+using System.Text.Json;
 
 namespace Chats.BE.Services.ChatServices.Implementations.OpenAI;
 
@@ -49,6 +51,16 @@ public partial class OpenAIChatService : ChatService
 
     public override async Task<ChatSegment> Chat(IReadOnlyList<ChatMessage> messages, ChatCompletionOptions options, CancellationToken cancellationToken)
     {
+        if (Model.ModelReference.IsSdkUnsupportedO1)
+        {
+            // must use replace system chat message into developer chat message for unsupported model
+            messages = messages.Select(m => m switch
+            {
+                SystemChatMessage sys => new DeveloperChatMessage(sys.Content[0].Text),
+                _ => m
+            }).ToList();
+        }
+
         ClientResult<ChatCompletion> cc = await _chatClient.CompleteChatAsync(messages, options, cancellationToken);
         ChatCompletion delta = cc.Value;
         return new ChatSegment
@@ -62,5 +74,38 @@ public partial class OpenAIChatService : ChatService
                 ReasoningTokens = delta.Usage.OutputTokenDetails?.ReasoningTokenCount ?? 0,
             } : null,
         };
+    }
+
+    private class DeveloperChatMessage(string content) : SystemChatMessage(content), IJsonModel<DeveloperChatMessage>
+    {
+        public DeveloperChatMessage Create(ref Utf8JsonReader reader, ModelReaderWriterOptions options)
+        {
+            throw new NotImplementedException();
+        }
+
+        public DeveloperChatMessage Create(BinaryData data, ModelReaderWriterOptions options)
+        {
+            throw new NotImplementedException();
+        }
+
+        public string GetFormatFromOptions(ModelReaderWriterOptions options)
+        {
+            throw new NotImplementedException();
+        }
+
+        public void Write(Utf8JsonWriter writer, ModelReaderWriterOptions options)
+        {
+            writer.WriteStartObject();
+            writer.WritePropertyName("role"u8);
+            writer.WriteStringValue("developer");
+            writer.WritePropertyName("content"u8);
+            writer.WriteStringValue(Content[0].Text);
+            writer.WriteEndObject();
+        }
+
+        public BinaryData Write(ModelReaderWriterOptions options)
+        {
+            throw new NotImplementedException();
+        }
     }
 }
