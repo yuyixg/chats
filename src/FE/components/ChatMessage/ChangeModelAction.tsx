@@ -12,6 +12,7 @@ interface Props {
   onChangeModel: (model: AdminModelDto) => void;
   modelId: number;
   modelName: string;
+  modelProviderId?: number;
 }
 
 export const ChangeModelAction = (props: Props) => {
@@ -20,6 +21,7 @@ export const ChangeModelAction = (props: Props) => {
     models,
     modelId,
     modelName,
+    modelProviderId,
     readonly,
     showRegenerate,
     onChangeModel,
@@ -36,6 +38,7 @@ export const ChangeModelAction = (props: Props) => {
           }}
           modelId={modelId}
           modelName={modelName}
+          modelProviderId={modelProviderId}
           showRegenerate={showRegenerate}
           content={modelName}
         />

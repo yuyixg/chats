@@ -48,4 +48,5 @@ export interface IChat {
   title: string;
   isShared: boolean;
   spans: ChatSpanDto[];
+  leafMessageId?: string;
 }

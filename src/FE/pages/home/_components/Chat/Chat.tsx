@@ -29,7 +29,11 @@ import ResponseMessage from '@/components/ChatMessage/ResponseMessage';
 import ResponseMessageActions from '@/components/ChatMessage/ResponseMessageActions';
 import UserMessage from '@/components/ChatMessage/UserMessage';
 
-import { setChats, setStopIds } from '../../_actions/chat.actions';
+import {
+  setChats,
+  setSelectedChat,
+  setStopIds,
+} from '../../_actions/chat.actions';
 import {
   setMessages,
   setSelectedMessages,
@@ -41,6 +45,7 @@ import ChatInput from './ChatInput';
 import ChatModelSetting from './ChatModelSetting';
 import NoModel from './NoModel';
 
+import { putChats } from '@/apis/clientApis';
 import { cn } from '@/lib/utils';
 
 const ResponseMessageTempId = 'RESPONSE_MESSAGE_TEMP_ID';
@@ -379,13 +384,6 @@ const Chat = memo(() => {
     messageDispatch(setSelectedMessages(selectedMsgs));
   };
 
-  const handleChangeMessage = (messageId: string) => {
-    const leafId = findLastLeafId(messages, messageId);
-    const selectedMsgs = findSelectedMessageByLeafId(messages, leafId);
-    messageDispatch(setSelectedMessages(selectedMsgs));
-    console.log(selectedMsgs, messages);
-  };
-
   useCallback(() => {
     if (autoScrollEnabled) {
       messagesEndRef.current?.scrollIntoView({ behavior: 'smooth' });
@@ -433,10 +431,18 @@ const Chat = memo(() => {
     }
   };
 
-  const handelMessageActive = (messageId: string) => {
+  const handleChangeChatLeafMessageId = (messageId: string) => {
+    if (messageId === selectedChat.leafMessageId) return;
     const leafId = findLastLeafId(messages, messageId);
-    const selectedMessageList = findSelectedMessageByLeafId(messages, leafId);
-    messageDispatch(setSelectedMessages(selectedMessageList));
+    const selectedMsgs = findSelectedMessageByLeafId(messages, leafId);
+    messageDispatch(setSelectedMessages(selectedMsgs));
+    chatDispatch(
+      setSelectedChat({ ...selectedChat, leafMessageId: messageId }),
+    );
+    putChats(selectedChat.id, {
+      setsLeafMessageId: true,
+      leafMessageId: messageId,
+    });
   };
 
   return (
@@ -478,7 +484,7 @@ const Chat = memo(() => {
                               selectedChat={selectedChat}
                               chatStatus={message.status}
                               message={message}
-                              onChangeMessage={handleChangeMessage}
+                              onChangeMessage={handleChangeChatLeafMessageId}
                               onEdit={handleEditMessageSend}
                             />
                           </div>
@@ -486,7 +492,7 @@ const Chat = memo(() => {
                         {message.role === ChatRole.Assistant && (
                           <div
                             onClick={() =>
-                              hasMultipleSpan && handelMessageActive(message.id)
+                              hasMultipleSpan && handleChangeChatLeafMessageId(message.id)
                             }
                             key={'response-message-' + message.id}
                             className={cn(
@@ -496,10 +502,10 @@ const Chat = memo(() => {
                                 'border-primary/50',
                             )}
                           >
-                            <ChatIcon
+                            {/* <ChatIcon
                               className="w-7 h-7 mr-1"
                               providerId={message.modelProviderId!}
-                            />
+                            /> */}
                             <div className="prose dark:prose-invert rounded-r-md">
                               {message.status === ChatStatus.Failed && (
                                 <ChatError error={message.content.error} />
@@ -513,7 +519,7 @@ const Chat = memo(() => {
                                 models={models}
                                 chatStatus={message.status}
                                 message={message as any}
-                                onChangeMessage={handleChangeMessage}
+                                onChangeMessage={handleChangeChatLeafMessageId}
                                 onRegenerate={(
                                   messageId: string,
                                   modelId: number,

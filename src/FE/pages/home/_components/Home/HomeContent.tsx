@@ -103,13 +103,19 @@ const HomeContent = () => {
     initialState,
   });
 
-  const selectChatMessage = (messages: ChatMessage[]) => {
+  const selectChatMessage = (
+    messages: ChatMessage[],
+    leafMessageId?: string,
+  ) => {
     messageDispatch(setMessages(messages));
-    const messageCount = messages.length - 1;
-    const lastMessage = messages[messageCount];
+    let leafMsgId = leafMessageId;
+    if (!leafMsgId) {
+      const messageCount = messages.length - 1;
+      leafMsgId = messages[messageCount].id;
+    }
     const selectedMessageList = findSelectedMessageByLeafId(
       messages,
-      lastMessage.id,
+      leafMsgId,
     );
     console.log('messages', messages);
     console.log('selectedMessageList', selectedMessageList);
@@ -132,7 +138,7 @@ const HomeContent = () => {
 
       getUserMessages(chat.id).then((data) => {
         if (data.length > 0) {
-          selectChatMessage(data);
+          selectChatMessage(data, chat.leafMessageId);
         } else {
           messageDispatch(setMessages([]));
           messageDispatch(setSelectedMessages([]));
@@ -157,7 +163,7 @@ const HomeContent = () => {
     chatDispatch(setSelectedChat(chat));
     getUserMessages(chat.id).then((data) => {
       if (data.length > 0) {
-        selectChatMessage(data);
+        selectChatMessage(data, chat.leafMessageId);
       } else {
         messageDispatch(setMessages([]));
         messageDispatch(setSelectedMessages([]));

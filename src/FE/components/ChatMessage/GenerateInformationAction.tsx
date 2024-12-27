@@ -32,12 +32,11 @@ export const GenerateInformationAction = (props: Props) => {
   const Render = () => {
     return (
       <Tips
-        className="h-[28px]"
         side="bottom"
         trigger={
           <Button
             variant="ghost"
-            className="p-1 m-0 h-auto"
+            className="p-1 m-0 h-7 w-7"
             onClick={(e) => {
               e.stopPropagation();
             }}

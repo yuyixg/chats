@@ -64,6 +64,7 @@ export interface ChatResult {
   title: string;
   isShared: boolean;
   spans: ChatSpanDto[];
+  leafMessageId?: string;
 }
 
 export interface ChatSpanDto {
@@ -84,6 +85,8 @@ export interface PostChatParams {
 export interface PutChatParams {
   title?: string;
   isShared?: boolean;
+  setsLeafMessageId?: boolean;
+  leafMessageId?: string;
 }
 
 export interface PostUserPassword {

@@ -28,6 +28,7 @@ const ChangeChatModelDropdownMenu = ({
   models,
   modelId,
   modelName,
+  modelProviderId,
   readonly,
   showRegenerate,
   content,
@@ -37,6 +38,7 @@ const ChangeChatModelDropdownMenu = ({
   models: AdminModelDto[];
   modelId?: number;
   modelName?: string;
+  modelProviderId?: number;
   readonly?: boolean;
   showRegenerate?: boolean;
   content?: string | React.JSX.Element;
@@ -78,15 +80,16 @@ const ChangeChatModelDropdownMenu = ({
     <DropdownMenu onOpenChange={handleOpenMenu}>
       <DropdownMenuTrigger
         disabled={readonly}
-        className="focus:outline-none hover:bg-muted rounded-sm p-1 m-0 h-auto flex items-center gap-1"
+        className="focus:outline-none hover:bg-muted rounded-sm p-1 m-0 h-7 flex items-center gap-1"
       >
         <>
           <span
             className={cn(
-              'font-medium px-1 md:w-full text-nowrap overflow-hidden text-ellipsis whitespace-nowrap w-auto',
+              'flex font-medium px-1 items-center md:w-full text-nowrap overflow-hidden text-ellipsis whitespace-nowrap w-auto',
               className,
             )}
           >
+            {/* {modelProviderId && <ChatIcon className='m-0' providerId={modelProviderId} />} */}
             {content && content}
           </span>
           {!readonly && typeof content === 'string' && <IconChevronDown />}

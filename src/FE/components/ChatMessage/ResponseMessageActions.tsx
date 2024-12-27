@@ -21,6 +21,7 @@ export interface ResponseMessage {
   firstTokenLatency: number;
   modelId: number;
   modelName: string;
+  modelProviderId: number;
 }
 
 interface Props {
@@ -33,7 +34,13 @@ interface Props {
 
 const ResponseMessageActions = (props: Props) => {
   const { models, message, onChangeMessage, onRegenerate, chatStatus } = props;
-  const { id: messageId, siblingIds, modelId, modelName } = message;
+  const {
+    id: messageId,
+    siblingIds,
+    modelId,
+    modelName,
+    modelProviderId,
+  } = message;
   const currentMessageIndex = siblingIds.findIndex((x) => x === messageId);
 
   return (
@@ -61,6 +68,7 @@ const ResponseMessageActions = (props: Props) => {
               showRegenerate={true}
               modelName={modelName!}
               modelId={modelId}
+              modelProviderId={modelProviderId}
             />
           </div>
         </div>
