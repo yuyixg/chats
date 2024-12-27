@@ -8,6 +8,11 @@ import useTranslation from '@/hooks/useTranslation';
 import { getPathChatId } from '@/utils/chats';
 import { findSelectedMessageByLeafId } from '@/utils/message';
 import { getSettings } from '@/utils/settings';
+import {
+  getUserSession,
+  redirectToHomePage,
+  redirectToLoginPage,
+} from '@/utils/user';
 
 import { ChatStatus, IChat } from '@/types/chat';
 import { IChatMessage } from '@/types/chatMessage';
@@ -237,6 +242,11 @@ const HomeContent = () => {
   }, []);
 
   useEffect(() => {
+    const session = getUserSession();
+    if (!session) {
+      redirectToLoginPage();
+      return;
+    }
     chatDispatch(setIsChatsLoading(true));
     getUserModels().then(async (modelList) => {
       modelDispatch(setModels(modelList));
