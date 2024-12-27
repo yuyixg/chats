@@ -31,13 +31,13 @@ interface SseResponseLineError {
 
 interface SseResponseLineUserMessage {
   k: SseResponseKind.UserMessage; // Kind is UserMessage
-  r: ChatMessage; // Result is ChatMessage
+  r: IChatMessage; // Result is ChatMessage
 }
 
 interface SseResponseLineResponseMessage {
   i: number; // SpanId is required for ResponseMessage
   k: SseResponseKind.ResponseMessage; // Kind is ResponseMessage
-  r: ChatMessage; // Result is ChatMessage
+  r: IChatMessage; // Result is ChatMessage
 }
 
 interface SseResponseLineUpdateTitle {
@@ -60,7 +60,7 @@ export type SseResponseLine =
   | SseResponseLineUpdateTitle
   | SseResponseLineTitleSegment;
 
-export interface ChatMessage {
+export interface IChatMessage {
   id: string;
   spanId: number | null;
   parentId: string | null;

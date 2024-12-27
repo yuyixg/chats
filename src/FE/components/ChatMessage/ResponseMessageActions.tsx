@@ -28,12 +28,20 @@ interface Props {
   models: AdminModelDto[];
   message: ResponseMessage;
   chatStatus: ChatSpanStatus;
+  readonly?: boolean;
   onChangeMessage?: (messageId: string) => void;
   onRegenerate?: (messageId: string, modelId: number) => void;
 }
 
 const ResponseMessageActions = (props: Props) => {
-  const { models, message, onChangeMessage, onRegenerate, chatStatus } = props;
+  const {
+    models,
+    message,
+    chatStatus,
+    readonly,
+    onChangeMessage,
+    onRegenerate,
+  } = props;
   const {
     id: messageId,
     siblingIds,
@@ -61,6 +69,7 @@ const ResponseMessageActions = (props: Props) => {
             <CopyAction text={message.content.text} />
             <GenerateInformationAction message={message} />
             <ChangeModelAction
+              readonly={readonly}
               models={models}
               onChangeModel={(model) => {
                 onRegenerate && onRegenerate(message.parentId!, model.modelId);

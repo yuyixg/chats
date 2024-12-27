@@ -10,7 +10,7 @@ import { findSelectedMessageByLeafId } from '@/utils/message';
 import { getSettings } from '@/utils/settings';
 
 import { ChatStatus, IChat } from '@/types/chat';
-import { ChatMessage } from '@/types/chatMessage';
+import { IChatMessage } from '@/types/chatMessage';
 import { ChatResult, GetChatsParams } from '@/types/clientApis';
 
 import Spinner from '@/components/Spinner/Spinner';
@@ -101,7 +101,7 @@ const HomeContent = () => {
   });
 
   const selectChatMessage = (
-    messages: ChatMessage[],
+    messages: IChatMessage[],
     leafMessageId?: string,
   ) => {
     messageDispatch(setMessages(messages));

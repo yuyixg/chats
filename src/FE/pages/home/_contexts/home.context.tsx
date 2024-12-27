@@ -4,7 +4,7 @@ import { ActionType } from '@/hooks/useCreateReducer';
 
 import { AdminModelDto } from '@/types/adminApis';
 import { IChat } from '@/types/chat';
-import { ChatMessage } from '@/types/chatMessage';
+import { IChatMessage } from '@/types/chatMessage';
 import { ChatResult, GetChatsParams } from '@/types/clientApis';
 import { Prompt, PromptSlim } from '@/types/prompt';
 
@@ -26,9 +26,9 @@ export interface HomeInitialState {
   temperature: number | null;
   enableSearch: boolean | null;
 
-  messages: ChatMessage[];
-  selectedMessages: ChatMessage[][];
-  currentMessages: ChatMessage[];
+  messages: IChatMessage[];
+  selectedMessages: IChatMessage[][];
+  currentMessages: IChatMessage[];
   selectedMessageLastId: string;
   currentChatMessageId: string;
 

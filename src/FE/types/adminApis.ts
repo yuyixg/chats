@@ -1,4 +1,4 @@
-import { ChatMessage } from './chatMessage';
+import { IChatMessage } from './chatMessage';
 import { DBFileServiceType } from './file';
 import { DBModelProvider } from './model';
 import { Paging } from './page';
@@ -100,7 +100,7 @@ export interface GetMessageDetailsResult {
   modelName?: string;
   modelTemperature?: number;
   modelPrompt?: number;
-  messages: ChatMessage[];
+  messages: IChatMessage[];
 }
 
 export interface PostFileServicesParams {

@@ -1,5 +1,10 @@
 import { ChatRole, ChatSpanStatus, Content, IChat } from '@/types/chat';
-import { ChatMessage, ChatMessageNode, ResponseMessageTempId, UserMessageTempId } from '@/types/chatMessage';
+import {
+  IChatMessage,
+  ChatMessageNode,
+  ResponseMessageTempId,
+  UserMessageTempId,
+} from '@/types/chatMessage';
 
 export function findLastLeafId(
   messages: ChatMessageNode[],
@@ -9,7 +14,7 @@ export function findLastLeafId(
   if (!currentMessage) {
     return id;
   }
-  const childMap: Record<string, ChatMessage[]> = {};
+  const childMap: Record<string, IChatMessage[]> = {};
   messages.forEach((node) => {
     if (node.parentId !== null) {
       if (!childMap[node.parentId]) {
@@ -20,7 +25,7 @@ export function findLastLeafId(
   });
 
   function findDeepest(
-    message: ChatMessage,
+    message: IChatMessage,
     depth: number,
   ): { id: string; depth: number } {
     if (!childMap[message.id] || childMap[message.id].length === 0) {
@@ -169,7 +174,7 @@ export function generateResponseMessage(
     reasoningTokens: 0,
     duration: 0,
     firstTokenLatency: 0,
-  } as ChatMessage;
+  } as IChatMessage;
 }
 
 export function generateUserMessage(content: Content, parentId?: string) {
@@ -182,5 +187,5 @@ export function generateUserMessage(content: Content, parentId?: string) {
     siblingIds: [],
     isActive: false,
     content,
-  } as ChatMessage;
+  } as IChatMessage;
 }

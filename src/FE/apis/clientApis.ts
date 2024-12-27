@@ -1,7 +1,7 @@
 import { useFetch } from '@/hooks/useFetch';
 
 import { AdminModelDto, PostPromptParams } from '@/types/adminApis';
-import { ChatMessage } from '@/types/chatMessage';
+import { IChatMessage } from '@/types/chatMessage';
 import {
   ChatResult,
   GetBalance7DaysUsageResult,
@@ -31,7 +31,7 @@ export const changeUserPassword = (params: PostUserPassword) => {
   });
 };
 
-export const getUserMessages = (chatId: string): Promise<ChatMessage[]> => {
+export const getUserMessages = (chatId: string): Promise<IChatMessage[]> => {
   const fetchService = useFetch();
   return fetchService.get(`/api/messages/${chatId}`);
 };

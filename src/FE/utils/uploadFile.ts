@@ -14,16 +14,13 @@ export async function uploadFile(
   try {
     const form = new FormData();
     form.append('file', file);
-    const resp = await fetch(
-      `${getApiUrl()}/api/file-service/upload`,
-      {
-        method: 'PUT',
-        body: form,
-        headers: {
-          Authorization: `Bearer ${getUserSession()}`,
-        },
+    const resp = await fetch(`${getApiUrl()}/api/file-service/upload`, {
+      method: 'PUT',
+      body: form,
+      headers: {
+        Authorization: `Bearer ${getUserSession()}`,
       },
-    );
+    });
     if (resp.ok) {
       onSuccessful && onSuccessful(await resp.json());
     } else {

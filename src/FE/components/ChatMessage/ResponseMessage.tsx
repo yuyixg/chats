@@ -25,7 +25,6 @@ const ResponseMessage = (props: Props) => {
 
   return (
     <MemoizedReactMarkdown
-      className="prose dark:prose-invert"
       remarkPlugins={[remarkMath, remarkGfm]}
       rehypePlugins={[rehypeKatex as any]}
       components={{

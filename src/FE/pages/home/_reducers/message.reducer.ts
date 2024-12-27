@@ -1,8 +1,8 @@
-import { ChatMessage } from '@/types/chatMessage';
+import { IChatMessage } from '@/types/chatMessage';
 
-export type SetMessagesType = ChatMessage[];
-export type SetSelectedMessagesType = ChatMessage[][];
-export type SetCurrentMessagesType = ChatMessage[];
+export type SetMessagesType = IChatMessage[];
+export type SetSelectedMessagesType = IChatMessage[][];
+export type SetCurrentMessagesType = IChatMessage[];
 export type SetLastMessageIdType = string;
 export type SetCurrentMessageIdType = string;
 

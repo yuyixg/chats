@@ -23,7 +23,7 @@ import { getUserSession } from '@/utils/user';
 
 import { ChatRole, ChatSpanStatus, ChatStatus, Message } from '@/types/chat';
 import {
-  ChatMessage,
+  IChatMessage,
   ResponseMessageTempId,
   SseResponseKind,
   SseResponseLine,
@@ -49,6 +49,7 @@ import HomeContext from '../../_contexts/home.context';
 import ChatHeader from './ChatHeader';
 import ChatInput from './ChatInput';
 import ChatModelSetting from './ChatModelSetting';
+import ChatMessageMemoized from './MemoizedChatMessage';
 import NoModel from './NoModel';
 
 import { putChats } from '@/apis/clientApis';
@@ -114,7 +115,7 @@ const Chat = memo(() => {
   };
 
   const changeSelectedResponseMessage = (
-    selectedMsgs: ChatMessage[][],
+    selectedMsgs: IChatMessage[][],
     messageId: string,
     text: string,
     status?: ChatSpanStatus,
@@ -269,7 +270,7 @@ const Chat = memo(() => {
 
   const handleChatMessage = async (
     response: Response,
-    selectedMessageList: ChatMessage[][],
+    selectedMessageList: IChatMessage[][],
   ) => {
     let messageList = [...messages];
     const data = response.body;
@@ -424,86 +425,15 @@ const Chat = memo(() => {
 
         {selectedMessages.length === 0 && <ChatModelSetting />}
 
-        <div className="w-4/5 m-auto p-4">
-          {selectedMessages.map((messages, index) => {
-            return (
-              <div
-                key={'message-group-' + index}
-                className={cn(
-                  messages.find((x) => x.role === ChatRole.User)
-                    ? 'flex w-full justify-end'
-                    : 'grid grid-cols-[repeat(auto-fit,minmax(375px,1fr))] gap-4',
-                )}
-              >
-                {messages.map((message) => {
-                  return (
-                    <>
-                      {message.role === ChatRole.User && (
-                        <div
-                          key={'user-message-' + message.id}
-                          className={cn(
-                            'prose w-full dark:prose-invert rounded-r-md group',
-                            index > 0 && 'mt-6',
-                          )}
-                        >
-                          <UserMessage
-                            selectedChat={selectedChat}
-                            message={message}
-                            onChangeMessage={handleChangeChatLeafMessageId}
-                            onEdit={handleEditMessageSend}
-                          />
-                        </div>
-                      )}
-                      {message.role === ChatRole.Assistant && (
-                        <div
-                          onClick={() =>
-                            hasMultipleSpan &&
-                            handleChangeChatLeafMessageId(message.id)
-                          }
-                          key={'response-message-' + message.id}
-                          className={cn(
-                            'border-[1px] rounded-md p-4 flex w-full',
-                            hasMultipleSpan &&
-                              message.isActive &&
-                              'border-primary/50',
-                          )}
-                        >
-                          {/* <ChatIcon
-                              className="w-7 h-7 mr-1"
-                              providerId={message.modelProviderId!}
-                            /> */}
-                          <div className="prose dark:prose-invert rounded-r-md">
-                            {message.status === ChatSpanStatus.Failed && (
-                              <ChatError error={message.content.error} />
-                            )}
-                            <ResponseMessage message={message} />
-                            <ResponseMessageActions
-                              models={models}
-                              chatStatus={message.status}
-                              message={message as any}
-                              onChangeMessage={handleChangeChatLeafMessageId}
-                              onRegenerate={(
-                                messageId: string,
-                                modelId: number,
-                              ) => {
-                                handleRegenerate(
-                                  message.spanId!,
-                                  messageId,
-                                  modelId,
-                                );
-                              }}
-                            />
-                          </div>
-                        </div>
-                      )}
-                    </>
-                  );
-                })}
-              </div>
-            );
-          })}
-          <div className="h-[162px] bg-background" ref={messagesEndRef} />
-        </div>
+        <ChatMessageMemoized
+          selectedChat={selectedChat}
+          selectedMessages={selectedMessages}
+          models={models}
+          messagesEndRef={messagesEndRef}
+          handleChangeChatLeafMessageId={handleChangeChatLeafMessageId}
+          handleEditMessageSend={handleEditMessageSend}
+          handleRegenerate={handleRegenerate}
+        />
       </div>
       {hasModel() && (
         <ChatInput
