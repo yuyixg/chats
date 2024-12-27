@@ -124,7 +124,7 @@ public class ChatController(ChatStopService stopService) : ControllerBase
             cancellationToken);
     }
 
-    public async Task<IActionResult> ChatPrivate(
+    private async Task<IActionResult> ChatPrivate(
         BaseChatRequest baseReq,
         ChatsDB db,
         CurrentUser currentUser,
