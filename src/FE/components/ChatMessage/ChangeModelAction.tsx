@@ -2,7 +2,7 @@ import useTranslation from '@/hooks/useTranslation';
 
 import { AdminModelDto } from '@/types/adminApis';
 
-import ChangeChatModelDropdownMenu from '@/components/ChangeModel/ChangeModel';
+import ChatModelDropdownMenu from '@/components/ChatModelDropdownMenu/ChatModelDropdownMenu';
 import Tips from '@/components/Tips/Tips';
 
 interface Props {
@@ -12,7 +12,6 @@ interface Props {
   onChangeModel: (model: AdminModelDto) => void;
   modelId: number;
   modelName: string;
-  modelProviderId?: number;
 }
 
 export const ChangeModelAction = (props: Props) => {
@@ -21,7 +20,6 @@ export const ChangeModelAction = (props: Props) => {
     models,
     modelId,
     modelName,
-    modelProviderId,
     readonly,
     showRegenerate,
     onChangeModel,
@@ -30,7 +28,7 @@ export const ChangeModelAction = (props: Props) => {
   return (
     <Tips
       trigger={
-        <ChangeChatModelDropdownMenu
+        <ChatModelDropdownMenu
           models={models}
           readonly={readonly}
           onChangeModel={(model) => {
@@ -38,7 +36,6 @@ export const ChangeModelAction = (props: Props) => {
           }}
           modelId={modelId}
           modelName={modelName}
-          modelProviderId={modelProviderId}
           showRegenerate={showRegenerate}
           content={modelName}
         />

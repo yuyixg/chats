@@ -194,6 +194,8 @@ const HomeContent = () => {
       selectChat(chatList, chatList[0].id);
     } else {
       chatDispatch(setSelectedChat(undefined));
+      messageDispatch(setSelectedMessages([]));
+      messageDispatch(setMessages([]));
     }
   };
 

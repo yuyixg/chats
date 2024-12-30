@@ -2,7 +2,7 @@ import { useContext } from 'react';
 
 import useTranslation from '@/hooks/useTranslation';
 
-import ChangeChatModelDropdownMenu from '@/components/ChangeModel/ChangeModel';
+import ChatModelDropdownMenu from '@/components/ChatModelDropdownMenu/ChatModelDropdownMenu';
 import { IconMinus } from '@/components/Icons';
 import Tips from '@/components/Tips/Tips';
 import { Button } from '@/components/ui/button';
@@ -82,7 +82,7 @@ const ChatHeader = () => {
           <div className="flex flex-col gap-y-1">
             <div>
               {selectedChat.spans.length < MAX_SELECT_MODEL_COUNT && (
-                <ChangeChatModelDropdownMenu
+                <ChatModelDropdownMenu
                   models={models}
                   className="font-semibold text-base"
                   content={t('Add another model')}
@@ -95,7 +95,7 @@ const ChatHeader = () => {
             <div className="flex flex-col gap-x-1">
               {selectedChat.spans.map((span) => (
                 <div className="flex" key={'chat-header-' + span.spanId}>
-                  <ChangeChatModelDropdownMenu
+                  <ChatModelDropdownMenu
                     key={'change-model-' + span.modelId}
                     models={models}
                     modelName={span.modelName}

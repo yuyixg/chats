@@ -10,7 +10,6 @@ export type SetChatPagingType = {
   pageSize: number;
 };
 
-export type SetMessageIsStreamingType = boolean;
 export type SetIsChatsLoadingType = boolean;
 export type SetStopIdsType = string[];
 
@@ -18,7 +17,6 @@ interface ChatInitialState {
   chats: SetChatsType;
   selectedChat?: SetSelectedChatType;
   chatsPaging: SetChatPagingType;
-  messageIsStreaming: SetMessageIsStreamingType;
   isChatsLoading: SetIsChatsLoadingType;
   stopIds: SetStopIdsType;
 }
@@ -27,7 +25,6 @@ export const chatInitialState: ChatInitialState = {
   chats: [],
   selectedChat: undefined,
   chatsPaging: { count: 0, page: 1, pageSize: 50 },
-  messageIsStreaming: false,
   isChatsLoading: false,
   stopIds: [],
 };

@@ -43,7 +43,7 @@ const ConversationComponent = ({ chat }: Props) => {
   const { t } = useTranslation();
   const {
     state: {
-      selectedChat: { id: selectChatId, status },
+      selectedChat: { id: selectChatId, status } = { id: undefined },
       chats,
     },
     handleSelectChat,
@@ -124,7 +124,7 @@ const ConversationComponent = ({ chat }: Props) => {
   }, [isChanging, isDeleting]);
 
   return (
-    <div className="relative flex items-center">
+    <div className="relative flex items-center rounded-lg">
       {isChanging && selectChatId === chat.id ? (
         <div className="flex w-full items-center gap-2 rounded-lg bg-background p-3">
           <input

@@ -151,7 +151,7 @@ const UserMessage = (props: Props) => {
                 ))}
             </div>
             <div
-              className={`prose whitespace-pre-wrap dark:prose-invert ${
+              className={`prose whitespace-pre-wrap dark:prose-invert text-sm ${
                 content?.fileIds && content.fileIds.length > 0 ? 'mt-2' : ''
               }`}
             >

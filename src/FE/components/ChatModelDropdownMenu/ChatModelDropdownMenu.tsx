@@ -24,11 +24,10 @@ import RegenerateModel from '../ChatMessage/RegenerateModel';
 
 import { cn } from '@/lib/utils';
 
-const ChangeChatModelDropdownMenu = ({
+const ChatModelDropdownMenu = ({
   models,
   modelId,
   modelName,
-  modelProviderId,
   readonly,
   showRegenerate,
   content,
@@ -38,7 +37,6 @@ const ChangeChatModelDropdownMenu = ({
   models: AdminModelDto[];
   modelId?: number;
   modelName?: string;
-  modelProviderId?: number;
   readonly?: boolean;
   showRegenerate?: boolean;
   content?: string | React.JSX.Element;
@@ -76,6 +74,13 @@ const ChangeChatModelDropdownMenu = ({
     setSearchTerm('');
   };
 
+  const NoModelRender = () =>
+    models.length === 0 && (
+      <div className="p-2 mx-1 text-center text-muted-foreground text-sm">
+        {t('No data')}
+      </div>
+    );
+
   return (
     <DropdownMenu onOpenChange={handleOpenMenu}>
       <DropdownMenuTrigger
@@ -89,7 +94,6 @@ const ChangeChatModelDropdownMenu = ({
               className,
             )}
           >
-            {/* {modelProviderId && <ChatIcon className='m-0' providerId={modelProviderId} />} */}
             {content && content}
           </span>
           {!readonly && typeof content === 'string' && <IconChevronDown />}
@@ -106,6 +110,7 @@ const ChangeChatModelDropdownMenu = ({
           searchTerm={searchTerm}
           onSearch={handleSearch}
         />
+        <NoModelRender />
         <DropdownMenuGroup>
           {modelGroup.map((m) => {
             return (
@@ -155,4 +160,4 @@ const ChangeChatModelDropdownMenu = ({
   );
 };
 
-export default ChangeChatModelDropdownMenu;
+export default ChatModelDropdownMenu;

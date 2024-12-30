@@ -6,10 +6,8 @@ import {
   ChatAction,
   ChatActionTypes,
   SetChatPagingType,
-  SetChatStatusType,
   SetChatsType,
   SetIsChatsLoadingType,
-  SetMessageIsStreamingType,
   SetSelectedChatType,
   SetStopIdsType,
 } from '../_reducers/chat.reducer';

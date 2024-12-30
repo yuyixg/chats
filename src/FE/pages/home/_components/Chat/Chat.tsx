@@ -21,7 +21,7 @@ import {
 import { throttle } from '@/utils/throttle';
 import { getUserSession } from '@/utils/user';
 
-import { ChatRole, ChatSpanStatus, ChatStatus, Message } from '@/types/chat';
+import { ChatSpanStatus, ChatStatus, Message } from '@/types/chat';
 import {
   IChatMessage,
   ResponseMessageTempId,
@@ -29,11 +29,6 @@ import {
   SseResponseLine,
 } from '@/types/chatMessage';
 import { Prompt } from '@/types/prompt';
-
-import ChatError from '@/components/ChatError/ChatError';
-import ResponseMessage from '@/components/ChatMessage/ResponseMessage';
-import ResponseMessageActions from '@/components/ChatMessage/ResponseMessageActions';
-import UserMessage from '@/components/ChatMessage/UserMessage';
 
 import {
   setChats,
@@ -52,7 +47,6 @@ import ChatMessageMemoized from './MemoizedChatMessage';
 import NoModel from './NoModel';
 
 import { putChats } from '@/apis/clientApis';
-import { cn } from '@/lib/utils';
 
 const Chat = memo(() => {
   const { t } = useTranslation();
@@ -60,12 +54,9 @@ const Chat = memo(() => {
     state: {
       chats,
       selectedChat,
-
       messages,
       selectedMessages,
-
       models,
-
       defaultPrompt,
     },
 
@@ -76,7 +67,6 @@ const Chat = memo(() => {
   const [autoScrollEnabled, setAutoScrollEnabled] = useState<boolean>(true);
   const [showScrollDownButton, setShowScrollDownButton] =
     useState<boolean>(false);
-  const hasMultipleSpan = selectedMessages.find((x) => x.length > 1);
 
   const messagesEndRef = useRef<HTMLDivElement>(null);
   const chatContainerRef = useRef<HTMLDivElement>(null);
@@ -417,9 +407,9 @@ const Chat = memo(() => {
         ref={chatContainerRef}
         onScroll={handleScroll}
       >
-        <ChatHeader />
+        {selectedChat && <ChatHeader />}
 
-        {selectedMessages.length === 0 && <ChatModelSetting />}
+        {selectedChat && selectedMessages.length === 0 && <ChatModelSetting />}
 
         <ChatMessageMemoized
           selectedChat={selectedChat}
@@ -431,7 +421,7 @@ const Chat = memo(() => {
           handleRegenerate={handleRegenerate}
         />
       </div>
-      {hasModel() && (
+      {hasModel() && selectedChat && (
         <ChatInput
           onSend={(message) => {
             const lastMessage = getSelectedMessagesLastActiveMessage();

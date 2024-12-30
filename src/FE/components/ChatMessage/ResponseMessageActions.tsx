@@ -74,10 +74,9 @@ const ResponseMessageActions = (props: Props) => {
               onChangeModel={(model) => {
                 onRegenerate && onRegenerate(message.parentId!, model.modelId);
               }}
-              showRegenerate={true}
+              showRegenerate={models.length > 0}
               modelName={modelName!}
               modelId={modelId}
-              modelProviderId={modelProviderId}
             />
           </div>
         </div>

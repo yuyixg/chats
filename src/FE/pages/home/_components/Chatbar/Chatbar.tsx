@@ -66,7 +66,7 @@ const Chatbar = () => {
     >
       <Sidebar<ChatResult>
         isLoading={isChatsLoading}
-        messageIsStreaming={selectedChat.status === ChatStatus.Chatting}
+        messageIsStreaming={selectedChat?.status === ChatStatus.Chatting}
         side={'left'}
         isOpen={showChatBar}
         addItemButtonTitle={t('New chat')}

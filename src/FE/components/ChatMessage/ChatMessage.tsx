@@ -88,7 +88,7 @@ export const ChatMessage: FC<Props> = memo(
                       className="w-7 h-7 mr-1"
                       providerId={message.modelProviderId!}
                     /> */}
-                        <div className="prose dark:prose-invert rounded-r-md flex-1 overflow-auto">
+                        <div className="prose dark:prose-invert rounded-r-md flex-1 overflow-auto text-sm">
                           <ResponseMessage message={message} />
                           {message.status === ChatSpanStatus.Failed && (
                             <ChatError error={message.content.error} />
