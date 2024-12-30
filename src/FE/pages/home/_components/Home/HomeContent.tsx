@@ -8,11 +8,7 @@ import useTranslation from '@/hooks/useTranslation';
 import { getPathChatId } from '@/utils/chats';
 import { findSelectedMessageByLeafId } from '@/utils/message';
 import { getSettings } from '@/utils/settings';
-import {
-  getUserSession,
-  redirectToHomePage,
-  redirectToLoginPage,
-} from '@/utils/user';
+import { getUserSession, redirectToLoginPage } from '@/utils/user';
 
 import { ChatStatus, IChat } from '@/types/chat';
 import { IChatMessage } from '@/types/chatMessage';
@@ -155,6 +151,10 @@ const HomeContent = () => {
     });
   };
 
+  const hasModel = () => {
+    return models?.length > 0;
+  };
+
   const handleSelectChat = (chat: IChat) => {
     chatDispatch(setSelectedChat(chat));
     getUserMessages(chat.id).then((data) => {
@@ -166,10 +166,6 @@ const HomeContent = () => {
       }
     });
     router.push('#/' + chat.id);
-  };
-
-  const hasModel = () => {
-    return models?.length > 0;
   };
 
   const handleUpdateChat = (
@@ -283,6 +279,18 @@ const HomeContent = () => {
   //   };
   // }, [chats]);
 
+  const PageLoadingRender = () => (
+    <div
+      className={`fixed top-0 left-0 bottom-0 right-0 bg-background z-50 text-center text-[12.5px]`}
+    >
+      <div className="fixed w-screen h-screen top-1/2">
+        <div className="flex justify-center">
+          <Spinner className="text-gray-500 dark:text-gray-50" />
+        </div>
+      </div>
+    </div>
+  );
+
   return (
     <HomeContext.Provider
       value={{
@@ -303,7 +311,6 @@ const HomeContent = () => {
 
         handleNewChat,
         handleStopChats,
-
         handleSelectChat,
         handleUpdateChat,
         handleDeleteChat,
@@ -311,19 +318,10 @@ const HomeContent = () => {
         getChats,
       }}
     >
-      {isPageLoading && (
-        <div
-          className={`fixed top-0 left-0 bottom-0 right-0 bg-background z-50 text-center text-[12.5px]`}
-        >
-          <div className="fixed w-screen h-screen top-1/2">
-            <div className="flex justify-center">
-              <Spinner className="text-gray-500 dark:text-gray-50" />
-            </div>
-          </div>
-        </div>
-      )}
-      {!isPageLoading && (
-        <div className={'flex h-screen w-screen flex-col text-sm'}>
+      {isPageLoading ? (
+        <PageLoadingRender />
+      ) : (
+        <div className="flex h-screen w-screen flex-col text-sm">
           <div className="flex h-full w-full bg-background">
             <Chatbar />
             <div className="flex w-full">
