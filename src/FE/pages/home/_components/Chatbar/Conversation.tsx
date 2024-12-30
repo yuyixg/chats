@@ -43,7 +43,10 @@ const ConversationComponent = ({ chat }: Props) => {
   const { t } = useTranslation();
   const {
     state: {
-      selectedChat: { id: selectChatId, status } = { id: undefined },
+      selectedChat: { id: selectChatId, status } = {
+        id: undefined,
+        status: undefined,
+      },
       chats,
     },
     handleSelectChat,
