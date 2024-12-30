@@ -18,22 +18,21 @@ export const RegenerateModel = (props: Props) => {
     return (
       <>
         <Separator className="my-1" />
+
         <div
-          className="flex my-1 justify-between p-2 gap-2 items-center text-sm rounded-md hover:bg-accent"
+          className="flex my-1 ml-[.8px] py-2 gap-[6px] items-center text-sm rounded-md hover:bg-accent"
           onClick={onRegenerate}
         >
-          <div className="flex flex-col">
-            <span>{t('Regenerate')}</span>
-            <span className="text-nowrap overflow-hidden text-ellipsis whitespace-nowrap">
-              {modelName}
-            </span>
-          </div>
           <div>
             <IconRefresh
-              size={18}
+              size={22}
               stroke="hsl(var(--muted-foreground))"
               className="text-muted-foreground ml-[6px] "
             />
+          </div>
+
+          <div className="text-nowrap overflow-hidden text-ellipsis whitespace-nowrap pr-2">
+            {t('Regenerate')}({modelName})
           </div>
         </div>
       </>

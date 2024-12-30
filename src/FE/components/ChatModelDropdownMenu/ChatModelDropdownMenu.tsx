@@ -32,6 +32,8 @@ const ChatModelDropdownMenu = ({
   showRegenerate,
   content,
   className,
+  hideIcon,
+  triggerClassName,
   onChangeModel,
 }: {
   models: AdminModelDto[];
@@ -41,6 +43,8 @@ const ChatModelDropdownMenu = ({
   showRegenerate?: boolean;
   content?: string | React.JSX.Element;
   className?: string;
+  triggerClassName?: string;
+  hideIcon?: boolean;
   onChangeModel: (model: AdminModelDto) => void;
 }) => {
   const { t } = useTranslation();
@@ -85,7 +89,10 @@ const ChatModelDropdownMenu = ({
     <DropdownMenu onOpenChange={handleOpenMenu}>
       <DropdownMenuTrigger
         disabled={readonly}
-        className="focus:outline-none hover:bg-muted rounded-sm p-1 m-0 h-7 flex items-center gap-1"
+        className={cn(
+          'focus:outline-none hover:bg-muted rounded-sm p-1 m-0 h-7 flex items-center gap-1',
+          triggerClassName,
+        )}
       >
         <>
           <span
@@ -96,7 +103,7 @@ const ChatModelDropdownMenu = ({
           >
             {content && content}
           </span>
-          {!readonly && typeof content === 'string' && <IconChevronDown />}
+          {!readonly && !hideIcon && <IconChevronDown />}
         </>
       </DropdownMenuTrigger>
       <DropdownMenuContent

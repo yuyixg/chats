@@ -50,17 +50,14 @@ const Sidebar = <T,>({
 }: Props<T>) => {
   const { t } = useTranslation();
 
-  const IsNoDataRender = () => {
-    const isNoData = isLoading === false && items.length === 0;
-    return isNoData ? (
+  const NoDataRender = () =>
+    isLoading === false &&
+    items.length === 0 && (
       <div className="select-none text-center flex flex-col justify-center h-56 opacity-50">
         <IconSearch className="mx-auto mb-3" />
         <span className="text-[14px] leading-normal">{t('No data')}</span>
       </div>
-    ) : (
-      <></>
     );
-  };
 
   return (
     <>
@@ -125,7 +122,7 @@ const Sidebar = <T,>({
           {items?.length > 0 && !isLoading && (
             <div className="pt-2">{itemComponent}</div>
           )}
-          {IsNoDataRender()}
+          {NoDataRender()}
         </div>
         {footerComponent}
       </div>

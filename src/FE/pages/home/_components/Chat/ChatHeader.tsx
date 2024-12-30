@@ -3,7 +3,7 @@ import { useContext } from 'react';
 import useTranslation from '@/hooks/useTranslation';
 
 import ChatModelDropdownMenu from '@/components/ChatModelDropdownMenu/ChatModelDropdownMenu';
-import { IconMinus } from '@/components/Icons';
+import { IconPlus, IconX } from '@/components/Icons';
 import Tips from '@/components/Tips/Tips';
 import { Button } from '@/components/ui/button';
 
@@ -75,59 +75,84 @@ const ChatHeader = () => {
     });
   };
 
+  const AddBtnRender = () => (
+    <div className="flex items-center rounded-md">
+      {selectedChat.spans.length < MAX_SELECT_MODEL_COUNT && (
+        <ChatModelDropdownMenu
+          models={models}
+          className="text-base"
+          content={
+            <Tips
+              trigger={
+                <Button
+                  variant="ghost"
+                  className="p-1 m-0 h-auto hover:bg-transparent"
+                >
+                  <IconPlus />
+                </Button>
+              }
+              content={t('Add Model')}
+            />
+          }
+          hideIcon={true}
+          onChangeModel={(model) => {
+            handleAddChatModel(model.modelId);
+          }}
+        />
+      )}
+    </div>
+  );
+
   return (
-    <div className="sticky top-0 pt-1 z-10 text-sm bg-background right-0">
-      <div className="flex justify-between h-auto">
-        <div className={cn('flex justify-start ml-24', showChatBar && 'ml-6')}>
-          <div className="flex flex-col gap-y-1">
-            <div>
-              {selectedChat.spans.length < MAX_SELECT_MODEL_COUNT && (
+    <div className="sticky top-0 z-10 text-sm bg-background right-0">
+      <div className="flex justify-between items-center w-full">
+        <div
+          className={cn(
+            'flex justify-start ml-24 h-11 items-center overflow-auto',
+            showChatBar && 'ml-6',
+          )}
+        >
+          <div className="flex gap-y-1 flex-wrap h-11 items-center overflow-auto">
+            {selectedChat.spans.map((span) => (
+              <div
+                className="flex hover:bg-muted p-1 rounded-md"
+                key={'chat-header-' + span.spanId}
+              >
                 <ChatModelDropdownMenu
+                  key={'change-model-' + span.modelId}
                   models={models}
-                  className="font-semibold text-base"
-                  content={t('Add another model')}
+                  modelName={span.modelName}
+                  className="text-sm"
+                  triggerClassName="hover:bg-transparent"
+                  content={span?.modelName}
+                  hideIcon={true}
                   onChangeModel={(model) => {
-                    handleAddChatModel(model.modelId);
+                    handleUpdateChatModel(span.spanId, model.modelId);
                   }}
                 />
-              )}
-            </div>
-            <div className="flex flex-col gap-x-1">
-              {selectedChat.spans.map((span) => (
-                <div className="flex" key={'chat-header-' + span.spanId}>
-                  <ChatModelDropdownMenu
-                    key={'change-model-' + span.modelId}
-                    models={models}
-                    modelName={span.modelName}
-                    className="font-semibold text-base"
-                    content={span?.modelName}
-                    onChangeModel={(model) => {
-                      handleUpdateChatModel(span.spanId, model.modelId);
-                    }}
-                  />
 
-                  <div hidden={selectedChat.spans.length === 1}>
-                    <Tips
-                      trigger={
-                        <Button
-                          onClick={() => {
-                            handleRemoveChatModel(span.spanId);
-                          }}
-                          variant="ghost"
-                          className="p-1 m-0 h-auto"
-                        >
-                          <IconMinus />
-                        </Button>
-                      }
-                      content={t('Remove')}
-                    />
-                  </div>
+                <div hidden={selectedChat.spans.length === 1}>
+                  <Tips
+                    trigger={
+                      <Button
+                        onClick={() => {
+                          handleRemoveChatModel(span.spanId);
+                        }}
+                        variant="ghost"
+                        className="p-1 m-0 h-auto hover:bg-transparent"
+                      >
+                        <IconX />
+                      </Button>
+                    }
+                    content={t('Remove')}
+                  />
                 </div>
-              ))}
-            </div>
+              </div>
+            ))}
           </div>
+          <AddBtnRender />
         </div>
-        <div className="mr-2 md:mr-4">{<ModeToggle />}</div>
+        <div className="ml-2 mr-2 md:mr-4">{<ModeToggle />}</div>
       </div>
     </div>
   );
