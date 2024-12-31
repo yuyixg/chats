@@ -144,7 +144,7 @@ const Chat = memo(() => {
         chatId,
         spans: chatSpans.map((x) => ({
           id: x.spanId,
-          systemPrompt: defaultPrompt?.content,
+          systemPrompt: x.prompt || defaultPrompt?.content,
           setsTemperature: true,
           enableSearch: x.enableSearch,
           temperature: x.temperature,
