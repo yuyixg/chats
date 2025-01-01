@@ -1,4 +1,4 @@
-import { ChatMessage } from './chatMessage';
+import { IChatMessage } from './chatMessage';
 import { DBFileServiceType } from './file';
 import { DBModelProvider } from './model';
 import { Paging } from './page';
@@ -24,7 +24,6 @@ export interface AdminModelDto {
   name: string;
   rank: number | null;
   enabled: boolean;
-  fileServiceId: number | null;
   modelKeyId: number;
   deploymentName: string | null;
   inputTokenPrice1M: number;
@@ -101,7 +100,7 @@ export interface GetMessageDetailsResult {
   modelName?: string;
   modelTemperature?: number;
   modelPrompt?: number;
-  messages: ChatMessage[];
+  messages: IChatMessage[];
 }
 
 export interface PostFileServicesParams {

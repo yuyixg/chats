@@ -1,79 +1,82 @@
 import { AdminModelDto } from '@/types/adminApis';
-import { PropsMessage } from '@/types/components/chat';
+import { ChatRole, ChatSpanStatus, Content } from '@/types/chat';
 
 import ChangeModelAction from './ChangeModelAction';
 import CopyAction from './CopyAction';
 import GenerateInformationAction from './GenerateInformationAction';
 import PaginationAction from './PaginationAction';
-import RegenerateAction from './RegenerateAction';
 
-import { cn } from '@/lib/utils';
+export interface ResponseMessage {
+  id: string;
+  siblingIds: string[];
+  parentId: string | null;
+  role: ChatRole;
+  content: Content;
+  inputTokens: number;
+  outputTokens: number;
+  reasoningTokens: number;
+  inputPrice: number;
+  outputPrice: number;
+  duration: number;
+  firstTokenLatency: number;
+  modelId: number;
+  modelName: string;
+  modelProviderId: number;
+}
 
 interface Props {
   models: AdminModelDto[];
-  message: PropsMessage;
-  modelName?: string;
-  modelId?: number;
-  lastMessageId: string | null;
-  assistantCurrentSelectIndex: number;
-  assistantChildrenIds: string[];
-  messageIsStreaming: boolean;
+  message: ResponseMessage;
+  chatStatus: ChatSpanStatus;
+  readonly?: boolean;
   onChangeMessage?: (messageId: string) => void;
-  onRegenerate?: (modelId?: number) => void;
+  onRegenerate?: (messageId: string, modelId: number) => void;
 }
 
 const ResponseMessageActions = (props: Props) => {
   const {
     models,
     message,
-    modelName,
-    modelId,
-    lastMessageId,
-    assistantCurrentSelectIndex,
-    assistantChildrenIds,
+    chatStatus,
+    readonly,
     onChangeMessage,
     onRegenerate,
-    messageIsStreaming,
   } = props;
+  const {
+    id: messageId,
+    siblingIds,
+    modelId,
+    modelName,
+    modelProviderId,
+  } = message;
+  const currentMessageIndex = siblingIds.findIndex((x) => x === messageId);
 
   return (
     <>
-      {messageIsStreaming ? (
+      {chatStatus === ChatSpanStatus.Chatting ? (
         <div className="h-9"></div>
       ) : (
         <div className="flex gap-1 flex-wrap mt-1">
           <PaginationAction
-            hidden={assistantChildrenIds.length <= 1}
-            disabledPrev={
-              assistantCurrentSelectIndex === 0 || messageIsStreaming
-            }
-            disabledNext={
-              assistantCurrentSelectIndex === assistantChildrenIds.length - 1 ||
-              messageIsStreaming
-            }
-            messageIds={assistantChildrenIds}
-            currentSelectIndex={assistantCurrentSelectIndex}
+            hidden={siblingIds.length <= 1}
+            disabledPrev={currentMessageIndex === 0}
+            disabledNext={currentMessageIndex === siblingIds.length - 1}
+            messageIds={siblingIds}
+            currentSelectIndex={currentMessageIndex}
             onChangeMessage={onChangeMessage}
           />
-          <div
-            className={cn(
-              lastMessageId === message.id ? 'visible' : 'invisible',
-              'flex gap-0 items-center group-hover:visible focus:visible',
-            )}
-          >
+          <div className="visible flex gap-0 items-center">
             <CopyAction text={message.content.text} />
             <GenerateInformationAction message={message} />
-            <RegenerateAction
-              onRegenerate={() => {
-                onRegenerate && onRegenerate(modelId);
-              }}
-            />
             <ChangeModelAction
+              readonly={readonly}
               models={models}
-              onChangeModel={(modelId: number) => {
-                onRegenerate && onRegenerate(modelId);
+              onChangeModel={(model) => {
+                onRegenerate && onRegenerate(message.parentId!, model.modelId);
               }}
+              showRegenerate={models.length > 0}
               modelName={modelName!}
+              modelId={modelId}
             />
           </div>
         </div>

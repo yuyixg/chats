@@ -2,8 +2,13 @@ import { useEffect, useRef, useState } from 'react';
 
 import useTranslation from '@/hooks/useTranslation';
 
-import { IChat, Message } from '@/types/chat';
-import { PropsMessage } from '@/types/components/chat';
+import {
+  ChatRole,
+  ChatSpanStatus,
+  Content,
+  IChat,
+  Message,
+} from '@/types/chat';
 
 import { Button } from '@/components/ui/button';
 
@@ -11,39 +16,43 @@ import CopyAction from './CopyAction';
 import EditAction from './EditAction';
 import PaginationAction from './PaginationAction';
 
-interface Props {
-  message: PropsMessage;
+export interface UserMessage {
+  id: string;
+  role: ChatRole;
+  content: Content;
+  status: ChatSpanStatus;
   parentId: string | null;
-  currentSelectIndex: number;
-  parentChildrenIds: string[];
+  siblingIds: string[];
+}
+
+interface Props {
+  message: UserMessage;
   selectedChat: IChat;
-  messageIsStreaming: boolean;
   onChangeMessage?: (messageId: string) => void;
-  onEdit?: (editedMessage: Message, parentId: string | null) => void;
+  onEdit?: (editedMessage: Message, parentId?: string) => void;
 }
 
 const UserMessage = (props: Props) => {
   const { t } = useTranslation();
 
-  const {
-    message,
-    parentId,
-    currentSelectIndex,
-    parentChildrenIds,
-    selectedChat,
-    messageIsStreaming,
-    onChangeMessage,
-    onEdit,
-  } = props;
+  const { message, selectedChat, onChangeMessage, onEdit } = props;
   const [isTyping, setIsTyping] = useState<boolean>(false);
   const [isEditing, setIsEditing] = useState<boolean>(false);
   const textareaRef = useRef<HTMLTextAreaElement>(null);
   const [messageContent, setMessageContent] = useState(message.content);
+  const {
+    id: messageId,
+    siblingIds,
+    parentId,
+    content,
+    status: chatStatus,
+  } = message;
+  const currentMessageIndex = siblingIds.findIndex((x) => x === messageId);
 
   const handleEditMessage = () => {
-    if (message.content != messageContent) {
+    if (content != messageContent) {
       if (selectedChat.id && onEdit) {
-        onEdit({ ...message, content: messageContent }, parentId);
+        onEdit({ ...message, content: messageContent }, parentId || undefined);
       }
     }
     setIsEditing(false);
@@ -52,7 +61,7 @@ const UserMessage = (props: Props) => {
   const handleInputChange = (event: React.ChangeEvent<HTMLTextAreaElement>) => {
     setMessageContent({
       text: event.target.value,
-      fileIds: message.content.fileIds,
+      fileIds: content.fileIds,
     });
     if (textareaRef.current) {
       textareaRef.current.style.height = 'inherit';
@@ -72,8 +81,8 @@ const UserMessage = (props: Props) => {
   };
 
   useEffect(() => {
-    setMessageContent(message.content);
-  }, [message.content]);
+    setMessageContent(content);
+  }, [content]);
 
   useEffect(() => {
     if (textareaRef.current) {
@@ -84,7 +93,7 @@ const UserMessage = (props: Props) => {
 
   return (
     <>
-      <div className="flex flex-row-reverse">
+      <div className="flex flex-row-reverse relative">
         {isEditing ? (
           <div className="flex w-full flex-col">
             <textarea
@@ -106,7 +115,7 @@ const UserMessage = (props: Props) => {
               }}
             />
 
-            <div className="absolute right-10 bottom-6  md:right-20 md:bottom-7 flex justify-end space-x-4">
+            <div className="absolute right-2 bottom-2 flex justify-end space-x-4">
               <Button
                 variant="default"
                 className="rounded-md px-4 py-1 text-sm font-medium"
@@ -119,7 +128,7 @@ const UserMessage = (props: Props) => {
                 variant="outline"
                 className="rounded-md border border-neutral-300 px-4 py-1 text-sm font-medium text-neutral-700 hover:bg-neutral-100 dark:border-neutral-700 dark:text-neutral-300 dark:hover:bg-neutral-800"
                 onClick={() => {
-                  setMessageContent(message.content);
+                  setMessageContent(content);
                   setIsEditing(false);
                 }}
               >
@@ -130,8 +139,8 @@ const UserMessage = (props: Props) => {
         ) : (
           <div className="bg-muted py-2 px-3 rounded-md overflow-x-scroll">
             <div className="flex flex-wrap justify-end text-right gap-2">
-              {message.content?.fileIds &&
-                message.content.fileIds.map((img, index) => (
+              {content?.fileIds &&
+                content.fileIds.map((img, index) => (
                   <img
                     className="rounded-md mr-2 not-prose"
                     key={index}
@@ -142,38 +151,39 @@ const UserMessage = (props: Props) => {
                 ))}
             </div>
             <div
-              className={`prose whitespace-pre-wrap dark:prose-invert ${
-                message.content?.fileIds && message.content.fileIds.length > 0
-                  ? 'mt-2'
-                  : ''
+              className={`prose whitespace-pre-wrap dark:prose-invert text-sm ${
+                content?.fileIds && content.fileIds.length > 0 ? 'mt-2' : ''
               }`}
             >
-              {message.content.text}
+              {content.text}
             </div>
           </div>
         )}
       </div>
 
-      <div className="flex justify-end pt-1">
+      <div className="flex justify-end my-2">
         {!isEditing && (
           <>
             <EditAction
-              disabled={messageIsStreaming}
+              disabled={chatStatus === ChatSpanStatus.Chatting}
               onToggleEditing={handleToggleEditing}
             />
             <CopyAction
               triggerClassName="invisible group-hover:visible focus:visible"
-              text={message.content.text}
+              text={content.text}
             />
             <PaginationAction
-              hidden={parentChildrenIds.length <= 1}
-              disabledPrev={currentSelectIndex === 0 || messageIsStreaming}
-              disabledNext={
-                currentSelectIndex === parentChildrenIds.length - 1 ||
-                messageIsStreaming
+              hidden={siblingIds.length <= 1}
+              disabledPrev={
+                currentMessageIndex === 0 ||
+                chatStatus === ChatSpanStatus.Chatting
               }
-              currentSelectIndex={currentSelectIndex}
-              messageIds={parentChildrenIds}
+              disabledNext={
+                currentMessageIndex === siblingIds.length - 1 ||
+                chatStatus === ChatSpanStatus.Chatting
+              }
+              currentSelectIndex={currentMessageIndex}
+              messageIds={siblingIds}
               onChangeMessage={onChangeMessage}
             />
           </>

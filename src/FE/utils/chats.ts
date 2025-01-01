@@ -1,15 +1,3 @@
-export const setStorageChatId = (chatId: string) => {
-  localStorage.setItem('selectedChatId', chatId);
-};
-
-export const getStorageChatId = () => {
-  return localStorage.getItem('selectedChatId');
-};
-
-export const removeStorageChatId = () => {
-  localStorage.removeItem('selectedChatId');
-};
-
 export const getPathChatId = (path: string) => {
   return path.substring(3);
 };

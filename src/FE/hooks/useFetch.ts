@@ -3,7 +3,11 @@ import toast from 'react-hot-toast';
 import useTranslation from '@/hooks/useTranslation';
 
 import { getApiUrl } from '@/utils/common';
-import { getUserSession, redirectToHome, redirectToLogin } from '@/utils/user';
+import {
+  getUserSession,
+  redirectToHomePage,
+  redirectToLoginPage,
+} from '@/utils/user';
 
 export type RequestModel = {
   params?: object;
@@ -48,11 +52,11 @@ const handleErrorResponse = async (err: Response) => {
       message = 'Internal server error, Please try again later';
       break;
     case 401:
-      redirectToLogin();
+      redirectToLoginPage();
       return;
     case 403:
       message = 'Resource denial of authorized access';
-      redirectToHome(1000);
+      redirectToHomePage(1000);
       break;
     case 404:
       return;

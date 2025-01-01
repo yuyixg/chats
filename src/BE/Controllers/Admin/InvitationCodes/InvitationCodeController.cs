@@ -21,7 +21,7 @@ public class InvitationCodeController(ChatsDB db) : ControllerBase
                 Count = x.Count,
                 Username = db.Users
                     .Where(u => u.Id == x.CreateUserId)
-                    .Select(x => x.Username)
+                    .Select(x => x.DisplayName)
                     .Single()
             })
             .ToArrayAsync(cancellationToken);

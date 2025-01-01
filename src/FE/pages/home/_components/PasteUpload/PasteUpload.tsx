@@ -6,7 +6,6 @@ import { ImageDef } from '@/types/chat';
 import { ChatModelFileConfig } from '@/types/model';
 
 interface IPasteUploadProps {
-  fileServiceId: number;
   fileConfig: ChatModelFileConfig;
   onUploading?: () => void;
   onSuccessful?: (def: ImageDef) => void;
@@ -14,8 +13,7 @@ interface IPasteUploadProps {
 }
 
 const PasteUpload = (props: IPasteUploadProps) => {
-  const { fileServiceId, fileConfig, onUploading, onSuccessful, onFailed } =
-    props;
+  const { fileConfig, onUploading, onSuccessful, onFailed } = props;
   const uploadRef = useRef<HTMLDivElement>(null);
 
   useEffect(() => {
@@ -47,7 +45,7 @@ const PasteUpload = (props: IPasteUploadProps) => {
       onFailed && onFailed('File is too large.');
       return;
     }
-    uploadFile(file, fileServiceId, onUploading, onSuccessful, onFailed);
+    uploadFile(file, onUploading, onSuccessful, onFailed);
   };
 
   return <div ref={uploadRef} hidden></div>;

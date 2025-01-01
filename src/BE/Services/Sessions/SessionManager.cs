@@ -59,7 +59,7 @@ public class SessionManager(JwtKeyManager jwtKeyManager)
         SessionEntry sessionEntry = new()
         {
             UserId = user.Id,
-            UserName = user.Username,
+            UserName = user.DisplayName,
             Role = user.Role,
             Sub = user.Sub,
             Provider = user.Provider
@@ -76,7 +76,7 @@ public class SessionManager(JwtKeyManager jwtKeyManager)
         return new LoginResponse
         {
             SessionId = jwt,
-            UserName = user.Username,
+            UserName = user.DisplayName,
             Role = user.Role,
             CanReCharge = hasPayService,
         };

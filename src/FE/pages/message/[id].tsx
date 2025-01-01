@@ -2,117 +2,67 @@ import { useEffect, useState } from 'react';
 
 import { useRouter } from 'next/router';
 
+import useTranslation from '@/hooks/useTranslation';
+
 import { getQueryId } from '@/utils/common';
-import { getSelectMessages } from '@/utils/message';
+import { findLastLeafId, findSelectedMessageByLeafId } from '@/utils/message';
 
-import { GetMessageDetailsResult } from '@/types/adminApis';
-import { ChatMessage } from '@/types/chatMessage';
+import { ChatStatus, IChat } from '@/types/chat';
+import { IChatMessage } from '@/types/chatMessage';
 
-import { ChatMessageByReadOnly } from '@/components/ChatMessage/ChatMessageByReadOnly';
+import { ChatMessage } from '@/components/ChatMessage';
+import PageNotFound from '@/components/PageNotFound/PageNotFound';
 
-import { getMessageDetails } from '@/apis/adminApis';
+import { getChat, getUserMessages } from '@/apis/clientApis';
 
 export default function MessageDetails() {
+  const { t } = useTranslation();
   const router = useRouter();
-  const [chat, setChat] = useState<GetMessageDetailsResult | null>(null);
-  const [selectMessages, setSelectMessages] = useState<ChatMessage[]>([]);
-  const [currentMessages, setCurrentMessages] = useState<ChatMessage[]>([]);
-  const [chatSummary, setChatSummary] = useState<{
-    tokenUsed: number;
-    calculatedPrice: number;
-  }>({
-    tokenUsed: 0,
-    calculatedPrice: 0,
-  });
+  const [selectedChat, setSelectedChat] = useState<IChat | null>(null);
+  const [messages, setMessages] = useState<IChatMessage[]>([]);
+  const [selectedMessages, setSelectedMessages] = useState<IChatMessage[][]>(
+    [],
+  );
+  const [loading, setLoading] = useState(true);
+
+  const handleChangeChatLeafMessageId = (messageId: string) => {
+    const leafId = findLastLeafId(messages, messageId);
+    const selectedMsgs = findSelectedMessageByLeafId(messages, leafId);
+    setSelectedMessages(selectedMsgs);
+  };
 
   useEffect(() => {
+    setLoading(true);
     if (!router.isReady) return;
-    const messageId = getQueryId(router);
-    getMessageDetails(messageId).then((data) => {
-      document.title = data.name;
-      if (data.messages.length > 0) {
-        setChat(data);
-        setCurrentMessages(data.messages);
-        let tokenUsed = 0;
-        let calculatedPrice = 0;
-        data.messages.forEach((x) => {
-          x.inputPrice = x.inputPrice || 0;
-          tokenUsed += ((x.inputTokens || 0) + (x.outputTokens || 0))!;
-          calculatedPrice += x.inputPrice + (x.outputPrice || 0);
-        });
-        setChatSummary({ tokenUsed, calculatedPrice });
-        const lastMessage = data.messages[data.messages.length - 1];
-        const _selectMessages = getSelectMessages(
-          data.messages,
-          lastMessage.id,
-        );
-        setSelectMessages(_selectMessages);
-      }
+    const chatId = getQueryId(router)!;
+    getChat(chatId).then(async (chat) => {
+      setSelectedChat({ ...chat, status: ChatStatus.None });
+      const msgs = await getUserMessages(chatId);
+      setMessages(msgs);
+      const selectedMsgs = findSelectedMessageByLeafId(
+        msgs,
+        chat.leafMessageId!,
+      );
+      setSelectedMessages(selectedMsgs);
+      setLoading(false);
     });
   }, [router.isReady]);
 
-  const onMessageChange = (messageId: string) => {
-    const _selectMessages = getSelectMessages(currentMessages, messageId);
-    setSelectMessages(_selectMessages);
+  const MessageRender = () => {
+    return selectedChat ? (
+      <>
+        <ChatMessage
+          selectedChat={selectedChat}
+          selectedMessages={selectedMessages}
+          messagesEndRef={null}
+          readonly={true}
+          handleChangeChatLeafMessageId={handleChangeChatLeafMessageId}
+        />
+      </>
+    ) : (
+      <PageNotFound />
+    );
   };
 
-  return (
-    <>
-      {selectMessages.length !== 0 && (
-        <div className="flex justify-center gap-2 my-2 font-semibold">
-          <div>{chat?.modelName}</div>
-          <div>{chat?.modelTemperature}­°C</div>
-          <div>
-            {chatSummary.tokenUsed}/{chatSummary.calculatedPrice.toFixed(8)}￥
-          </div>
-        </div>
-      )}
-      {chat &&
-        selectMessages.map((current, index) => {
-          let parentChildrenIds: string[] = [];
-          if (!current.parentId) {
-            parentChildrenIds = currentMessages
-              .filter((x) => !x.parentId)
-              .map((x) => x.id);
-          } else {
-            parentChildrenIds =
-              currentMessages.find((x) => x.id === current.parentId)
-                ?.childrenIds || [];
-            parentChildrenIds = [...parentChildrenIds].reverse();
-          }
-          return (
-            <ChatMessageByReadOnly
-              currentSelectIndex={parentChildrenIds.findIndex(
-                (x) => x === current.id,
-              )}
-              isLastMessage={selectMessages.length - 1 === index}
-              key={current.id + index}
-              parentId={current.parentId}
-              onChangeMessage={(messageId: string) => {
-                onMessageChange(messageId);
-              }}
-              childrenIds={current.childrenIds!}
-              parentChildrenIds={parentChildrenIds}
-              assistantChildrenIds={current.assistantChildrenIds!}
-              assistantCurrentSelectIndex={current.assistantChildrenIds!.findIndex(
-                (x) => x === current.id,
-              )}
-              modelName={current.modelName}
-              message={{
-                id: current.id!,
-                role: current.role,
-                content: current.content,
-                duration: current.duration || 0,
-                firstTokenLatency: current.firstTokenLatency || 0,
-                inputTokens: current.inputTokens || 0,
-                outputTokens: current.outputTokens || 0,
-                reasoningTokens: current.reasoningTokens || 0,
-                inputPrice: current.inputPrice || 0,
-                outputPrice: current.outputPrice || 0,
-              }}
-            />
-          );
-        })}
-    </>
-  );
+  return loading ? <></> : MessageRender();
 }

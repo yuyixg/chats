@@ -2,11 +2,11 @@ import { FC, memo } from 'react';
 
 import { ChatMessage, Props } from '@/components/ChatMessage';
 
-const MemoizedChatMessage: FC<Props> = memo(
-  ChatMessage,
-  (prevProps, nextProps) =>
-    prevProps.message.content === nextProps.message.content &&
-    prevProps.messageIsStreaming === nextProps.messageIsStreaming,
-);
+// const ChatMessageMemoized: FC<Props> = memo(
+//   ChatMessage,
+//   (prevProps, nextProps) =>
+//     prevProps.selectedMessages.length === nextProps.selectedMessages.length &&
+//     prevProps.selectedChat.status === nextProps.selectedChat.status,
+// );
 
-export default MemoizedChatMessage;
+export default ChatMessage;

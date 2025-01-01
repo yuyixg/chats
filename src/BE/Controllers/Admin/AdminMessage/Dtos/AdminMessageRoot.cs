@@ -1,5 +1,6 @@
 ﻿using Chats.BE.Controllers.Chats.Chats.Dtos;
 using Chats.BE.Controllers.Chats.Messages.Dtos;
+using Chats.BE.Controllers.Chats.UserChats.Dtos;
 using Chats.BE.DB;
 using Chats.BE.Services.ChatServices;
 using Chats.BE.Services.FileServices;
@@ -13,14 +14,8 @@ public record AdminMessageRoot
     [JsonPropertyName("name")]
     public required string Name { get; init; }
 
-    [JsonPropertyName("modelName")]
-    public required string ModelName { get; init; }
-
-    [JsonPropertyName("modelTemperature")]
-    public required float ModelTemperature { get; init; }
-
-    [JsonPropertyName("modelPrompt")]
-    public string? ModelPrompt { get; init; }
+    [JsonPropertyName("spans")]
+    public required ChatSpanDto[] Spans { get; init; }
 
     [JsonPropertyName("messages")]
     public required AdminMessageBasicItem[] Messages { get; init; }
@@ -29,19 +24,15 @@ public record AdminMessageRoot
 public record AdminMessageDtoTemp
 {
     public required string Name { get; init; }
-    public required string ModelName { get; init; }
-    public required string? DeploymentName { get; init; }
-    public required float? Temperature { get; init; }
+    public required ChatSpanDto[] Spans { get; init; }
 
-    public AdminMessageRoot ToDto(AdminMessageBasicItem[] messages)
+    public AdminMessageRoot Combine(AdminMessageBasicItem[] messages)
     {
         return new AdminMessageRoot
         {
             Name = Name,
-            ModelName = ModelName,
-            ModelTemperature = Temperature ?? ChatService.DefaultTemperature,
-            ModelPrompt = messages.FirstOrDefault(x => x.Role.Equals(DBChatRole.System.ToString(), StringComparison.OrdinalIgnoreCase))?.Content.Text,
-            Messages = messages.Where(x => !x.Role.Equals(DBChatRole.System.ToString(), StringComparison.OrdinalIgnoreCase)).ToArray(),
+            Spans = Spans,
+            Messages = messages,
         };
     }
 }

@@ -18,6 +18,22 @@ namespace Chats.BE.Controllers.Chats.Files;
 [Route("api"), Authorize]
 public class FileController(ChatsDB db, FileServiceFactory fileServiceFactory, IUrlEncryptionService urlEncryption, ILogger<FileController> logger) : ControllerBase
 {
+    [Route("file-service/upload"), HttpPut]
+    public async Task<ActionResult<FileDto>> DefaultUpload(IFormFile file,
+        [FromServices] ClientInfoManager clientInfoManager,
+        [FromServices] FileUrlProvider fdup,
+        [FromServices] CurrentUser currentUser,
+        CancellationToken cancellationToken)
+    {
+        FileService? fileService = await FileService.GetDefault(db, cancellationToken);
+        if (fileService == null)
+        {
+            return NotFound("File service config not found.");
+        }
+
+        return await UploadPrivate(db, fileServiceFactory, logger, file, clientInfoManager, fdup, currentUser, fileService, cancellationToken);
+    }
+
     [Route("file-service/{fileServiceId:int}/upload"), HttpPut]
     public async Task<ActionResult<FileDto>> Upload(int fileServiceId, IFormFile file,
         [FromServices] ClientInfoManager clientInfoManager,
@@ -25,11 +41,22 @@ public class FileController(ChatsDB db, FileServiceFactory fileServiceFactory, I
         [FromServices] CurrentUser currentUser,
         CancellationToken cancellationToken)
     {
+        FileService? fileService = await db.FileServices.FindAsync([fileServiceId], cancellationToken);
+        if (fileService == null)
+        {
+            return NotFound("File server config not found.");
+        }
+
+        return await UploadPrivate(db, fileServiceFactory, logger, file, clientInfoManager, fdup, currentUser, fileService, cancellationToken);
+    }
+
+    private async Task<ActionResult<FileDto>> UploadPrivate(ChatsDB db, FileServiceFactory fileServiceFactory, ILogger<FileController> logger, IFormFile file, ClientInfoManager clientInfoManager, FileUrlProvider fdup, CurrentUser currentUser, FileService fileService, CancellationToken cancellationToken)
+    {
         if (file.Length == 0)
         {
             return BadRequest("File is empty.");
         }
-        if (file.Length > 10 * 1024 * 1024)
+        if (file.Length > 15 * 1024 * 1024)
         {
             return BadRequest("File is too large.");
         }
@@ -38,15 +65,10 @@ public class FileController(ChatsDB db, FileServiceFactory fileServiceFactory, I
             return BadRequest("Invalid file name.");
         }
 
-        FileService? fileService = await db.FileServices.FindAsync([fileServiceId], cancellationToken);
-        if (fileService == null)
-        {
-            return NotFound("File server config not found.");
-        }
         if (!fileService.IsDefault && !currentUser.IsAdmin)
         {
             // only admin can upload to non-default file service
-            return NotFound("File server config not found.");
+            return NotFound("File service config not found.");
         }
 
         IFileService fs = fileServiceFactory.Create((DBFileServiceType)fileService.FileServiceTypeId, fileService.Configs);
@@ -62,7 +84,7 @@ public class FileController(ChatsDB db, FileServiceFactory fileServiceFactory, I
         {
             FileName = file.FileName,
             FileContentType = await GetOrCreateDBContentType(file.ContentType, cancellationToken),
-            FileServiceId = fileServiceId,
+            FileServiceId = fileService.Id,
             StorageKey = storageKey,
             Size = (int)file.Length,
             ClientInfo = await clientInfoManager.GetClientInfo(cancellationToken),

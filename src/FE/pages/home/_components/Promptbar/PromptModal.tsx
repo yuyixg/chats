@@ -1,4 +1,4 @@
-import React, { useContext } from 'react';
+import React from 'react';
 import { useForm } from 'react-hook-form';
 
 import useTranslation from '@/hooks/useTranslation';
@@ -23,8 +23,6 @@ import { Form, FormField } from '@/components/ui/form';
 import FormInput from '@/components/ui/form/input';
 import FormSwitch from '@/components/ui/form/switch';
 import FormTextarea from '@/components/ui/form/textarea';
-
-import HomeContext from '../../_contexts/home.context';
 
 import { useUserInfo } from '@/providers/UserProvider';
 import { zodResolver } from '@hookform/resolvers/zod';

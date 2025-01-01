@@ -2,29 +2,41 @@ import useTranslation from '@/hooks/useTranslation';
 
 import { AdminModelDto } from '@/types/adminApis';
 
-import ChangeModel from '@/components/ChangeModel/ChangeModel';
+import ChatModelDropdownMenu from '@/components/ChatModelDropdownMenu/ChatModelDropdownMenu';
 import Tips from '@/components/Tips/Tips';
 
 interface Props {
   models: AdminModelDto[];
   readonly?: boolean;
-  onChangeModel: (modelId: number) => void;
+  showRegenerate?: boolean;
+  onChangeModel: (model: AdminModelDto) => void;
+  modelId: number;
   modelName: string;
 }
 
 export const ChangeModelAction = (props: Props) => {
   const { t } = useTranslation();
-  const { models, modelName, readonly, onChangeModel } = props;
+  const {
+    models,
+    modelId,
+    modelName,
+    readonly,
+    showRegenerate,
+    onChangeModel,
+  } = props;
 
   return (
     <Tips
       trigger={
-        <ChangeModel
+        <ChatModelDropdownMenu
           models={models}
           readonly={readonly}
           onChangeModel={(model) => {
-            onChangeModel && onChangeModel(model.modelId);
+            onChangeModel && onChangeModel(model);
           }}
+          modelId={modelId}
+          modelName={modelName}
+          showRegenerate={showRegenerate}
           content={modelName}
         />
       }

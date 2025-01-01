@@ -12,6 +12,7 @@ using System.Text.Json;
 using System.Text.Json.Nodes;
 using Chats.BE.Controllers.OpenAICompatible.Dtos;
 using Microsoft.EntityFrameworkCore;
+using System.Diagnostics;
 
 namespace Chats.BE.Controllers.OpenAICompatible;
 
@@ -21,7 +22,7 @@ public partial class OpenAICompatibleController(ChatsDB db, CurrentApiKey curren
     [HttpPost("chat/completions")]
     public async Task<ActionResult> ChatCompletion([FromBody] JsonObject json, [FromServices] ClientInfoManager clientInfoManager, CancellationToken cancellationToken)
     {
-        InChatContext icc = new();
+        InChatContext icc = new(Stopwatch.GetTimestamp());
         CcoWrapper cco = new(json);
         if (!cco.SeemsValid())
         {

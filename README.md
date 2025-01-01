@@ -80,17 +80,17 @@ Chats提供了以下几个镜像：
 
 对于不便使用 Docker 部署的环境，Chats 提供了 8 种操作系统或架构的直接部署选项。可从以下链接获取相应的编译包：
 
-| 平台             | Github下载链接                                                                                                  | 替代下载链接                                                                                     |
+| 平台             | Github下载链接                                                                                                  | 国内下载链接                                                                                     |
 | ---------------- | --------------------------------------------------------------------------------------------------------------- | ------------------------------------------------------------------------------------------------ |
-| Windows 64位     | [chats-win-x64.zip](https://github.com/sdcb/chats/releases/latest/download/chats-win-x64.zip)                   | [chats-win-x64.zip](https://io.starworks.cc:88/chats/latest/chats-win-x64.zip)                   |
-| Linux 64位       | [chats-linux-x64.zip](https://github.com/sdcb/chats/releases/latest/download/chats-linux-x64.zip)               | [chats-linux-x64.zip](https://io.starworks.cc:88/chats/latest/chats-linux-x64.zip)               |
-| Linux ARM64      | [chats-linux-arm64.zip](https://github.com/sdcb/chats/releases/latest/download/chats-linux-arm64.zip)           | [chats-linux-arm64.zip](https://io.starworks.cc:88/chats/latest/chats-linux-arm64.zip)           |
-| Linux musl x64   | [chats-linux-musl-x64.zip](https://github.com/sdcb/chats/releases/latest/download/chats-linux-musl-x64.zip)     | [chats-linux-musl-x64.zip](https://io.starworks.cc:88/chats/latest/chats-linux-musl-x64.zip)     |
-| Linux musl ARM64 | [chats-linux-musl-arm64.zip](https://github.com/sdcb/chats/releases/latest/download/chats-linux-musl-arm64.zip) | [chats-linux-musl-arm64.zip](https://io.starworks.cc:88/chats/latest/chats-linux-musl-arm64.zip) |
-| macOS ARM64      | [chats-osx-arm64.zip](https://github.com/sdcb/chats/releases/latest/download/chats-osx-arm64.zip)               | [chats-osx-arm64.zip](https://io.starworks.cc:88/chats/latest/chats-osx-arm64.zip)               |
-| macOS x64        | [chats-osx-x64.zip](https://github.com/sdcb/chats/releases/latest/download/chats-osx-x64.zip)                   | [chats-osx-x64.zip](https://io.starworks.cc:88/chats/latest/chats-osx-x64.zip)                   |
-| 依赖.NET的通用包 | [chats.zip](https://github.com/sdcb/chats/releases/latest/download/chats.zip)                                   | [chats.zip](https://io.starworks.cc:88/chats/latest/chats.zip)                                   |
-| 纯前端文件       | [chats-fe.zip](https://github.com/sdcb/chats/releases/latest/download/chats-fe.zip)                             | [chats-fe.zip](https://io.starworks.cc:88/chats/latest/chats-fe.zip)                             |
+| Windows 64位     | [chats-win-x64.zip](https://github.com/sdcb/chats/releases/latest/download/chats-win-x64.zip)                   | [chats-win-x64.7z](https://io.starworks.cc:88/chats/latest/chats-win-x64.7z)                   |
+| Linux 64位       | [chats-linux-x64.zip](https://github.com/sdcb/chats/releases/latest/download/chats-linux-x64.zip)               | [chats-linux-x64.7z](https://io.starworks.cc:88/chats/latest/chats-linux-x64.7z)               |
+| Linux ARM64      | [chats-linux-arm64.zip](https://github.com/sdcb/chats/releases/latest/download/chats-linux-arm64.zip)           | [chats-linux-arm64.7z](https://io.starworks.cc:88/chats/latest/chats-linux-arm64.7z)           |
+| Linux musl x64   | [chats-linux-musl-x64.zip](https://github.com/sdcb/chats/releases/latest/download/chats-linux-musl-x64.zip)     | [chats-linux-musl-x64.7z](https://io.starworks.cc:88/chats/latest/chats-linux-musl-x64.7z)     |
+| Linux musl ARM64 | [chats-linux-musl-arm64.zip](https://github.com/sdcb/chats/releases/latest/download/chats-linux-musl-arm64.zip) | [chats-linux-musl-arm64.7z](https://io.starworks.cc:88/chats/latest/chats-linux-musl-arm64.7z) |
+| macOS ARM64      | [chats-osx-arm64.zip](https://github.com/sdcb/chats/releases/latest/download/chats-osx-arm64.zip)               | [chats-osx-arm64.7z](https://io.starworks.cc:88/chats/latest/chats-osx-arm64.7z)               |
+| macOS x64        | [chats-osx-x64.zip](https://github.com/sdcb/chats/releases/latest/download/chats-osx-x64.zip)                   | [chats-osx-x64.7z](https://io.starworks.cc:88/chats/latest/chats-osx-x64.7z)                   |
+| 依赖.NET的通用包 | [chats.zip](https://github.com/sdcb/chats/releases/latest/download/chats.zip)                                   | [chats.7z](https://io.starworks.cc:88/chats/latest/chats.7z)                                   |
+| 纯前端文件       | [chats-fe.zip](https://github.com/sdcb/chats/releases/latest/download/chats-fe.zip)                             | [chats-fe.7z](https://io.starworks.cc:88/chats/latest/chats-fe.7z)                             |
 
 ### 版本和下载说明
 
@@ -107,7 +107,7 @@ Chats提供了以下几个镜像：
      ```
    - 例如，通过替代下载直接获取最新的 Windows 64-bit 版：
      ```
-     https://io.starworks.cc:88/chats/latest/chats-win-x64.zip
+     https://io.starworks.cc:88/chats/latest/chats-win-x64.7z
      ```
 
 ### 执行文件目录结构和运行说明
@@ -141,12 +141,16 @@ C:\Users\ZhouJie\Downloads\chats-win-x64>dir
 
 - 对于下载的 `chats.zip`，将需要.NET SDK支持。安装.NET运行时后，使用 `dotnet Chats.BE.dll` 启动程序。
 
-### 支持的大模型
+### 支持的大模型服务
 
-- OpenAI OpenAI
-- Azure(或兼容OpenAI协议的API，如ollama)
-- 通义千问(Dashscope)
+- Azure OpenAI
+- 腾讯混元(HunYuan)
+- 零一万物(01.ai)
 - 月之暗面(Moonshot)
-- 文心一言(Wenxin Qianfan)
-- 智谱清言(Zhipu AI)
-- ...
+- OpenAI(或兼容OpenAI协议的API，如ollama)
+- 文心千帆(Wenxin Qianfan)
+- 阿里灵积大模型平台(Aliyun DashScope)
+- 讯飞星火(Xunfei Sparkdesk)
+- DeepSeek
+- x.AI
+- Github Models

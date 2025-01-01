@@ -9,7 +9,7 @@ import toast from 'react-hot-toast';
 
 import useTranslation from '@/hooks/useTranslation';
 
-import { ChatResult } from '@/types/clientApis';
+import { ChatStatus, IChat } from '@/types/chat';
 
 import SidebarActionButton from '@/components/Button/SidebarActionButton';
 import ChatIcon from '@/components/ChatIcon/ChatIcon';
@@ -33,22 +33,27 @@ import SharedMessageModal from '../Chat/SharedMessageModal';
 import ChatbarContext from '../Chatbar/Chatbar.context';
 
 import { deleteChats, putChats } from '@/apis/clientApis';
+import { cn } from '@/lib/utils';
 
 interface Props {
-  chat: ChatResult;
+  chat: IChat;
 }
 
 const ConversationComponent = ({ chat }: Props) => {
   const { t } = useTranslation();
   const {
     state: {
-      selectedChat: { id: selectChatId } = { id: undefined },
-      messageIsStreaming,
+      selectedChat: { id: selectChatId, status } = {
+        id: undefined,
+        status: undefined,
+      },
       chats,
     },
     handleSelectChat,
     handleUpdateChat,
   } = useContext(HomeContext);
+
+  const chatting = status === ChatStatus.Chatting;
 
   const { handleDeleteChat } = useContext(ChatbarContext);
 
@@ -122,10 +127,9 @@ const ConversationComponent = ({ chat }: Props) => {
   }, [isChanging, isDeleting]);
 
   return (
-    <div className="relative flex items-center">
+    <div className="relative flex items-center rounded-lg">
       {isChanging && selectChatId === chat.id ? (
         <div className="flex w-full items-center gap-2 rounded-lg bg-background p-3">
-          <ChatIcon isShard={chat.isShared} providerId={chat.modelProviderId} />
           <input
             className="mr-12 flex-1 overflow-hidden overflow-ellipsis border-neutral-400 bg-transparent text-left text-[12.5px] leading-3 outline-none text-black dark:text-white"
             type="text"
@@ -138,12 +142,27 @@ const ConversationComponent = ({ chat }: Props) => {
       ) : (
         <button
           className={`flex w-full cursor-pointer items-center gap-2 rounded-lg p-3 text-sm transition-colors duration-200 hover:bg-muted ${
-            messageIsStreaming ? 'disabled:cursor-not-allowed' : ''
+            chatting ? 'disabled:cursor-not-allowed' : ''
           } ${selectChatId === chat.id ? 'bg-muted' : ''}`}
           onClick={() => handleSelectChat(chat)}
-          disabled={messageIsStreaming}
+          disabled={chatting}
         >
-          <ChatIcon isShard={chat.isShared} providerId={chat.modelProviderId} />
+          <div
+            className={cn(
+              'group relative max-w-[20px] transition-all duration-1000 overflow-hidden hover:max-w-[240px]',
+            )}
+          >
+            <div className="flex overflow-hidden">
+              {chat.spans.map((span) => (
+                <ChatIcon
+                  className="border border-muted"
+                  key={'chat-icon-' + span.spanId}
+                  providerId={span.modelProviderId}
+                />
+              ))}
+            </div>
+          </div>
+
           <div
             className={`relative max-h-5 flex-1 overflow-hidden text-ellipsis whitespace-nowrap break-all text-left text-[12.5px] leading-4 ${
               selectChatId === chat.id ? 'pr-12' : 'pr-1'
@@ -169,7 +188,7 @@ const ConversationComponent = ({ chat }: Props) => {
         <div className="absolute right-[0.6rem] z-10 flex text-gray-300">
           <DropdownMenu>
             <DropdownMenuTrigger
-              disabled={messageIsStreaming}
+              disabled={chatting}
               className="focus:outline-none p-[6px]"
             >
               <IconDots className="hover:opacity-50" size={16} />
