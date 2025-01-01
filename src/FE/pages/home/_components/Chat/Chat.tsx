@@ -149,7 +149,7 @@ const Chat = memo(() => {
           enableSearch: x.enableSearch,
           temperature: x.temperature,
         })),
-        utcOffset: new Date().getTimezoneOffset(),
+        timezoneOffset: new Date().getTimezoneOffset(),
         parentAssistantMessageId: messageId || null,
         userMessage: {
           text: contentText,
@@ -203,6 +203,7 @@ const Chat = memo(() => {
       spanId,
       modelId,
       parentUserMessageId: messageId || null,
+      timezoneOffset: new Date().getTimezoneOffset(),
     };
 
     const response = await fetch(
@@ -242,6 +243,7 @@ const Chat = memo(() => {
       spanIds: chatSpans.map((x) => x.spanId),
       parentAssistantMessageId: messageId || null,
       userMessage: message.content,
+      timezoneOffset: new Date().getTimezoneOffset(),
     };
 
     const response = await fetch(`${getApiUrl()}/api/chats/general-chat`, {

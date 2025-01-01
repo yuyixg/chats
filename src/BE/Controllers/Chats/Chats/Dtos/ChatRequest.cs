@@ -63,4 +63,6 @@ public record ChatRequest
     public required long? MessageId { get; init; }
 
     public required MessageContentRequest? UserMessage { get; init; }
+
+    public required short TimezoneOffset { get; init; }
 }

@@ -9,6 +9,9 @@ public abstract record BaseChatRequest
     [JsonPropertyName("chatId")]
     public required string EncryptedChatId { get; init; }
 
+    [JsonPropertyName("timezoneOffset")]
+    public required short TimezoneOffset { get; init; }
+
     public abstract ChatRequest ToChatRequest(IUrlEncryptionService idEncryption);
 }
 
@@ -34,7 +37,8 @@ public record FreshChatRequest : BaseChatRequest
             {
                 null => null, 
                 _ => idEncryption.DecryptMessageId(ParentAssistantMessageId)
-            }
+            },
+            TimezoneOffset = TimezoneOffset,
         };
     }
 }
@@ -58,6 +62,7 @@ public record RegenerateAssistantMessageRequest : BaseChatRequest
             MessageId = idEncryption.DecryptMessageId(ParentUserMessageId),
             Spans = [new ChatSpanRequest { Id = SpanId, ModelId = ModelId }],
             UserMessage = null,
+            TimezoneOffset = TimezoneOffset,
         };
     }
 }
@@ -84,7 +89,8 @@ public record GeneralChatRequest : BaseChatRequest
                 _ => idEncryption.DecryptMessageId(ParentAssistantMessageId)
             },
             Spans = SpanIds.Select(x => new ChatSpanRequest() { Id = (byte)x }).ToArray(),
-            UserMessage = UserMessage
+            UserMessage = UserMessage,
+            TimezoneOffset = TimezoneOffset,
         };
     }
 }

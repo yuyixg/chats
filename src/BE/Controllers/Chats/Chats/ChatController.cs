@@ -256,6 +256,7 @@ public class ChatController(ChatStopService stopService) : ControllerBase
                 GetMessageTree(existingMessages, req.MessageId),
                 systemMessages.Where(x => x.Role == DBChatRole.System && x.SpanId == span.Id || x.SpanId == null).ToArray(),
                 dbUserMessage,
+                new ChatExtraDetails() { TimezoneOffset = req.TimezoneOffset },
                 userBalance,
                 clientInfoTask,
                 channels[index].Writer,
@@ -374,6 +375,7 @@ public class ChatController(ChatStopService stopService) : ControllerBase
         IEnumerable<MessageLiteDto> messageTree,
         MessageLiteDto[] systemMessages,
         Message? dbUserMessage,
+        ChatExtraDetails extraDetails,
         UserBalance userBalance,
         Task<ClientInfo> clientInfoTask,
         ChannelWriter<SseResponseLine> writer,
@@ -397,7 +399,7 @@ public class ChatController(ChatStopService stopService) : ControllerBase
         try
         {
             using ChatService s = chatFactory.CreateConversationService(userModel.Model);
-            await foreach (InternalChatSegment seg in icc.Run(userBalance.Balance, userModel, s.ChatStreamedFEProcessed(messageToSend, cco, cancellationToken)))
+            await foreach (InternalChatSegment seg in icc.Run(userBalance.Balance, userModel, s.ChatStreamedFEProcessed(messageToSend, cco, extraDetails, cancellationToken)))
             {
                 if (seg.TextSegment == string.Empty) continue;
                 await writer.WriteAsync(SseResponseLine.Segment(span.Id, seg.TextSegment), cancellationToken);
