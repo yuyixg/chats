@@ -5,6 +5,7 @@ import ChangeModelAction from './ChangeModelAction';
 import CopyAction from './CopyAction';
 import GenerateInformationAction from './GenerateInformationAction';
 import PaginationAction from './PaginationAction';
+import RegenerateAction from './RegenerateAction';
 
 export interface ResponseMessage {
   id: string;
@@ -42,13 +43,7 @@ const ResponseMessageActions = (props: Props) => {
     onChangeMessage,
     onRegenerate,
   } = props;
-  const {
-    id: messageId,
-    siblingIds,
-    modelId,
-    modelName,
-    modelProviderId,
-  } = message;
+  const { id: messageId, siblingIds, modelId, modelName, parentId } = message;
   const currentMessageIndex = siblingIds.findIndex((x) => x === messageId);
 
   return (
@@ -68,11 +63,17 @@ const ResponseMessageActions = (props: Props) => {
           <div className="visible flex gap-0 items-center">
             <CopyAction text={message.content.text} />
             <GenerateInformationAction message={message} />
+            <RegenerateAction
+              hidden={readonly}
+              onRegenerate={() => {
+                onRegenerate && onRegenerate(parentId!, modelId);
+              }}
+            />
             <ChangeModelAction
               readonly={readonly}
               models={models}
               onChangeModel={(model) => {
-                onRegenerate && onRegenerate(message.parentId!, model.modelId);
+                onRegenerate && onRegenerate(parentId!, model.modelId);
               }}
               showRegenerate={models.length > 0}
               modelName={modelName!}

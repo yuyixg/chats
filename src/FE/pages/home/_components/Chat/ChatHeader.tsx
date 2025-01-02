@@ -76,11 +76,11 @@ const ChatHeader = () => {
   };
 
   const AddBtnRender = () => (
-    <div className="flex items-center rounded-md">
+    <div className="flex items-center rounded-md mx-1">
       {selectedChat.spans.length < MAX_SELECT_MODEL_COUNT && (
         <ChatModelDropdownMenu
           models={models}
-          className="text-base"
+          className="text-sm"
           content={
             <Tips
               trigger={
@@ -108,14 +108,14 @@ const ChatHeader = () => {
       <div className="flex justify-between items-center w-full">
         <div
           className={cn(
-            'flex justify-start ml-24 h-11 items-center overflow-auto',
+            'flex justify-start ml-24 h-12 items-center overflow-auto',
             showChatBar && 'ml-6',
           )}
         >
-          <div className="flex gap-y-1 flex-wrap h-11 items-center overflow-auto">
+          <div className="flex gap-2 flex-wrap h-10 items-center overflow-auto">
             {selectedChat.spans.map((span) => (
               <div
-                className="flex hover:bg-muted p-1 rounded-md"
+                className="flex bg-muted rounded-md"
                 key={'chat-header-' + span.spanId}
               >
                 <ChatModelDropdownMenu
@@ -123,7 +123,6 @@ const ChatHeader = () => {
                   models={models}
                   modelName={span.modelName}
                   className="text-sm"
-                  triggerClassName="hover:bg-transparent"
                   content={span?.modelName}
                   hideIcon={true}
                   onChangeModel={(model) => {
@@ -139,7 +138,7 @@ const ChatHeader = () => {
                           handleRemoveChatModel(span.spanId);
                         }}
                         variant="ghost"
-                        className="p-1 m-0 h-auto hover:bg-transparent"
+                        className="py-1 px-0 pr-1 m-0 h-auto hover:bg-transparent"
                       >
                         <IconX />
                       </Button>

@@ -41,7 +41,12 @@ export const ChatMessage: FC<Props> = memo(
   }) => {
     const hasMultipleSpan = selectedMessages.find((x) => x.length > 1);
     return (
-      <div className={cn('w-4/5 m-auto p-4', !hasMultipleSpan && 'w-3/5')}>
+      <div
+        className={cn(
+          'w-4/5 m-auto p-4',
+          !hasMultipleSpan && 'w-full md:w-3/5',
+        )}
+      >
         {selectedMessages.map((messages, index) => {
           return (
             <div
@@ -49,7 +54,7 @@ export const ChatMessage: FC<Props> = memo(
               className={cn(
                 messages.find((x) => x.role === ChatRole.User)
                   ? 'flex w-full justify-end'
-                  : 'grid grid-cols-[repeat(auto-fit,minmax(375px,1fr))] gap-4',
+                  : 'md:grid md:grid-cols-[repeat(auto-fit,minmax(375px,1fr))] gap-4',
               )}
             >
               {messages.map((message) => {
@@ -89,7 +94,7 @@ export const ChatMessage: FC<Props> = memo(
                         )}
                       >
                         {!hasMultipleSpan && (
-                          <div className="w-9 h-9">
+                          <div className="w-9 h-9 hidden md:block">
                             <IconRobot className="w-7 h-7 mr-1" />
                           </div>
                         )}
