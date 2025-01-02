@@ -5,6 +5,8 @@ import { ChatRole, ChatSpanStatus, IChat, Message } from '@/types/chat';
 import { IChatMessage } from '@/types/chatMessage';
 
 import ChatError from '../ChatError/ChatError';
+import ChatIcon from '../ChatIcon/ChatIcon';
+import { IconRobot } from '../Icons';
 import ResponseMessage from './ResponseMessage';
 import ResponseMessageActions from './ResponseMessageActions';
 import UserMessage from './UserMessage';
@@ -39,7 +41,7 @@ export const ChatMessage: FC<Props> = memo(
   }) => {
     const hasMultipleSpan = selectedMessages.find((x) => x.length > 1);
     return (
-      <div className="w-4/5 m-auto p-4">
+      <div className={cn('w-4/5 m-auto p-4', !hasMultipleSpan && 'w-3/5')}>
         {selectedMessages.map((messages, index) => {
           return (
             <div
@@ -78,17 +80,20 @@ export const ChatMessage: FC<Props> = memo(
                         }
                         key={'response-message-' + message.id}
                         className={cn(
-                          'border-[1px] rounded-md p-4 flex w-full',
+                          'border-[1px] rounded-md flex w-full',
                           hasMultipleSpan &&
                             message.isActive &&
                             'border-primary/50',
+                          hasMultipleSpan && 'p-4',
+                          !hasMultipleSpan && 'border-none',
                         )}
                       >
-                        {/* <ChatIcon
-                      className="w-7 h-7 mr-1"
-                      providerId={message.modelProviderId!}
-                    /> */}
-                        <div className="prose dark:prose-invert rounded-r-md flex-1 overflow-auto text-sm">
+                        {!hasMultipleSpan && (
+                          <div className="w-9 h-9">
+                            <IconRobot className="w-7 h-7 mr-1" />
+                          </div>
+                        )}
+                        <div className="prose dark:prose-invert rounded-r-md flex-1 overflow-auto text-base">
                           <ResponseMessage message={message} />
                           {message.status === ChatSpanStatus.Failed && (
                             <ChatError error={message.content.error} />
