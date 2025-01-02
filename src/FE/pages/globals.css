@@ -113,7 +113,7 @@ html {
 }
 
 .prose {
-  max-width: 100ch !important;
+  max-width: 100% !important;
 }
 
 .prose pre {
