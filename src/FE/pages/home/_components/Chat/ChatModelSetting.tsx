@@ -80,7 +80,7 @@ const ChatModelSetting = () => {
             return (
               <div
                 key={'chat-model-' + span.spanId}
-                className="space-y-4 rounded-lg border border-neutral-200 p-4 dark:border-neutral-600"
+                className="space-y-4 rounded-lg p-4 border"
               >
                 <ChatModelInfo
                   modelId={span.modelId}

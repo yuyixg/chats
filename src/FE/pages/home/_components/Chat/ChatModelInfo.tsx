@@ -44,7 +44,7 @@ const ChatModelInfo = (props: { modelId: number; modelName: string }) => {
 
   return (
     <div className="flex flex-col">
-      <label className="mb-2 text-base text-left text-neutral-700 dark:text-neutral-400 font-semibold">
+      <label className="mb-2 text-left">
         {modelName}
       </label>
       <div className="flex items-center">

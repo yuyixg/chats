@@ -193,7 +193,7 @@ const ConversationComponent = ({ chat }: Props) => {
             >
               <IconDots className="hover:opacity-50" size={16} />
             </DropdownMenuTrigger>
-            <DropdownMenuContent className="w-42">
+            <DropdownMenuContent className="w-42 border-none">
               <DropdownMenuItem
                 className="flex justify-start gap-3"
                 onClick={handleOpenChangeTitleModal}
