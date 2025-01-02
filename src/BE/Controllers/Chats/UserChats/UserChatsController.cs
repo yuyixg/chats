@@ -35,6 +35,7 @@ public class UserChatsController(ChatsDB db, CurrentUser currentUser, IUrlEncryp
                     EnableSearch = s.EnableSearch,
                 }).ToArray(),
                 LeafMessageId = x.LeafMessageId != null ? idEncryption.EncryptMessageId(x.LeafMessageId.Value) : null,
+                CreatedAt = x.CreatedAt,
             })
             .FirstOrDefaultAsync(cancellationToken);
 
@@ -73,6 +74,7 @@ public class UserChatsController(ChatsDB db, CurrentUser currentUser, IUrlEncryp
                     EnableSearch = s.EnableSearch,
                 }).ToArray(),
                 LeafMessageId = x.LeafMessageId != null ? idEncryption.EncryptMessageId(x.LeafMessageId.Value) : null,
+                CreatedAt = x.CreatedAt,
             }),
             request,
             cancellationToken);
@@ -145,6 +147,7 @@ public class UserChatsController(ChatsDB db, CurrentUser currentUser, IUrlEncryp
                 EnableSearch = s.EnableSearch,
             }).ToArray(),
             LeafMessageId = chat.LeafMessageId != null ? idEncryption.EncryptMessageId(chat.LeafMessageId.Value) : null,
+            CreatedAt = chat.CreatedAt,
         });
     }
 
