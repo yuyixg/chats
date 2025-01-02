@@ -13,15 +13,9 @@ export interface PromptbarContextProps {
   handleUpdatePrompt: (prompt: Prompt) => void;
 }
 
-export interface PromptbarInitialState {
-  searchTerm: string;
-  filteredPrompts: PromptSlim[];
-}
+export interface PromptbarInitialState {}
 
-export const initialState: PromptbarInitialState = {
-  searchTerm: '',
-  filteredPrompts: [],
-};
+export const initialState: PromptbarInitialState = {};
 
 const PromptbarContext = createContext<PromptbarContextProps>(undefined!);
 

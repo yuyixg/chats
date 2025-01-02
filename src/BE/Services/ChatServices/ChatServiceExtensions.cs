@@ -7,9 +7,9 @@ namespace Chats.BE.Services.ChatServices;
 
 public abstract partial class ChatService
 {
-    public async IAsyncEnumerable<InternalChatSegment> ChatStreamedFEProcessed(IReadOnlyList<ChatMessage> messages, ChatCompletionOptions options, [EnumeratorCancellation] CancellationToken cancellationToken)
+    public async IAsyncEnumerable<InternalChatSegment> ChatStreamedFEProcessed(IReadOnlyList<ChatMessage> messages, ChatCompletionOptions options, ChatExtraDetails feOptions, [EnumeratorCancellation] CancellationToken cancellationToken)
     {
-        ChatMessage[] filteredMessage = FEPreprocess(messages, options);
+        ChatMessage[] filteredMessage = FEPreprocess(messages, options, feOptions);
 
         await foreach (InternalChatSegment seg in ChatStreamedSimulated(suggestedStreaming: true, filteredMessage, options, cancellationToken))
         {
@@ -48,20 +48,25 @@ public abstract partial class ChatService
         }
     }
 
-    protected virtual ChatMessage[] FEPreprocess(IReadOnlyList<ChatMessage> messages, ChatCompletionOptions options)
+    protected virtual ChatMessage[] FEPreprocess(IReadOnlyList<ChatMessage> messages, ChatCompletionOptions options, ChatExtraDetails feOptions)
     {
         if (!Model.ModelReference.AllowSystemPrompt)
         {
-            string systemPrompt = string.Join("\n", messages.OfType<SystemChatMessage>().Select(x => string.Join("\n", x.Content.Where(v => v.Kind == ChatMessageContentPartKind.Text).Select(x => x.Text))));
-            UserChatMessage? firstUserMessage = messages.OfType<UserChatMessage>().FirstOrDefault();
-            if (firstUserMessage != null)
+            // Remove system prompt
+            messages = messages.Where(m => m is not SystemChatMessage).ToArray();
+        }
+        else
+        {
+            // system message transform
+            SystemChatMessage? existingSystemPrompt = messages.OfType<SystemChatMessage>().FirstOrDefault();
+            DateTime now = feOptions.Now;
+            if (existingSystemPrompt is not null)
             {
-                firstUserMessage.Content.Insert(0, ChatMessageContentPart.CreateTextPart(systemPrompt + "\n\n"));
-                messages = messages.Where(x => x is not SystemChatMessage).ToArray();
-            }
-            else
-            {
-                messages = [new UserChatMessage([ChatMessageContentPart.CreateTextPart(systemPrompt)]), .. messages.Where(x => x is not SystemChatMessage)];
+                existingSystemPrompt.Content[0] = existingSystemPrompt.Content[0].Text
+                    .Replace("{{CURRENT_DATE}}", now.ToString("yyyy/MM/dd"))
+                    .Replace("{{MODEL_NAME}}", Model.ModelReference.ShortName ?? Model.ModelReference.Name)
+                    .Replace("{{CURRENT_TIME}}", now.ToString("HH:mm:ss"));
+                ;
             }
         }
 

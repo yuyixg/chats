@@ -12,7 +12,6 @@ interface Props {
   onUploading?: () => void;
   onFailed?: (reason: string | null) => void;
   children?: React.ReactNode;
-  fileServiceId: number;
   fileConfig: ChatModelFileConfig;
   maxFileSize?: number;
 }
@@ -22,7 +21,6 @@ const UploadButton: React.FunctionComponent<Props> = ({
   onUploading,
   onFailed,
   fileConfig,
-  fileServiceId,
   children,
 }: Props) => {
   const uploadRef = useRef<HTMLInputElement>(null);
@@ -36,7 +34,7 @@ const UploadButton: React.FunctionComponent<Props> = ({
 
     try {
       if (file) {
-        uploadFile(file, fileServiceId, onUploading, onSuccessful, onFailed);
+        uploadFile(file, onUploading, onSuccessful, onFailed);
       }
     } catch (error) {
       console.error(error);
@@ -50,7 +48,7 @@ const UploadButton: React.FunctionComponent<Props> = ({
     return () => {
       fileInput.removeEventListener('change', changeFile);
     };
-  }, [fileServiceId]);
+  }, []);
 
   return (
     <div>

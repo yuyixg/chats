@@ -1,4 +1,4 @@
-import { DBModelProvider, UserModelConfig } from './model';
+import { DBModelProvider } from './model';
 import { Paging } from './page';
 import { LoginType } from './user';
 
@@ -62,11 +62,19 @@ export interface GetChatsParams extends Paging {
 export interface ChatResult {
   id: string;
   title: string;
+  isShared: boolean;
+  spans: ChatSpanDto[];
+  leafMessageId?: string;
+}
+
+export interface ChatSpanDto {
+  spanId: number;
   modelId: number;
   modelName: string;
-  isShared: boolean;
-  userModelConfig: UserModelConfig;
+  prompt: string;
   modelProviderId: DBModelProvider;
+  temperature: number | null;
+  enableSearch: boolean;
 }
 
 export interface PostChatParams {
@@ -77,6 +85,8 @@ export interface PostChatParams {
 export interface PutChatParams {
   title?: string;
   isShared?: boolean;
+  setsLeafMessageId?: boolean;
+  leafMessageId?: string;
 }
 
 export interface PostUserPassword {
@@ -102,4 +112,20 @@ export interface GetUserApiKeyResult {
   updatedAt: string;
   lastUsedAt: string;
   modelCount: number;
+}
+
+export interface PostUserChatSpanParams {
+  modelId?: number;
+  setTemperature?: boolean;
+  temperature?: number | null;
+  enableSearch?: boolean;
+}
+
+export interface PostUserChatSpanResult {
+  spanId: number;
+  modelId: number;
+  modelName: string;
+  modelProviderId: number;
+  temperature: number;
+  enableSearch: boolean;
 }

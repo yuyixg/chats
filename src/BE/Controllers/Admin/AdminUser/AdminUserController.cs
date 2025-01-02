@@ -19,14 +19,14 @@ public class AdminUserController(ChatsDB db, CurrentUser adminUser) : Controller
             .OrderByDescending(x => x.UpdatedAt);
         if (!string.IsNullOrEmpty(pagingRequest.Query))
         {
-            query = query.Where(x => x.Account == pagingRequest.Query);
+            query = query.Where(x => x.UserName == pagingRequest.Query);
         }
 
         return await PagedResult.FromTempQuery(query.Select(x => new AdminUserDtoTemp()
         {
             Id = x.Id,
-            Username = x.Username,
-            Account = x.Account,
+            Username = x.DisplayName,
+            Account = x.UserName,
             Balance = x.UserBalance!.Balance.ToString(),
             Role = x.Role,
             Avatar = x.Avatar,
@@ -61,7 +61,7 @@ public class AdminUserController(ChatsDB db, CurrentUser adminUser) : Controller
     [HttpPost]
     public async Task<IActionResult> CreateUser([FromBody] CreateUserDto dto, [FromServices] PasswordHasher passwordHasher, [FromServices] UserManager userManager, CancellationToken cancellationToken)
     {
-        User? existingUser = await db.Users.FirstOrDefaultAsync(x => x.Account == dto.UserName, cancellationToken);
+        User? existingUser = await db.Users.FirstOrDefaultAsync(x => x.UserName == dto.UserName, cancellationToken);
         if (existingUser != null)
         {
             return BadRequest("User existed");
@@ -69,15 +69,15 @@ public class AdminUserController(ChatsDB db, CurrentUser adminUser) : Controller
 
         User user = new()
         {
-            Account = dto.UserName,
-            Username = dto.UserName,
+            UserName = dto.UserName,
+            DisplayName = dto.UserName,
             Email = dto.Email,
             Phone = dto.Phone,
             Role = dto.Role,
             Avatar = dto.Avatar,
             Enabled = dto.Enabled ?? false,
             Provider = null,
-            Password = passwordHasher.HashPassword(dto.Password),
+            PasswordHash = passwordHasher.HashPassword(dto.Password),
             CreatedAt = DateTime.UtcNow,
             UpdatedAt = DateTime.UtcNow,
         };

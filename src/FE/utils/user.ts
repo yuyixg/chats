@@ -29,11 +29,11 @@ export const getLoginUrl = () => {
   return '/login';
 };
 
-export const redirectToLogin = () => {
+export const redirectToLoginPage = () => {
   location.href = getLoginUrl();
 };
 
-export const redirectToHome = (ms?: number) => {
+export const redirectToHomePage = (ms?: number) => {
   const toHome = () => {
     location.href = '/';
   };

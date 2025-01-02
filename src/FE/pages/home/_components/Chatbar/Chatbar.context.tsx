@@ -2,6 +2,7 @@ import { Dispatch, createContext } from 'react';
 
 import { ActionType } from '@/hooks/useCreateReducer';
 
+import { IChat } from '@/types/chat';
 import { ChatResult } from '@/types/clientApis';
 
 export interface ChatbarContextProps {
@@ -11,7 +12,7 @@ export interface ChatbarContextProps {
 }
 export interface ChatbarInitialState {
   searchTerm: string;
-  filteredChats: ChatResult[];
+  filteredChats: IChat[];
 }
 
 export const initialState: ChatbarInitialState = {

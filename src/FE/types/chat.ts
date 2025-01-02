@@ -1,16 +1,27 @@
-import { DBModelProvider, UserModelConfig } from './model';
+import { ChatSpanDto } from './clientApis';
 
 export type Role = 'assistant' | 'user' | 'system';
+export enum ChatRole {
+  'System' = 1,
+  'User' = 2,
+  'Assistant' = 3,
+}
 export const DEFAULT_TEMPERATURE = 0.5;
+
+export enum ChatSpanStatus {
+  None = 1,
+  Chatting = 2,
+  Failed = 3,
+}
 
 export enum ChatStatus {
   None = 1,
-  Running = 2,
+  Chatting = 2,
   Failed = 3,
 }
 
 export interface Message {
-  role: Role;
+  role: ChatRole;
   content: Content;
 }
 
@@ -39,18 +50,10 @@ export interface ChatBody {
 }
 
 export interface IChat {
-  // id: string;
-  // title: string;
-  // chatModelId?: string;
-  // modelName: string;
-  // userModelConfig: UserModelConfig;
-  // isShared: boolean;
-
   id: string;
   title: string;
-  modelId: number;
-  modelName: string;
   isShared: boolean;
-  userModelConfig: UserModelConfig;
-  modelProviderId: DBModelProvider;
+  status: ChatStatus;
+  spans: ChatSpanDto[];
+  leafMessageId?: string;
 }

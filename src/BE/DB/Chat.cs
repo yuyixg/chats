@@ -7,8 +7,8 @@ using Microsoft.EntityFrameworkCore;
 namespace Chats.BE.DB;
 
 [Table("Chat")]
+[Index("CreatedAt", Name = "IX_Chat_CreateAt")]
 [Index("UserId", Name = "IX_Chat_UserId")]
-[Index("ModelId", Name = "IX_Conversation2_Model")]
 public partial class Chat
 {
     [Key]
@@ -17,26 +17,25 @@ public partial class Chat
     [StringLength(50)]
     public string Title { get; set; } = null!;
 
-    public short ModelId { get; set; }
-
-    public float? Temperature { get; set; }
-
-    public bool? EnableSearch { get; set; }
-
     public bool IsShared { get; set; }
 
     public bool IsDeleted { get; set; }
+
+    public long? LeafMessageId { get; set; }
 
     public DateTime CreatedAt { get; set; }
 
     public int UserId { get; set; }
 
     [InverseProperty("Chat")]
-    public virtual ICollection<Message> Messages { get; set; } = new List<Message>();
+    public virtual ICollection<ChatSpan> ChatSpans { get; set; } = new List<ChatSpan>();
 
-    [ForeignKey("ModelId")]
+    [ForeignKey("LeafMessageId")]
     [InverseProperty("Chats")]
-    public virtual Model Model { get; set; } = null!;
+    public virtual Message? LeafMessage { get; set; }
+
+    [InverseProperty("Chat")]
+    public virtual ICollection<Message> Messages { get; set; } = new List<Message>();
 
     [ForeignKey("UserId")]
     [InverseProperty("Chats")]

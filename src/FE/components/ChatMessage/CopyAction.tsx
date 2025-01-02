@@ -38,12 +38,14 @@ const CopyAction = (props: Props) => {
           </Button>
         ) : (
           <Tips
-            className="h-[28px]"
             trigger={
               <Button
                 variant="ghost"
-                className={cn('p-1 m-0 h-auto', triggerClassName)}
-                onClick={() => copyOnClick(text)}
+                className={cn('p-1 m-0 h-7 w-7', triggerClassName)}
+                onClick={(e) => {
+                  copyOnClick(text);
+                  e.stopPropagation();
+                }}
               >
                 <IconCopy />
               </Button>

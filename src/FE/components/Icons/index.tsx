@@ -1,6 +1,6 @@
 interface IconProps {
   className?: string;
-  size?: number;
+  size?: number | string;
   strokeWidth?: number;
   stroke?: string;
   onClick?: (e: React.MouseEvent<SVGSVGElement, MouseEvent>) => void;
@@ -11,7 +11,7 @@ const IconX = (props: IconProps) => {
   const {
     className,
     size = 20,
-    strokeWidth = 2,
+    strokeWidth = 1.6,
     stroke,
     style,
     onClick,
@@ -40,7 +40,7 @@ const IconX = (props: IconProps) => {
 };
 
 const IconShare = (props: IconProps) => {
-  const { className, size = 20, strokeWidth = 2, stroke, onClick } = props;
+  const { className, size = 20, strokeWidth = 1.6, stroke, onClick } = props;
 
   return (
     <svg
@@ -67,7 +67,7 @@ const IconShare = (props: IconProps) => {
 };
 
 const IconCheck = (props: IconProps) => {
-  const { className, size = 20, strokeWidth = 2, stroke, onClick } = props;
+  const { className, size = 20, strokeWidth = 1.6, stroke, onClick } = props;
 
   return (
     <svg
@@ -90,7 +90,7 @@ const IconCheck = (props: IconProps) => {
 };
 
 const IconCopy = (props: IconProps) => {
-  const { className, size = 20, strokeWidth = 2, stroke, onClick } = props;
+  const { className, size = 20, strokeWidth = 1.6, stroke, onClick } = props;
 
   return (
     <svg
@@ -114,7 +114,7 @@ const IconCopy = (props: IconProps) => {
 };
 
 const IconRobot = (props: IconProps) => {
-  const { className, size = 20, strokeWidth = 2, stroke, onClick } = props;
+  const { className, size = 20, strokeWidth = 1.6, stroke, onClick } = props;
 
   return (
     <svg
@@ -145,7 +145,7 @@ const IconRobot = (props: IconProps) => {
 };
 
 const IconUser = (props: IconProps) => {
-  const { className, size = 20, strokeWidth = 2, stroke, onClick } = props;
+  const { className, size = 20, strokeWidth = 1.6, stroke, onClick } = props;
 
   return (
     <svg
@@ -169,7 +169,7 @@ const IconUser = (props: IconProps) => {
 };
 
 const IconUserCog = (props: IconProps) => {
-  const { className, size = 20, strokeWidth = 2, stroke, onClick } = props;
+  const { className, size = 20, strokeWidth = 1.6, stroke, onClick } = props;
 
   return (
     <svg
@@ -200,7 +200,7 @@ const IconUserCog = (props: IconProps) => {
 };
 
 const IconUsers = (props: IconProps) => {
-  const { className, size = 20, strokeWidth = 2, stroke, onClick } = props;
+  const { className, size = 20, strokeWidth = 1.6, stroke, onClick } = props;
 
   return (
     <svg
@@ -226,7 +226,7 @@ const IconUsers = (props: IconProps) => {
 };
 
 const IconArrowDown = (props: IconProps) => {
-  const { className, size = 20, strokeWidth = 2, stroke, onClick } = props;
+  const { className, size = 20, strokeWidth = 1.6, stroke, onClick } = props;
 
   return (
     <svg
@@ -251,7 +251,7 @@ const IconArrowDown = (props: IconProps) => {
 };
 
 const IconCircleX = (props: IconProps) => {
-  const { className, size = 20, strokeWidth = 2, stroke, onClick } = props;
+  const { className, size = 20, strokeWidth = 1.6, stroke, onClick } = props;
 
   return (
     <svg
@@ -275,7 +275,7 @@ const IconCircleX = (props: IconProps) => {
 };
 
 const IconSend = (props: IconProps) => {
-  const { className, size = 20, strokeWidth = 2, stroke, onClick } = props;
+  const { className, size = 20, strokeWidth = 1.6, stroke, onClick } = props;
 
   return (
     <svg
@@ -299,7 +299,7 @@ const IconSend = (props: IconProps) => {
 };
 
 const IconPaperclip = (props: IconProps) => {
-  const { className, size = 20, strokeWidth = 2, stroke, onClick } = props;
+  const { className, size = 20, strokeWidth = 1.6, stroke, onClick } = props;
 
   return (
     <svg
@@ -322,7 +322,7 @@ const IconPaperclip = (props: IconProps) => {
 };
 
 const IconEdit = (props: IconProps) => {
-  const { className, size = 20, strokeWidth = 2, stroke, onClick } = props;
+  const { className, size = 20, strokeWidth = 1.6, stroke, onClick } = props;
 
   return (
     <svg
@@ -346,7 +346,7 @@ const IconEdit = (props: IconProps) => {
 };
 
 const IconTrash = (props: IconProps) => {
-  const { className, size = 20, strokeWidth = 2, stroke, onClick } = props;
+  const { className, size = 20, strokeWidth = 1.6, stroke, onClick } = props;
 
   return (
     <svg
@@ -372,7 +372,7 @@ const IconTrash = (props: IconProps) => {
   );
 };
 const IconLogout = (props: IconProps) => {
-  const { className, size = 20, strokeWidth = 2, stroke, onClick } = props;
+  const { className, size = 20, strokeWidth = 1.6, stroke, onClick } = props;
 
   return (
     <svg
@@ -396,7 +396,7 @@ const IconLogout = (props: IconProps) => {
   );
 };
 const IconMoneybag = (props: IconProps) => {
-  const { className, size = 20, strokeWidth = 2, stroke, onClick } = props;
+  const { className, size = 20, strokeWidth = 1.6, stroke, onClick } = props;
 
   return (
     <svg
@@ -419,7 +419,7 @@ const IconMoneybag = (props: IconProps) => {
   );
 };
 const IconPasswordUser = (props: IconProps) => {
-  const { className, size = 20, strokeWidth = 2, stroke, onClick } = props;
+  const { className, size = 20, strokeWidth = 1.6, stroke, onClick } = props;
 
   return (
     <svg
@@ -451,7 +451,7 @@ const IconPasswordUser = (props: IconProps) => {
   );
 };
 const IconSettings = (props: IconProps) => {
-  const { className, size = 20, strokeWidth = 2, stroke, onClick } = props;
+  const { className, size = 20, strokeWidth = 1.6, stroke, onClick } = props;
 
   return (
     <svg
@@ -474,7 +474,7 @@ const IconSettings = (props: IconProps) => {
   );
 };
 const IconMessage = (props: IconProps) => {
-  const { className, size = 20, strokeWidth = 2, stroke, onClick } = props;
+  const { className, size = 20, strokeWidth = 1.6, stroke, onClick } = props;
 
   return (
     <svg
@@ -498,7 +498,7 @@ const IconMessage = (props: IconProps) => {
   );
 };
 const IconMessageShare = (props: IconProps) => {
-  const { className, size = 20, strokeWidth = 2, stroke, onClick } = props;
+  const { className, size = 20, strokeWidth = 1.6, stroke, onClick } = props;
 
   return (
     <svg
@@ -524,7 +524,7 @@ const IconMessageShare = (props: IconProps) => {
   );
 };
 const IconPencil = (props: IconProps) => {
-  const { className, size = 20, strokeWidth = 2, stroke, onClick } = props;
+  const { className, size = 20, strokeWidth = 1.6, stroke, onClick } = props;
 
   return (
     <svg
@@ -547,7 +547,7 @@ const IconPencil = (props: IconProps) => {
   );
 };
 const IconClipboard = (props: IconProps) => {
-  const { className, size = 20, strokeWidth = 2, stroke, onClick } = props;
+  const { className, size = 20, strokeWidth = 1.6, stroke, onClick } = props;
 
   return (
     <svg
@@ -571,7 +571,7 @@ const IconClipboard = (props: IconProps) => {
 };
 
 const IconBulbFilled = (props: IconProps) => {
-  const { className, size = 20, strokeWidth = 2, stroke, onClick } = props;
+  const { className, size = 20, strokeWidth = 1.6, stroke, onClick } = props;
 
   return (
     <svg
@@ -629,7 +629,7 @@ const IconBulbFilled = (props: IconProps) => {
 };
 
 const IconSearch = (props: IconProps) => {
-  const { className, size = 20, strokeWidth = 2, stroke, onClick } = props;
+  const { className, size = 20, strokeWidth = 1.6, stroke, onClick } = props;
 
   return (
     <svg
@@ -651,7 +651,7 @@ const IconSearch = (props: IconProps) => {
   );
 };
 const IconPlus = (props: IconProps) => {
-  const { className, size = 20, strokeWidth = 2, stroke, onClick } = props;
+  const { className, size = 20, strokeWidth = 1.6, stroke, onClick } = props;
 
   return (
     <svg
@@ -674,7 +674,7 @@ const IconPlus = (props: IconProps) => {
   );
 };
 const IconSquareRoundedX = (props: IconProps) => {
-  const { className, size = 20, strokeWidth = 2, stroke, onClick } = props;
+  const { className, size = 20, strokeWidth = 1.6, stroke, onClick } = props;
 
   return (
     <svg
@@ -697,7 +697,7 @@ const IconSquareRoundedX = (props: IconProps) => {
   );
 };
 const IconChartPie = (props: IconProps) => {
-  const { className, size = 20, strokeWidth = 2, stroke, onClick } = props;
+  const { className, size = 20, strokeWidth = 1.6, stroke, onClick } = props;
 
   return (
     <svg
@@ -720,7 +720,7 @@ const IconChartPie = (props: IconProps) => {
   );
 };
 const IconCreditCard = (props: IconProps) => {
-  const { className, size = 20, strokeWidth = 2, stroke, onClick } = props;
+  const { className, size = 20, strokeWidth = 1.6, stroke, onClick } = props;
 
   return (
     <svg
@@ -745,7 +745,7 @@ const IconCreditCard = (props: IconProps) => {
   );
 };
 const IconFiles = (props: IconProps) => {
-  const { className, size = 20, strokeWidth = 2, stroke, onClick } = props;
+  const { className, size = 20, strokeWidth = 1.6, stroke, onClick } = props;
 
   return (
     <svg
@@ -769,7 +769,7 @@ const IconFiles = (props: IconProps) => {
   );
 };
 const IconKey = (props: IconProps) => {
-  const { className, size = 20, strokeWidth = 2, stroke, onClick } = props;
+  const { className, size = 20, strokeWidth = 1.6, stroke, onClick } = props;
 
   return (
     <svg
@@ -792,7 +792,7 @@ const IconKey = (props: IconProps) => {
   );
 };
 const IconMessages = (props: IconProps) => {
-  const { className, size = 20, strokeWidth = 2, stroke, onClick } = props;
+  const { className, size = 20, strokeWidth = 1.6, stroke, onClick } = props;
 
   return (
     <svg
@@ -815,7 +815,7 @@ const IconMessages = (props: IconProps) => {
   );
 };
 const IconNotes = (props: IconProps) => {
-  const { className, size = 20, strokeWidth = 2, stroke, onClick } = props;
+  const { className, size = 20, strokeWidth = 1.6, stroke, onClick } = props;
 
   return (
     <svg
@@ -840,7 +840,7 @@ const IconNotes = (props: IconProps) => {
   );
 };
 const IconSettingsCog = (props: IconProps) => {
-  const { className, size = 20, strokeWidth = 2, stroke, onClick } = props;
+  const { className, size = 20, strokeWidth = 1.6, stroke, onClick } = props;
 
   return (
     <svg
@@ -870,7 +870,7 @@ const IconSettingsCog = (props: IconProps) => {
   );
 };
 const IconDots = (props: IconProps) => {
-  const { className, size = 20, strokeWidth = 2, stroke, onClick } = props;
+  const { className, size = 20, strokeWidth = 1.6, stroke, onClick } = props;
 
   return (
     <svg
@@ -895,7 +895,7 @@ const IconDots = (props: IconProps) => {
 };
 
 var IconShieldLock = (props: IconProps) => {
-  const { className, size = 20, strokeWidth = 2, stroke, onClick } = props;
+  const { className, size = 20, strokeWidth = 1.6, stroke, onClick } = props;
 
   return (
     <svg
@@ -920,7 +920,7 @@ var IconShieldLock = (props: IconProps) => {
 };
 
 var IconRefresh = (props: IconProps) => {
-  const { className, size = 20, strokeWidth = 2, stroke, onClick } = props;
+  const { className, size = 20, strokeWidth = 1.6, stroke, onClick } = props;
 
   return (
     <svg
@@ -944,7 +944,7 @@ var IconRefresh = (props: IconProps) => {
 };
 
 var IconStopFilled = (props: IconProps) => {
-  const { className, size = 20, strokeWidth = 2, stroke, onClick } = props;
+  const { className, size = 20, strokeWidth = 1.6, stroke, onClick } = props;
 
   return (
     <svg
@@ -971,7 +971,7 @@ var IconStopFilled = (props: IconProps) => {
 };
 
 var IconChevronLeft = (props: IconProps) => {
-  const { className, size = 20, strokeWidth = 2, stroke, onClick } = props;
+  const { className, size = 20, strokeWidth = 1.6, stroke, onClick } = props;
 
   return (
     <svg
@@ -994,7 +994,7 @@ var IconChevronLeft = (props: IconProps) => {
 };
 
 var IconChevronRight = (props: IconProps) => {
-  const { className, size = 20, strokeWidth = 2, stroke, onClick } = props;
+  const { className, size = 20, strokeWidth = 1.6, stroke, onClick } = props;
 
   return (
     <svg
@@ -1017,7 +1017,7 @@ var IconChevronRight = (props: IconProps) => {
 };
 
 var IconChevronDown = (props: IconProps) => {
-  const { className, size = 20, strokeWidth = 2, stroke, onClick } = props;
+  const { className, size = 20, strokeWidth = 1.6, stroke, onClick } = props;
 
   return (
     <svg
@@ -1040,7 +1040,7 @@ var IconChevronDown = (props: IconProps) => {
 };
 
 var IconError = (props: IconProps) => {
-  const { className, size = 20, strokeWidth = 2, stroke, onClick } = props;
+  const { className, size = 20, strokeWidth = 1.6, stroke, onClick } = props;
 
   return (
     <svg
@@ -1065,7 +1065,7 @@ var IconError = (props: IconProps) => {
 };
 
 var IconSquarePlus = (props: IconProps) => {
-  const { className, size = 20, strokeWidth = 2, stroke, onClick } = props;
+  const { className, size = 20, strokeWidth = 1.6, stroke, onClick } = props;
 
   return (
     <svg
@@ -1090,7 +1090,7 @@ var IconSquarePlus = (props: IconProps) => {
 };
 
 var IconMessageCirclePlus = (props: IconProps) => {
-  const { className, size = 20, strokeWidth = 2, stroke, onClick } = props;
+  const { className, size = 20, strokeWidth = 1.6, stroke, onClick } = props;
 
   return (
     <svg
@@ -1114,108 +1114,8 @@ var IconMessageCirclePlus = (props: IconProps) => {
   );
 };
 
-var IconLayoutSidebarRightExpand = (props: IconProps) => {
-  const { className, size = 20, strokeWidth = 2, stroke, onClick } = props;
-
-  return (
-    <svg
-      xmlns="http://www.w3.org/2000/svg"
-      onClick={onClick}
-      className={className}
-      width={size}
-      height={size}
-      strokeWidth={strokeWidth}
-      stroke={stroke || 'hsl(var(--foreground))'}
-      viewBox="0 0 24 24"
-      fill="none"
-      strokeLinecap="round"
-      strokeLinejoin="round"
-    >
-      <path stroke="none" d="M0 0h24v24H0z" fill="none" />
-      <path d="M4 4m0 2a2 2 0 0 1 2 -2h12a2 2 0 0 1 2 2v12a2 2 0 0 1 -2 2h-12a2 2 0 0 1 -2 -2z" />
-      <path d="M15 4v16" />
-      <path d="M10 10l-2 2l2 2" />
-    </svg>
-  );
-};
-
-var IconLayoutSidebarLeftExpand = (props: IconProps) => {
-  const { className, size = 20, strokeWidth = 2, stroke, onClick } = props;
-
-  return (
-    <svg
-      xmlns="http://www.w3.org/2000/svg"
-      onClick={onClick}
-      className={className}
-      width={size}
-      height={size}
-      strokeWidth={strokeWidth}
-      stroke={stroke || 'hsl(var(--foreground))'}
-      viewBox="0 0 24 24"
-      fill="none"
-      strokeLinecap="round"
-      strokeLinejoin="round"
-    >
-      <path stroke="none" d="M0 0h24v24H0z" fill="none" />
-      <path d="M4 4m0 2a2 2 0 0 1 2 -2h12a2 2 0 0 1 2 2v12a2 2 0 0 1 -2 2h-12a2 2 0 0 1 -2 -2z" />
-      <path d="M9 4v16" />
-      <path d="M14 10l2 2l-2 2" />
-    </svg>
-  );
-};
-
-var IconLayoutSidebarRightCollapse = (props: IconProps) => {
-  const { className, size = 20, strokeWidth = 2, stroke, onClick } = props;
-
-  return (
-    <svg
-      xmlns="http://www.w3.org/2000/svg"
-      onClick={onClick}
-      className={className}
-      width={size}
-      height={size}
-      strokeWidth={strokeWidth}
-      stroke={stroke || 'hsl(var(--foreground))'}
-      viewBox="0 0 24 24"
-      fill="none"
-      strokeLinecap="round"
-      strokeLinejoin="round"
-    >
-      <path stroke="none" d="M0 0h24v24H0z" fill="none" />
-      <path d="M4 4m0 2a2 2 0 0 1 2 -2h12a2 2 0 0 1 2 2v12a2 2 0 0 1 -2 2h-12a2 2 0 0 1 -2 -2z" />
-      <path d="M15 4v16" />
-      <path d="M9 10l2 2l-2 2" />
-    </svg>
-  );
-};
-
-var IconLayoutSidebarLeftCollapse = (props: IconProps) => {
-  const { className, size = 20, strokeWidth = 2, stroke, onClick } = props;
-
-  return (
-    <svg
-      xmlns="http://www.w3.org/2000/svg"
-      onClick={onClick}
-      className={className}
-      width={size}
-      height={size}
-      strokeWidth={strokeWidth}
-      stroke={stroke || 'hsl(var(--foreground))'}
-      viewBox="0 0 24 24"
-      fill="none"
-      strokeLinecap="round"
-      strokeLinejoin="round"
-    >
-      <path stroke="none" d="M0 0h24v24H0z" fill="none" />
-      <path d="M4 4m0 2a2 2 0 0 1 2 -2h12a2 2 0 0 1 2 2v12a2 2 0 0 1 -2 2h-12a2 2 0 0 1 -2 -2z" />
-      <path d="M9 4v16" />
-      <path d="M15 10l-2 2l2 2" />
-    </svg>
-  );
-};
-
 var IconLayoutSidebar = (props: IconProps) => {
-  const { className, size = 20, strokeWidth = 2, stroke, onClick } = props;
+  const { className, size = 20, strokeWidth = 1.5, stroke, onClick } = props;
 
   return (
     <svg
@@ -1239,7 +1139,7 @@ var IconLayoutSidebar = (props: IconProps) => {
 };
 
 var IconLayoutSidebarRight = (props: IconProps) => {
-  const { className, size = 20, strokeWidth = 2, stroke, onClick } = props;
+  const { className, size = 20, strokeWidth = 1.6, stroke, onClick } = props;
 
   return (
     <svg
@@ -1263,7 +1163,7 @@ var IconLayoutSidebarRight = (props: IconProps) => {
 };
 
 var IconIdBadge = (props: IconProps) => {
-  const { className, size = 20, strokeWidth = 2, stroke, onClick } = props;
+  const { className, size = 20, strokeWidth = 1.6, stroke, onClick } = props;
 
   return (
     <svg
@@ -1290,7 +1190,7 @@ var IconIdBadge = (props: IconProps) => {
 };
 
 var IconAddress = (props: IconProps) => {
-  const { className, size = 20, strokeWidth = 2, stroke, onClick } = props;
+  const { className, size = 20, strokeWidth = 1.6, stroke, onClick } = props;
 
   return (
     <svg
@@ -1318,7 +1218,7 @@ var IconAddress = (props: IconProps) => {
 };
 
 var IconInfo = (props: IconProps) => {
-  const { className, size = 20, strokeWidth = 2, stroke, onClick } = props;
+  const { className, size = 20, strokeWidth = 1.6, stroke, onClick } = props;
 
   return (
     <svg
@@ -1343,7 +1243,7 @@ var IconInfo = (props: IconProps) => {
 };
 
 var IconEyeOff = (props: IconProps) => {
-  const { className, size = 20, strokeWidth = 2, stroke, onClick } = props;
+  const { className, size = 20, strokeWidth = 1.6, stroke, onClick } = props;
 
   return (
     <svg
@@ -1368,7 +1268,7 @@ var IconEyeOff = (props: IconProps) => {
 };
 
 var IconEye = (props: IconProps) => {
-  const { className, size = 20, strokeWidth = 2, stroke, onClick } = props;
+  const { className, size = 20, strokeWidth = 1.6, stroke, onClick } = props;
 
   return (
     <svg
@@ -1392,7 +1292,7 @@ var IconEye = (props: IconProps) => {
 };
 
 var IconSun = (props: IconProps) => {
-  const { className, size = 20, strokeWidth = 2, stroke, onClick } = props;
+  const { className, size = 20, strokeWidth = 1.6, stroke, onClick } = props;
 
   return (
     <svg
@@ -1423,7 +1323,7 @@ var IconSun = (props: IconProps) => {
 };
 
 var IconMoon = (props: IconProps) => {
-  const { className, size = 20, strokeWidth = 2, stroke, onClick } = props;
+  const { className, size = 20, strokeWidth = 1.6, stroke, onClick } = props;
 
   return (
     <svg
@@ -1446,7 +1346,7 @@ var IconMoon = (props: IconProps) => {
 };
 
 var IconLoader = (props: IconProps) => {
-  const { className, size = 20, strokeWidth = 2, stroke, onClick } = props;
+  const { className, size = 20, strokeWidth = 1.6, stroke, onClick } = props;
 
   return (
     <svg
@@ -1468,7 +1368,7 @@ var IconLoader = (props: IconProps) => {
 };
 
 var IconModelSearch = (props: IconProps) => {
-  const { className, size = 20, strokeWidth = 2, stroke, onClick } = props;
+  const { className, size = 20, strokeWidth = 1.6, stroke, onClick } = props;
 
   return (
     <svg
@@ -1491,8 +1391,31 @@ var IconModelSearch = (props: IconProps) => {
     </svg>
   );
 };
+
+var IconMinus = (props: IconProps) => {
+  const { className, size = 20, strokeWidth = 1.6, stroke, onClick } = props;
+
+  return (
+    <svg
+      xmlns="http://www.w3.org/2000/svg"
+      onClick={onClick}
+      className={className}
+      width={size}
+      height={size}
+      strokeWidth={strokeWidth}
+      stroke={stroke || 'hsl(var(--foreground))'}
+      viewBox="0 0 24 24"
+      fill="none"
+      strokeLinecap="round"
+      strokeLinejoin="round"
+    >
+      <path d="M5 12h14" />
+    </svg>
+  );
+};
+
 var Icon = (props: IconProps) => {
-  const { className, size = 20, strokeWidth = 2, stroke, onClick } = props;
+  const { className, size = 20, strokeWidth = 1.6, stroke, onClick } = props;
 
   return (
     <svg
@@ -1566,4 +1489,5 @@ export {
   IconMoon,
   IconLoader,
   IconModelSearch,
+  IconMinus,
 };

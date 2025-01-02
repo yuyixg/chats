@@ -13,7 +13,7 @@ public class OpenAIApiKeySessionManager(ChatsDB db)
             .Select(x => new ApiKeyEntry()
             {
                 UserId = x.User.Id,
-                UserName = x.User.Username,
+                UserName = x.User.DisplayName,
                 Role = x.User.Role,
                 Sub = x.User.Sub,
                 Provider = x.User.Provider,

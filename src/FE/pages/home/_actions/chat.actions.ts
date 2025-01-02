@@ -1,11 +1,13 @@
+import { AdminModelDto } from '@/types/adminApis';
+import { IChat } from '@/types/chat';
+import { ChatSpanDto } from '@/types/clientApis';
+
 import {
   ChatAction,
   ChatActionTypes,
   SetChatPagingType,
-  SetChatStatusType,
   SetChatsType,
   SetIsChatsLoadingType,
-  SetMessageIsStreamingType,
   SetSelectedChatType,
   SetStopIdsType,
 } from '../_reducers/chat.reducer';
@@ -15,25 +17,38 @@ export const setChats = (chats: SetChatsType): ChatAction => ({
   payload: chats,
 });
 
-export const setSelectedChat = (chat?: SetSelectedChatType): ChatAction => ({
-  type: ChatActionTypes.SET_SELECTED_CHAT,
-  payload: chat,
-});
+export const setSelectedChat = (chat?: SetSelectedChatType): ChatAction => {
+  return {
+    type: ChatActionTypes.SET_SELECTED_CHAT,
+    payload: chat,
+  };
+};
 
-export const setChatStatus = (status: SetChatStatusType): ChatAction => ({
-  type: ChatActionTypes.SET_CHAT_STATUS,
-  payload: status,
-});
+export const setChangeSelectedChatSpan = (
+  chat: IChat,
+  span: ChatSpanDto,
+  model: AdminModelDto,
+): ChatAction => {
+  chat.spans = chat.spans.map((s) => {
+    if (s.spanId === span.spanId) {
+      s = {
+        ...s,
+        ...span,
+        modelId: model.modelId,
+        modelName: model.name,
+        modelProviderId: model.modelProviderId,
+      };
+    }
+    return s;
+  });
+  return {
+    type: ChatActionTypes.SET_SELECTED_CHAT,
+    payload: chat,
+  };
+};
 
 export const setChatPaging = (paging: SetChatPagingType): ChatAction => ({
   type: ChatActionTypes.SET_CHAT_PAGING,
-  payload: paging,
-});
-
-export const setMessageIsStreaming = (
-  paging: SetMessageIsStreamingType,
-): ChatAction => ({
-  type: ChatActionTypes.SET_MESSAGE_IS_STREAMING,
   payload: paging,
 });
 

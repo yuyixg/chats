@@ -20,19 +20,31 @@ import {
   DropdownMenuTrigger,
 } from '@/components/ui/dropdown-menu';
 
+import RegenerateModel from '../ChatMessage/RegenerateModel';
+
 import { cn } from '@/lib/utils';
 
-const ChangeModel = ({
+const ChatModelDropdownMenu = ({
   models,
+  modelId,
+  modelName,
   readonly,
+  showRegenerate,
   content,
   className,
+  hideIcon,
+  triggerClassName,
   onChangeModel,
 }: {
   models: AdminModelDto[];
+  modelId?: number;
+  modelName?: string;
   readonly?: boolean;
+  showRegenerate?: boolean;
   content?: string | React.JSX.Element;
   className?: string;
+  triggerClassName?: string;
+  hideIcon?: boolean;
   onChangeModel: (model: AdminModelDto) => void;
 }) => {
   const { t } = useTranslation();
@@ -66,20 +78,38 @@ const ChangeModel = ({
     setSearchTerm('');
   };
 
+  const NoModelRender = () =>
+    models.length === 0 && (
+      <div className="p-2 mx-1 text-center text-muted-foreground text-sm">
+        {t('No data')}
+      </div>
+    );
+
   return (
     <DropdownMenu onOpenChange={handleOpenMenu}>
       <DropdownMenuTrigger
         disabled={readonly}
-        className="focus:outline-none hover:bg-muted rounded-sm p-1 m-0 h-auto flex items-center gap-1"
+        className={cn(
+          'focus:outline-none hover:bg-muted rounded-sm p-1 m-0 h-7 flex items-center gap-1',
+          triggerClassName,
+        )}
       >
         <>
-          <span className={cn('font-medium px-1', className)}>
+          <span
+            className={cn(
+              'flex font-medium px-1 items-center md:w-full text-nowrap overflow-hidden text-ellipsis whitespace-nowrap w-auto',
+              className,
+            )}
+          >
             {content && content}
           </span>
-          {!readonly && typeof content === 'string' && <IconChevronDown />}
+          {!readonly && !hideIcon && <IconChevronDown />}
         </>
       </DropdownMenuTrigger>
-      <DropdownMenuContent className="w-40">
+      <DropdownMenuContent
+        className="w-40 md:w-52"
+        onClick={(e) => e.stopPropagation()}
+      >
         <Search
           className="p-2 mx-1"
           containerClassName="pt-1 pb-1"
@@ -87,6 +117,7 @@ const ChangeModel = ({
           searchTerm={searchTerm}
           onSearch={handleSearch}
         />
+        <NoModelRender />
         <DropdownMenuGroup>
           {modelGroup.map((m) => {
             return (
@@ -101,11 +132,17 @@ const ChangeModel = ({
                   </span>
                 </DropdownMenuSubTrigger>
                 <DropdownMenuPortal>
-                  <DropdownMenuSubContent className="max-w-[64px] md:max-w-[200px]">
+                  <DropdownMenuSubContent
+                    className="max-w-[64px] md:max-w-[200px]"
+                    onClick={(e) => e.stopPropagation()}
+                  >
                     {m.child.map((x) => (
                       <DropdownMenuItem
                         key={x.modelId}
-                        onClick={() => onChangeModel(x)}
+                        onClick={(e) => {
+                          onChangeModel(x);
+                          e.stopPropagation();
+                        }}
                       >
                         {x.name}
                       </DropdownMenuItem>
@@ -116,9 +153,18 @@ const ChangeModel = ({
             );
           })}
         </DropdownMenuGroup>
+        <RegenerateModel
+          hidden={!showRegenerate}
+          onRegenerate={(e) => {
+            const model = models.find((x) => x.modelId === modelId);
+            onChangeModel(model!);
+            e.stopPropagation();
+          }}
+          modelName={modelName}
+        />
       </DropdownMenuContent>
     </DropdownMenu>
   );
 };
 
-export default ChangeModel;
+export default ChatModelDropdownMenu;

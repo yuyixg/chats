@@ -34,20 +34,20 @@ public class ChangePasswordController(ChatsDB db, CurrentUser currentUser, Passw
         }
 
         // only check old password when it is set
-        if (user.Password != null)
+        if (user.PasswordHash != null)
         {
-            if (!passwordHasher.VerifyPassword(req.OldPassword, user.Password))
+            if (!passwordHasher.VerifyPassword(req.OldPassword, user.PasswordHash))
             {
                 return this.BadRequestMessage("Old password incorrect");
             }
 
-            if (passwordHasher.VerifyPassword(req.NewPassword, user.Password))
+            if (passwordHasher.VerifyPassword(req.NewPassword, user.PasswordHash))
             {
                 return this.BadRequestMessage("New password should be different from the old one");
             }
         }
 
-        user.Password = passwordHasher.HashPassword(req.NewPassword);
+        user.PasswordHash = passwordHasher.HashPassword(req.NewPassword);
         user.UpdatedAt = DateTime.UtcNow;
         await db.SaveChangesAsync(cancellationToken);
         return NoContent();

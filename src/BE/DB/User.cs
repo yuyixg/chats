@@ -16,13 +16,14 @@ public partial class User
     public string? Avatar { get; set; }
 
     [StringLength(1000)]
-    public string Account { get; set; } = null!;
+    public string UserName { get; set; } = null!;
 
     [StringLength(1000)]
-    public string Username { get; set; } = null!;
+    public string DisplayName { get; set; } = null!;
 
     [StringLength(1000)]
-    public string? Password { get; set; }
+    [Unicode(false)]
+    public string? PasswordHash { get; set; }
 
     [StringLength(1000)]
     public string? Email { get; set; }
@@ -36,6 +37,7 @@ public partial class User
     public bool Enabled { get; set; }
 
     [StringLength(1000)]
+    [Unicode(false)]
     public string? Provider { get; set; }
 
     [StringLength(1000)]

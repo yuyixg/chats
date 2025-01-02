@@ -1,9 +1,7 @@
 import { useFetch } from '@/hooks/useFetch';
 
-import { formatMessages } from '@/utils/message';
-
 import { AdminModelDto, PostPromptParams } from '@/types/adminApis';
-import { ChatMessage } from '@/types/chatMessage';
+import { IChatMessage } from '@/types/chatMessage';
 import {
   ChatResult,
   GetBalance7DaysUsageResult,
@@ -15,6 +13,8 @@ import {
   LoginConfigsResult,
   ModelUsageDto,
   PostChatParams,
+  PostUserChatSpanParams,
+  PostUserChatSpanResult,
   PostUserPassword,
   PutChatParams,
   SingInParams,
@@ -31,7 +31,7 @@ export const changeUserPassword = (params: PostUserPassword) => {
   });
 };
 
-export const getUserMessages = (chatId: string): Promise<ChatMessage[]> => {
+export const getUserMessages = (chatId: string): Promise<IChatMessage[]> => {
   const fetchService = useFetch();
   return fetchService.get(`/api/messages/${chatId}`);
 };
@@ -130,7 +130,7 @@ export const getDefaultPrompt = () => {
 
 export const postUserPrompts = (params: PostPromptParams) => {
   const fetchServer = useFetch();
-  return fetchServer.post('/api/prompts', { body: params });
+  return fetchServer.post<Prompt>('/api/prompts', { body: params });
 };
 
 export const putUserPrompts = (promptId: number, params: PostPromptParams) => {
@@ -228,4 +228,33 @@ export const deleteUserApiKey = (id: number) => {
 export const getModelUsage = (modelId: number) => {
   const fetchServer = useFetch();
   return fetchServer.get<ModelUsageDto>('/api/models/' + modelId + '/usage');
+};
+
+export const postUserChatSpan = (
+  chatId: string,
+  params?: PostUserChatSpanParams,
+) => {
+  const fetchServer = useFetch();
+  return fetchServer.post<PostUserChatSpanResult>(`/api/chat/${chatId}/span`, {
+    body: params,
+  });
+};
+
+export const putUserChatSpan = (
+  chatId: string,
+  spanId: number,
+  params?: PostUserChatSpanParams,
+) => {
+  const fetchServer = useFetch();
+  return fetchServer.put<PostUserChatSpanResult>(
+    `/api/chat/${chatId}/span/${spanId}`,
+    {
+      body: params,
+    },
+  );
+};
+
+export const deleteUserChatSpan = (chatId: string, spanId: number) => {
+  const fetchServer = useFetch();
+  return fetchServer.delete(`/api/chat/${chatId}/span/${spanId}`);
 };

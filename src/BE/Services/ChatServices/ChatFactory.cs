@@ -44,7 +44,7 @@ public class ChatFactory(ILogger<ChatFactory> logger)
         });
         try
         {
-            await foreach (var seg in cs.ChatStreamedFEProcessed([new UserChatMessage("1+1=?")], new ChatCompletionOptions(), cancellationToken))
+            await foreach (var seg in cs.ChatStreamedFEProcessed([new UserChatMessage("1+1=?")], new ChatCompletionOptions(), ChatExtraDetails.Default, cancellationToken))
             {
                 if (seg.IsFromUpstream)
                 {

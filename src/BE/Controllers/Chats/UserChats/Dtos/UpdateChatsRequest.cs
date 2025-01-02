@@ -1,6 +1,6 @@
 ﻿using Chats.BE.DB;
-using Chats.BE.DB.Jsons;
-using System.Text.Json;
+using Chats.BE.Services.UrlEncryption;
+using Microsoft.EntityFrameworkCore;
 using System.Text.Json.Serialization;
 
 namespace Chats.BE.Controllers.Chats.UserChats.Dtos;
@@ -10,33 +10,70 @@ public class UpdateChatsRequest
     [JsonPropertyName("title")]
     public string? Title { get; set; } = null!;
 
-    [JsonPropertyName("modelId")]
-    public short? ModelId { get; set; }
-
-    [JsonPropertyName("userModelConfig")]
-    public string? UserModelConfig { get; set; } = null!;
-
     [JsonPropertyName("isShared")]
     public bool? IsShared { get; set; }
 
     [JsonPropertyName("isDeleted")]
     public bool? IsDeleted { get; set; }
 
+    [JsonPropertyName("setsLeafMessageId")]
+    public bool SetsLeafMessageId { get; set; }
+
+    [JsonPropertyName("leafMessageId")]
+    public string? LeafMessageId { get; set; } = null!;
+
+    public DecryptedUpdateChatsRequest Decrypt(IUrlEncryptionService urlEncryptionService)
+    {
+        return new DecryptedUpdateChatsRequest
+        {
+            Title = Title,
+            IsShared = IsShared,
+            IsDeleted = IsDeleted,
+            SetsLeafMessageId = SetsLeafMessageId,
+            LeafMessageId = LeafMessageId switch
+            {
+                null => null,
+                _ => urlEncryptionService.DecryptMessageId(LeafMessageId)
+            },
+        };
+    }
+}
+
+
+public class DecryptedUpdateChatsRequest
+{
+    public string? Title { get; set; } = null!;
+
+    public bool? IsShared { get; set; }
+
+    public bool? IsDeleted { get; set; }
+
+    public bool SetsLeafMessageId { get; set; }
+
+    public long? LeafMessageId { get; set; } = null!;
+
+    public async Task<string?> Validate(ChatsDB db, int chatId)
+    {
+        if (Title != null && Title.Length > 50)
+        {
+            return "Title is too long";
+        }
+
+        if (SetsLeafMessageId && LeafMessageId != null)
+        {
+            if (!await db.Messages.AnyAsync(x => x.Id == LeafMessageId && x.ChatId == chatId))
+            {
+                return "Leaf message not found";
+            }
+        }
+        return null;
+    }
+
     public void ApplyToChats(Chat chat)
     {
         if (Title != null)
         {
             chat.Title = Title;
-        }
-        if (ModelId != null)
-        {
-            chat.ModelId = ModelId.Value;
-        }
-        if (UserModelConfig != null)
-        {
-            JsonUserModelConfig obj = JsonSerializer.Deserialize<JsonUserModelConfig>(UserModelConfig)!;
-            chat.Temperature = obj.Temperature;
-            chat.EnableSearch = obj.EnableSearch;
         }
         if (IsShared != null)
         {
@@ -45,6 +82,10 @@ public class UpdateChatsRequest
         if (IsDeleted != null)
         {
             chat.IsDeleted = IsDeleted.Value;
+        }
+        if (SetsLeafMessageId)
+        {
+            chat.LeafMessageId = LeafMessageId;
         }
     }
 }

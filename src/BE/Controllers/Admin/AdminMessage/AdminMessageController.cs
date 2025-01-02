@@ -1,6 +1,7 @@
 ﻿using Chats.BE.Controllers.Admin.AdminMessage.Dtos;
 using Chats.BE.Controllers.Admin.Common;
 using Chats.BE.Controllers.Chats.Chats.Dtos;
+using Chats.BE.Controllers.Chats.UserChats.Dtos;
 using Chats.BE.Controllers.Common.Dtos;
 using Chats.BE.DB;
 using Chats.BE.DB.Enums;
@@ -24,27 +25,29 @@ public class AdminMessageController(ChatsDB db, CurrentUser currentUser, IUrlEnc
             .Where(x => x.User.Role != "admin" || x.UserId == currentUser.Id);
         if (!string.IsNullOrEmpty(req.Query))
         {
-            chats = chats.Where(x => x.User.Username == req.Query);
+            chats = chats.Where(x => x.User.UserName == req.Query);
         }
 
-        return await PagedResult.FromTempQuery(chats
+        return await PagedResult.FromQuery(chats
             .OrderByDescending(x => x.CreatedAt)
-            .Select(x => new AdminChatsDtoTemp
+            .Select(x => new AdminChatsDto
             {
-                Id = x.Id,
+                Id = idEncryption.EncryptChatId(x.Id),
                 CreatedAt = x.CreatedAt,
                 IsDeleted = x.IsDeleted,
                 IsShared = x.IsShared,
-                ModelName = x.Model.Name,
                 Title = x.Title,
-                UserName = x.User.Username,
-                //Cost = x.Messages.Select(x => x.Usage).Sum(x => x.InputCost + x.OutputCost)
-                JsonUserModelConfig = new JsonUserModelConfig()
+                UserName = x.User.UserName,
+                Spans = x.ChatSpans.Select(s => new ChatSpanDto
                 {
-                    Temperature = x.Temperature, 
-                    EnableSearch = x.EnableSearch,
-                },
-            }), req, x => x.ToDto(), cancellationToken);
+                    SpanId = s.SpanId,
+                    ModelId = s.ModelId,
+                    ModelName = s.Model.Name,
+                    ModelProviderId = s.Model.ModelKey.ModelProviderId,
+                    Temperature = s.Temperature,
+                    EnableSearch = s.EnableSearch,
+                }).ToArray(),
+            }), req, cancellationToken);
     }
 
     [HttpGet("message-details")]
@@ -55,19 +58,25 @@ public class AdminMessageController(ChatsDB db, CurrentUser currentUser, IUrlEnc
         return await GetAdminMessageInternal(db, chatId, idEncryption, fup, cancellationToken);
     }
 
-    internal static async Task<ActionResult<AdminMessageRoot>> GetAdminMessageInternal(ChatsDB db, int conversationId, 
+    internal static async Task<ActionResult<AdminMessageRoot>> GetAdminMessageInternal(ChatsDB db, int chatId, 
         IUrlEncryptionService urlEncryption, 
         FileUrlProvider fup,
         CancellationToken cancellationToken)
     {
         AdminMessageDtoTemp? adminMessageTemp = await db.Chats
-                    .Where(x => x.Id == conversationId)
+                    .Where(x => x.Id == chatId)
                     .Select(x => new AdminMessageDtoTemp()
                     {
                         Name = x.Title,
-                        ModelName = x.Model.Name,
-                        Temperature = x.Temperature,
-                        DeploymentName = x.Model.DeploymentName,
+                        Spans = x.ChatSpans.Select(s => new ChatSpanDto
+                        {
+                            SpanId = s.SpanId,
+                            ModelId = s.ModelId,
+                            ModelName = s.Model.Name,
+                            ModelProviderId = s.Model.ModelKey.ModelProviderId,
+                            Temperature = s.Temperature,
+                            EnableSearch = s.EnableSearch,
+                        }).ToArray()
                     })
                     .SingleOrDefaultAsync(cancellationToken);
         if (adminMessageTemp == null) return new NotFoundResult();
@@ -76,7 +85,7 @@ public class AdminMessageController(ChatsDB db, CurrentUser currentUser, IUrlEnc
             .Include(x => x.MessageContents).ThenInclude(x => x.MessageContentBlob)
             .Include(x => x.MessageContents).ThenInclude(x => x.MessageContentFile).ThenInclude(x => x!.File).ThenInclude(x => x.FileService)
             .Include(x => x.MessageContents).ThenInclude(x => x.MessageContentText)
-            .Where(x => x.ChatId == conversationId)
+            .Where(x => x.ChatId == chatId)
             .Select(x => new AdminMessageItemTemp
             {
                 Id = x.Id,
@@ -98,7 +107,7 @@ public class AdminMessageController(ChatsDB db, CurrentUser currentUser, IUrlEnc
             .ToArrayAsync(cancellationToken);
 
         AdminMessageBasicItem[] items = AdminMessageItemTemp.ToDtos(messagesTemp, urlEncryption, fup);
-        AdminMessageRoot dto = adminMessageTemp.ToDto(items);
+        AdminMessageRoot dto = adminMessageTemp.Combine(items);
 
         return new OkObjectResult(dto);
     }

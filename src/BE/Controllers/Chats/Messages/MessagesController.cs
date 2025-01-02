@@ -31,6 +31,7 @@ public class MessagesController(ChatsDB db, CurrentUser currentUser, IUrlEncrypt
                     .OrderBy(x => x.Id)
                     .ToArray(),
                 CreatedAt = x.CreatedAt,
+                SpanId = x.SpanId,
                 Usage = x.Usage == null ? null : new ChatMessageTempUsage()
                 {
                     InputTokens = x.Usage.InputTokens,
@@ -41,7 +42,8 @@ public class MessagesController(ChatsDB db, CurrentUser currentUser, IUrlEncrypt
                     Duration = x.Usage.TotalDurationMs - x.Usage.PreprocessDurationMs,
                     FirstTokenLatency = x.Usage.FirstResponseDurationMs,
                     ModelId = x.Usage.UserModel.ModelId,
-                    ModelName = x.Usage.UserModel.Model.Name
+                    ModelName = x.Usage.UserModel.Model.Name,
+                    ModelProviderId = x.Usage.UserModel.Model.ModelKey.ModelProviderId,
                 },
             })
             .OrderBy(x => x.CreatedAt)

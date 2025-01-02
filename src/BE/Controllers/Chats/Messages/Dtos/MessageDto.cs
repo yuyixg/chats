@@ -19,13 +19,16 @@ public abstract record MessageDto
     public required string? ParentId { get; init; }
 
     [JsonPropertyName("role")]
-    public required string Role { get; init; }
+    public required DBChatRole Role { get; init; }
 
     [JsonPropertyName("content")]
     public required MessageContentResponse Content { get; init; }
 
     [JsonPropertyName("createdAt")]
     public required DateTime CreatedAt { get; init; }
+
+    [JsonPropertyName("spanId")]
+    public required byte? SpanId { get; init; }
 }
 
 public record RequestMessageDto : MessageDto;
@@ -58,6 +61,9 @@ public record ResponseMessageDto : MessageDto
 
     [JsonPropertyName("modelName")]
     public required string? ModelName { get; init; }
+
+    [JsonPropertyName("modelProviderId")]
+    public required short ModelProviderId { get; init; }
 }
 
 public record MessageContentRequest
@@ -129,6 +135,8 @@ public record ChatMessageTempUsage
     public required int InputTokens { get; init; }
     public required short ModelId { get; init; }
     public required string ModelName { get; init; }
+
+    public required short ModelProviderId { get; init; }
     public required decimal OutputPrice { get; init; }
     public required int OutputTokens { get; init; }
     public required int ReasoningTokens { get; init; }
@@ -141,6 +149,7 @@ public record ChatMessageTemp
     public required DBChatRole Role { get; init; }
     public required MessageContent[] Content { get; init; }
     public required DateTime CreatedAt { get; init; }
+    public required byte? SpanId { get; init; }
     public required ChatMessageTempUsage? Usage { get; init; }
 
     public MessageDto ToDto(IUrlEncryptionService urlEncryption, FileUrlProvider fup)
@@ -151,9 +160,10 @@ public record ChatMessageTemp
             {
                 Id = urlEncryption.EncryptMessageId(Id),
                 ParentId = ParentId != null ? urlEncryption.EncryptMessageId(ParentId.Value) : null, 
-                Role = Role.ToString().ToLowerInvariant(),
+                Role = Role,
                 Content = MessageContentResponse.FromSegments(Content, fup),
-                CreatedAt = CreatedAt
+                CreatedAt = CreatedAt,
+                SpanId = SpanId,
             };
         }
         else
@@ -162,9 +172,10 @@ public record ChatMessageTemp
             {
                 Id = urlEncryption.EncryptMessageId(Id),
                 ParentId = ParentId != null ? urlEncryption.EncryptMessageId(ParentId.Value) : null, 
-                Role = Role.ToString().ToLowerInvariant(),
+                Role = Role,
                 Content = MessageContentResponse.FromSegments(Content, fup),
                 CreatedAt = CreatedAt,
+                SpanId = SpanId,
 
                 InputTokens = Usage.InputTokens,
                 OutputTokens = Usage.OutputTokens,
@@ -175,6 +186,7 @@ public record ChatMessageTemp
                 FirstTokenLatency = Usage.FirstTokenLatency,
                 ModelId = Usage.ModelId,
                 ModelName = Usage.ModelName,
+                ModelProviderId = Usage.ModelProviderId,
             };
         }
     }

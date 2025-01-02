@@ -62,7 +62,7 @@ public class AccountLoginController(ChatsDB db, ILogger<AccountLoginController> 
 
     private async Task<ActionResult> PasswordLogin(PasswordHasher passwordHasher, PasswordLoginRequest passwordDto, CancellationToken cancellationToken)
     {
-        User? dbUser = await db.Users.FirstOrDefaultAsync(x => x.Account == passwordDto.UserName, cancellationToken);
+        User? dbUser = await db.Users.FirstOrDefaultAsync(x => x.UserName == passwordDto.UserName, cancellationToken);
 
         if (dbUser == null)
         {
@@ -74,7 +74,7 @@ public class AccountLoginController(ChatsDB db, ILogger<AccountLoginController> 
             logger.LogWarning("User disabled: {UserName}", passwordDto.UserName);
             return BadRequest("Invalid username or password");
         }
-        if (!passwordHasher.VerifyPassword(passwordDto.Password, dbUser.Password))
+        if (!passwordHasher.VerifyPassword(passwordDto.Password, dbUser.PasswordHash))
         {
             logger.LogWarning("Invalid password: {UserName}", passwordDto.UserName);
             return BadRequest("Invalid username or password");
@@ -198,9 +198,9 @@ public class AccountLoginController(ChatsDB db, ILogger<AccountLoginController> 
             Enabled = true,
             CreatedAt = DateTime.UtcNow,
             UpdatedAt = DateTime.UtcNow,
-            Account = req.Phone,
-            Username = req.Phone,
-            Password = null,
+            UserName = req.Phone,
+            DisplayName = req.Phone,
+            PasswordHash = null,
             Avatar = null,
             Email = null, 
             Provider = KnownLoginProviders.Phone,

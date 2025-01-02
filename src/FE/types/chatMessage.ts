@@ -1,13 +1,14 @@
-import { Content, Role } from './chat';
+import { ChatRole, ChatSpanStatus, Content, Role } from './chat';
 
 // Enum equivalent to SseResponseKind
 export enum SseResponseKind {
   StopId = 0,
   Segment = 1,
   Error = 2,
-  PostMessage = 3,
+  UserMessage = 3,
   UpdateTitle = 4,
   TitleSegment = 5,
+  ResponseMessage = 6,
 }
 
 // Discriminated unions for SseResponseLine
@@ -17,34 +18,36 @@ interface SseResponseLineStopId {
 }
 
 interface SseResponseLineSegment {
+  i: number; // SpanId is required for Segment
   k: SseResponseKind.Segment; // Kind is Segment
   r: string; // Result is a string
 }
 
 interface SseResponseLineError {
+  i: number; // SpanId is required for Error
   k: SseResponseKind.Error; // Kind is Error
   r: string; // Result is a string
 }
 
-interface SseResponseLinePostMessage {
-  k: SseResponseKind.PostMessage; // Kind is End
-  r: SseEndMessage; // Result is SseEndMessage
+interface SseResponseLineUserMessage {
+  k: SseResponseKind.UserMessage; // Kind is UserMessage
+  r: IChatMessage; // Result is ChatMessage
+}
+
+interface SseResponseLineResponseMessage {
+  i: number; // SpanId is required for ResponseMessage
+  k: SseResponseKind.ResponseMessage; // Kind is ResponseMessage
+  r: IChatMessage; // Result is ChatMessage
 }
 
 interface SseResponseLineUpdateTitle {
-  k: SseResponseKind.UpdateTitle;
-  r: string;
+  k: SseResponseKind.UpdateTitle; // Kind is UpdateTitle
+  r: string; // Result is a string
 }
 
 interface SseResponseLineTitleSegment {
-  k: SseResponseKind.TitleSegment;
-  r: string;
-}
-
-// Definition of SseEndMessage
-interface SseEndMessage {
-  requestMessage: ChatMessage | null; // May be null
-  responseMessage: ChatMessage; // Required
+  k: SseResponseKind.TitleSegment; // Kind is TitleSegment
+  r: string; // Result is a string
 }
 
 // Combined type for SseResponseLine
@@ -52,19 +55,23 @@ export type SseResponseLine =
   | SseResponseLineStopId
   | SseResponseLineSegment
   | SseResponseLineError
-  | SseResponseLinePostMessage
+  | SseResponseLineUserMessage
+  | SseResponseLineResponseMessage
   | SseResponseLineUpdateTitle
   | SseResponseLineTitleSegment;
 
-export interface ChatMessage {
+export interface IChatMessage {
   id: string;
+  spanId: number | null;
   parentId: string | null;
-  childrenIds?: string[];
-  assistantChildrenIds?: string[];
-  role: Role;
+  siblingIds: string[];
+  role: ChatRole;
   content: Content;
+  status: ChatSpanStatus;
+  isActive?: boolean;
   modelName?: string;
   modelId?: number;
+  modelProviderId?: number;
   inputPrice?: number;
   outputPrice?: number;
   inputTokens?: number;
@@ -78,8 +85,7 @@ export interface MessageNode {
   id: string;
   parentId: string | null;
   content: Content;
-  childrenIds?: string[];
-  assistantChildrenIds?: string[];
+  siblingIds: string[];
   modelName?: string;
   role: Role;
   inputTokens?: number;
@@ -88,3 +94,23 @@ export interface MessageNode {
   inputPrice?: number;
   outputPrice?: number;
 }
+
+export interface ChatMessageNode {
+  id: string;
+  parentId: string | null;
+  content: Content;
+  siblingIds: string[];
+  isActive?: boolean;
+  status: ChatSpanStatus;
+  spanId: number | null;
+  role: ChatRole;
+  modelName?: string;
+  inputTokens?: number;
+  outputTokens?: number;
+  reasoningTokens?: number;
+  inputPrice?: number;
+  outputPrice?: number;
+}
+
+export const ResponseMessageTempId = 'RESPONSE_MESSAGE_TEMP_ID';
+export const UserMessageTempId = 'USER_MESSAGE_TEMP_ID';

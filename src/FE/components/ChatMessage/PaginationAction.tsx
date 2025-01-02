@@ -25,12 +25,13 @@ export const PaginationAction = (props: Props) => {
       <div className="flex text-sm items-center">
         <Button
           variant="ghost"
-          className="p-1 m-0 h-auto disabled:opacity-50"
+          className="p-1 m-0 h-7 w-7 disabled:opacity-50"
           disabled={disabledPrev}
-          onClick={() => {
+          onClick={(e) => {
             if (onChangeMessage) {
               const index = currentSelectIndex - 1;
               onChangeMessage(messageIds[index]);
+              e.stopPropagation();
             }
           }}
         >
@@ -41,13 +42,14 @@ export const PaginationAction = (props: Props) => {
         </span>
         <Button
           variant="ghost"
-          className="p-1 m-0 h-auto"
+          className="p-1 m-0 h-7 w-7"
           disabled={disabledNext}
-          onClick={() => {
+          onClick={(e) => {
             if (onChangeMessage) {
               const index = currentSelectIndex + 1;
               onChangeMessage(messageIds[index]);
             }
+            e.stopPropagation();
           }}
         >
           <IconChevronRight />

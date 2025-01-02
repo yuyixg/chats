@@ -1,7 +1,5 @@
 ﻿using Chats.BE.Controllers.Chats.Chats.Dtos;
-using Chats.BE.Controllers.Common;
 using Chats.BE.DB;
-using Chats.BE.DB.Jsons;
 using Chats.BE.Infrastructure;
 using Chats.BE.Services;
 using Chats.BE.Services.ChatServices;
@@ -15,169 +13,396 @@ using Microsoft.EntityFrameworkCore;
 using OpenAI.Chat;
 using Sdcb.DashScope;
 using System.ClientModel;
+using System.Diagnostics;
 using System.Text.Json;
-using TencentCloud.Common;
+using System.Threading.Channels;
 using OpenAIChatMessage = OpenAI.Chat.ChatMessage;
 
 namespace Chats.BE.Controllers.Chats.Chats;
 
 [Route("api/chats"), Authorize]
-public class ChatController(
-    ChatsDB db, 
-    CurrentUser currentUser, 
-    ILogger<ChatController> logger, 
-    IUrlEncryptionService idEncryption,
-    ChatStopService stopService) : ControllerBase
+public class ChatController(ChatStopService stopService) : ControllerBase
 {
-    [HttpPost]
-    public async Task<IActionResult> StartConversationStreamed(
-        [FromBody] ChatRequest request,
+    [HttpPost("fresh-chat-message")]
+    public async Task<IActionResult> FreshChat(
+        [FromBody] FreshChatRequest req,
+        [FromServices] ChatsDB db,
+        [FromServices] CurrentUser currentUser,
+        [FromServices] ILogger<ChatController> logger,
+        [FromServices] IUrlEncryptionService idEncryption,
         [FromServices] BalanceService balanceService,
-        [FromServices] ChatFactory conversationFactory,
+        [FromServices] ChatFactory chatFactory,
         [FromServices] UserModelManager userModelManager,
         [FromServices] ClientInfoManager clientInfoManager,
         [FromServices] FileUrlProvider fup,
         CancellationToken cancellationToken)
     {
-        InChatContext icc = new();
-        int chatId = idEncryption.DecryptChatId(request.EncryptedChatId);
-        long? messageId = request.EncryptedMessageId != null ? idEncryption.DecryptMessageId(request.EncryptedMessageId) : null;
-
-        UserModel? userModel = await userModelManager.GetUserModel(currentUser.Id, request.ModelId, cancellationToken);
-
-        UserBalance userBalance = await db.UserBalances.Where(x => x.UserId == currentUser.Id).SingleAsync(cancellationToken);
-        Chat? thisChat = await db.Chats.SingleOrDefaultAsync(x => x.Id == chatId && x.UserId == currentUser.Id, cancellationToken);
-        if (thisChat == null)
+        if (!ModelState.IsValid)
         {
-            return this.BadRequestMessage("Chat not found");
+            return BadRequest(ModelState);
         }
 
-        Dictionary<long, MessageLiteDto> existingMessages = await db.Messages
-            .Include(x => x.MessageContents).ThenInclude(x => x.MessageContentBlob)
-            .Include(x => x.MessageContents).ThenInclude(x => x.MessageContentFile).ThenInclude(x => x!.File).ThenInclude(x => x.FileService)
-            .Include(x => x.MessageContents).ThenInclude(x => x.MessageContentFile).ThenInclude(x => x!.File).ThenInclude(x => x.FileImageInfo)
-            .Include(x => x.MessageContents).ThenInclude(x => x.MessageContentText)
-            .Where(x => x.ChatId == chatId && x.Chat.UserId == currentUser.Id)
+        // ensure request span id is unique
+        if (req.Spans.Select(x => x.Id).Distinct().Count() != req.Spans.Length)
+        {
+            return BadRequest("Duplicate span id");
+        }
+
+        return await ChatPrivate(
+            req,
+            db, currentUser, logger, idEncryption, balanceService, chatFactory, userModelManager, clientInfoManager, fup,
+            cancellationToken);
+    }
+
+    [HttpPost("regenerate-assistant-message")]
+    public async Task<IActionResult> RegenerateMessage(
+        [FromBody] RegenerateAssistantMessageRequest req,
+        [FromServices] ChatsDB db,
+        [FromServices] CurrentUser currentUser,
+        [FromServices] ILogger<ChatController> logger,
+        [FromServices] IUrlEncryptionService idEncryption,
+        [FromServices] BalanceService balanceService,
+        [FromServices] ChatFactory chatFactory,
+        [FromServices] UserModelManager userModelManager,
+        [FromServices] ClientInfoManager clientInfoManager,
+        [FromServices] FileUrlProvider fup,
+        CancellationToken cancellationToken)
+    {
+        if (!ModelState.IsValid)
+        {
+            return BadRequest(ModelState);
+        }
+
+        return await ChatPrivate(
+            req,
+            db, currentUser, logger, idEncryption, balanceService, chatFactory, userModelManager, clientInfoManager, fup,
+            cancellationToken);
+    }
+
+    [HttpPost("general-chat")]
+    public async Task<IActionResult> GeneralChat(
+        [FromBody] GeneralChatRequest req,
+        [FromServices] ChatsDB db,
+        [FromServices] CurrentUser currentUser,
+        [FromServices] ILogger<ChatController> logger,
+        [FromServices] IUrlEncryptionService idEncryption,
+        [FromServices] BalanceService balanceService,
+        [FromServices] ChatFactory chatFactory,
+        [FromServices] UserModelManager userModelManager,
+        [FromServices] ClientInfoManager clientInfoManager,
+        [FromServices] FileUrlProvider fup,
+        CancellationToken cancellationToken)
+    {
+        if (!ModelState.IsValid)
+        {
+            return BadRequest(ModelState);
+        }
+
+        if (req.SpanIds.Length == 0)
+        {
+            return BadRequest("Spans must be provided");
+        }
+
+        foreach (int spanId in req.SpanIds)
+        {
+            if (spanId >= byte.MinValue && spanId <= byte.MaxValue)
+            {
+                continue;
+            }
+            return BadRequest("Invalid span id");
+        }
+
+        // ensure request span id is unique
+        if (req.SpanIds.Distinct().Count() != req.SpanIds.Length)
+        {
+            return BadRequest("Duplicate span id");
+        }
+
+        return await ChatPrivate(
+            req,
+            db, currentUser, logger, idEncryption, balanceService, chatFactory, userModelManager, clientInfoManager, fup,
+            cancellationToken);
+    }
+
+    private async Task<IActionResult> ChatPrivate(
+        BaseChatRequest baseReq,
+        ChatsDB db,
+        CurrentUser currentUser,
+        ILogger<ChatController> logger,
+        IUrlEncryptionService idEncryption,
+        BalanceService balanceService,
+        ChatFactory chatFactory,
+        UserModelManager userModelManager,
+        ClientInfoManager clientInfoManager,
+        FileUrlProvider fup,
+        CancellationToken cancellationToken)
+    {
+        long firstTick = Stopwatch.GetTimestamp();
+        ChatRequest req = baseReq.ToChatRequest(idEncryption);
+
+        // req.Spans should never be null
+        if (req.Spans == null || req.Spans.Length == 0) return BadRequest("Spans must be provided");
+
+
+        // one of message id and user message must be non-null
+        if (req.MessageId == null && req.UserMessage == null)
+        {
+            return BadRequest("Message id or user message must be provided");
+        }
+
+        Chat? chat = await db.Chats
+            .Include(x => x.ChatSpans)
+            .Include(x => x.Messages).ThenInclude(x => x.MessageContents).ThenInclude(x => x.MessageContentBlob)
+            .Include(x => x.Messages).ThenInclude(x => x.MessageContents).ThenInclude(x => x.MessageContentFile)
+                .ThenInclude(x => x!.File).ThenInclude(x => x.FileService)
+            .Include(x => x.Messages).ThenInclude(x => x.MessageContents).ThenInclude(x => x.MessageContentFile)
+                .ThenInclude(x => x!.File).ThenInclude(x => x.FileImageInfo)
+            .Include(x => x.Messages).ThenInclude(x => x.MessageContents).ThenInclude(x => x.MessageContentText)
+            .AsSplitQuery()
+            .FirstOrDefaultAsync(x => x.Id == req.ChatId && x.UserId == currentUser.Id, cancellationToken);
+        if (chat == null)
+        {
+            return NotFound();
+        }
+
+        Dictionary<long, MessageLiteDto> existingMessages = chat.Messages
             .Select(x => new MessageLiteDto()
             {
                 Id = x.Id,
-                Content = x.MessageContents
-                    .OrderBy(x => x.Id)
-                    .ToArray(),
+                Content = [.. x.MessageContents.OrderBy(x => x.Id)],
                 Role = (DBChatRole)x.ChatRoleId,
                 ParentId = x.ParentId,
+                SpanId = x.SpanId,
             })
-            .ToDictionaryAsync(x => x.Id, x => x, cancellationToken);
-        MessageLiteDto? systemMessage = existingMessages
-            .Values
-            .Where(x => x.Role == DBChatRole.System)
-            .FirstOrDefault();
-        // insert system message if it doesn't exist
-        if (existingMessages.Count == 0)
-        {
-            if (!string.IsNullOrWhiteSpace(request.UserModelConfig.Prompt))
-            {
-                Message toBeInsert = new()
-                {
-                    ChatId = chatId,
-                    ChatRoleId = (byte)DBChatRole.System,
-                    MessageContents =
-                    [
-                        MessageContent.FromText(request.UserModelConfig.Prompt)
-                    ],
-                    CreatedAt = DateTime.UtcNow,
-                };
-                db.Messages.Add(toBeInsert);
+            .ToDictionary(x => x.Id, x => x);
 
-                systemMessage = new MessageLiteDto
+        // insert system message if it doesn't exist
+        bool isEmptyChat = existingMessages.Count == 0;
+        if (isEmptyChat && (req.Spans == null || req.Spans.Length == 0))
+        {
+            return BadRequest("Empty chat must have at least one span");
+        }
+        MessageLiteDto[] systemMessages = GetSystemMessages(chat, req.Spans, existingMessages, isEmptyChat);
+
+        // ensure chat.ChatSpan contains all span ids that in request, otherwise return error
+        if (req.Spans.Any(x => !chat.ChatSpans.Any(y => y.SpanId == x.Id)))
+        {
+            return BadRequest("Invalid span id");
+        }
+
+        // apply span model update
+        if (baseReq is FreshChatRequest)
+        {
+            foreach (ChatSpanRequest span in req.Spans)
+            {
+                ChatSpan chatSpan = chat.ChatSpans.First(x => x.SpanId == span.Id);
+                span.ApplyTo(chatSpan);
+            }
+        }
+
+        // get span id -> model id mapping but request only contains span id, so we need to get model id from chat.ChatSpan
+        Dictionary<byte, short> spanModelMapping = req.Spans.ToDictionary(x => x.Id, x => x.ModelId ?? chat.ChatSpans.First(y => y.SpanId == x.Id).ModelId);
+        Dictionary<short, UserModel> userModels = await userModelManager.GetUserModels(currentUser.Id, [.. spanModelMapping.Values], cancellationToken);
+        // ensure spanModelMapping contains all userModels
+        if (spanModelMapping.Values.Any(x => !userModels.ContainsKey(x)))
+        {
+            return BadRequest("Invalid span model");
+        }
+
+        Message? dbUserMessage = null;
+        if (req.MessageId != null)
+        {
+            if (!existingMessages.TryGetValue(req.MessageId.Value, out MessageLiteDto? parentMessage))
+            {
+                return BadRequest("Invalid message id");
+            }
+            else if (parentMessage.Role == DBChatRole.User)
+            {
+                // kind: RegenerateAssistantMessageRequest
+            }
+            else if (parentMessage.Role == DBChatRole.Assistant)
+            {
+                // kind: EditUserMessageRequest
+                dbUserMessage = MakeDbUserMessage(chat, idEncryption, req);
+            }
+        }
+        else
+        {
+            // kind: NewMessageRequest
+            dbUserMessage = MakeDbUserMessage(chat, idEncryption, req);
+        }
+
+        Response.Headers.ContentType = "text/event-stream";
+        Response.Headers.CacheControl = "no-cache";
+        Response.Headers.Connection = "keep-alive";
+        string stopId = stopService.CreateAndCombineCancellationToken(ref cancellationToken);
+        await YieldResponse(SseResponseLine.StopId(stopId));
+
+        UserBalance userBalance = await db.UserBalances.Where(x => x.UserId == currentUser.Id).SingleAsync(cancellationToken);
+        Task<ClientInfo> clientInfoTask = clientInfoManager.GetClientInfo(cancellationToken);
+
+        Channel<SseResponseLine>[] channels = req.Spans.Select(x => Channel.CreateUnbounded<SseResponseLine>()).ToArray();
+        Task<ChatSpanResponse>[] streamTasks = req.Spans
+            .Select((span, index) => ProcessChatSpan(
+                currentUser,
+                logger,
+                chatFactory,
+                fup,
+                span,
+                firstTick,
+                req,
+                chat,
+                userModels[spanModelMapping[span.Id]],
+                GetMessageTree(existingMessages, req.MessageId),
+                systemMessages.Where(x => x.Role == DBChatRole.System && x.SpanId == span.Id || x.SpanId == null).ToArray(),
+                dbUserMessage,
+                new ChatExtraDetails() { TimezoneOffset = req.TimezoneOffset },
+                userBalance,
+                clientInfoTask,
+                channels[index].Writer,
+                cancellationToken))
+            .ToArray();
+
+        if (isEmptyChat) chat.Title = req.UserMessage!.Text[..Math.Min(50, req.UserMessage.Text.Length)];
+        bool dbUserMessageYield = false;
+        await foreach (SseResponseLine line in MergeChannels(channels).Reader.ReadAllAsync(CancellationToken.None))
+        {
+            if (line.Kind == SseResponseKind.End)
+            {
+                Message dbAssistantMessage = (Message)line.Result;
+                chat.Messages.Add(dbAssistantMessage);
+                bool isLast = line.SpanId == req.Spans.Last().Id;
+                if (isLast)
                 {
-                    Id = toBeInsert.Id,
-                    Content = [toBeInsert.MessageContents.First()],
-                    Role = DBChatRole.System,
-                    ParentId = null,
-                };
+                    chat.LeafMessage = dbAssistantMessage;
+                }
+                await db.SaveChangesAsync(cancellationToken);
+                
+                if (dbUserMessage != null && !dbUserMessageYield)
+                {
+                    await YieldResponse(SseResponseLine.UserMessage(dbUserMessage, idEncryption, fup));
+                    dbUserMessageYield = true;
+                }
+                await YieldResponse(SseResponseLine.ResponseMessage(line.SpanId!.Value, dbAssistantMessage, idEncryption, fup));
+                if (isLast)
+                {
+                    await YieldResponse(SseResponseLine.ChatLeafMessageId(chat.LeafMessageId!.Value, idEncryption));
+                }
+            }
+            else
+            {
+                await YieldResponse(line);
+            }
+        }
+        cancellationToken = CancellationToken.None;
+        stopService.Remove(stopId);
+
+        // not cancellable from here
+        ChatSpanResponse[] resps = await Task.WhenAll(streamTasks);
+
+        // finish costs
+        if (resps.Any(x => x.Cost.CostBalance > 0))
+        {
+            await balanceService.UpdateBalance(db, currentUser.Id, cancellationToken);
+        }
+        if (resps.Any(x => x.Cost.CostUsage))
+        {
+            foreach (short modelId in userModels.Keys)
+            {
+                await balanceService.UpdateUsage(db, modelId, cancellationToken);
+            }
+        }
+
+        // yield title
+        if (isEmptyChat) await YieldTitle(chat.Title);
+        return new EmptyResult();
+    }
+
+    private static MessageLiteDto[] GetSystemMessages(Chat chat, ChatSpanRequest[]? spans, Dictionary<long, MessageLiteDto> existingMessages, bool isEmptyChat)
+    {
+        if (isEmptyChat)
+        {
+            if (spans == null || spans.Length == 0)
+            {
+                throw new ArgumentException("Empty chat must have at least one span");
             }
 
-            thisChat.Title = request.UserMessage.Text[..Math.Min(50, request.UserMessage.Text.Length)];
-            thisChat.ModelId = request.ModelId;
-            thisChat.EnableSearch = request.UserModelConfig.EnableSearch;
-            thisChat.Temperature = request.UserModelConfig.Temperature;
+            if (spans.Select(x => x.SystemPrompt).Distinct().Count() == 1 && spans[0].SystemPromptValid)
+            {
+                // only insert null spaned system message if all prompts are the same
+                return [MakeSystemMessage(null, chat, spans[0])];
+            }
+            else
+            {
+                return spans
+                    .Where(x => !string.IsNullOrWhiteSpace(x.SystemPrompt))
+                    .Select(x => MakeSystemMessage(x.Id, chat, x))
+                    .ToArray();
+            }
         }
         else
         {
-            request = request with
-            {
-                UserModelConfig = new JsonUserModelConfig
-                {
-                    EnableSearch = request.UserModelConfig.EnableSearch ?? thisChat.EnableSearch,
-                    Temperature = request.UserModelConfig.Temperature ?? thisChat.Temperature,
-                }
-            };
+            return existingMessages.Values
+                .Where(x => x.Role == DBChatRole.System)
+                .ToArray();
         }
+    }
 
-        List<OpenAIChatMessage> messageToSend =
+    private static Message MakeDbUserMessage(Chat chat, IUrlEncryptionService idEncryption, ChatRequest req)
+    {
+        // insert new user message
+        Message? dbUserMessage = new()
+        {
+            ChatRoleId = (byte)DBChatRole.User,
+            MessageContents = req.UserMessage!.ToMessageContents(idEncryption),
+            CreatedAt = DateTime.UtcNow,
+            ParentId = req.MessageId,
+        };
+        chat.Messages.Add(dbUserMessage);
+        return dbUserMessage;
+    }
+
+    private static async Task<ChatSpanResponse> ProcessChatSpan(
+        CurrentUser currentUser,
+        ILogger<ChatController> logger,
+        ChatFactory chatFactory,
+        FileUrlProvider fup,
+        ChatSpanRequest span,
+        long firstTick,
+        ChatRequest req,
+        Chat chat,
+        UserModel userModel,
+        IEnumerable<MessageLiteDto> messageTree,
+        MessageLiteDto[] systemMessages,
+        Message? dbUserMessage,
+        ChatExtraDetails extraDetails,
+        UserBalance userBalance,
+        Task<ClientInfo> clientInfoTask,
+        ChannelWriter<SseResponseLine> writer,
+        CancellationToken cancellationToken)
+    {
+        OpenAIChatMessage[] messageToSend = await ((IEnumerable<MessageLiteDto>)
         [
-            ..(systemMessage != null ? [new SystemChatMessage(systemMessage.Content[0].ToString())] : Array.Empty<OpenAIChatMessage>()),
-            ..await GetMessageTree(existingMessages, messageId).ToAsyncEnumerable().SelectAwait(async x => await x.ToOpenAI(fup, cancellationToken)).ToArrayAsync(cancellationToken),
-        ];
+            ..systemMessages,
+            ..messageTree,
+            ..(dbUserMessage != null ? [MessageLiteDto.FromDB(dbUserMessage)] : Array.Empty<MessageLiteDto>()),
+        ])
+        .ToAsyncEnumerable()
+        .SelectAwait(async x => await x.ToOpenAI(fup, cancellationToken))
+        .ToArrayAsync(cancellationToken);
 
-        // new user message
-        MessageLiteDto userMessageLite;
-        Message? dbUserMessage = null;
-        if (messageId != null && existingMessages.TryGetValue(messageId.Value, out MessageLiteDto? parentMessage) && parentMessage.Role == DBChatRole.User)
-        {
-            // existing user message
-            userMessageLite = existingMessages[messageId!.Value];
-        }
-        else
-        {
-            // insert new user message
-            dbUserMessage = new()
-            {
-                ChatId = chatId,
-                ChatRoleId = (byte)DBChatRole.User,
-                MessageContents = request.UserMessage.ToMessageContents(idEncryption),
-                CreatedAt = DateTime.UtcNow,
-                ParentId = messageId,
-            };
-            db.Messages.Add(dbUserMessage);
-            await db.SaveChangesAsync(cancellationToken);
-            userMessageLite = new()
-            {
-                Id = dbUserMessage.Id,
-                Content = request.UserMessage.ToMessageContents(idEncryption),
-                Role = (DBChatRole)dbUserMessage.ChatRoleId,
-                ParentId = dbUserMessage.ParentId,
-            };
-            messageToSend.Add(await userMessageLite.ToOpenAI(fup, cancellationToken));
-        }
+        ChatCompletionOptions cco = span.ToChatCompletionOptions(currentUser.Id, chat.ChatSpans.First(cs => cs.SpanId == span.Id));
+
+        InChatContext icc = new(firstTick);
 
         string? errorText = null;
-        bool everYield = false;
-        string? stopId = null;
         try
         {
-            if (userModel == null)
-            {
-                icc.FinishReason = DBFinishReason.InvalidModel;
-                throw new InvalidModelException(request.ModelId.ToString());
-            }
-
-            ChatCompletionOptions cco = request.UserModelConfig.ToChatCompletionOptions(currentUser.Id);
-            using ChatService s = conversationFactory.CreateConversationService(userModel.Model);
-            await foreach (InternalChatSegment seg in icc.Run(userBalance.Balance, userModel, s.ChatStreamedFEProcessed(messageToSend, cco, cancellationToken)))
+            using ChatService s = chatFactory.CreateConversationService(userModel.Model);
+            await foreach (InternalChatSegment seg in icc.Run(userBalance.Balance, userModel, s.ChatStreamedFEProcessed(messageToSend, cco, extraDetails, cancellationToken)))
             {
                 if (seg.TextSegment == string.Empty) continue;
-                if (!everYield)
-                {
-                    Response.Headers.ContentType = "text/event-stream";
-                    Response.Headers.CacheControl = "no-cache";
-                    Response.Headers.Connection = "keep-alive";
-                    stopId = stopService.CreateAndCombineCancellationToken(ref cancellationToken);
-                    await YieldResponse(SseResponseLine.StopId(stopId));
-                    everYield = true;
-                }
-                await YieldResponse(SseResponseLine.Segment(seg.TextSegment));
+                await writer.WriteAsync(SseResponseLine.Segment(span.Id, seg.TextSegment), cancellationToken);
 
                 if (cancellationToken.IsCancellationRequested)
                 {
@@ -188,13 +413,13 @@ public class ChatController(
         catch (ChatServiceException cse)
         {
             icc.FinishReason = cse.ErrorCode;
-            return this.BadRequestMessage(cse.Message);
+            errorText = cse.Message;
         }
-        catch (Exception e) when (e is DashScopeException or ClientResultException or TencentCloudSDKException)
+        catch (Exception e) when (e is DashScopeException or ClientResultException or TencentCloud.Common.TencentCloudSDKException)
         {
             icc.FinishReason = DBFinishReason.UpstreamError;
             errorText = e.Message;
-            logger.LogError(e, "Upstream error: {userMessageId}", userMessageLite.Id);
+            logger.LogError(e, "Upstream error: {userMessageId}", req.MessageId);
         }
         catch (TaskCanceledException)
         {
@@ -206,57 +431,100 @@ public class ChatController(
         {
             icc.FinishReason = DBFinishReason.UnknownError;
             errorText = "Unknown Error";
-            logger.LogError(e, "Error in conversation for message: {userMessageId}", userMessageLite.Id);
+            logger.LogError(e, "Error in conversation for message: {userMessageId}", req.MessageId);
         }
         finally
         {
             // cancel the conversation because following code is credit deduction related
             cancellationToken = CancellationToken.None;
-            if (stopId != null)
-            {
-                stopService.Remove(stopId);
-            }
         }
 
         // success
         // insert new assistant message
-        InternalChatSegment fullResponse = icc.FullResponse;
         Message dbAssistantMessage = new()
         {
-            ChatId = chatId,
+            ChatId = chat.Id,
             ChatRoleId = (byte)DBChatRole.Assistant,
             MessageContents =
             [
-                MessageContent.FromText(fullResponse.TextSegment),
+                MessageContent.FromText(icc.FullResponse.TextSegment),
             ],
+            SpanId = span.Id,
             CreatedAt = DateTime.UtcNow,
-            ParentId = userMessageLite.Id,
         };
+        if (dbUserMessage != null)
+        {
+            dbAssistantMessage.Parent = dbUserMessage;
+        }
+        else
+        {
+            dbAssistantMessage.ParentId = req.MessageId;
+        }
 
         if (errorText != null)
         {
             dbAssistantMessage.MessageContents.Add(MessageContent.FromError(errorText));
-            await YieldResponse(SseResponseLine.Error(errorText));
+            await writer.WriteAsync(SseResponseLine.Error(span.Id, errorText), cancellationToken);
         }
-        dbAssistantMessage.Usage = icc.ToUserModelUsage(currentUser.Id, await clientInfoManager.GetClientInfo(cancellationToken), isApi: false);
-        db.Messages.Add(dbAssistantMessage);
+        dbAssistantMessage.Usage = icc.ToUserModelUsage(currentUser.Id, await clientInfoTask, isApi: false);
+        await writer.WriteAsync(new SseResponseLine { Kind = SseResponseKind.End, Result = dbAssistantMessage, SpanId = span.Id }, cancellationToken);
+        writer.Complete();
+        return new ChatSpanResponse()
+        {
+            AssistantMessage = dbAssistantMessage,
+            Cost = icc.Cost,
+            SpanId = span.Id,
+        };
+    }
 
-        await db.SaveChangesAsync(cancellationToken);
-        if (icc.Cost.CostBalance > 0)
+    private static MessageLiteDto MakeSystemMessage(byte? specifiedSpanId, Chat chat, ChatSpanRequest span)
+    {
+        if (specifiedSpanId != null && specifiedSpanId != span.Id)
         {
-            await balanceService.UpdateBalance(db, currentUser.Id, CancellationToken.None);
-        }
-        if (icc.Cost.CostUsage)
-        {
-            await balanceService.UpdateUsage(db, userModel!.Id, CancellationToken.None);
+            throw new ArgumentException("specifiedSpanId must be null or equal to span.Id");
         }
 
-        await YieldResponse(SseResponseLine.PostMessage(dbUserMessage, dbAssistantMessage, idEncryption, fup));
-        if (existingMessages.Count == 0)
+        Message toBeInsert = new()
         {
-            await YieldTitle(thisChat.Title);
+            ChatRoleId = (byte)DBChatRole.System,
+            MessageContents =
+            [
+                MessageContent.FromText(span.SystemPrompt!)
+            ],
+            CreatedAt = DateTime.UtcNow,
+            SpanId = specifiedSpanId,
+        };
+        chat.Messages.Add(toBeInsert);
+        return MessageLiteDto.FromDB(toBeInsert);
+    }
+
+    static Channel<T> MergeChannels<T>(params Channel<T>[] channels)
+    {
+        Channel<T> outputChannel = Channel.CreateUnbounded<T>();
+        int remainingChannels = channels.Length;
+
+        foreach (Channel<T> channel in channels)
+        {
+            _ = Task.Run(async () =>
+            {
+                try
+                {
+                    await foreach (var item in channel.Reader.ReadAllAsync())
+                    {
+                        await outputChannel.Writer.WriteAsync(item);
+                    }
+                }
+                finally
+                {
+                    if (Interlocked.Decrement(ref remainingChannels) == 0)
+                    {
+                        outputChannel.Writer.Complete();
+                    }
+                }
+            });
         }
-        return new EmptyResult();
+
+        return outputChannel;
     }
 
     private async Task YieldTitle(string title)
@@ -272,7 +540,7 @@ public class ChatController(
     private readonly static ReadOnlyMemory<byte> dataU8 = "data: "u8.ToArray();
     private readonly static ReadOnlyMemory<byte> lfu8 = "\r\n\r\n"u8.ToArray();
 
-    private async Task YieldResponse<T>(SseResponseLine<T> line)
+    private async Task YieldResponse(SseResponseLine line)
     {
         await Response.Body.WriteAsync(dataU8);
         await Response.Body.WriteAsync(JsonSerializer.SerializeToUtf8Bytes(line, JSON.JsonSerializerOptions));
