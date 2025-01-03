@@ -276,6 +276,7 @@ public class ChatController(ChatStopService stopService) : ControllerBase
                 {
                     chat.LeafMessage = dbAssistantMessage;
                 }
+                chat.UpdatedAt = DateTime.UtcNow;
                 await db.SaveChangesAsync(cancellationToken);
                 
                 if (dbUserMessage != null && !dbUserMessageYield)
