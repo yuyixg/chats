@@ -5,7 +5,6 @@ import { useRouter } from 'next/router';
 import { useCreateReducer } from '@/hooks/useCreateReducer';
 import useTranslation from '@/hooks/useTranslation';
 
-import { getPathChatId } from '@/utils/chats';
 import { findSelectedMessageByLeafId } from '@/utils/message';
 import { getSettings } from '@/utils/settings';
 import { getUserSession, redirectToLoginPage } from '@/utils/user';
@@ -111,7 +110,7 @@ const HomeContent = () => {
   };
 
   const prepareChat = (chatList: ChatResult[], selectChatId?: string) => {
-    let chatId = selectChatId || getPathChatId(router.asPath);
+    let chatId = selectChatId || router.asPath.substring(3);
     if (chatList.length > 0) {
       const foundChat = chatList.find((x) => x.id === chatId) || chatList[0];
       return foundChat;
@@ -205,7 +204,7 @@ const HomeContent = () => {
     });
   };
 
-  const getChats = async (params: GetChatsParams, isAppend = true) => {
+  const getChats = async (params: GetChatsParams, isAppend = false) => {
     const { page, pageSize } = params;
     getChatsByPaging(params).then((data) => {
       const { rows, count } = data || { rows: [], count: 0 };
