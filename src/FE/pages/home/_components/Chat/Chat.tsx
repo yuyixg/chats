@@ -389,6 +389,7 @@ const Chat = memo(() => {
   };
 
   const handleChangeChatLeafMessageId = (messageId: string) => {
+    if (selectedChat.status === ChatStatus.Chatting) return;
     const leafId = findLastLeafId(messages, messageId);
     if (leafId === selectedChat.leafMessageId) return;
     const selectedMsgs = findSelectedMessageByLeafId(messages, leafId);
