@@ -7,7 +7,6 @@ import { IChat } from '@/types/chat';
 import { Button } from '@/components/ui/button';
 
 import HomeContext from '../../_contexts/home.context';
-import { chatsGroupByUpdatedAt } from './Chatbar.utils';
 import ConversationComponent from './Conversation';
 
 interface Props {
@@ -31,6 +30,56 @@ const Conversations = ({ chats }: Props) => {
   const handleShowMore = () => {
     const { page, pageSize } = chatsPaging;
     getChats({ page: page + 1, pageSize: pageSize }, true);
+  };
+
+  const chatsGroupByUpdatedAt = (data: IChat[]): Map<string, IChat[]> => {
+    const groupedData = new Map<string, IChat[]>();
+    const now = new Date();
+
+    const isSameDay = (date1: Date, date2: Date): boolean => {
+      return (
+        date1.getFullYear() === date2.getFullYear() &&
+        date1.getMonth() === date2.getMonth() &&
+        date1.getDate() === date2.getDate()
+      );
+    };
+
+    const isWithinDays = (date: Date, days: number): boolean => {
+      const pastDate = new Date(now);
+      pastDate.setDate(now.getDate() - days);
+      return date >= pastDate && date <= now;
+    };
+
+    data.forEach((item) => {
+      const date = new Date(item.updatedAt);
+
+      let groupKey: string;
+
+      if (isSameDay(date, now)) {
+        groupKey = t('Today');
+      } else if (
+        isSameDay(
+          date,
+          new Date(now.getFullYear(), now.getMonth(), now.getDate() - 1),
+        )
+      ) {
+        groupKey = t('Yesterday');
+      } else if (isWithinDays(date, 7)) {
+        groupKey = t('Last 7 days');
+      } else if (isWithinDays(date, 30)) {
+        groupKey = t('Last 30 days');
+      } else {
+        groupKey = `${date.getFullYear()}`;
+      }
+
+      if (!groupedData.has(groupKey)) {
+        groupedData.set(groupKey, []);
+      }
+
+      groupedData.get(groupKey)!.push(item);
+    });
+
+    return groupedData;
   };
 
   return (
