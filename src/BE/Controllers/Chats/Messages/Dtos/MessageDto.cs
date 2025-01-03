@@ -74,12 +74,15 @@ public record MessageContentRequest
     [JsonPropertyName("fileIds")]
     public List<string>? FileIds { get; init; }
 
-    public MessageContent[] ToMessageContents(IUrlEncryptionService idEncryptionService)
+    public async Task<MessageContent[]> ToMessageContents(FileUrlProvider fup, CancellationToken cancellationToken)
     {
         return
         [
             MessageContent.FromText(Text),
-            ..(FileIds ?? []).Select(x => MessageContent.FromFileId(idEncryptionService.DecryptFileId(x))),
+            ..(await (FileIds ?? [])
+                .ToAsyncEnumerable()
+                .SelectAwait(async fileId => await fup.CreateFileContent(fileId, cancellationToken))
+                .ToArrayAsync(cancellationToken)),
         ];
     }
 }
