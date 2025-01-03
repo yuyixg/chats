@@ -5,7 +5,7 @@ import { useRouter } from 'next/router';
 import { useCreateReducer } from '@/hooks/useCreateReducer';
 import useTranslation from '@/hooks/useTranslation';
 
-import { iSODateString } from '@/utils/date';
+import { getNowAsISODateString as getNowAsISODateString } from '@/utils/date';
 import { findSelectedMessageByLeafId } from '@/utils/message';
 import { getSettings } from '@/utils/settings';
 import { getUserSession, redirectToLoginPage } from '@/utils/user';
@@ -178,7 +178,7 @@ const HomeContent = () => {
     params: HandleUpdateChatParams,
   ) => {
     const chatList = chats.map((x) => {
-      if (x.id === id) return { ...x, ...params, updatedAt: iSODateString() };
+      if (x.id === id) return { ...x, ...params, updatedAt: getNowAsISODateString() };
       return x;
     });
     chatDispatch(setChats(chatList));
