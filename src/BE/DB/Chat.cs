@@ -7,7 +7,7 @@ using Microsoft.EntityFrameworkCore;
 namespace Chats.BE.DB;
 
 [Table("Chat")]
-[Index("CreatedAt", Name = "IX_Chat_CreateAt")]
+[Index("UpdatedAt", Name = "IX_Chat_UpdatedAt")]
 [Index("UserId", Name = "IX_Chat_UserId")]
 public partial class Chat
 {
@@ -24,6 +24,8 @@ public partial class Chat
     public long? LeafMessageId { get; set; }
 
     public DateTime CreatedAt { get; set; }
+
+    public DateTime UpdatedAt { get; set; }
 
     public int UserId { get; set; }
 

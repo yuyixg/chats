@@ -65,6 +65,7 @@ export interface ChatResult {
   isShared: boolean;
   spans: ChatSpanDto[];
   leafMessageId?: string;
+  updatedAt: string;
 }
 
 export interface ChatSpanDto {

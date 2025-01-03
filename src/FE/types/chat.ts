@@ -56,4 +56,5 @@ export interface IChat {
   status: ChatStatus;
   spans: ChatSpanDto[];
   leafMessageId?: string;
+  updatedAt: string;
 }

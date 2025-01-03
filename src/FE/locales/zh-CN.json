@@ -357,5 +357,9 @@
   "Invalid file name.": "无效的文件名。",
   "There's no model here": "这里没有模型",
   "You can contact the administrator or create one yourself": "你可以联系管理员或者自己创建一个",
-  "Customized Text(Company name, etc)": "自定义文本（公司名称等）"
+  "Customized Text(Company name, etc)": "自定义文本（公司名称等）",
+  "Today": "今天",
+  "Yesterday": "昨天",
+  "Last 7 days": "过去7天",
+  "Last 30 days": "过去30天"
 }

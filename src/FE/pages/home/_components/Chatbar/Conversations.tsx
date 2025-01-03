@@ -16,7 +16,7 @@ interface Props {
 const Conversations = ({ chats }: Props) => {
   const { t } = useTranslation();
   const {
-    state: { chatsPaging },
+    state: { chatsPaging, chatGroups },
     getChats,
   } = useContext(HomeContext);
 
@@ -34,11 +34,18 @@ const Conversations = ({ chats }: Props) => {
 
   return (
     <div className="flex w-full flex-col gap-1">
-      {chats.slice().map((chat, index) => (
-        <ConversationComponent key={index} chat={chat} />
+      {[...chatGroups.entries()].map(([group, items]) => (
+        <div key={group}>
+          <div className="w-full pl-2.5 text-xs text-gray-500 font-medium my-1">
+            {t(group)}
+          </div>
+          {items.map((chat, index) => (
+            <ConversationComponent key={index} chat={chat} />
+          ))}
+        </div>
       ))}
       {!showMore && (
-        <Button onClick={handleShowMore} className="text-[12px]" variant="link">
+        <Button onClick={handleShowMore} className="text-xs" variant="link">
           {t('Show more')}
         </Button>
       )}

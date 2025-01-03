@@ -5,11 +5,3 @@ export function mergeConfigs(obj1: any, obj2: any) {
   }, {});
   return JSON.stringify(config, null, 2);
 }
-
-export function getStorageModelId() {
-  return localStorage.getItem('selectModelId');
-}
-
-export function setStorageModelId(modelId: number) {
-  return localStorage.setItem('selectModelId', modelId.toString());
-}
