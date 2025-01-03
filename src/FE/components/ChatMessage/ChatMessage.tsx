@@ -43,8 +43,8 @@ export const ChatMessage: FC<Props> = memo(
     return (
       <div
         className={cn(
-          'w-4/5 m-auto p-4',
-          !hasMultipleSpan && 'w-full md:w-3/5',
+          'w-11/12 m-auto p-4',
+          !hasMultipleSpan && 'w-full md:w-4/5',
         )}
       >
         {selectedMessages.map((messages, index) => {

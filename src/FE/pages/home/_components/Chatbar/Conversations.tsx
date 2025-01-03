@@ -48,7 +48,7 @@ const Conversations = ({ chats }: Props) => {
         ),
       )}
       {!showMore && (
-        <Button onClick={handleShowMore} className="text-[12px]" variant="link">
+        <Button onClick={handleShowMore} className="text-xs" variant="link">
           {t('Show more')}
         </Button>
       )}
