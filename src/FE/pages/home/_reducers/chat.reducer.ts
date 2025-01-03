@@ -1,7 +1,7 @@
 import { IChat } from '@/types/chat';
-import { ChatResult } from '@/types/clientApis';
 
-export type SetChatsType = ChatResult[];
+export type SetChatsType = IChat[];
+export type SetChatGroupsType = Map<string, IChat[]>;
 export type SetSelectedChatType = IChat | undefined;
 export type SetChatStatusType = boolean;
 export type SetChatPagingType = {
@@ -15,6 +15,7 @@ export type SetStopIdsType = string[];
 
 interface ChatInitialState {
   chats: SetChatsType;
+  chatGroups: SetChatGroupsType;
   selectedChat?: SetSelectedChatType;
   chatsPaging: SetChatPagingType;
   isChatsLoading: SetIsChatsLoadingType;
@@ -23,6 +24,7 @@ interface ChatInitialState {
 
 export const chatInitialState: ChatInitialState = {
   chats: [],
+  chatGroups: new Map<string, IChat[]>(),
   selectedChat: undefined,
   chatsPaging: { count: 0, page: 1, pageSize: 50 },
   isChatsLoading: false,
@@ -31,6 +33,7 @@ export const chatInitialState: ChatInitialState = {
 
 export enum ChatActionTypes {
   SET_CHATS = 'SET_CHATS',
+  SET_CHAT_GROUPS = 'SET_CHAT_GROUPS',
   SET_CHATS_INCR = 'SET_CHATS_INCR',
   SET_SELECTED_CHAT = 'SET_SELECTED_CHAT',
   SET_CHAT_PAGING = 'SET_CHAT_PAGING',
@@ -40,6 +43,7 @@ export enum ChatActionTypes {
 
 export type ChatAction =
   | { type: ChatActionTypes.SET_CHATS; payload: SetChatsType }
+  | { type: ChatActionTypes.SET_CHAT_GROUPS; payload: SetChatGroupsType }
   | { type: ChatActionTypes.SET_CHATS_INCR; payload: SetChatsType }
   | { type: ChatActionTypes.SET_SELECTED_CHAT; payload: SetSelectedChatType }
   | { type: ChatActionTypes.SET_CHAT_PAGING; payload: SetChatPagingType }
@@ -59,6 +63,8 @@ export default function chatReducer(
   switch (action.type) {
     case ChatActionTypes.SET_CHATS:
       return { ...state, chats: action.payload };
+    case ChatActionTypes.SET_CHAT_GROUPS:
+      return { ...state, chatGroups: action.payload };
     case ChatActionTypes.SET_SELECTED_CHAT:
       return { ...state, selectedChat: action.payload };
     case ChatActionTypes.SET_CHAT_PAGING:

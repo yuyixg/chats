@@ -2,16 +2,30 @@ import { Dispatch, createContext } from 'react';
 
 import { ActionType } from '@/hooks/useCreateReducer';
 
-import { AdminModelDto } from '@/types/adminApis';
 import { IChat } from '@/types/chat';
-import { IChatMessage } from '@/types/chatMessage';
-import { ChatResult, GetChatsParams } from '@/types/clientApis';
-import { Prompt, PromptSlim } from '@/types/prompt';
+import { GetChatsParams } from '@/types/clientApis';
 
-import { ChatAction } from '../_reducers/chat.reducer';
-import { MessageAction } from '../_reducers/message.reducer';
-import { ModelAction } from '../_reducers/model.reducer';
-import { PromptAction } from '../_reducers/prompt.reducer';
+import {
+  ChatAction,
+  SetChatGroupsType,
+  SetChatPagingType,
+  SetChatsType,
+} from '../_reducers/chat.reducer';
+import {
+  MessageAction,
+  SetMessagesType,
+  SetSelectedMessagesType,
+} from '../_reducers/message.reducer';
+import {
+  ModelAction,
+  SetModelMapType,
+  SetModelsType,
+} from '../_reducers/model.reducer';
+import {
+  PromptAction,
+  SetDefaultPromptType,
+  SetPromptsType,
+} from '../_reducers/prompt.reducer';
 import { SettingsAction } from '../_reducers/setting.reducer';
 
 export interface HandleUpdateChatParams {
@@ -21,19 +35,20 @@ export interface HandleUpdateChatParams {
 }
 
 export interface HomeInitialState {
-  messages: IChatMessage[];
-  selectedMessages: IChatMessage[][];
+  messages: SetMessagesType;
+  selectedMessages: SetSelectedMessagesType;
 
-  chats: ChatResult[];
+  chats: SetChatsType;
+  chatGroups: SetChatGroupsType;
   selectedChat: IChat;
-  chatsPaging: { count: number; page: number; pageSize: number };
+  chatsPaging: SetChatPagingType;
   isChatsLoading: boolean;
 
-  models: AdminModelDto[];
-  modelMap: Record<string, AdminModelDto>;
+  models: SetModelsType;
+  modelMap: SetModelMapType;
 
-  defaultPrompt: Prompt | null;
-  prompts: PromptSlim[];
+  defaultPrompt: SetDefaultPromptType | null;
+  prompts: SetPromptsType;
 
   showChatBar: boolean;
   showPromptBar: boolean;
@@ -44,6 +59,7 @@ export const initialState: HomeInitialState = {
   selectedMessages: [],
 
   chats: [],
+  chatGroups: new Map<string, IChat[]>(),
   selectedChat: {} as IChat,
   chatsPaging: { count: 0, page: 1, pageSize: 50 },
   isChatsLoading: false,
@@ -73,7 +89,7 @@ export interface HomeContextProps {
   handleDeleteChat: (id: string) => void;
   handleSelectChat: (chat: IChat) => void;
   handleUpdateChat: (
-    chats: ChatResult[],
+    chats: IChat[],
     id: string,
     params: HandleUpdateChatParams,
   ) => void;

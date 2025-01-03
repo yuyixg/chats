@@ -5,6 +5,7 @@ import { useRouter } from 'next/router';
 import { useCreateReducer } from '@/hooks/useCreateReducer';
 import useTranslation from '@/hooks/useTranslation';
 
+import { iSODateString } from '@/utils/date';
 import { findSelectedMessageByLeafId } from '@/utils/message';
 import { getSettings } from '@/utils/settings';
 import { getUserSession, redirectToLoginPage } from '@/utils/user';
@@ -16,6 +17,7 @@ import { ChatResult, GetChatsParams } from '@/types/clientApis';
 import Spinner from '@/components/Spinner/Spinner';
 
 import {
+  setChatGroups,
   setChatPaging,
   setChats,
   setIsChatsLoading,
@@ -109,7 +111,7 @@ const HomeContent = () => {
     messageDispatch(setSelectedMessages(selectedMessageList));
   };
 
-  const prepareChat = (chatList: ChatResult[], selectChatId?: string) => {
+  const prepareChat = (chatList: IChat[], selectChatId?: string) => {
     let chatId = selectChatId || router.asPath.substring(3);
     if (chatList.length > 0) {
       const foundChat = chatList.find((x) => x.id === chatId) || chatList[0];
@@ -122,7 +124,7 @@ const HomeContent = () => {
     return { ...chat, status: ChatStatus.None };
   };
 
-  const selectChat = (chatList: ChatResult[], chatId?: string) => {
+  const selectChat = (chatList: IChat[], chatId?: string) => {
     const chat = prepareChat(chatList, chatId);
     if (chat) {
       chatDispatch(setSelectedChat(supplyChatProperty(chat)));
@@ -140,8 +142,11 @@ const HomeContent = () => {
 
   const handleNewChat = () => {
     postChats({ title: t('New Conversation') }).then((data) => {
-      chatDispatch(setChats([data, ...chats]));
-      chatDispatch(setSelectedChat(supplyChatProperty(data)));
+      const chat = supplyChatProperty(data);
+      const chatList = [chat, ...chats];
+      chatDispatch(setChats(chatList));
+      chatDispatch(setChatGroups(chatList));
+      chatDispatch(setSelectedChat(chat));
       messageDispatch(setMessages([]));
       messageDispatch(setSelectedMessages([]));
 
@@ -168,15 +173,16 @@ const HomeContent = () => {
   };
 
   const handleUpdateChat = (
-    chats: ChatResult[],
+    chats: IChat[],
     id: string,
     params: HandleUpdateChatParams,
   ) => {
     const chatList = chats.map((x) => {
-      if (x.id === id) return { ...x, ...params };
+      if (x.id === id) return { ...x, ...params, updatedAt: iSODateString() };
       return x;
     });
     chatDispatch(setChats(chatList));
+    chatDispatch(setChatGroups(chatList));
   };
 
   const handleDeleteChat = (id: string) => {
@@ -184,6 +190,7 @@ const HomeContent = () => {
       return x.id !== id;
     });
     chatDispatch(setChats(chatList));
+    chatDispatch(setChatGroups(chatList));
 
     if (chatList.length > 0) {
       selectChat(chatList, chatList[0].id);
@@ -208,11 +215,15 @@ const HomeContent = () => {
     const { page, pageSize } = params;
     getChatsByPaging(params).then((data) => {
       const { rows, count } = data || { rows: [], count: 0 };
-      let chatList = rows;
+      const mapRows = rows.map(
+        (x) => ({ ...x, status: ChatStatus.None } as IChat),
+      );
+      let chatList = mapRows;
       if (isAppend) {
-        chatList = chats.concat(rows);
+        chatList = chats.concat(mapRows);
       }
       chatDispatch(setChats(chatList));
+      chatDispatch(setChatGroups(chatList));
       chatDispatch(setChatPaging({ count, page, pageSize }));
     });
   };
@@ -221,13 +232,16 @@ const HomeContent = () => {
     const params = { page: 1, pageSize: 50 };
     getChatsByPaging(params).then((data) => {
       const { rows, count } = data || { rows: [], count: 0 };
-      let chatList = rows;
+      const chatList = rows.map(
+        (x) => ({ ...x, status: ChatStatus.None } as IChat),
+      );
 
       chatDispatch(setChats(chatList));
+      chatDispatch(setChatGroups(chatList));
       chatDispatch(
         setChatPaging({ count, page: params.page, pageSize: params.pageSize }),
       );
-      selectChat(rows);
+      selectChat(chatList);
     });
   };
 
