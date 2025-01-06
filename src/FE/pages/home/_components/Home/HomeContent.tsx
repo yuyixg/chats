@@ -324,9 +324,7 @@ const HomeContent = () => {
         <div className="flex h-screen w-screen flex-col text-sm">
           <div className="flex h-full w-full bg-background">
             <Chatbar />
-            <div className="flex w-full">
-              <Chat />
-            </div>
+            <Chat />
             {showPromptBar && <PromptBar />}
           </div>
         </div>
