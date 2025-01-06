@@ -422,9 +422,9 @@ const Chat = memo(() => {
   };
 
   return (
-    <div className="relative flex-1 overflow-hidden">
+    <div className="relative flex-1">
       <div
-        className="max-h-full overflow-x-hidden scroll-container"
+        className="relative max-h-full overflow-x-hidden scroll-container"
         ref={chatContainerRef}
         onScroll={handleScroll}
       >
