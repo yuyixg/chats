@@ -35,7 +35,7 @@ public class UserChatsController(ChatsDB db, CurrentUser currentUser, IUrlEncryp
                     EnableSearch = s.EnableSearch,
                 }).ToArray(),
                 LeafMessageId = x.LeafMessageId != null ? idEncryption.EncryptMessageId(x.LeafMessageId.Value) : null,
-                CreatedAt = x.CreatedAt,
+                UpdatedAt = x.UpdatedAt,
             })
             .FirstOrDefaultAsync(cancellationToken);
 
@@ -52,7 +52,7 @@ public class UserChatsController(ChatsDB db, CurrentUser currentUser, IUrlEncryp
     {
         IQueryable<Chat> query = db.Chats
             .Where(x => x.UserId == currentUser.Id && !x.IsDeleted)
-            .OrderByDescending(x => x.Id);
+            .OrderByDescending(x => x.UpdatedAt);
         if (!string.IsNullOrWhiteSpace(request.Query))
         {
             query = query.Where(x => x.Title.Contains(request.Query));
@@ -74,7 +74,7 @@ public class UserChatsController(ChatsDB db, CurrentUser currentUser, IUrlEncryp
                     EnableSearch = s.EnableSearch,
                 }).ToArray(),
                 LeafMessageId = x.LeafMessageId != null ? idEncryption.EncryptMessageId(x.LeafMessageId.Value) : null,
-                CreatedAt = x.CreatedAt,
+                UpdatedAt = x.UpdatedAt,
             }),
             request,
             cancellationToken);
@@ -98,6 +98,7 @@ public class UserChatsController(ChatsDB db, CurrentUser currentUser, IUrlEncryp
             IsShared = false,
             CreatedAt = DateTime.UtcNow,
             IsDeleted = false,
+            UpdatedAt = DateTime.UtcNow,
         };
 
         Chat? lastChat = await db.Chats
@@ -147,7 +148,7 @@ public class UserChatsController(ChatsDB db, CurrentUser currentUser, IUrlEncryp
                 EnableSearch = s.EnableSearch,
             }).ToArray(),
             LeafMessageId = chat.LeafMessageId != null ? idEncryption.EncryptMessageId(chat.LeafMessageId.Value) : null,
-            CreatedAt = chat.CreatedAt,
+            UpdatedAt = chat.UpdatedAt,
         });
     }
 
@@ -205,6 +206,7 @@ public class UserChatsController(ChatsDB db, CurrentUser currentUser, IUrlEncryp
         req.ApplyToChats(chat);
         if (db.ChangeTracker.HasChanges())
         {
+            chat.UpdatedAt = DateTime.UtcNow;
             await db.SaveChangesAsync(cancellationToken);
         }
         return NoContent();

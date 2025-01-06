@@ -1,7 +1,3 @@
-export const getPathChatId = (path: string) => {
-  return path.substring(3);
-};
-
 export function preprocessLaTeX(content?: string) {
   if (!content) {
     return '';

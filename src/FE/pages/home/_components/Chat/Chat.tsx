@@ -11,6 +11,7 @@ import toast from 'react-hot-toast';
 import useTranslation from '@/hooks/useTranslation';
 
 import { getApiUrl } from '@/utils/common';
+import { getNowAsISODateString as getNowAsISODateString } from '@/utils/date';
 import {
   findLastLeafId,
   findSelectedMessageByLeafId,
@@ -31,6 +32,7 @@ import {
 import { Prompt } from '@/types/prompt';
 
 import {
+  setChatGroups,
   setChats,
   setSelectedChat,
   setStopIds,
@@ -237,12 +239,16 @@ const Chat = memo(() => {
     let responseMessages = generateResponseMessages(selectedChat, messageId);
     selectedMessageList.push(responseMessages);
     messageDispatch(setSelectedMessages(selectedMessageList));
+    const { text: contentText, fileIds } = message.content;
 
     let chatBody = {
       chatId,
       spanIds: chatSpans.map((x) => x.spanId),
       parentAssistantMessageId: messageId || null,
-      userMessage: message.content,
+      userMessage: {
+        text: contentText,
+        fileIds: fileIds?.map((x) => x.id),
+      },
       timezoneOffset: new Date().getTimezoneOffset(),
     };
 
@@ -338,6 +344,13 @@ const Chat = memo(() => {
       messageList,
       messageList[messageList.length - 1].id,
     );
+
+    const chatList = chats.map((x) =>
+      x.id === selectedChat.id ? { ...x, updatedAt: getNowAsISODateString() } : x,
+    );
+
+    chatDispatch(setChats(chatList));
+    chatDispatch(setChatGroups(chatList));
     messageDispatch(setSelectedMessages(selectedMsgs));
     messageDispatch(setMessages(messageList));
     changeSelectedChatStatus(ChatStatus.None);
@@ -389,6 +402,7 @@ const Chat = memo(() => {
   };
 
   const handleChangeChatLeafMessageId = (messageId: string) => {
+    if (selectedChat.status === ChatStatus.Chatting) return;
     const leafId = findLastLeafId(messages, messageId);
     if (leafId === selectedChat.leafMessageId) return;
     const selectedMsgs = findSelectedMessageByLeafId(messages, leafId);
@@ -396,6 +410,11 @@ const Chat = memo(() => {
     chatDispatch(
       setSelectedChat({ ...selectedChat, leafMessageId: messageId }),
     );
+    const chatList = chats.map((x) =>
+      x.id === selectedChat.id ? { ...x, updatedAt: getNowAsISODateString() } : x,
+    );
+    chatDispatch(setChats(chatList));
+    chatDispatch(setChatGroups(chatList));
     putChats(selectedChat.id, {
       setsLeafMessageId: true,
       leafMessageId: leafId,

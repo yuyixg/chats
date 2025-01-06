@@ -223,13 +223,13 @@ public class ChatController(ChatStopService stopService) : ControllerBase
             else if (parentMessage.Role == DBChatRole.Assistant)
             {
                 // kind: EditUserMessageRequest
-                dbUserMessage = MakeDbUserMessage(chat, idEncryption, req);
+                dbUserMessage = await MakeDbUserMessage(chat, fup, req, cancellationToken);
             }
         }
         else
         {
             // kind: NewMessageRequest
-            dbUserMessage = MakeDbUserMessage(chat, idEncryption, req);
+            dbUserMessage = await MakeDbUserMessage(chat, fup, req, cancellationToken);
         }
 
         Response.Headers.ContentType = "text/event-stream";
@@ -276,7 +276,8 @@ public class ChatController(ChatStopService stopService) : ControllerBase
                 {
                     chat.LeafMessage = dbAssistantMessage;
                 }
-                await db.SaveChangesAsync(cancellationToken);
+                chat.UpdatedAt = DateTime.UtcNow;
+                await db.SaveChangesAsync(CancellationToken.None);
                 
                 if (dbUserMessage != null && !dbUserMessageYield)
                 {
@@ -348,13 +349,13 @@ public class ChatController(ChatStopService stopService) : ControllerBase
         }
     }
 
-    private static Message MakeDbUserMessage(Chat chat, IUrlEncryptionService idEncryption, ChatRequest req)
+    private static async Task<Message> MakeDbUserMessage(Chat chat, FileUrlProvider fup, ChatRequest req, CancellationToken cancellationToken)
     {
         // insert new user message
         Message? dbUserMessage = new()
         {
             ChatRoleId = (byte)DBChatRole.User,
-            MessageContents = req.UserMessage!.ToMessageContents(idEncryption),
+            MessageContents = await req.UserMessage!.ToMessageContents(fup, cancellationToken),
             CreatedAt = DateTime.UtcNow,
             ParentId = req.MessageId,
         };

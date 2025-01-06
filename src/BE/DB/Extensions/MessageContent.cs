@@ -11,7 +11,7 @@ public partial class MessageContent
         return (DBMessageContentType)ContentTypeId switch
         {
             DBMessageContentType.Text => ChatMessageContentPart.CreateTextPart(MessageContentText!.Content),
-            DBMessageContentType.FileId => await fup.CreateOpenAIPart(MessageContentFile!, cancellationToken),
+            DBMessageContentType.FileId => await fup.CreateOpenAIPart(MessageContentFile, cancellationToken),
             _ => throw new NotImplementedException()
         };
     }
@@ -32,9 +32,9 @@ public partial class MessageContent
         return new MessageContent { MessageContentText = new() { Content = text }, ContentTypeId = (byte)DBMessageContentType.Text };
     }
 
-    public static MessageContent FromFileId(int fileId)
+    public static MessageContent FromFile(int fileId, File file)
     {
-        return new MessageContent { MessageContentFile = new() { FileId = fileId }, ContentTypeId = (byte)DBMessageContentType.FileId };
+        return new MessageContent { MessageContentFile = new() { FileId = fileId, File = file }, ContentTypeId = (byte)DBMessageContentType.FileId };
     }
 
     public static MessageContent FromError(string error)

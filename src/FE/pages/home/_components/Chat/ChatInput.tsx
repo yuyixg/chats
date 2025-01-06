@@ -276,6 +276,15 @@ const ChatInput = ({
               ))}
           </div>
 
+          {showScrollDownButton && (
+            <Button
+              className="absolute w-auto h-auto -right-1 bottom-12 rounded-full bg-transparent hover:bg-transparent"
+              onClick={onScrollDownClick}
+            >
+              <IconArrowDown />
+            </Button>
+          )}
+
           <textarea
             ref={textareaRef}
             className="m-0 w-full resize-none border-none outline-none rounded-md p-0 py-2 pr-16 pl-4 bg-background md:py-3 md:pl-4"
@@ -333,15 +342,6 @@ const ChatInput = ({
               />
             )}
           </div>
-
-          {showScrollDownButton && (
-            <Button
-              className="absolute bottom-8 w-auto h-auto -right-1 lg:bottom-0.5 lg:-right-10 rounded-full bg-transparent hover:bg-transparent"
-              onClick={onScrollDownClick}
-            >
-              <IconArrowDown />
-            </Button>
-          )}
 
           {showPromptList && filteredPrompts.length > 0 && (
             <div className="absolute bottom-12 w-full">

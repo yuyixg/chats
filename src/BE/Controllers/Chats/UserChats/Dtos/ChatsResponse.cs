@@ -20,8 +20,8 @@ public record ChatsResponse
     [JsonPropertyName("leafMessageId")]
     public required string? LeafMessageId { get; init; }
 
-    [JsonPropertyName("createdAt")]
-    public required DateTime CreatedAt { get; init; }
+    [JsonPropertyName("updatedAt")]
+    public required DateTime UpdatedAt { get; init; }
 }
 
 public record ChatSpanDto

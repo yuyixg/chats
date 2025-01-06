@@ -141,7 +141,7 @@ const ConversationComponent = ({ chat }: Props) => {
         </div>
       ) : (
         <button
-          className={`flex w-full cursor-pointer items-center gap-2 rounded-lg p-3 text-sm transition-colors duration-200 hover:bg-muted ${
+          className={`flex w-full cursor-pointer items-center gap-2 rounded-lg p-3 transition-colors duration-200 hover:bg-muted ${
             chatting ? 'disabled:cursor-not-allowed' : ''
           } ${selectChatId === chat.id ? 'bg-muted' : ''}`}
           onClick={() => handleSelectChat(chat)}
@@ -164,7 +164,7 @@ const ConversationComponent = ({ chat }: Props) => {
           </div>
 
           <div
-            className={`relative max-h-5 flex-1 overflow-hidden text-ellipsis whitespace-nowrap break-all text-left text-[12.5px] leading-4 ${
+            className={`relative max-h-5 flex-1 overflow-hidden text-ellipsis whitespace-nowrap text-sm break-all text-left text-[12.5px] leading-4 ${
               selectChatId === chat.id ? 'pr-12' : 'pr-1'
             }`}
           >
