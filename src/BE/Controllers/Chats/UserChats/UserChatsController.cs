@@ -166,6 +166,31 @@ public class UserChatsController(ChatsDB db, CurrentUser currentUser, IUrlEncryp
         return NoContent();
     }
 
+    [HttpGet("archived")]
+    public async Task<ActionResult<ChatsResponse>> ListArchived(CancellationToken cancellationToken)
+    {
+        List<ChatsResponse> result = await db.Chats
+            .Where(x => x.UserId == currentUser.Id && x.IsArchived)
+            .Select(x => new ChatsResponse()
+            {
+                Id = idEncryption.EncryptChatId(x.Id),
+                Title = x.Title,
+                Spans = x.ChatSpans.Select(s => new ChatSpanDto
+                {
+                    SpanId = s.SpanId,
+                    ModelId = s.ModelId,
+                    ModelName = s.Model.Name,
+                    ModelProviderId = s.Model.ModelKey.ModelProviderId,
+                    Temperature = s.Temperature,
+                    EnableSearch = s.EnableSearch,
+                }).ToArray(),
+                LeafMessageId = x.LeafMessageId != null ? idEncryption.EncryptMessageId(x.LeafMessageId.Value) : null,
+                UpdatedAt = x.UpdatedAt,
+            })
+            .ToListAsync(cancellationToken);
+        return Ok(result);
+    }
+
     [HttpPut("{encryptedChatId}")]
     public async Task<IActionResult> UpdateChats(string encryptedChatId, [FromBody] UpdateChatsRequest request, CancellationToken cancellationToken)
     {
