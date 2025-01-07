@@ -32,18 +32,18 @@ public class MessagesController(ChatsDB db, CurrentUser currentUser, IUrlEncrypt
                     .ToArray(),
                 CreatedAt = x.CreatedAt,
                 SpanId = x.SpanId,
-                Usage = x.Usage == null ? null : new ChatMessageTempUsage()
+                Usage = x.MessageResponse!.Usage == null ? null : new ChatMessageTempUsage()
                 {
-                    InputTokens = x.Usage.InputTokens,
-                    OutputTokens = x.Usage.OutputTokens,
-                    InputPrice = x.Usage.InputCost,
-                    OutputPrice = x.Usage.OutputCost,
-                    ReasoningTokens = x.Usage.ReasoningTokens,
-                    Duration = x.Usage.TotalDurationMs - x.Usage.PreprocessDurationMs,
-                    FirstTokenLatency = x.Usage.FirstResponseDurationMs,
-                    ModelId = x.Usage.UserModel.ModelId,
-                    ModelName = x.Usage.UserModel.Model.Name,
-                    ModelProviderId = x.Usage.UserModel.Model.ModelKey.ModelProviderId,
+                    InputTokens = x.MessageResponse.Usage.InputTokens,
+                    OutputTokens = x.MessageResponse.Usage.OutputTokens,
+                    InputPrice = x.MessageResponse.Usage.InputCost,
+                    OutputPrice = x.MessageResponse.Usage.OutputCost,
+                    ReasoningTokens = x.MessageResponse.Usage.ReasoningTokens,
+                    Duration = x.MessageResponse.Usage.TotalDurationMs - x.MessageResponse.Usage.PreprocessDurationMs,
+                    FirstTokenLatency = x.MessageResponse.Usage.FirstResponseDurationMs,
+                    ModelId = x.MessageResponse.Usage.UserModel.ModelId,
+                    ModelName = x.MessageResponse.Usage.UserModel.Model.Name,
+                    ModelProviderId = x.MessageResponse.Usage.UserModel.Model.ModelKey.ModelProviderId,
                 },
             })
             .OrderBy(x => x.CreatedAt)

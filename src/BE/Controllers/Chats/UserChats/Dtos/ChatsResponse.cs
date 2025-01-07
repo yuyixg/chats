@@ -14,9 +14,6 @@ public record ChatsResponse
     [JsonPropertyName("spans")]
     public required ChatSpanDto[] Spans { get; init; }
 
-    [JsonPropertyName("isShared")]
-    public required bool IsShared { get; init; }
-
     [JsonPropertyName("leafMessageId")]
     public required string? LeafMessageId { get; init; }
 

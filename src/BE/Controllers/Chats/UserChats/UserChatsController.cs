@@ -19,12 +19,11 @@ public class UserChatsController(ChatsDB db, CurrentUser currentUser, IUrlEncryp
     public async Task<ActionResult<ChatsResponse>> GetOneChat(string encryptedChatId, CancellationToken cancellationToken)
     {
         ChatsResponse? result = await db.Chats
-            .Where(x => x.Id == idEncryption.DecryptChatId(encryptedChatId) && x.UserId == currentUser.Id && !x.IsDeleted)
+            .Where(x => x.Id == idEncryption.DecryptChatId(encryptedChatId) && x.UserId == currentUser.Id && !x.IsArchived)
             .Select(x => new ChatsResponse()
             {
                 Id = idEncryption.EncryptChatId(x.Id),
                 Title = x.Title,
-                IsShared = x.IsShared,
                 Spans = x.ChatSpans.Select(s => new ChatSpanDto
                 {
                     SpanId = s.SpanId,
@@ -51,7 +50,7 @@ public class UserChatsController(ChatsDB db, CurrentUser currentUser, IUrlEncryp
     public async Task<ActionResult<PagedResult<ChatsResponse>>> GetChats([FromQuery] PagingRequest request, CancellationToken cancellationToken)
     {
         IQueryable<Chat> query = db.Chats
-            .Where(x => x.UserId == currentUser.Id && !x.IsDeleted)
+            .Where(x => x.UserId == currentUser.Id && !x.IsArchived)
             .OrderByDescending(x => x.UpdatedAt);
         if (!string.IsNullOrWhiteSpace(request.Query))
         {
@@ -63,7 +62,6 @@ public class UserChatsController(ChatsDB db, CurrentUser currentUser, IUrlEncryp
             {
                 Id = idEncryption.EncryptChatId(x.Id),
                 Title = x.Title,
-                IsShared = x.IsShared,
                 Spans = x.ChatSpans.Select(s => new ChatSpanDto
                 {
                     SpanId = s.SpanId,
@@ -95,15 +93,14 @@ public class UserChatsController(ChatsDB db, CurrentUser currentUser, IUrlEncryp
         {
             UserId = currentUser.Id,
             Title = request.Title,
-            IsShared = false,
             CreatedAt = DateTime.UtcNow,
-            IsDeleted = false,
+            IsArchived = false,
             UpdatedAt = DateTime.UtcNow,
         };
 
         Chat? lastChat = await db.Chats
             .Include(x => x.ChatSpans.OrderBy(x => x.SpanId))
-            .Where(x => x.UserId == currentUser.Id && !x.IsDeleted && x.ChatSpans.Any())
+            .Where(x => x.UserId == currentUser.Id && !x.IsArchived && x.ChatSpans.Any())
             .OrderByDescending(x => x.CreatedAt)
             .FirstOrDefaultAsync(cancellationToken);
         if (lastChat != null && lastChat.ChatSpans.All(cs => validModels.ContainsKey(cs.ModelId)))
@@ -137,7 +134,6 @@ public class UserChatsController(ChatsDB db, CurrentUser currentUser, IUrlEncryp
         {
             Id = idEncryption.EncryptChatId(chat.Id),
             Title = chat.Title,
-            IsShared = chat.IsShared,
             Spans = chat.ChatSpans.Select(s => new ChatSpanDto
             {
                 SpanId = s.SpanId,
@@ -167,7 +163,7 @@ public class UserChatsController(ChatsDB db, CurrentUser currentUser, IUrlEncryp
         {
             await db.Chats
                 .Where(x => x.Id == chatId)
-                .ExecuteUpdateAsync(x => x.SetProperty(y => y.IsDeleted, true), cancellationToken);
+                .ExecuteUpdateAsync(x => x.SetProperty(y => y.IsArchived, true), cancellationToken);
         }
         else
         {

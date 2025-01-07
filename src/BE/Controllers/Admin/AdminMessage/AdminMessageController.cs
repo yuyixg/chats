@@ -34,8 +34,7 @@ public class AdminMessageController(ChatsDB db, CurrentUser currentUser, IUrlEnc
             {
                 Id = idEncryption.EncryptChatId(x.Id),
                 CreatedAt = x.CreatedAt,
-                IsDeleted = x.IsDeleted,
-                IsShared = x.IsShared,
+                IsDeleted = x.IsArchived,
                 Title = x.Title,
                 UserName = x.User.UserName,
                 Spans = x.ChatSpans.Select(s => new ChatSpanDto
@@ -85,23 +84,24 @@ public class AdminMessageController(ChatsDB db, CurrentUser currentUser, IUrlEnc
             .Include(x => x.MessageContents).ThenInclude(x => x.MessageContentBlob)
             .Include(x => x.MessageContents).ThenInclude(x => x.MessageContentFile).ThenInclude(x => x!.File).ThenInclude(x => x.FileService)
             .Include(x => x.MessageContents).ThenInclude(x => x.MessageContentText)
+            .Include(x => x.MessageResponse).ThenInclude(x => x!.Usage)
             .Where(x => x.ChatId == chatId)
             .Select(x => new AdminMessageItemTemp
             {
                 Id = x.Id,
                 ParentId = x.ParentId,
-                ModelName = x.Usage!.UserModel.Model.Name,
+                ModelName = x.MessageResponse!.Usage.UserModel.Model.Name,
                 CreatedAt = x.CreatedAt,
-                InputTokens = x.Usage.InputTokens,
-                OutputTokens = x.Usage.OutputTokens,
-                InputPrice = x.Usage.InputCost,
-                OutputPrice = x.Usage.OutputCost,
-                ReasoningTokens = x.Usage.ReasoningTokens,
+                InputTokens = x.MessageResponse!.Usage.InputTokens,
+                OutputTokens = x.MessageResponse!.Usage.OutputTokens,
+                InputPrice = x.MessageResponse!.Usage.InputCost,
+                OutputPrice = x.MessageResponse!.Usage.OutputCost,
+                ReasoningTokens = x.MessageResponse!.Usage!.ReasoningTokens,
                 Role = (DBChatRole)x.ChatRoleId,
                 Content = x.MessageContents
                     .ToArray(),
-                Duration = x.Usage.TotalDurationMs - x.Usage.PreprocessDurationMs,
-                FirstTokenLatency = x.Usage.FirstResponseDurationMs
+                Duration = x.MessageResponse!.Usage.TotalDurationMs - x.MessageResponse!.Usage.PreprocessDurationMs,
+                FirstTokenLatency = x.MessageResponse!.Usage.FirstResponseDurationMs
             })
             .OrderBy(x => x.Id)
             .ToArrayAsync(cancellationToken);

@@ -30,7 +30,17 @@ public static class UrlEncryptionServiceExtensions
         return that.CreateSignedPath(timedId, EncryptionPurpose.FileId);
     }
 
+    public static string CreateChatIdPath(this IUrlEncryptionService that, TimedId timedId)
+    {
+        return that.CreateSignedPath(timedId, EncryptionPurpose.ChatId);
+    }
+
     public static Result<int> DecodeFileIdPath(this IUrlEncryptionService that, string path, long validBefore, string hash)
+    {
+        return that.DecodeSignedPathAsInt32(path, validBefore, hash, EncryptionPurpose.FileId);
+    }
+
+    public static Result<int> DecodeChatIdPath(this IUrlEncryptionService that, string path, long validBefore, string hash)
     {
         return that.DecodeSignedPathAsInt32(path, validBefore, hash, EncryptionPurpose.FileId);
     }

@@ -52,18 +52,18 @@ public record SseResponseLine
             ParentId = assistantMessage.ParentId,
             Role = (DBChatRole)assistantMessage.ChatRoleId,
             SpanId = assistantMessage.SpanId,
-            Usage = assistantMessage.Usage == null ? null : new ChatMessageTempUsage()
+            Usage = assistantMessage.MessageResponse?.Usage == null ? null : new ChatMessageTempUsage()
             {
-                Duration = assistantMessage.Usage.TotalDurationMs - assistantMessage.Usage.PreprocessDurationMs,
-                FirstTokenLatency = assistantMessage.Usage.FirstResponseDurationMs,
-                InputPrice = assistantMessage.Usage.InputCost,
-                InputTokens = assistantMessage.Usage.InputTokens,
-                ModelId = assistantMessage.Usage.UserModel.ModelId,
-                ModelName = assistantMessage.Usage.UserModel.Model.Name,
-                OutputPrice = assistantMessage.Usage.OutputCost,
-                OutputTokens = assistantMessage.Usage.OutputTokens,
-                ReasoningTokens = assistantMessage.Usage.ReasoningTokens,
-                ModelProviderId = assistantMessage.Usage.UserModel.Model.ModelKey.ModelProviderId,
+                Duration = assistantMessage.MessageResponse.Usage.TotalDurationMs - assistantMessage.MessageResponse.Usage.PreprocessDurationMs,
+                FirstTokenLatency = assistantMessage.MessageResponse.Usage.FirstResponseDurationMs,
+                InputPrice = assistantMessage.MessageResponse.Usage.InputCost,
+                InputTokens = assistantMessage.MessageResponse.Usage.InputTokens,
+                ModelId = assistantMessage.MessageResponse.Usage.UserModel.ModelId,
+                ModelName = assistantMessage.MessageResponse.Usage.UserModel.Model.Name,
+                OutputPrice = assistantMessage.MessageResponse.Usage.OutputCost,
+                OutputTokens = assistantMessage.MessageResponse.Usage.OutputTokens,
+                ReasoningTokens = assistantMessage.MessageResponse.Usage.ReasoningTokens,
+                ModelProviderId = assistantMessage.MessageResponse.Usage.UserModel.Model.ModelKey.ModelProviderId,
             },
         };
         MessageDto assistantMessageDto = assistantMessageTemp.ToDto(urlEncryptionService, fup);
