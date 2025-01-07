@@ -25,6 +25,8 @@ public class UserChatsController(ChatsDB db, CurrentUser currentUser, IUrlEncryp
                 Id = idEncryption.EncryptChatId(x.Id),
                 Title = x.Title,
                 IsTopMost = x.IsTopMost,
+                Group = x.ChatGroup!.Name,
+                Tags = x.ChatTags.Select(x => x.Name).ToArray(),
                 Spans = x.ChatSpans.Select(s => new ChatSpanDto
                 {
                     SpanId = s.SpanId,
@@ -65,6 +67,8 @@ public class UserChatsController(ChatsDB db, CurrentUser currentUser, IUrlEncryp
                 Id = idEncryption.EncryptChatId(x.Id),
                 Title = x.Title,
                 IsTopMost = x.IsTopMost,
+                Group = x.ChatGroup!.Name,
+                Tags = x.ChatTags.Select(x => x.Name).ToArray(),
                 Spans = x.ChatSpans.Select(s => new ChatSpanDto
                 {
                     SpanId = s.SpanId,
@@ -139,6 +143,8 @@ public class UserChatsController(ChatsDB db, CurrentUser currentUser, IUrlEncryp
             Id = idEncryption.EncryptChatId(chat.Id),
             Title = chat.Title,
             IsTopMost = chat.IsTopMost,
+            Group = null,
+            Tags = [],
             Spans = chat.ChatSpans.Select(s => new ChatSpanDto
             {
                 SpanId = s.SpanId,
@@ -181,6 +187,8 @@ public class UserChatsController(ChatsDB db, CurrentUser currentUser, IUrlEncryp
                 Id = idEncryption.EncryptChatId(x.Id),
                 Title = x.Title,
                 IsTopMost = x.IsTopMost,
+                Group = x.ChatGroup!.Name,
+                Tags = x.ChatTags.Select(x => x.Name).ToArray(),
                 Spans = x.ChatSpans.Select(s => new ChatSpanDto
                 {
                     SpanId = s.SpanId,
@@ -229,6 +237,4 @@ public class UserChatsController(ChatsDB db, CurrentUser currentUser, IUrlEncryp
         }
         return NoContent();
     }
-
-
 }
