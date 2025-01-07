@@ -93,6 +93,7 @@ public class MessagesController(ChatsDB db, CurrentUser currentUser, IUrlEncrypt
         long messageId = urlEncryption.DecryptMessageId(encryptedMessageId);
         Message? message = await db.Messages
             .Include(x => x.MessageResponse)
+            .Include(x => x.Chat)
             .FirstOrDefaultAsync(x => x.Id == messageId, cancellationToken);
 
         if (message == null || message.MessageResponse == null)
@@ -100,8 +101,86 @@ public class MessagesController(ChatsDB db, CurrentUser currentUser, IUrlEncrypt
             return NotFound();
         }
 
+        if (message.Chat.UserId != currentUser.Id)
+        {
+            return Forbid();
+        }
+
         message.MessageResponse.ReactionId = reactionId;
+        message.Chat.UpdatedAt = DateTime.UtcNow;
         await db.SaveChangesAsync(cancellationToken);
         return Ok();
+    }
+
+    [HttpPut("{encryptedMessageId}/edit")]
+    public async Task<ActionResult> EditMessage(string encryptedMessageId, [FromBody] MessageContentRequest content,
+        [FromServices] FileUrlProvider fup,
+        CancellationToken cancellationToken)
+    {
+        long messageId = urlEncryption.DecryptMessageId(encryptedMessageId);
+        Message? message = await db.Messages
+            .Include(x => x.MessageContents)
+            .Include(x => x.Chat)
+            .FirstOrDefaultAsync(x => x.Id == messageId, cancellationToken);
+        if (message == null)
+        {
+            return NotFound();
+        }
+        if (message.Chat.UserId != currentUser.Id)
+        {
+            return Forbid();
+        }
+
+        message.MessageContents = await content.ToMessageContents(fup, cancellationToken);
+        message.Chat.UpdatedAt = DateTime.UtcNow;
+        await db.SaveChangesAsync(cancellationToken);
+        return Ok();
+    }
+
+    [HttpDelete("{encryptedMessageId}")]
+    public async Task<ActionResult<string[]>> DeleteMessage(string encryptedMessageId, bool recursive, CancellationToken cancellationToken)
+    {
+        long messageId = urlEncryption.DecryptMessageId(encryptedMessageId);
+        Message? message = await db.Messages
+            .Include(x => x.Chat)
+            .Include(x => x.InverseParent)
+            .FirstOrDefaultAsync(x => x.Id == messageId, cancellationToken);
+        if (message == null)
+        {
+            return NotFound();
+        }
+        if (message.Chat.UserId != currentUser.Id)
+        {
+            return Forbid();
+        }
+
+        if (message.InverseParent.Count > 0)
+        {
+            if (!recursive)
+            {
+                return BadRequest("Cannot delete a message with replies");
+            }
+
+            List<long> messageIdsQueue = [messageId];
+            List<long> toDeleteMessageIds = [];
+            while (messageIdsQueue.Count > 0)
+            {
+                toDeleteMessageIds.AddRange(messageIdsQueue);
+                messageIdsQueue = await db.Messages
+                        .Where(x => x.ParentId != null && messageIdsQueue.Contains(x.ParentId.Value))
+                        .Select(x => x.Id)
+                        .ToListAsync(cancellationToken);
+            }
+            await db.Messages
+                .Where(x => toDeleteMessageIds.Contains(x.Id))
+                .ExecuteDeleteAsync(cancellationToken);
+            return Ok(toDeleteMessageIds.Select(urlEncryption.EncryptMessageId));
+        }
+        else
+        {
+            db.Messages.Remove(message);
+            await db.SaveChangesAsync(cancellationToken);
+            return Ok(new string[] { urlEncryption.EncryptMessageId(messageId) });
+        }
     }
 }
