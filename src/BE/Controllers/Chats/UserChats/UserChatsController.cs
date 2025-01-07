@@ -50,10 +50,17 @@ public class UserChatsController(ChatsDB db, CurrentUser currentUser, IUrlEncryp
     }
 
     [HttpGet]
-    public async Task<ActionResult<PagedResult<ChatsResponse>>> GetChats([FromQuery] PagingRequest request, CancellationToken cancellationToken)
+    public async Task<ActionResult<PagedResult<ChatsResponse>>> GetChatsForGroup([FromQuery] ChatsQuery request, CancellationToken cancellationToken)
     {
+        PagedResult<ChatsResponse> result = await GetChatsForGroupAsync(db, currentUser, idEncryption, request, cancellationToken);
+        return Ok(result);
+    }
+
+    internal static async Task<PagedResult<ChatsResponse>> GetChatsForGroupAsync(ChatsDB db, CurrentUser currentUser, IUrlEncryptionService idEncryption, ChatsQuery request, CancellationToken cancellationToken)
+    {
+        int? chatGroupId = request.GroupId != null ? idEncryption.DecryptChatGroupId(request.GroupId) : null;
         IQueryable<Chat> query = db.Chats
-            .Where(x => x.UserId == currentUser.Id && !x.IsArchived)
+            .Where(x => x.UserId == currentUser.Id && !x.IsArchived && x.ChatGroupId == chatGroupId)
             .OrderByDescending(x => x.IsTopMost)
             .ThenByDescending(x => x.UpdatedAt);
         if (!string.IsNullOrWhiteSpace(request.Query))
@@ -83,7 +90,7 @@ public class UserChatsController(ChatsDB db, CurrentUser currentUser, IUrlEncryp
             }),
             request,
             cancellationToken);
-        return Ok(result);
+        return result;
     }
 
     [HttpPost]

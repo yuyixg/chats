@@ -29,6 +29,39 @@ public class ChatGroupController(ChatsDB db, CurrentUser user, IUrlEncryptionSer
         return Ok(groups);
     }
 
+    [HttpGet("with-messages")]
+    public async Task<ActionResult<ChatGroupDto[]>> ListGroupsWithMessages([FromServices] IServiceScopeFactory scopeFactory, CancellationToken cancellationToken)
+    {
+        List<ChatGroupDtoWithMessage> groups = await db.ChatGroups
+            .OrderBy(x => x.Rank)
+            .ThenBy(x => x.Name)
+            .Where(x => x.UserId == user.Id)
+            .Select(x => new ChatGroupDtoWithMessage
+            {
+                Id = urlEncryption.EncryptChatGroupId(x.Id),
+                Name = x.Name,
+                Rank = x.Rank,
+                IsExpanded = x.IsExpanded,
+            })
+            .ToListAsync(cancellationToken);
+        groups.Add(new ChatGroupDtoWithMessage()
+        {
+            Id = null!,
+            Name = "Ungrouped",
+            IsExpanded = true,
+            Rank = 0,
+        });
+
+        await Parallel.ForEachAsync(groups.Where(x => x.IsExpanded), cancellationToken, async (group, ct) =>
+        {
+            using IServiceScope scope = scopeFactory.CreateScope();
+            using ChatsDB db = scope.ServiceProvider.GetRequiredService<ChatsDB>();
+            group.Messages = await UserChatsController.GetChatsForGroupAsync(db, user, urlEncryption, new ChatsQuery(group.Id, 1, 50, null), ct);
+        });
+
+        return Ok(groups);
+    }
+
     [HttpPost]
     public async Task<ActionResult<ChatGroupDto>> CreateGroup([FromBody] CreateChatGroupRequest req, CancellationToken cancellationToken)
     {
