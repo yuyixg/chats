@@ -28,37 +28,22 @@ internal class Utils
         aes.Key = key;
 
         byte[] encryptedIdBytes = aes.EncryptCbc(input, iv);
-
-        byte[] encryptedIdBytesWithIV = new byte[1 + encryptedIdBytes.Length];
-        encryptedIdBytesWithIV[0] = 0; // Version
-        Array.Copy(encryptedIdBytes, 0, encryptedIdBytesWithIV, 1, encryptedIdBytes.Length);
-
-        return WebEncoders.Base64UrlEncode(encryptedIdBytesWithIV);
+        return WebEncoders.Base64UrlEncode(encryptedIdBytes);
     }
 
     public static byte[] Decrypt(string encrypted, byte[] key, byte[] iv)
     {
-        byte[] encryptedIdBytesWithIV = WebEncoders.Base64UrlDecode(encrypted);
+        byte[] encryptedIdBytes = WebEncoders.Base64UrlDecode(encrypted);
 
-        if (encryptedIdBytesWithIV[0] == 0) // Version 0
+        if (encryptedIdBytes.Length != 16)
         {
-            if (encryptedIdBytesWithIV.Length != 1 + 16)
-            {
-                throw new InvalidOperationException("Invalid encrypted ID length.");
-            }
-
-            byte[] encryptedIdBytes = new byte[encryptedIdBytesWithIV.Length - 1];
-            Array.Copy(encryptedIdBytesWithIV, 1, encryptedIdBytes, 0, encryptedIdBytes.Length);
-
-            using Aes aes = Aes.Create();
-            aes.Key = key;
-            byte[] decryptedIdBytes = aes.DecryptCbc(encryptedIdBytes, iv);
-
-            return decryptedIdBytes;
+            throw new InvalidOperationException("Invalid encrypted ID length.");
         }
-        else
-        {
-            throw new InvalidOperationException($"Unsupported version: {encryptedIdBytesWithIV[0]}");
-        }
+
+        using Aes aes = Aes.Create();
+        aes.Key = key;
+        byte[] decryptedIdBytes = aes.DecryptCbc(encryptedIdBytes, iv);
+
+        return decryptedIdBytes;
     }
 }
