@@ -804,3 +804,6 @@ GO
 ALTER TABLE dbo.Chat SET (LOCK_ESCALATION = TABLE)
 GO
 COMMIT
+
+
+EXECUTE sp_rename N'dbo.ChatGroup.IsCollapsed', N'IsExpanded', 'COLUMN';

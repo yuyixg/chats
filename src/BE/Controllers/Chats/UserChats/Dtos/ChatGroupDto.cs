@@ -13,8 +13,8 @@ public record ChatGroupDto
     [JsonPropertyName("rank")]
     public required short Rank { get; init; }
 
-    [JsonPropertyName("isCollapsed")]
-    public required bool IsCollapsed { get; init; }
+    [JsonPropertyName("isExpanded")]
+    public required bool IsExpanded { get; init; }
 }
 
 public record CreateChatGroupRequest
@@ -25,6 +25,6 @@ public record CreateChatGroupRequest
     [JsonPropertyName("rank")]
     public required short Rank { get; init; }
 
-    [JsonPropertyName("isCollapsed")]
-    public required bool IsCollapsed { get; init; }
+    [JsonPropertyName("isExpanded")]
+    public required bool IsExpanded { get; init; }
 }

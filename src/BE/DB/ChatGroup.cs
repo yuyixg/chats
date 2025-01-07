@@ -18,7 +18,7 @@ public partial class ChatGroup
     [StringLength(50)]
     public string Name { get; set; } = null!;
 
-    public bool IsCollapsed { get; set; }
+    public bool IsExpanded { get; set; }
 
     public short Rank { get; set; }
 

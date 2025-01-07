@@ -23,7 +23,7 @@ public class ChatGroupController(ChatsDB db, CurrentUser user, IUrlEncryptionSer
                 Id = urlEncryption.EncryptChatGroupId(x.Id),
                 Name = x.Name,
                 Rank = x.Rank,
-                IsCollapsed = x.IsCollapsed,
+                IsExpanded = x.IsExpanded,
             })
             .ToArrayAsync(cancellationToken);
         return Ok(groups);
@@ -47,7 +47,7 @@ public class ChatGroupController(ChatsDB db, CurrentUser user, IUrlEncryptionSer
             Name = req.Name,
             UserId = user.Id,
             Rank = req.Rank,
-            IsCollapsed = req.IsCollapsed,
+            IsExpanded = req.IsExpanded,
         };
         db.ChatGroups.Add(group);
         await db.SaveChangesAsync(cancellationToken);
@@ -56,7 +56,7 @@ public class ChatGroupController(ChatsDB db, CurrentUser user, IUrlEncryptionSer
             Id = urlEncryption.EncryptChatGroupId(group.Id),
             Name = group.Name,
             Rank = group.Rank,
-            IsCollapsed = group.IsCollapsed,
+            IsExpanded = group.IsExpanded,
         });
     }
 
@@ -71,7 +71,7 @@ public class ChatGroupController(ChatsDB db, CurrentUser user, IUrlEncryptionSer
         }
         group.Name = req.Name;
         group.Rank = req.Rank;
-        group.IsCollapsed = req.IsCollapsed;
+        group.IsExpanded = req.IsExpanded;
         await db.SaveChangesAsync(cancellationToken);
         return Ok();
     }
