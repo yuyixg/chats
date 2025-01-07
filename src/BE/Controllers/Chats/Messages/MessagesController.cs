@@ -69,4 +69,39 @@ public class MessagesController(ChatsDB db, CurrentUser currentUser, IUrlEncrypt
 
         return Ok(content.ToString());
     }
+
+    [HttpPut("{encryptedMessageId}/reaction/up")]
+    public async Task<ActionResult> ReactionUp(string encryptedMessageId, CancellationToken cancellationToken)
+    {
+        return await ReactionPrivate(encryptedMessageId, reactionId: true, cancellationToken);
+    }
+
+    [HttpPut("{encryptedMessageId}/reaction/down")]
+    public async Task<ActionResult> ReactionDown(string encryptedMessageId, CancellationToken cancellationToken)
+    {
+        return await ReactionPrivate(encryptedMessageId, reactionId: false, cancellationToken);
+    }
+
+    [HttpPut("{encryptedMessageId}/reaction/clear")]
+    public async Task<ActionResult> ReactionClear(string encryptedMessageId, CancellationToken cancellationToken)
+    {
+        return await ReactionPrivate(encryptedMessageId, reactionId: null, cancellationToken);
+    }
+
+    private async Task<ActionResult> ReactionPrivate(string encryptedMessageId, bool? reactionId, CancellationToken cancellationToken)
+    {
+        long messageId = urlEncryption.DecryptMessageId(encryptedMessageId);
+        Message? message = await db.Messages
+            .Include(x => x.MessageResponse)
+            .FirstOrDefaultAsync(x => x.Id == messageId, cancellationToken);
+
+        if (message == null || message.MessageResponse == null)
+        {
+            return NotFound();
+        }
+
+        message.MessageResponse.ReactionId = reactionId;
+        await db.SaveChangesAsync(cancellationToken);
+        return Ok();
+    }
 }
