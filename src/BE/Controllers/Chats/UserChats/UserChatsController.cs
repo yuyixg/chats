@@ -159,18 +159,9 @@ public class UserChatsController(ChatsDB db, CurrentUser currentUser, IUrlEncryp
             return NotFound();
         }
 
-        if (await db.Messages.AnyAsync(m => m.ChatId == chatId, cancellationToken))
-        {
-            await db.Chats
-                .Where(x => x.Id == chatId)
-                .ExecuteUpdateAsync(x => x.SetProperty(y => y.IsArchived, true), cancellationToken);
-        }
-        else
-        {
-            await db.Chats
-                .Where(x => x.Id == chatId)
-                .ExecuteDeleteAsync(cancellationToken);
-        }
+        await db.Chats
+            .Where(x => x.Id == chatId)
+            .ExecuteDeleteAsync(cancellationToken);
 
         return NoContent();
     }

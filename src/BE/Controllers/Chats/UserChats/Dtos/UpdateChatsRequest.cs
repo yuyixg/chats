@@ -10,8 +10,8 @@ public class UpdateChatsRequest
     [JsonPropertyName("title")]
     public string? Title { get; set; } = null!;
 
-    [JsonPropertyName("isDeleted")]
-    public bool? IsDeleted { get; set; }
+    [JsonPropertyName("isArchived")]
+    public bool? IsArchived { get; set; }
 
     [JsonPropertyName("setsLeafMessageId")]
     public bool SetsLeafMessageId { get; set; }
@@ -24,7 +24,7 @@ public class UpdateChatsRequest
         return new DecryptedUpdateChatsRequest
         {
             Title = Title,
-            IsDeleted = IsDeleted,
+            IsArchived = IsArchived,
             SetsLeafMessageId = SetsLeafMessageId,
             LeafMessageId = LeafMessageId switch
             {
@@ -40,7 +40,7 @@ public class DecryptedUpdateChatsRequest
 {
     public string? Title { get; set; } = null!;
 
-    public bool? IsDeleted { get; set; }
+    public bool? IsArchived { get; set; }
 
     public bool SetsLeafMessageId { get; set; }
 
@@ -69,9 +69,9 @@ public class DecryptedUpdateChatsRequest
         {
             chat.Title = Title;
         }
-        if (IsDeleted != null)
+        if (IsArchived != null)
         {
-            chat.IsArchived = IsDeleted.Value;
+            chat.IsArchived = IsArchived.Value;
         }
         if (SetsLeafMessageId)
         {
