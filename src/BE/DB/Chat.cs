@@ -8,7 +8,7 @@ namespace Chats.BE.DB;
 
 [Table("Chat")]
 [Index("ChatGroupId", Name = "IX_Chat_ChatGroupId")]
-[Index("UpdatedAt", Name = "IX_Chat_UpdatedAt")]
+[Index("IsTopMost", "UpdatedAt", Name = "IX_Chat_UpdatedAt")]
 [Index("UserId", Name = "IX_Chat_UserId")]
 public partial class Chat
 {

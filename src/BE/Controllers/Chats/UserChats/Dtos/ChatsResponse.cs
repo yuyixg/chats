@@ -11,6 +11,9 @@ public record ChatsResponse
     [JsonPropertyName("title")]
     public required string Title { get; init; }
 
+    [JsonPropertyName("isTopMost")]
+    public required bool IsTopMost { get; init; }
+
     [JsonPropertyName("spans")]
     public required ChatSpanDto[] Spans { get; init; }
 

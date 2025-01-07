@@ -13,6 +13,9 @@ public class UpdateChatsRequest
     [JsonPropertyName("isArchived")]
     public bool? IsArchived { get; set; }
 
+    [JsonPropertyName("isTopMost")]
+    public bool? IsTopMost { get; set; }
+
     [JsonPropertyName("setsLeafMessageId")]
     public bool SetsLeafMessageId { get; set; }
 
@@ -25,6 +28,7 @@ public class UpdateChatsRequest
         {
             Title = Title,
             IsArchived = IsArchived,
+            IsTopMost = IsTopMost,
             SetsLeafMessageId = SetsLeafMessageId,
             LeafMessageId = LeafMessageId switch
             {
@@ -41,6 +45,8 @@ public class DecryptedUpdateChatsRequest
     public string? Title { get; set; } = null!;
 
     public bool? IsArchived { get; set; }
+
+    public bool? IsTopMost { get; set; }
 
     public bool SetsLeafMessageId { get; set; }
 
@@ -60,6 +66,7 @@ public class DecryptedUpdateChatsRequest
                 return "Leaf message not found";
             }
         }
+
         return null;
     }
 
@@ -76,6 +83,10 @@ public class DecryptedUpdateChatsRequest
         if (SetsLeafMessageId)
         {
             chat.LeafMessageId = LeafMessageId;
+        }
+        if (IsTopMost != null)
+        {
+            chat.IsTopMost = IsTopMost.Value;
         }
     }
 }

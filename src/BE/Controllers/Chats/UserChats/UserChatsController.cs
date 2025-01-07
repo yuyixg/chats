@@ -24,6 +24,7 @@ public class UserChatsController(ChatsDB db, CurrentUser currentUser, IUrlEncryp
             {
                 Id = idEncryption.EncryptChatId(x.Id),
                 Title = x.Title,
+                IsTopMost = x.IsTopMost,
                 Spans = x.ChatSpans.Select(s => new ChatSpanDto
                 {
                     SpanId = s.SpanId,
@@ -51,10 +52,11 @@ public class UserChatsController(ChatsDB db, CurrentUser currentUser, IUrlEncryp
     {
         IQueryable<Chat> query = db.Chats
             .Where(x => x.UserId == currentUser.Id && !x.IsArchived)
-            .OrderByDescending(x => x.UpdatedAt);
+            .OrderByDescending(x => x.IsTopMost)
+            .ThenByDescending(x => x.UpdatedAt);
         if (!string.IsNullOrWhiteSpace(request.Query))
         {
-            query = query.Where(x => x.Title.Contains(request.Query));
+            query = query.Where(x => x.Title.Contains(request.Query) || x.ChatTags.Any(t => t.Name == request.Query));
         }
 
         PagedResult<ChatsResponse> result = await PagedResult.FromQuery(query
@@ -62,6 +64,7 @@ public class UserChatsController(ChatsDB db, CurrentUser currentUser, IUrlEncryp
             {
                 Id = idEncryption.EncryptChatId(x.Id),
                 Title = x.Title,
+                IsTopMost = x.IsTopMost,
                 Spans = x.ChatSpans.Select(s => new ChatSpanDto
                 {
                     SpanId = s.SpanId,
@@ -93,6 +96,7 @@ public class UserChatsController(ChatsDB db, CurrentUser currentUser, IUrlEncryp
         {
             UserId = currentUser.Id,
             Title = request.Title,
+            IsTopMost = false,
             CreatedAt = DateTime.UtcNow,
             IsArchived = false,
             UpdatedAt = DateTime.UtcNow,
@@ -134,6 +138,7 @@ public class UserChatsController(ChatsDB db, CurrentUser currentUser, IUrlEncryp
         {
             Id = idEncryption.EncryptChatId(chat.Id),
             Title = chat.Title,
+            IsTopMost = chat.IsTopMost,
             Spans = chat.ChatSpans.Select(s => new ChatSpanDto
             {
                 SpanId = s.SpanId,
@@ -175,6 +180,7 @@ public class UserChatsController(ChatsDB db, CurrentUser currentUser, IUrlEncryp
             {
                 Id = idEncryption.EncryptChatId(x.Id),
                 Title = x.Title,
+                IsTopMost = x.IsTopMost,
                 Spans = x.ChatSpans.Select(s => new ChatSpanDto
                 {
                     SpanId = s.SpanId,
@@ -223,4 +229,6 @@ public class UserChatsController(ChatsDB db, CurrentUser currentUser, IUrlEncryp
         }
         return NoContent();
     }
+
+
 }
