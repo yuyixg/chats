@@ -57,7 +57,7 @@ export interface IChat {
   spans: ChatSpanDto[];
   leafMessageId?: string;
   isTopMost: boolean;
-  groupId: string;
+  groupId: string | null;
   tags: string[];
   updatedAt: string;
 }

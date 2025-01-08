@@ -13,16 +13,14 @@ import { getUserSession, redirectToLoginPage } from '@/utils/user';
 import { ChatStatus, IChat } from '@/types/chat';
 import { IChatMessage } from '@/types/chatMessage';
 import { ChatResult, GetChatsParams } from '@/types/clientApis';
-import { IChatFolder } from '@/types/folder';
+import { IChatGroup } from '@/types/group';
 
 import Spinner from '@/components/Spinner/Spinner';
 
 import {
-  setChatFolder,
-  setChatGroups,
+  setChatGroup,
   setChatPaging,
   setChats,
-  setGroupedChats,
   setIsChatsLoading,
   setSelectedChat,
   setStopIds,
@@ -149,7 +147,6 @@ const HomeContent = () => {
       const chat = supplyChatProperty(data);
       const chatList = [chat, ...chats];
       chatDispatch(setChats(chatList));
-      chatDispatch(setChatGroups(chatList));
       chatDispatch(setSelectedChat(chat));
       messageDispatch(setMessages([]));
       messageDispatch(setSelectedMessages([]));
@@ -187,7 +184,6 @@ const HomeContent = () => {
       return x;
     });
     chatDispatch(setChats(chatList));
-    chatDispatch(setChatGroups(chatList));
   };
 
   const handleDeleteChat = (id: string) => {
@@ -195,7 +191,6 @@ const HomeContent = () => {
       return x.id !== id;
     });
     chatDispatch(setChats(chatList));
-    chatDispatch(setChatGroups(chatList));
 
     if (chatList.length > 0) {
       selectChat(chatList, chatList[0].id);
@@ -228,7 +223,6 @@ const HomeContent = () => {
         chatList = chats.concat(mapRows);
       }
       chatDispatch(setChats(chatList));
-      chatDispatch(setChatGroups(chatList));
       chatDispatch(setChatPaging({ count, page, pageSize }));
     });
   };
@@ -279,14 +273,13 @@ const HomeContent = () => {
         pageSize: 50,
       });
       const chatList: IChat[] = [];
-      const chatFolder: IChatFolder[] = [];
+      const chatGroupList: IChatGroup[] = [];
       data.forEach((d) => {
-        chatFolder.push({ ...d });
+        chatGroupList.push({ ...d });
         chatList.push(...d.messages.rows);
       });
       chatDispatch(setChats(chatList));
-      chatDispatch(setChatGroups(chatList));
-      chatDispatch(setChatFolder(chatFolder));
+      chatDispatch(setChatGroup(chatGroupList));
       selectChat(chatList);
       chatDispatch(setIsChatsLoading(false));
     });

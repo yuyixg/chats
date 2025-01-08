@@ -164,3 +164,10 @@ export interface PostChatGroupParams {
   rank?: number;
   isExpanded?: boolean;
 }
+
+export interface PutChatGroupParams {
+  id: string;
+  name?: string;
+  rank?: number;
+  isExpanded?: boolean;
+}

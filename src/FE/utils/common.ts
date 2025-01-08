@@ -41,3 +41,20 @@ export const getQueryId = (router: NextRouter): string => {
   const pathSegments = asPath.split('/');
   return pathSegments[pathSegments.length - 1] || '';
 };
+
+export function getNextName(existingNames: string[], baseName: string): string {
+  const regex = new RegExp(`^${baseName}(?: (\\d+))?$`);
+
+  let maxIndex = 0;
+
+  for (const name of existingNames) {
+    const match = name.match(regex);
+    if (match) {
+      const currentIndex = match[1] ? parseInt(match[1], 10) : 0;
+      if (currentIndex > maxIndex) {
+        maxIndex = currentIndex;
+      }
+    }
+  }
+  return `${baseName} ${maxIndex + 1}`;
+}

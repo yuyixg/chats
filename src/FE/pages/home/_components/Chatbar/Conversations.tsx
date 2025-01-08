@@ -44,11 +44,11 @@ const Conversations = ({ chatGroups }: Props) => {
           ))}
         </div>
       ))}
-      {!showMore && (
+      {/* {!showMore && (
         <Button onClick={handleShowMore} className="text-xs" variant="link">
           {t('Show more')}
         </Button>
-      )}
+      )} */}
     </div>
   );
 };

@@ -11,7 +11,7 @@ import toast from 'react-hot-toast';
 import useTranslation from '@/hooks/useTranslation';
 
 import { getApiUrl } from '@/utils/common';
-import { currentISODateString as currentISODateString } from '@/utils/date';
+import { currentISODateString } from '@/utils/date';
 import {
   findLastLeafId,
   findSelectedMessageByLeafId,
@@ -32,7 +32,6 @@ import {
 import { Prompt } from '@/types/prompt';
 
 import {
-  setChatGroups,
   setChats,
   setSelectedChat,
   setStopIds,
@@ -346,11 +345,12 @@ const Chat = memo(() => {
     );
 
     const chatList = chats.map((x) =>
-      x.id === selectedChat.id ? { ...x, updatedAt: currentISODateString() } : x,
+      x.id === selectedChat.id
+        ? { ...x, updatedAt: currentISODateString() }
+        : x,
     );
 
     chatDispatch(setChats(chatList));
-    chatDispatch(setChatGroups(chatList));
     messageDispatch(setSelectedMessages(selectedMsgs));
     messageDispatch(setMessages(messageList));
     changeSelectedChatStatus(ChatStatus.None);
@@ -411,10 +411,11 @@ const Chat = memo(() => {
       setSelectedChat({ ...selectedChat, leafMessageId: messageId }),
     );
     const chatList = chats.map((x) =>
-      x.id === selectedChat.id ? { ...x, updatedAt: currentISODateString() } : x,
+      x.id === selectedChat.id
+        ? { ...x, updatedAt: currentISODateString() }
+        : x,
     );
     chatDispatch(setChats(chatList));
-    chatDispatch(setChatGroups(chatList));
     putChats(selectedChat.id, {
       setsLeafMessageId: true,
       leafMessageId: leafId,

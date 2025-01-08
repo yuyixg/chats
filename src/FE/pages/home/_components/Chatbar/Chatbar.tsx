@@ -3,17 +3,19 @@ import { useContext, useEffect, useState } from 'react';
 import { useCreateReducer } from '@/hooks/useCreateReducer';
 import useTranslation from '@/hooks/useTranslation';
 
+import { getNextName } from '@/utils/common';
+
 import { ChatStatus } from '@/types/chat';
 import { ChatResult } from '@/types/clientApis';
 
+import { setChatGroup } from '../../_actions/chat.actions';
 import { setShowChatBar } from '../../_actions/setting.actions';
 import HomeContext from '../../_contexts/home.context';
 import Sidebar from '../Sidebar/Sidebar';
-import { ChatFolders } from './ChatFolders';
+import { ChatGroups } from './ChatGroups';
 import ChatbarContext from './Chatbar.context';
 import { ChatbarInitialState, initialState } from './Chatbar.context';
 import ChatBarSettings from './ChatbarSettings';
-import Conversations from './Conversations';
 
 import { postChatGroup } from '@/apis/clientApis';
 
@@ -25,7 +27,8 @@ const Chatbar = () => {
   });
 
   const {
-    state: { chats, showChatBar, selectedChat, isChatsLoading },
+    state: { chats, chatGroups, showChatBar, selectedChat, isChatsLoading },
+    chatDispatch,
     settingDispatch,
     handleDeleteChat,
     handleNewChat,
@@ -43,10 +46,12 @@ const Chatbar = () => {
     settingDispatch(setShowChatBar(!showChatBar));
   };
 
-  const handleAddFolder = () => {
-    postChatGroup({ rank: 0, name: t('New Folder'), isExpanded: true }).then(
-      () => {},
-    );
+  const handleAddGroup = () => {
+    const groupNames = chatGroups.map((x) => x.name);
+    const name = getNextName(groupNames, t('New Group'));
+    postChatGroup({ rank: 0, name, isExpanded: true }).then((data) => {
+      chatDispatch(setChatGroup([data, ...chatGroups]));
+    });
   };
 
   useEffect(() => {
@@ -80,9 +85,9 @@ const Chatbar = () => {
         isOpen={showChatBar}
         addItemButtonTitle={t('New chat')}
         hasModel={hasModel}
-        onAddFolder={handleAddFolder}
+        onAddFolder={handleAddGroup}
         // itemComponent={<Conversations chats={filteredChats} />}
-        folderComponent={<ChatFolders searchTerm="" />}
+        folderComponent={<ChatGroups />}
         items={filteredChats}
         searchTerm={searchTerm}
         handleSearchTerm={(value: string) => {

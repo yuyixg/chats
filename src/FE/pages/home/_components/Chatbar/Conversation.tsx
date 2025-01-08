@@ -33,7 +33,7 @@ import {
   DropdownMenuTrigger,
 } from '@/components/ui/dropdown-menu';
 
-import { setChatGroups, setChats } from '../../_actions/chat.actions';
+import { setChats } from '../../_actions/chat.actions';
 import HomeContext from '../../_contexts/home.context';
 import SharedMessageModal from '../Chat/SharedMessageModal';
 import ChatbarContext from '../Chatbar/Chatbar.context';
@@ -133,7 +133,6 @@ const ConversationComponent = ({ chat }: Props) => {
 
   const handleChangeChatPin = (chatId: string, isPin: boolean = false) => {
     putChats(chatId, { isTopMost: isPin }).then(() => {
-      toast.success(t(isPin ? 'Pin successfully' : 'UnPinned successfully'));
       chats.map((x) => {
         if (x.id === chatId) {
           x.isTopMost = isPin;

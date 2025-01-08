@@ -7,10 +7,9 @@ import { ChatSpanDto } from '@/types/clientApis';
 import {
   ChatAction,
   ChatActionTypes,
-  SetChatFolderType,
+  SetChatGroupType,
   SetChatPagingType,
   SetChatsType,
-  SetGroupedChatsType,
   SetIsChatsLoadingType,
   SetSelectedChatType,
   SetStopIdsType,
@@ -20,15 +19,6 @@ export const setChats = (chats: SetChatsType): ChatAction => ({
   type: ChatActionTypes.SET_CHATS,
   payload: chats,
 });
-
-export const setChatGroups = (chats: IChat[]): ChatAction => {
-  const chatGroups = chatsGroupByUpdatedAt(chats);
-
-  return {
-    type: ChatActionTypes.SET_CHAT_GROUPS,
-    payload: chatGroups,
-  };
-};
 
 export const setSelectedChat = (chat?: SetSelectedChatType): ChatAction => {
   return {
@@ -77,15 +67,9 @@ export const setStopIds = (stopIds: SetStopIdsType): ChatAction => ({
   payload: stopIds,
 });
 
-export const setChatFolder = (folder: SetChatFolderType): ChatAction => ({
-  type: ChatActionTypes.SET_CHAT_FOLDER,
-  payload: folder,
+export const setChatGroup = (group: SetChatGroupType): ChatAction => ({
+  type: ChatActionTypes.SET_CHAT_GROUP,
+  payload: group,
 });
 
-export const setGroupedChats = (
-  groupedChats: SetGroupedChatsType,
-): ChatAction => ({
-  type: ChatActionTypes.SET_GROUPED_CHATS,
-  payload: groupedChats,
-});
 export default function () {}

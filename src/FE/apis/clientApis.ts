@@ -19,10 +19,12 @@ import {
   PostUserChatSpanParams,
   PostUserChatSpanResult,
   PostUserPassword,
+  PutChatGroupParams,
   PutChatParams,
   SingInParams,
   SingInResult,
 } from '@/types/clientApis';
+import { IChatGroup } from '@/types/group';
 import { PageResult } from '@/types/page';
 import { Prompt, PromptSlim } from '@/types/prompt';
 import { SmsType } from '@/types/user';
@@ -274,9 +276,23 @@ export const getUserChatGroupWithMessages = (
   );
 };
 
-export const postChatGroup = (params: PostChatGroupParams) => {
+export const postChatGroup = (
+  params: PostChatGroupParams,
+): Promise<IChatGroup> => {
   const fetchServer = useFetch();
   return fetchServer.post(`/api/chat/group`, {
     body: params,
   });
+};
+
+export const putChatGroup = (params: PutChatGroupParams) => {
+  const fetchServer = useFetch();
+  return fetchServer.put(`/api/chat/group/${params.id}`, {
+    body: params,
+  });
+};
+
+export const deleteChatGroup = (id: string) => {
+  const fetchServer = useFetch();
+  return fetchServer.delete(`/api/chat/group/${id}`);
 };

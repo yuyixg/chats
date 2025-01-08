@@ -3,7 +3,7 @@ import { KeyboardEvent, ReactElement, useEffect, useState } from 'react';
 import useTranslation from '@/hooks/useTranslation';
 
 import { ChatUngrouped } from '@/types/chat';
-import { IChatFolder } from '@/types/folder';
+import { IChatGroup } from '@/types/group';
 
 import SidebarActionButton from '../Button/SidebarActionButton';
 import {
@@ -25,25 +25,25 @@ import {
 import { Input } from '../ui/input';
 
 interface Props {
-  currentFolder: IChatFolder;
-  searchTerm: string;
+  currentFolder: IChatGroup;
   defaultOpen?: boolean;
   showActions?: boolean;
   folderComponent: ReactElement | undefined;
-  onDrop: (e: any, folder: IChatFolder) => void;
-  onUpdateFolder?: (id: string, name: string) => void;
-  onDeleteFolder?: (id: string) => void;
+  onDrop: (e: any, folder: IChatGroup) => void;
+  onRenameGroup?: (id: string, value: string) => void;
+  onDeleteGroup?: (id: string) => void;
+  onClickGroup?: (group: IChatGroup) => void;
 }
 
 const Folder = ({
   currentFolder,
-  searchTerm,
   showActions = true,
   defaultOpen = false,
   folderComponent,
   onDrop,
-  onUpdateFolder,
-  onDeleteFolder,
+  onRenameGroup,
+  onDeleteGroup,
+  onClickGroup,
 }: Props) => {
   const { t } = useTranslation();
 
@@ -60,7 +60,7 @@ const Folder = ({
   };
 
   const handleRename = () => {
-    onUpdateFolder && onUpdateFolder(currentFolder.id, renameValue);
+    onRenameGroup && onRenameGroup(currentFolder.id, renameValue);
     setRenameValue('');
     setIsRenaming(false);
   };
@@ -95,26 +95,18 @@ const Folder = ({
     }
   }, [isRenaming, isDeleting]);
 
-  // useEffect(() => {
-  //   if (searchTerm) {
-  //     setIsOpen(true);
-  //   } else {
-  //     setIsOpen(false);
-  //   }
-  // }, [searchTerm]);
+  const handleClickFolder = () => {
+    setIsOpen(!isOpen);
+    onClickGroup && onClickGroup(currentFolder);
+  };
 
   return (
     <>
       <div className="relative flex items-center">
         {isRenaming ? (
-          <div className="flex w-full items-center gap-3 p-3">
-            {isOpen ? (
-              <IconChevronDown size={18} />
-            ) : (
-              <IconChevronRight size={18} />
-            )}
+          <div className="flex h-10 w-full items-center gap-2 rounded-lg bg-background p-3">
             <Input
-              className="mr-12 flex-1 overflow-hidden overflow-ellipsis border-neutral-400 bg-transparent text-left text-[12.5px] leading-3 outline-none focus:border-neutral-100"
+              className="mr-12 flex-1 overflow-hidden overflow-ellipsis border-neutral-400 bg-transparent text-left text-[12.5px] leading-3 outline-none border-none text-black dark:text-white"
               type="text"
               value={renameValue}
               onChange={(e) => setRenameValue(e.target.value)}
@@ -125,8 +117,8 @@ const Folder = ({
         ) : (
           <Button
             variant="ghost"
-            className="flex w-full gap-3 rounded-lg text-sm p-2"
-            onClick={() => setIsOpen(!isOpen)}
+            className="flex w-full gap-3 rounded-lg p-2"
+            onClick={handleClickFolder}
             onDrop={(e) => dropHandler(e)}
             onDragOver={allowDrop}
             onDragEnter={highlightDrop}
@@ -138,7 +130,7 @@ const Folder = ({
               <IconChevronRight size={18} stroke="#6b7280" />
             )}
 
-            <div className="relative flex-1 overflow-hidden text-ellipsis whitespace-nowrap break-all text-left text-sm text-gray-500">
+            <div className="relative flex-1 overflow-hidden text-ellipsis whitespace-nowrap break-all text-left text-[12.5px] text-gray-500">
               {currentFolder.name === ChatUngrouped
                 ? t('All chats')
                 : currentFolder.name}
@@ -153,7 +145,7 @@ const Folder = ({
                 e.stopPropagation();
 
                 if (isDeleting) {
-                  onDeleteFolder && onDeleteFolder(currentFolder.id);
+                  onDeleteGroup && onDeleteGroup(currentFolder.id);
                 } else if (isRenaming) {
                   handleRename();
                 }
@@ -180,7 +172,11 @@ const Folder = ({
           <div className="absolute right-[0.6rem] z-10 flex text-gray-300">
             <DropdownMenu>
               <DropdownMenuTrigger className="focus:outline-none p-[6px]">
-                <IconDots className="hover:opacity-50" size={16} />
+                <IconDots
+                  className="hover:opacity-50"
+                  size={16}
+                  stroke="#6b7280"
+                />
               </DropdownMenuTrigger>
               <DropdownMenuContent className="w-42 border-none">
                 <DropdownMenuItem
