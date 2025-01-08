@@ -1,4 +1,5 @@
 ﻿using Chats.BE.Controllers.Chats.UserChats.Dtos;
+using Chats.BE.Controllers.Common.Dtos;
 using Chats.BE.DB;
 using Chats.BE.Infrastructure;
 using Chats.BE.Services.UrlEncryption;
@@ -30,7 +31,7 @@ public class ChatGroupController(ChatsDB db, CurrentUser user, IUrlEncryptionSer
     }
 
     [HttpGet("with-messages")]
-    public async Task<ActionResult<ChatGroupDtoWithMessage[]>> ListGroupsWithMessages(string? query, [FromServices] IServiceScopeFactory scopeFactory, CancellationToken cancellationToken)
+    public async Task<ActionResult<ChatGroupDtoWithMessage[]>> ListGroupsWithMessages([FromQuery] PagingRequest req, [FromServices] IServiceScopeFactory scopeFactory, CancellationToken cancellationToken)
     {
         List<ChatGroupDtoWithMessage> groups = await db.ChatGroups
             .OrderBy(x => x.Rank)
@@ -56,7 +57,7 @@ public class ChatGroupController(ChatsDB db, CurrentUser user, IUrlEncryptionSer
         {
             using IServiceScope scope = scopeFactory.CreateScope();
             using ChatsDB db = scope.ServiceProvider.GetRequiredService<ChatsDB>();
-            group.Messages = await UserChatsController.GetChatsForGroupAsync(db, user, urlEncryption, new ChatsQuery(group.Id, 1, 50, query), ct);
+            group.Messages = await UserChatsController.GetChatsForGroupAsync(db, user, urlEncryption, new ChatsQuery(group.Id, req.Page, req.PageSize, req.Query), ct);
         });
 
         return Ok(groups);
