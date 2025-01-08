@@ -43,7 +43,7 @@ public class UpdateChatsRequest
 
 public class DecryptedUpdateChatsRequest
 {
-    public string? Title { get; set; };
+    public string? Title { get; set; }
 
     public bool? IsArchived { get; set; }
 
