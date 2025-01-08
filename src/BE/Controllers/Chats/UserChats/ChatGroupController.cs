@@ -95,18 +95,24 @@ public class ChatGroupController(ChatsDB db, CurrentUser user, IUrlEncryptionSer
     }
 
     [HttpPut("{encryptedChatGroupId}")]
-    public async Task<ActionResult> UpdateGroup(string encryptedChatGroupId, [FromBody] CreateChatGroupRequest req, CancellationToken cancellationToken)
+    public async Task<ActionResult> UpdateGroup(string encryptedChatGroupId, [FromBody] UpdateChatGroupRequest req, CancellationToken cancellationToken)
     {
+        if (string.IsNullOrWhiteSpace(encryptedChatGroupId))
+        {
+            return BadRequest("Group ID cannot be empty");
+        }
+
         int chatGroupId = urlEncryption.DecryptChatGroupId(encryptedChatGroupId);
         ChatGroup? group = await db.ChatGroups.FirstOrDefaultAsync(x => x.UserId == user.Id && x.Id == chatGroupId, cancellationToken);
         if (group == null)
         {
             return NotFound();
         }
-        group.Name = req.Name;
-        group.Rank = req.Rank;
-        group.IsExpanded = req.IsExpanded;
-        await db.SaveChangesAsync(cancellationToken);
+        req.ApplyTo(group);
+        if (db.ChangeTracker.HasChanges())
+        {
+            await db.SaveChangesAsync(cancellationToken);
+        }
         return Ok();
     }
 
