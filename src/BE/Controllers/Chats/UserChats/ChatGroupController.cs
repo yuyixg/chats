@@ -52,7 +52,7 @@ public class ChatGroupController(ChatsDB db, CurrentUser user, IUrlEncryptionSer
             Rank = 0,
         });
 
-        await Parallel.ForEachAsync(groups.Where(x => x.IsExpanded), cancellationToken, async (group, ct) =>
+        await Parallel.ForEachAsync(groups, cancellationToken, async (group, ct) =>
         {
             using IServiceScope scope = scopeFactory.CreateScope();
             using ChatsDB db = scope.ServiceProvider.GetRequiredService<ChatsDB>();
