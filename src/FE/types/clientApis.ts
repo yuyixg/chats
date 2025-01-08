@@ -1,3 +1,4 @@
+import { ChatStatus } from './chat';
 import { DBModelProvider } from './model';
 import { Paging } from './page';
 import { LoginType } from './user';
@@ -88,6 +89,9 @@ export interface PutChatParams {
   isShared?: boolean;
   setsLeafMessageId?: boolean;
   leafMessageId?: string;
+  isTopMost?: boolean;
+  groupId?: string;
+  setsGroupId?: boolean;
 }
 
 export interface PostUserPassword {
@@ -129,4 +133,34 @@ export interface PostUserChatSpanResult {
   modelProviderId: number;
   temperature: number;
   enableSearch: boolean;
+}
+
+interface GetUserChatResult {
+  id: string;
+  title: string;
+  isShared: boolean;
+  status: ChatStatus;
+  spans: ChatSpanDto[];
+  leafMessageId?: string;
+  isTopMost: boolean;
+  groupId: string;
+  tags: string[];
+  updatedAt: string;
+}
+
+export interface GetUserChatGroupWithMessagesResult {
+  id: string;
+  name: string;
+  rank: 0;
+  isExpanded: boolean;
+  messages: {
+    rows: GetUserChatResult[];
+  };
+  count: 0;
+}
+
+export interface PostChatGroupParams {
+  name: string;
+  rank?: number;
+  isExpanded?: boolean;
 }

@@ -11,7 +11,7 @@ import toast from 'react-hot-toast';
 import useTranslation from '@/hooks/useTranslation';
 
 import { getApiUrl } from '@/utils/common';
-import { getNowAsISODateString as getNowAsISODateString } from '@/utils/date';
+import { currentISODateString as currentISODateString } from '@/utils/date';
 import {
   findLastLeafId,
   findSelectedMessageByLeafId,
@@ -346,7 +346,7 @@ const Chat = memo(() => {
     );
 
     const chatList = chats.map((x) =>
-      x.id === selectedChat.id ? { ...x, updatedAt: getNowAsISODateString() } : x,
+      x.id === selectedChat.id ? { ...x, updatedAt: currentISODateString() } : x,
     );
 
     chatDispatch(setChats(chatList));
@@ -411,7 +411,7 @@ const Chat = memo(() => {
       setSelectedChat({ ...selectedChat, leafMessageId: messageId }),
     );
     const chatList = chats.map((x) =>
-      x.id === selectedChat.id ? { ...x, updatedAt: getNowAsISODateString() } : x,
+      x.id === selectedChat.id ? { ...x, updatedAt: currentISODateString() } : x,
     );
     chatDispatch(setChats(chatList));
     chatDispatch(setChatGroups(chatList));

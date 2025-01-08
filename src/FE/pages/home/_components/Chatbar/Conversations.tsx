@@ -10,13 +10,13 @@ import HomeContext from '../../_contexts/home.context';
 import ConversationComponent from './Conversation';
 
 interface Props {
-  chats: IChat[];
+  chatGroups: Map<string, IChat[]>;
 }
 
-const Conversations = ({ chats }: Props) => {
+const Conversations = ({ chatGroups }: Props) => {
   const { t } = useTranslation();
   const {
-    state: { chatsPaging, chatGroups },
+    state: { chatsPaging },
     getChats,
   } = useContext(HomeContext);
 
@@ -34,7 +34,7 @@ const Conversations = ({ chats }: Props) => {
 
   return (
     <div className="flex w-full flex-col gap-1">
-      {[...chatGroups.entries()].map(([group, items]) => (
+      {chatGroups.size > 0 && [...chatGroups.entries()].map(([group, items]) => (
         <div key={group}>
           <div className="w-full pl-2.5 text-xs text-gray-500 font-medium my-1">
             {t(group)}

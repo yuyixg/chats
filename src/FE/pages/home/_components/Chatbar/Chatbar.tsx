@@ -9,10 +9,13 @@ import { ChatResult } from '@/types/clientApis';
 import { setShowChatBar } from '../../_actions/setting.actions';
 import HomeContext from '../../_contexts/home.context';
 import Sidebar from '../Sidebar/Sidebar';
+import { ChatFolders } from './ChatFolders';
 import ChatbarContext from './Chatbar.context';
 import { ChatbarInitialState, initialState } from './Chatbar.context';
 import ChatBarSettings from './ChatbarSettings';
 import Conversations from './Conversations';
+
+import { postChatGroup } from '@/apis/clientApis';
 
 const Chatbar = () => {
   const { t } = useTranslation();
@@ -38,6 +41,12 @@ const Chatbar = () => {
 
   const handleToggleChatbar = () => {
     settingDispatch(setShowChatBar(!showChatBar));
+  };
+
+  const handleAddFolder = () => {
+    postChatGroup({ rank: 0, name: t('New Folder'), isExpanded: true }).then(
+      () => {},
+    );
   };
 
   useEffect(() => {
@@ -71,7 +80,9 @@ const Chatbar = () => {
         isOpen={showChatBar}
         addItemButtonTitle={t('New chat')}
         hasModel={hasModel}
-        itemComponent={<Conversations chats={filteredChats} />}
+        onAddFolder={handleAddFolder}
+        // itemComponent={<Conversations chats={filteredChats} />}
+        folderComponent={<ChatFolders searchTerm="" />}
         items={filteredChats}
         searchTerm={searchTerm}
         handleSearchTerm={(value: string) => {
@@ -80,6 +91,7 @@ const Chatbar = () => {
         }}
         toggleOpen={handleToggleChatbar}
         handleCreateItem={handleNewChat}
+        onDrop={() => {}}
         footerComponent={<ChatBarSettings />}
       />
     </ChatbarContext.Provider>

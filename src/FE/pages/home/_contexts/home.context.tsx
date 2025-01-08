@@ -7,9 +7,11 @@ import { GetChatsParams } from '@/types/clientApis';
 
 import {
   ChatAction,
+  SetChatFolderType,
   SetChatGroupsType,
   SetChatPagingType,
   SetChatsType,
+  SetGroupedChatsType,
 } from '../_reducers/chat.reducer';
 import {
   MessageAction,
@@ -39,10 +41,12 @@ export interface HomeInitialState {
   selectedMessages: SetSelectedMessagesType;
 
   chats: SetChatsType;
+  groupedChats: SetGroupedChatsType;
   chatGroups: SetChatGroupsType;
   selectedChat: IChat;
   chatsPaging: SetChatPagingType;
   isChatsLoading: boolean;
+  chatFolders: SetChatFolderType;
 
   models: SetModelsType;
   modelMap: SetModelMapType;
@@ -59,10 +63,12 @@ export const initialState: HomeInitialState = {
   selectedMessages: [],
 
   chats: [],
+  groupedChats: [],
   chatGroups: new Map<string, IChat[]>(),
   selectedChat: {} as IChat,
   chatsPaging: { count: 0, page: 1, pageSize: 50 },
   isChatsLoading: false,
+  chatFolders: [],
 
   models: [],
   modelMap: {},

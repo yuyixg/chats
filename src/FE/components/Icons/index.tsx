@@ -1414,6 +1414,82 @@ var IconMinus = (props: IconProps) => {
   );
 };
 
+var IconFolderPlus = (props: IconProps) => {
+  const { className, size = 20, strokeWidth = 1.6, stroke, onClick } = props;
+
+  return (
+    <svg
+      xmlns="http://www.w3.org/2000/svg"
+      onClick={onClick}
+      className={className}
+      width={size}
+      height={size}
+      strokeWidth={strokeWidth}
+      stroke={stroke || 'hsl(var(--foreground))'}
+      viewBox="0 0 24 24"
+      fill="none"
+      strokeLinecap="round"
+      strokeLinejoin="round"
+    >
+      <path stroke="none" d="M0 0h24v24H0z" fill="none" />
+      <path d="M12 19h-7a2 2 0 0 1 -2 -2v-11a2 2 0 0 1 2 -2h4l3 3h7a2 2 0 0 1 2 2v3.5" />
+      <path d="M16 19h6" />
+      <path d="M19 16v6" />
+    </svg>
+  );
+};
+
+var IconPin = (props: IconProps) => {
+  const { className, size = 20, strokeWidth = 1.6, stroke, onClick } = props;
+
+  return (
+    <svg
+      xmlns="http://www.w3.org/2000/svg"
+      onClick={onClick}
+      className={className}
+      width={size}
+      height={size}
+      strokeWidth={strokeWidth}
+      stroke={stroke || 'hsl(var(--foreground))'}
+      viewBox="0 0 24 24"
+      fill="none"
+      strokeLinecap="round"
+      strokeLinejoin="round"
+    >
+      <path stroke="none" d="M0 0h24v24H0z" fill="none" />
+      <path d="M15 4.5l-4 4l-4 1.5l-1.5 1.5l7 7l1.5 -1.5l1.5 -4l4 -4" />
+      <path d="M9 15l-4.5 4.5" />
+      <path d="M14.5 4l5.5 5.5" />
+    </svg>
+  );
+};
+
+var IconPinnedOff = (props: IconProps) => {
+  const { className, size = 20, strokeWidth = 1.6, stroke, onClick } = props;
+
+  return (
+    <svg
+      xmlns="http://www.w3.org/2000/svg"
+      onClick={onClick}
+      className={className}
+      width={size}
+      height={size}
+      strokeWidth={strokeWidth}
+      stroke={stroke || 'hsl(var(--foreground))'}
+      viewBox="0 0 24 24"
+      fill="none"
+      strokeLinecap="round"
+      strokeLinejoin="round"
+    >
+      <path stroke="none" d="M0 0h24v24H0z" fill="none" />
+      <path d="M3 3l18 18" />
+      <path d="M15 4.5l-3.249 3.249m-2.57 1.433l-2.181 .818l-1.5 1.5l7 7l1.5 -1.5l.82 -2.186m1.43 -2.563l3.25 -3.251" />
+      <path d="M9 15l-4.5 4.5" />
+      <path d="M14.5 4l5.5 5.5" />
+    </svg>
+  );
+};
+
 var Icon = (props: IconProps) => {
   const { className, size = 20, strokeWidth = 1.6, stroke, onClick } = props;
 
@@ -1490,4 +1566,7 @@ export {
   IconLoader,
   IconModelSearch,
   IconMinus,
+  IconFolderPlus,
+  IconPin,
+  IconPinnedOff,
 };

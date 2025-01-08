@@ -76,8 +76,8 @@ html {
 ::-webkit-scrollbar {
   background-color: var(--scrollbar);
   border-radius: 10px;
-  width: 3px;
-  height: 3px;
+  width: .5px;
+  height: .5px;
 }
 
 ::-webkit-scrollbar-thumb {

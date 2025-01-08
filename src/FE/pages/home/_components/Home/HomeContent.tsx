@@ -5,7 +5,7 @@ import { useRouter } from 'next/router';
 import { useCreateReducer } from '@/hooks/useCreateReducer';
 import useTranslation from '@/hooks/useTranslation';
 
-import { getNowAsISODateString as getNowAsISODateString } from '@/utils/date';
+import { currentISODateString } from '@/utils/date';
 import { findSelectedMessageByLeafId } from '@/utils/message';
 import { getSettings } from '@/utils/settings';
 import { getUserSession, redirectToLoginPage } from '@/utils/user';
@@ -13,13 +13,16 @@ import { getUserSession, redirectToLoginPage } from '@/utils/user';
 import { ChatStatus, IChat } from '@/types/chat';
 import { IChatMessage } from '@/types/chatMessage';
 import { ChatResult, GetChatsParams } from '@/types/clientApis';
+import { IChatFolder } from '@/types/folder';
 
 import Spinner from '@/components/Spinner/Spinner';
 
 import {
+  setChatFolder,
   setChatGroups,
   setChatPaging,
   setChats,
+  setGroupedChats,
   setIsChatsLoading,
   setSelectedChat,
   setStopIds,
@@ -57,6 +60,7 @@ import PromptBar from '../Promptbar/Promptbar';
 import {
   getChatsByPaging,
   getDefaultPrompt,
+  getUserChatGroupWithMessages,
   getUserMessages,
   getUserModels,
   getUserPromptBrief,
@@ -121,7 +125,7 @@ const HomeContent = () => {
   };
 
   const supplyChatProperty = (chat: ChatResult): IChat => {
-    return { ...chat, status: ChatStatus.None };
+    return { ...chat, status: ChatStatus.None } as any;
   };
 
   const selectChat = (chatList: IChat[], chatId?: string) => {
@@ -178,7 +182,8 @@ const HomeContent = () => {
     params: HandleUpdateChatParams,
   ) => {
     const chatList = chats.map((x) => {
-      if (x.id === id) return { ...x, ...params, updatedAt: getNowAsISODateString() };
+      if (x.id === id)
+        return { ...x, ...params, updatedAt: currentISODateString() };
       return x;
     });
     chatDispatch(setChats(chatList));
@@ -229,20 +234,20 @@ const HomeContent = () => {
   };
 
   const loadFirstChats = async () => {
-    const params = { page: 1, pageSize: 50 };
-    getChatsByPaging(params).then((data) => {
-      const { rows, count } = data || { rows: [], count: 0 };
-      const chatList = rows.map(
-        (x) => ({ ...x, status: ChatStatus.None } as IChat),
-      );
-
-      chatDispatch(setChats(chatList));
-      chatDispatch(setChatGroups(chatList));
-      chatDispatch(
-        setChatPaging({ count, page: params.page, pageSize: params.pageSize }),
-      );
-      selectChat(chatList);
-    });
+    // const params = { page: 1, pageSize: 50 };
+    // getChatsByPaging(params).then((data) => {
+    //   const { rows, count } = data || { rows: [], count: 0 };
+    //   const chatList = rows.map((x) => {
+    //     return { ...x, status: ChatStatus.None } as IChat;
+    //   });
+    //   // chatDispatch(setChatFolder([PinFolder]));
+    //   chatDispatch(setChats(chatList));
+    //   chatDispatch(setChatGroups(chatList));
+    //   chatDispatch(
+    //     setChatPaging({ count, page: params.page, pageSize: params.pageSize }),
+    //   );
+    //   selectChat(chatList);
+    // });
   };
 
   useEffect(() => {
@@ -269,7 +274,20 @@ const HomeContent = () => {
         });
       }
 
-      await loadFirstChats();
+      const data = await getUserChatGroupWithMessages({
+        page: 1,
+        pageSize: 50,
+      });
+      const chatList: IChat[] = [];
+      const chatFolder: IChatFolder[] = [];
+      data.forEach((d) => {
+        chatFolder.push({ ...d });
+        chatList.push(...d.messages.rows);
+      });
+      chatDispatch(setChats(chatList));
+      chatDispatch(setChatGroups(chatList));
+      chatDispatch(setChatFolder(chatFolder));
+      selectChat(chatList);
       chatDispatch(setIsChatsLoading(false));
     });
 

@@ -1,6 +1,7 @@
 import { useFetch } from '@/hooks/useFetch';
 
 import { AdminModelDto, PostPromptParams } from '@/types/adminApis';
+import { IGroupedChat } from '@/types/chat';
 import { IChatMessage } from '@/types/chatMessage';
 import {
   ChatResult,
@@ -10,8 +11,10 @@ import {
   GetSiteInfoResult,
   GetUserApiKeyResult,
   GetUserBalanceResult,
+  GetUserChatGroupWithMessagesResult,
   LoginConfigsResult,
   ModelUsageDto,
+  PostChatGroupParams,
   PostChatParams,
   PostUserChatSpanParams,
   PostUserChatSpanResult,
@@ -21,7 +24,7 @@ import {
   SingInResult,
 } from '@/types/clientApis';
 import { PageResult } from '@/types/page';
-import { IdName, Prompt, PromptSlim } from '@/types/prompt';
+import { Prompt, PromptSlim } from '@/types/prompt';
 import { SmsType } from '@/types/user';
 
 export const changeUserPassword = (params: PostUserPassword) => {
@@ -257,4 +260,23 @@ export const putUserChatSpan = (
 export const deleteUserChatSpan = (chatId: string, spanId: number) => {
   const fetchServer = useFetch();
   return fetchServer.delete(`/api/chat/${chatId}/span/${spanId}`);
+};
+
+export const getUserChatGroupWithMessages = (
+  params: GetChatsParams,
+): Promise<GetUserChatGroupWithMessagesResult[]> => {
+  const { query, page, pageSize } = params;
+  const fetchServer = useFetch();
+  return fetchServer.get(
+    `/api/chat/group/with-messages?page=${page}&pageSize=${pageSize}&query=${
+      query || ''
+    }`,
+  );
+};
+
+export const postChatGroup = (params: PostChatGroupParams) => {
+  const fetchServer = useFetch();
+  return fetchServer.post(`/api/chat/group`, {
+    body: params,
+  });
 };

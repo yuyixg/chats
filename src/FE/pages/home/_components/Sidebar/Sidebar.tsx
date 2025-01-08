@@ -3,6 +3,7 @@ import { ReactNode } from 'react';
 import useTranslation from '@/hooks/useTranslation';
 
 import {
+  IconFolderPlus,
   IconLayoutSidebar,
   IconLayoutSidebarRight,
   IconSearch,
@@ -22,7 +23,8 @@ interface Props<T> {
   addItemButtonTitle: string;
   side: 'left' | 'right';
   items: T[];
-  itemComponent: ReactNode;
+  itemComponent?: ReactNode;
+  folderComponent?: ReactNode;
   footerComponent?: ReactNode;
   searchTerm: string;
   messageIsStreaming?: boolean;
@@ -30,6 +32,8 @@ interface Props<T> {
   toggleOpen: () => void;
   handleCreateItem: () => void;
   hasModel: () => boolean;
+  onDrop?: (e: any) => void;
+  onAddFolder?: () => void;
 }
 
 const Sidebar = <T,>({
@@ -40,6 +44,7 @@ const Sidebar = <T,>({
   side,
   items,
   itemComponent,
+  folderComponent,
   footerComponent,
   searchTerm,
   messageIsStreaming,
@@ -47,8 +52,22 @@ const Sidebar = <T,>({
   toggleOpen,
   handleCreateItem,
   hasModel,
+  onDrop,
+  onAddFolder,
 }: Props<T>) => {
   const { t } = useTranslation();
+
+  const allowDrop = (e: any) => {
+    e.preventDefault();
+  };
+
+  const highlightDrop = (e: any) => {
+    e.target.style.background = '#FFF';
+  };
+
+  const removeHighlight = (e: any) => {
+    e.target.style.background = 'none';
+  };
 
   const NoDataRender = () =>
     isLoading === false &&
@@ -64,11 +83,11 @@ const Sidebar = <T,>({
       <div
         className={`${
           isOpen ? 'w-[260px]' : 'w-0 hidden'
-        } fixed top-0 ${side}-0 z-40 flex h-full flex-none flex-col bg-gray-50 dark:bg-[#202123] p-2 text-[14px] sm:relative  sm:top-0`}
+        } fixed top-0 ${side}-0 z-40 flex h-full flex-none flex-col bg-gray-50 dark:bg-[#202123] p-2 text-[14px] sm:relative sm:top-0`}
       >
         <div
           className={cn(
-            'flex items-center px-[6px] justify-between',
+            'flex items-center px-1.5 justify-between',
             side === 'right' && 'flex-row-reverse',
           )}
         >
@@ -105,12 +124,28 @@ const Sidebar = <T,>({
             />
           )}
         </div>
+        <div
+          className={cn(
+            'px-1.5 h-16',
+            onAddFolder && 'flex items-center gap-x-1',
+          )}
+        >
+          <Search
+            placeholder={t('Search...') || ''}
+            searchTerm={searchTerm}
+            onSearch={handleSearchTerm}
+          />
+          {onAddFolder && (
+            <Button
+              variant="ghost"
+              className="h-auto p-1"
+              onClick={onAddFolder}
+            >
+              <IconFolderPlus size={25} />
+            </Button>
+          )}
+        </div>
 
-        <Search
-          placeholder={t('Search...') || ''}
-          searchTerm={searchTerm}
-          onSearch={handleSearchTerm}
-        />
         {isLoading && (
           <div className="h-screen flex flex-col space-y-2 py-2">
             <Skeleton className="h-11 w-full" />
@@ -118,9 +153,20 @@ const Sidebar = <T,>({
             <Skeleton className="h-11 w-full" />
           </div>
         )}
+
         <div className="flex-grow overflow-auto scroll-container">
+          <div className="flex">{folderComponent}</div>
+
           {items?.length > 0 && !isLoading && (
-            <div className="pt-2">{itemComponent}</div>
+            <div
+              className="pt-2"
+              onDrop={onDrop}
+              onDragOver={allowDrop}
+              onDragEnter={highlightDrop}
+              onDragLeave={removeHighlight}
+            >
+              {itemComponent}
+            </div>
           )}
           {NoDataRender()}
         </div>

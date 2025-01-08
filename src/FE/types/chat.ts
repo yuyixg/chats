@@ -56,5 +56,22 @@ export interface IChat {
   status: ChatStatus;
   spans: ChatSpanDto[];
   leafMessageId?: string;
+  isTopMost: boolean;
+  groupId: string;
+  tags: string[];
   updatedAt: string;
 }
+
+export interface IGroupedChat {
+  id: string;
+  name: string;
+  rank: 0;
+  isExpanded: boolean;
+  messages: {
+    rows: IChat[];
+  };
+  count: 0;
+}
+
+export const ChatPinGroup = 'Pin';
+export const ChatUngrouped = 'Ungrouped';
