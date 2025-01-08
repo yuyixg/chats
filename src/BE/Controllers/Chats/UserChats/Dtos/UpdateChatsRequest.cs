@@ -23,6 +23,9 @@ public class UpdateChatsRequest
     [JsonPropertyName("leafMessageId")]
     public string? LeafMessageId { get; set; } = null!;
 
+    [JsonPropertyName("setsGroupId")]
+    public bool SetsGroupId { get; set; }
+
     [JsonPropertyName("groupId")]
     public string? GroupId { get; set; } = null!;
 
@@ -35,6 +38,7 @@ public class UpdateChatsRequest
             IsTopMost = IsTopMost,
             SetsLeafMessageId = SetsLeafMessageId,
             LeafMessageId = urlEncryptionService.DecryptMessageIdOrNull(LeafMessageId),
+            SetsGroupId = SetsGroupId,
             GroupId = urlEncryptionService.DecryptChatGroupIdOrNull(GroupId),
         };
     }
@@ -53,6 +57,8 @@ public class DecryptedUpdateChatsRequest
 
     public long? LeafMessageId { get; set; }
 
+    public bool SetsGroupId { get; set; }
+
     public int? GroupId { get; set; }
 
     public async Task<string?> Validate(ChatsDB db, int chatId, CurrentUser currentUser)
@@ -70,7 +76,7 @@ public class DecryptedUpdateChatsRequest
             }
         }
 
-        if (GroupId != null)
+        if (SetsGroupId && GroupId != null)
         {
             if (!await db.ChatGroups.AnyAsync(x => x.Id == GroupId && x.UserId == currentUser.Id))
             {
@@ -99,7 +105,7 @@ public class DecryptedUpdateChatsRequest
         {
             chat.IsTopMost = IsTopMost.Value;
         }
-        if (GroupId != null)
+        if (SetsGroupId)
         {
             chat.ChatGroupId = GroupId;
         }
