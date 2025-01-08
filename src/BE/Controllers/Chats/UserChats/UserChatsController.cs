@@ -94,8 +94,9 @@ public class UserChatsController(ChatsDB db, CurrentUser currentUser, IUrlEncryp
     }
 
     [HttpPost]
-    public async Task<ActionResult<ChatsResponse>> CreateChat([FromBody] CreateChatRequest request, [FromServices] UserModelManager userModelManager, CancellationToken cancellationToken)
+    public async Task<ActionResult<ChatsResponse>> CreateChat([FromBody] EncryptedCreateChatRequest encryptedRequest, [FromServices] UserModelManager userModelManager, CancellationToken cancellationToken)
     {
+        CreateChatRequest request = encryptedRequest.Decrypt(idEncryption);
         Dictionary<short, UserModel> validModels = await userModelManager.GetValidModelsByUserId(currentUser.Id)
             .ToDictionaryAsync(k => k.ModelId, v => v, cancellationToken);
         if (validModels.Count == 0)
@@ -103,10 +104,21 @@ public class UserChatsController(ChatsDB db, CurrentUser currentUser, IUrlEncryp
             return this.BadRequestMessage("No model available.");
         }
 
+        if (request.GroupId != null)
+        {
+            // ensure group exists
+            bool groupExists = await db.ChatGroups.AnyAsync(x => x.Id == request.GroupId.Value && x.UserId == currentUser.Id, cancellationToken);
+            if (!groupExists)
+            {
+                return BadRequest("Group not found");
+            }
+        }
+
         Chat chat = new()
         {
             UserId = currentUser.Id,
             Title = request.Title,
+            ChatGroupId = request.GroupId,
             IsTopMost = false,
             CreatedAt = DateTime.UtcNow,
             IsArchived = false,
