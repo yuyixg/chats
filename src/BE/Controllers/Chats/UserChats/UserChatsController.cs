@@ -230,7 +230,7 @@ public class UserChatsController(ChatsDB db, CurrentUser currentUser, IUrlEncryp
             return NotFound();
         }
 
-        string? error = await req.Validate(db, chat.Id);
+        string? error = await req.Validate(db, chat.Id, currentUser);
         if (error != null)
         {
             return BadRequest(error);

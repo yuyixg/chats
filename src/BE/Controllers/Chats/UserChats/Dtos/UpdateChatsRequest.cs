@@ -1,4 +1,5 @@
 ﻿using Chats.BE.DB;
+using Chats.BE.Infrastructure;
 using Chats.BE.Services.UrlEncryption;
 using Microsoft.EntityFrameworkCore;
 using System.Text.Json.Serialization;
@@ -22,6 +23,9 @@ public class UpdateChatsRequest
     [JsonPropertyName("leafMessageId")]
     public string? LeafMessageId { get; set; } = null!;
 
+    [JsonPropertyName("groupId")]
+    public string? GroupId { get; set; } = null!;
+
     public DecryptedUpdateChatsRequest Decrypt(IUrlEncryptionService urlEncryptionService)
     {
         return new DecryptedUpdateChatsRequest
@@ -30,11 +34,8 @@ public class UpdateChatsRequest
             IsArchived = IsArchived,
             IsTopMost = IsTopMost,
             SetsLeafMessageId = SetsLeafMessageId,
-            LeafMessageId = LeafMessageId switch
-            {
-                null => null,
-                _ => urlEncryptionService.DecryptMessageId(LeafMessageId)
-            },
+            LeafMessageId = urlEncryptionService.DecryptMessageIdOrNull(LeafMessageId),
+            GroupId = urlEncryptionService.DecryptChatGroupIdOrNull(GroupId),
         };
     }
 }
@@ -42,7 +43,7 @@ public class UpdateChatsRequest
 
 public class DecryptedUpdateChatsRequest
 {
-    public string? Title { get; set; } = null!;
+    public string? Title { get; set; };
 
     public bool? IsArchived { get; set; }
 
@@ -50,9 +51,11 @@ public class DecryptedUpdateChatsRequest
 
     public bool SetsLeafMessageId { get; set; }
 
-    public long? LeafMessageId { get; set; } = null!;
+    public long? LeafMessageId { get; set; }
 
-    public async Task<string?> Validate(ChatsDB db, int chatId)
+    public int? GroupId { get; set; }
+
+    public async Task<string?> Validate(ChatsDB db, int chatId, CurrentUser currentUser)
     {
         if (Title != null && Title.Length > 50)
         {
@@ -64,6 +67,14 @@ public class DecryptedUpdateChatsRequest
             if (!await db.Messages.AnyAsync(x => x.Id == LeafMessageId && x.ChatId == chatId))
             {
                 return "Leaf message not found";
+            }
+        }
+
+        if (GroupId != null)
+        {
+            if (!await db.ChatGroups.AnyAsync(x => x.Id == GroupId && x.UserId == currentUser.Id))
+            {
+                return "Group not found";
             }
         }
 
@@ -87,6 +98,10 @@ public class DecryptedUpdateChatsRequest
         if (IsTopMost != null)
         {
             chat.IsTopMost = IsTopMost.Value;
+        }
+        if (GroupId != null)
+        {
+            chat.ChatGroupId = GroupId;
         }
     }
 }
