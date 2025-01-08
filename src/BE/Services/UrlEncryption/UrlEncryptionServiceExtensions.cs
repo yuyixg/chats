@@ -60,6 +60,11 @@ public static class UrlEncryptionServiceExtensions
         return that.Encrypt(chatGroupId, EncryptionPurpose.ChatGroupId);
     }
 
+    public static string? EncryptChatGroupId(this IUrlEncryptionService that, int? chatGroupId)
+    {
+        return chatGroupId == null ? null : that.Encrypt(chatGroupId.Value, EncryptionPurpose.ChatGroupId);
+    }
+
     public static int DecryptChatGroupId(this IUrlEncryptionService that, string encryptedChatId)
     {
         return that.DecryptAsInt32(encryptedChatId, EncryptionPurpose.ChatGroupId);

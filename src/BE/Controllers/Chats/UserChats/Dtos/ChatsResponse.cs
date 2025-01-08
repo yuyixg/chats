@@ -17,6 +17,9 @@ public record ChatsResponse
     [JsonPropertyName("spans")]
     public required ChatSpanDto[] Spans { get; init; }
 
+    [JsonPropertyName("groupId")]
+    public required string? GroupId { get; init; }
+
     [JsonPropertyName("tags")]
     public required string[] Tags { get; init; }
 
