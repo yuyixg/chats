@@ -1,4 +1,5 @@
-﻿using Chats.BE.DB;
+﻿using Chats.BE.Controllers.Chats.Messages.Dtos;
+using Chats.BE.DB;
 using System.Text.Json.Serialization;
 
 namespace Chats.BE.Controllers.Chats.UserChats.Dtos;
@@ -28,6 +29,28 @@ public record ChatsResponse
 
     [JsonPropertyName("updatedAt")]
     public required DateTime UpdatedAt { get; init; }
+
+    public ChatsResponseWithMessage WithMessages(MessageDto[] messages)
+    {
+        return new ChatsResponseWithMessage
+        {
+            Id = Id,
+            Title = Title,
+            IsTopMost = IsTopMost,
+            Spans = Spans,
+            GroupId = GroupId,
+            Tags = Tags,
+            LeafMessageId = LeafMessageId,
+            UpdatedAt = UpdatedAt,
+            Messages = messages,
+        };
+    }
+}
+
+public record ChatsResponseWithMessage : ChatsResponse
+{
+    [JsonPropertyName("messages")]
+    public required MessageDto[] Messages { get; init; }
 }
 
 public record ChatSpanDto

@@ -1,5 +1,6 @@
 ﻿using Chats.BE.Controllers.Admin.AdminMessage;
 using Chats.BE.Controllers.Admin.AdminMessage.Dtos;
+using Chats.BE.Controllers.Chats.UserChats.Dtos;
 using Chats.BE.DB;
 using Chats.BE.Infrastructure;
 using Chats.BE.Infrastructure.Functional;
@@ -12,11 +13,11 @@ using Microsoft.EntityFrameworkCore;
 
 namespace Chats.BE.Controllers.Public.SharedMessage;
 
-[Route("api/public/messages")]
-public class SharedMessageController(ChatsDB db) : ControllerBase
+[Route("api/public/chats")]
+public class SharedChatController(ChatsDB db) : ControllerBase
 {
     [HttpGet("{path}")]
-    public async Task<ActionResult<AdminMessageRoot>> GetSharedMessage(string path,
+    public async Task<ActionResult<ChatsResponseWithMessage>> GetSharedChat(string path,
         long validBefore, string hash,
         [FromServices] IUrlEncryptionService idEncryption,
         [FromServices] FileUrlProvider fup,
@@ -28,12 +29,12 @@ public class SharedMessageController(ChatsDB db) : ControllerBase
             return BadRequest(decodedChat.Error);
         }
 
-        if (!await db.Chats.AnyAsync(x => x.Id == decodedChat.Value && !x.IsArchived, cancellationToken: cancellationToken))
+        if (!await db.Chats.AnyAsync(x => x.Id == decodedChat.Value && !x.IsArchived, cancellationToken))
         {
             return NotFound();
         }
 
-        return await AdminMessageController.GetAdminMessageInternal(db, decodedChat.Value, idEncryption, fup, cancellationToken);
+        return Ok(await AdminMessageController.InternalGetChatWithMessages(db, idEncryption, decodedChat.Value, fup, cancellationToken));
     }
 
     [HttpPost("{encryptedChatId}"), Authorize]

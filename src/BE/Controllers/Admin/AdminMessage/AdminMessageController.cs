@@ -1,11 +1,9 @@
 ﻿using Chats.BE.Controllers.Admin.AdminMessage.Dtos;
 using Chats.BE.Controllers.Admin.Common;
-using Chats.BE.Controllers.Chats.Chats.Dtos;
+using Chats.BE.Controllers.Chats.Messages.Dtos;
 using Chats.BE.Controllers.Chats.UserChats.Dtos;
 using Chats.BE.Controllers.Common.Dtos;
 using Chats.BE.DB;
-using Chats.BE.DB.Enums;
-using Chats.BE.DB.Jsons;
 using Chats.BE.Infrastructure;
 using Chats.BE.Services.ChatServices;
 using Chats.BE.Services.FileServices;
@@ -16,7 +14,7 @@ using Microsoft.EntityFrameworkCore;
 namespace Chats.BE.Controllers.Admin.AdminMessage;
 
 [Route("api/admin"), AuthorizeAdmin]
-public class AdminMessageController(ChatsDB db, CurrentUser currentUser, IUrlEncryptionService idEncryption) : ControllerBase
+public class AdminMessageController(ChatsDB db, CurrentUser currentUser, IUrlEncryptionService urlEncryption) : ControllerBase
 {
     [HttpGet("messages")]
     public async Task<ActionResult<PagedResult<AdminChatsDto>>> GetMessages([FromQuery] PagingRequest req, CancellationToken cancellationToken)
@@ -32,7 +30,7 @@ public class AdminMessageController(ChatsDB db, CurrentUser currentUser, IUrlEnc
             .OrderByDescending(x => x.CreatedAt)
             .Select(x => new AdminChatsDto
             {
-                Id = idEncryption.EncryptChatId(x.Id),
+                Id = urlEncryption.EncryptChatId(x.Id),
                 CreatedAt = x.CreatedAt,
                 IsDeleted = x.IsArchived,
                 Title = x.Title,
@@ -50,65 +48,73 @@ public class AdminMessageController(ChatsDB db, CurrentUser currentUser, IUrlEnc
     }
 
     [HttpGet("message-details")]
-    public async Task<ActionResult<AdminMessageRoot>> GetAdminMessage(int chatId,
+    public async Task<ActionResult<ChatsResponseWithMessage>> GetAdminMessage(int chatId,
         [FromServices] FileUrlProvider fup,
         CancellationToken cancellationToken)
     {
-        return await GetAdminMessageInternal(db, chatId, idEncryption, fup, cancellationToken);
+        ChatsResponseWithMessage? resp = await InternalGetChatWithMessages(db, urlEncryption, chatId, fup, cancellationToken);
+        return Ok(resp);
     }
 
-    internal static async Task<ActionResult<AdminMessageRoot>> GetAdminMessageInternal(ChatsDB db, int chatId, 
-        IUrlEncryptionService urlEncryption, 
-        FileUrlProvider fup,
-        CancellationToken cancellationToken)
+    internal static async Task<ChatsResponseWithMessage?> InternalGetChatWithMessages(ChatsDB db, IUrlEncryptionService urlEncryption, int chatId, FileUrlProvider fup, CancellationToken cancellationToken)
     {
-        AdminMessageDtoTemp? adminMessageTemp = await db.Chats
-                    .Where(x => x.Id == chatId)
-                    .Select(x => new AdminMessageDtoTemp()
-                    {
-                        Name = x.Title,
-                        Spans = x.ChatSpans.Select(s => new ChatSpanDto
-                        {
-                            SpanId = s.SpanId,
-                            ModelId = s.ModelId,
-                            ModelName = s.Model.Name,
-                            ModelProviderId = s.Model.ModelKey.ModelProviderId,
-                            Temperature = s.Temperature,
-                            EnableSearch = s.EnableSearch,
-                        }).ToArray()
-                    })
-                    .SingleOrDefaultAsync(cancellationToken);
-        if (adminMessageTemp == null) return new NotFoundResult();
+        ChatsResponse? chats = await db.Chats
+            .Where(x => x.Id == chatId)
+            .Select(x => new ChatsResponse()
+            {
+                Id = urlEncryption.EncryptChatId(x.Id),
+                Title = x.Title,
+                IsTopMost = x.IsTopMost,
+                GroupId = urlEncryption.EncryptChatGroupId(x.ChatGroupId),
+                Tags = x.ChatTags.Select(x => x.Name).ToArray(),
+                Spans = x.ChatSpans.Select(s => new ChatSpanDto
+                {
+                    SpanId = s.SpanId,
+                    ModelId = s.ModelId,
+                    ModelName = s.Model.Name,
+                    ModelProviderId = s.Model.ModelKey.ModelProviderId,
+                    Temperature = s.Temperature,
+                    EnableSearch = s.EnableSearch,
+                }).ToArray(),
+                LeafMessageId = x.LeafMessageId != null ? urlEncryption.EncryptMessageId(x.LeafMessageId.Value) : null,
+                UpdatedAt = x.UpdatedAt,
+            })
+            .FirstOrDefaultAsync(cancellationToken);
 
-        AdminMessageItemTemp[] messagesTemp = await db.Messages
+        if (chats == null) return null;
+
+        return chats.WithMessages(await db.Messages
             .Include(x => x.MessageContents).ThenInclude(x => x.MessageContentBlob)
             .Include(x => x.MessageContents).ThenInclude(x => x.MessageContentFile).ThenInclude(x => x!.File).ThenInclude(x => x.FileService)
             .Include(x => x.MessageContents).ThenInclude(x => x.MessageContentText)
-            .Include(x => x.MessageResponse).ThenInclude(x => x!.Usage)
-            .Where(x => x.ChatId == chatId)
-            .Select(x => new AdminMessageItemTemp
+            .Where(m => m.ChatId == chatId && m.ChatRoleId != (byte)DBChatRole.System)
+            .Select(x => new ChatMessageTemp()
             {
                 Id = x.Id,
                 ParentId = x.ParentId,
-                ModelName = x.MessageResponse!.Usage.UserModel.Model.Name,
-                CreatedAt = x.CreatedAt,
-                InputTokens = x.MessageResponse!.Usage.InputTokens,
-                OutputTokens = x.MessageResponse!.Usage.OutputTokens,
-                InputPrice = x.MessageResponse!.Usage.InputCost,
-                OutputPrice = x.MessageResponse!.Usage.OutputCost,
-                ReasoningTokens = x.MessageResponse!.Usage!.ReasoningTokens,
                 Role = (DBChatRole)x.ChatRoleId,
                 Content = x.MessageContents
+                    .OrderBy(x => x.Id)
                     .ToArray(),
-                Duration = x.MessageResponse!.Usage.TotalDurationMs - x.MessageResponse!.Usage.PreprocessDurationMs,
-                FirstTokenLatency = x.MessageResponse!.Usage.FirstResponseDurationMs
+                CreatedAt = x.CreatedAt,
+                SpanId = x.SpanId,
+                Usage = x.MessageResponse!.Usage == null ? null : new ChatMessageTempUsage()
+                {
+                    InputTokens = x.MessageResponse.Usage.InputTokens,
+                    OutputTokens = x.MessageResponse.Usage.OutputTokens,
+                    InputPrice = x.MessageResponse.Usage.InputCost,
+                    OutputPrice = x.MessageResponse.Usage.OutputCost,
+                    ReasoningTokens = x.MessageResponse.Usage.ReasoningTokens,
+                    Duration = x.MessageResponse.Usage.TotalDurationMs - x.MessageResponse.Usage.PreprocessDurationMs,
+                    FirstTokenLatency = x.MessageResponse.Usage.FirstResponseDurationMs,
+                    ModelId = x.MessageResponse.Usage.UserModel.ModelId,
+                    ModelName = x.MessageResponse.Usage.UserModel.Model.Name,
+                    ModelProviderId = x.MessageResponse.Usage.UserModel.Model.ModelKey.ModelProviderId,
+                    Reaction = x.MessageResponse.ReactionId,
+                },
             })
-            .OrderBy(x => x.Id)
-            .ToArrayAsync(cancellationToken);
-
-        AdminMessageBasicItem[] items = AdminMessageItemTemp.ToDtos(messagesTemp, urlEncryption, fup);
-        AdminMessageRoot dto = adminMessageTemp.Combine(items);
-
-        return new OkObjectResult(dto);
+            .OrderBy(x => x.CreatedAt)
+            .Select(x => x.ToDto(urlEncryption, fup))
+            .ToArrayAsync(cancellationToken));
     }
 }
