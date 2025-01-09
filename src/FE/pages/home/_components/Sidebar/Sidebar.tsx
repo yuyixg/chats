@@ -52,23 +52,9 @@ const Sidebar = <T,>({
   toggleOpen,
   handleCreateItem,
   hasModel,
-  onDrop,
   onAddFolder,
 }: Props<T>) => {
   const { t } = useTranslation();
-
-  const allowDrop = (e: any) => {
-    e.preventDefault();
-  };
-
-  const highlightDrop = (e: any) => {
-    e.target.style.background = '#FFF';
-  };
-
-  const removeHighlight = (e: any) => {
-    e.target.style.background = 'none';
-  };
-
   const NoDataRender = () =>
     isLoading === false &&
     items.length === 0 && (
@@ -88,7 +74,7 @@ const Sidebar = <T,>({
         <div className="sticky">
           <div
             className={cn(
-              'flex items-center px-1.5 justify-between',
+              'flex items-center pr-1.5 justify-between',
               side === 'right' && 'flex-row-reverse',
             )}
           >
@@ -127,7 +113,7 @@ const Sidebar = <T,>({
           </div>
           <div
             className={cn(
-              'px-1.5 h-16',
+              'pr-1.5 h-16',
               onAddFolder && 'flex items-center gap-x-1',
             )}
           >
@@ -170,7 +156,7 @@ const Sidebar = <T,>({
       {!isOpen && showOpenButton && (
         <div
           className={`group fixed z-20 ${
-            side === 'right' ? 'right-2' : 'left-[14px]'
+            side === 'right' ? 'right-2' : 'left-[8px]'
           }`}
           style={{ top: '8px' }}
         >

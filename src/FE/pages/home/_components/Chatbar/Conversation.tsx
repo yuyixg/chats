@@ -155,7 +155,7 @@ const ConversationComponent = ({ chat }: Props) => {
   return (
     <div className="relative flex items-center rounded-lg">
       {isChanging && selectChatId === chat.id ? (
-        <div className="flex w-full items-center gap-2 rounded-lg bg-background p-3">
+        <div className="flex w-full h-11 items-center gap-2 rounded-lg bg-background p-3">
           <input
             className="mr-12 flex-1 overflow-hidden overflow-ellipsis border-neutral-400 bg-transparent text-left text-[12.5px] leading-3 outline-none text-black dark:text-white"
             type="text"
@@ -167,7 +167,7 @@ const ConversationComponent = ({ chat }: Props) => {
         </div>
       ) : (
         <button
-          className={`flex w-full h-11 cursor-pointer items-center gap-2 rounded-lg px-3 transition-colors duration-200 hover:bg-muted ${
+          className={`flex w-full h-11 cursor-pointer items-center gap-2 rounded-lg px-2 transition-colors duration-200 hover:bg-muted ${
             chatting ? 'disabled:cursor-not-allowed' : ''
           } ${selectChatId === chat.id ? 'bg-muted' : ''}`}
           onClick={() => handleSelectChat(chat)}

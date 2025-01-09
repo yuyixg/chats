@@ -1,6 +1,6 @@
 import { useContext, useRef } from 'react';
 
-import { chatsGroupByUpdatedAt, isAllChatsGroup } from '@/utils/chats';
+import { chatsGroupByUpdatedAt, isUnGroupChat } from '@/utils/chats';
 import { currentISODateString } from '@/utils/date';
 
 import { IChat, UngroupedChatName } from '@/types/chat';
@@ -87,7 +87,7 @@ export const ChatGroups = ({ onShowMore }: Props) => {
     const groupByUpdatedChats = chatsGroupByUpdatedAt(chatList);
     return (
       <div
-        className={cn(!isAllChatsGroup(chatGroup.id) && 'ml-4 gap-2 border-l')}
+        className={cn(!isUnGroupChat(chatGroup.id) && 'ml-4 gap-2 border-l')}
       >
         <Conversations
           groupId={chatGroup.id}
@@ -126,7 +126,7 @@ export const ChatGroups = ({ onShowMore }: Props) => {
   return (
     <div className="flex w-full flex-col pt-2 bg-m">
       {chatGroups.map((group, index) => {
-        const isAllChatGroup = isAllChatsGroup(group.id);
+        const isAllChatGroup = isUnGroupChat(group.id);
         return (
           <div
             key={'chat-group-' + index}

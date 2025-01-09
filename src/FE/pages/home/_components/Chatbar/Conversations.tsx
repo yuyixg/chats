@@ -2,12 +2,16 @@ import { useContext, useEffect, useState } from 'react';
 
 import useTranslation from '@/hooks/useTranslation';
 
+import { isUnGroupChat } from '@/utils/chats';
+
 import { IChat } from '@/types/chat';
 
 import { Button } from '@/components/ui/button';
 
 import HomeContext from '../../_contexts/home.context';
 import ConversationComponent from './Conversation';
+
+import { cn } from '@/lib/utils';
 
 interface Props {
   groupId: string | null;
@@ -19,7 +23,6 @@ const Conversations = ({ groupId, chatGroups, onShowMore }: Props) => {
   const { t } = useTranslation();
   const {
     state: { chatPaging },
-    getChatsByGroup,
   } = useContext(HomeContext);
 
   const [showMore, setShowMore] = useState(true);
@@ -44,7 +47,12 @@ const Conversations = ({ groupId, chatGroups, onShowMore }: Props) => {
               {t(group)}
             </div>
             {items.map((chat, index) => (
-              <ConversationComponent key={index} chat={chat} />
+              <div
+                className={cn(!isUnGroupChat(groupId) && 'ml-1')}
+                key={'conversation-' + index}
+              >
+                <ConversationComponent chat={chat} />
+              </div>
             ))}
           </div>
         ))}

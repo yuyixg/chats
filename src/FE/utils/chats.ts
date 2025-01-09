@@ -81,6 +81,6 @@ export const chatsGroupByUpdatedAt = (data: IChat[]): Map<string, IChat[]> => {
   return groupedData;
 };
 
-export const isAllChatsGroup = (id: string) => {
+export const isUnGroupChat = (id: string | null) => {
   return id === null;
 };
