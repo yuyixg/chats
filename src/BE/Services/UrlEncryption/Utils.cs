@@ -28,12 +28,12 @@ internal class Utils
         aes.Key = key;
 
         byte[] encryptedIdBytes = aes.EncryptCbc(input, iv);
-        return WebEncoders.Base64UrlEncode(encryptedIdBytes);
+        return Serialize(encryptedIdBytes);
     }
 
     public static byte[] Decrypt(string encrypted, byte[] key, byte[] iv)
     {
-        byte[] encryptedIdBytes = WebEncoders.Base64UrlDecode(encrypted);
+        byte[] encryptedIdBytes = Deserialize(encrypted);
 
         if (encryptedIdBytes.Length != 16)
         {
@@ -45,5 +45,29 @@ internal class Utils
         byte[] decryptedIdBytes = aes.DecryptCbc(encryptedIdBytes, iv);
 
         return decryptedIdBytes;
+    }
+
+    private static string Serialize(byte[] encryptedIdBytes)
+    {
+        if (encryptedIdBytes.Length == 16)
+        {
+            return new Guid(encryptedIdBytes).ToString();
+        }
+        else
+        {
+            return WebEncoders.Base64UrlEncode(encryptedIdBytes);
+        }
+    }
+
+    private static byte[] Deserialize(string encrypted)
+    {
+        if (encrypted.Length == 36)
+        {
+            return Guid.Parse(encrypted).ToByteArray();
+        }
+        else
+        {
+            return WebEncoders.Base64UrlDecode(encrypted);
+        }
     }
 }
