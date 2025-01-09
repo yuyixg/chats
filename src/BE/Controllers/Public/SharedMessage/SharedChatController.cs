@@ -13,28 +13,25 @@ using Microsoft.EntityFrameworkCore;
 
 namespace Chats.BE.Controllers.Public.SharedMessage;
 
-[Route("api/public/chats")]
+[Route("api/public/chat-share")]
 public class SharedChatController(ChatsDB db) : ControllerBase
 {
-    [HttpGet("{path}")]
-    public async Task<ActionResult<ChatsResponseWithMessage>> GetSharedChat(string path,
-        long validBefore, string hash,
+    [HttpGet("{encryptedChatShareId}")]
+    public async Task<ActionResult<ChatsResponseWithMessage>> GetSharedChat(string encryptedChatShareId,
         [FromServices] IUrlEncryptionService idEncryption,
         [FromServices] FileUrlProvider fup,
         CancellationToken cancellationToken)
     {
-        Result<int> decodedChat = idEncryption.DecodeChatIdPath(path, validBefore, hash);
-        if (decodedChat.IsFailure)
-        {
-            return BadRequest(decodedChat.Error);
-        }
-
-        if (!await db.Chats.AnyAsync(x => x.Id == decodedChat.Value && !x.IsArchived, cancellationToken))
+        int chatShareId = idEncryption.DecryptChatShareId(encryptedChatShareId);
+        ChatShare? chatShare = await db.ChatShares.FirstOrDefaultAsync(x => x.Id == chatShareId, cancellationToken);
+        if (chatShare == null || chatShare.ExpiresAt < DateTime.UtcNow)
         {
             return NotFound();
         }
 
-        return Ok(await AdminMessageController.InternalGetChatWithMessages(db, idEncryption, decodedChat.Value, fup, cancellationToken));
+        ChatsResponseWithMessage data = (await AdminMessageController.InternalGetChatWithMessages(db, idEncryption, chatShare.ChatId, fup, cancellationToken))!;
+        data.Messages = data.Messages.Where(x => x.CreatedAt <= chatShare.SnapshotTime).ToArray();
+        return Ok(data);
     }
 
     [HttpPost("{encryptedChatId}"), Authorize]
@@ -46,13 +43,47 @@ public class SharedChatController(ChatsDB db) : ControllerBase
         CancellationToken cancellationToken)
     {
         int chatId = idEncryption.DecryptChatId(encryptedChatId);
-        Chat? chat = await db.Chats.FirstOrDefaultAsync(x => x.Id == chatId && x.UserId == user.Id && !x.IsArchived, cancellationToken: cancellationToken);
-        if (chat == null)
+        bool isChatOwner = await db.Chats.AnyAsync(x => x.Id == chatId && x.UserId == user.Id, cancellationToken);
+        if (!isChatOwner)
+        {
+            return Forbid();
+        }
+
+        ChatShare cs = new()
+        {
+            ChatId = chatId,
+            ExpiresAt = validBefore,
+            CreatedAt = DateTime.UtcNow,
+            SnapshotTime = DateTime.UtcNow,
+        };
+        db.ChatShares.Add(cs);
+        await db.SaveChangesAsync(cancellationToken);
+
+        string encryptedChatShare = idEncryption.EncryptChatShareId(cs.Id);
+        return Created(new Uri($"{hostUrlservice.GetFEUrl()}/share/{encryptedChatShare}"), null);
+    }
+
+    [HttpPut("{encryptedChatShareId}"), Authorize]
+    public async Task<ActionResult> UpdateShared(string encryptedChatShareId,
+        DateTimeOffset validBefore,
+        [FromServices] IUrlEncryptionService idEncryption,
+        [FromServices] CurrentUser user,
+        CancellationToken cancellationToken)
+    {
+        int chatShareId = idEncryption.DecryptChatShareId(encryptedChatShareId);
+        ChatShare? chatShare = await db.ChatShares.FirstOrDefaultAsync(x => x.Id == chatShareId, cancellationToken);
+        if (chatShare == null)
         {
             return NotFound();
         }
-
-        string path = idEncryption.CreateChatIdPath(new TimedId(chatId, validBefore));
-        return Created(new Uri($"{hostUrlservice.GetFEUrl()}/share/{path}"), null);
+        bool isChatOwner = await db.Chats.AnyAsync(x => x.Id == chatShare.ChatId && x.UserId == user.Id, cancellationToken);
+        if (!isChatOwner)
+        {
+            return Forbid();
+        }
+        chatShare.ExpiresAt = validBefore;
+        chatShare.SnapshotTime = DateTime.UtcNow;
+        await db.SaveChangesAsync(cancellationToken);
+        return Ok();
     }
 }

@@ -54,7 +54,7 @@ public record ChatsResponse
 public record ChatsResponseWithMessage : ChatsResponse
 {
     [JsonPropertyName("messages")]
-    public required MessageDto[] Messages { get; init; }
+    public required MessageDto[] Messages { get; set; }
 }
 
 public record ChatSpanDto
