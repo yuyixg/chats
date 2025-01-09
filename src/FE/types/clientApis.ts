@@ -68,6 +68,9 @@ export interface ChatResult {
   spans: ChatSpanDto[];
   leafMessageId?: string;
   updatedAt: string;
+  isTopMost: boolean;
+  groupId: string | null;
+  tags: string[];
 }
 
 export interface ChatSpanDto {

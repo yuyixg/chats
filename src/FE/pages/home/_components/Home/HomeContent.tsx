@@ -241,25 +241,6 @@ const HomeContent = () => {
     chatDispatch(setChatGroup(chatGroupList));
     chatDispatch(setChatPaging(chatPagingList));
     selectChat(chatList);
-    // const { page, pageSize } = params;
-    // getChatsByPaging(params).then((data) => {
-    //   const { rows, count } = data || { rows: [], count: 0 };
-    //   const mapRows = rows.map(
-    //     (x) => ({ ...x, status: ChatStatus.None } as IChat),
-    //   );
-    //   let chatList = mapRows;
-    //   if (isAppend) {
-    //     chatList = chats.concat(mapRows);
-    //   }
-    //   chatDispatch(setChats(chatList));
-    //   const chatPagingList = chatPaging.map((x) => {
-    //     if (x.groupId === params.groupId) {
-    //       return { ...x, count, page, pageSize };
-    //     }
-    //     return x;
-    //   });
-    //   chatDispatch(setChatPaging(chatPagingList));
-    // });
   };
 
   const getChatsByGroup = (params: GetChatsParams) => {
