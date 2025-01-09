@@ -44,6 +44,7 @@ public class MessagesController(ChatsDB db, CurrentUser currentUser, IUrlEncrypt
                     ModelId = x.MessageResponse.Usage.UserModel.ModelId,
                     ModelName = x.MessageResponse.Usage.UserModel.Model.Name,
                     ModelProviderId = x.MessageResponse.Usage.UserModel.Model.ModelKey.ModelProviderId,
+                    Reaction = x.MessageResponse.ReactionId,
                 },
             })
             .OrderBy(x => x.CreatedAt)

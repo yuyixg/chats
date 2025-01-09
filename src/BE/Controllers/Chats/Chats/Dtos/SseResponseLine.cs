@@ -64,6 +64,7 @@ public record SseResponseLine
                 OutputTokens = assistantMessage.MessageResponse.Usage.OutputTokens,
                 ReasoningTokens = assistantMessage.MessageResponse.Usage.ReasoningTokens,
                 ModelProviderId = assistantMessage.MessageResponse.Usage.UserModel.Model.ModelKey.ModelProviderId,
+                Reaction = assistantMessage.MessageResponse.ReactionId,
             },
         };
         MessageDto assistantMessageDto = assistantMessageTemp.ToDto(urlEncryptionService, fup);
