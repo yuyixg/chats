@@ -145,6 +145,7 @@ const HomeContent = () => {
         }
       });
     }
+    return chat;
   };
 
   const handleNewChat = () => {
@@ -225,7 +226,7 @@ const HomeContent = () => {
       query,
     });
     const chatList: IChat[] = [];
-    const chatGroupList: IChatGroup[] = [];
+    let chatGroupList: IChatGroup[] = [];
     const chatPagingList: IChatPaging[] = [];
     data.forEach((d) => {
       if (query && d.messages.count === 0) return;
@@ -237,10 +238,14 @@ const HomeContent = () => {
       chatGroupList.push({ ...d, isExpanded: query ? true : d.isExpanded });
       chatList.push(...d.messages.rows);
     });
+    const chat = selectChat(chatList);
+    if (chat)
+      chatGroupList = chatGroupList.map((x) =>
+        x.id === chat.groupId ? { ...x, isExpanded: true } : x,
+      );
     chatDispatch(setChats(chatList));
     chatDispatch(setChatGroup(chatGroupList));
     chatDispatch(setChatPaging(chatPagingList));
-    selectChat(chatList);
   };
 
   const getChatsByGroup = (params: GetChatsParams) => {

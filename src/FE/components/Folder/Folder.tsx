@@ -29,7 +29,6 @@ interface Props {
   defaultOpen?: boolean;
   showActions?: boolean;
   folderComponent: ReactElement | undefined;
-  onDrop: (e: any, folder: IChatGroup) => void;
   onRenameGroup?: (id: string, value: string) => void;
   onDeleteGroup?: (id: string) => void;
   onClickGroup?: (group: IChatGroup) => void;
@@ -40,7 +39,6 @@ const Folder = ({
   showActions = true,
   defaultOpen = false,
   folderComponent,
-  onDrop,
   onRenameGroup,
   onDeleteGroup,
   onClickGroup,
@@ -95,7 +93,7 @@ const Folder = ({
         ) : (
           <Button
             variant="ghost"
-            className="flex w-full gap-3 rounded-lg p-2"
+            className="flex w-full gap-3 rounded-lg p-2 pr-11"
             onClick={handleClickFolder}
           >
             {isOpen ? (

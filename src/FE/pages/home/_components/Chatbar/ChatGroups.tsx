@@ -114,7 +114,6 @@ export const ChatGroups = ({ onShowMore }: Props) => {
   };
 
   const highlightDrop = (groupId: string) => {
-    console.log(groupRefs.current);
     Object.keys(groupRefs.current).forEach((key: string) => {
       if (key === groupId) {
         groupRefs.current[key].style.background = 'hsl(var(--muted))';
@@ -141,18 +140,21 @@ export const ChatGroups = ({ onShowMore }: Props) => {
               highlightDrop(group.id || UngroupedChatName);
             }}
           >
-            <Folder
-              showActions={!isAllChatGroup}
-              defaultOpen={group.isExpanded}
-              currentFolder={group}
-              onDrop={handleDrop}
-              onClickGroup={handleClickGroup}
-              onDeleteGroup={(id: string) => {
-                handleDeleteGroup(id, index);
-              }}
-              onRenameGroup={handRenameGroup}
-              folderComponent={ChatGroupsRender(group)}
-            />
+            {isAllChatGroup ? (
+              <div className="pt-1">{ChatGroupsRender(group)}</div>
+            ) : (
+              <Folder
+                showActions={!isAllChatGroup}
+                defaultOpen={group.isExpanded}
+                currentFolder={group}
+                onClickGroup={handleClickGroup}
+                onDeleteGroup={(id: string) => {
+                  handleDeleteGroup(id, index);
+                }}
+                onRenameGroup={handRenameGroup}
+                folderComponent={ChatGroupsRender(group)}
+              />
+            )}
           </div>
         );
       })}
