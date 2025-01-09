@@ -1,7 +1,6 @@
 import { useFetch } from '@/hooks/useFetch';
 
 import { AdminModelDto, PostPromptParams } from '@/types/adminApis';
-import { IGroupedChat } from '@/types/chat';
 import { IChatMessage } from '@/types/chatMessage';
 import {
   ChatResult,
@@ -44,10 +43,12 @@ export const getUserMessages = (chatId: string): Promise<IChatMessage[]> => {
 export const getChatsByPaging = (
   params: GetChatsParams,
 ): Promise<PageResult<ChatResult[]>> => {
-  const { query, page, pageSize } = params;
+  const { groupId, query, page, pageSize } = params;
   const fetchService = useFetch();
   return fetchService.get(
-    `/api/user/chats?page=${page}&pageSize=${pageSize}&query=${query || ''}`,
+    `/api/user/chats?groupId=${
+      groupId || ''
+    }&page=${page}&pageSize=${pageSize}&query=${query || ''}`,
   );
 };
 

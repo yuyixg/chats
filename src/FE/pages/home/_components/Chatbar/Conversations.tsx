@@ -10,45 +10,49 @@ import HomeContext from '../../_contexts/home.context';
 import ConversationComponent from './Conversation';
 
 interface Props {
+  groupId: string | null;
   chatGroups: Map<string, IChat[]>;
+  onShowMore?: (groupId: string | null) => void;
 }
 
-const Conversations = ({ chatGroups }: Props) => {
+const Conversations = ({ groupId, chatGroups, onShowMore }: Props) => {
   const { t } = useTranslation();
   const {
-    state: { chatsPaging },
-    getChats,
+    state: { chatPaging },
+    getChatsByGroup,
   } = useContext(HomeContext);
 
-  const [showMore, setShowMore] = useState(false);
+  const [showMore, setShowMore] = useState(true);
 
   useEffect(() => {
-    const { count, page, pageSize } = chatsPaging;
+    const { count, page, pageSize } = chatPaging.find(
+      (x) => x.groupId === groupId,
+    )!;
     setShowMore(count <= page * pageSize);
-  }, [chatsPaging]);
+  }, [chatPaging]);
 
   const handleShowMore = () => {
-    const { page, pageSize } = chatsPaging;
-    getChats({ page: page + 1, pageSize: pageSize }, true);
+    onShowMore && onShowMore(groupId);
   };
 
   return (
     <div className="flex w-full flex-col gap-1">
-      {chatGroups.size > 0 && [...chatGroups.entries()].map(([group, items]) => (
-        <div key={group}>
-          <div className="w-full pl-2.5 text-xs text-gray-500 font-medium my-1">
-            {t(group)}
+      {chatGroups.size > 0 &&
+        [...chatGroups.entries()].map(([group, items]) => (
+          <div key={group}>
+            <div className="w-full pl-2.5 text-xs text-gray-500 font-medium my-1">
+              {t(group)}
+            </div>
+            {items.map((chat, index) => (
+              <ConversationComponent key={index} chat={chat} />
+            ))}
           </div>
-          {items.map((chat, index) => (
-            <ConversationComponent key={index} chat={chat} />
-          ))}
-        </div>
-      ))}
-      {/* {!showMore && (
+        ))}
+      {!showMore && (
         <Button onClick={handleShowMore} className="text-xs" variant="link">
           {t('Show more')}
         </Button>
-      )} */}
+      )}
     </div>
   );
 };

@@ -57,6 +57,7 @@ export interface GetSiteInfoResult {
 }
 
 export interface GetChatsParams extends Paging {
+  groupId: string | null;
   query?: string;
 }
 
@@ -156,8 +157,8 @@ export interface GetUserChatGroupWithMessagesResult {
   isExpanded: boolean;
   messages: {
     rows: GetUserChatResult[];
+    count: 0;
   };
-  count: 0;
 }
 
 export interface PostChatGroupParams {

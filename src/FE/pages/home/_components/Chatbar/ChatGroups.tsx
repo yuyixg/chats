@@ -3,7 +3,7 @@ import { useContext, useRef } from 'react';
 import { chatsGroupByUpdatedAt, isAllChatsGroup } from '@/utils/chats';
 import { currentISODateString } from '@/utils/date';
 
-import { IChat } from '@/types/chat';
+import { IChat, UngroupedChatName } from '@/types/chat';
 import { IChatGroup } from '@/types/group';
 
 import Folder from '@/components/Folder/Folder';
@@ -15,15 +15,17 @@ import Conversations from './Conversations';
 import { deleteChatGroup, putChatGroup, putChats } from '@/apis/clientApis';
 import { cn } from '@/lib/utils';
 
-interface Props {}
+interface Props {
+  onShowMore?: (groupId: string | null) => void;
+}
 
-export const ChatGroups = ({}: Props) => {
+export const ChatGroups = ({ onShowMore }: Props) => {
   const {
     state: { chats, chatGroups },
     chatDispatch,
   } = useContext(HomeContext);
 
-  const groupRefs = useRef<any>([]);
+  const groupRefs = useRef<any>({});
 
   const handleDrop = (e: any, folder: IChatGroup) => {
     if (e.dataTransfer) {
@@ -45,12 +47,15 @@ export const ChatGroups = ({}: Props) => {
   };
 
   const handleClickGroup = (folder: IChatGroup) => {
-    if (folder.id) {
+    const chatGroupList = chatGroups.map((x) =>
+      x.id === folder.id ? { ...x, isExpanded: !folder.isExpanded } : x,
+    );
+    chatDispatch(setChatGroup(chatGroupList));
+    folder.id &&
       putChatGroup({ id: folder.id, isExpanded: !folder.isExpanded });
-    }
   };
 
-  const handleDeleteGroup = (groupId: string) => {
+  const handleDeleteGroup = (groupId: string, index: number) => {
     deleteChatGroup(groupId).then(() => {
       const chatList = chats.map((x) => {
         if (x.groupId === groupId) {
@@ -61,6 +66,7 @@ export const ChatGroups = ({}: Props) => {
       const chatFolderList = chatGroups.filter((x) => x.id !== groupId);
       chatDispatch(setChats(chatList));
       chatDispatch(setChatGroup(chatFolderList));
+      groupRefs.current[groupId] = undefined;
     });
   };
 
@@ -83,7 +89,11 @@ export const ChatGroups = ({}: Props) => {
       <div
         className={cn(!isAllChatsGroup(chatGroup.id) && 'ml-4 gap-2 border-l')}
       >
-        <Conversations chatGroups={groupByUpdatedChats} />
+        <Conversations
+          groupId={chatGroup.id}
+          onShowMore={onShowMore}
+          chatGroups={groupByUpdatedChats}
+        />
       </div>
     );
   };
@@ -95,19 +105,21 @@ export const ChatGroups = ({}: Props) => {
   const dropHandler = (e: any, currentGroup: IChatGroup) => {
     if (e.dataTransfer) {
       handleDrop(e, currentGroup);
-
-      groupRefs.current.forEach((x: any) => {
-        x.style.background = 'none';
+      Object.keys(groupRefs.current).forEach((key: string) => {
+        if (groupRefs.current[key]) {
+          groupRefs.current[key].style.background = 'none';
+        }
       });
     }
   };
 
-  const highlightDrop = (index: number) => {
-    groupRefs.current.forEach((x: any, i: number) => {
-      if (index === i) {
-        x.style.background = 'hsl(var(--muted))';
-      } else {
-        x.style.background = 'none';
+  const highlightDrop = (groupId: string) => {
+    console.log(groupRefs.current);
+    Object.keys(groupRefs.current).forEach((key: string) => {
+      if (key === groupId) {
+        groupRefs.current[key].style.background = 'hsl(var(--muted))';
+      } else if (groupRefs.current[key]) {
+        groupRefs.current[key].style.background = 'none';
       }
     });
   };
@@ -118,22 +130,26 @@ export const ChatGroups = ({}: Props) => {
         const isAllChatGroup = isAllChatsGroup(group.id);
         return (
           <div
+            key={'chat-group-' + index}
             className="rounded-md"
-            ref={(el) => (groupRefs.current[index] = el)}
+            ref={(el) =>
+              (groupRefs.current[group.id || UngroupedChatName] = el)
+            }
             onDrop={(e) => dropHandler(e, group)}
             onDragOver={allowDrop}
             onDragEnter={() => {
-              highlightDrop(index);
+              highlightDrop(group.id || UngroupedChatName);
             }}
           >
             <Folder
-              key={index}
               showActions={!isAllChatGroup}
               defaultOpen={group.isExpanded}
               currentFolder={group}
               onDrop={handleDrop}
               onClickGroup={handleClickGroup}
-              onDeleteGroup={handleDeleteGroup}
+              onDeleteGroup={(id: string) => {
+                handleDeleteGroup(id, index);
+              }}
               onRenameGroup={handRenameGroup}
               folderComponent={ChatGroupsRender(group)}
             />

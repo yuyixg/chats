@@ -74,4 +74,16 @@ export interface IGroupedChat {
 }
 
 export const ChatPinGroup = 'Pin';
-export const ChatUngrouped = 'Ungrouped';
+export const UngroupedChatName = 'Ungrouped';
+export const DefaultChatPaging = {
+  groupId: null,
+  page: 1,
+  pageSize: 50,
+};
+
+export interface IChatPaging {
+  groupId: string | null;
+  count: number;
+  page: number;
+  pageSize: number;
+}

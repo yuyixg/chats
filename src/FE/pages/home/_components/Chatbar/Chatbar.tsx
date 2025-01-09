@@ -5,10 +5,10 @@ import useTranslation from '@/hooks/useTranslation';
 
 import { getNextName } from '@/utils/common';
 
-import { ChatStatus } from '@/types/chat';
+import { ChatStatus, DefaultChatPaging } from '@/types/chat';
 import { ChatResult } from '@/types/clientApis';
 
-import { setChatGroup } from '../../_actions/chat.actions';
+import { setChatGroup, setChatPaging } from '../../_actions/chat.actions';
 import { setShowChatBar } from '../../_actions/setting.actions';
 import HomeContext from '../../_contexts/home.context';
 import Sidebar from '../Sidebar/Sidebar';
@@ -27,13 +27,21 @@ const Chatbar = () => {
   });
 
   const {
-    state: { chats, chatGroups, showChatBar, selectedChat, isChatsLoading },
+    state: {
+      chats,
+      chatGroups,
+      chatPaging,
+      showChatBar,
+      selectedChat,
+      isChatsLoading,
+    },
     chatDispatch,
     settingDispatch,
     handleDeleteChat,
     handleNewChat,
     hasModel,
     getChats,
+    getChatsByGroup,
   } = useContext(HomeContext);
 
   const {
@@ -49,8 +57,14 @@ const Chatbar = () => {
   const handleAddGroup = () => {
     const groupNames = chatGroups.map((x) => x.name);
     const name = getNextName(groupNames, t('New Group'));
-    postChatGroup({ rank: 0, name, isExpanded: true }).then((data) => {
+    postChatGroup({ rank: 0, name, isExpanded: false }).then((data) => {
       chatDispatch(setChatGroup([data, ...chatGroups]));
+      chatDispatch(
+        setChatPaging([
+          ...chatPaging,
+          { ...DefaultChatPaging, count: 0, groupId: data.id },
+        ]),
+      );
     });
   };
 
@@ -71,6 +85,16 @@ const Chatbar = () => {
     }
   }, [searchTerm, chats]);
 
+  const handleShowMore = (groupId: string | null) => {
+    const { page, pageSize } = chatPaging.find((x) => x.groupId === groupId)!;
+    getChatsByGroup({
+      groupId,
+      page: page + 1,
+      pageSize: pageSize,
+      query: searchTerm,
+    });
+  };
+
   return (
     <ChatbarContext.Provider
       value={{
@@ -86,13 +110,12 @@ const Chatbar = () => {
         addItemButtonTitle={t('New chat')}
         hasModel={hasModel}
         onAddFolder={handleAddGroup}
-        // itemComponent={<Conversations chats={filteredChats} />}
-        folderComponent={<ChatGroups />}
+        folderComponent={<ChatGroups onShowMore={handleShowMore} />}
         items={filteredChats}
         searchTerm={searchTerm}
         handleSearchTerm={(value: string) => {
           setSearchTerm(value);
-          getChats({ query: value, page: 1, pageSize: 50 });
+          getChats(value);
         }}
         toggleOpen={handleToggleChatbar}
         handleCreateItem={handleNewChat}

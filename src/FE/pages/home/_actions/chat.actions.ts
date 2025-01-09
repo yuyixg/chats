@@ -1,5 +1,3 @@
-import { chatsGroupByUpdatedAt } from '@/utils/chats';
-
 import { AdminModelDto } from '@/types/adminApis';
 import { IChat } from '@/types/chat';
 import { ChatSpanDto } from '@/types/clientApis';
@@ -8,7 +6,7 @@ import {
   ChatAction,
   ChatActionTypes,
   SetChatGroupType,
-  SetChatPagingType,
+  SetChatsPagingType,
   SetChatsType,
   SetIsChatsLoadingType,
   SetSelectedChatType,
@@ -50,7 +48,7 @@ export const setChangeSelectedChatSpan = (
   };
 };
 
-export const setChatPaging = (paging: SetChatPagingType): ChatAction => ({
+export const setChatPaging = (paging: SetChatsPagingType): ChatAction => ({
   type: ChatActionTypes.SET_CHAT_PAGING,
   payload: paging,
 });
