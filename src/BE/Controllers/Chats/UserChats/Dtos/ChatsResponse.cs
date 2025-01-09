@@ -15,6 +15,9 @@ public record ChatsResponse
     [JsonPropertyName("isTopMost")]
     public required bool IsTopMost { get; init; }
 
+    [JsonPropertyName("isShared")]
+    public required bool IsShared { get; init; }
+
     [JsonPropertyName("spans")]
     public required ChatSpanDto[] Spans { get; init; }
 
@@ -37,6 +40,7 @@ public record ChatsResponse
             Id = Id,
             Title = Title,
             IsTopMost = IsTopMost,
+            IsShared = IsShared,
             Spans = Spans,
             GroupId = GroupId,
             Tags = Tags,

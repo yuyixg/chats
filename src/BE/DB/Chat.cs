@@ -37,6 +37,9 @@ public partial class Chat
     public virtual ChatGroup? ChatGroup { get; set; }
 
     [InverseProperty("Chat")]
+    public virtual ICollection<ChatShare> ChatShares { get; set; } = new List<ChatShare>();
+
+    [InverseProperty("Chat")]
     public virtual ICollection<ChatSpan> ChatSpans { get; set; } = new List<ChatSpan>();
 
     [ForeignKey("LeafMessageId")]

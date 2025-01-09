@@ -19,6 +19,8 @@ public partial class ChatsDB : DbContext
 
     public virtual DbSet<ChatRole> ChatRoles { get; set; }
 
+    public virtual DbSet<ChatShare> ChatShares { get; set; }
+
     public virtual DbSet<ChatSpan> ChatSpans { get; set; }
 
     public virtual DbSet<ChatTag> ChatTags { get; set; }
@@ -154,6 +156,13 @@ public partial class ChatsDB : DbContext
             entity.HasOne(d => d.User).WithMany(p => p.ChatGroups)
                 .OnDelete(DeleteBehavior.ClientSetNull)
                 .HasConstraintName("FK_ChatGroup_User");
+        });
+
+        modelBuilder.Entity<ChatShare>(entity =>
+        {
+            entity.HasOne(d => d.Chat).WithMany(p => p.ChatShares)
+                .OnDelete(DeleteBehavior.ClientSetNull)
+                .HasConstraintName("FK_ChatShare_Chat");
         });
 
         modelBuilder.Entity<ChatSpan>(entity =>

@@ -64,6 +64,7 @@ public class AdminMessageController(ChatsDB db, CurrentUser currentUser, IUrlEnc
             {
                 Id = urlEncryption.EncryptChatId(x.Id),
                 Title = x.Title,
+                IsShared = x.ChatShares.Any(),
                 IsTopMost = x.IsTopMost,
                 GroupId = urlEncryption.EncryptChatGroupId(x.ChatGroupId),
                 Tags = x.ChatTags.Select(x => x.Name).ToArray(),
