@@ -80,3 +80,7 @@ export const chatsGroupByUpdatedAt = (data: IChat[]): Map<string, IChat[]> => {
 
   return groupedData;
 };
+
+export const isAllChatsGroup = (id: string) => {
+  return id === null;
+};

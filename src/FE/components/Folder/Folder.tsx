@@ -65,28 +65,6 @@ const Folder = ({
     setIsRenaming(false);
   };
 
-  const dropHandler = (e: any) => {
-    if (e.dataTransfer) {
-      setIsOpen(true);
-
-      onDrop(e, currentFolder);
-
-      e.target.style.background = 'none';
-    }
-  };
-
-  const allowDrop = (e: any) => {
-    e.preventDefault();
-  };
-
-  const highlightDrop = (e: any) => {
-    e.target.style.background = '#FFF';
-  };
-
-  const removeHighlight = (e: any) => {
-    e.target.style.background = 'none';
-  };
-
   useEffect(() => {
     if (isRenaming) {
       setIsDeleting(false);
@@ -119,10 +97,6 @@ const Folder = ({
             variant="ghost"
             className="flex w-full gap-3 rounded-lg p-2"
             onClick={handleClickFolder}
-            onDrop={(e) => dropHandler(e)}
-            onDragOver={allowDrop}
-            onDragEnter={highlightDrop}
-            onDragLeave={removeHighlight}
           >
             {isOpen ? (
               <IconChevronDown size={18} stroke="#6b7280" />

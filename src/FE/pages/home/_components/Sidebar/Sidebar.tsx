@@ -85,65 +85,67 @@ const Sidebar = <T,>({
           isOpen ? 'w-[260px]' : 'w-0 hidden'
         } fixed top-0 ${side}-0 z-40 flex h-full flex-none flex-col bg-gray-50 dark:bg-[#202123] p-2 text-[14px] sm:relative sm:top-0`}
       >
-        <div
-          className={cn(
-            'flex items-center px-1.5 justify-between',
-            side === 'right' && 'flex-row-reverse',
-          )}
-        >
-          <Tips
-            trigger={
-              <Button
-                variant="ghost"
-                className="p-1 m-0 h-auto"
-                onClick={toggleOpen}
-              >
-                {side === 'right' ? (
-                  <IconLayoutSidebarRight size={26} />
-                ) : (
-                  <IconLayoutSidebar size={26} />
-                )}
-              </Button>
-            }
-          />
-          {hasModel() && (
+        <div className="sticky">
+          <div
+            className={cn(
+              'flex items-center px-1.5 justify-between',
+              side === 'right' && 'flex-row-reverse',
+            )}
+          >
             <Tips
               trigger={
                 <Button
-                  onClick={() => {
-                    handleCreateItem();
-                  }}
-                  disabled={messageIsStreaming}
                   variant="ghost"
                   className="p-1 m-0 h-auto"
+                  onClick={toggleOpen}
                 >
-                  <IconSquarePlus size={26} />
+                  {side === 'right' ? (
+                    <IconLayoutSidebarRight size={26} />
+                  ) : (
+                    <IconLayoutSidebar size={26} />
+                  )}
                 </Button>
               }
-              content={addItemButtonTitle}
             />
-          )}
-        </div>
-        <div
-          className={cn(
-            'px-1.5 h-16',
-            onAddFolder && 'flex items-center gap-x-1',
-          )}
-        >
-          <Search
-            placeholder={t('Search...') || ''}
-            searchTerm={searchTerm}
-            onSearch={handleSearchTerm}
-          />
-          {onAddFolder && (
-            <Button
-              variant="ghost"
-              className="h-auto p-1"
-              onClick={onAddFolder}
-            >
-              <IconFolderPlus size={25} />
-            </Button>
-          )}
+            {hasModel() && (
+              <Tips
+                trigger={
+                  <Button
+                    onClick={() => {
+                      handleCreateItem();
+                    }}
+                    disabled={messageIsStreaming}
+                    variant="ghost"
+                    className="p-1 m-0 h-auto"
+                  >
+                    <IconSquarePlus size={26} />
+                  </Button>
+                }
+                content={addItemButtonTitle}
+              />
+            )}
+          </div>
+          <div
+            className={cn(
+              'px-1.5 h-16',
+              onAddFolder && 'flex items-center gap-x-1',
+            )}
+          >
+            <Search
+              placeholder={t('Search...') || ''}
+              searchTerm={searchTerm}
+              onSearch={handleSearchTerm}
+            />
+            {onAddFolder && (
+              <Button
+                variant="ghost"
+                className="h-auto p-1"
+                onClick={onAddFolder}
+              >
+                <IconFolderPlus size={25} />
+              </Button>
+            )}
+          </div>
         </div>
 
         {isLoading && (
@@ -154,19 +156,11 @@ const Sidebar = <T,>({
           </div>
         )}
 
-        <div className="flex-grow overflow-auto scroll-container">
+        <div className="flex-grow overflow-hidden overflow-y-scroll scroll-container">
           <div className="flex">{folderComponent}</div>
 
           {items?.length > 0 && !isLoading && (
-            <div
-              className="pt-2"
-              onDrop={onDrop}
-              onDragOver={allowDrop}
-              onDragEnter={highlightDrop}
-              onDragLeave={removeHighlight}
-            >
-              {itemComponent}
-            </div>
+            <div className="pt-2">{itemComponent}</div>
           )}
           {NoDataRender()}
         </div>

@@ -87,7 +87,7 @@ const HomeContent = () => {
     promptInitialState,
   );
 
-  const { chats, stopIds } = chatState;
+  const { chats, selectedChat, stopIds } = chatState;
   const { models } = modelState;
   const { showPromptBar } = settingState;
   const [isPageLoading, setIsPageLoading] = useState(true);
@@ -143,7 +143,10 @@ const HomeContent = () => {
   };
 
   const handleNewChat = () => {
-    postChats({ title: t('New Conversation') }).then((data) => {
+    postChats({
+      title: t('New Conversation'),
+      groupId: selectedChat?.groupId || null,
+    }).then((data) => {
       const chat = supplyChatProperty(data);
       const chatList = [chat, ...chats];
       chatDispatch(setChats(chatList));
