@@ -129,4 +129,17 @@ public class ChatGroupController(ChatsDB db, CurrentUser user, IUrlEncryptionSer
         await db.SaveChangesAsync(cancellationToken);
         return Ok();
     }
+
+    [HttpPut("move")]
+    public async Task<ActionResult> MoveGroup([FromBody] EncryptedMoveChatGroupRequest encryptedRequest, CancellationToken cancellationToken)
+    {
+        MoveChatGroupRequest req = encryptedRequest.Decrypt(urlEncryption);
+        ChatGroup? group = await db.ChatGroups.FirstOrDefaultAsync(x => x.UserId == user.Id && x.Id == req.GroupId, cancellationToken);
+        if (group == null)
+        {
+            return NotFound();
+        }
+
+        throw new NotImplementedException();
+    }
 }
