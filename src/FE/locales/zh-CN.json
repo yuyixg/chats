@@ -361,5 +361,13 @@
   "Today": "今天",
   "Yesterday": "昨天",
   "Last 7 days": "过去7天",
-  "Last 30 days": "过去30天"
+  "Last 30 days": "过去30天",
+  "New Group": "新建分组",
+  "Pin": "置顶",
+  "UnPin": "取消置顶",
+  "Pinned": "已置顶",
+  "All chats": "所有对话",
+  "Group name already exists": "组名已存在",
+  "Like": "赞",
+  "Dislike": "踩"
 }

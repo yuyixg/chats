@@ -1,10 +1,13 @@
 import { AdminModelDto } from '@/types/adminApis';
 import { ChatRole, ChatSpanStatus, Content } from '@/types/chat';
+import { ReactionMessageType } from '@/types/chatMessage';
 
 import ChangeModelAction from './ChangeModelAction';
 import CopyAction from './CopyAction';
 import GenerateInformationAction from './GenerateInformationAction';
 import PaginationAction from './PaginationAction';
+import ReactionBadResponseAction from './ReactionBadResponseAction';
+import ReactionGoodResponseAction from './ReactionGoodResponseAction';
 import RegenerateAction from './RegenerateAction';
 
 export interface ResponseMessage {
@@ -23,6 +26,7 @@ export interface ResponseMessage {
   modelId: number;
   modelName: string;
   modelProviderId: number;
+  reaction: boolean | null;
 }
 
 interface Props {
@@ -32,6 +36,7 @@ interface Props {
   readonly?: boolean;
   onChangeMessage?: (messageId: string) => void;
   onRegenerate?: (messageId: string, modelId: number) => void;
+  onReactionMessage?: (type: ReactionMessageType, messageId: string) => void;
 }
 
 const ResponseMessageActions = (props: Props) => {
@@ -42,9 +47,15 @@ const ResponseMessageActions = (props: Props) => {
     readonly,
     onChangeMessage,
     onRegenerate,
+    onReactionMessage,
   } = props;
+
   const { id: messageId, siblingIds, modelId, modelName, parentId } = message;
   const currentMessageIndex = siblingIds.findIndex((x) => x === messageId);
+
+  const handleReactionMessage = (type: ReactionMessageType) => {
+    onReactionMessage && onReactionMessage(type, messageId);
+  };
 
   return (
     <>
@@ -63,6 +74,16 @@ const ResponseMessageActions = (props: Props) => {
           <div className="visible flex gap-0 items-center">
             <CopyAction text={message.content.text} />
             <GenerateInformationAction message={message} />
+
+            <ReactionGoodResponseAction
+              value={message.reaction}
+              onReactionMessage={handleReactionMessage}
+            />
+            <ReactionBadResponseAction
+              value={message.reaction}
+              onReactionMessage={handleReactionMessage}
+            />
+
             <RegenerateAction
               hidden={readonly}
               onRegenerate={() => {

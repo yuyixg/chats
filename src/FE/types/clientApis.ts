@@ -1,3 +1,4 @@
+import { ChatStatus } from './chat';
 import { DBModelProvider } from './model';
 import { Paging } from './page';
 import { LoginType } from './user';
@@ -56,6 +57,7 @@ export interface GetSiteInfoResult {
 }
 
 export interface GetChatsParams extends Paging {
+  groupId: string | null;
   query?: string;
 }
 
@@ -66,6 +68,9 @@ export interface ChatResult {
   spans: ChatSpanDto[];
   leafMessageId?: string;
   updatedAt: string;
+  isTopMost: boolean;
+  groupId: string | null;
+  tags: string[];
 }
 
 export interface ChatSpanDto {
@@ -80,6 +85,7 @@ export interface ChatSpanDto {
 
 export interface PostChatParams {
   title: string;
+  groupId: string | null;
   chatModelId?: string;
 }
 
@@ -88,6 +94,9 @@ export interface PutChatParams {
   isShared?: boolean;
   setsLeafMessageId?: boolean;
   leafMessageId?: string;
+  isTopMost?: boolean;
+  groupId?: string;
+  setsGroupId?: boolean;
 }
 
 export interface PostUserPassword {
@@ -129,4 +138,41 @@ export interface PostUserChatSpanResult {
   modelProviderId: number;
   temperature: number;
   enableSearch: boolean;
+}
+
+interface GetUserChatResult {
+  id: string;
+  title: string;
+  isShared: boolean;
+  status: ChatStatus;
+  spans: ChatSpanDto[];
+  leafMessageId?: string;
+  isTopMost: boolean;
+  groupId: string;
+  tags: string[];
+  updatedAt: string;
+}
+
+export interface GetUserChatGroupWithMessagesResult {
+  id: string;
+  name: string;
+  rank: 0;
+  isExpanded: boolean;
+  messages: {
+    rows: GetUserChatResult[];
+    count: 0;
+  };
+}
+
+export interface PostChatGroupParams {
+  name: string;
+  rank?: number;
+  isExpanded?: boolean;
+}
+
+export interface PutChatGroupParams {
+  id: string;
+  name?: string;
+  rank?: number;
+  isExpanded?: boolean;
 }

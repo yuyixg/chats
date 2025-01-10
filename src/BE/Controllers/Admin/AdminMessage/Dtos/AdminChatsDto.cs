@@ -17,9 +17,6 @@ public record AdminChatsDto
     [JsonPropertyName("isDeleted")]
     public required bool IsDeleted { get; init; }
 
-    [JsonPropertyName("isShared")]
-    public required bool IsShared { get; init; }
-
     [JsonPropertyName("spans")]
     public required ChatSpanDto[] Spans { get; init; }
 

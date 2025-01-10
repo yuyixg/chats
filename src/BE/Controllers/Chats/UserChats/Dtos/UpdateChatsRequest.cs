@@ -1,4 +1,5 @@
 ﻿using Chats.BE.DB;
+using Chats.BE.Infrastructure;
 using Chats.BE.Services.UrlEncryption;
 using Microsoft.EntityFrameworkCore;
 using System.Text.Json.Serialization;
@@ -10,11 +11,11 @@ public class UpdateChatsRequest
     [JsonPropertyName("title")]
     public string? Title { get; set; } = null!;
 
-    [JsonPropertyName("isShared")]
-    public bool? IsShared { get; set; }
+    [JsonPropertyName("isArchived")]
+    public bool? IsArchived { get; set; }
 
-    [JsonPropertyName("isDeleted")]
-    public bool? IsDeleted { get; set; }
+    [JsonPropertyName("isTopMost")]
+    public bool? IsTopMost { get; set; }
 
     [JsonPropertyName("setsLeafMessageId")]
     public bool SetsLeafMessageId { get; set; }
@@ -22,19 +23,23 @@ public class UpdateChatsRequest
     [JsonPropertyName("leafMessageId")]
     public string? LeafMessageId { get; set; } = null!;
 
+    [JsonPropertyName("setsGroupId")]
+    public bool SetsGroupId { get; set; }
+
+    [JsonPropertyName("groupId")]
+    public string? GroupId { get; set; } = null!;
+
     public DecryptedUpdateChatsRequest Decrypt(IUrlEncryptionService urlEncryptionService)
     {
         return new DecryptedUpdateChatsRequest
         {
             Title = Title,
-            IsShared = IsShared,
-            IsDeleted = IsDeleted,
+            IsArchived = IsArchived,
+            IsTopMost = IsTopMost,
             SetsLeafMessageId = SetsLeafMessageId,
-            LeafMessageId = LeafMessageId switch
-            {
-                null => null,
-                _ => urlEncryptionService.DecryptMessageId(LeafMessageId)
-            },
+            LeafMessageId = urlEncryptionService.DecryptMessageIdOrNull(LeafMessageId),
+            SetsGroupId = SetsGroupId,
+            GroupId = urlEncryptionService.DecryptChatGroupIdOrNull(GroupId),
         };
     }
 }
@@ -42,17 +47,21 @@ public class UpdateChatsRequest
 
 public class DecryptedUpdateChatsRequest
 {
-    public string? Title { get; set; } = null!;
+    public string? Title { get; set; }
 
-    public bool? IsShared { get; set; }
+    public bool? IsArchived { get; set; }
 
-    public bool? IsDeleted { get; set; }
+    public bool? IsTopMost { get; set; }
 
     public bool SetsLeafMessageId { get; set; }
 
-    public long? LeafMessageId { get; set; } = null!;
+    public long? LeafMessageId { get; set; }
 
-    public async Task<string?> Validate(ChatsDB db, int chatId)
+    public bool SetsGroupId { get; set; }
+
+    public int? GroupId { get; set; }
+
+    public async Task<string?> Validate(ChatsDB db, int chatId, CurrentUser currentUser)
     {
         if (Title != null && Title.Length > 50)
         {
@@ -66,6 +75,15 @@ public class DecryptedUpdateChatsRequest
                 return "Leaf message not found";
             }
         }
+
+        if (SetsGroupId && GroupId != null)
+        {
+            if (!await db.ChatGroups.AnyAsync(x => x.Id == GroupId && x.UserId == currentUser.Id))
+            {
+                return "Group not found";
+            }
+        }
+
         return null;
     }
 
@@ -75,17 +93,21 @@ public class DecryptedUpdateChatsRequest
         {
             chat.Title = Title;
         }
-        if (IsShared != null)
+        if (IsArchived != null)
         {
-            chat.IsShared = IsShared.Value;
-        }
-        if (IsDeleted != null)
-        {
-            chat.IsDeleted = IsDeleted.Value;
+            chat.IsArchived = IsArchived.Value;
         }
         if (SetsLeafMessageId)
         {
             chat.LeafMessageId = LeafMessageId;
+        }
+        if (IsTopMost != null)
+        {
+            chat.IsTopMost = IsTopMost.Value;
+        }
+        if (SetsGroupId)
+        {
+            chat.ChatGroupId = GroupId;
         }
     }
 }

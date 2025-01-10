@@ -15,9 +15,15 @@ public partial class ChatsDB : DbContext
 
     public virtual DbSet<Chat> Chats { get; set; }
 
+    public virtual DbSet<ChatGroup> ChatGroups { get; set; }
+
     public virtual DbSet<ChatRole> ChatRoles { get; set; }
 
+    public virtual DbSet<ChatShare> ChatShares { get; set; }
+
     public virtual DbSet<ChatSpan> ChatSpans { get; set; }
+
+    public virtual DbSet<ChatTag> ChatTags { get; set; }
 
     public virtual DbSet<ClientInfo> ClientInfos { get; set; }
 
@@ -56,6 +62,8 @@ public partial class ChatsDB : DbContext
     public virtual DbSet<MessageContentText> MessageContentTexts { get; set; }
 
     public virtual DbSet<MessageContentType> MessageContentTypes { get; set; }
+
+    public virtual DbSet<MessageResponse> MessageResponses { get; set; }
 
     public virtual DbSet<Model> Models { get; set; }
 
@@ -116,11 +124,45 @@ public partial class ChatsDB : DbContext
 
         modelBuilder.Entity<Chat>(entity =>
         {
+            entity.HasOne(d => d.ChatGroup).WithMany(p => p.Chats)
+                .OnDelete(DeleteBehavior.SetNull)
+                .HasConstraintName("FK_Chat_ChatGroup");
+
             entity.HasOne(d => d.LeafMessage).WithMany(p => p.Chats).HasConstraintName("FK_Chat_Message");
 
             entity.HasOne(d => d.User).WithMany(p => p.Chats)
                 .OnDelete(DeleteBehavior.ClientSetNull)
                 .HasConstraintName("FK_Chat_UserId");
+
+            entity.HasMany(d => d.ChatTags).WithMany(p => p.Chats)
+                .UsingEntity<Dictionary<string, object>>(
+                    "ChatTagChat",
+                    r => r.HasOne<ChatTag>().WithMany()
+                        .HasForeignKey("ChatTagId")
+                        .OnDelete(DeleteBehavior.ClientSetNull)
+                        .HasConstraintName("FK_ChatTagChat_ChatTag"),
+                    l => l.HasOne<Chat>().WithMany()
+                        .HasForeignKey("ChatId")
+                        .HasConstraintName("FK_ChatTagChat_Chat"),
+                    j =>
+                    {
+                        j.HasKey("ChatId", "ChatTagId");
+                        j.ToTable("ChatTagChat");
+                    });
+        });
+
+        modelBuilder.Entity<ChatGroup>(entity =>
+        {
+            entity.HasOne(d => d.User).WithMany(p => p.ChatGroups)
+                .OnDelete(DeleteBehavior.ClientSetNull)
+                .HasConstraintName("FK_ChatGroup_User");
+        });
+
+        modelBuilder.Entity<ChatShare>(entity =>
+        {
+            entity.HasOne(d => d.Chat).WithMany(p => p.ChatShares)
+                .OnDelete(DeleteBehavior.ClientSetNull)
+                .HasConstraintName("FK_ChatShare_Chat");
         });
 
         modelBuilder.Entity<ChatSpan>(entity =>
@@ -207,8 +249,6 @@ public partial class ChatsDB : DbContext
                 .HasConstraintName("FK_Message_ChatRole");
 
             entity.HasOne(d => d.Parent).WithMany(p => p.InverseParent).HasConstraintName("FK_Message_ParentMessage");
-
-            entity.HasOne(d => d.Usage).WithOne(p => p.Message).HasConstraintName("FK_Message_UserModelUsage");
         });
 
         modelBuilder.Entity<MessageContent>(entity =>
@@ -248,6 +288,17 @@ public partial class ChatsDB : DbContext
         modelBuilder.Entity<MessageContentType>(entity =>
         {
             entity.HasKey(e => e.Id).HasName("PK__MessageC__3214EC07D7BA864A");
+        });
+
+        modelBuilder.Entity<MessageResponse>(entity =>
+        {
+            entity.Property(e => e.MessageId).ValueGeneratedNever();
+
+            entity.HasOne(d => d.Message).WithOne(p => p.MessageResponse).HasConstraintName("FK_MessageResponse_Message");
+
+            entity.HasOne(d => d.Usage).WithOne(p => p.MessageResponse)
+                .OnDelete(DeleteBehavior.ClientSetNull)
+                .HasConstraintName("FK_MessageResponse_UserModelUsage");
         });
 
         modelBuilder.Entity<Model>(entity =>

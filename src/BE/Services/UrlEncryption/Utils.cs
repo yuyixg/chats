@@ -28,37 +28,46 @@ internal class Utils
         aes.Key = key;
 
         byte[] encryptedIdBytes = aes.EncryptCbc(input, iv);
-
-        byte[] encryptedIdBytesWithIV = new byte[1 + encryptedIdBytes.Length];
-        encryptedIdBytesWithIV[0] = 0; // Version
-        Array.Copy(encryptedIdBytes, 0, encryptedIdBytesWithIV, 1, encryptedIdBytes.Length);
-
-        return WebEncoders.Base64UrlEncode(encryptedIdBytesWithIV);
+        return Serialize(encryptedIdBytes);
     }
 
     public static byte[] Decrypt(string encrypted, byte[] key, byte[] iv)
     {
-        byte[] encryptedIdBytesWithIV = WebEncoders.Base64UrlDecode(encrypted);
+        byte[] encryptedIdBytes = Deserialize(encrypted);
 
-        if (encryptedIdBytesWithIV[0] == 0) // Version 0
+        if (encryptedIdBytes.Length != 16)
         {
-            if (encryptedIdBytesWithIV.Length != 1 + 16)
-            {
-                throw new InvalidOperationException("Invalid encrypted ID length.");
-            }
+            throw new InvalidOperationException("Invalid encrypted ID length.");
+        }
 
-            byte[] encryptedIdBytes = new byte[encryptedIdBytesWithIV.Length - 1];
-            Array.Copy(encryptedIdBytesWithIV, 1, encryptedIdBytes, 0, encryptedIdBytes.Length);
+        using Aes aes = Aes.Create();
+        aes.Key = key;
+        byte[] decryptedIdBytes = aes.DecryptCbc(encryptedIdBytes, iv);
 
-            using Aes aes = Aes.Create();
-            aes.Key = key;
-            byte[] decryptedIdBytes = aes.DecryptCbc(encryptedIdBytes, iv);
+        return decryptedIdBytes;
+    }
 
-            return decryptedIdBytes;
+    private static string Serialize(byte[] encryptedIdBytes)
+    {
+        if (encryptedIdBytes.Length == 16)
+        {
+            return new Guid(encryptedIdBytes).ToString();
         }
         else
         {
-            throw new InvalidOperationException($"Unsupported version: {encryptedIdBytesWithIV[0]}");
+            return WebEncoders.Base64UrlEncode(encryptedIdBytes);
+        }
+    }
+
+    private static byte[] Deserialize(string encrypted)
+    {
+        if (encrypted.Length == 36)
+        {
+            return Guid.Parse(encrypted).ToByteArray();
+        }
+        else
+        {
+            return WebEncoders.Base64UrlDecode(encrypted);
         }
     }
 }

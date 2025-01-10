@@ -10,18 +10,22 @@ import {
   GetSiteInfoResult,
   GetUserApiKeyResult,
   GetUserBalanceResult,
+  GetUserChatGroupWithMessagesResult,
   LoginConfigsResult,
   ModelUsageDto,
+  PostChatGroupParams,
   PostChatParams,
   PostUserChatSpanParams,
   PostUserChatSpanResult,
   PostUserPassword,
+  PutChatGroupParams,
   PutChatParams,
   SingInParams,
   SingInResult,
 } from '@/types/clientApis';
+import { IChatGroup } from '@/types/group';
 import { PageResult } from '@/types/page';
-import { IdName, Prompt, PromptSlim } from '@/types/prompt';
+import { Prompt, PromptSlim } from '@/types/prompt';
 import { SmsType } from '@/types/user';
 
 export const changeUserPassword = (params: PostUserPassword) => {
@@ -39,10 +43,12 @@ export const getUserMessages = (chatId: string): Promise<IChatMessage[]> => {
 export const getChatsByPaging = (
   params: GetChatsParams,
 ): Promise<PageResult<ChatResult[]>> => {
-  const { query, page, pageSize } = params;
+  const { groupId, query, page, pageSize } = params;
   const fetchService = useFetch();
   return fetchService.get(
-    `/api/user/chats?page=${page}&pageSize=${pageSize}&query=${query || ''}`,
+    `/api/user/chats?groupId=${
+      groupId || ''
+    }&page=${page}&pageSize=${pageSize}&query=${query || ''}`,
   );
 };
 
@@ -257,4 +263,50 @@ export const putUserChatSpan = (
 export const deleteUserChatSpan = (chatId: string, spanId: number) => {
   const fetchServer = useFetch();
   return fetchServer.delete(`/api/chat/${chatId}/span/${spanId}`);
+};
+
+export const getUserChatGroupWithMessages = (
+  params: GetChatsParams,
+): Promise<GetUserChatGroupWithMessagesResult[]> => {
+  const { query, page, pageSize } = params;
+  const fetchServer = useFetch();
+  return fetchServer.get(
+    `/api/chat/group/with-messages?page=${page}&pageSize=${pageSize}&query=${
+      query || ''
+    }`,
+  );
+};
+
+export const postChatGroup = (
+  params: PostChatGroupParams,
+): Promise<IChatGroup> => {
+  const fetchServer = useFetch();
+  return fetchServer.post(`/api/chat/group`, {
+    body: params,
+  });
+};
+
+export const putChatGroup = (params: PutChatGroupParams) => {
+  const fetchServer = useFetch();
+  return fetchServer.put(`/api/chat/group/${params.id}`, {
+    body: params,
+  });
+};
+
+export const deleteChatGroup = (id: string) => {
+  const fetchServer = useFetch();
+  return fetchServer.delete(`/api/chat/group/${id}`);
+};
+
+export const putMessageReactionUp = (messageId: string) => {
+  const fetchServer = useFetch();
+  return fetchServer.put(`/api/messages/${messageId}/reaction/up`);
+};
+export const putMessageReactionDown = (messageId: string) => {
+  const fetchServer = useFetch();
+  return fetchServer.put(`/api/messages/${messageId}/reaction/down`);
+};
+export const putMessageReactionClear = (messageId: string) => {
+  const fetchServer = useFetch();
+  return fetchServer.put(`/api/messages/${messageId}/reaction/clear`);
 };

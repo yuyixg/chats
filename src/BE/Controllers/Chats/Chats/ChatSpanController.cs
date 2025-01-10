@@ -20,7 +20,7 @@ public class ChatSpanController(ChatsDB db, IUrlEncryptionService idEncryption, 
     {
         Chat? chat = await db.Chats
             .Include(x => x.ChatSpans.OrderByDescending(x => x.SpanId))
-            .FirstOrDefaultAsync(x => x.Id == idEncryption.DecryptChatId(encryptedChatId) && x.UserId == currentUser.Id && !x.IsDeleted, cancellationToken);
+            .FirstOrDefaultAsync(x => x.Id == idEncryption.DecryptChatId(encryptedChatId) && x.UserId == currentUser.Id && !x.IsArchived, cancellationToken);
         if (chat == null)
         {
             return NotFound();
@@ -117,7 +117,7 @@ public class ChatSpanController(ChatsDB db, IUrlEncryptionService idEncryption, 
         int chatId = idEncryption.DecryptChatId(encryptedChatId);
 
         ChatSpan? span = await db.ChatSpans.FirstOrDefaultAsync(x => 
-            x.ChatId == chatId && x.SpanId == spanId && x.Chat.UserId == currentUser.Id && !x.Chat.IsDeleted, cancellationToken);
+            x.ChatId == chatId && x.SpanId == spanId && x.Chat.UserId == currentUser.Id && !x.Chat.IsArchived, cancellationToken);
         if (span == null)
         {
             return NotFound();
@@ -154,7 +154,7 @@ public class ChatSpanController(ChatsDB db, IUrlEncryptionService idEncryption, 
     {
         int chatId = idEncryption.DecryptChatId(encryptedChatId);
         ChatSpan? span = await db.ChatSpans.FirstOrDefaultAsync(x =>
-            x.ChatId == chatId && x.SpanId == spanId && x.Chat.UserId == currentUser.Id && !x.Chat.IsDeleted, cancellationToken);
+            x.ChatId == chatId && x.SpanId == spanId && x.Chat.UserId == currentUser.Id && !x.Chat.IsArchived, cancellationToken);
         if (span == null)
         {
             return NotFound();

@@ -32,18 +32,19 @@ public class MessagesController(ChatsDB db, CurrentUser currentUser, IUrlEncrypt
                     .ToArray(),
                 CreatedAt = x.CreatedAt,
                 SpanId = x.SpanId,
-                Usage = x.Usage == null ? null : new ChatMessageTempUsage()
+                Usage = x.MessageResponse!.Usage == null ? null : new ChatMessageTempUsage()
                 {
-                    InputTokens = x.Usage.InputTokens,
-                    OutputTokens = x.Usage.OutputTokens,
-                    InputPrice = x.Usage.InputCost,
-                    OutputPrice = x.Usage.OutputCost,
-                    ReasoningTokens = x.Usage.ReasoningTokens,
-                    Duration = x.Usage.TotalDurationMs - x.Usage.PreprocessDurationMs,
-                    FirstTokenLatency = x.Usage.FirstResponseDurationMs,
-                    ModelId = x.Usage.UserModel.ModelId,
-                    ModelName = x.Usage.UserModel.Model.Name,
-                    ModelProviderId = x.Usage.UserModel.Model.ModelKey.ModelProviderId,
+                    InputTokens = x.MessageResponse.Usage.InputTokens,
+                    OutputTokens = x.MessageResponse.Usage.OutputTokens,
+                    InputPrice = x.MessageResponse.Usage.InputCost,
+                    OutputPrice = x.MessageResponse.Usage.OutputCost,
+                    ReasoningTokens = x.MessageResponse.Usage.ReasoningTokens,
+                    Duration = x.MessageResponse.Usage.TotalDurationMs - x.MessageResponse.Usage.PreprocessDurationMs,
+                    FirstTokenLatency = x.MessageResponse.Usage.FirstResponseDurationMs,
+                    ModelId = x.MessageResponse.Usage.UserModel.ModelId,
+                    ModelName = x.MessageResponse.Usage.UserModel.Model.Name,
+                    ModelProviderId = x.MessageResponse.Usage.UserModel.Model.ModelKey.ModelProviderId,
+                    Reaction = x.MessageResponse.ReactionId,
                 },
             })
             .OrderBy(x => x.CreatedAt)
@@ -68,5 +69,119 @@ public class MessagesController(ChatsDB db, CurrentUser currentUser, IUrlEncrypt
         }
 
         return Ok(content.ToString());
+    }
+
+    [HttpPut("{encryptedMessageId}/reaction/up")]
+    public async Task<ActionResult> ReactionUp(string encryptedMessageId, CancellationToken cancellationToken)
+    {
+        return await ReactionPrivate(encryptedMessageId, reactionId: true, cancellationToken);
+    }
+
+    [HttpPut("{encryptedMessageId}/reaction/down")]
+    public async Task<ActionResult> ReactionDown(string encryptedMessageId, CancellationToken cancellationToken)
+    {
+        return await ReactionPrivate(encryptedMessageId, reactionId: false, cancellationToken);
+    }
+
+    [HttpPut("{encryptedMessageId}/reaction/clear")]
+    public async Task<ActionResult> ReactionClear(string encryptedMessageId, CancellationToken cancellationToken)
+    {
+        return await ReactionPrivate(encryptedMessageId, reactionId: null, cancellationToken);
+    }
+
+    private async Task<ActionResult> ReactionPrivate(string encryptedMessageId, bool? reactionId, CancellationToken cancellationToken)
+    {
+        long messageId = urlEncryption.DecryptMessageId(encryptedMessageId);
+        Message? message = await db.Messages
+            .Include(x => x.MessageResponse)
+            .Include(x => x.Chat)
+            .FirstOrDefaultAsync(x => x.Id == messageId, cancellationToken);
+
+        if (message == null || message.MessageResponse == null)
+        {
+            return NotFound();
+        }
+
+        if (message.Chat.UserId != currentUser.Id)
+        {
+            return Forbid();
+        }
+
+        message.MessageResponse.ReactionId = reactionId;
+        message.Chat.UpdatedAt = DateTime.UtcNow;
+        await db.SaveChangesAsync(cancellationToken);
+        return Ok();
+    }
+
+    [HttpPut("{encryptedMessageId}/edit")]
+    public async Task<ActionResult> EditMessage(string encryptedMessageId, [FromBody] MessageContentRequest content,
+        [FromServices] FileUrlProvider fup,
+        CancellationToken cancellationToken)
+    {
+        long messageId = urlEncryption.DecryptMessageId(encryptedMessageId);
+        Message? message = await db.Messages
+            .Include(x => x.MessageContents)
+            .Include(x => x.Chat)
+            .FirstOrDefaultAsync(x => x.Id == messageId, cancellationToken);
+        if (message == null)
+        {
+            return NotFound();
+        }
+        if (message.Chat.UserId != currentUser.Id)
+        {
+            return Forbid();
+        }
+
+        message.MessageContents = await content.ToMessageContents(fup, cancellationToken);
+        message.Chat.UpdatedAt = DateTime.UtcNow;
+        await db.SaveChangesAsync(cancellationToken);
+        return Ok();
+    }
+
+    [HttpDelete("{encryptedMessageId}")]
+    public async Task<ActionResult<string[]>> DeleteMessage(string encryptedMessageId, bool recursive, CancellationToken cancellationToken)
+    {
+        long messageId = urlEncryption.DecryptMessageId(encryptedMessageId);
+        Message? message = await db.Messages
+            .Include(x => x.Chat)
+            .Include(x => x.InverseParent)
+            .FirstOrDefaultAsync(x => x.Id == messageId, cancellationToken);
+        if (message == null)
+        {
+            return NotFound();
+        }
+        if (message.Chat.UserId != currentUser.Id)
+        {
+            return Forbid();
+        }
+
+        if (message.InverseParent.Count > 0)
+        {
+            if (!recursive)
+            {
+                return BadRequest("Cannot delete a message with replies");
+            }
+
+            List<long> messageIdsQueue = [messageId];
+            List<long> toDeleteMessageIds = [];
+            while (messageIdsQueue.Count > 0)
+            {
+                toDeleteMessageIds.AddRange(messageIdsQueue);
+                messageIdsQueue = await db.Messages
+                        .Where(x => x.ParentId != null && messageIdsQueue.Contains(x.ParentId.Value))
+                        .Select(x => x.Id)
+                        .ToListAsync(cancellationToken);
+            }
+            await db.Messages
+                .Where(x => toDeleteMessageIds.Contains(x.Id))
+                .ExecuteDeleteAsync(cancellationToken);
+            return Ok(toDeleteMessageIds.Select(urlEncryption.EncryptMessageId));
+        }
+        else
+        {
+            db.Messages.Remove(message);
+            await db.SaveChangesAsync(cancellationToken);
+            return Ok(new string[] { urlEncryption.EncryptMessageId(messageId) });
+        }
     }
 }
