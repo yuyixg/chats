@@ -56,5 +56,34 @@ export interface IChat {
   status: ChatStatus;
   spans: ChatSpanDto[];
   leafMessageId?: string;
+  isTopMost: boolean;
+  groupId: string | null;
+  tags: string[];
   updatedAt: string;
+}
+
+export interface IGroupedChat {
+  id: string;
+  name: string;
+  rank: 0;
+  isExpanded: boolean;
+  messages: {
+    rows: IChat[];
+  };
+  count: 0;
+}
+
+export const ChatPinGroup = 'Pin';
+export const UngroupedChatName = 'Ungrouped';
+export const DefaultChatPaging = {
+  groupId: null,
+  page: 1,
+  pageSize: 50,
+};
+
+export interface IChatPaging {
+  groupId: string | null;
+  count: number;
+  page: number;
+  pageSize: number;
 }

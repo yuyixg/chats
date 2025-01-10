@@ -5,19 +5,25 @@ import { useRouter } from 'next/router';
 import { useCreateReducer } from '@/hooks/useCreateReducer';
 import useTranslation from '@/hooks/useTranslation';
 
-import { getNowAsISODateString as getNowAsISODateString } from '@/utils/date';
+import { currentISODateString } from '@/utils/date';
 import { findSelectedMessageByLeafId } from '@/utils/message';
 import { getSettings } from '@/utils/settings';
 import { getUserSession, redirectToLoginPage } from '@/utils/user';
 
-import { ChatStatus, IChat } from '@/types/chat';
+import {
+  ChatStatus,
+  DefaultChatPaging,
+  IChat,
+  IChatPaging,
+} from '@/types/chat';
 import { IChatMessage } from '@/types/chatMessage';
 import { ChatResult, GetChatsParams } from '@/types/clientApis';
+import { IChatGroup } from '@/types/group';
 
 import Spinner from '@/components/Spinner/Spinner';
 
 import {
-  setChatGroups,
+  setChatGroup,
   setChatPaging,
   setChats,
   setIsChatsLoading,
@@ -57,6 +63,7 @@ import PromptBar from '../Promptbar/Promptbar';
 import {
   getChatsByPaging,
   getDefaultPrompt,
+  getUserChatGroupWithMessages,
   getUserMessages,
   getUserModels,
   getUserPromptBrief,
@@ -85,7 +92,7 @@ const HomeContent = () => {
     promptInitialState,
   );
 
-  const { chats, stopIds } = chatState;
+  const { chats, selectedChat, chatPaging, stopIds } = chatState;
   const { models } = modelState;
   const { showPromptBar } = settingState;
   const [isPageLoading, setIsPageLoading] = useState(true);
@@ -121,7 +128,7 @@ const HomeContent = () => {
   };
 
   const supplyChatProperty = (chat: ChatResult): IChat => {
-    return { ...chat, status: ChatStatus.None };
+    return { ...chat, status: ChatStatus.None } as any;
   };
 
   const selectChat = (chatList: IChat[], chatId?: string) => {
@@ -138,14 +145,17 @@ const HomeContent = () => {
         }
       });
     }
+    return chat;
   };
 
   const handleNewChat = () => {
-    postChats({ title: t('New Conversation') }).then((data) => {
+    postChats({
+      title: t('New Conversation'),
+      groupId: selectedChat?.groupId || null,
+    }).then((data) => {
       const chat = supplyChatProperty(data);
       const chatList = [chat, ...chats];
       chatDispatch(setChats(chatList));
-      chatDispatch(setChatGroups(chatList));
       chatDispatch(setSelectedChat(chat));
       messageDispatch(setMessages([]));
       messageDispatch(setSelectedMessages([]));
@@ -178,11 +188,11 @@ const HomeContent = () => {
     params: HandleUpdateChatParams,
   ) => {
     const chatList = chats.map((x) => {
-      if (x.id === id) return { ...x, ...params, updatedAt: getNowAsISODateString() };
+      if (x.id === id)
+        return { ...x, ...params, updatedAt: currentISODateString() };
       return x;
     });
     chatDispatch(setChats(chatList));
-    chatDispatch(setChatGroups(chatList));
   };
 
   const handleDeleteChat = (id: string) => {
@@ -190,7 +200,6 @@ const HomeContent = () => {
       return x.id !== id;
     });
     chatDispatch(setChats(chatList));
-    chatDispatch(setChatGroups(chatList));
 
     if (chatList.length > 0) {
       selectChat(chatList, chatList[0].id);
@@ -211,37 +220,47 @@ const HomeContent = () => {
     });
   };
 
-  const getChats = async (params: GetChatsParams, isAppend = false) => {
-    const { page, pageSize } = params;
+  const getChats = async (query: string = '') => {
+    const data = await getUserChatGroupWithMessages({
+      ...DefaultChatPaging,
+      query,
+    });
+    const chatList: IChat[] = [];
+    let chatGroupList: IChatGroup[] = [];
+    const chatPagingList: IChatPaging[] = [];
+    data.forEach((d) => {
+      if (query && d.messages.count === 0) return;
+      chatPagingList.push({
+        ...DefaultChatPaging,
+        groupId: d.id,
+        count: d.messages.count,
+      });
+      chatGroupList.push({ ...d, isExpanded: query ? true : d.isExpanded });
+      chatList.push(...d.messages.rows);
+    });
+    const chat = selectChat(chatList);
+    if (chat)
+      chatGroupList = chatGroupList.map((x) =>
+        x.id === chat.groupId ? { ...x, isExpanded: true } : x,
+      );
+    chatDispatch(setChats(chatList));
+    chatDispatch(setChatGroup(chatGroupList));
+    chatDispatch(setChatPaging(chatPagingList));
+  };
+
+  const getChatsByGroup = (params: GetChatsParams) => {
+    const { page, groupId } = params;
     getChatsByPaging(params).then((data) => {
-      const { rows, count } = data || { rows: [], count: 0 };
+      const { rows } = data || { rows: [], count: 0 };
       const mapRows = rows.map(
         (x) => ({ ...x, status: ChatStatus.None } as IChat),
       );
-      let chatList = mapRows;
-      if (isAppend) {
-        chatList = chats.concat(mapRows);
-      }
+      let chatList = chats.concat(mapRows);
       chatDispatch(setChats(chatList));
-      chatDispatch(setChatGroups(chatList));
-      chatDispatch(setChatPaging({ count, page, pageSize }));
-    });
-  };
-
-  const loadFirstChats = async () => {
-    const params = { page: 1, pageSize: 50 };
-    getChatsByPaging(params).then((data) => {
-      const { rows, count } = data || { rows: [], count: 0 };
-      const chatList = rows.map(
-        (x) => ({ ...x, status: ChatStatus.None } as IChat),
+      const chatPagingList = chatPaging.map((x) =>
+        x.groupId === groupId ? { ...x, page } : x,
       );
-
-      chatDispatch(setChats(chatList));
-      chatDispatch(setChatGroups(chatList));
-      chatDispatch(
-        setChatPaging({ count, page: params.page, pageSize: params.pageSize }),
-      );
-      selectChat(chatList);
+      chatDispatch(setChatPaging(chatPagingList));
     });
   };
 
@@ -268,8 +287,7 @@ const HomeContent = () => {
           promptDispatch(setDefaultPrompt(data));
         });
       }
-
-      await loadFirstChats();
+      await getChats();
       chatDispatch(setIsChatsLoading(false));
     });
 
@@ -329,6 +347,7 @@ const HomeContent = () => {
         handleDeleteChat,
         hasModel,
         getChats,
+        getChatsByGroup,
       }}
     >
       {isPageLoading ? (

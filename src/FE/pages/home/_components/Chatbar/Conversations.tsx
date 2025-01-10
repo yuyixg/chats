@@ -2,6 +2,8 @@ import { useContext, useEffect, useState } from 'react';
 
 import useTranslation from '@/hooks/useTranslation';
 
+import { isUnGroupChat } from '@/utils/chats';
+
 import { IChat } from '@/types/chat';
 
 import { Button } from '@/components/ui/button';
@@ -9,41 +11,51 @@ import { Button } from '@/components/ui/button';
 import HomeContext from '../../_contexts/home.context';
 import ConversationComponent from './Conversation';
 
+import { cn } from '@/lib/utils';
+
 interface Props {
-  chats: IChat[];
+  groupId: string | null;
+  chatGroups: Map<string, IChat[]>;
+  onShowMore?: (groupId: string | null) => void;
 }
 
-const Conversations = ({ chats }: Props) => {
+const Conversations = ({ groupId, chatGroups, onShowMore }: Props) => {
   const { t } = useTranslation();
   const {
-    state: { chatsPaging, chatGroups },
-    getChats,
+    state: { chatPaging },
   } = useContext(HomeContext);
 
-  const [showMore, setShowMore] = useState(false);
+  const [showMore, setShowMore] = useState(true);
 
   useEffect(() => {
-    const { count, page, pageSize } = chatsPaging;
+    const { count, page, pageSize } = chatPaging.find(
+      (x) => x.groupId === groupId,
+    )!;
     setShowMore(count <= page * pageSize);
-  }, [chatsPaging]);
+  }, [chatPaging]);
 
   const handleShowMore = () => {
-    const { page, pageSize } = chatsPaging;
-    getChats({ page: page + 1, pageSize: pageSize }, true);
+    onShowMore && onShowMore(groupId);
   };
 
   return (
     <div className="flex w-full flex-col gap-1">
-      {[...chatGroups.entries()].map(([group, items]) => (
-        <div key={group}>
-          <div className="w-full pl-2.5 text-xs text-gray-500 font-medium my-1">
-            {t(group)}
+      {chatGroups.size > 0 &&
+        [...chatGroups.entries()].map(([group, items]) => (
+          <div key={group}>
+            <div className="w-full pl-2.5 text-xs text-gray-500 font-medium my-1">
+              {t(group)}
+            </div>
+            {items.map((chat, index) => (
+              <div
+                className={cn(!isUnGroupChat(groupId) && 'ml-1')}
+                key={'conversation-' + index}
+              >
+                <ConversationComponent chat={chat} />
+              </div>
+            ))}
           </div>
-          {items.map((chat, index) => (
-            <ConversationComponent key={index} chat={chat} />
-          ))}
-        </div>
-      ))}
+        ))}
       {!showMore && (
         <Button onClick={handleShowMore} className="text-xs" variant="link">
           {t('Show more')}

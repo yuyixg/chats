@@ -3,16 +3,21 @@ import { useContext, useEffect, useState } from 'react';
 import { useCreateReducer } from '@/hooks/useCreateReducer';
 import useTranslation from '@/hooks/useTranslation';
 
-import { ChatStatus } from '@/types/chat';
+import { getNextName } from '@/utils/common';
+
+import { ChatStatus, DefaultChatPaging } from '@/types/chat';
 import { ChatResult } from '@/types/clientApis';
 
+import { setChatGroup, setChatPaging } from '../../_actions/chat.actions';
 import { setShowChatBar } from '../../_actions/setting.actions';
 import HomeContext from '../../_contexts/home.context';
 import Sidebar from '../Sidebar/Sidebar';
+import ChatGroups from './ChatGroups';
 import ChatbarContext from './Chatbar.context';
 import { ChatbarInitialState, initialState } from './Chatbar.context';
 import ChatBarSettings from './ChatbarSettings';
-import Conversations from './Conversations';
+
+import { postChatGroup } from '@/apis/clientApis';
 
 const Chatbar = () => {
   const { t } = useTranslation();
@@ -22,12 +27,21 @@ const Chatbar = () => {
   });
 
   const {
-    state: { chats, showChatBar, selectedChat, isChatsLoading },
+    state: {
+      chats,
+      chatGroups,
+      chatPaging,
+      showChatBar,
+      selectedChat,
+      isChatsLoading,
+    },
+    chatDispatch,
     settingDispatch,
     handleDeleteChat,
     handleNewChat,
     hasModel,
     getChats,
+    getChatsByGroup,
   } = useContext(HomeContext);
 
   const {
@@ -38,6 +52,20 @@ const Chatbar = () => {
 
   const handleToggleChatbar = () => {
     settingDispatch(setShowChatBar(!showChatBar));
+  };
+
+  const handleAddGroup = () => {
+    const groupNames = chatGroups.map((x) => x.name);
+    const name = getNextName(groupNames, t('New Group'));
+    postChatGroup({ rank: 0, name, isExpanded: false }).then((data) => {
+      chatDispatch(setChatGroup([data, ...chatGroups]));
+      chatDispatch(
+        setChatPaging([
+          ...chatPaging,
+          { ...DefaultChatPaging, count: 0, groupId: data.id },
+        ]),
+      );
+    });
   };
 
   useEffect(() => {
@@ -57,6 +85,16 @@ const Chatbar = () => {
     }
   }, [searchTerm, chats]);
 
+  const handleShowMore = (groupId: string | null) => {
+    const { page, pageSize } = chatPaging.find((x) => x.groupId === groupId)!;
+    getChatsByGroup({
+      groupId,
+      page: page + 1,
+      pageSize: pageSize,
+      query: searchTerm,
+    });
+  };
+
   return (
     <ChatbarContext.Provider
       value={{
@@ -71,15 +109,17 @@ const Chatbar = () => {
         isOpen={showChatBar}
         addItemButtonTitle={t('New chat')}
         hasModel={hasModel}
-        itemComponent={<Conversations chats={filteredChats} />}
+        onAddFolder={handleAddGroup}
+        folderComponent={<ChatGroups onShowMore={handleShowMore} />}
         items={filteredChats}
         searchTerm={searchTerm}
         handleSearchTerm={(value: string) => {
           setSearchTerm(value);
-          getChats({ query: value, page: 1, pageSize: 50 });
+          getChats(value);
         }}
         toggleOpen={handleToggleChatbar}
         handleCreateItem={handleNewChat}
+        onDrop={() => {}}
         footerComponent={<ChatBarSettings />}
       />
     </ChatbarContext.Provider>

@@ -19,12 +19,15 @@ public class UserChatsController(ChatsDB db, CurrentUser currentUser, IUrlEncryp
     public async Task<ActionResult<ChatsResponse>> GetOneChat(string encryptedChatId, CancellationToken cancellationToken)
     {
         ChatsResponse? result = await db.Chats
-            .Where(x => x.Id == idEncryption.DecryptChatId(encryptedChatId) && x.UserId == currentUser.Id && !x.IsDeleted)
+            .Where(x => x.Id == idEncryption.DecryptChatId(encryptedChatId) && x.UserId == currentUser.Id && !x.IsArchived)
             .Select(x => new ChatsResponse()
             {
                 Id = idEncryption.EncryptChatId(x.Id),
                 Title = x.Title,
-                IsShared = x.IsShared,
+                IsTopMost = x.IsTopMost,
+                IsShared = x.ChatShares.Any(),
+                GroupId = idEncryption.EncryptChatGroupId(x.ChatGroupId),
+                Tags = x.ChatTags.Select(x => x.Name).ToArray(),
                 Spans = x.ChatSpans.Select(s => new ChatSpanDto
                 {
                     SpanId = s.SpanId,
@@ -48,14 +51,22 @@ public class UserChatsController(ChatsDB db, CurrentUser currentUser, IUrlEncryp
     }
 
     [HttpGet]
-    public async Task<ActionResult<PagedResult<ChatsResponse>>> GetChats([FromQuery] PagingRequest request, CancellationToken cancellationToken)
+    public async Task<ActionResult<PagedResult<ChatsResponse>>> GetChatsForGroup([FromQuery] ChatsQuery request, CancellationToken cancellationToken)
     {
+        PagedResult<ChatsResponse> result = await GetChatsForGroupAsync(db, currentUser, idEncryption, request, cancellationToken);
+        return Ok(result);
+    }
+
+    internal static async Task<PagedResult<ChatsResponse>> GetChatsForGroupAsync(ChatsDB db, CurrentUser currentUser, IUrlEncryptionService idEncryption, ChatsQuery request, CancellationToken cancellationToken)
+    {
+        int? chatGroupId = request.GroupId != null ? idEncryption.DecryptChatGroupId(request.GroupId) : null;
         IQueryable<Chat> query = db.Chats
-            .Where(x => x.UserId == currentUser.Id && !x.IsDeleted)
-            .OrderByDescending(x => x.UpdatedAt);
+            .Where(x => x.UserId == currentUser.Id && !x.IsArchived && x.ChatGroupId == chatGroupId)
+            .OrderByDescending(x => x.IsTopMost)
+            .ThenByDescending(x => x.UpdatedAt);
         if (!string.IsNullOrWhiteSpace(request.Query))
         {
-            query = query.Where(x => x.Title.Contains(request.Query));
+            query = query.Where(x => x.Title.Contains(request.Query) || x.ChatTags.Any(t => t.Name == request.Query));
         }
 
         PagedResult<ChatsResponse> result = await PagedResult.FromQuery(query
@@ -63,7 +74,10 @@ public class UserChatsController(ChatsDB db, CurrentUser currentUser, IUrlEncryp
             {
                 Id = idEncryption.EncryptChatId(x.Id),
                 Title = x.Title,
-                IsShared = x.IsShared,
+                IsTopMost = x.IsTopMost,
+                IsShared = x.ChatShares.Any(),
+                GroupId = idEncryption.EncryptChatGroupId(x.ChatGroupId),
+                Tags = x.ChatTags.Select(x => x.Name).ToArray(),
                 Spans = x.ChatSpans.Select(s => new ChatSpanDto
                 {
                     SpanId = s.SpanId,
@@ -78,12 +92,13 @@ public class UserChatsController(ChatsDB db, CurrentUser currentUser, IUrlEncryp
             }),
             request,
             cancellationToken);
-        return Ok(result);
+        return result;
     }
 
     [HttpPost]
-    public async Task<ActionResult<ChatsResponse>> CreateChat([FromBody] CreateChatRequest request, [FromServices] UserModelManager userModelManager, CancellationToken cancellationToken)
+    public async Task<ActionResult<ChatsResponse>> CreateChat([FromBody] EncryptedCreateChatRequest encryptedRequest, [FromServices] UserModelManager userModelManager, CancellationToken cancellationToken)
     {
+        CreateChatRequest request = encryptedRequest.Decrypt(idEncryption);
         Dictionary<short, UserModel> validModels = await userModelManager.GetValidModelsByUserId(currentUser.Id)
             .ToDictionaryAsync(k => k.ModelId, v => v, cancellationToken);
         if (validModels.Count == 0)
@@ -91,19 +106,30 @@ public class UserChatsController(ChatsDB db, CurrentUser currentUser, IUrlEncryp
             return this.BadRequestMessage("No model available.");
         }
 
+        if (request.GroupId != null)
+        {
+            // ensure group exists
+            bool groupExists = await db.ChatGroups.AnyAsync(x => x.Id == request.GroupId.Value && x.UserId == currentUser.Id, cancellationToken);
+            if (!groupExists)
+            {
+                return BadRequest("Group not found");
+            }
+        }
+
         Chat chat = new()
         {
             UserId = currentUser.Id,
             Title = request.Title,
-            IsShared = false,
+            ChatGroupId = request.GroupId,
+            IsTopMost = false,
             CreatedAt = DateTime.UtcNow,
-            IsDeleted = false,
+            IsArchived = false,
             UpdatedAt = DateTime.UtcNow,
         };
 
         Chat? lastChat = await db.Chats
             .Include(x => x.ChatSpans.OrderBy(x => x.SpanId))
-            .Where(x => x.UserId == currentUser.Id && !x.IsDeleted && x.ChatSpans.Any())
+            .Where(x => x.UserId == currentUser.Id && !x.IsArchived && x.ChatSpans.Any())
             .OrderByDescending(x => x.CreatedAt)
             .FirstOrDefaultAsync(cancellationToken);
         if (lastChat != null && lastChat.ChatSpans.All(cs => validModels.ContainsKey(cs.ModelId)))
@@ -137,7 +163,10 @@ public class UserChatsController(ChatsDB db, CurrentUser currentUser, IUrlEncryp
         {
             Id = idEncryption.EncryptChatId(chat.Id),
             Title = chat.Title,
-            IsShared = chat.IsShared,
+            IsTopMost = chat.IsTopMost,
+            IsShared = false,
+            GroupId = idEncryption.EncryptChatGroupId(chat.ChatGroupId),
+            Tags = [],
             Spans = chat.ChatSpans.Select(s => new ChatSpanDto
             {
                 SpanId = s.SpanId,
@@ -163,20 +192,40 @@ public class UserChatsController(ChatsDB db, CurrentUser currentUser, IUrlEncryp
             return NotFound();
         }
 
-        if (await db.Messages.AnyAsync(m => m.ChatId == chatId, cancellationToken))
-        {
-            await db.Chats
-                .Where(x => x.Id == chatId)
-                .ExecuteUpdateAsync(x => x.SetProperty(y => y.IsDeleted, true), cancellationToken);
-        }
-        else
-        {
-            await db.Chats
-                .Where(x => x.Id == chatId)
-                .ExecuteDeleteAsync(cancellationToken);
-        }
+        await db.Chats
+            .Where(x => x.Id == chatId)
+            .ExecuteDeleteAsync(cancellationToken);
 
         return NoContent();
+    }
+
+    [HttpGet("archived")]
+    public async Task<ActionResult<ChatsResponse>> ListArchived(CancellationToken cancellationToken)
+    {
+        List<ChatsResponse> result = await db.Chats
+            .Where(x => x.UserId == currentUser.Id && x.IsArchived)
+            .Select(x => new ChatsResponse()
+            {
+                Id = idEncryption.EncryptChatId(x.Id),
+                Title = x.Title,
+                IsTopMost = x.IsTopMost,
+                IsShared = x.ChatShares.Any(),
+                GroupId = idEncryption.EncryptChatGroupId(x.ChatGroupId),
+                Tags = x.ChatTags.Select(x => x.Name).ToArray(),
+                Spans = x.ChatSpans.Select(s => new ChatSpanDto
+                {
+                    SpanId = s.SpanId,
+                    ModelId = s.ModelId,
+                    ModelName = s.Model.Name,
+                    ModelProviderId = s.Model.ModelKey.ModelProviderId,
+                    Temperature = s.Temperature,
+                    EnableSearch = s.EnableSearch,
+                }).ToArray(),
+                LeafMessageId = x.LeafMessageId != null ? idEncryption.EncryptMessageId(x.LeafMessageId.Value) : null,
+                UpdatedAt = x.UpdatedAt,
+            })
+            .ToListAsync(cancellationToken);
+        return Ok(result);
     }
 
     [HttpPut("{encryptedChatId}")]
@@ -197,7 +246,7 @@ public class UserChatsController(ChatsDB db, CurrentUser currentUser, IUrlEncryp
             return NotFound();
         }
 
-        string? error = await req.Validate(db, chat.Id);
+        string? error = await req.Validate(db, chat.Id, currentUser);
         if (error != null)
         {
             return BadRequest(error);

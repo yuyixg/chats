@@ -64,6 +64,9 @@ public record ResponseMessageDto : MessageDto
 
     [JsonPropertyName("modelProviderId")]
     public required short ModelProviderId { get; init; }
+
+    [JsonPropertyName("reaction")]
+    public required bool? Reaction { get; init; }
 }
 
 public record MessageContentRequest
@@ -138,6 +141,7 @@ public record ChatMessageTempUsage
     public required int InputTokens { get; init; }
     public required short ModelId { get; init; }
     public required string ModelName { get; init; }
+    public required bool? Reaction { get; init; }
 
     public required short ModelProviderId { get; init; }
     public required decimal OutputPrice { get; init; }
@@ -190,6 +194,7 @@ public record ChatMessageTemp
                 ModelId = Usage.ModelId,
                 ModelName = Usage.ModelName,
                 ModelProviderId = Usage.ModelProviderId,
+                Reaction = Usage.Reaction,
             };
         }
     }

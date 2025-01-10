@@ -1,1 +1,1 @@
-export const getNowAsISODateString = () => new Date().toISOString();
+export const currentISODateString = () => new Date().toISOString();

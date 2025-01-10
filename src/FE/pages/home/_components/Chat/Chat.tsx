@@ -11,7 +11,7 @@ import toast from 'react-hot-toast';
 import useTranslation from '@/hooks/useTranslation';
 
 import { getApiUrl } from '@/utils/common';
-import { getNowAsISODateString as getNowAsISODateString } from '@/utils/date';
+import { currentISODateString } from '@/utils/date';
 import {
   findLastLeafId,
   findSelectedMessageByLeafId,
@@ -25,6 +25,7 @@ import { getUserSession } from '@/utils/user';
 import { ChatSpanStatus, ChatStatus, Message } from '@/types/chat';
 import {
   IChatMessage,
+  ReactionMessageType,
   ResponseMessageTempId,
   SseResponseKind,
   SseResponseLine,
@@ -32,7 +33,6 @@ import {
 import { Prompt } from '@/types/prompt';
 
 import {
-  setChatGroups,
   setChats,
   setSelectedChat,
   setStopIds,
@@ -48,7 +48,12 @@ import ChatModelSetting from './ChatModelSetting';
 import ChatMessageMemoized from './MemoizedChatMessage';
 import NoModel from './NoModel';
 
-import { putChats } from '@/apis/clientApis';
+import {
+  putChats,
+  putMessageReactionClear,
+  putMessageReactionDown,
+  putMessageReactionUp,
+} from '@/apis/clientApis';
 
 const Chat = memo(() => {
   const { t } = useTranslation();
@@ -346,11 +351,12 @@ const Chat = memo(() => {
     );
 
     const chatList = chats.map((x) =>
-      x.id === selectedChat.id ? { ...x, updatedAt: getNowAsISODateString() } : x,
+      x.id === selectedChat.id
+        ? { ...x, updatedAt: currentISODateString() }
+        : x,
     );
 
     chatDispatch(setChats(chatList));
-    chatDispatch(setChatGroups(chatList));
     messageDispatch(setSelectedMessages(selectedMsgs));
     messageDispatch(setMessages(messageList));
     changeSelectedChatStatus(ChatStatus.None);
@@ -411,13 +417,50 @@ const Chat = memo(() => {
       setSelectedChat({ ...selectedChat, leafMessageId: messageId }),
     );
     const chatList = chats.map((x) =>
-      x.id === selectedChat.id ? { ...x, updatedAt: getNowAsISODateString() } : x,
+      x.id === selectedChat.id
+        ? { ...x, updatedAt: currentISODateString() }
+        : x,
     );
     chatDispatch(setChats(chatList));
-    chatDispatch(setChatGroups(chatList));
     putChats(selectedChat.id, {
       setsLeafMessageId: true,
       leafMessageId: leafId,
+    });
+  };
+
+  const handleReactionMessage = (
+    type: ReactionMessageType,
+    messageId: string,
+  ) => {
+    const message = messages.find((m) => m.id === messageId);
+    let p = null;
+    let reaction: boolean | null = null;
+
+    if (type === ReactionMessageType.Good) {
+      if (message?.reaction) {
+        p = putMessageReactionClear(messageId);
+      } else {
+        reaction = true;
+        p = putMessageReactionUp(messageId);
+      }
+    } else {
+      if (message?.reaction === false) {
+        p = putMessageReactionClear(messageId);
+      } else {
+        reaction = false;
+        p = putMessageReactionUp(messageId);
+      }
+    }
+
+    p.then(() => {
+      const msgs = messages.map((m) =>
+        m.id === messageId ? { ...m, reaction } : m,
+      );
+      const selectedMsgs = selectedMessages.map((msg) => {
+        return msg.map((m) => (m.id === message?.id ? { ...m, reaction } : m));
+      });
+      messageDispatch(setSelectedMessages(selectedMsgs));
+      messageDispatch(setMessages(msgs));
     });
   };
 
@@ -437,9 +480,10 @@ const Chat = memo(() => {
           selectedMessages={selectedMessages}
           models={models}
           messagesEndRef={messagesEndRef}
-          handleChangeChatLeafMessageId={handleChangeChatLeafMessageId}
-          handleEditMessageSend={handleEditMessageSend}
-          handleRegenerate={handleRegenerate}
+          onChangeChatLeafMessageId={handleChangeChatLeafMessageId}
+          onEditMessageSend={handleEditMessageSend}
+          onRegenerate={handleRegenerate}
+          onReactionMessage={handleReactionMessage}
         />
       </div>
       {hasModel() && selectedChat && (
