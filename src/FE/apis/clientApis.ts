@@ -297,3 +297,16 @@ export const deleteChatGroup = (id: string) => {
   const fetchServer = useFetch();
   return fetchServer.delete(`/api/chat/group/${id}`);
 };
+
+export const putMessageReactionUp = (messageId: string) => {
+  const fetchServer = useFetch();
+  return fetchServer.put(`/api/messages/${messageId}/reaction/up`);
+};
+export const putMessageReactionDown = (messageId: string) => {
+  const fetchServer = useFetch();
+  return fetchServer.put(`/api/messages/${messageId}/reaction/down`);
+};
+export const putMessageReactionClear = (messageId: string) => {
+  const fetchServer = useFetch();
+  return fetchServer.put(`/api/messages/${messageId}/reaction/clear`);
+};

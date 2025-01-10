@@ -19,7 +19,7 @@ interface Props {
   onShowMore?: (groupId: string | null) => void;
 }
 
-export const ChatGroups = ({ onShowMore }: Props) => {
+const ChatGroups = ({ onShowMore }: Props) => {
   const {
     state: { chats, chatGroups },
     chatDispatch,
@@ -161,3 +161,5 @@ export const ChatGroups = ({ onShowMore }: Props) => {
     </div>
   );
 };
+
+export default ChatGroups;

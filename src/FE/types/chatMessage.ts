@@ -79,6 +79,7 @@ export interface IChatMessage {
   reasoningTokens?: number;
   duration?: number;
   firstTokenLatency?: number;
+  reaction?: boolean | null;
 }
 
 export interface MessageNode {
@@ -114,3 +115,8 @@ export interface ChatMessageNode {
 
 export const ResponseMessageTempId = 'RESPONSE_MESSAGE_TEMP_ID';
 export const UserMessageTempId = 'USER_MESSAGE_TEMP_ID';
+
+export enum ReactionMessageType {
+  Good = 1,
+  Bad = 2,
+}

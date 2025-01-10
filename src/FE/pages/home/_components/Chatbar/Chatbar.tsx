@@ -12,7 +12,7 @@ import { setChatGroup, setChatPaging } from '../../_actions/chat.actions';
 import { setShowChatBar } from '../../_actions/setting.actions';
 import HomeContext from '../../_contexts/home.context';
 import Sidebar from '../Sidebar/Sidebar';
-import { ChatGroups } from './ChatGroups';
+import ChatGroups from './ChatGroups';
 import ChatbarContext from './Chatbar.context';
 import { ChatbarInitialState, initialState } from './Chatbar.context';
 import ChatBarSettings from './ChatbarSettings';

@@ -367,5 +367,7 @@
   "UnPin": "取消置顶",
   "Pinned": "已置顶",
   "All chats": "所有对话",
-  "Group name already exists": "组名已存在"
+  "Group name already exists": "组名已存在",
+  "Good Response": "最佳回复",
+  "Bad Response": "错误回复"
 }

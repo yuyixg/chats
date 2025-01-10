@@ -58,7 +58,7 @@ export default function ShareMessage() {
           selectedMessages={selectedMessages}
           messagesEndRef={null}
           readonly={true}
-          handleChangeChatLeafMessageId={handleChangeChatLeafMessageId}
+          onChangeChatLeafMessageId={handleChangeChatLeafMessageId}
         />
         <div className="fixed bottom-0 py-4 w-full bg-white dark:bg-black dark:text-white">
           <div className="flex justify-center pb-2">

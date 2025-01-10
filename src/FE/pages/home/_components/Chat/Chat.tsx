@@ -25,6 +25,7 @@ import { getUserSession } from '@/utils/user';
 import { ChatSpanStatus, ChatStatus, Message } from '@/types/chat';
 import {
   IChatMessage,
+  ReactionMessageType,
   ResponseMessageTempId,
   SseResponseKind,
   SseResponseLine,
@@ -47,7 +48,12 @@ import ChatModelSetting from './ChatModelSetting';
 import ChatMessageMemoized from './MemoizedChatMessage';
 import NoModel from './NoModel';
 
-import { putChats } from '@/apis/clientApis';
+import {
+  putChats,
+  putMessageReactionClear,
+  putMessageReactionDown,
+  putMessageReactionUp,
+} from '@/apis/clientApis';
 
 const Chat = memo(() => {
   const { t } = useTranslation();
@@ -422,6 +428,42 @@ const Chat = memo(() => {
     });
   };
 
+  const handleReactionMessage = (
+    type: ReactionMessageType,
+    messageId: string,
+  ) => {
+    const message = messages.find((m) => m.id === messageId);
+    let p = null;
+    let reaction: boolean | null = null;
+
+    if (type === ReactionMessageType.Good) {
+      if (message?.reaction) {
+        p = putMessageReactionClear(messageId);
+      } else {
+        reaction = true;
+        p = putMessageReactionUp(messageId);
+      }
+    } else {
+      if (message?.reaction === false) {
+        p = putMessageReactionClear(messageId);
+      } else {
+        reaction = false;
+        p = putMessageReactionUp(messageId);
+      }
+    }
+
+    p.then(() => {
+      const msgs = messages.map((m) =>
+        m.id === messageId ? { ...m, reaction } : m,
+      );
+      const selectedMsgs = selectedMessages.map((msg) => {
+        return msg.map((m) => (m.id === message?.id ? { ...m, reaction } : m));
+      });
+      messageDispatch(setSelectedMessages(selectedMsgs));
+      messageDispatch(setMessages(msgs));
+    });
+  };
+
   return (
     <div className="relative flex-1">
       <div
@@ -438,9 +480,10 @@ const Chat = memo(() => {
           selectedMessages={selectedMessages}
           models={models}
           messagesEndRef={messagesEndRef}
-          handleChangeChatLeafMessageId={handleChangeChatLeafMessageId}
-          handleEditMessageSend={handleEditMessageSend}
-          handleRegenerate={handleRegenerate}
+          onChangeChatLeafMessageId={handleChangeChatLeafMessageId}
+          onEditMessageSend={handleEditMessageSend}
+          onRegenerate={handleRegenerate}
+          onReactionMessage={handleReactionMessage}
         />
       </div>
       {hasModel() && selectedChat && (
