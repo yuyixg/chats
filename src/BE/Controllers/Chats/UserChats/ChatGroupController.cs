@@ -40,10 +40,7 @@ public class ChatGroupController(ChatsDB db, CurrentUser user, IUrlEncryptionSer
     [HttpGet("with-messages")]
     public async Task<ActionResult<ChatGroupDtoWithMessage[]>> ListGroupsWithMessages([FromQuery] PagingRequest req, [FromServices] IServiceScopeFactory scopeFactory, CancellationToken cancellationToken)
     {
-        List<ChatGroupDtoWithMessage> groups = await db.ChatGroups
-            .OrderBy(x => x.Rank)
-            .ThenBy(x => x.Name)
-            .Where(x => x.UserId == user.Id)
+        List<ChatGroupDtoWithMessage> groups = await UserOrderedChatGroups
             .Select(x => new ChatGroupDtoWithMessage
             {
                 Id = urlEncryption.EncryptChatGroupId(x.Id),
