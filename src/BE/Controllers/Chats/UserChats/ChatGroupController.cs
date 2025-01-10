@@ -2,6 +2,7 @@
 using Chats.BE.Controllers.Common.Dtos;
 using Chats.BE.DB;
 using Chats.BE.Infrastructure;
+using Chats.BE.Infrastructure.Functional;
 using Chats.BE.Services.UrlEncryption;
 using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Mvc;
@@ -12,13 +13,19 @@ namespace Chats.BE.Controllers.Chats.UserChats;
 [Route("api/chat/group"), Authorize]
 public class ChatGroupController(ChatsDB db, CurrentUser user, IUrlEncryptionService urlEncryption) : ControllerBase
 {
+    internal const int MaxGroupCount = 60;
+    internal const short RankStep = 1000;
+    internal const short RankStart = -30000;
+
+    IOrderedQueryable<ChatGroup> UserOrderedChatGroups => db.ChatGroups
+        .Where(x => x.UserId == user.Id)
+        .OrderByDescending(x => x.Rank)
+        .ThenByDescending(x => x.Id);
+
     [HttpGet]
     public async Task<ActionResult<ChatGroupDto[]>> ListGroups(CancellationToken cancellationToken)
     {
-        ChatGroupDto[] groups = await db.ChatGroups
-            .OrderBy(x => x.Rank)
-            .ThenBy(x => x.Name)
-            .Where(x => x.UserId == user.Id)
+        ChatGroupDto[] groups = await UserOrderedChatGroups
             .Select(x => new ChatGroupDto
             {
                 Id = urlEncryption.EncryptChatGroupId(x.Id),
@@ -70,17 +77,34 @@ public class ChatGroupController(ChatsDB db, CurrentUser user, IUrlEncryptionSer
         {
             return BadRequest("Group name cannot be empty");
         }
-        bool isDuplicatedName = await db.ChatGroups.AnyAsync(x => x.UserId == user.Id && x.Name == req.Name, cancellationToken);
+
+        ChatGroup[] existingGroups = await UserOrderedChatGroups
+            .ToArrayAsync(cancellationToken);
+
+        if (existingGroups.Length >= MaxGroupCount)
+        {
+            return BadRequest("You have reached the maximum number of groups");
+        }
+
+        bool isDuplicatedName = existingGroups.Any(x => x.Name.Equals(req.Name, StringComparison.OrdinalIgnoreCase));
         if (isDuplicatedName)
         {
             return BadRequest("Group name already exists");
+        }
+
+        int sugguestedRank = existingGroups.Length > 0 ? existingGroups[0].Rank + RankStep : RankStart;
+        if (sugguestedRank > short.MaxValue)
+        {
+            ReorderGroups(existingGroups);
+            await db.SaveChangesAsync(cancellationToken);
+            sugguestedRank = existingGroups[0].Rank + RankStep;
         }
 
         ChatGroup group = new()
         {
             Name = req.Name,
             UserId = user.Id,
-            Rank = req.Rank,
+            Rank = (short)sugguestedRank,
             IsExpanded = req.IsExpanded,
         };
         db.ChatGroups.Add(group);
@@ -92,6 +116,14 @@ public class ChatGroupController(ChatsDB db, CurrentUser user, IUrlEncryptionSer
             Rank = group.Rank,
             IsExpanded = group.IsExpanded,
         });
+    }
+
+    private static void ReorderGroups(ChatGroup[] existingGroups)
+    {
+        for (int i = 0; i < existingGroups.Length; i++)
+        {
+            existingGroups[i].Rank = (short)(RankStart + i * RankStep);
+        }
     }
 
     [HttpPut("{encryptedChatGroupId}")]
@@ -131,15 +163,33 @@ public class ChatGroupController(ChatsDB db, CurrentUser user, IUrlEncryptionSer
     }
 
     [HttpPut("move")]
-    public async Task<ActionResult> MoveGroup([FromBody] EncryptedMoveChatGroupRequest encryptedRequest, CancellationToken cancellationToken)
+    public async Task<ActionResult> MoveGroup([FromBody] EncryptedMoveChatGroupRequest encryptedRequest,
+        [FromServices] IServiceScopeFactory scopeFactory,
+        CancellationToken cancellationToken)
     {
+        // 1. 解密请求
         MoveChatGroupRequest req = encryptedRequest.Decrypt(urlEncryption);
-        ChatGroup? group = await db.ChatGroups.FirstOrDefaultAsync(x => x.UserId == user.Id && x.Id == req.GroupId, cancellationToken);
-        if (group == null)
+        Result<MoveChatGroupContext> ctxResult = await req.Load(db, scopeFactory, user.Id, cancellationToken);
+        if (ctxResult.IsFailure)
         {
-            return NotFound();
+            return BadRequest(ctxResult.Error);
         }
 
-        throw new NotImplementedException();
+        MoveChatGroupContext ctx = ctxResult.Value;
+        if (!ctx.ValidateBeforeAfterRank())
+        {
+            return BadRequest("Invalid move request");
+        }
+
+        bool needReorder = ctx.ApplyMove();
+        if (needReorder)
+        {
+            ChatGroup[] allGroups = await UserOrderedChatGroups.ToArrayAsync(cancellationToken);
+            ReorderGroups(allGroups);
+            ctx.Reload(allGroups);
+            ctx.ApplyMove();
+        }
+        await db.SaveChangesAsync(cancellationToken);
+        return Ok();
     }
 }

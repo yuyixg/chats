@@ -30,9 +30,6 @@ public record CreateChatGroupRequest
     [JsonPropertyName("name")]
     public required string Name { get; init; }
 
-    [JsonPropertyName("rank")]
-    public required short Rank { get; init; }
-
     [JsonPropertyName("isExpanded")]
     public required bool IsExpanded { get; init; }
 }
