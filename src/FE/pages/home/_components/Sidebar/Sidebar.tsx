@@ -3,6 +3,7 @@ import { ReactNode } from 'react';
 import useTranslation from '@/hooks/useTranslation';
 
 import {
+  IconFolderPlus,
   IconLayoutSidebar,
   IconLayoutSidebarRight,
   IconSearch,
@@ -22,7 +23,8 @@ interface Props<T> {
   addItemButtonTitle: string;
   side: 'left' | 'right';
   items: T[];
-  itemComponent: ReactNode;
+  itemComponent?: ReactNode;
+  folderComponent?: ReactNode;
   footerComponent?: ReactNode;
   searchTerm: string;
   messageIsStreaming?: boolean;
@@ -30,6 +32,8 @@ interface Props<T> {
   toggleOpen: () => void;
   handleCreateItem: () => void;
   hasModel: () => boolean;
+  onDrop?: (e: any) => void;
+  onAddFolder?: () => void;
 }
 
 const Sidebar = <T,>({
@@ -40,6 +44,7 @@ const Sidebar = <T,>({
   side,
   items,
   itemComponent,
+  folderComponent,
   footerComponent,
   searchTerm,
   messageIsStreaming,
@@ -47,9 +52,9 @@ const Sidebar = <T,>({
   toggleOpen,
   handleCreateItem,
   hasModel,
+  onAddFolder,
 }: Props<T>) => {
   const { t } = useTranslation();
-
   const NoDataRender = () =>
     isLoading === false &&
     items.length === 0 && (
@@ -64,53 +69,71 @@ const Sidebar = <T,>({
       <div
         className={`${
           isOpen ? 'w-[260px]' : 'w-0 hidden'
-        } fixed top-0 ${side}-0 z-40 flex h-full flex-none flex-col bg-gray-50 dark:bg-[#202123] p-2 text-[14px] sm:relative  sm:top-0`}
+        } fixed top-0 ${side}-0 z-40 flex h-full flex-none flex-col bg-gray-50 dark:bg-[#202123] p-2 text-[14px] sm:relative sm:top-0`}
       >
-        <div
-          className={cn(
-            'flex items-center px-[6px] justify-between',
-            side === 'right' && 'flex-row-reverse',
-          )}
-        >
-          <Tips
-            trigger={
-              <Button
-                variant="ghost"
-                className="p-1 m-0 h-auto"
-                onClick={toggleOpen}
-              >
-                {side === 'right' ? (
-                  <IconLayoutSidebarRight size={26} />
-                ) : (
-                  <IconLayoutSidebar size={26} />
-                )}
-              </Button>
-            }
-          />
-          {hasModel() && (
+        <div className="sticky">
+          <div
+            className={cn(
+              'flex items-center pr-1.5 justify-between',
+              side === 'right' && 'flex-row-reverse',
+            )}
+          >
             <Tips
               trigger={
                 <Button
-                  onClick={() => {
-                    handleCreateItem();
-                  }}
-                  disabled={messageIsStreaming}
                   variant="ghost"
                   className="p-1 m-0 h-auto"
+                  onClick={toggleOpen}
                 >
-                  <IconSquarePlus size={26} />
+                  {side === 'right' ? (
+                    <IconLayoutSidebarRight size={26} />
+                  ) : (
+                    <IconLayoutSidebar size={26} />
+                  )}
                 </Button>
               }
-              content={addItemButtonTitle}
             />
-          )}
+            {hasModel() && (
+              <Tips
+                trigger={
+                  <Button
+                    onClick={() => {
+                      handleCreateItem();
+                    }}
+                    disabled={messageIsStreaming}
+                    variant="ghost"
+                    className="p-1 m-0 h-auto"
+                  >
+                    <IconSquarePlus size={26} />
+                  </Button>
+                }
+                content={addItemButtonTitle}
+              />
+            )}
+          </div>
+          <div
+            className={cn(
+              'pr-1.5 h-16',
+              onAddFolder && 'flex items-center gap-x-1',
+            )}
+          >
+            <Search
+              placeholder={t('Search...') || ''}
+              searchTerm={searchTerm}
+              onSearch={handleSearchTerm}
+            />
+            {onAddFolder && (
+              <Button
+                variant="ghost"
+                className="h-auto p-1"
+                onClick={onAddFolder}
+              >
+                <IconFolderPlus size={25} />
+              </Button>
+            )}
+          </div>
         </div>
 
-        <Search
-          placeholder={t('Search...') || ''}
-          searchTerm={searchTerm}
-          onSearch={handleSearchTerm}
-        />
         {isLoading && (
           <div className="h-screen flex flex-col space-y-2 py-2">
             <Skeleton className="h-11 w-full" />
@@ -118,7 +141,10 @@ const Sidebar = <T,>({
             <Skeleton className="h-11 w-full" />
           </div>
         )}
-        <div className="flex-grow overflow-auto scroll-container">
+
+        <div className="flex-grow overflow-hidden overflow-y-scroll scroll-container">
+          <div className="flex">{folderComponent}</div>
+
           {items?.length > 0 && !isLoading && (
             <div className="pt-2">{itemComponent}</div>
           )}
@@ -130,7 +156,7 @@ const Sidebar = <T,>({
       {!isOpen && showOpenButton && (
         <div
           className={`group fixed z-20 ${
-            side === 'right' ? 'right-2' : 'left-[14px]'
+            side === 'right' ? 'right-2' : 'left-[8px]'
           }`}
           style={{ top: '8px' }}
         >

@@ -7,8 +7,8 @@ import { GetChatsParams } from '@/types/clientApis';
 
 import {
   ChatAction,
-  SetChatGroupsType,
-  SetChatPagingType,
+  SetChatGroupType,
+  SetChatsPagingType,
   SetChatsType,
 } from '../_reducers/chat.reducer';
 import {
@@ -39,9 +39,9 @@ export interface HomeInitialState {
   selectedMessages: SetSelectedMessagesType;
 
   chats: SetChatsType;
-  chatGroups: SetChatGroupsType;
+  chatGroups: SetChatGroupType;
   selectedChat: IChat;
-  chatsPaging: SetChatPagingType;
+  chatPaging: SetChatsPagingType;
   isChatsLoading: boolean;
 
   models: SetModelsType;
@@ -59,10 +59,10 @@ export const initialState: HomeInitialState = {
   selectedMessages: [],
 
   chats: [],
-  chatGroups: new Map<string, IChat[]>(),
   selectedChat: {} as IChat,
-  chatsPaging: { count: 0, page: 1, pageSize: 50 },
+  chatPaging: [],
   isChatsLoading: false,
+  chatGroups: [],
 
   models: [],
   modelMap: {},
@@ -93,7 +93,8 @@ export interface HomeContextProps {
     id: string,
     params: HandleUpdateChatParams,
   ) => void;
-  getChats: (params: GetChatsParams, isAppend?: boolean) => void;
+  getChats: (query: string) => void;
+  getChatsByGroup: (params: GetChatsParams) => void;
   handleStopChats: () => void;
 }
 

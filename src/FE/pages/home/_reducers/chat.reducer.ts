@@ -1,34 +1,30 @@
-import { IChat } from '@/types/chat';
+import { IChat, IChatPaging } from '@/types/chat';
+import { IChatGroup } from '@/types/group';
 
 export type SetChatsType = IChat[];
-export type SetChatGroupsType = Map<string, IChat[]>;
 export type SetSelectedChatType = IChat | undefined;
 export type SetChatStatusType = boolean;
-export type SetChatPagingType = {
-  count: number;
-  page: number;
-  pageSize: number;
-};
-
+export type SetChatsPagingType = IChatPaging[];
 export type SetIsChatsLoadingType = boolean;
 export type SetStopIdsType = string[];
+export type SetChatGroupType = IChatGroup[];
 
 interface ChatInitialState {
   chats: SetChatsType;
-  chatGroups: SetChatGroupsType;
   selectedChat?: SetSelectedChatType;
-  chatsPaging: SetChatPagingType;
+  chatPaging: SetChatsPagingType;
   isChatsLoading: SetIsChatsLoadingType;
   stopIds: SetStopIdsType;
+  chatGroups: SetChatGroupType;
 }
 
 export const chatInitialState: ChatInitialState = {
   chats: [],
-  chatGroups: new Map<string, IChat[]>(),
   selectedChat: undefined,
-  chatsPaging: { count: 0, page: 1, pageSize: 50 },
+  chatPaging: [],
   isChatsLoading: false,
   stopIds: [],
+  chatGroups: [],
 };
 
 export enum ChatActionTypes {
@@ -39,22 +35,20 @@ export enum ChatActionTypes {
   SET_CHAT_PAGING = 'SET_CHAT_PAGING',
   SET_IS_CHATS_LOADING = 'SET_IS_CHATS_LOADING',
   SET_STOP_IDS = 'SET_STOP_IDS',
+  SET_CHAT_GROUP = 'SET_CHAT_GROUP',
 }
 
 export type ChatAction =
   | { type: ChatActionTypes.SET_CHATS; payload: SetChatsType }
-  | { type: ChatActionTypes.SET_CHAT_GROUPS; payload: SetChatGroupsType }
   | { type: ChatActionTypes.SET_CHATS_INCR; payload: SetChatsType }
   | { type: ChatActionTypes.SET_SELECTED_CHAT; payload: SetSelectedChatType }
-  | { type: ChatActionTypes.SET_CHAT_PAGING; payload: SetChatPagingType }
+  | { type: ChatActionTypes.SET_CHAT_PAGING; payload: SetChatsPagingType }
   | {
       type: ChatActionTypes.SET_IS_CHATS_LOADING;
       payload: SetIsChatsLoadingType;
     }
-  | {
-      type: ChatActionTypes.SET_STOP_IDS;
-      payload: SetStopIdsType;
-    };
+  | { type: ChatActionTypes.SET_STOP_IDS; payload: SetStopIdsType }
+  | { type: ChatActionTypes.SET_CHAT_GROUP; payload: SetChatGroupType };
 
 export default function chatReducer(
   state: ChatInitialState,
@@ -63,16 +57,16 @@ export default function chatReducer(
   switch (action.type) {
     case ChatActionTypes.SET_CHATS:
       return { ...state, chats: action.payload };
-    case ChatActionTypes.SET_CHAT_GROUPS:
-      return { ...state, chatGroups: action.payload };
     case ChatActionTypes.SET_SELECTED_CHAT:
       return { ...state, selectedChat: action.payload };
     case ChatActionTypes.SET_CHAT_PAGING:
-      return { ...state, chatsPaging: action.payload };
+      return { ...state, chatPaging: action.payload };
     case ChatActionTypes.SET_IS_CHATS_LOADING:
       return { ...state, isChatsLoading: action.payload };
     case ChatActionTypes.SET_STOP_IDS:
       return { ...state, stopIds: action.payload };
+    case ChatActionTypes.SET_CHAT_GROUP:
+      return { ...state, chatGroups: action.payload };
     default:
       return state;
   }

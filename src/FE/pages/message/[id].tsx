@@ -56,7 +56,7 @@ export default function MessageDetails() {
           selectedMessages={selectedMessages}
           messagesEndRef={null}
           readonly={true}
-          handleChangeChatLeafMessageId={handleChangeChatLeafMessageId}
+          onChangeChatLeafMessageId={handleChangeChatLeafMessageId}
         />
       </>
     ) : (
