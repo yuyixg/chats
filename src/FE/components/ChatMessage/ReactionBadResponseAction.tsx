@@ -34,7 +34,7 @@ export const ReactionBadResponseAction = (props: Props) => {
           </Button>
         }
         side="bottom"
-        content={t('Bad Response')!}
+        content={t('Dislike')!}
       />
     );
   };

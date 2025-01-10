@@ -73,7 +73,7 @@ SELECT
     [UsageId],                -- Message 表中的 UsageId 映射到 MessageResponse 的 UsageId
     NULL AS [ReactionId]      -- ReactionId 在迁移过程中设置为 NULL
 FROM 
-    [Chats3].[dbo].[Message]
+    [dbo].[Message]
 WHERE 
     [ChatRoleId] = 3          -- 只迁移 ChatRoleId = 3 的数据
     AND [UsageId] IS NOT NULL -- 确保 UsageId 不为 NULL
