@@ -308,9 +308,9 @@ public class ChatController(ChatStopService stopService) : ControllerBase
         }
         if (resps.Any(x => x.Cost.CostUsage))
         {
-            foreach (short modelId in userModels.Keys)
+            foreach (UserModel um in userModels.Values)
             {
-                await balanceService.UpdateUsage(db, modelId, cancellationToken);
+                await balanceService.UpdateUsage(db, um.Id, cancellationToken);
             }
         }
 
