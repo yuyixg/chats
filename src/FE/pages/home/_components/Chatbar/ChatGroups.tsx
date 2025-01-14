@@ -52,7 +52,6 @@ const ChatGroups = ({ onShowMore }: Props) => {
       chatDispatch(setChats(chatList));
       putChats(currentDragChat.id, { setsGroupId: true, groupId: folder.id });
     } else if (currentDragGroup) {
-      debugger;
       const groupId = currentDragGroup.id;
       const chatGroupsCount = chatGroups.length;
       const params = {
