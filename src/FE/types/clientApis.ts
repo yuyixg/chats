@@ -176,3 +176,9 @@ export interface PutChatGroupParams {
   rank?: number;
   isExpanded?: boolean;
 }
+
+export interface PutMoveChatGroupParams {
+  groupId: string;
+  beforeGroupId: string | null;
+  afterGroupId: string | null;
+}

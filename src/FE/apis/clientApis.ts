@@ -20,6 +20,7 @@ import {
   PostUserPassword,
   PutChatGroupParams,
   PutChatParams,
+  PutMoveChatGroupParams,
   SingInParams,
   SingInResult,
 } from '@/types/clientApis';
@@ -296,6 +297,13 @@ export const putChatGroup = (params: PutChatGroupParams) => {
 export const deleteChatGroup = (id: string) => {
   const fetchServer = useFetch();
   return fetchServer.delete(`/api/chat/group/${id}`);
+};
+
+export const putMoveChatGroup = (params: PutMoveChatGroupParams) => {
+  const fetchServer = useFetch();
+  return fetchServer.put(`/api/chat/group/move`, {
+    body: params,
+  });
 };
 
 export const putMessageReactionUp = (messageId: string) => {
