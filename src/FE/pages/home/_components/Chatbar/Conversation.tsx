@@ -43,9 +43,10 @@ import { cn } from '@/lib/utils';
 
 interface Props {
   chat: IChat;
+  onDragItemStart?: (e: DragEvent<HTMLButtonElement>, chat: IChat) => void;
 }
 
-const ConversationComponent = ({ chat }: Props) => {
+const ConversationComponent = ({ chat, onDragItemStart }: Props) => {
   const { t } = useTranslation();
   const {
     state: {
@@ -88,9 +89,7 @@ const ConversationComponent = ({ chat }: Props) => {
   };
 
   const handleDragStart = (e: DragEvent<HTMLButtonElement>, chat: IChat) => {
-    if (e.dataTransfer) {
-      e.dataTransfer.setData('chat', JSON.stringify(chat));
-    }
+    onDragItemStart && onDragItemStart(e, chat);
   };
 
   const handleConfirm: MouseEventHandler<HTMLButtonElement> = (e) => {
@@ -172,7 +171,7 @@ const ConversationComponent = ({ chat }: Props) => {
           } ${selectChatId === chat.id ? 'bg-muted' : ''}`}
           onClick={() => handleSelectChat(chat)}
           disabled={chatting}
-          draggable="true"
+          draggable
           onDragStart={(e) => handleDragStart(e, chat)}
         >
           <div
