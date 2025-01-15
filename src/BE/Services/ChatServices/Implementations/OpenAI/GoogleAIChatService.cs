@@ -6,5 +6,11 @@ namespace Chats.BE.Services.ChatServices.Implementations.OpenAI;
 
 public class GoogleAIChatService(Model model) : OpenAIChatService(model, new Uri("https://generativelanguage.googleapis.com/v1beta/openai/"))
 {
+    protected override Task<ChatMessage[]> FEPreprocess(IReadOnlyList<ChatMessage> messages, ChatCompletionOptions options, ChatExtraDetails feOptions, CancellationToken cancellationToken)
+    {
+        options.EndUserId = null;
+        return base.FEPreprocess(messages, options, feOptions, cancellationToken);
+    }
+
     protected override bool SupportsVisionLink => false;
 }
