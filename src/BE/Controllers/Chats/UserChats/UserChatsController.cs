@@ -261,7 +261,26 @@ public class UserChatsController(ChatsDB db, CurrentUser currentUser, IUrlEncryp
         return NoContent();
     }
 
-    [HttpPost("{encryptedChatId}/share"), Authorize]
+    [HttpGet("{encryptedChatId}/share")]
+    public async Task<ActionResult<ChatShareDto[]>> ListShared(string encryptedChatId, CancellationToken cancellationToken)
+    {
+        int chatId = idEncryption.DecryptChatId(encryptedChatId);
+        Chat? chat = await db.Chats
+            .Include(x => x.ChatShares)
+            .FirstOrDefaultAsync(x => x.Id == chatId && x.UserId == currentUser.Id, cancellationToken);
+
+        if (chat == null)
+        {
+            return NotFound();
+        }
+
+        ChatShareDto[] result = chat.ChatShares
+            .Select(x => ChatShareDto.FromDB(x, idEncryption))
+            .ToArray();
+        return Ok(result);
+    }
+
+    [HttpPost("{encryptedChatId}/share")]
     public async Task<ActionResult<ChatShareDto>> CreateShared(string encryptedChatId,
         DateTimeOffset validBefore,
         [FromServices] IUrlEncryptionService idEncryption,
