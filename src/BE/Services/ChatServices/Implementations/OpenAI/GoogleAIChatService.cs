@@ -6,6 +6,8 @@ namespace Chats.BE.Services.ChatServices.Implementations.OpenAI;
 
 public class GoogleAIChatService(Model model) : OpenAIChatService(model, new Uri("https://generativelanguage.googleapis.com/v1beta/openai/"))
 {
+    protected override bool SupportsVisionLink => false;
+
     protected override Dtos.ChatTokenUsage GetUsage(ChatTokenUsage usage)
     {
         IDictionary<string, BinaryData> b = GetSerializedAdditionalRawData(usage)!;
