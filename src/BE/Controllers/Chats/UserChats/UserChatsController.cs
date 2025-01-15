@@ -260,4 +260,50 @@ public class UserChatsController(ChatsDB db, CurrentUser currentUser, IUrlEncryp
         }
         return NoContent();
     }
+
+    [HttpPost("{encryptedChatId}/share"), Authorize]
+    public async Task<ActionResult<ChatShareDto>> CreateShared(string encryptedChatId,
+        DateTimeOffset validBefore,
+        [FromServices] IUrlEncryptionService idEncryption,
+        [FromServices] CurrentUser user,
+        [FromServices] HostUrlService hostUrlService,
+        CancellationToken cancellationToken)
+    {
+        int chatId = idEncryption.DecryptChatId(encryptedChatId);
+        bool isChatOwner = await db.Chats.AnyAsync(x => x.Id == chatId && x.UserId == user.Id, cancellationToken);
+        if (!isChatOwner)
+        {
+            return Forbid();
+        }
+
+        ChatShare cs = new()
+        {
+            ChatId = chatId,
+            ExpiresAt = validBefore,
+            CreatedAt = DateTime.UtcNow,
+            SnapshotTime = DateTime.UtcNow,
+        };
+        db.ChatShares.Add(cs);
+        await db.SaveChangesAsync(cancellationToken);
+
+        ChatShareDto dto = ChatShareDto.FromDB(cs, idEncryption);
+        return Created(dto.ToUrl(hostUrlService), dto);
+    }
+
+    [HttpDelete("{encryptedChatId}/share")]
+    public async Task<ActionResult<int>> DeleteAllShared(string encryptedChatId, CancellationToken cancellationToken)
+    {
+        int chatId = idEncryption.DecryptChatId(encryptedChatId);
+        bool isChatOwner = await db.Chats.AnyAsync(x => x.Id == chatId && x.UserId == currentUser.Id, cancellationToken);
+        if (!isChatOwner)
+        {
+            return Forbid();
+        }
+
+        int rowsEffected = await db.ChatShares
+            .Where(x => x.ChatId == chatId)
+            .ExecuteDeleteAsync(cancellationToken);
+
+        return Ok(rowsEffected);
+    }
 }

@@ -1,10 +1,7 @@
 ﻿using Chats.BE.Controllers.Admin.AdminMessage;
-using Chats.BE.Controllers.Admin.AdminMessage.Dtos;
 using Chats.BE.Controllers.Chats.UserChats.Dtos;
 using Chats.BE.DB;
 using Chats.BE.Infrastructure;
-using Chats.BE.Infrastructure.Functional;
-using Chats.BE.Services;
 using Chats.BE.Services.FileServices;
 using Chats.BE.Services.UrlEncryption;
 using Microsoft.AspNetCore.Authorization;
@@ -34,37 +31,8 @@ public class SharedChatController(ChatsDB db) : ControllerBase
         return Ok(data);
     }
 
-    [HttpPost("{encryptedChatId}"), Authorize]
-    public async Task<ActionResult<string>> CreateShared(string encryptedChatId,
-        DateTimeOffset validBefore,
-        [FromServices] IUrlEncryptionService idEncryption,
-        [FromServices] CurrentUser user,
-        [FromServices] HostUrlService hostUrlservice,
-        CancellationToken cancellationToken)
-    {
-        int chatId = idEncryption.DecryptChatId(encryptedChatId);
-        bool isChatOwner = await db.Chats.AnyAsync(x => x.Id == chatId && x.UserId == user.Id, cancellationToken);
-        if (!isChatOwner)
-        {
-            return Forbid();
-        }
-
-        ChatShare cs = new()
-        {
-            ChatId = chatId,
-            ExpiresAt = validBefore,
-            CreatedAt = DateTime.UtcNow,
-            SnapshotTime = DateTime.UtcNow,
-        };
-        db.ChatShares.Add(cs);
-        await db.SaveChangesAsync(cancellationToken);
-
-        string encryptedChatShare = idEncryption.EncryptChatShareId(cs.Id);
-        return Created(new Uri($"{hostUrlservice.GetFEUrl()}/share/{encryptedChatShare}"), null);
-    }
-
     [HttpPut("{encryptedChatShareId}"), Authorize]
-    public async Task<ActionResult> UpdateShared(string encryptedChatShareId,
+    public async Task<ActionResult<ChatShareDto>> UpdateShared(string encryptedChatShareId,
         DateTimeOffset validBefore,
         [FromServices] IUrlEncryptionService idEncryption,
         [FromServices] CurrentUser user,
@@ -83,6 +51,30 @@ public class SharedChatController(ChatsDB db) : ControllerBase
         }
         chatShare.ExpiresAt = validBefore;
         chatShare.SnapshotTime = DateTime.UtcNow;
+        await db.SaveChangesAsync(cancellationToken);
+        return Ok(ChatShareDto.FromDB(chatShare, idEncryption));
+    }
+
+    [HttpDelete("{encryptedChatShareId}"), Authorize]
+    public async Task<ActionResult> DeleteShared(string encryptedChatShareId,
+        [FromServices] IUrlEncryptionService idEncryption,
+        [FromServices] CurrentUser user,
+        CancellationToken cancellationToken)
+    {
+        int chatShareId = idEncryption.DecryptChatShareId(encryptedChatShareId);
+        ChatShare? chatShare = await db.ChatShares
+            .Include(x => x.Chat)
+            .FirstOrDefaultAsync(x => x.Id == chatShareId, cancellationToken);
+        if (chatShare == null)
+        {
+            return NotFound();
+        }
+        bool isChatOwner = chatShare.Chat.UserId == user.Id;
+        if (!isChatOwner)
+        {
+            return Forbid();
+        }
+        db.ChatShares.Remove(chatShare);
         await db.SaveChangesAsync(cancellationToken);
         return Ok();
     }
