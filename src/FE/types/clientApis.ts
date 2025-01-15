@@ -158,7 +158,7 @@ export interface GetUserChatGroupWithMessagesResult {
   name: string;
   rank: 0;
   isExpanded: boolean;
-  messages: {
+  chats: {
     rows: GetUserChatResult[];
     count: 0;
   };

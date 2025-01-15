@@ -19,10 +19,10 @@ public record ChatGroupDto
     public required bool IsExpanded { get; init; }
 }
 
-public record ChatGroupDtoWithMessage : ChatGroupDto
+public record ChatGroupDtoWithChats : ChatGroupDto
 {
-    [JsonPropertyName("messages")]
-    public PagedResult<ChatsResponse> Messages { get; set; } = null!;
+    [JsonPropertyName("chats")]
+    public PagedResult<ChatsResponse> Chats { get; set; } = null!;
 }
 
 public record CreateChatGroupRequest
