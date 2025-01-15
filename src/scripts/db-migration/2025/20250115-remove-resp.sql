@@ -195,3 +195,4 @@ UPDATE M SET M.UsageId = MR.UsageId, M.ReactionId = MR.ReactionId
 FROM [dbo].[Message] M
 INNER JOIN [dbo].[MessageResponse] MR ON M.Id = MR.MessageId;
 
+DROP TABLE [dbo].[MessageResponse];
