@@ -65,7 +65,7 @@ public partial class UserModelUsage
     public virtual FinishReason FinishReason { get; set; } = null!;
 
     [InverseProperty("Usage")]
-    public virtual MessageResponse? MessageResponse { get; set; }
+    public virtual Message? Message { get; set; }
 
     [ForeignKey("UsageTransactionId")]
     [InverseProperty("UserModelUsage")]

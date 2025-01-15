@@ -467,10 +467,7 @@ public class ChatController(ChatStopService stopService) : ControllerBase
             dbAssistantMessage.MessageContents.Add(MessageContent.FromError(errorText));
             await writer.WriteAsync(SseResponseLine.Error(span.Id, errorText), cancellationToken);
         }
-        dbAssistantMessage.MessageResponse = new MessageResponse()
-        {
-            Usage = icc.ToUserModelUsage(currentUser.Id, await clientInfoTask, isApi: false)
-        };
+        dbAssistantMessage.Usage = icc.ToUserModelUsage(currentUser.Id, await clientInfoTask, isApi: false);
         await writer.WriteAsync(new SseResponseLine { Kind = SseResponseKind.End, Result = dbAssistantMessage, SpanId = span.Id }, cancellationToken);
         writer.Complete();
         return new ChatSpanResponse()
