@@ -104,7 +104,7 @@ public record MoveChatGroupContext
     public bool ApplyMove()
     {
         // move the group into center of before and after group
-        // if no gap, return false, otherwise return true
+        // if no gap, return false(means need reorder), otherwise return true(means success)
         // throw exception when assert failed
         if (!ValidateBeforeAfterRank())
         {

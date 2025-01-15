@@ -10,7 +10,7 @@ import {
   GetSiteInfoResult,
   GetUserApiKeyResult,
   GetUserBalanceResult,
-  GetUserChatGroupWithMessagesResult,
+  GetUserChatGroupWithMessagesResult as GetUserChatGroupWithChatsResult,
   LoginConfigsResult,
   ModelUsageDto,
   PostChatGroupParams,
@@ -268,11 +268,11 @@ export const deleteUserChatSpan = (chatId: string, spanId: number) => {
 
 export const getUserChatGroupWithMessages = (
   params: GetChatsParams,
-): Promise<GetUserChatGroupWithMessagesResult[]> => {
+): Promise<GetUserChatGroupWithChatsResult[]> => {
   const { query, page, pageSize } = params;
   const fetchServer = useFetch();
   return fetchServer.get(
-    `/api/chat/group/with-messages?page=${page}&pageSize=${pageSize}&query=${
+    `/api/chat/group/with-chats?page=${page}&pageSize=${pageSize}&query=${
       query || ''
     }`,
   );

@@ -62,10 +62,10 @@ const ChatGroups = ({ onShowMore }: Props) => {
 
       const index = chatGroups.findIndex((x) => x.id === groupId);
       if (index >= 0 && index < chatGroupsCount - 1) {
-        params.afterGroupId = chatGroups[index + 1].id;
+        params.beforeGroupId = chatGroups[index + 1].id;
       }
       if (index > 0) {
-        params.beforeGroupId = chatGroups[index - 1].id;
+        params.afterGroupId = chatGroups[index - 1].id;
       }
       putMoveChatGroup(params);
     }
