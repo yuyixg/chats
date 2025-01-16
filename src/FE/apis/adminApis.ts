@@ -43,6 +43,7 @@ import {
   UserModelDisplayDto,
   ValidateModelParams,
 } from '@/types/adminApis';
+import { GetChatShareResult } from '@/types/clientApis';
 import { ChatModelFileConfig, DBModelProvider } from '@/types/model';
 import { PageResult } from '@/types/page';
 
@@ -379,6 +380,13 @@ export const postModelFastCreate = (params: ModelFastCreateParams) => {
   return fetchServer.post<ErrorResult>(`/api/admin/models/fast-create`, {
     body: params,
   });
+};
+
+export const getAdminMessage = (chatId: string) => {
+  const fetchServer = useFetch();
+  return fetchServer.get<GetChatShareResult>(
+    `/api/admin/message-details?chatId=${chatId}`,
+  );
 };
 
 export const defaultFileConfig: ChatModelFileConfig = {
