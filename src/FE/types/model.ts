@@ -39,6 +39,7 @@ export const feModelProviders: FEModelProvider[] = [
   { id: 10, name: 'DeepSeek', icon: '/logos/deepseek.svg' },
   { id: 11, name: 'x.ai', icon: '/logos/x.svg' },
   { id: 12, name: 'Github Models', icon: '/logos/github.svg' },
+  { id: 13, name: 'Google AI', icon: '/logos/google.svg' },
 ];
 
 export interface ChatModelFileConfig {

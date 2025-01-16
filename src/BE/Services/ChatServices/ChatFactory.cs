@@ -29,6 +29,7 @@ public class ChatFactory(ILogger<ChatFactory> logger)
             DBModelProvider.DeepSeek => new DeepSeekChatService(model),
             DBModelProvider.xAI => new XAIChatService(model),
             DBModelProvider.GithubModels => new GithubModelsChatService(model),
+            DBModelProvider.GoogleAI => new GoogleAIChatService(model),
             _ => throw new NotSupportedException($"Unknown model provider: {modelProvider}")
         };
         return cs;

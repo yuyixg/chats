@@ -63,8 +63,6 @@ public partial class ChatsDB : DbContext
 
     public virtual DbSet<MessageContentType> MessageContentTypes { get; set; }
 
-    public virtual DbSet<MessageResponse> MessageResponses { get; set; }
-
     public virtual DbSet<Model> Models { get; set; }
 
     public virtual DbSet<ModelKey> ModelKeys { get; set; }
@@ -249,6 +247,8 @@ public partial class ChatsDB : DbContext
                 .HasConstraintName("FK_Message_ChatRole");
 
             entity.HasOne(d => d.Parent).WithMany(p => p.InverseParent).HasConstraintName("FK_Message_ParentMessage");
+
+            entity.HasOne(d => d.Usage).WithOne(p => p.Message).HasConstraintName("FK_Message_UserModelUsage");
         });
 
         modelBuilder.Entity<MessageContent>(entity =>
@@ -288,17 +288,6 @@ public partial class ChatsDB : DbContext
         modelBuilder.Entity<MessageContentType>(entity =>
         {
             entity.HasKey(e => e.Id).HasName("PK__MessageC__3214EC07D7BA864A");
-        });
-
-        modelBuilder.Entity<MessageResponse>(entity =>
-        {
-            entity.Property(e => e.MessageId).ValueGeneratedNever();
-
-            entity.HasOne(d => d.Message).WithOne(p => p.MessageResponse).HasConstraintName("FK_MessageResponse_Message");
-
-            entity.HasOne(d => d.Usage).WithOne(p => p.MessageResponse)
-                .OnDelete(DeleteBehavior.ClientSetNull)
-                .HasConstraintName("FK_MessageResponse_UserModelUsage");
         });
 
         modelBuilder.Entity<Model>(entity =>

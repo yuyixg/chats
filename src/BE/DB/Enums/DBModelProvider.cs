@@ -15,4 +15,5 @@ public enum DBModelProvider
     DeepSeek = 10,
     xAI = 11, 
     GithubModels = 12,
+    GoogleAI = 13,
 }

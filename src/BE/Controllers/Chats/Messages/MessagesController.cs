@@ -32,19 +32,19 @@ public class MessagesController(ChatsDB db, CurrentUser currentUser, IUrlEncrypt
                     .ToArray(),
                 CreatedAt = x.CreatedAt,
                 SpanId = x.SpanId,
-                Usage = x.MessageResponse!.Usage == null ? null : new ChatMessageTempUsage()
+                Usage = x.Usage == null ? null : new ChatMessageTempUsage()
                 {
-                    InputTokens = x.MessageResponse.Usage.InputTokens,
-                    OutputTokens = x.MessageResponse.Usage.OutputTokens,
-                    InputPrice = x.MessageResponse.Usage.InputCost,
-                    OutputPrice = x.MessageResponse.Usage.OutputCost,
-                    ReasoningTokens = x.MessageResponse.Usage.ReasoningTokens,
-                    Duration = x.MessageResponse.Usage.TotalDurationMs - x.MessageResponse.Usage.PreprocessDurationMs,
-                    FirstTokenLatency = x.MessageResponse.Usage.FirstResponseDurationMs,
-                    ModelId = x.MessageResponse.Usage.UserModel.ModelId,
-                    ModelName = x.MessageResponse.Usage.UserModel.Model.Name,
-                    ModelProviderId = x.MessageResponse.Usage.UserModel.Model.ModelKey.ModelProviderId,
-                    Reaction = x.MessageResponse.ReactionId,
+                    InputTokens = x.Usage.InputTokens,
+                    OutputTokens = x.Usage.OutputTokens,
+                    InputPrice = x.Usage.InputCost,
+                    OutputPrice = x.Usage.OutputCost,
+                    ReasoningTokens = x.Usage.ReasoningTokens,
+                    Duration = x.Usage.TotalDurationMs - x.Usage.PreprocessDurationMs,
+                    FirstTokenLatency = x.Usage.FirstResponseDurationMs,
+                    ModelId = x.Usage.UserModel.ModelId,
+                    ModelName = x.Usage.UserModel.Model.Name,
+                    ModelProviderId = x.Usage.UserModel.Model.ModelKey.ModelProviderId,
+                    Reaction = x.ReactionId,
                 },
             })
             .OrderBy(x => x.CreatedAt)
@@ -93,11 +93,10 @@ public class MessagesController(ChatsDB db, CurrentUser currentUser, IUrlEncrypt
     {
         long messageId = urlEncryption.DecryptMessageId(encryptedMessageId);
         Message? message = await db.Messages
-            .Include(x => x.MessageResponse)
             .Include(x => x.Chat)
             .FirstOrDefaultAsync(x => x.Id == messageId, cancellationToken);
 
-        if (message == null || message.MessageResponse == null)
+        if (message == null)
         {
             return NotFound();
         }
@@ -107,7 +106,7 @@ public class MessagesController(ChatsDB db, CurrentUser currentUser, IUrlEncrypt
             return Forbid();
         }
 
-        message.MessageResponse.ReactionId = reactionId;
+        message.ReactionId = reactionId;
         message.Chat.UpdatedAt = DateTime.UtcNow;
         await db.SaveChangesAsync(cancellationToken);
         return Ok();
@@ -133,6 +132,42 @@ public class MessagesController(ChatsDB db, CurrentUser currentUser, IUrlEncrypt
         }
 
         message.MessageContents = await content.ToMessageContents(fup, cancellationToken);
+        message.Chat.UpdatedAt = DateTime.UtcNow;
+        await db.SaveChangesAsync(cancellationToken);
+        return Ok();
+    }
+
+    [HttpPut("{encryptedMessageId}/edit-and-save-new")]
+    public async Task<ActionResult> EditAndSaveNew(string encryptedMessageId, [FromBody] MessageContentRequest content,
+    [FromServices] FileUrlProvider fup,
+    CancellationToken cancellationToken)
+    {
+        long messageId = urlEncryption.DecryptMessageId(encryptedMessageId);
+        Message? message = await db.Messages
+            .Include(x => x.Chat)
+            .FirstOrDefaultAsync(x => x.Id == messageId, cancellationToken);
+        if (message == null)
+        {
+            return NotFound();
+        }
+        if (message.Chat.UserId != currentUser.Id)
+        {
+            return Forbid();
+        }
+
+        Message newMessage = new()
+        {
+            Edited = true,
+            CreatedAt = DateTime.UtcNow,
+            SpanId = message.SpanId,
+            ChatId = message.ChatId,
+            ParentId = message.ParentId,
+            ChatRoleId = message.ChatRoleId,
+            ChatRole = message.ChatRole,
+            MessageContents = await content.ToMessageContents(fup, cancellationToken),
+            UsageId = null,
+        };
+        db.Messages.Add(newMessage);
         message.Chat.UpdatedAt = DateTime.UtcNow;
         await db.SaveChangesAsync(cancellationToken);
         return Ok();

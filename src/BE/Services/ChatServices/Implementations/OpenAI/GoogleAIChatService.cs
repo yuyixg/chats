@@ -1,17 +1,16 @@
 ﻿using Chats.BE.DB;
 using OpenAI.Chat;
+using System.Runtime.CompilerServices;
 
 namespace Chats.BE.Services.ChatServices.Implementations.OpenAI;
 
-public class GithubModelsChatService(Model model) : OpenAIChatService(model, new Uri("https://models.inference.ai.azure.com"))
+public class GoogleAIChatService(Model model) : OpenAIChatService(model, new Uri("https://generativelanguage.googleapis.com/v1beta/openai/"))
 {
     protected override Task<ChatMessage[]> FEPreprocess(IReadOnlyList<ChatMessage> messages, ChatCompletionOptions options, ChatExtraDetails feOptions, CancellationToken cancellationToken)
     {
-        if (Model.ModelReference.ShortName == "Mistral")
-        {
-            // Mistral model does not support end-user ID
-            options.EndUserId = null;
-        }
+        options.EndUserId = null;
         return base.FEPreprocess(messages, options, feOptions, cancellationToken);
     }
+
+    protected override bool SupportsVisionLink => false;
 }
