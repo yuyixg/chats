@@ -37,11 +37,11 @@ public class ChatGroupController(ChatsDB db, CurrentUser user, IUrlEncryptionSer
         return Ok(groups);
     }
 
-    [HttpGet("with-messages")]
-    public async Task<ActionResult<ChatGroupDtoWithMessage[]>> ListGroupsWithMessages([FromQuery] PagingRequest req, [FromServices] IServiceScopeFactory scopeFactory, CancellationToken cancellationToken)
+    [HttpGet("with-chats")]
+    public async Task<ActionResult<ChatGroupDtoWithChats[]>> ListGroupsWithChats([FromQuery] PagingRequest req, [FromServices] IServiceScopeFactory scopeFactory, CancellationToken cancellationToken)
     {
-        List<ChatGroupDtoWithMessage> groups = await UserOrderedChatGroups
-            .Select(x => new ChatGroupDtoWithMessage
+        List<ChatGroupDtoWithChats> groups = await UserOrderedChatGroups
+            .Select(x => new ChatGroupDtoWithChats
             {
                 Id = urlEncryption.EncryptChatGroupId(x.Id),
                 Name = x.Name,
@@ -49,7 +49,7 @@ public class ChatGroupController(ChatsDB db, CurrentUser user, IUrlEncryptionSer
                 IsExpanded = x.IsExpanded,
             })
             .ToListAsync(cancellationToken);
-        groups.Add(new ChatGroupDtoWithMessage()
+        groups.Add(new ChatGroupDtoWithChats()
         {
             Id = null!,
             Name = "Ungrouped",
@@ -61,7 +61,7 @@ public class ChatGroupController(ChatsDB db, CurrentUser user, IUrlEncryptionSer
         {
             using IServiceScope scope = scopeFactory.CreateScope();
             using ChatsDB db = scope.ServiceProvider.GetRequiredService<ChatsDB>();
-            group.Messages = await UserChatsController.GetChatsForGroupAsync(db, user, urlEncryption, new ChatsQuery(group.Id, req.Page, req.PageSize, req.Query), ct);
+            group.Chats = await UserChatsController.GetChatsForGroupAsync(db, user, urlEncryption, new ChatsQuery(group.Id, req.Page, req.PageSize, req.Query), ct);
         });
 
         return Ok(groups);
@@ -119,7 +119,8 @@ public class ChatGroupController(ChatsDB db, CurrentUser user, IUrlEncryptionSer
     {
         for (int i = 0; i < existingGroups.Length; i++)
         {
-            existingGroups[i].Rank = (short)(RankStart + i * RankStep);
+            int reverseIndex = existingGroups.Length - i - 1;
+            existingGroups[reverseIndex].Rank = (short)(RankStart + i * RankStep);
         }
     }
 
@@ -164,7 +165,6 @@ public class ChatGroupController(ChatsDB db, CurrentUser user, IUrlEncryptionSer
         [FromServices] IServiceScopeFactory scopeFactory,
         CancellationToken cancellationToken)
     {
-        // 1. 解密请求
         MoveChatGroupRequest req = encryptedRequest.Decrypt(urlEncryption);
         Result<MoveChatGroupContext> ctxResult = await req.Load(db, scopeFactory, user.Id, cancellationToken);
         if (ctxResult.IsFailure)
@@ -178,7 +178,7 @@ public class ChatGroupController(ChatsDB db, CurrentUser user, IUrlEncryptionSer
             return BadRequest("Invalid move request");
         }
 
-        bool needReorder = ctx.ApplyMove();
+        bool needReorder = !ctx.ApplyMove();
         if (needReorder)
         {
             ChatGroup[] allGroups = await UserOrderedChatGroups.ToArrayAsync(cancellationToken);

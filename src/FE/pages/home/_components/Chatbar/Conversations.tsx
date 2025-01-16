@@ -1,4 +1,4 @@
-import { useContext, useEffect, useState } from 'react';
+import { DragEvent, useContext, useEffect, useState } from 'react';
 
 import useTranslation from '@/hooks/useTranslation';
 
@@ -17,9 +17,15 @@ interface Props {
   groupId: string | null;
   chatGroups: Map<string, IChat[]>;
   onShowMore?: (groupId: string | null) => void;
+  onDragItemStart?: (e: DragEvent<HTMLButtonElement>, chat: IChat) => void;
 }
 
-const Conversations = ({ groupId, chatGroups, onShowMore }: Props) => {
+const Conversations = ({
+  groupId,
+  chatGroups,
+  onShowMore,
+  onDragItemStart,
+}: Props) => {
   const { t } = useTranslation();
   const {
     state: { chatPaging },
@@ -51,7 +57,10 @@ const Conversations = ({ groupId, chatGroups, onShowMore }: Props) => {
                 className={cn(!isUnGroupChat(groupId) && 'ml-1')}
                 key={'conversation-' + index}
               >
-                <ConversationComponent chat={chat} />
+                <ConversationComponent
+                  onDragItemStart={onDragItemStart}
+                  chat={chat}
+                />
               </div>
             ))}
           </div>

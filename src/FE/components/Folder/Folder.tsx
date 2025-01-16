@@ -1,4 +1,10 @@
-import { KeyboardEvent, ReactElement, useEffect, useState } from 'react';
+import {
+  DragEvent,
+  KeyboardEvent,
+  ReactElement,
+  useEffect,
+  useState,
+} from 'react';
 
 import useTranslation from '@/hooks/useTranslation';
 
@@ -32,6 +38,7 @@ interface Props {
   onRenameGroup?: (id: string, value: string) => void;
   onDeleteGroup?: (id: string) => void;
   onClickGroup?: (group: IChatGroup) => void;
+  onDragStart?: (e: DragEvent<HTMLButtonElement>, group: IChatGroup) => void;
 }
 
 const Folder = ({
@@ -42,6 +49,7 @@ const Folder = ({
   onRenameGroup,
   onDeleteGroup,
   onClickGroup,
+  onDragStart,
 }: Props) => {
   const { t } = useTranslation();
 
@@ -76,6 +84,10 @@ const Folder = ({
     onClickGroup && onClickGroup(currentFolder);
   };
 
+  const handleDragStart = (e: DragEvent<HTMLButtonElement>) => {
+    onDragStart && onDragStart(e, currentFolder);
+  };
+
   return (
     <>
       <div className="relative flex items-center">
@@ -92,6 +104,8 @@ const Folder = ({
           </div>
         ) : (
           <Button
+            draggable
+            onDragStart={(e) => handleDragStart(e)}
             variant="ghost"
             className="flex w-full gap-3 rounded-lg p-2 pr-11"
             onClick={handleClickFolder}

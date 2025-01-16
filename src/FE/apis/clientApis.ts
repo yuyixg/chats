@@ -5,21 +5,24 @@ import { IChatMessage } from '@/types/chatMessage';
 import {
   ChatResult,
   GetBalance7DaysUsageResult,
+  GetChatShareResult,
   GetChatsParams,
   GetLoginProvidersResult,
   GetSiteInfoResult,
   GetUserApiKeyResult,
   GetUserBalanceResult,
-  GetUserChatGroupWithMessagesResult,
+  GetUserChatGroupWithMessagesResult as GetUserChatGroupWithChatsResult,
   LoginConfigsResult,
   ModelUsageDto,
   PostChatGroupParams,
   PostChatParams,
+  PostUserChatShareResult,
   PostUserChatSpanParams,
   PostUserChatSpanResult,
   PostUserPassword,
   PutChatGroupParams,
   PutChatParams,
+  PutMoveChatGroupParams,
   SingInParams,
   SingInResult,
 } from '@/types/clientApis';
@@ -267,11 +270,11 @@ export const deleteUserChatSpan = (chatId: string, spanId: number) => {
 
 export const getUserChatGroupWithMessages = (
   params: GetChatsParams,
-): Promise<GetUserChatGroupWithMessagesResult[]> => {
+): Promise<GetUserChatGroupWithChatsResult[]> => {
   const { query, page, pageSize } = params;
   const fetchServer = useFetch();
   return fetchServer.get(
-    `/api/chat/group/with-messages?page=${page}&pageSize=${pageSize}&query=${
+    `/api/chat/group/with-chats?page=${page}&pageSize=${pageSize}&query=${
       query || ''
     }`,
   );
@@ -298,6 +301,13 @@ export const deleteChatGroup = (id: string) => {
   return fetchServer.delete(`/api/chat/group/${id}`);
 };
 
+export const putMoveChatGroup = (params: PutMoveChatGroupParams) => {
+  const fetchServer = useFetch();
+  return fetchServer.put(`/api/chat/group/move`, {
+    body: params,
+  });
+};
+
 export const putMessageReactionUp = (messageId: string) => {
   const fetchServer = useFetch();
   return fetchServer.put(`/api/messages/${messageId}/reaction/up`);
@@ -309,4 +319,43 @@ export const putMessageReactionDown = (messageId: string) => {
 export const putMessageReactionClear = (messageId: string) => {
   const fetchServer = useFetch();
   return fetchServer.put(`/api/messages/${messageId}/reaction/clear`);
+};
+
+export const postUserChatShare = (
+  encryptedChatId: string,
+  validBefore: string,
+) => {
+  const fetchServer = useFetch();
+  return fetchServer.post<PostUserChatShareResult>(
+    `/api/user/chats/${encryptedChatId}/share?validBefore=${validBefore}`,
+  );
+};
+
+export const getUserChatShare = (encryptedChatId: string) => {
+  const fetchServer = useFetch();
+  return fetchServer.get<PostUserChatShareResult[]>(
+    `/api/user/chats/${encryptedChatId}/share`,
+  );
+};
+
+export const deleteUserChatShare = (encryptedChatId: string) => {
+  const fetchServer = useFetch();
+  return fetchServer.delete(`/api/user/chats/${encryptedChatId}/share`);
+};
+
+export const putChatShare = (
+  encryptedChatShareId: string,
+  validBefore: string,
+) => {
+  const fetchServer = useFetch();
+  return fetchServer.put(`/api/public/chat-share`, {
+    body: { encryptedChatShareId, validBefore },
+  });
+};
+
+export const getChatShare = (encryptedChatShareId: string) => {
+  const fetchServer = useFetch();
+  return fetchServer.get<GetChatShareResult>(
+    `/api/public/chat-share/${encryptedChatShareId}`,
+  );
 };

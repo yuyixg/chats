@@ -5,6 +5,7 @@ export interface UserModelConfig {
 }
 
 export enum DBModelProvider {
+  Test = 0,
   Azure = 1,
   HunYuan = 2,
   LingYi = 3,
@@ -17,6 +18,7 @@ export enum DBModelProvider {
   DeepSeek = 10,
   X_AI = 11,
   GithubModels = 12,
+  GoogleAI = 13,
 }
 
 export type FEModelProvider = {
@@ -26,19 +28,20 @@ export type FEModelProvider = {
 };
 
 export const feModelProviders: FEModelProvider[] = [
-  { id: 0, name: 'Test', icon: '/icons/logo.png' },
-  { id: 1, name: 'Azure OpenAI', icon: '/logos/azure.svg' },
-  { id: 2, name: 'Tencent Hunyuan', icon: '/logos/hunyuan.svg' },
-  { id: 3, name: '01.ai', icon: '/logos/lingyi.svg' },
-  { id: 4, name: 'Moonshot', icon: '/logos/moonshot.svg' },
-  { id: 5, name: 'OpenAI', icon: '/logos/openai.svg' },
-  { id: 6, name: 'Wenxin Qianfan', icon: '/logos/qianfan.svg' },
-  { id: 7, name: 'DashScope', icon: '/logos/qianwen.svg' },
-  { id: 8, name: 'Xunfei SparkDesk', icon: '/logos/spark.svg' },
-  { id: 9, name: 'Zhipu AI', icon: '/logos/zhipuai.svg' },
-  { id: 10, name: 'DeepSeek', icon: '/logos/deepseek.svg' },
-  { id: 11, name: 'x.ai', icon: '/logos/x.svg' },
-  { id: 12, name: 'Github Models', icon: '/logos/github.svg' },
+  { id: DBModelProvider.Test, name: 'Test', icon: '/icons/logo.png' },
+  { id: DBModelProvider.Azure, name: 'Azure OpenAI', icon: '/logos/azure.svg' },
+  { id: DBModelProvider.HunYuan, name: 'Tencent Hunyuan', icon: '/logos/hunyuan.svg' },
+  { id: DBModelProvider.LingYi, name: '01.ai', icon: '/logos/lingyi.svg' },
+  { id: DBModelProvider.Moonshot, name: 'Moonshot', icon: '/logos/moonshot.svg' },
+  { id: DBModelProvider.OpenAI, name: 'OpenAI', icon: '/logos/openai.svg' },
+  { id: DBModelProvider.QianFan, name: 'Wenxin Qianfan', icon: '/logos/qianfan.svg' },
+  { id: DBModelProvider.QianWen, name: 'DashScope', icon: '/logos/qianwen.svg' },
+  { id: DBModelProvider.Spark, name: 'Xunfei SparkDesk', icon: '/logos/spark.svg' },
+  { id: DBModelProvider.ZhiPuAI, name: 'Zhipu AI', icon: '/logos/zhipuai.svg' },
+  { id: DBModelProvider.DeepSeek, name: 'DeepSeek', icon: '/logos/deepseek.svg' },
+  { id: DBModelProvider.X_AI, name: 'x.ai', icon: '/logos/x.svg' },
+  { id: DBModelProvider.GithubModels, name: 'Github Models', icon: '/logos/github.svg' },
+  { id: DBModelProvider.GoogleAI, name: 'Google AI', icon: '/logos/google.svg' },
 ];
 
 export interface ChatModelFileConfig {

@@ -1,4 +1,5 @@
 import { ChatStatus } from './chat';
+import { IChatMessage } from './chatMessage';
 import { DBModelProvider } from './model';
 import { Paging } from './page';
 import { LoginType } from './user';
@@ -158,7 +159,7 @@ export interface GetUserChatGroupWithMessagesResult {
   name: string;
   rank: 0;
   isExpanded: boolean;
-  messages: {
+  chats: {
     rows: GetUserChatResult[];
     count: 0;
   };
@@ -175,4 +176,29 @@ export interface PutChatGroupParams {
   name?: string;
   rank?: number;
   isExpanded?: boolean;
+}
+
+export interface PutMoveChatGroupParams {
+  groupId: string;
+  beforeGroupId: string | null;
+  afterGroupId: string | null;
+}
+
+export interface PostUserChatShareResult {
+  shareId: string;
+  expiresAt: string;
+  snapshotTime: string;
+}
+
+export interface GetChatShareResult {
+  id: string;
+  title: string;
+  isTopMost: boolean;
+  isShared: boolean;
+  spans: ChatSpanDto[];
+  groupId: string;
+  tags: string[];
+  leafMessageId: string;
+  updatedAt: string;
+  messages: IChatMessage[];
 }

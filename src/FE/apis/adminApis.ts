@@ -16,7 +16,7 @@ import {
   GetRequestLogsParams,
   GetUserInitialConfigResult,
   GetUserMessageParams,
-  GetUserMessageResult,
+  AdminChatsDto,
   GetUsersParams,
   GetUsersResult,
   ModelFastCreateParams,
@@ -43,6 +43,7 @@ import {
   UserModelDisplayDto,
   ValidateModelParams,
 } from '@/types/adminApis';
+import { GetChatShareResult } from '@/types/clientApis';
 import { ChatModelFileConfig, DBModelProvider } from '@/types/model';
 import { PageResult } from '@/types/page';
 
@@ -124,11 +125,11 @@ export const putUserBalance = (params: PutUserBalanceParams) => {
 
 export const getMessages = (
   params: GetUserMessageParams,
-): Promise<PageResult<GetUserMessageResult[]>> => {
+): Promise<PageResult<AdminChatsDto[]>> => {
   const { query = null, page = 1, pageSize = 12 } = params;
   const fetchService = useFetch();
   return fetchService.get(
-    `/api/admin/messages?page=${page}&pageSize=${pageSize}&query=${query}`,
+    `/api/admin/chats?page=${page}&pageSize=${pageSize}&query=${query}`,
   );
 };
 
@@ -379,6 +380,13 @@ export const postModelFastCreate = (params: ModelFastCreateParams) => {
   return fetchServer.post<ErrorResult>(`/api/admin/models/fast-create`, {
     body: params,
   });
+};
+
+export const getAdminMessage = (chatId: string) => {
+  const fetchServer = useFetch();
+  return fetchServer.get<GetChatShareResult>(
+    `/api/admin/message-details?chatId=${chatId}`,
+  );
 };
 
 export const defaultFileConfig: ChatModelFileConfig = {

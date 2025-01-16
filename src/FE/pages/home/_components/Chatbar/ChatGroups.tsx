@@ -1,9 +1,10 @@
-import { useContext, useRef } from 'react';
+import { DragEvent, useContext, useRef, useState } from 'react';
 
 import { chatsGroupByUpdatedAt, isUnGroupChat } from '@/utils/chats';
 import { currentISODateString } from '@/utils/date';
 
 import { IChat, UngroupedChatName } from '@/types/chat';
+import { PutMoveChatGroupParams } from '@/types/clientApis';
 import { IChatGroup } from '@/types/group';
 
 import Folder from '@/components/Folder/Folder';
@@ -12,7 +13,12 @@ import { setChatGroup, setChats } from '../../_actions/chat.actions';
 import HomeContext from '../../_contexts/home.context';
 import Conversations from './Conversations';
 
-import { deleteChatGroup, putChatGroup, putChats } from '@/apis/clientApis';
+import {
+  deleteChatGroup,
+  putChatGroup,
+  putChats,
+  putMoveChatGroup,
+} from '@/apis/clientApis';
 import { cn } from '@/lib/utils';
 
 interface Props {
@@ -27,12 +33,14 @@ const ChatGroups = ({ onShowMore }: Props) => {
 
   const groupRefs = useRef<any>({});
 
+  const [currentDragGroup, setCurrentDragGroup] = useState<IChatGroup | null>();
+  const [currentDragChat, setCurrentDragChat] = useState<IChat | null>();
+
   const handleDrop = (e: any, folder: IChatGroup) => {
-    if (e.dataTransfer) {
-      const chat = JSON.parse(e.dataTransfer.getData('chat')) as IChat;
-      if (chat.groupId === folder.id) return;
+    if (currentDragChat) {
+      if (currentDragChat.groupId === folder.id) return;
       const chatList = chats.map((c) => {
-        if (c.id === chat.id) {
+        if (c.id === currentDragChat.id) {
           return {
             ...c,
             groupId: folder.id,
@@ -42,8 +50,33 @@ const ChatGroups = ({ onShowMore }: Props) => {
         return c;
       });
       chatDispatch(setChats(chatList));
-      putChats(chat.id, { setsGroupId: true, groupId: folder.id });
+      putChats(currentDragChat.id, { setsGroupId: true, groupId: folder.id });
+    } else if (currentDragGroup) {
+      const groupId = currentDragGroup.id;
+      const chatGroupsCount = chatGroups.length;
+      const params = {
+        groupId,
+        beforeGroupId: null,
+        afterGroupId: null,
+      } as PutMoveChatGroupParams;
+
+      const index = chatGroups.findIndex((x) => x.id === groupId);
+      if (index >= 0 && index < chatGroupsCount - 1) {
+        params.beforeGroupId = chatGroups[index + 1].id;
+      }
+      if (index > 0) {
+        params.afterGroupId = chatGroups[index - 1].id;
+      }
+      putMoveChatGroup(params);
     }
+    Object.keys(groupRefs.current).forEach((key: string) => {
+      if (groupRefs.current[key]) {
+        groupRefs.current[key].style.background = 'none';
+      }
+    });
+
+    setCurrentDragChat(null);
+    setCurrentDragGroup(null);
   };
 
   const handleClickGroup = (folder: IChatGroup) => {
@@ -82,6 +115,47 @@ const ChatGroups = ({ onShowMore }: Props) => {
     });
   };
 
+  const handleGroupDragStart = (
+    e: DragEvent<HTMLButtonElement>,
+    group: IChatGroup,
+  ) => {
+    const chatGroupList = chatGroups.map((x) => ({ ...x, isExpanded: false }));
+    chatDispatch(setChatGroup(chatGroupList));
+    setCurrentDragGroup(group);
+  };
+
+  const handleItemDragStart = (
+    e: DragEvent<HTMLButtonElement>,
+    chat: IChat,
+  ) => {
+    const chatGroupList = chatGroups.map((x) => ({ ...x, isExpanded: false }));
+    chatDispatch(setChatGroup(chatGroupList));
+    setCurrentDragChat(chat);
+  };
+
+  const handleDragOver = (e: any) => {
+    e.preventDefault();
+  };
+
+  const handleDragEnter = (index: number, groupId: string) => {
+    if (currentDragGroup) {
+      const chatGroupList = [...chatGroups];
+      const dragGroupIndex = chatGroupList.findIndex(
+        (x) => x.id === currentDragGroup?.id,
+      );
+      chatGroupList.splice(dragGroupIndex, 1);
+      chatGroupList.splice(index, 0, currentDragGroup!);
+      chatDispatch(setChatGroup(chatGroupList));
+    }
+    Object.keys(groupRefs.current).forEach((key: string) => {
+      if (key === groupId) {
+        groupRefs.current[key].style.background = 'hsl(var(--muted))';
+      } else if (groupRefs.current[key]) {
+        groupRefs.current[key].style.background = 'none';
+      }
+    });
+  };
+
   const ChatGroupsRender = (chatGroup: IChatGroup) => {
     const chatList = chats.filter((x) => x.groupId === chatGroup.id);
     const groupByUpdatedChats = chatsGroupByUpdatedAt(chatList);
@@ -90,37 +164,13 @@ const ChatGroups = ({ onShowMore }: Props) => {
         className={cn(!isUnGroupChat(chatGroup.id) && 'ml-4 gap-2 border-l')}
       >
         <Conversations
+          onDragItemStart={handleItemDragStart}
           groupId={chatGroup.id}
           onShowMore={onShowMore}
           chatGroups={groupByUpdatedChats}
         />
       </div>
     );
-  };
-
-  const allowDrop = (e: any) => {
-    e.preventDefault();
-  };
-
-  const dropHandler = (e: any, currentGroup: IChatGroup) => {
-    if (e.dataTransfer) {
-      handleDrop(e, currentGroup);
-      Object.keys(groupRefs.current).forEach((key: string) => {
-        if (groupRefs.current[key]) {
-          groupRefs.current[key].style.background = 'none';
-        }
-      });
-    }
-  };
-
-  const highlightDrop = (groupId: string) => {
-    Object.keys(groupRefs.current).forEach((key: string) => {
-      if (key === groupId) {
-        groupRefs.current[key].style.background = 'hsl(var(--muted))';
-      } else if (groupRefs.current[key]) {
-        groupRefs.current[key].style.background = 'none';
-      }
-    });
   };
 
   return (
@@ -134,10 +184,11 @@ const ChatGroups = ({ onShowMore }: Props) => {
             ref={(el) =>
               (groupRefs.current[group.id || UngroupedChatName] = el)
             }
-            onDrop={(e) => dropHandler(e, group)}
-            onDragOver={allowDrop}
+            onDrop={(e) => handleDrop(e, group)}
+            onDragOver={handleDragOver}
             onDragEnter={() => {
-              highlightDrop(group.id || UngroupedChatName);
+              !isAllChatGroup &&
+                handleDragEnter(index, group.id || UngroupedChatName);
             }}
           >
             {isAllChatGroup ? (
@@ -152,6 +203,7 @@ const ChatGroups = ({ onShowMore }: Props) => {
                   handleDeleteGroup(id, index);
                 }}
                 onRenameGroup={handRenameGroup}
+                onDragStart={handleGroupDragStart}
                 folderComponent={ChatGroupsRender(group)}
               />
             )}

@@ -15,7 +15,7 @@ import { ChatMessage } from '@/components/ChatMessage';
 import PageNotFound from '@/components/PageNotFound/PageNotFound';
 import { Button } from '@/components/ui/button';
 
-import { getChat, getUserMessages } from '@/apis/clientApis';
+import { getChatShare } from '@/apis/clientApis';
 
 export default function ShareMessage() {
   const { t } = useTranslation();
@@ -36,14 +36,13 @@ export default function ShareMessage() {
   useEffect(() => {
     setLoading(true);
     if (!router.isReady) return;
-    const chatId = getQueryId(router)!;
-    getChat(chatId).then(async (chat) => {
-      setSelectedChat({ ...chat, status: ChatStatus.None });
-      const msgs = await getUserMessages(chatId);
-      setMessages(msgs);
+    const chatShareId = getQueryId(router)!;
+    getChatShare(chatShareId).then((data) => {
+      setSelectedChat({ ...data, status: ChatStatus.None });
+      setMessages(data.messages);
       const selectedMsgs = findSelectedMessageByLeafId(
-        msgs,
-        chat.leafMessageId!,
+        data.messages,
+        data.leafMessageId!,
       );
       setSelectedMessages(selectedMsgs);
       setLoading(false);

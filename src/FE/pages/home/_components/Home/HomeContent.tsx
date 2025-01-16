@@ -229,14 +229,14 @@ const HomeContent = () => {
     let chatGroupList: IChatGroup[] = [];
     const chatPagingList: IChatPaging[] = [];
     data.forEach((d) => {
-      if (query && d.messages.count === 0) return;
+      if (query && d.chats.count === 0) return;
       chatPagingList.push({
         ...DefaultChatPaging,
         groupId: d.id,
-        count: d.messages.count,
+        count: d.chats.count,
       });
       chatGroupList.push({ ...d, isExpanded: query ? true : d.isExpanded });
-      chatList.push(...d.messages.rows);
+      chatList.push(...d.chats.rows);
     });
     const chat = selectChat(chatList);
     if (chat)

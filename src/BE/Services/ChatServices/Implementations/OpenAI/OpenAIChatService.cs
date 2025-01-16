@@ -67,12 +67,17 @@ public partial class OpenAIChatService : ChatService
         {
             TextSegment = delta.Content[0].Text,
             FinishReason = delta.FinishReason,
-            Usage = delta.Usage != null ? new Dtos.ChatTokenUsage()
-            {
-                InputTokens = delta.Usage.InputTokenCount,
-                OutputTokens = delta.Usage.OutputTokenCount,
-                ReasoningTokens = delta.Usage.OutputTokenDetails?.ReasoningTokenCount ?? 0,
-            } : null,
+            Usage = delta.Usage != null ? GetUsage(delta.Usage) : null,
+        };
+    }
+
+    protected virtual Dtos.ChatTokenUsage GetUsage(global::OpenAI.Chat.ChatTokenUsage usage)
+    {
+        return new Dtos.ChatTokenUsage()
+        {
+            InputTokens = usage.InputTokenCount,
+            OutputTokens = usage.OutputTokenCount,
+            ReasoningTokens = usage.OutputTokenDetails?.ReasoningTokenCount ?? 0,
         };
     }
 

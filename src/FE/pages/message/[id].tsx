@@ -2,8 +2,6 @@ import { useEffect, useState } from 'react';
 
 import { useRouter } from 'next/router';
 
-import useTranslation from '@/hooks/useTranslation';
-
 import { getQueryId } from '@/utils/common';
 import { findLastLeafId, findSelectedMessageByLeafId } from '@/utils/message';
 
@@ -13,10 +11,9 @@ import { IChatMessage } from '@/types/chatMessage';
 import { ChatMessage } from '@/components/ChatMessage';
 import PageNotFound from '@/components/PageNotFound/PageNotFound';
 
-import { getChat, getUserMessages } from '@/apis/clientApis';
+import { getAdminMessage } from '@/apis/adminApis';
 
 export default function MessageDetails() {
-  const { t } = useTranslation();
   const router = useRouter();
   const [selectedChat, setSelectedChat] = useState<IChat | null>(null);
   const [messages, setMessages] = useState<IChatMessage[]>([]);
@@ -34,14 +31,13 @@ export default function MessageDetails() {
   useEffect(() => {
     setLoading(true);
     if (!router.isReady) return;
-    const chatId = getQueryId(router)!;
-    getChat(chatId).then(async (chat) => {
-      setSelectedChat({ ...chat, status: ChatStatus.None });
-      const msgs = await getUserMessages(chatId);
-      setMessages(msgs);
+    const chatShareId = getQueryId(router)!;
+    getAdminMessage(chatShareId).then((data) => {
+      setSelectedChat({ ...data, status: ChatStatus.None });
+      setMessages(data.messages);
       const selectedMsgs = findSelectedMessageByLeafId(
-        msgs,
-        chat.leafMessageId!,
+        data.messages,
+        data.leafMessageId!,
       );
       setSelectedMessages(selectedMsgs);
       setLoading(false);

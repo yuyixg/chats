@@ -16,8 +16,8 @@ namespace Chats.BE.Controllers.Admin.AdminMessage;
 [Route("api/admin"), AuthorizeAdmin]
 public class AdminMessageController(ChatsDB db, CurrentUser currentUser, IUrlEncryptionService urlEncryption) : ControllerBase
 {
-    [HttpGet("messages")]
-    public async Task<ActionResult<PagedResult<AdminChatsDto>>> GetMessages([FromQuery] PagingRequest req, CancellationToken cancellationToken)
+    [HttpGet("chats")]
+    public async Task<ActionResult<PagedResult<AdminChatsDto>>> GetAdminChats([FromQuery] PagingRequest req, CancellationToken cancellationToken)
     {
         IQueryable<Chat> chats = db.Chats
             .Where(x => x.User.Role != "admin" || x.UserId == currentUser.Id);
@@ -27,12 +27,13 @@ public class AdminMessageController(ChatsDB db, CurrentUser currentUser, IUrlEnc
         }
 
         return await PagedResult.FromQuery(chats
-            .OrderByDescending(x => x.CreatedAt)
+            .OrderByDescending(x => x.Id)
             .Select(x => new AdminChatsDto
             {
-                Id = urlEncryption.EncryptChatId(x.Id),
+                Id = x.Id.ToString(),
                 CreatedAt = x.CreatedAt,
                 IsDeleted = x.IsArchived,
+                IsShared = x.ChatShares.Any(),
                 Title = x.Title,
                 UserName = x.User.UserName,
                 Spans = x.ChatSpans.Select(s => new ChatSpanDto
@@ -99,19 +100,19 @@ public class AdminMessageController(ChatsDB db, CurrentUser currentUser, IUrlEnc
                     .ToArray(),
                 CreatedAt = x.CreatedAt,
                 SpanId = x.SpanId,
-                Usage = x.MessageResponse!.Usage == null ? null : new ChatMessageTempUsage()
+                Usage = x.Usage == null ? null : new ChatMessageTempUsage()
                 {
-                    InputTokens = x.MessageResponse.Usage.InputTokens,
-                    OutputTokens = x.MessageResponse.Usage.OutputTokens,
-                    InputPrice = x.MessageResponse.Usage.InputCost,
-                    OutputPrice = x.MessageResponse.Usage.OutputCost,
-                    ReasoningTokens = x.MessageResponse.Usage.ReasoningTokens,
-                    Duration = x.MessageResponse.Usage.TotalDurationMs - x.MessageResponse.Usage.PreprocessDurationMs,
-                    FirstTokenLatency = x.MessageResponse.Usage.FirstResponseDurationMs,
-                    ModelId = x.MessageResponse.Usage.UserModel.ModelId,
-                    ModelName = x.MessageResponse.Usage.UserModel.Model.Name,
-                    ModelProviderId = x.MessageResponse.Usage.UserModel.Model.ModelKey.ModelProviderId,
-                    Reaction = x.MessageResponse.ReactionId,
+                    InputTokens = x.Usage.InputTokens,
+                    OutputTokens = x.Usage.OutputTokens,
+                    InputPrice = x.Usage.InputCost,
+                    OutputPrice = x.Usage.OutputCost,
+                    ReasoningTokens = x.Usage.ReasoningTokens,
+                    Duration = x.Usage.TotalDurationMs - x.Usage.PreprocessDurationMs,
+                    FirstTokenLatency = x.Usage.FirstResponseDurationMs,
+                    ModelId = x.Usage.UserModel.ModelId,
+                    ModelName = x.Usage.UserModel.Model.Name,
+                    ModelProviderId = x.Usage.UserModel.Model.ModelKey.ModelProviderId,
+                    Reaction = x.ReactionId,
                 },
             })
             .OrderBy(x => x.CreatedAt)

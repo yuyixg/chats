@@ -1,11 +1,11 @@
 import useTranslation from '@/hooks/useTranslation';
 
-import { feModelProviders } from '@/types/model';
+import { DBModelProvider, feModelProviders } from '@/types/model';
 
 import { cn } from '@/lib/utils';
 
 interface Props {
-  providerId: number;
+  providerId: DBModelProvider;
   className?: string;
 }
 
