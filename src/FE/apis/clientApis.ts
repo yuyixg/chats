@@ -5,6 +5,7 @@ import { IChatMessage } from '@/types/chatMessage';
 import {
   ChatResult,
   GetBalance7DaysUsageResult,
+  GetChatShareResult,
   GetChatsParams,
   GetLoginProvidersResult,
   GetSiteInfoResult,
@@ -15,6 +16,7 @@ import {
   ModelUsageDto,
   PostChatGroupParams,
   PostChatParams,
+  PostUserChatShareResult,
   PostUserChatSpanParams,
   PostUserChatSpanResult,
   PostUserPassword,
@@ -317,4 +319,43 @@ export const putMessageReactionDown = (messageId: string) => {
 export const putMessageReactionClear = (messageId: string) => {
   const fetchServer = useFetch();
   return fetchServer.put(`/api/messages/${messageId}/reaction/clear`);
+};
+
+export const postUserChatShare = (
+  encryptedChatId: string,
+  validBefore: string,
+) => {
+  const fetchServer = useFetch();
+  return fetchServer.post<PostUserChatShareResult>(
+    `/api/user/chats/${encryptedChatId}/share?validBefore=${validBefore}`,
+  );
+};
+
+export const getUserChatShare = (encryptedChatId: string) => {
+  const fetchServer = useFetch();
+  return fetchServer.get<PostUserChatShareResult[]>(
+    `/api/user/chats/${encryptedChatId}/share`,
+  );
+};
+
+export const deleteUserChatShare = (encryptedChatId: string) => {
+  const fetchServer = useFetch();
+  return fetchServer.delete(`/api/user/chats/${encryptedChatId}/share`);
+};
+
+export const putChatShare = (
+  encryptedChatShareId: string,
+  validBefore: string,
+) => {
+  const fetchServer = useFetch();
+  return fetchServer.put(`/api/public/chat-share`, {
+    body: { encryptedChatShareId, validBefore },
+  });
+};
+
+export const getChatShare = (encryptedChatShareId: string) => {
+  const fetchServer = useFetch();
+  return fetchServer.get<GetChatShareResult>(
+    `/api/public/chat-share/${encryptedChatShareId}`,
+  );
 };

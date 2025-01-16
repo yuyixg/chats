@@ -1,4 +1,4 @@
-import React, { useState } from 'react';
+import React, { useEffect, useState } from 'react';
 import toast from 'react-hot-toast';
 
 import useTranslation from '@/hooks/useTranslation';
@@ -12,9 +12,12 @@ import {
   DialogHeader,
   DialogTitle,
 } from '@/components/ui/dialog';
-import { Input } from '@/components/ui/input';
 
-import { putChats } from '@/apis/clientApis';
+import {
+  deleteUserChatShare,
+  getUserChatShare,
+  postUserChatShare,
+} from '@/apis/clientApis';
 
 interface IProps {
   chat: ChatResult;
@@ -27,14 +30,18 @@ const SharedMessageModal = (props: IProps) => {
   const { t } = useTranslation();
   const { chat, isOpen, onClose, onShareChange } = props;
   const [loading, setLoading] = useState(false);
-  const shareUrl = `${location.origin}/share/${chat.id}`;
+  const [shareUrl, setShareUrl] = useState<string>('');
+  const baseUrl = `${location.origin}/share/`;
 
   const handleSharedMessage = () => {
+    const date = new Date().addYear(2).toISOString();
     setLoading(true);
-    putChats(chat.id, { isShared: true })
-      .then(() => {
+    postUserChatShare(chat.id, date)
+      .then((data) => {
         onShareChange(true);
-        handleCopySharedUrl();
+        const url = baseUrl + data.shareId;
+        setShareUrl(baseUrl + data.shareId);
+        handleCopySharedUrl(url);
       })
       .finally(() => {
         setLoading(false);
@@ -43,9 +50,10 @@ const SharedMessageModal = (props: IProps) => {
 
   const handleCloseShared = () => {
     setLoading(true);
-    putChats(chat.id, { isShared: false })
+    deleteUserChatShare(chat.id)
       .then(() => {
         onShareChange(false);
+        setShareUrl('');
         toast.success(t('Save successful'));
       })
       .finally(() => {
@@ -53,12 +61,20 @@ const SharedMessageModal = (props: IProps) => {
       });
   };
 
-  const handleCopySharedUrl = () => {
+  const handleCopySharedUrl = (url: string) => {
     if (!navigator.clipboard) return;
-    navigator.clipboard.writeText(shareUrl).then(() => {
+    navigator.clipboard.writeText(url).then(() => {
       toast.success(t('Copy Successful'));
     });
   };
+
+  useEffect(() => {
+    setLoading(true);
+    getUserChatShare(chat.id).then((data) => {
+      if (data.length > 0) setShareUrl(baseUrl + data[0].shareId);
+      setLoading(false);
+    });
+  }, []);
 
   return (
     <Dialog open={isOpen} onOpenChange={onClose}>
@@ -68,8 +84,7 @@ const SharedMessageModal = (props: IProps) => {
         </DialogHeader>
 
         <div className="flex flex-col gap-2">
-          <Input value={shareUrl}></Input>
-          {chat?.isShared ? (
+          {shareUrl ? (
             <>
               <Button
                 variant="link"
@@ -82,7 +97,7 @@ const SharedMessageModal = (props: IProps) => {
               </Button>
               <Button
                 onClick={() => {
-                  handleCopySharedUrl();
+                  handleCopySharedUrl(shareUrl);
                 }}
                 disabled={loading}
               >

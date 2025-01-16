@@ -16,7 +16,6 @@ import PageNotFound from '@/components/PageNotFound/PageNotFound';
 import { getChat, getUserMessages } from '@/apis/clientApis';
 
 export default function MessageDetails() {
-  const { t } = useTranslation();
   const router = useRouter();
   const [selectedChat, setSelectedChat] = useState<IChat | null>(null);
   const [messages, setMessages] = useState<IChatMessage[]>([]);
