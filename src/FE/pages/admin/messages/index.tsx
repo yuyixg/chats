@@ -2,7 +2,7 @@ import React, { useEffect, useState } from 'react';
 
 import useTranslation from '@/hooks/useTranslation';
 
-import { GetUserMessageResult } from '@/types/adminApis';
+import { AdminChatsDto } from '@/types/adminApis';
 import { PageResult, Paging } from '@/types/page';
 
 import { Badge } from '@/components/ui/badge';
@@ -20,6 +20,7 @@ import {
 import PaginationContainer from '../_components/Pagiation/Pagiation';
 
 import { getMessages } from '@/apis/adminApis';
+import ChatIcon from '@/components/ChatIcon/ChatIcon';
 
 export default function Messages() {
   const { t } = useTranslation();
@@ -28,7 +29,7 @@ export default function Messages() {
     page: 1,
     pageSize: 12,
   });
-  const [messages, setMessages] = useState<PageResult<GetUserMessageResult[]>>({
+  const [messages, setMessages] = useState<PageResult<AdminChatsDto[]>>({
     count: 0,
     rows: [],
   });
@@ -60,7 +61,7 @@ export default function Messages() {
           <TableHeader>
             <TableRow>
               <TableHead>{t('Title')}</TableHead>
-              <TableHead>{t('Model Display Name')}</TableHead>
+              <TableHead>{t('Model')}</TableHead>
               <TableHead>{t('User Name')}</TableHead>
               <TableHead>{t('Created Time')}</TableHead>
               <TableHead>{t('Status')}</TableHead>
@@ -77,7 +78,7 @@ export default function Messages() {
                 >
                   {item.title}
                 </TableCell>
-                <TableCell>{item.modelName}</TableCell>
+                <TableCell>{item.spans.map(x => <><ChatIcon className='inline' providerId={x.modelProviderId} />{x.modelName} </>)}</TableCell>
                 <TableCell>{item.username}</TableCell>
                 <TableCell>
                   {new Date(item.createdAt).toLocaleString()}

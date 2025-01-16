@@ -16,8 +16,8 @@ namespace Chats.BE.Controllers.Admin.AdminMessage;
 [Route("api/admin"), AuthorizeAdmin]
 public class AdminMessageController(ChatsDB db, CurrentUser currentUser, IUrlEncryptionService urlEncryption) : ControllerBase
 {
-    [HttpGet("messages")]
-    public async Task<ActionResult<PagedResult<AdminChatsDto>>> GetMessages([FromQuery] PagingRequest req, CancellationToken cancellationToken)
+    [HttpGet("chats")]
+    public async Task<ActionResult<PagedResult<AdminChatsDto>>> GetAdminChats([FromQuery] PagingRequest req, CancellationToken cancellationToken)
     {
         IQueryable<Chat> chats = db.Chats
             .Where(x => x.User.Role != "admin" || x.UserId == currentUser.Id);
@@ -27,12 +27,13 @@ public class AdminMessageController(ChatsDB db, CurrentUser currentUser, IUrlEnc
         }
 
         return await PagedResult.FromQuery(chats
-            .OrderByDescending(x => x.CreatedAt)
+            .OrderByDescending(x => x.Id)
             .Select(x => new AdminChatsDto
             {
-                Id = urlEncryption.EncryptChatId(x.Id),
+                Id = x.Id.ToString(),
                 CreatedAt = x.CreatedAt,
                 IsDeleted = x.IsArchived,
+                IsShared = x.ChatShares.Any(),
                 Title = x.Title,
                 UserName = x.User.UserName,
                 Spans = x.ChatSpans.Select(s => new ChatSpanDto

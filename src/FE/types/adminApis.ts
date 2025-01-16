@@ -1,4 +1,5 @@
 import { IChatMessage } from './chatMessage';
+import { ChatSpanDto } from './clientApis';
 import { DBFileServiceType } from './file';
 import { DBModelProvider } from './model';
 import { Paging } from './page';
@@ -85,14 +86,14 @@ export interface GetUserMessageParams extends Paging {
   query: string;
 }
 
-export interface GetUserMessageResult {
+export interface AdminChatsDto {
   id: string;
   username: string;
   isDeleted: boolean;
   isShared: boolean;
   title: string;
-  modelName: string;
   createdAt: string;
+  spans: ChatSpanDto[];
 }
 
 export interface GetMessageDetailsResult {

@@ -16,7 +16,7 @@ import {
   GetRequestLogsParams,
   GetUserInitialConfigResult,
   GetUserMessageParams,
-  GetUserMessageResult,
+  AdminChatsDto,
   GetUsersParams,
   GetUsersResult,
   ModelFastCreateParams,
@@ -125,11 +125,11 @@ export const putUserBalance = (params: PutUserBalanceParams) => {
 
 export const getMessages = (
   params: GetUserMessageParams,
-): Promise<PageResult<GetUserMessageResult[]>> => {
+): Promise<PageResult<AdminChatsDto[]>> => {
   const { query = null, page = 1, pageSize = 12 } = params;
   const fetchService = useFetch();
   return fetchService.get(
-    `/api/admin/messages?page=${page}&pageSize=${pageSize}&query=${query}`,
+    `/api/admin/chats?page=${page}&pageSize=${pageSize}&query=${query}`,
   );
 };
 
