@@ -132,8 +132,9 @@ C:\Users\ZhouJie\Downloads\chats-win-x64>dir
 - **启动应用**：运行 `Chats.BE.exe` 即可启动 Chats 应用，该文件名虽指“后端”，但实际同时包含前端和后端组件。
 - **数据库配置**：默认情况下，应用将在当前目录创建名为 `AppData` 的目录，并以 SQLite 作为数据库。命令行参数可用于指定不同的数据库类型：
   ```pwsh
-  .\Chats.BE.exe --DBType=mssql --ConnectionStrings:ChatsDB="Data Source=(localdb)\mssqllocaldb; Initial Catalog=ChatsDB; Integrated Security=True"
+  .\Chats.BE.exe --urls http://+:5000 --DBType=mssql --ConnectionStrings:ChatsDB="Data Source=(localdb)\mssqllocaldb; Initial Catalog=ChatsDB; Integrated Security=True"
   ```
+  - 参数 `--urls`：用于指定应用监听的地址和端口。
   - 参数 `DBType`：可选 `sqlite`、`mssql` 或 `pgsql`。
   - 参数 `--ConnectionStrings:ChatsDB`：用于指定数据库的ADO.NET连接字符串。
 
