@@ -128,8 +128,10 @@ public record MessageContentResponse
 
 public record FileDto
 {
+    [JsonPropertyName("id")]
     public required string Id { get; init; }
 
+    [JsonPropertyName("url")]
     public required Uri Url { get; init; }
 }
 
