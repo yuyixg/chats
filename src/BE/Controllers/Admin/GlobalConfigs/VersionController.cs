@@ -9,7 +9,7 @@ public class VersionController : ControllerBase
 {
     const int buildVersion = 0;
 
-    [HttpGet("current")]
+    [HttpGet]
     public ActionResult GetCurrentVersion()
     {
         return Ok(buildVersion);

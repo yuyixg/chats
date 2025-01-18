@@ -97,6 +97,13 @@ jobs:
           name: chats-fe
           path: ./src/BE/wwwroot
 
+      - name: sed version
+        run: |
+          # file: ./src/BE/Controllers/Admin/GlobalConfigs/VersionController.cs
+          # const int buildVersion = 0; -> const int buildVersion = github.run_number;
+          sed -i "s/const int buildVersion = 0;/const int buildVersion = ${{ github.run_number }};/" ./src/BE/Controllers/Admin/GlobalConfigs/VersionController.cs
+          cat ./src/BE/Controllers/Admin/GlobalConfigs/VersionController.cs
+
       - name: Build container
         run: |
           dotnet publish ./src/BE/Chats.BE.csproj -c Release --os linux --arch x64 /t:PublishContainer /p:ContainerRepository=chats
@@ -142,6 +149,13 @@ jobs:
         with:
           name: chats-fe
           path: ./src/BE/wwwroot
+
+      - name: sed version
+        run: |
+          # file: ./src/BE/Controllers/Admin/GlobalConfigs/VersionController.cs
+          # const int buildVersion = 0; -> const int buildVersion = github.run_number;
+          sed -i "s/const int buildVersion = 0;/const int buildVersion = ${{ github.run_number }};/" ./src/BE/Controllers/Admin/GlobalConfigs/VersionController.cs
+          cat ./src/BE/Controllers/Admin/GlobalConfigs/VersionController.cs
 
       - name: Build container
         run: |
@@ -227,6 +241,13 @@ jobs:
         with:
           name: chats-fe
           path: ./src/BE/wwwroot
+
+      - name: sed version
+        run: |
+          # file: ./src/BE/Controllers/Admin/GlobalConfigs/VersionController.cs
+          # const int buildVersion = 0; -> const int buildVersion = github.run_number;
+          sed -i "s/const int buildVersion = 0;/const int buildVersion = ${{ github.run_number }};/" ./src/BE/Controllers/Admin/GlobalConfigs/VersionController.cs
+          cat ./src/BE/Controllers/Admin/GlobalConfigs/VersionController.cs
 
       - name: build binary
         run: |
