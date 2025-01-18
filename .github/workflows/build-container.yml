@@ -102,7 +102,6 @@ jobs:
           # file: ./src/BE/Controllers/Admin/GlobalConfigs/VersionController.cs
           # const int buildVersion = 0; -> const int buildVersion = github.run_number;
           sed -i "s/const int buildVersion = 0;/const int buildVersion = ${{ github.run_number }};/" ./src/BE/Controllers/Admin/GlobalConfigs/VersionController.cs
-          cat ./src/BE/Controllers/Admin/GlobalConfigs/VersionController.cs
 
       - name: Build container
         run: |
@@ -155,7 +154,6 @@ jobs:
           # file: ./src/BE/Controllers/Admin/GlobalConfigs/VersionController.cs
           # const int buildVersion = 0; -> const int buildVersion = github.run_number;
           sed -i "s/const int buildVersion = 0;/const int buildVersion = ${{ github.run_number }};/" ./src/BE/Controllers/Admin/GlobalConfigs/VersionController.cs
-          cat ./src/BE/Controllers/Admin/GlobalConfigs/VersionController.cs
 
       - name: Build container
         run: |
@@ -247,7 +245,6 @@ jobs:
           # file: ./src/BE/Controllers/Admin/GlobalConfigs/VersionController.cs
           # const int buildVersion = 0; -> const int buildVersion = github.run_number;
           sed -i "s/const int buildVersion = 0;/const int buildVersion = ${{ github.run_number }};/" ./src/BE/Controllers/Admin/GlobalConfigs/VersionController.cs
-          cat ./src/BE/Controllers/Admin/GlobalConfigs/VersionController.cs
 
       - name: build binary
         run: |

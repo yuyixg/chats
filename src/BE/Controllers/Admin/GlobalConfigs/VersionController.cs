@@ -7,6 +7,7 @@ namespace Chats.BE.Controllers.Admin.GlobalConfigs;
 [AuthorizeAdmin, Route("api/version")]
 public class VersionController : ControllerBase
 {
+    // it will be replaced by CI/CD pipeline
     const int buildVersion = 0;
 
     [HttpGet]
