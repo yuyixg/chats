@@ -10,13 +10,13 @@ public class VersionController : ControllerBase
     const int buildVersion = 0;
 
     [HttpGet]
-    public ActionResult GetCurrentVersion()
+    public ActionResult<int> GetCurrentVersion()
     {
         return Ok(buildVersion);
     }
 
     [HttpPost("check-update")]
-    public async Task<ActionResult> CheckUpdate(CancellationToken cancellationToken)
+    public async Task<ActionResult<CheckUpdateResponse>> CheckUpdate(CancellationToken cancellationToken)
     {
         string tagName = await GitHubReleaseChecker.SdcbChats.GetLatestReleaseTagNameAsync(cancellationToken);
         bool hasNewVersion = GitHubReleaseChecker.IsNewVersionAvailableAsync(tagName, buildVersion);
