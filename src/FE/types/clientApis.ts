@@ -87,7 +87,6 @@ export interface ChatSpanDto {
 export interface PostChatParams {
   title: string;
   groupId: string | null;
-  chatModelId?: string;
 }
 
 export interface PutChatParams {
