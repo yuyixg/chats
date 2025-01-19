@@ -139,7 +139,7 @@ const ConfigModelModal = (props: IProps) => {
             <TableHeader>
               <TableRow className="pointer-events-none">
                 <TableHead>{t('Model Display Name')}</TableHead>
-                {modelProverId == DBModelProvider.Azure && (
+                {modelProverId == DBModelProvider.AzureOpenAI && (
                   <TableHead>{t('Deployment Name')}</TableHead>
                 )}
                 <TableHead className="w-20">{t('Actions')}</TableHead>
@@ -161,7 +161,7 @@ const ConfigModelModal = (props: IProps) => {
                       </Badge>
                     )}
                   </TableCell>
-                  {modelProverId == DBModelProvider.Azure && (
+                  {modelProverId == DBModelProvider.AzureOpenAI && (
                     <TableCell>
                       <Input
                         className="max-w-[200px]"
