@@ -309,6 +309,8 @@ jobs:
               target_commitish: '${{ github.sha }}',
               body: `### Full Changelogs
             https://github.com/sdcb/chats/compare/${latestTag}...r-${{ github.run_number }}
+
+            <details>
     
             ### Docker
             | Description                   | Docker Image                                                                                                 |
@@ -335,6 +337,8 @@ jobs:
     
             **NOTE**: 
             Replace \`r${{ github.run_number }}\` with \`latest\` in the download link to get the latest version, for example: \`${{ vars.MINIO_URL }}/chats/latest/chats-win-x64.7z\`
+
+            </details>
             `,
               draft: false,
               prerelease: false,
