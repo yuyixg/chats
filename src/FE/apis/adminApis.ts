@@ -262,13 +262,6 @@ export const deleteModelKeys = (id: number) => {
   return fetchService.delete(`/api/admin/model-keys/${id}`);
 };
 
-export const postAutoCreateModels = (modelKey: number) => {
-  const fetchService = useFetch();
-  return fetchService.post<AutoCreateModelResult[]>(
-    `/api/admin/model-keys/${modelKey}/auto-create-models`,
-  );
-};
-
 export const getUserInitialConfig = () => {
   const fetchServer = useFetch();
   return fetchServer.get<GetUserInitialConfigResult[]>(

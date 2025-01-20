@@ -122,13 +122,6 @@ public class AdminModelsController(ChatsDB db, CurrentUser adminUser) : Controll
             return BadRequest($"Invalid ModelReferenceId: {req.ModelReferenceId}");
         }
 
-        bool hasExistingModel = await db.Models
-            .AnyAsync(x => x.ModelKeyId == req.ModelKeyId && x.ModelReferenceId == req.ModelReferenceId && x.DeploymentName == req.DeploymentName, cancellationToken);
-        if (hasExistingModel)
-        {
-            return BadRequest("Model already exists");
-        }
-
         Model toCreate = new()
         {
             ModelKeyId = req.ModelKeyId,
@@ -209,7 +202,7 @@ public class AdminModelsController(ChatsDB db, CurrentUser adminUser) : Controll
     }
 
     [HttpGet("user-models/{userId:int}")]
-    public async Task<ActionResult<IEnumerable<UserModelDto>>> GetUserModels(int userId, CancellationToken cancellationToken)
+    public async Task<ActionResult<UserModelDto[]>> GetUserModels(int userId, CancellationToken cancellationToken)
     {
         UserModelDto[] userModels = await db.Models
             .Where(x => !x.IsDeleted)
