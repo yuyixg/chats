@@ -211,7 +211,6 @@ const EditModelModal = (props: IProps) => {
                 render={({ field }) => {
                   return (
                     <FormInput
-                      disabled
                       field={field}
                       label={t('Model Version')!}
                     />

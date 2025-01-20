@@ -74,8 +74,10 @@ const ChatInput = ({
   );
   const updatePromptListVisibility = useCallback((text: string) => {
     const match = text.match(/\/\w*$/);
+    const textLength = text.length;
+    const t = textLength > 0 ? text[textLength - 1] : '';
 
-    if (match) {
+    if (match && t === '/') {
       setShowPromptList(true);
       setPromptInputValue(match[0].slice(1));
     } else {
