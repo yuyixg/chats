@@ -189,7 +189,6 @@ const ModelKeysModal = (props: IProps) => {
               render={({ field }) => (
                 <FormSelect
                   label={t('Model Provider')}
-                  disabled={!!selected}
                   field={field}
                   items={feModelProviders.map((p) => ({
                     value: p.id.toString(),
