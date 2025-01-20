@@ -22,7 +22,7 @@ public partial class ModelKey
     [Unicode(false)]
     public string? Host { get; set; }
 
-    [StringLength(500)]
+    [StringLength(1000)]
     [Unicode(false)]
     public string? Secret { get; set; }
 
