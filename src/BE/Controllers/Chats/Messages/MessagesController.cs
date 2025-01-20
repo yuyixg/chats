@@ -132,7 +132,11 @@ public class MessagesController(ChatsDB db, CurrentUser currentUser, IUrlEncrypt
             return Forbid();
         }
 
-        message.MessageContents = await content.ToMessageContents(fup, cancellationToken);
+        message.MessageContents.Clear();
+        foreach (MessageContent c in await content.ToMessageContents(fup, cancellationToken))
+        {
+            message.MessageContents.Add(c);
+        }
         message.Chat.UpdatedAt = DateTime.UtcNow;
         message.Edited = true;
         await db.SaveChangesAsync(cancellationToken);
