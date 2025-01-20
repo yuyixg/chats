@@ -140,7 +140,7 @@ public class MessagesController(ChatsDB db, CurrentUser currentUser, IUrlEncrypt
     }
 
     [HttpPut("{encryptedMessageId}/edit-and-save-new")]
-    public async Task<ActionResult> EditAndSaveNew(string encryptedMessageId, [FromBody] MessageContentRequest content,
+    public async Task<ActionResult<RequestMessageDto>> EditAndSaveNew(string encryptedMessageId, [FromBody] MessageContentRequest content,
     [FromServices] FileUrlProvider fup,
     CancellationToken cancellationToken)
     {
@@ -172,7 +172,7 @@ public class MessagesController(ChatsDB db, CurrentUser currentUser, IUrlEncrypt
         db.Messages.Add(newMessage);
         message.Chat.UpdatedAt = DateTime.UtcNow;
         await db.SaveChangesAsync(cancellationToken);
-        return Ok();
+        return Ok(RequestMessageDto.FromDB(newMessage, fup));
     }
 
     [HttpDelete("{encryptedMessageId}")]

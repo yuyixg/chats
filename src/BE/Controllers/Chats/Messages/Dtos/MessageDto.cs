@@ -34,7 +34,22 @@ public abstract record MessageDto
     public required bool Edited { get; init; }
 }
 
-public record RequestMessageDto : MessageDto;
+public record RequestMessageDto : MessageDto
+{
+    public static RequestMessageDto FromDB(Message message, FileUrlProvider fup)
+    {
+        return new RequestMessageDto()
+        {
+            Id = message.Id.ToString(),
+            ParentId = message.ParentId?.ToString(),
+            Role = (DBChatRole)message.ChatRoleId,
+            Content = MessageContentResponse.FromSegments([.. message.MessageContents], fup),
+            CreatedAt = message.CreatedAt,
+            SpanId = message.SpanId,
+            Edited = message.Edited,
+        };
+    }
+}
 
 public record ResponseMessageDto : MessageDto
 {
