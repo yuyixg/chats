@@ -130,8 +130,9 @@ C:\Users\ZhouJie\Downloads\chats-win-x64>dir
 - **Start Application**: Run `Chats.BE.exe` to start the Chats application. Although this filename indicates "backend," it actually contains both frontend and backend components.
 - **Database Configuration**: By default, the application will create a directory named `AppData` in the current directory and use SQLite as the database. Command-line parameters can be used to specify a different database type:
   ```pwsh
-  .\Chats.BE.exe --DBType=mssql --ConnectionStrings:ChatsDB="Data Source=(localdb)\mssqllocaldb; Initial Catalog=ChatsDB; Integrated Security=True"
+  .\Chats.BE.exe --urls http://+:5000 --DBType=mssql --ConnectionStrings:ChatsDB="Data Source=(localdb)\mssqllocaldb; Initial Catalog=ChatsDB; Integrated Security=True"
   ```
+  - Parameter `--urls`: Used to specify the address and port the application listens on.
   - Parameter `DBType`: Options are `sqlite`, `mssql`, or `pgsql`.
   - Parameter `--ConnectionStrings:ChatsDB`: For specifying the ADO.NET connection string for the database.
 

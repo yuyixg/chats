@@ -158,9 +158,7 @@ public partial class ChatsDB : DbContext
 
         modelBuilder.Entity<ChatShare>(entity =>
         {
-            entity.HasOne(d => d.Chat).WithMany(p => p.ChatShares)
-                .OnDelete(DeleteBehavior.ClientSetNull)
-                .HasConstraintName("FK_ChatShare_Chat");
+            entity.HasOne(d => d.Chat).WithMany(p => p.ChatShares).HasConstraintName("FK_ChatShare_Chat");
         });
 
         modelBuilder.Entity<ChatSpan>(entity =>

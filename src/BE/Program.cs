@@ -3,7 +3,7 @@ using Chats.BE.DB.Init;
 using Chats.BE.Infrastructure;
 using Chats.BE.Services;
 using Chats.BE.Services.Configs;
-using Chats.BE.Services.ChatServices;
+using Chats.BE.Services.Models;
 using Chats.BE.Services.UrlEncryption;
 using Chats.BE.Services.OpenAIApiKeySession;
 using Chats.BE.Services.Sessions;
@@ -45,7 +45,7 @@ public class Program
         builder.Services.AddSingleton<CsrfTokenService>();
         builder.Services.AddScoped<GlobalDBConfig>();
         builder.Services.AddScoped<UserManager>();
-        builder.Services.AddScoped<JwtKeyManager>();
+        builder.Services.AddSingleton<JwtKeyManager>();
         builder.Services.AddScoped<SessionManager>();
         builder.Services.AddScoped<UserModelManager>();
         builder.Services.AddScoped<OpenAIApiKeySessionManager>();

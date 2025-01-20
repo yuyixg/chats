@@ -345,9 +345,10 @@ const Chat = memo(() => {
       }
     }
 
+    const leafMessageId = messageList[messageList.length - 1].id;
     const selectedMsgs = findSelectedMessageByLeafId(
       messageList,
-      messageList[messageList.length - 1].id,
+      leafMessageId,
     );
 
     const chatList = chats.map((x) =>
@@ -396,7 +397,6 @@ const Chat = memo(() => {
       messagesEndRef.current?.scrollIntoView(true);
     }
   };
-
   const throttledScrollDown = throttle(scrollDown, 250);
 
   useEffect(() => {
@@ -410,7 +410,6 @@ const Chat = memo(() => {
   const handleChangeChatLeafMessageId = (messageId: string) => {
     if (selectedChat.status === ChatStatus.Chatting) return;
     const leafId = findLastLeafId(messages, messageId);
-    if (leafId === selectedChat.leafMessageId) return;
     const selectedMsgs = findSelectedMessageByLeafId(messages, leafId);
     messageDispatch(setSelectedMessages(selectedMsgs));
     chatDispatch(

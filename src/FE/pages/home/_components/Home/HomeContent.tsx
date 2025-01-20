@@ -151,7 +151,7 @@ const HomeContent = () => {
   const handleNewChat = () => {
     postChats({
       title: t('New Conversation'),
-      groupId: selectedChat?.groupId || null,
+      groupId: null,
     }).then((data) => {
       const chat = supplyChatProperty(data);
       const chatList = [chat, ...chats];

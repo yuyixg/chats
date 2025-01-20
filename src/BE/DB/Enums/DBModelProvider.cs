@@ -16,4 +16,6 @@ public enum DBModelProvider
     xAI = 11, 
     GithubModels = 12,
     GoogleAI = 13,
+    Ollama = 14,
+    MiniMax = 15,
 }

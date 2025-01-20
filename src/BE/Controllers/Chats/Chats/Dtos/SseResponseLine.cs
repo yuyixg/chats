@@ -1,6 +1,6 @@
 ﻿using Chats.BE.Controllers.Chats.Messages.Dtos;
 using Chats.BE.DB;
-using Chats.BE.Services.ChatServices;
+using Chats.BE.Services.Models;
 using Chats.BE.Services.FileServices;
 using Chats.BE.Services.UrlEncryption;
 using System.Text.Json.Serialization;
@@ -52,6 +52,7 @@ public record SseResponseLine
             ParentId = assistantMessage.ParentId,
             Role = (DBChatRole)assistantMessage.ChatRoleId,
             SpanId = assistantMessage.SpanId,
+            Edited = assistantMessage.Edited,
             Usage = assistantMessage.Usage == null ? null : new ChatMessageTempUsage()
             {
                 Duration = assistantMessage.Usage.TotalDurationMs - assistantMessage.Usage.PreprocessDurationMs,
@@ -89,6 +90,7 @@ public record SseResponseLine
             ParentId = userMessage.ParentId,
             Role = (DBChatRole)userMessage.ChatRoleId,
             SpanId = userMessage.SpanId,
+            Edited = userMessage.Edited,
             Usage = null,
         };
         MessageDto userMessageDto = userMessageTemp.ToDto(urlEncryptionService, fup);

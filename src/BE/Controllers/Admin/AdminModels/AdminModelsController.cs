@@ -5,7 +5,7 @@ using Chats.BE.DB;
 using Chats.BE.DB.Jsons;
 using Chats.BE.Infrastructure;
 using Chats.BE.Services;
-using Chats.BE.Services.ChatServices;
+using Chats.BE.Services.Models;
 using Microsoft.AspNetCore.Mvc;
 using Microsoft.AspNetCore.Mvc.ModelBinding;
 using Microsoft.EntityFrameworkCore;
@@ -122,13 +122,6 @@ public class AdminModelsController(ChatsDB db, CurrentUser adminUser) : Controll
             return BadRequest($"Invalid ModelReferenceId: {req.ModelReferenceId}");
         }
 
-        bool hasExistingModel = await db.Models
-            .AnyAsync(x => x.ModelKeyId == req.ModelKeyId && x.ModelReferenceId == req.ModelReferenceId && x.DeploymentName == req.DeploymentName, cancellationToken);
-        if (hasExistingModel)
-        {
-            return BadRequest("Model already exists");
-        }
-
         Model toCreate = new()
         {
             ModelKeyId = req.ModelKeyId,
@@ -182,7 +175,7 @@ public class AdminModelsController(ChatsDB db, CurrentUser adminUser) : Controll
     [HttpPost("models/validate")]
     public async Task<ActionResult<ModelValidateResult>> ValidateModel(
         [FromBody] ValidateModelRequest req,
-        [FromServices] ChatFactory conversationFactory,
+        [FromServices] ChatFactory chatFactory,
         CancellationToken cancellationToken)
     {
         ModelKey? modelKey = await db.ModelKeys
@@ -204,12 +197,12 @@ public class AdminModelsController(ChatsDB db, CurrentUser adminUser) : Controll
             return this.BadRequestMessage($"Model reference id: {req.ModelReferenceId} not found");
         }
 
-        ModelValidateResult result = await conversationFactory.ValidateModel(modelKey, modelReference, req.DeploymentName, cancellationToken);
+        ModelValidateResult result = await chatFactory.ValidateModel(modelKey, modelReference, req.DeploymentName, cancellationToken);
         return Ok(result);
     }
 
     [HttpGet("user-models/{userId:int}")]
-    public async Task<ActionResult<IEnumerable<UserModelDto>>> GetUserModels(int userId, CancellationToken cancellationToken)
+    public async Task<ActionResult<UserModelDto[]>> GetUserModels(int userId, CancellationToken cancellationToken)
     {
         UserModelDto[] userModels = await db.Models
             .Where(x => !x.IsDeleted)

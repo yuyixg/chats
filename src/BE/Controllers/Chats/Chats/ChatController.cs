@@ -2,9 +2,9 @@
 using Chats.BE.DB;
 using Chats.BE.Infrastructure;
 using Chats.BE.Services;
-using Chats.BE.Services.ChatServices;
-using Chats.BE.Services.ChatServices.Dtos;
-using Chats.BE.Services.ChatServices.Implementations.Test;
+using Chats.BE.Services.Models;
+using Chats.BE.Services.Models.Dtos;
+using Chats.BE.Services.Models.ChatServices.Test;
 using Chats.BE.Services.FileServices;
 using Chats.BE.Services.UrlEncryption;
 using Microsoft.AspNetCore.Authorization;
@@ -399,7 +399,7 @@ public class ChatController(ChatStopService stopService) : ControllerBase
         string? errorText = null;
         try
         {
-            using ChatService s = chatFactory.CreateConversationService(userModel.Model);
+            using ChatService s = chatFactory.CreateChatService(userModel.Model);
             await foreach (InternalChatSegment seg in icc.Run(userBalance.Balance, userModel, s.ChatStreamedFEProcessed(messageToSend, cco, extraDetails, cancellationToken)))
             {
                 if (seg.TextSegment == string.Empty) continue;

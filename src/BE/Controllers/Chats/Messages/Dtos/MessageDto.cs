@@ -1,6 +1,6 @@
 ﻿using Chats.BE.DB;
 using Chats.BE.DB.Enums;
-using Chats.BE.Services.ChatServices;
+using Chats.BE.Services.Models;
 using Chats.BE.Services.FileServices;
 using Chats.BE.Services.UrlEncryption;
 using System.Text.Json.Serialization;
@@ -29,9 +29,27 @@ public abstract record MessageDto
 
     [JsonPropertyName("spanId")]
     public required byte? SpanId { get; init; }
+
+    [JsonPropertyName("edited")]
+    public required bool Edited { get; init; }
 }
 
-public record RequestMessageDto : MessageDto;
+public record RequestMessageDto : MessageDto
+{
+    public static RequestMessageDto FromDB(Message message, FileUrlProvider fup)
+    {
+        return new RequestMessageDto()
+        {
+            Id = message.Id.ToString(),
+            ParentId = message.ParentId?.ToString(),
+            Role = (DBChatRole)message.ChatRoleId,
+            Content = MessageContentResponse.FromSegments([.. message.MessageContents], fup),
+            CreatedAt = message.CreatedAt,
+            SpanId = message.SpanId,
+            Edited = message.Edited,
+        };
+    }
+}
 
 public record ResponseMessageDto : MessageDto
 {
@@ -128,8 +146,10 @@ public record MessageContentResponse
 
 public record FileDto
 {
+    [JsonPropertyName("id")]
     public required string Id { get; init; }
 
+    [JsonPropertyName("url")]
     public required Uri Url { get; init; }
 }
 
@@ -157,6 +177,7 @@ public record ChatMessageTemp
     public required MessageContent[] Content { get; init; }
     public required DateTime CreatedAt { get; init; }
     public required byte? SpanId { get; init; }
+    public required bool Edited { get; init; }
     public required ChatMessageTempUsage? Usage { get; init; }
 
     public MessageDto ToDto(IUrlEncryptionService urlEncryption, FileUrlProvider fup)
@@ -171,6 +192,7 @@ public record ChatMessageTemp
                 Content = MessageContentResponse.FromSegments(Content, fup),
                 CreatedAt = CreatedAt,
                 SpanId = SpanId,
+                Edited = Edited,
             };
         }
         else
@@ -183,6 +205,7 @@ public record ChatMessageTemp
                 Content = MessageContentResponse.FromSegments(Content, fup),
                 CreatedAt = CreatedAt,
                 SpanId = SpanId,
+                Edited = Edited,
 
                 InputTokens = Usage.InputTokens,
                 OutputTokens = Usage.OutputTokens,

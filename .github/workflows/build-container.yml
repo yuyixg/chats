@@ -97,6 +97,12 @@ jobs:
           name: chats-fe
           path: ./src/BE/wwwroot
 
+      - name: sed version
+        run: |
+          # file: ./src/BE/Controllers/Admin/GlobalConfigs/VersionController.cs
+          # const int buildVersion = 0; -> const int buildVersion = github.run_number;
+          sed -i "s/const int buildVersion = 0;/const int buildVersion = ${{ github.run_number }};/" ./src/BE/Controllers/Admin/GlobalConfigs/VersionController.cs
+
       - name: Build container
         run: |
           dotnet publish ./src/BE/Chats.BE.csproj -c Release --os linux --arch x64 /t:PublishContainer /p:ContainerRepository=chats
@@ -142,6 +148,12 @@ jobs:
         with:
           name: chats-fe
           path: ./src/BE/wwwroot
+
+      - name: sed version
+        run: |
+          # file: ./src/BE/Controllers/Admin/GlobalConfigs/VersionController.cs
+          # const int buildVersion = 0; -> const int buildVersion = github.run_number;
+          sed -i "s/const int buildVersion = 0;/const int buildVersion = ${{ github.run_number }};/" ./src/BE/Controllers/Admin/GlobalConfigs/VersionController.cs
 
       - name: Build container
         run: |
@@ -228,6 +240,12 @@ jobs:
           name: chats-fe
           path: ./src/BE/wwwroot
 
+      - name: sed version
+        run: |
+          # file: ./src/BE/Controllers/Admin/GlobalConfigs/VersionController.cs
+          # const int buildVersion = 0; -> const int buildVersion = github.run_number;
+          sed -i "s/const int buildVersion = 0;/const int buildVersion = ${{ github.run_number }};/" ./src/BE/Controllers/Admin/GlobalConfigs/VersionController.cs
+
       - name: build binary
         run: |
           dotnet publish ./src/BE/Chats.BE.csproj -c Release -o ./Publish ${{ matrix.args }} /p:DeleteExistingFiles=True
@@ -291,6 +309,8 @@ jobs:
               target_commitish: '${{ github.sha }}',
               body: `### Full Changelogs
             https://github.com/sdcb/chats/compare/${latestTag}...r-${{ github.run_number }}
+
+            <details>
     
             ### Docker
             | Description                   | Docker Image                                                                                                 |
@@ -317,6 +337,8 @@ jobs:
     
             **NOTE**: 
             Replace \`r${{ github.run_number }}\` with \`latest\` in the download link to get the latest version, for example: \`${{ vars.MINIO_URL }}/chats/latest/chats-win-x64.7z\`
+
+            </details>
             `,
               draft: false,
               prerelease: false,

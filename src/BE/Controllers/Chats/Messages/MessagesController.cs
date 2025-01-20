@@ -2,7 +2,7 @@
 using Chats.BE.DB;
 using Chats.BE.DB.Enums;
 using Chats.BE.Infrastructure;
-using Chats.BE.Services.ChatServices;
+using Chats.BE.Services.Models;
 using Chats.BE.Services.FileServices;
 using Chats.BE.Services.UrlEncryption;
 using Microsoft.AspNetCore.Authorization;
@@ -32,6 +32,7 @@ public class MessagesController(ChatsDB db, CurrentUser currentUser, IUrlEncrypt
                     .ToArray(),
                 CreatedAt = x.CreatedAt,
                 SpanId = x.SpanId,
+                Edited = x.Edited,
                 Usage = x.Usage == null ? null : new ChatMessageTempUsage()
                 {
                     InputTokens = x.Usage.InputTokens,
@@ -112,8 +113,8 @@ public class MessagesController(ChatsDB db, CurrentUser currentUser, IUrlEncrypt
         return Ok();
     }
 
-    [HttpPut("{encryptedMessageId}/edit")]
-    public async Task<ActionResult> EditMessage(string encryptedMessageId, [FromBody] MessageContentRequest content,
+    [HttpPut("{encryptedMessageId}/edit-in-place")]
+    public async Task<ActionResult> EditMessageInPlace(string encryptedMessageId, [FromBody] MessageContentRequest content,
         [FromServices] FileUrlProvider fup,
         CancellationToken cancellationToken)
     {
@@ -131,14 +132,19 @@ public class MessagesController(ChatsDB db, CurrentUser currentUser, IUrlEncrypt
             return Forbid();
         }
 
-        message.MessageContents = await content.ToMessageContents(fup, cancellationToken);
+        message.MessageContents.Clear();
+        foreach (MessageContent c in await content.ToMessageContents(fup, cancellationToken))
+        {
+            message.MessageContents.Add(c);
+        }
         message.Chat.UpdatedAt = DateTime.UtcNow;
+        message.Edited = true;
         await db.SaveChangesAsync(cancellationToken);
         return Ok();
     }
 
     [HttpPut("{encryptedMessageId}/edit-and-save-new")]
-    public async Task<ActionResult> EditAndSaveNew(string encryptedMessageId, [FromBody] MessageContentRequest content,
+    public async Task<ActionResult<RequestMessageDto>> EditAndSaveNew(string encryptedMessageId, [FromBody] MessageContentRequest content,
     [FromServices] FileUrlProvider fup,
     CancellationToken cancellationToken)
     {
@@ -170,7 +176,7 @@ public class MessagesController(ChatsDB db, CurrentUser currentUser, IUrlEncrypt
         db.Messages.Add(newMessage);
         message.Chat.UpdatedAt = DateTime.UtcNow;
         await db.SaveChangesAsync(cancellationToken);
-        return Ok();
+        return Ok(RequestMessageDto.FromDB(newMessage, fup));
     }
 
     [HttpDelete("{encryptedMessageId}")]

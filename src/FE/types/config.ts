@@ -1,7 +1,6 @@
 export enum GlobalConfigKeys {
   tencentSms = 'tencentSms',
   siteInfo = 'siteInfo',
-  JwtSecretKey = 'JwtSecretKey',
 }
 
 export interface SiteInfoConfig {
@@ -21,5 +20,4 @@ export const GlobalDefaultConfigs = {
     filingNumber: '',
     companyName: '',
   },
-  JwtSecretKey: '',
 };
