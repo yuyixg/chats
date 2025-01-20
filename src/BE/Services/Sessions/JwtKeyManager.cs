@@ -1,10 +1,12 @@
-﻿namespace Chats.BE.Services.Sessions;
+﻿using System.Configuration;
 
-public class JwtKeyManager
+namespace Chats.BE.Services.Sessions;
+
+public class JwtKeyManager(IConfiguration configuration)
 {
     public string GetOrCreateSecretKey()
     {
-        string? secretKey = Environment.GetEnvironmentVariable("JWT_SECRET_KEY");
+        string? secretKey = configuration["JWT_SECRET_KEY"];
         if (secretKey != null)
         {
             return secretKey;
@@ -12,7 +14,7 @@ public class JwtKeyManager
         else
         {
             string generated = Guid.NewGuid().ToString();
-            Environment.SetEnvironmentVariable("JWT_SECRET_KEY", generated);
+            configuration["JWT_SECRET_KEY"] = generated;
             return generated;
         }
     }
