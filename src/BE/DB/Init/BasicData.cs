@@ -107,7 +107,7 @@ internal static class BasicData
 
     private static void InsertModelReferences(ChatsDB db)
     {
-        // Generated from data, hash: bcd5a4d707fabdfc1dc936a05fa8f28f44117908b195d1aafbc531240d17d238
+        // Generated from data, hash: 88ff31dc432a7309dd0e65065384a0d87443fca7838456ac41c2d179bcbfa93c
         db.ModelReferences.AddRange(
         [
             new(){ Id=0,    ProviderId=0,  Name="Test",                          ShortName=null,                   IsLegacy=false, MinTemperature=0.00M, MaxTemperature=2.00M, AllowSearch=false, AllowVision=true,  AllowSystemPrompt=true,  AllowStreaming=true,  ContextWindow=2048,     MaxResponseTokens=2048,   TokenizerId=1,    InputTokenPrice1M=0.00000M,   OutputTokenPrice1M=0.00000M,   CurrencyCode="RMB", },
@@ -251,13 +251,16 @@ internal static class BasicData
             new(){ Id=1220, ProviderId=12, Name="o1-2024-12-17",                 ShortName="o1",                   IsLegacy=false, MinTemperature=1.00M, MaxTemperature=1.00M, AllowSearch=false, AllowVision=true,  AllowSystemPrompt=true,  AllowStreaming=false, ContextWindow=200000,   MaxResponseTokens=100000, TokenizerId=2,    InputTokenPrice1M=15.00000M,  OutputTokenPrice1M=60.00000M,  CurrencyCode="USD", },
             new(){ Id=1300, ProviderId=13, Name="gemini-2.0-flash-thinking-exp", ShortName="gemini",               IsLegacy=false, MinTemperature=0.00M, MaxTemperature=2.00M, AllowSearch=false, AllowVision=true,  AllowSystemPrompt=true,  AllowStreaming=true,  ContextWindow=40000,    MaxResponseTokens=8000,   TokenizerId=null, InputTokenPrice1M=0.00000M,   OutputTokenPrice1M=0.00000M,   CurrencyCode="USD", },
             new(){ Id=1301, ProviderId=13, Name="gemini-2.0-flash-exp",          ShortName="gemini",               IsLegacy=false, MinTemperature=0.00M, MaxTemperature=2.00M, AllowSearch=false, AllowVision=true,  AllowSystemPrompt=true,  AllowStreaming=true,  ContextWindow=1048576,  MaxResponseTokens=8000,   TokenizerId=null, InputTokenPrice1M=0.00000M,   OutputTokenPrice1M=0.00000M,   CurrencyCode="USD", },
-            new(){ Id=1302, ProviderId=13, Name="gemini-exp-1206",               ShortName="gemini",               IsLegacy=false, MinTemperature=0.00M, MaxTemperature=2.00M, AllowSearch=false, AllowVision=true,  AllowSystemPrompt=true,  AllowStreaming=true,  ContextWindow=2097152,  MaxResponseTokens=8000,   TokenizerId=null, InputTokenPrice1M=0.00000M,   OutputTokenPrice1M=0.00000M,   CurrencyCode="USD", }
+            new(){ Id=1302, ProviderId=13, Name="gemini-exp-1206",               ShortName="gemini",               IsLegacy=false, MinTemperature=0.00M, MaxTemperature=2.00M, AllowSearch=false, AllowVision=true,  AllowSystemPrompt=true,  AllowStreaming=true,  ContextWindow=2097152,  MaxResponseTokens=8000,   TokenizerId=null, InputTokenPrice1M=0.00000M,   OutputTokenPrice1M=0.00000M,   CurrencyCode="USD", },
+            new(){ Id=1400, ProviderId=14, Name="general",                       ShortName=null,                   IsLegacy=false, MinTemperature=0.00M, MaxTemperature=2.00M, AllowSearch=false, AllowVision=false, AllowSystemPrompt=true,  AllowStreaming=true,  ContextWindow=128000,   MaxResponseTokens=8000,   TokenizerId=null, InputTokenPrice1M=0.00000M,   OutputTokenPrice1M=0.00000M,   CurrencyCode="RMB", },
+            new(){ Id=1401, ProviderId=14, Name="general-vision",                ShortName=null,                   IsLegacy=false, MinTemperature=0.00M, MaxTemperature=2.00M, AllowSearch=false, AllowVision=true,  AllowSystemPrompt=true,  AllowStreaming=true,  ContextWindow=128000,   MaxResponseTokens=8000,   TokenizerId=null, InputTokenPrice1M=0.00000M,   OutputTokenPrice1M=0.00000M,   CurrencyCode="RMB", },
+            new(){ Id=1500, ProviderId=15, Name="MiniMax-Text-01",               ShortName=null,                   IsLegacy=false, MinTemperature=0.00M, MaxTemperature=2.00M, AllowSearch=false, AllowVision=true,  AllowSystemPrompt=true,  AllowStreaming=true,  ContextWindow=1000000,  MaxResponseTokens=8000,   TokenizerId=null, InputTokenPrice1M=1.00000M,   OutputTokenPrice1M=8.00000M,   CurrencyCode="RMB", }
         ]);
     }
 
     private static void InsertModelProviders(ChatsDB db)
     {
-        // Generated from data, hash: 0c51c3982b9ce410261a8695176e270a98f6ab8433fd70c1afcd24c22653d4e7
+        // Generated from data, hash: 3746cc1a6f22a05f83d27814361078fef50de0cd7b5e777e0c55e1840525f843
         db.ModelProviders.AddRange(
         [
             new(){ Id=0,  Name="Test",             InitialHost=null,                                        InitialSecret=null,                                  },
@@ -273,7 +276,9 @@ internal static class BasicData
             new(){ Id=10, Name="DeepSeek",         InitialHost=null,                                        InitialSecret="",                                    },
             new(){ Id=11, Name="x.ai",             InitialHost=null,                                        InitialSecret="xai-yourkey",                         },
             new(){ Id=12, Name="Github Models",    InitialHost=null,                                        InitialSecret="ghp_yourkey",                         },
-            new(){ Id=13, Name="Google AI",        InitialHost=null,                                        InitialSecret="",                                    }
+            new(){ Id=13, Name="Google AI",        InitialHost=null,                                        InitialSecret="",                                    },
+            new(){ Id=14, Name="Ollama",           InitialHost="http://localhost:11434/v1",                 InitialSecret="ollama",                              },
+            new(){ Id=15, Name="MiniMax",          InitialHost=null,                                        InitialSecret="your-key",                            }
         ]);
     }
 };
