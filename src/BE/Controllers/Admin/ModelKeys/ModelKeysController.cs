@@ -115,7 +115,7 @@ public class ModelKeysController(ChatsDB db) : ControllerBase
     }
 
     [HttpPost("{modelKeyId:int}/auto-create-models")]
-    public async Task<ActionResult<AutoCreateModelResult[]>> AutoCreateModels(short modelKeyId, [FromServices] ModelFactory conversationFactory, CancellationToken cancellationToken)
+    public async Task<ActionResult<AutoCreateModelResult[]>> AutoCreateModels(short modelKeyId, [FromServices] ChatFactory chatFactory, CancellationToken cancellationToken)
     {
         ModelKey? modelKey = await db
             .ModelKeys
@@ -140,7 +140,7 @@ public class ModelKeysController(ChatsDB db) : ControllerBase
         ParepareAutoCreateModelResult[] scanedModels = await Task.WhenAll(readyRefs
             .Select(async r => existingModelRefIds.Contains(r.Id)
                 ? ParepareAutoCreateModelResult.ModelAlreadyExists(r)
-                : ParepareAutoCreateModelResult.FromModelValidateResult(await conversationFactory.ValidateModel(modelKey, r, r.Name, cancellationToken), r)));
+                : ParepareAutoCreateModelResult.FromModelValidateResult(await chatFactory.ValidateModel(modelKey, r, r.Name, cancellationToken), r)));
 
         FileService? fileService = await db.FileServices
             .OrderByDescending(x => x.Id)

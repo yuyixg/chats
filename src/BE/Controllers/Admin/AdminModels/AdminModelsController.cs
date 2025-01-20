@@ -182,7 +182,7 @@ public class AdminModelsController(ChatsDB db, CurrentUser adminUser) : Controll
     [HttpPost("models/validate")]
     public async Task<ActionResult<ModelValidateResult>> ValidateModel(
         [FromBody] ValidateModelRequest req,
-        [FromServices] ModelFactory conversationFactory,
+        [FromServices] ChatFactory chatFactory,
         CancellationToken cancellationToken)
     {
         ModelKey? modelKey = await db.ModelKeys
@@ -204,7 +204,7 @@ public class AdminModelsController(ChatsDB db, CurrentUser adminUser) : Controll
             return this.BadRequestMessage($"Model reference id: {req.ModelReferenceId} not found");
         }
 
-        ModelValidateResult result = await conversationFactory.ValidateModel(modelKey, modelReference, req.DeploymentName, cancellationToken);
+        ModelValidateResult result = await chatFactory.ValidateModel(modelKey, modelReference, req.DeploymentName, cancellationToken);
         return Ok(result);
     }
 

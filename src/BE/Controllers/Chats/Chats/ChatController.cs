@@ -31,7 +31,7 @@ public class ChatController(ChatStopService stopService) : ControllerBase
         [FromServices] ILogger<ChatController> logger,
         [FromServices] IUrlEncryptionService idEncryption,
         [FromServices] BalanceService balanceService,
-        [FromServices] ModelFactory chatFactory,
+        [FromServices] ChatFactory chatFactory,
         [FromServices] UserModelManager userModelManager,
         [FromServices] ClientInfoManager clientInfoManager,
         [FromServices] FileUrlProvider fup,
@@ -62,7 +62,7 @@ public class ChatController(ChatStopService stopService) : ControllerBase
         [FromServices] ILogger<ChatController> logger,
         [FromServices] IUrlEncryptionService idEncryption,
         [FromServices] BalanceService balanceService,
-        [FromServices] ModelFactory chatFactory,
+        [FromServices] ChatFactory chatFactory,
         [FromServices] UserModelManager userModelManager,
         [FromServices] ClientInfoManager clientInfoManager,
         [FromServices] FileUrlProvider fup,
@@ -87,7 +87,7 @@ public class ChatController(ChatStopService stopService) : ControllerBase
         [FromServices] ILogger<ChatController> logger,
         [FromServices] IUrlEncryptionService idEncryption,
         [FromServices] BalanceService balanceService,
-        [FromServices] ModelFactory chatFactory,
+        [FromServices] ChatFactory chatFactory,
         [FromServices] UserModelManager userModelManager,
         [FromServices] ClientInfoManager clientInfoManager,
         [FromServices] FileUrlProvider fup,
@@ -131,7 +131,7 @@ public class ChatController(ChatStopService stopService) : ControllerBase
         ILogger<ChatController> logger,
         IUrlEncryptionService idEncryption,
         BalanceService balanceService,
-        ModelFactory chatFactory,
+        ChatFactory chatFactory,
         UserModelManager userModelManager,
         ClientInfoManager clientInfoManager,
         FileUrlProvider fup,
@@ -366,7 +366,7 @@ public class ChatController(ChatStopService stopService) : ControllerBase
     private static async Task<ChatSpanResponse> ProcessChatSpan(
         CurrentUser currentUser,
         ILogger<ChatController> logger,
-        ModelFactory chatFactory,
+        ChatFactory chatFactory,
         FileUrlProvider fup,
         ChatSpanRequest span,
         long firstTick,
@@ -399,7 +399,7 @@ public class ChatController(ChatStopService stopService) : ControllerBase
         string? errorText = null;
         try
         {
-            using ChatService s = chatFactory.CreateConversationService(userModel.Model);
+            using ChatService s = chatFactory.CreateChatService(userModel.Model);
             await foreach (InternalChatSegment seg in icc.Run(userBalance.Balance, userModel, s.ChatStreamedFEProcessed(messageToSend, cco, extraDetails, cancellationToken)))
             {
                 if (seg.TextSegment == string.Empty) continue;
