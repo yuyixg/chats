@@ -112,8 +112,8 @@ public class MessagesController(ChatsDB db, CurrentUser currentUser, IUrlEncrypt
         return Ok();
     }
 
-    [HttpPut("{encryptedMessageId}/edit")]
-    public async Task<ActionResult> EditMessage(string encryptedMessageId, [FromBody] MessageContentRequest content,
+    [HttpPut("{encryptedMessageId}/edit-in-place")]
+    public async Task<ActionResult> EditMessageInPlace(string encryptedMessageId, [FromBody] MessageContentRequest content,
         [FromServices] FileUrlProvider fup,
         CancellationToken cancellationToken)
     {
@@ -133,6 +133,7 @@ public class MessagesController(ChatsDB db, CurrentUser currentUser, IUrlEncrypt
 
         message.MessageContents = await content.ToMessageContents(fup, cancellationToken);
         message.Chat.UpdatedAt = DateTime.UtcNow;
+        message.Edited = true;
         await db.SaveChangesAsync(cancellationToken);
         return Ok();
     }
