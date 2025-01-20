@@ -13,10 +13,10 @@ public class SessionManager(JwtKeyManager jwtKeyManager)
     private const string ValidAudience = "chats";
     private static readonly TimeSpan ValidPeriod = TimeSpan.FromHours(8);
 
-    public async Task<SessionEntry> GetCachedUserInfoBySession(string jwt, CancellationToken cancellationToken = default)
+    public Task<SessionEntry> GetCachedUserInfoBySession(string jwt, CancellationToken _ = default)
     {
-        ClaimsPrincipal claims = ValidateJwt(jwt, await GetSecurityKey(cancellationToken));
-        return SessionEntry.FromClaims(claims);
+        ClaimsPrincipal claims = ValidateJwt(jwt, GetSecurityKey());
+        return Task.FromResult(SessionEntry.FromClaims(claims));
     }
 
     private static ClaimsPrincipal ValidateJwt(string jwt, SecurityKey signingKey)
@@ -51,11 +51,11 @@ public class SessionManager(JwtKeyManager jwtKeyManager)
         return new Rfc2898DeriveBytes(input, salt, 10000, HashAlgorithmName.SHA256).GetBytes(32);
     }
 
-    private async Task<SymmetricSecurityKey> GetSecurityKey(CancellationToken cancellationToken) => new(Pdkdf2StringToByte32(await jwtKeyManager.GetOrCreateSecretKey(cancellationToken)));
+    private SymmetricSecurityKey GetSecurityKey() => new(Pdkdf2StringToByte32(jwtKeyManager.GetOrCreateSecretKey()));
 
-    public async Task<LoginResponse> GenerateSessionForUser(User user, CancellationToken cancellationToken)
+    public Task<LoginResponse> GenerateSessionForUser(User user, CancellationToken _)
     {
-        SigningCredentials cred = new(await GetSecurityKey(cancellationToken), SecurityAlgorithms.HmacSha256);
+        SigningCredentials cred = new(GetSecurityKey(), SecurityAlgorithms.HmacSha256);
         SessionEntry sessionEntry = new()
         {
             UserId = user.Id,
@@ -73,12 +73,12 @@ public class SessionManager(JwtKeyManager jwtKeyManager)
 
         string jwt = new JwtSecurityTokenHandler().WriteToken(token);
         bool hasPayService = false;
-        return new LoginResponse
+        return Task.FromResult(new LoginResponse
         {
             SessionId = jwt,
             UserName = user.DisplayName,
             Role = user.Role,
             CanReCharge = hasPayService,
-        };
+        });
     }
 }

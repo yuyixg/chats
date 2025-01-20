@@ -45,7 +45,7 @@ public class Program
         builder.Services.AddSingleton<CsrfTokenService>();
         builder.Services.AddScoped<GlobalDBConfig>();
         builder.Services.AddScoped<UserManager>();
-        builder.Services.AddScoped<JwtKeyManager>();
+        builder.Services.AddSingleton<JwtKeyManager>();
         builder.Services.AddScoped<SessionManager>();
         builder.Services.AddScoped<UserModelManager>();
         builder.Services.AddScoped<OpenAIApiKeySessionManager>();
