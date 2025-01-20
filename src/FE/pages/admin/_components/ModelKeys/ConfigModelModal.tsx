@@ -128,6 +128,10 @@ const ConfigModelModal = (props: IProps) => {
     setModels(modelList);
   }
 
+  function needDeploymentName(modelProviderId: DBModelProvider) {
+    return modelProviderId === DBModelProvider.AzureOpenAI || modelProviderId === DBModelProvider.Ollama;
+  }
+
   return (
     <Dialog open={isOpen} onOpenChange={onClose}>
       <DialogContent className="min-w-[375px] w-3/5">
@@ -138,16 +142,28 @@ const ConfigModelModal = (props: IProps) => {
           <Table>
             <TableHeader>
               <TableRow className="pointer-events-none">
-                <TableHead>{t('Model Display Name')}</TableHead>
-                {modelProverId == DBModelProvider.AzureOpenAI && (
+                {needDeploymentName(modelProverId) && (
                   <TableHead>{t('Deployment Name')}</TableHead>
                 )}
+                <TableHead>{t('Model Reference Name')}</TableHead>
                 <TableHead className="w-20">{t('Actions')}</TableHead>
               </TableRow>
             </TableHeader>
             <TableBody>
               {models.map((model, index) => (
                 <TableRow key={model.modelReferenceId}>
+                  {needDeploymentName(modelProverId) && (
+                    <TableCell>
+                      <Input
+                        className="max-w-[200px]"
+                        disabled={model.isExists}
+                        value={model.deploymentName || ''}
+                        onChange={(e) => {
+                          handleChangeDeploymentName(index, e.target.value);
+                        }}
+                      />
+                    </TableCell>
+                  )}
                   <TableCell>
                     {model.referenceName}
                     {model.isExists && (
@@ -161,18 +177,6 @@ const ConfigModelModal = (props: IProps) => {
                       </Badge>
                     )}
                   </TableCell>
-                  {modelProverId == DBModelProvider.AzureOpenAI && (
-                    <TableCell>
-                      <Input
-                        className="max-w-[200px]"
-                        disabled={model.isExists}
-                        value={model.deploymentName || ''}
-                        onChange={(e) => {
-                          handleChangeDeploymentName(index, e.target.value);
-                        }}
-                      />
-                    </TableCell>
-                  )}
                   <TableCell className="flex gap-x-2 items-center">
                     {!model.isExists && (
                       <Button

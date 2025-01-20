@@ -2,6 +2,7 @@
 using Chats.BE.Controllers.Admin.ModelKeys.Dtos;
 using Chats.BE.Controllers.Common;
 using Chats.BE.DB;
+using Chats.BE.DB.Enums;
 using Chats.BE.Services.Common;
 using Chats.BE.Services.Models;
 using Microsoft.AspNetCore.Mvc;
@@ -115,7 +116,7 @@ public class ModelKeysController(ChatsDB db) : ControllerBase
     }
 
     [HttpGet("{modelKeyId:int}/possible-models")]
-    public async Task<ActionResult<PossibleModelDto[]>> ListModelKeyPossibleModels(short modelKeyId, CancellationToken cancellationToken)
+    public async Task<ActionResult<PossibleModelDto[]>> ListModelKeyPossibleModels(short modelKeyId, [FromServices] ChatFactory cf, CancellationToken cancellationToken)
     {
         ModelKey? modelKey = await db
            .ModelKeys
@@ -128,21 +129,77 @@ public class ModelKeysController(ChatsDB db) : ControllerBase
             return NotFound();
         }
 
-        PossibleModelDto[] readyRefs = await db.ModelReferences
-            .Where(x => x.ProviderId == modelKey.ModelProviderId)
-            .OrderBy(x => x.Name)
-            .Select(x => new PossibleModelDto()
-            {
-                DeploymentName = x.Models.FirstOrDefault(m => m.ModelKeyId == modelKeyId)!.DeploymentName,
-                ReferenceId = x.Id,
-                ReferenceName = x.Name,
-                IsLegacy = x.IsLegacy,
-                IsExists = x.Models.Any(m => m.ModelKeyId == modelKeyId),
-            })
-            .OrderBy(x => (x.IsLegacy ? 1 : 0) + (x.IsExists ? 2 : 0))
-            .ThenByDescending(x => x.ReferenceId)
-            .ToArrayAsync(cancellationToken);
+        DBModelProvider modelProvider = (DBModelProvider)modelKey.ModelProviderId;
+        ModelLoader? loader = cf.CreateModelLoader(modelProvider);
+        if (loader != null)
+        {
+            string[] models = await loader.ListModels(modelKey, cancellationToken);
+            HashSet<string> existsDeploymentNames = await db.Models
+                .Where(x => x.ModelKeyId == modelKeyId && x.DeploymentName != null)
+                .Select(x => x.DeploymentName!)
+                .ToHashSetAsync(cancellationToken);
 
-        return Ok(readyRefs);
+            if (modelProvider == DBModelProvider.Ollama)
+            {
+                Dictionary<short, ModelReference> referenceOptions = await db.ModelReferences
+                    .Where(x => x.ProviderId == modelKey.ModelProviderId)
+                    .ToDictionaryAsync(k => k.Id, v => v, cancellationToken);
+
+                return Ok(models.Select(model =>
+                {
+                    bool isVision = model.Contains("qvq", StringComparison.OrdinalIgnoreCase) ||
+                        model.Contains("vision", StringComparison.OrdinalIgnoreCase);
+                    short modelReferenceId = isVision ? (short)1401 : (short)1400;
+                    return new PossibleModelDto()
+                    {
+                        DeploymentName = model,
+                        ReferenceId = modelReferenceId,
+                        ReferenceName = referenceOptions[modelReferenceId].Name,
+                        IsLegacy = referenceOptions[modelReferenceId].IsLegacy,
+                        IsExists = existsDeploymentNames.Contains(model),
+                    };
+                }));
+            }
+            else
+            {
+                Dictionary<string, ModelReference> referenceOptions = await db.ModelReferences
+                    .Where(x => x.ProviderId == modelKey.ModelProviderId)
+                    .ToDictionaryAsync(k => k.Name, v => v, cancellationToken);
+                HashSet<string> referenceOptionNames = [.. referenceOptions.Keys];
+
+                return Ok(models.Select(model =>
+                {
+                    string bestMatch = FuzzyMatcher.FindBestMatch(model, referenceOptionNames);
+
+                    return new PossibleModelDto()
+                    {
+                        DeploymentName = model,
+                        ReferenceId = referenceOptions[bestMatch].Id,
+                        ReferenceName = referenceOptions[bestMatch].Name,
+                        IsLegacy = false,
+                        IsExists = existsDeploymentNames.Contains(model),
+                    };
+                }).ToArray());
+            }
+        }
+        else
+        {
+            PossibleModelDto[] readyRefs = await db.ModelReferences
+                .Where(x => x.ProviderId == modelKey.ModelProviderId)
+                .OrderBy(x => x.Name)
+                .Select(x => new PossibleModelDto()
+                {
+                    DeploymentName = x.Models.FirstOrDefault(m => m.ModelKeyId == modelKeyId)!.DeploymentName,
+                    ReferenceId = x.Id,
+                    ReferenceName = x.Name,
+                    IsLegacy = x.IsLegacy,
+                    IsExists = x.Models.Any(m => m.ModelKeyId == modelKeyId),
+                })
+                .OrderBy(x => (x.IsLegacy ? 1 : 0) + (x.IsExists ? 2 : 0))
+                .ThenByDescending(x => x.ReferenceId)
+                .ToArrayAsync(cancellationToken);
+
+            return Ok(readyRefs);
+        }
     }
 }
