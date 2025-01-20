@@ -1,6 +1,6 @@
 ﻿using Chats.BE.Controllers.Chats.Messages.Dtos;
 using Chats.BE.DB;
-using Chats.BE.Services.ChatServices.Extensions;
+using Chats.BE.Services.Models.Extensions;
 using OpenAI.Chat;
 using System.Text.Json.Serialization;
 

@@ -2,9 +2,9 @@
 using Chats.BE.DB;
 using Chats.BE.Infrastructure;
 using Chats.BE.Services;
-using Chats.BE.Services.ChatServices;
-using Chats.BE.Services.ChatServices.Dtos;
-using Chats.BE.Services.ChatServices.Implementations.Test;
+using Chats.BE.Services.Models;
+using Chats.BE.Services.Models.Dtos;
+using Chats.BE.Services.Models.ChatServices.Test;
 using Chats.BE.Services.FileServices;
 using Chats.BE.Services.UrlEncryption;
 using Microsoft.AspNetCore.Authorization;
@@ -31,7 +31,7 @@ public class ChatController(ChatStopService stopService) : ControllerBase
         [FromServices] ILogger<ChatController> logger,
         [FromServices] IUrlEncryptionService idEncryption,
         [FromServices] BalanceService balanceService,
-        [FromServices] ChatFactory chatFactory,
+        [FromServices] ModelFactory chatFactory,
         [FromServices] UserModelManager userModelManager,
         [FromServices] ClientInfoManager clientInfoManager,
         [FromServices] FileUrlProvider fup,
@@ -62,7 +62,7 @@ public class ChatController(ChatStopService stopService) : ControllerBase
         [FromServices] ILogger<ChatController> logger,
         [FromServices] IUrlEncryptionService idEncryption,
         [FromServices] BalanceService balanceService,
-        [FromServices] ChatFactory chatFactory,
+        [FromServices] ModelFactory chatFactory,
         [FromServices] UserModelManager userModelManager,
         [FromServices] ClientInfoManager clientInfoManager,
         [FromServices] FileUrlProvider fup,
@@ -87,7 +87,7 @@ public class ChatController(ChatStopService stopService) : ControllerBase
         [FromServices] ILogger<ChatController> logger,
         [FromServices] IUrlEncryptionService idEncryption,
         [FromServices] BalanceService balanceService,
-        [FromServices] ChatFactory chatFactory,
+        [FromServices] ModelFactory chatFactory,
         [FromServices] UserModelManager userModelManager,
         [FromServices] ClientInfoManager clientInfoManager,
         [FromServices] FileUrlProvider fup,
@@ -131,7 +131,7 @@ public class ChatController(ChatStopService stopService) : ControllerBase
         ILogger<ChatController> logger,
         IUrlEncryptionService idEncryption,
         BalanceService balanceService,
-        ChatFactory chatFactory,
+        ModelFactory chatFactory,
         UserModelManager userModelManager,
         ClientInfoManager clientInfoManager,
         FileUrlProvider fup,
@@ -366,7 +366,7 @@ public class ChatController(ChatStopService stopService) : ControllerBase
     private static async Task<ChatSpanResponse> ProcessChatSpan(
         CurrentUser currentUser,
         ILogger<ChatController> logger,
-        ChatFactory chatFactory,
+        ModelFactory chatFactory,
         FileUrlProvider fup,
         ChatSpanRequest span,
         long firstTick,

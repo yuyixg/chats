@@ -3,7 +3,7 @@ using Chats.BE.Controllers.Admin.ModelKeys.Dtos;
 using Chats.BE.Controllers.Common;
 using Chats.BE.DB;
 using Chats.BE.Services.Common;
-using Chats.BE.Services.ChatServices;
+using Chats.BE.Services.Models;
 using Microsoft.AspNetCore.Mvc;
 using Microsoft.EntityFrameworkCore;
 
@@ -115,7 +115,7 @@ public class ModelKeysController(ChatsDB db) : ControllerBase
     }
 
     [HttpPost("{modelKeyId:int}/auto-create-models")]
-    public async Task<ActionResult<AutoCreateModelResult[]>> AutoCreateModels(short modelKeyId, [FromServices] ChatFactory conversationFactory, CancellationToken cancellationToken)
+    public async Task<ActionResult<AutoCreateModelResult[]>> AutoCreateModels(short modelKeyId, [FromServices] ModelFactory conversationFactory, CancellationToken cancellationToken)
     {
         ModelKey? modelKey = await db
             .ModelKeys

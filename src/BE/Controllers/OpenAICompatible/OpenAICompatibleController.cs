@@ -1,8 +1,8 @@
 ﻿using Chats.BE.Controllers.Chats.Chats;
 using Chats.BE.DB;
 using Chats.BE.Services;
-using Chats.BE.Services.ChatServices;
-using Chats.BE.Services.ChatServices.Dtos;
+using Chats.BE.Services.Models;
+using Chats.BE.Services.Models.Dtos;
 using Chats.BE.Services.OpenAIApiKeySession;
 using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Mvc;
@@ -17,7 +17,7 @@ using System.Diagnostics;
 namespace Chats.BE.Controllers.OpenAICompatible;
 
 [Route("v1"), Authorize(AuthenticationSchemes = "OpenAIApiKey")]
-public partial class OpenAICompatibleController(ChatsDB db, CurrentApiKey currentApiKey, ChatFactory cf, UserModelManager userModelManager, ILogger<OpenAICompatibleController> logger, BalanceService balanceService) : ControllerBase
+public partial class OpenAICompatibleController(ChatsDB db, CurrentApiKey currentApiKey, ModelFactory cf, UserModelManager userModelManager, ILogger<OpenAICompatibleController> logger, BalanceService balanceService) : ControllerBase
 {
     [HttpPost("chat/completions")]
     public async Task<ActionResult> ChatCompletion([FromBody] JsonObject json, [FromServices] ClientInfoManager clientInfoManager, CancellationToken cancellationToken)
