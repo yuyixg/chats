@@ -7,16 +7,17 @@ namespace Chats.BE.Controllers.Admin.GlobalConfigs;
 [AuthorizeAdmin, Route("api/version")]
 public class VersionController : ControllerBase
 {
+    // it will be replaced by CI/CD pipeline
     const int buildVersion = 0;
 
-    [HttpGet("current")]
-    public ActionResult GetCurrentVersion()
+    [HttpGet]
+    public ActionResult<int> GetCurrentVersion()
     {
         return Ok(buildVersion);
     }
 
     [HttpPost("check-update")]
-    public async Task<ActionResult> CheckUpdate(CancellationToken cancellationToken)
+    public async Task<ActionResult<CheckUpdateResponse>> CheckUpdate(CancellationToken cancellationToken)
     {
         string tagName = await GitHubReleaseChecker.SdcbChats.GetLatestReleaseTagNameAsync(cancellationToken);
         bool hasNewVersion = GitHubReleaseChecker.IsNewVersionAvailableAsync(tagName, buildVersion);

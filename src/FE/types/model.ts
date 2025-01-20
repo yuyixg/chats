@@ -6,7 +6,7 @@ export interface UserModelConfig {
 
 export enum DBModelProvider {
   Test = 0,
-  Azure = 1,
+  AzureOpenAI = 1,
   HunYuan = 2,
   LingYi = 3,
   Moonshot = 4,
@@ -19,6 +19,8 @@ export enum DBModelProvider {
   X_AI = 11,
   GithubModels = 12,
   GoogleAI = 13,
+  Ollama = 14,
+  MiniMax = 15,
 }
 
 export type FEModelProvider = {
@@ -29,7 +31,7 @@ export type FEModelProvider = {
 
 export const feModelProviders: FEModelProvider[] = [
   { id: DBModelProvider.Test, name: 'Test', icon: '/icons/logo.png' },
-  { id: DBModelProvider.Azure, name: 'Azure OpenAI', icon: '/logos/azure.svg' },
+  { id: DBModelProvider.AzureOpenAI, name: 'Azure OpenAI', icon: '/logos/azure-openai.svg' },
   { id: DBModelProvider.HunYuan, name: 'Tencent Hunyuan', icon: '/logos/hunyuan.svg' },
   { id: DBModelProvider.LingYi, name: '01.ai', icon: '/logos/lingyi.svg' },
   { id: DBModelProvider.Moonshot, name: 'Moonshot', icon: '/logos/moonshot.svg' },
@@ -41,7 +43,9 @@ export const feModelProviders: FEModelProvider[] = [
   { id: DBModelProvider.DeepSeek, name: 'DeepSeek', icon: '/logos/deepseek.svg' },
   { id: DBModelProvider.X_AI, name: 'x.ai', icon: '/logos/x.svg' },
   { id: DBModelProvider.GithubModels, name: 'Github Models', icon: '/logos/github.svg' },
-  { id: DBModelProvider.GoogleAI, name: 'Google AI', icon: '/logos/google.svg' },
+  { id: DBModelProvider.GoogleAI, name: 'Google AI', icon: '/logos/google-ai.svg' },
+  { id: DBModelProvider.Ollama, name: 'Ollama', icon: '/logos/ollama.svg' },
+  { id: DBModelProvider.MiniMax, name: 'MiniMax', icon: '/logos/minimax.svg' },
 ];
 
 export interface ChatModelFileConfig {
