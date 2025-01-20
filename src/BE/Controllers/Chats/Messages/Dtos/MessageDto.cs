@@ -29,6 +29,9 @@ public abstract record MessageDto
 
     [JsonPropertyName("spanId")]
     public required byte? SpanId { get; init; }
+
+    [JsonPropertyName("edited")]
+    public required bool Edited { get; init; }
 }
 
 public record RequestMessageDto : MessageDto;
@@ -159,6 +162,7 @@ public record ChatMessageTemp
     public required MessageContent[] Content { get; init; }
     public required DateTime CreatedAt { get; init; }
     public required byte? SpanId { get; init; }
+    public required bool Edited { get; init; }
     public required ChatMessageTempUsage? Usage { get; init; }
 
     public MessageDto ToDto(IUrlEncryptionService urlEncryption, FileUrlProvider fup)
@@ -173,6 +177,7 @@ public record ChatMessageTemp
                 Content = MessageContentResponse.FromSegments(Content, fup),
                 CreatedAt = CreatedAt,
                 SpanId = SpanId,
+                Edited = Edited,
             };
         }
         else
@@ -185,6 +190,7 @@ public record ChatMessageTemp
                 Content = MessageContentResponse.FromSegments(Content, fup),
                 CreatedAt = CreatedAt,
                 SpanId = SpanId,
+                Edited = Edited,
 
                 InputTokens = Usage.InputTokens,
                 OutputTokens = Usage.OutputTokens,

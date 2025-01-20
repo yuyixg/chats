@@ -32,6 +32,7 @@ public class MessagesController(ChatsDB db, CurrentUser currentUser, IUrlEncrypt
                     .ToArray(),
                 CreatedAt = x.CreatedAt,
                 SpanId = x.SpanId,
+                Edited = x.Edited,
                 Usage = x.Usage == null ? null : new ChatMessageTempUsage()
                 {
                     InputTokens = x.Usage.InputTokens,
