@@ -214,6 +214,7 @@
   "Rank": "#",
   "ID": "模型",
   "Model Display Name": "模型显示名称",
+  "Model Reference Name": "模型参考名称",
   "Model Key": "模型密钥",
   "Model Type": "模型类型",
   "Model Provider": "模型提供商",

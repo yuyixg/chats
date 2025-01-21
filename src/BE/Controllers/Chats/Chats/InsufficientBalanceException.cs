@@ -1,4 +1,4 @@
-﻿using Chats.BE.Services.ChatServices;
+﻿using Chats.BE.Services.Models;
 
 namespace Chats.BE.Controllers.Chats.Chats;
 

@@ -2,8 +2,9 @@
 using Chats.BE.Controllers.Admin.ModelKeys.Dtos;
 using Chats.BE.Controllers.Common;
 using Chats.BE.DB;
+using Chats.BE.DB.Enums;
 using Chats.BE.Services.Common;
-using Chats.BE.Services.ChatServices;
+using Chats.BE.Services.Models;
 using Microsoft.AspNetCore.Mvc;
 using Microsoft.EntityFrameworkCore;
 
@@ -114,75 +115,8 @@ public class ModelKeysController(ChatsDB db) : ControllerBase
         return NoContent();
     }
 
-    [HttpPost("{modelKeyId:int}/auto-create-models")]
-    public async Task<ActionResult<AutoCreateModelResult[]>> AutoCreateModels(short modelKeyId, [FromServices] ChatFactory conversationFactory, CancellationToken cancellationToken)
-    {
-        ModelKey? modelKey = await db
-            .ModelKeys
-            .Include(x => x.Models)
-            .AsSplitQuery()
-            .FirstOrDefaultAsync(x => x.Id == modelKeyId, cancellationToken);
-
-        if (modelKey == null)
-        {
-            return NotFound();
-        }
-
-        HashSet<short> existingModelRefIds = modelKey.Models
-            .Select(x => x.ModelReferenceId)
-            .ToHashSet();
-
-        ModelReference[] readyRefs = await db.ModelReferences
-            .Include(x => x.CurrencyCodeNavigation)
-            .Where(x => !x.IsLegacy && x.ProviderId == modelKey.ModelProviderId)
-            .ToArrayAsync(cancellationToken);
-
-        ParepareAutoCreateModelResult[] scanedModels = await Task.WhenAll(readyRefs
-            .Select(async r => existingModelRefIds.Contains(r.Id)
-                ? ParepareAutoCreateModelResult.ModelAlreadyExists(r)
-                : ParepareAutoCreateModelResult.FromModelValidateResult(await conversationFactory.ValidateModel(modelKey, r, r.Name, cancellationToken), r)));
-
-        FileService? fileService = await db.FileServices
-            .OrderByDescending(x => x.Id)
-            .FirstOrDefaultAsync(cancellationToken);
-        AutoCreateModelResult[] results = await scanedModels
-            .ToAsyncEnumerable()
-            .SelectAwait(async (m) =>
-            {
-                if (!m.IsValidationPassed)
-                {
-                    return m.ToResult(null);
-                }
-
-                db.Models.Add(new Model
-                {
-                    ModelKeyId = modelKeyId,
-                    ModelReferenceId = m.ModelReference.Id,
-                    Name = m.ModelReference.Name,
-                    CreatedAt = DateTime.UtcNow,
-                    UpdatedAt = DateTime.UtcNow,
-                    DeploymentName = null, // don't need to specify deploymentName because it's auto created
-                    IsDeleted = false,
-                    InputTokenPrice1M = m.ModelReference.InputTokenPrice1M * m.ModelReference.CurrencyCodeNavigation.ExchangeRate,
-                    OutputTokenPrice1M = m.ModelReference.OutputTokenPrice1M * m.ModelReference.CurrencyCodeNavigation.ExchangeRate,
-                });
-                try
-                {
-                    await db.SaveChangesAsync(cancellationToken);
-                    return m.ToResult(null);
-                }
-                catch (Exception ex)
-                {
-                    return m.ToResult(ex.Message);
-                }
-            })
-            .ToArrayAsync(cancellationToken);
-
-        return Ok(results);
-    }
-
     [HttpGet("{modelKeyId:int}/possible-models")]
-    public async Task<ActionResult<PossibleModelDto[]>> ListModelKeyPossibleModels(short modelKeyId, CancellationToken cancellationToken)
+    public async Task<ActionResult<PossibleModelDto[]>> ListModelKeyPossibleModels(short modelKeyId, [FromServices] ChatFactory cf, CancellationToken cancellationToken)
     {
         ModelKey? modelKey = await db
            .ModelKeys
@@ -195,21 +129,81 @@ public class ModelKeysController(ChatsDB db) : ControllerBase
             return NotFound();
         }
 
-        PossibleModelDto[] readyRefs = await db.ModelReferences
-            .Where(x => x.ProviderId == modelKey.ModelProviderId)
-            .OrderBy(x => x.Name)
-            .Select(x => new PossibleModelDto()
-            {
-                DeploymentName = x.Models.FirstOrDefault(m => m.ModelKeyId == modelKeyId)!.DeploymentName,
-                ReferenceId = x.Id,
-                ReferenceName = x.Name,
-                IsLegacy = x.IsLegacy,
-                IsExists = x.Models.Any(m => m.ModelKeyId == modelKeyId),
-            })
-            .OrderBy(x => (x.IsLegacy ? 1 : 0) + (x.IsExists ? 2 : 0))
-            .ThenByDescending(x => x.ReferenceId)
-            .ToArrayAsync(cancellationToken);
+        DBModelProvider modelProvider = (DBModelProvider)modelKey.ModelProviderId;
+        ModelLoader? loader = cf.CreateModelLoader(modelProvider);
+        if (loader != null)
+        {
+            string[] models = await loader.ListModels(modelKey, cancellationToken);
+            HashSet<string> existsDeploymentNames = await db.Models
+                .Where(x => x.ModelKeyId == modelKeyId && x.DeploymentName != null)
+                .Select(x => x.DeploymentName!)
+                .ToHashSetAsync(cancellationToken);
 
-        return Ok(readyRefs);
+            if (modelProvider == DBModelProvider.Ollama)
+            {
+                Dictionary<short, ModelReference> referenceOptions = await db.ModelReferences
+                    .Where(x => x.ProviderId == modelKey.ModelProviderId)
+                    .ToDictionaryAsync(k => k.Id, v => v, cancellationToken);
+
+                return Ok(models.Select(model =>
+                {
+                    bool isVision = model.Contains("qvq", StringComparison.OrdinalIgnoreCase) ||
+                        model.Contains("vision", StringComparison.OrdinalIgnoreCase);
+                    short modelReferenceId = isVision ? (short)1401 : (short)1400;
+                    return new PossibleModelDto()
+                    {
+                        DeploymentName = model,
+                        ReferenceId = modelReferenceId,
+                        ReferenceName = referenceOptions[modelReferenceId].Name,
+                        IsLegacy = referenceOptions[modelReferenceId].PublishDate switch
+                        {
+                            var x when x < new DateOnly(2024, 7, 1) => true,
+                            _ => false
+                        },
+                        IsExists = existsDeploymentNames.Contains(model),
+                    };
+                }));
+            }
+            else
+            {
+                Dictionary<string, ModelReference> referenceOptions = await db.ModelReferences
+                    .Where(x => x.ProviderId == modelKey.ModelProviderId)
+                    .ToDictionaryAsync(k => k.Name, v => v, cancellationToken);
+                HashSet<string> referenceOptionNames = [.. referenceOptions.Keys];
+
+                return Ok(models.Select(model =>
+                {
+                    string bestMatch = FuzzyMatcher.FindBestMatch(model, referenceOptionNames);
+
+                    return new PossibleModelDto()
+                    {
+                        DeploymentName = model,
+                        ReferenceId = referenceOptions[bestMatch].Id,
+                        ReferenceName = referenceOptions[bestMatch].Name,
+                        IsLegacy = false,
+                        IsExists = existsDeploymentNames.Contains(model),
+                    };
+                }).ToArray());
+            }
+        }
+        else
+        {
+            PossibleModelDto[] readyRefs = await db.ModelReferences
+                .Where(x => x.ProviderId == modelKey.ModelProviderId)
+                .OrderBy(x => x.Name)
+                .Select(x => new PossibleModelDto()
+                {
+                    DeploymentName = x.Models.FirstOrDefault(m => m.ModelKeyId == modelKeyId)!.DeploymentName,
+                    ReferenceId = x.Id,
+                    ReferenceName = x.Name,
+                    IsLegacy = x.PublishDate == null || x.PublishDate < new DateOnly(2024, 7, 1),
+                    IsExists = x.Models.Any(m => m.ModelKeyId == modelKeyId),
+                })
+                .OrderBy(x => (x.IsLegacy ? 1 : 0) + (x.IsExists ? 2 : 0))
+                .ThenByDescending(x => x.ReferenceId)
+                .ToArrayAsync(cancellationToken);
+
+            return Ok(readyRefs);
+        }
     }
 }

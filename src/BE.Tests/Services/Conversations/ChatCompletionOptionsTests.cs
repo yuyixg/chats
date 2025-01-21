@@ -1,4 +1,4 @@
-﻿using Chats.BE.Services.ChatServices.Extensions;
+﻿using Chats.BE.Services.Models.Extensions;
 using OpenAI.Chat;
 using System.Runtime.CompilerServices;
 

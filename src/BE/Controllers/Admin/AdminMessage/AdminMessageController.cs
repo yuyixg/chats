@@ -5,7 +5,7 @@ using Chats.BE.Controllers.Chats.UserChats.Dtos;
 using Chats.BE.Controllers.Common.Dtos;
 using Chats.BE.DB;
 using Chats.BE.Infrastructure;
-using Chats.BE.Services.ChatServices;
+using Chats.BE.Services.Models;
 using Chats.BE.Services.FileServices;
 using Chats.BE.Services.UrlEncryption;
 using Microsoft.AspNetCore.Mvc;
@@ -78,7 +78,7 @@ public class AdminMessageController(ChatsDB db, CurrentUser currentUser, IUrlEnc
                     Temperature = s.Temperature,
                     EnableSearch = s.EnableSearch,
                 }).ToArray(),
-                LeafMessageId = x.LeafMessageId != null ? urlEncryption.EncryptMessageId(x.LeafMessageId.Value) : null,
+                LeafMessageId = urlEncryption.EncryptMessageId(x.LeafMessageId),
                 UpdatedAt = x.UpdatedAt,
             })
             .FirstOrDefaultAsync(cancellationToken);
@@ -100,6 +100,7 @@ public class AdminMessageController(ChatsDB db, CurrentUser currentUser, IUrlEnc
                     .ToArray(),
                 CreatedAt = x.CreatedAt,
                 SpanId = x.SpanId,
+                Edited = x.Edited,
                 Usage = x.Usage == null ? null : new ChatMessageTempUsage()
                 {
                     InputTokens = x.Usage.InputTokens,

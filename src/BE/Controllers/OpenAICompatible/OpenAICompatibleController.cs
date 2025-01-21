@@ -1,8 +1,8 @@
 ﻿using Chats.BE.Controllers.Chats.Chats;
 using Chats.BE.DB;
 using Chats.BE.Services;
-using Chats.BE.Services.ChatServices;
-using Chats.BE.Services.ChatServices.Dtos;
+using Chats.BE.Services.Models;
+using Chats.BE.Services.Models.Dtos;
 using Chats.BE.Services.OpenAIApiKeySession;
 using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Mvc;
@@ -37,7 +37,7 @@ public partial class OpenAICompatibleController(ChatsDB db, CurrentApiKey curren
         if (userModel == null) return InvalidModel(cco.Model);
 
         Model cm = userModel.Model;
-        using ChatService s = cf.CreateConversationService(cm);
+        using ChatService s = cf.CreateChatService(cm);
 
         UserBalance userBalance = await db.UserBalances
             .Where(x => x.UserId == currentApiKey.User.Id)

@@ -23,9 +23,6 @@ public class InitService(IServiceScopeFactory scopeFactory)
 
     private static async Task InsertInitialData(IServiceScope scope, ChatsDB db, CancellationToken cancellationToken)
     {
-        JwtKeyManager jwtKeyManager = scope.ServiceProvider.GetRequiredService<JwtKeyManager>();
-        await jwtKeyManager.GetOrCreateSecretKey(cancellationToken);
-
         BasicData.InsertAll(db);
         await db.SaveChangesAsync(cancellationToken);
 

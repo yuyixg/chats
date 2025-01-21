@@ -1,7 +1,7 @@
 ﻿using Chats.BE.Controllers.Chats.Prompts.Dtos;
 using Chats.BE.DB;
 using Chats.BE.Infrastructure;
-using Chats.BE.Services.ChatServices;
+using Chats.BE.Services.Models;
 using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Mvc;
 using Microsoft.EntityFrameworkCore;

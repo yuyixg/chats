@@ -2,12 +2,14 @@
 using Chats.BE.DB;
 using Chats.BE.DB.Enums;
 using Chats.BE.Infrastructure;
-using Chats.BE.Services.ChatServices;
+using Chats.BE.Services.Models;
 using Chats.BE.Services.FileServices;
 using Chats.BE.Services.UrlEncryption;
 using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Mvc;
 using Microsoft.EntityFrameworkCore;
+using Microsoft.ML.Tokenizers;
+using Chats.BE.Services;
 
 namespace Chats.BE.Controllers.Chats.Messages;
 
@@ -32,6 +34,7 @@ public class MessagesController(ChatsDB db, CurrentUser currentUser, IUrlEncrypt
                     .ToArray(),
                 CreatedAt = x.CreatedAt,
                 SpanId = x.SpanId,
+                Edited = x.Edited,
                 Usage = x.Usage == null ? null : new ChatMessageTempUsage()
                 {
                     InputTokens = x.Usage.InputTokens,
@@ -131,7 +134,11 @@ public class MessagesController(ChatsDB db, CurrentUser currentUser, IUrlEncrypt
             return Forbid();
         }
 
-        message.MessageContents = await content.ToMessageContents(fup, cancellationToken);
+        message.MessageContents.Clear();
+        foreach (MessageContent c in await content.ToMessageContents(fup, cancellationToken))
+        {
+            message.MessageContents.Add(c);
+        }
         message.Chat.UpdatedAt = DateTime.UtcNow;
         message.Edited = true;
         await db.SaveChangesAsync(cancellationToken);
@@ -139,8 +146,9 @@ public class MessagesController(ChatsDB db, CurrentUser currentUser, IUrlEncrypt
     }
 
     [HttpPut("{encryptedMessageId}/edit-and-save-new")]
-    public async Task<ActionResult> EditAndSaveNew(string encryptedMessageId, [FromBody] MessageContentRequest content,
+    public async Task<ActionResult<RequestMessageDto>> EditAndSaveNew(string encryptedMessageId, [FromBody] MessageContentRequest content,
     [FromServices] FileUrlProvider fup,
+    [FromServices] ClientInfoManager clientInfoManager,
     CancellationToken cancellationToken)
     {
         long messageId = urlEncryption.DecryptMessageId(encryptedMessageId);
@@ -166,12 +174,34 @@ public class MessagesController(ChatsDB db, CurrentUser currentUser, IUrlEncrypt
             ChatRoleId = message.ChatRoleId,
             ChatRole = message.ChatRole,
             MessageContents = await content.ToMessageContents(fup, cancellationToken),
-            UsageId = null,
         };
+        if (message.Usage != null)
+        {
+            newMessage.Usage = new UserModelUsage()
+            {
+                UserModelId = message.Usage.UserModelId,
+                FinishReasonId = (byte)DBFinishReason.Success,
+                SegmentCount = 1,
+                InputTokens = message.Usage.InputTokens,
+                OutputTokens = TiktokenTokenizer.CreateForEncoding("cl100k_base").CountTokens(content.Text),
+                ReasoningTokens = 0,
+                IsUsageReliable = false,
+                PreprocessDurationMs = 0,
+                FirstResponseDurationMs = 0,
+                PostprocessDurationMs = 0,
+                TotalDurationMs = 0,
+                InputCost = 0,
+                OutputCost = 0,
+                BalanceTransactionId = null,
+                UsageTransactionId = null,
+                ClientInfo = await clientInfoManager.GetClientInfo(cancellationToken),
+                CreatedAt = DateTime.UtcNow,
+            };
+        }
         db.Messages.Add(newMessage);
         message.Chat.UpdatedAt = DateTime.UtcNow;
         await db.SaveChangesAsync(cancellationToken);
-        return Ok();
+        return Ok(RequestMessageDto.FromDB(newMessage, fup, urlEncryption));
     }
 
     [HttpDelete("{encryptedMessageId}")]
