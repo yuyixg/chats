@@ -78,7 +78,7 @@ public class AdminMessageController(ChatsDB db, CurrentUser currentUser, IUrlEnc
                     Temperature = s.Temperature,
                     EnableSearch = s.EnableSearch,
                 }).ToArray(),
-                LeafMessageId = x.LeafMessageId != null ? urlEncryption.EncryptMessageId(x.LeafMessageId.Value) : null,
+                LeafMessageId = urlEncryption.EncryptMessageId(x.LeafMessageId),
                 UpdatedAt = x.UpdatedAt,
             })
             .FirstOrDefaultAsync(cancellationToken);

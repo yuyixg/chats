@@ -36,12 +36,12 @@ public abstract record MessageDto
 
 public record RequestMessageDto : MessageDto
 {
-    public static RequestMessageDto FromDB(Message message, FileUrlProvider fup)
+    public static RequestMessageDto FromDB(Message message, FileUrlProvider fup, IUrlEncryptionService urlEncryption)
     {
         return new RequestMessageDto()
         {
-            Id = message.Id.ToString(),
-            ParentId = message.ParentId?.ToString(),
+            Id = urlEncryption.EncryptMessageId(message.Id),
+            ParentId = urlEncryption.EncryptMessageId(message.ParentId),
             Role = (DBChatRole)message.ChatRoleId,
             Content = MessageContentResponse.FromSegments([.. message.MessageContents], fup),
             CreatedAt = message.CreatedAt,
