@@ -30,7 +30,7 @@ public class ModelsController : ControllerBase
                 ModelProviderId = x.ModelKey.ModelProviderId,
                 ModelReferenceId = x.ModelReferenceId,
                 ModelReferenceName = x.ModelReference.Name,
-                ModelReferenceShortName = x.ModelReference.ShortName,
+                ModelReferenceShortName = x.ModelReference.DisplayName,
                 InputTokenPrice1M = x.InputTokenPrice1M,
                 OutputTokenPrice1M = x.OutputTokenPrice1M,
                 Rank = x.Order,

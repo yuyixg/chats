@@ -7,7 +7,7 @@ public class GithubModelsChatService(Model model) : OpenAIChatService(model, new
 {
     protected override Task<ChatMessage[]> FEPreprocess(IReadOnlyList<ChatMessage> messages, ChatCompletionOptions options, ChatExtraDetails feOptions, CancellationToken cancellationToken)
     {
-        if (Model.ModelReference.ShortName == "Mistral")
+        if (Model.ModelReference.DisplayName == "Mistral")
         {
             // Mistral model does not support end-user ID
             options.EndUserId = null;

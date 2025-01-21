@@ -112,6 +112,7 @@ static int GetValueDisplayLength(object? value)
 		null => 4,
 		string str => GetStringDisplayLength(str),
 		decimal d => d.ToString().Length + 1,
+		DateOnly d => 26,
 		not null => value.ToString()!.Length,
 	};
 
@@ -160,7 +161,7 @@ static int MaxConsecutiveChar(string s, char c)
 	return maxCount;
 }
 
-static LiteralExpressionSyntax ValueToLiteral(object? value)
+static ExpressionSyntax ValueToLiteral(object? value)
 {
 	return value switch
 	{
@@ -179,6 +180,24 @@ static LiteralExpressionSyntax ValueToLiteral(object? value)
 		bool boolValue => boolValue
 			? SyntaxFactory.LiteralExpression(SyntaxKind.TrueLiteralExpression)
 			: SyntaxFactory.LiteralExpression(SyntaxKind.FalseLiteralExpression),
+
+		DateOnly date => ObjectCreationExpression(
+			Token(SyntaxKind.NewKeyword).WithTrailingTrivia(Whitespace(" ")),
+			IdentifierName("DateOnly"),
+			ArgumentList(
+				Token(SyntaxKind.OpenParenToken),
+				SeparatedList<ArgumentSyntax>(
+				[
+					Argument(LiteralExpression(SyntaxKind.NumericLiteralExpression, Literal(date.Year))),
+					Argument(LiteralExpression(SyntaxKind.NumericLiteralExpression, Literal(date.Month).WithLeadingTrivia(Whitespace(date.Month < 10 ? " " : "")))),
+					Argument(LiteralExpression(SyntaxKind.NumericLiteralExpression, Literal(date.Day).WithLeadingTrivia(Whitespace(date.Day < 10 ? " " : "")))),
+				],
+				[
+					Token(SyntaxKind.CommaToken).WithTrailingTrivia(Whitespace(" ")),
+					Token(SyntaxKind.CommaToken).WithTrailingTrivia(Whitespace(" ")),
+				]),
+				Token(SyntaxKind.CloseParenToken)),
+			null),
 
 		string stringValue => stringValue switch
 		{
