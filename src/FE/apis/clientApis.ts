@@ -23,6 +23,9 @@ import {
   PutChatGroupParams,
   PutChatParams,
   PutMoveChatGroupParams,
+  PutResponseMessageEditAndSaveNewParams,
+  PutResponseMessageEditAndSaveNewResult,
+  PutResponseMessageEditInPlaceParams,
   SingInParams,
   SingInResult,
 } from '@/types/clientApis';
@@ -358,4 +361,24 @@ export const getChatShare = (encryptedChatShareId: string) => {
   return fetchServer.get<GetChatShareResult>(
     `/api/public/chat-share/${encryptedChatShareId}`,
   );
+};
+
+export const putResponseMessageEditAndSaveNew = (
+  params: PutResponseMessageEditAndSaveNewParams,
+) => {
+  const fetchServer = useFetch();
+  return fetchServer.put<PutResponseMessageEditAndSaveNewResult>(
+    `/api/messages/${params.messageId}/edit-and-save-new`,
+    {
+      body: params.content,
+    },
+  );
+};
+export const putResponseMessageEditInPlace = (
+  params: PutResponseMessageEditInPlaceParams,
+) => {
+  const fetchServer = useFetch();
+  return fetchServer.put(`/api/messages/${params.messageId}/edit-in-place`, {
+    body: params.content,
+  });
 };

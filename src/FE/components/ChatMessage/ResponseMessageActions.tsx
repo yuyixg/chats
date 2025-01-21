@@ -4,6 +4,7 @@ import { ReactionMessageType } from '@/types/chatMessage';
 
 import ChangeModelAction from './ChangeModelAction';
 import CopyAction from './CopyAction';
+import EditAction from './EditAction';
 import GenerateInformationAction from './GenerateInformationAction';
 import PaginationAction from './PaginationAction';
 import ReactionBadResponseAction from './ReactionBadResponseAction';
@@ -27,6 +28,7 @@ export interface ResponseMessage {
   modelName: string;
   modelProviderId: number;
   reaction: boolean | null;
+  edited?: boolean;
 }
 
 interface Props {
@@ -34,6 +36,7 @@ interface Props {
   message: ResponseMessage;
   chatStatus: ChatSpanStatus;
   readonly?: boolean;
+  onToggleEditingMessage?: (messageId: string) => void;
   onChangeMessage?: (messageId: string) => void;
   onRegenerate?: (messageId: string, modelId: number) => void;
   onReactionMessage?: (type: ReactionMessageType, messageId: string) => void;
@@ -45,6 +48,7 @@ const ResponseMessageActions = (props: Props) => {
     message,
     chatStatus,
     readonly,
+    onToggleEditingMessage,
     onChangeMessage,
     onRegenerate,
     onReactionMessage,
@@ -72,6 +76,12 @@ const ResponseMessageActions = (props: Props) => {
             onChangeMessage={onChangeMessage}
           />
           <div className="visible flex gap-0 items-center">
+            <EditAction
+              visible
+              onToggleEditing={() => {
+                onToggleEditingMessage && onToggleEditingMessage(messageId);
+              }}
+            />
             <CopyAction text={message.content.text} />
             <GenerateInformationAction message={message} />
 

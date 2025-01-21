@@ -153,7 +153,7 @@ const ChatModelDropdownMenu = ({
             );
           })}
         </DropdownMenuGroup>
-        <RegenerateModel
+        {/* <RegenerateModel
           hidden={!showRegenerate}
           onRegenerate={(e) => {
             const model = models.find((x) => x.modelId === modelId);
@@ -161,7 +161,7 @@ const ChatModelDropdownMenu = ({
             e.stopPropagation();
           }}
           modelName={modelName}
-        />
+        /> */}
       </DropdownMenuContent>
     </DropdownMenu>
   );

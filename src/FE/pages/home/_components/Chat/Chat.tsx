@@ -22,7 +22,13 @@ import {
 import { throttle } from '@/utils/throttle';
 import { getUserSession } from '@/utils/user';
 
-import { ChatSpanStatus, ChatStatus, Message } from '@/types/chat';
+import {
+  ChatRole,
+  ChatSpanStatus,
+  ChatStatus,
+  Content,
+  Message,
+} from '@/types/chat';
 import {
   IChatMessage,
   ReactionMessageType,
@@ -30,6 +36,7 @@ import {
   SseResponseKind,
   SseResponseLine,
 } from '@/types/chatMessage';
+import { PutResponseMessageEditAndSaveNewResult } from '@/types/clientApis';
 import { Prompt } from '@/types/prompt';
 
 import {
@@ -51,8 +58,9 @@ import NoModel from './NoModel';
 import {
   putChats,
   putMessageReactionClear,
-  putMessageReactionDown,
   putMessageReactionUp,
+  putResponseMessageEditAndSaveNew,
+  putResponseMessageEditInPlace,
 } from '@/apis/clientApis';
 
 const Chat = memo(() => {
@@ -363,6 +371,64 @@ const Chat = memo(() => {
     changeSelectedChatStatus(ChatStatus.None);
   };
 
+  const handleUpdateResponseMessage = async (
+    messageId: string,
+    content: Content,
+    isCopy: boolean = false,
+  ) => {
+    let data: PutResponseMessageEditAndSaveNewResult;
+    const params = {
+      messageId,
+      content: { ...content, fileIds: content.fileIds?.map((x) => x.id) || [] },
+    };
+    if (isCopy) {
+      data = await putResponseMessageEditAndSaveNew(params);
+    } else {
+      await putResponseMessageEditInPlace(params);
+    }
+
+    let msgs = [...messages],
+      copyMsg: IChatMessage;
+
+    let messageIndex = messages.findIndex(
+      (x) => x.id === messageId && x.role === ChatRole.Assistant,
+    );
+
+    let msgGroupIndex = 0,
+      msgIndex = 0;
+    let selectedMsgs = selectedMessages.map((msg, groupIndex) => {
+      return msg.map((m, i) => {
+        msgGroupIndex = groupIndex;
+        msgIndex = i;
+        if (m.id === messageId && m.role === ChatRole.Assistant) {
+          const msgSiblingIds = isCopy
+            ? [...m.siblingIds, data.id]
+            : m.siblingIds;
+          copyMsg = {
+            ...m,
+            id: data?.id,
+            content,
+            siblingIds: msgSiblingIds,
+          };
+
+          return {
+            ...m,
+            content: isCopy ? m.content : content,
+            siblingIds: msgSiblingIds,
+          };
+        }
+        return m;
+      });
+    });
+
+    if (isCopy) {
+      msgs.splice(messageIndex + 1, 0, copyMsg!);
+      selectedMsgs[msgGroupIndex][msgIndex] = copyMsg!;
+    }
+    messageDispatch(setMessages(msgs));
+    messageDispatch(setSelectedMessages(selectedMsgs));
+  };
+
   useCallback(() => {
     if (autoScrollEnabled) {
       messagesEndRef.current?.scrollIntoView({ behavior: 'smooth' });
@@ -483,6 +549,7 @@ const Chat = memo(() => {
           onEditMessageSend={handleEditMessageSend}
           onRegenerate={handleRegenerate}
           onReactionMessage={handleReactionMessage}
+          onEditResponseMessage={handleUpdateResponseMessage}
         />
       </div>
       {hasModel() && selectedChat && (

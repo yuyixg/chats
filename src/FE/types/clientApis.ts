@@ -1,4 +1,4 @@
-import { ChatStatus } from './chat';
+import { ChatStatus, ImageDef } from './chat';
 import { IChatMessage } from './chatMessage';
 import { DBModelProvider } from './model';
 import { Paging } from './page';
@@ -200,4 +200,25 @@ export interface GetChatShareResult {
   leafMessageId: string;
   updatedAt: string;
   messages: IChatMessage[];
+}
+
+export interface PutResponseMessageContent {
+  text?: string;
+  fileIds?: string[];
+}
+
+export interface PutResponseMessageEditAndSaveNewParams {
+  messageId: string;
+  content: PutResponseMessageContent;
+}
+
+export interface PutResponseMessageEditAndSaveNewResult {
+  id: string;
+  parentId: string;
+  edited: boolean;
+}
+
+export interface PutResponseMessageEditInPlaceParams {
+  messageId: string;
+  content: PutResponseMessageContent;
 }

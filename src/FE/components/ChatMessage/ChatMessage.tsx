@@ -1,13 +1,11 @@
 import { FC, memo } from 'react';
 
 import { AdminModelDto } from '@/types/adminApis';
-import { ChatRole, ChatSpanStatus, IChat, Message } from '@/types/chat';
+import { ChatRole, Content, IChat, Message } from '@/types/chat';
 import { IChatMessage, ReactionMessageType } from '@/types/chatMessage';
 
-import ChatError from '../ChatError/ChatError';
 import { IconRobot } from '../Icons';
 import ResponseMessage from './ResponseMessage';
-import ResponseMessageActions from './ResponseMessageActions';
 import UserMessage from './UserMessage';
 
 import { cn } from '@/lib/utils';
@@ -22,6 +20,11 @@ export interface Props {
   onEditMessageSend?: (editedMessage: Message, parentId?: string) => void;
   onRegenerate?: (spanId: number, messageId: string, modelId: number) => void;
   onReactionMessage?: (type: ReactionMessageType, messageId: string) => void;
+  onEditResponseMessage?: (
+    messageId: string,
+    content: Content,
+    isCopy?: boolean,
+  ) => void;
 }
 
 export const ChatMessage: FC<Props> = memo(
@@ -35,6 +38,7 @@ export const ChatMessage: FC<Props> = memo(
     onEditMessageSend,
     onRegenerate,
     onReactionMessage,
+    onEditResponseMessage,
   }) => {
     const hasMultipleSpan = selectedMessages.find((x) => x.length > 1);
     return (
@@ -99,29 +103,14 @@ export const ChatMessage: FC<Props> = memo(
                           <ResponseMessage
                             key={'response-message-' + message.id}
                             message={message}
-                          />
-                          {message.status === ChatSpanStatus.Failed && (
-                            <ChatError error={message.content.error} />
-                          )}
-                          <ResponseMessageActions
-                            key={'response-actions-' + message.id}
                             readonly={readonly}
                             models={models}
-                            chatStatus={message.status}
-                            message={message as any}
-                            onChangeMessage={onChangeChatLeafMessageId}
+                            onRegenerate={onRegenerate}
                             onReactionMessage={onReactionMessage}
-                            onRegenerate={(
-                              messageId: string,
-                              modelId: number,
-                            ) => {
-                              onRegenerate &&
-                                onRegenerate(
-                                  message.spanId!,
-                                  messageId,
-                                  modelId,
-                                );
-                            }}
+                            onEditResponseMessage={onEditResponseMessage}
+                            onChangeChatLeafMessageId={
+                              onChangeChatLeafMessageId
+                            }
                           />
                         </div>
                       </div>
