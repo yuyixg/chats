@@ -83,7 +83,7 @@ const ResponseMessageActions = (props: Props) => {
               }}
             />
             <CopyAction text={message.content.text} />
-            <GenerateInformationAction message={message} />
+            {!message.edited && <GenerateInformationAction message={message} />}
 
             <ReactionGoodResponseAction
               value={message.reaction}

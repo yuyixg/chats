@@ -387,20 +387,24 @@ const Chat = memo(() => {
       await putResponseMessageEditInPlace(params);
     }
 
-    let msgs = [...messages],
+    let messageIndex = 0,
       copyMsg: IChatMessage;
 
-    let messageIndex = messages.findIndex(
-      (x) => x.id === messageId && x.role === ChatRole.Assistant,
-    );
+    let msgs = messages.map((x, index) => {
+      if (x.id === messageId && x.role === ChatRole.Assistant && !isCopy) {
+        messageIndex = index;
+        return { ...x, content };
+      }
+      return x;
+    });
 
     let msgGroupIndex = 0,
       msgIndex = 0;
     let selectedMsgs = selectedMessages.map((msg, groupIndex) => {
       return msg.map((m, i) => {
-        msgGroupIndex = groupIndex;
-        msgIndex = i;
         if (m.id === messageId && m.role === ChatRole.Assistant) {
+          msgGroupIndex = groupIndex;
+          msgIndex = i;
           const msgSiblingIds = isCopy
             ? [...m.siblingIds, data.id]
             : m.siblingIds;
@@ -424,6 +428,7 @@ const Chat = memo(() => {
     if (isCopy) {
       msgs.splice(messageIndex + 1, 0, copyMsg!);
       selectedMsgs[msgGroupIndex][msgIndex] = copyMsg!;
+      selectedMsgs.splice(msgGroupIndex + 1, selectedMsgs.length);
     }
     messageDispatch(setMessages(msgs));
     messageDispatch(setSelectedMessages(selectedMsgs));
