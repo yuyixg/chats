@@ -20,9 +20,9 @@ public partial class ModelReference
     public string Name { get; set; } = null!;
 
     [StringLength(50)]
-    public string? ShortName { get; set; }
+    public string? DisplayName { get; set; }
 
-    public bool IsLegacy { get; set; }
+    public DateOnly? PublishDate { get; set; }
 
     [Column(TypeName = "decimal(3, 2)")]
     public decimal MinTemperature { get; set; }

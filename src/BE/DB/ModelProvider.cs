@@ -28,6 +28,8 @@ public partial class ModelProvider
     [Unicode(false)]
     public string? InitialSecret { get; set; }
 
+    public bool RequireDeploymentName { get; set; }
+
     [InverseProperty("ModelProvider")]
     public virtual ICollection<ModelKey> ModelKeys { get; set; } = new List<ModelKey>();
 

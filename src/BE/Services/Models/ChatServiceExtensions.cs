@@ -64,7 +64,7 @@ public abstract partial class ChatService
             {
                 existingSystemPrompt.Content[0] = existingSystemPrompt.Content[0].Text
                     .Replace("{{CURRENT_DATE}}", now.ToString("yyyy/MM/dd"))
-                    .Replace("{{MODEL_NAME}}", Model.ModelReference.ShortName ?? Model.ModelReference.Name)
+                    .Replace("{{MODEL_NAME}}", Model.ModelReference.DisplayName ?? Model.ModelReference.Name)
                     .Replace("{{CURRENT_TIME}}", now.ToString("HH:mm:ss"));
                 ;
             }
