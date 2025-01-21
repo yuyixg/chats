@@ -426,13 +426,17 @@ const Chat = memo(() => {
     });
 
     if (isCopy) {
-      msgs.splice(messageIndex + 1, 0, copyMsg!);
+      msgs.push(copyMsg!);
       selectedMsgs[msgGroupIndex][msgIndex] = copyMsg!;
       selectedMsgs.splice(msgGroupIndex + 1, selectedMsgs.length);
     }
     messageDispatch(setMessages(msgs));
     messageDispatch(setSelectedMessages(selectedMsgs));
+    console.log('msgs', msgs);
+    console.log('selectedMsgs', selectedMsgs);
   };
+
+  console.log('selectedMessages', selectedMessages);
 
   useCallback(() => {
     if (autoScrollEnabled) {
