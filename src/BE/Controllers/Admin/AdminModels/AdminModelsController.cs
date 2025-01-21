@@ -207,6 +207,7 @@ public class AdminModelsController(ChatsDB db, CurrentUser adminUser) : Controll
         UserModelDto[] userModels = await db.Models
             .Where(x => !x.IsDeleted)
             .OrderBy(x => x.Order)
+            .ThenByDescending(x => x.Id)
             .Select(x => new
             {
                 Model = x,
