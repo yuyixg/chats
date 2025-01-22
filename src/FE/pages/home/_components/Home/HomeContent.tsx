@@ -118,10 +118,13 @@ const HomeContent = () => {
     messageDispatch(setSelectedMessages(selectedMessageList));
   };
 
-  const prepareChat = (chatList: IChat[], selectChatId?: string) => {
+  const findChat = (chatList: IChat[], selectChatId?: string) => {
     let chatId = selectChatId || router.asPath.substring(3);
     if (chatList.length > 0) {
-      const foundChat = chatList.find((x) => x.id === chatId) || chatList[0];
+      const foundChat =
+        chatList.find((x) => x.id === chatId) ||
+        chatList.find((x) => x.groupId === null) ||
+        chatList[0];
       return foundChat;
     }
     return undefined;
@@ -132,7 +135,7 @@ const HomeContent = () => {
   };
 
   const selectChat = (chatList: IChat[], chatId?: string) => {
-    const chat = prepareChat(chatList, chatId);
+    const chat = findChat(chatList, chatId);
     if (chat) {
       chatDispatch(setSelectedChat(supplyChatProperty(chat)));
 
@@ -148,12 +151,13 @@ const HomeContent = () => {
     return chat;
   };
 
-  const handleNewChat = () => {
+  const handleNewChat = (groupId: string | null = null) => {
     postChats({
       title: t('New Conversation'),
-      groupId: null,
+      groupId,
     }).then((data) => {
       const chat = supplyChatProperty(data);
+      chat.groupId = groupId;
       const chatList = [chat, ...chats];
       chatDispatch(setChats(chatList));
       chatDispatch(setSelectedChat(chat));

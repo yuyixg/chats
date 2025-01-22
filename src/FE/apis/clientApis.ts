@@ -383,7 +383,9 @@ export const putResponseMessageEditInPlace = (
   });
 };
 
-export const deleteMessage = (messageId: string) => {
+export const deleteMessage = (messageId: string, leafId: string) => {
   const fetchServer = useFetch();
-  return fetchServer.delete(`/api/messages/${messageId}?recursive=true`);
+  return fetchServer.delete(
+    `/api/messages/${messageId}?encryptedLeafMessageId=${leafId}&recursive=true`,
+  );
 };

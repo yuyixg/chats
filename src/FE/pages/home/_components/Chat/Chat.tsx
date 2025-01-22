@@ -567,7 +567,6 @@ const Chat = memo(() => {
   };
 
   const handleDeleteMessage = async (messageId: string) => {
-    await deleteMessage(messageId);
     let nextMsgId = '';
     let msgs = messages.filter((x) => x.id !== messageId);
     selectedMessages.forEach((msg) => {
@@ -588,6 +587,7 @@ const Chat = memo(() => {
     });
 
     const leafId = findLastLeafId(msgs, nextMsgId);
+    await deleteMessage(messageId, leafId);
     const selectedMsgs = findSelectedMessageByLeafId(msgs, leafId);
     messageDispatch(setSelectedMessages(selectedMsgs));
     messageDispatch(setMessages(msgs));

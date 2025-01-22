@@ -18,6 +18,7 @@ import {
   IconChevronRight,
   IconDots,
   IconPencil,
+  IconPlus,
   IconTrash,
   IconX,
 } from '../Icons';
@@ -39,6 +40,7 @@ interface Props {
   onDeleteGroup?: (id: string) => void;
   onClickGroup?: (group: IChatGroup) => void;
   onDragStart?: (e: DragEvent<HTMLButtonElement>, group: IChatGroup) => void;
+  onNewGroupChat?: (groupId: string) => void;
 }
 
 const Folder = ({
@@ -50,6 +52,7 @@ const Folder = ({
   onDeleteGroup,
   onClickGroup,
   onDragStart,
+  onNewGroupChat,
 }: Props) => {
   const { t } = useTranslation();
 
@@ -165,6 +168,15 @@ const Folder = ({
                 />
               </DropdownMenuTrigger>
               <DropdownMenuContent className="w-42 border-none">
+                <DropdownMenuItem
+                  className="flex justify-start gap-3"
+                  onClick={() => {
+                    onNewGroupChat && onNewGroupChat(currentFolder.id);
+                  }}
+                >
+                  <IconPlus size={18} />
+                  {t('New chat')}
+                </DropdownMenuItem>
                 <DropdownMenuItem
                   className="flex justify-start gap-3"
                   onClick={(e) => {

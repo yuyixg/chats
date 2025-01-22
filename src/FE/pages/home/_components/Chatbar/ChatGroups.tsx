@@ -29,6 +29,7 @@ const ChatGroups = ({ onShowMore }: Props) => {
   const {
     state: { chats, chatGroups },
     chatDispatch,
+    handleNewChat,
   } = useContext(HomeContext);
 
   const groupRefs = useRef<any>({});
@@ -156,6 +157,10 @@ const ChatGroups = ({ onShowMore }: Props) => {
     });
   };
 
+  const handleGroupNewChat = async (groupId: string) => {
+    await handleNewChat(groupId);
+  };
+
   const ChatGroupsRender = (chatGroup: IChatGroup) => {
     const chatList = chats.filter((x) => x.groupId === chatGroup.id);
     const groupByUpdatedChats = chatsGroupByUpdatedAt(chatList);
@@ -204,6 +209,7 @@ const ChatGroups = ({ onShowMore }: Props) => {
                 }}
                 onRenameGroup={handRenameGroup}
                 onDragStart={handleGroupDragStart}
+                onNewGroupChat={handleGroupNewChat}
                 folderComponent={ChatGroupsRender(group)}
               />
             )}
