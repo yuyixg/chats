@@ -154,6 +154,7 @@ public class MessagesController(ChatsDB db, CurrentUser currentUser, IUrlEncrypt
         long messageId = urlEncryption.DecryptMessageId(encryptedMessageId);
         Message? message = await db.Messages
             .Include(x => x.Chat)
+            .Include(x => x.Usage)
             .FirstOrDefaultAsync(x => x.Id == messageId, cancellationToken);
         if (message == null)
         {
@@ -201,7 +202,8 @@ public class MessagesController(ChatsDB db, CurrentUser currentUser, IUrlEncrypt
         db.Messages.Add(newMessage);
         message.Chat.UpdatedAt = DateTime.UtcNow;
         await db.SaveChangesAsync(cancellationToken);
-        return Ok(RequestMessageDto.FromDB(newMessage, fup, urlEncryption));
+        ChatMessageTemp temp = ChatMessageTemp.FromDB(message);
+        return Ok(temp.ToDto(urlEncryption, fup));
     }
 
     [HttpDelete("{encryptedMessageId}")]
