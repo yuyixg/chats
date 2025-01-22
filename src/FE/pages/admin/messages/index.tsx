@@ -80,7 +80,10 @@ export default function Messages() {
                 </TableCell>
                 <TableCell>
                   {item.spans.map((x) => (
-                    <div className="flex gap-x-1">
+                    <div
+                      className="flex gap-x-1"
+                      key={'message-chat-icon' + x.modelId}
+                    >
                       <ChatIcon
                         className="inline"
                         providerId={x.modelProviderId}
