@@ -5,6 +5,7 @@ import useTranslation from '@/hooks/useTranslation';
 import { AdminChatsDto } from '@/types/adminApis';
 import { PageResult, Paging } from '@/types/page';
 
+import ChatIcon from '@/components/ChatIcon/ChatIcon';
 import { Badge } from '@/components/ui/badge';
 import { Card } from '@/components/ui/card';
 import { Input } from '@/components/ui/input';
@@ -20,7 +21,6 @@ import {
 import PaginationContainer from '../_components/Pagiation/Pagiation';
 
 import { getMessages } from '@/apis/adminApis';
-import ChatIcon from '@/components/ChatIcon/ChatIcon';
 
 export default function Messages() {
   const { t } = useTranslation();
@@ -78,7 +78,17 @@ export default function Messages() {
                 >
                   {item.title}
                 </TableCell>
-                <TableCell>{item.spans.map(x => <><ChatIcon className='inline' providerId={x.modelProviderId} />{x.modelName} </>)}</TableCell>
+                <TableCell>
+                  {item.spans.map((x) => (
+                    <div className="flex gap-x-1">
+                      <ChatIcon
+                        className="inline"
+                        providerId={x.modelProviderId}
+                      />
+                      {x.modelName}
+                    </div>
+                  ))}
+                </TableCell>
                 <TableCell>{item.username}</TableCell>
                 <TableCell>
                   {new Date(item.createdAt).toLocaleString()}

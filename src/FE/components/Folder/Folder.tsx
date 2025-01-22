@@ -61,6 +61,18 @@ const Folder = ({
   const [renameValue, setRenameValue] = useState('');
   const [isOpen, setIsOpen] = useState(defaultOpen);
 
+  useEffect(() => {
+    setIsOpen(defaultOpen);
+  }, [defaultOpen]);
+
+  useEffect(() => {
+    if (isRenaming) {
+      setIsDeleting(false);
+    } else if (isDeleting) {
+      setIsRenaming(false);
+    }
+  }, [isRenaming, isDeleting]);
+
   const handleEnterDown = (e: KeyboardEvent<HTMLDivElement>) => {
     if (e.key === 'Enter') {
       e.preventDefault();
@@ -73,14 +85,6 @@ const Folder = ({
     setRenameValue('');
     setIsRenaming(false);
   };
-
-  useEffect(() => {
-    if (isRenaming) {
-      setIsDeleting(false);
-    } else if (isDeleting) {
-      setIsRenaming(false);
-    }
-  }, [isRenaming, isDeleting]);
 
   const handleClickFolder = () => {
     setIsOpen(!isOpen);
