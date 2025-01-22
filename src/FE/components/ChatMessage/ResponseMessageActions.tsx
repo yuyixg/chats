@@ -4,6 +4,7 @@ import { ReactionMessageType } from '@/types/chatMessage';
 
 import ChangeModelAction from './ChangeModelAction';
 import CopyAction from './CopyAction';
+import DeleteAction from './DeleteAction';
 import EditAction from './EditAction';
 import GenerateInformationAction from './GenerateInformationAction';
 import PaginationAction from './PaginationAction';
@@ -40,6 +41,7 @@ interface Props {
   onChangeMessage?: (messageId: string) => void;
   onRegenerate?: (messageId: string, modelId: number) => void;
   onReactionMessage?: (type: ReactionMessageType, messageId: string) => void;
+  onDeleteResponseMessage?: (messageId: string) => void;
 }
 
 const ResponseMessageActions = (props: Props) => {
@@ -52,6 +54,7 @@ const ResponseMessageActions = (props: Props) => {
     onChangeMessage,
     onRegenerate,
     onReactionMessage,
+    onDeleteResponseMessage,
   } = props;
 
   const { id: messageId, siblingIds, modelId, modelName, parentId } = message;
@@ -83,7 +86,18 @@ const ResponseMessageActions = (props: Props) => {
               }}
             />
             <CopyAction text={message.content.text} />
-            {!message.edited && <GenerateInformationAction message={message} />}
+            {/* {siblingIds.length > 1 && (
+              <DeleteAction
+                visible
+                onDelete={() => {
+                  onDeleteMessage && onDeleteMessage(messageId);
+                }}
+              />
+            )} */}
+            <GenerateInformationAction
+              hidden={message.edited}
+              message={message}
+            />
 
             <ReactionGoodResponseAction
               value={message.reaction}

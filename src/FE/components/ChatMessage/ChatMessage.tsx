@@ -17,7 +17,7 @@ export interface Props {
   messagesEndRef: any;
   readonly?: boolean;
   onChangeChatLeafMessageId?: (messageId: string) => void;
-  onEditMessageSend?: (editedMessage: Message, parentId?: string) => void;
+  onEditAndSendMessage?: (editedMessage: Message, parentId?: string) => void;
   onRegenerate?: (spanId: number, messageId: string, modelId: number) => void;
   onReactionMessage?: (type: ReactionMessageType, messageId: string) => void;
   onEditResponseMessage?: (
@@ -25,6 +25,9 @@ export interface Props {
     content: Content,
     isCopy?: boolean,
   ) => void;
+  onEditUserMessage?: (messageId: string, content: Content) => void;
+  onDeleteResponseMessage?: (messageId: string) => void;
+  onDeleteUserMessage?: (messageId: string) => void;
 }
 
 export const ChatMessage: FC<Props> = memo(
@@ -35,10 +38,13 @@ export const ChatMessage: FC<Props> = memo(
     messagesEndRef,
     readonly,
     onChangeChatLeafMessageId,
-    onEditMessageSend,
+    onEditAndSendMessage,
     onRegenerate,
     onReactionMessage,
     onEditResponseMessage,
+    onEditUserMessage,
+    onDeleteResponseMessage,
+    onDeleteUserMessage,
   }) => {
     const hasMultipleSpan = selectedMessages.find((x) => x.length > 1);
     return (
@@ -73,7 +79,9 @@ export const ChatMessage: FC<Props> = memo(
                           selectedChat={selectedChat}
                           message={message}
                           onChangeMessage={onChangeChatLeafMessageId}
-                          onEdit={onEditMessageSend}
+                          onEditAndSendMessage={onEditAndSendMessage}
+                          onEditUserMessage={onEditUserMessage}
+                          onDeleteUserMessage={onDeleteUserMessage}
                         />
                       </div>
                     )}
@@ -111,6 +119,7 @@ export const ChatMessage: FC<Props> = memo(
                             onChangeChatLeafMessageId={
                               onChangeChatLeafMessageId
                             }
+                            onDeleteResponseMessage={onDeleteResponseMessage}
                           />
                         </div>
                       </div>

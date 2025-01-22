@@ -5,7 +5,7 @@ import useTranslation from '@/hooks/useTranslation';
 import { preprocessLaTeX } from '@/utils/chats';
 
 import { AdminModelDto } from '@/types/adminApis';
-import { ChatSpanStatus, Content, Message } from '@/types/chat';
+import { ChatSpanStatus, Content } from '@/types/chat';
 import { ReactionMessageType } from '@/types/chatMessage';
 
 import { CodeBlock } from '@/components/Markdown/CodeBlock';
@@ -38,6 +38,7 @@ interface Props {
     content: Content,
     isCopy?: boolean,
   ) => void;
+  onDeleteResponseMessage?: (messageId: string) => void;
 }
 
 const ResponseMessage = (props: Props) => {
@@ -49,6 +50,7 @@ const ResponseMessage = (props: Props) => {
     onRegenerate,
     onReactionMessage,
     onEditResponseMessage,
+    onDeleteResponseMessage,
   } = props;
   const { t } = useTranslation();
 
@@ -59,7 +61,7 @@ const ResponseMessage = (props: Props) => {
   const [messageContent, setMessageContent] = useState(message.content);
 
   const handleEditMessage = (isCopyAndSave: boolean = false) => {
-    if (content != messageContent) {
+    if (isCopyAndSave || content != messageContent) {
       onEditResponseMessage &&
         onEditResponseMessage(messageId, messageContent, isCopyAndSave);
     }
@@ -232,6 +234,7 @@ const ResponseMessage = (props: Props) => {
         onRegenerate={(messageId: string, modelId: number) => {
           onRegenerate && onRegenerate(message.spanId!, messageId, modelId);
         }}
+        onDeleteResponseMessage={onDeleteResponseMessage}
       />
     </>
   );
