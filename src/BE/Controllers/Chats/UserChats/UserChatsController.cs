@@ -37,7 +37,7 @@ public class UserChatsController(ChatsDB db, CurrentUser currentUser, IUrlEncryp
                     Temperature = s.Temperature,
                     EnableSearch = s.EnableSearch,
                 }).ToArray(),
-                LeafMessageId = x.LeafMessageId != null ? idEncryption.EncryptMessageId(x.LeafMessageId.Value) : null,
+                LeafMessageId = idEncryption.EncryptMessageId(x.LeafMessageId),
                 UpdatedAt = x.UpdatedAt,
             })
             .FirstOrDefaultAsync(cancellationToken);
@@ -87,7 +87,7 @@ public class UserChatsController(ChatsDB db, CurrentUser currentUser, IUrlEncryp
                     Temperature = s.Temperature,
                     EnableSearch = s.EnableSearch,
                 }).ToArray(),
-                LeafMessageId = x.LeafMessageId != null ? idEncryption.EncryptMessageId(x.LeafMessageId.Value) : null,
+                LeafMessageId = idEncryption.EncryptMessageId(x.LeafMessageId),
                 UpdatedAt = x.UpdatedAt,
             }),
             request,
@@ -176,7 +176,7 @@ public class UserChatsController(ChatsDB db, CurrentUser currentUser, IUrlEncryp
                 Temperature = s.Temperature,
                 EnableSearch = s.EnableSearch,
             }).ToArray(),
-            LeafMessageId = chat.LeafMessageId != null ? idEncryption.EncryptMessageId(chat.LeafMessageId.Value) : null,
+            LeafMessageId = idEncryption.EncryptMessageId(chat.LeafMessageId),
             UpdatedAt = chat.UpdatedAt,
         });
     }
@@ -221,7 +221,7 @@ public class UserChatsController(ChatsDB db, CurrentUser currentUser, IUrlEncryp
                     Temperature = s.Temperature,
                     EnableSearch = s.EnableSearch,
                 }).ToArray(),
-                LeafMessageId = x.LeafMessageId != null ? idEncryption.EncryptMessageId(x.LeafMessageId.Value) : null,
+                LeafMessageId = idEncryption.EncryptMessageId(x.LeafMessageId),
                 UpdatedAt = x.UpdatedAt,
             })
             .ToListAsync(cancellationToken);

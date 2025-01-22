@@ -44,30 +44,7 @@ public record SseResponseLine
         IUrlEncryptionService urlEncryptionService,
         FileUrlProvider fup)
     {
-        ChatMessageTemp assistantMessageTemp = new()
-        {
-            Content = [.. assistantMessage.MessageContents],
-            CreatedAt = assistantMessage.CreatedAt,
-            Id = assistantMessage.Id,
-            ParentId = assistantMessage.ParentId,
-            Role = (DBChatRole)assistantMessage.ChatRoleId,
-            SpanId = assistantMessage.SpanId,
-            Edited = assistantMessage.Edited,
-            Usage = assistantMessage.Usage == null ? null : new ChatMessageTempUsage()
-            {
-                Duration = assistantMessage.Usage.TotalDurationMs - assistantMessage.Usage.PreprocessDurationMs,
-                FirstTokenLatency = assistantMessage.Usage.FirstResponseDurationMs,
-                InputPrice = assistantMessage.Usage.InputCost,
-                InputTokens = assistantMessage.Usage.InputTokens,
-                ModelId = assistantMessage.Usage.UserModel.ModelId,
-                ModelName = assistantMessage.Usage.UserModel.Model.Name,
-                OutputPrice = assistantMessage.Usage.OutputCost,
-                OutputTokens = assistantMessage.Usage.OutputTokens,
-                ReasoningTokens = assistantMessage.Usage.ReasoningTokens,
-                ModelProviderId = assistantMessage.Usage.UserModel.Model.ModelKey.ModelProviderId,
-                Reaction = assistantMessage.ReactionId,
-            },
-        };
+        ChatMessageTemp assistantMessageTemp = ChatMessageTemp.FromDB(assistantMessage);
         MessageDto assistantMessageDto = assistantMessageTemp.ToDto(urlEncryptionService, fup);
         return new SseResponseLine
         {
@@ -82,17 +59,7 @@ public record SseResponseLine
         IUrlEncryptionService urlEncryptionService,
         FileUrlProvider fup)
     {
-        ChatMessageTemp userMessageTemp = new()
-        {
-            Content = [.. userMessage.MessageContents],
-            CreatedAt = userMessage.CreatedAt,
-            Id = userMessage.Id,
-            ParentId = userMessage.ParentId,
-            Role = (DBChatRole)userMessage.ChatRoleId,
-            SpanId = userMessage.SpanId,
-            Edited = userMessage.Edited,
-            Usage = null,
-        };
+        ChatMessageTemp userMessageTemp = ChatMessageTemp.FromDB(userMessage);
         MessageDto userMessageDto = userMessageTemp.ToDto(urlEncryptionService, fup);
         return new SseResponseLine
         {

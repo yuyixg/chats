@@ -8,6 +8,8 @@ using Chats.BE.Services.UrlEncryption;
 using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Mvc;
 using Microsoft.EntityFrameworkCore;
+using Microsoft.ML.Tokenizers;
+using Chats.BE.Services;
 
 namespace Chats.BE.Controllers.Chats.Messages;
 
@@ -146,11 +148,13 @@ public class MessagesController(ChatsDB db, CurrentUser currentUser, IUrlEncrypt
     [HttpPut("{encryptedMessageId}/edit-and-save-new")]
     public async Task<ActionResult<RequestMessageDto>> EditAndSaveNew(string encryptedMessageId, [FromBody] MessageContentRequest content,
     [FromServices] FileUrlProvider fup,
+    [FromServices] ClientInfoManager clientInfoManager,
     CancellationToken cancellationToken)
     {
         long messageId = urlEncryption.DecryptMessageId(encryptedMessageId);
         Message? message = await db.Messages
             .Include(x => x.Chat)
+            .Include(x => x.Usage)
             .FirstOrDefaultAsync(x => x.Id == messageId, cancellationToken);
         if (message == null)
         {
@@ -171,21 +175,45 @@ public class MessagesController(ChatsDB db, CurrentUser currentUser, IUrlEncrypt
             ChatRoleId = message.ChatRoleId,
             ChatRole = message.ChatRole,
             MessageContents = await content.ToMessageContents(fup, cancellationToken),
-            UsageId = null,
         };
+        if (message.Usage != null)
+        {
+            newMessage.Usage = new UserModelUsage()
+            {
+                UserModelId = message.Usage.UserModelId,
+                FinishReasonId = (byte)DBFinishReason.Success,
+                SegmentCount = 1,
+                InputTokens = message.Usage.InputTokens,
+                OutputTokens = TiktokenTokenizer.CreateForEncoding("cl100k_base").CountTokens(content.Text),
+                ReasoningTokens = 0,
+                IsUsageReliable = false,
+                PreprocessDurationMs = 0,
+                FirstResponseDurationMs = 0,
+                PostprocessDurationMs = 0,
+                TotalDurationMs = 0,
+                InputCost = 0,
+                OutputCost = 0,
+                BalanceTransactionId = null,
+                UsageTransactionId = null,
+                ClientInfo = await clientInfoManager.GetClientInfo(cancellationToken),
+                CreatedAt = DateTime.UtcNow,
+            };
+        }
         db.Messages.Add(newMessage);
         message.Chat.UpdatedAt = DateTime.UtcNow;
         await db.SaveChangesAsync(cancellationToken);
-        return Ok(RequestMessageDto.FromDB(newMessage, fup));
+        ChatMessageTemp temp = ChatMessageTemp.FromDB(message);
+        return Ok(temp.ToDto(urlEncryption, fup));
     }
 
     [HttpDelete("{encryptedMessageId}")]
-    public async Task<ActionResult<string[]>> DeleteMessage(string encryptedMessageId, bool recursive, CancellationToken cancellationToken)
+    public async Task<ActionResult<string[]>> DeleteMessage(string encryptedMessageId, string? encryptedLeafMessageId, CancellationToken cancellationToken)
     {
         long messageId = urlEncryption.DecryptMessageId(encryptedMessageId);
+        long? leafMessageId = urlEncryption.DecryptMessageIdOrNull(encryptedLeafMessageId);
         Message? message = await db.Messages
             .Include(x => x.Chat)
-            .Include(x => x.InverseParent)
+            .Include(x => x.Chat.Messages)
             .FirstOrDefaultAsync(x => x.Id == messageId, cancellationToken);
         if (message == null)
         {
@@ -196,33 +224,34 @@ public class MessagesController(ChatsDB db, CurrentUser currentUser, IUrlEncrypt
             return Forbid();
         }
 
-        if (message.InverseParent.Count > 0)
+        Message? leafMessage = leafMessageId == null ? null : message.Chat.Messages.FirstOrDefault(x => x.Id == leafMessageId);
+        if (leafMessageId != null)
         {
-            if (!recursive)
+            if (leafMessage == null)
             {
-                return BadRequest("Cannot delete a message with replies");
+                return BadRequest("Leaf message not found");
             }
+            else if (leafMessage.ChatId != message.ChatId)
+            {
+                return BadRequest("Leaf message does not belong to the same chat");
+            }
+        }
 
-            List<long> messageIdsQueue = [messageId];
-            List<long> toDeleteMessageIds = [];
-            while (messageIdsQueue.Count > 0)
-            {
-                toDeleteMessageIds.AddRange(messageIdsQueue);
-                messageIdsQueue = await db.Messages
-                        .Where(x => x.ParentId != null && messageIdsQueue.Contains(x.ParentId.Value))
-                        .Select(x => x.Id)
-                        .ToListAsync(cancellationToken);
-            }
-            await db.Messages
-                .Where(x => toDeleteMessageIds.Contains(x.Id))
-                .ExecuteDeleteAsync(cancellationToken);
-            return Ok(toDeleteMessageIds.Select(urlEncryption.EncryptMessageId));
-        }
-        else
+        List<Message> messagesQueue = [message];
+        List<Message> toDeleteMessages = [];
+        while (messagesQueue.Count > 0)
         {
-            db.Messages.Remove(message);
-            await db.SaveChangesAsync(cancellationToken);
-            return Ok(new string[] { urlEncryption.EncryptMessageId(messageId) });
+            toDeleteMessages.AddRange(messagesQueue);
+            messagesQueue = message.Chat.Messages
+                .Where(x => x.ParentId != null && messagesQueue.Any(toDelete => toDelete.Id == x.ParentId.Value))
+                .ToList();
         }
+        foreach (Message toDeleteMessage in toDeleteMessages)
+        {
+            message.Chat.Messages.Remove(toDeleteMessage);
+        }
+        message.Chat.LeafMessageId = leafMessageId;
+        await db.SaveChangesAsync(cancellationToken);
+        return Ok(toDeleteMessages.Select(x => urlEncryption.EncryptMessageId(x.Id)).ToArray());
     }
 }

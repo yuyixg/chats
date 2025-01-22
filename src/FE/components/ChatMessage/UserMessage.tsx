@@ -13,6 +13,7 @@ import {
 import { Button } from '@/components/ui/button';
 
 import CopyAction from './CopyAction';
+import DeleteAction from './DeleteAction';
 import EditAction from './EditAction';
 import PaginationAction from './PaginationAction';
 
@@ -29,13 +30,22 @@ interface Props {
   message: UserMessage;
   selectedChat: IChat;
   onChangeMessage?: (messageId: string) => void;
-  onEdit?: (editedMessage: Message, parentId?: string) => void;
+  onEditAndSendMessage?: (editedMessage: Message, parentId?: string) => void;
+  onEditUserMessage?: (messageId: string, content: Content) => void;
+  onDeleteMessage?: (messageId: string) => void;
 }
 
 const UserMessage = (props: Props) => {
   const { t } = useTranslation();
 
-  const { message, selectedChat, onChangeMessage, onEdit } = props;
+  const {
+    message,
+    selectedChat,
+    onChangeMessage,
+    onEditAndSendMessage,
+    onEditUserMessage,
+    onDeleteMessage,
+  } = props;
   const [isTyping, setIsTyping] = useState<boolean>(false);
   const [isEditing, setIsEditing] = useState<boolean>(false);
   const textareaRef = useRef<HTMLTextAreaElement>(null);
@@ -49,10 +59,17 @@ const UserMessage = (props: Props) => {
   } = message;
   const currentMessageIndex = siblingIds.findIndex((x) => x === messageId);
 
-  const handleEditMessage = () => {
+  const handleEditMessage = (isOnlySave: boolean = false) => {
     if (content != messageContent) {
-      if (selectedChat.id && onEdit) {
-        onEdit({ ...message, content: messageContent }, parentId || undefined);
+      if (isOnlySave) {
+        onEditUserMessage && onEditUserMessage(message.id, messageContent);
+      } else {
+        if (selectedChat.id && onEditAndSendMessage) {
+          onEditAndSendMessage(
+            { ...message, content: messageContent },
+            parentId || undefined,
+          );
+        }
       }
     }
     setIsEditing(false);
@@ -117,9 +134,21 @@ const UserMessage = (props: Props) => {
 
             <div className="absolute right-2 bottom-2 flex justify-end space-x-4">
               <Button
+                variant="link"
+                className="rounded-md px-4 py-1 text-sm font-medium"
+                onClick={() => {
+                  handleEditMessage(true);
+                }}
+                disabled={(messageContent.text || '')?.trim().length <= 0}
+              >
+                {t('Save')}
+              </Button>
+              <Button
                 variant="default"
                 className="rounded-md px-4 py-1 text-sm font-medium"
-                onClick={handleEditMessage}
+                onClick={() => {
+                  handleEditMessage();
+                }}
                 disabled={(messageContent.text || '')?.trim().length <= 0}
               >
                 {t('Send')}
@@ -165,12 +194,22 @@ const UserMessage = (props: Props) => {
         {!isEditing && (
           <>
             <EditAction
+              isHoverVisible
               disabled={chatStatus === ChatSpanStatus.Chatting}
               onToggleEditing={handleToggleEditing}
             />
             <CopyAction
               triggerClassName="invisible group-hover:visible focus:visible"
               text={content.text}
+            />
+            <DeleteAction
+              hidden={
+                !(message.parentId !== null || message?.siblingIds?.length > 1)
+              }
+              isHoverVisible
+              onDelete={() => {
+                onDeleteMessage && onDeleteMessage(messageId);
+              }}
             />
             <PaginationAction
               hidden={siblingIds.length <= 1}

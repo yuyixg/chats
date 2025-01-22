@@ -85,7 +85,7 @@ export interface HomeContextProps {
   promptDispatch: Dispatch<PromptAction>;
 
   hasModel: () => boolean;
-  handleNewChat: () => void;
+  handleNewChat: (groupId?: string | null) => void;
   handleDeleteChat: (id: string) => void;
   handleSelectChat: (chat: IChat) => void;
   handleUpdateChat: (

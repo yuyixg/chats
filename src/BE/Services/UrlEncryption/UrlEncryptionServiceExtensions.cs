@@ -40,6 +40,11 @@ public static class UrlEncryptionServiceExtensions
         return that.Encrypt(messageId, EncryptionPurpose.MessageId);
     }
 
+    public static string? EncryptMessageId(this IUrlEncryptionService that, long? messageId)
+    {
+        return messageId == null ? null : that.EncryptMessageId(messageId.Value);
+    }
+
     public static long DecryptMessageId(this IUrlEncryptionService that, string encryptedMessageId)
     {
         return that.DecryptAsInt64(encryptedMessageId, EncryptionPurpose.MessageId);

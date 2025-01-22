@@ -4,6 +4,8 @@ import { ReactionMessageType } from '@/types/chatMessage';
 
 import ChangeModelAction from './ChangeModelAction';
 import CopyAction from './CopyAction';
+import DeleteAction from './DeleteAction';
+import EditAction from './EditAction';
 import GenerateInformationAction from './GenerateInformationAction';
 import PaginationAction from './PaginationAction';
 import ReactionBadResponseAction from './ReactionBadResponseAction';
@@ -27,6 +29,7 @@ export interface ResponseMessage {
   modelName: string;
   modelProviderId: number;
   reaction: boolean | null;
+  edited?: boolean;
 }
 
 interface Props {
@@ -34,9 +37,11 @@ interface Props {
   message: ResponseMessage;
   chatStatus: ChatSpanStatus;
   readonly?: boolean;
+  onToggleEditingMessage?: (messageId: string) => void;
   onChangeMessage?: (messageId: string) => void;
   onRegenerate?: (messageId: string, modelId: number) => void;
   onReactionMessage?: (type: ReactionMessageType, messageId: string) => void;
+  onDeleteMessage?: (messageId: string) => void;
 }
 
 const ResponseMessageActions = (props: Props) => {
@@ -45,9 +50,11 @@ const ResponseMessageActions = (props: Props) => {
     message,
     chatStatus,
     readonly,
+    onToggleEditingMessage,
     onChangeMessage,
     onRegenerate,
     onReactionMessage,
+    onDeleteMessage,
   } = props;
 
   const { id: messageId, siblingIds, modelId, modelName, parentId } = message;
@@ -72,8 +79,25 @@ const ResponseMessageActions = (props: Props) => {
             onChangeMessage={onChangeMessage}
           />
           <div className="visible flex gap-0 items-center">
+            <EditAction
+              onToggleEditing={() => {
+                onToggleEditingMessage && onToggleEditingMessage(messageId);
+              }}
+            />
+
             <CopyAction text={message.content.text} />
-            <GenerateInformationAction message={message} />
+
+            <DeleteAction
+              hidden={siblingIds.length <= 1}
+              onDelete={() => {
+                onDeleteMessage && onDeleteMessage(messageId);
+              }}
+            />
+
+            <GenerateInformationAction
+              hidden={message.edited}
+              message={message}
+            />
 
             <ReactionGoodResponseAction
               value={message.reaction}

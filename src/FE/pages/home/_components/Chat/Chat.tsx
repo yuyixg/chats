@@ -22,7 +22,13 @@ import {
 import { throttle } from '@/utils/throttle';
 import { getUserSession } from '@/utils/user';
 
-import { ChatSpanStatus, ChatStatus, Message } from '@/types/chat';
+import {
+  ChatRole,
+  ChatSpanStatus,
+  ChatStatus,
+  Content,
+  Message,
+} from '@/types/chat';
 import {
   IChatMessage,
   ReactionMessageType,
@@ -30,6 +36,7 @@ import {
   SseResponseKind,
   SseResponseLine,
 } from '@/types/chatMessage';
+import { PutResponseMessageEditAndSaveNewResult } from '@/types/clientApis';
 import { Prompt } from '@/types/prompt';
 
 import {
@@ -49,10 +56,12 @@ import ChatMessageMemoized from './MemoizedChatMessage';
 import NoModel from './NoModel';
 
 import {
+  deleteMessage,
   putChats,
   putMessageReactionClear,
-  putMessageReactionDown,
   putMessageReactionUp,
+  putResponseMessageEditAndSaveNew,
+  putResponseMessageEditInPlace,
 } from '@/apis/clientApis';
 
 const Chat = memo(() => {
@@ -228,7 +237,7 @@ const Chat = memo(() => {
     await handleChatMessage(response, selectedMessageList);
   };
 
-  const handleEditMessageSend = async (
+  const handleEditAndSendMessage = async (
     message: Message,
     messageId?: string,
   ) => {
@@ -463,6 +472,127 @@ const Chat = memo(() => {
     });
   };
 
+  const handleUpdateResponseMessage = async (
+    messageId: string,
+    content: Content,
+    isCopy: boolean = false,
+  ) => {
+    let data: PutResponseMessageEditAndSaveNewResult;
+    const params = {
+      messageId,
+      content: { ...content, fileIds: content.fileIds?.map((x) => x.id) || [] },
+    };
+    if (isCopy) {
+      data = await putResponseMessageEditAndSaveNew(params);
+    } else {
+      await putResponseMessageEditInPlace(params);
+    }
+
+    let copyMsg: IChatMessage;
+
+    let msgs = messages.map((x) => {
+      if (x.id === messageId && x.role === ChatRole.Assistant && !isCopy) {
+        return { ...x, content };
+      }
+      return x;
+    });
+
+    let msgGroupIndex = 0,
+      msgIndex = 0;
+    let selectedMsgs = selectedMessages.map((msg, groupIndex) => {
+      return msg.map((m, i) => {
+        if (m.id === messageId && m.role === ChatRole.Assistant) {
+          msgGroupIndex = groupIndex;
+          msgIndex = i;
+          const msgSiblingIds = isCopy
+            ? [...m.siblingIds, data.id]
+            : m.siblingIds;
+          copyMsg = {
+            ...m,
+            id: data?.id,
+            content,
+            siblingIds: msgSiblingIds,
+          };
+
+          return {
+            ...m,
+            content: isCopy ? m.content : content,
+            siblingIds: msgSiblingIds,
+          };
+        }
+        return m;
+      });
+    });
+
+    if (isCopy) {
+      msgs.push(copyMsg!);
+      selectedMsgs[msgGroupIndex][msgIndex] = copyMsg!;
+      selectedMsgs.splice(msgGroupIndex + 1, selectedMsgs.length);
+    }
+    messageDispatch(setMessages(msgs));
+    messageDispatch(setSelectedMessages(selectedMsgs));
+  };
+
+  const handleUpdateUserMessage = async (
+    messageId: string,
+    content: Content,
+  ) => {
+    const params = {
+      messageId,
+      content: { ...content, fileIds: content.fileIds?.map((x) => x.id) || [] },
+    };
+    await putResponseMessageEditInPlace(params);
+
+    const msgs = messages.map((x) => {
+      if (x.id === messageId && x.role === ChatRole.User) {
+        return { ...x, content };
+      }
+      return x;
+    });
+
+    const selectedMsgs = selectedMessages.map((msg) => {
+      return msg.map((m) => {
+        if (m.id === messageId && m.role === ChatRole.User) {
+          return {
+            ...m,
+            content,
+          };
+        }
+        return m;
+      });
+    });
+
+    messageDispatch(setMessages(msgs));
+    messageDispatch(setSelectedMessages(selectedMsgs));
+  };
+
+  const handleDeleteMessage = async (messageId: string) => {
+    let nextMsgId = '';
+    let msgs = messages.filter((x) => x.id !== messageId);
+    selectedMessages.forEach((msg) => {
+      msg.forEach((m) => {
+        if (m.id === messageId) {
+          if (m?.siblingIds?.length > 1) {
+            const siblingIds = m.siblingIds.filter((id) => id !== m.id);
+            nextMsgId = siblingIds[siblingIds.length - 1];
+          } else if (m.parentId !== null) {
+            if (m.role === ChatRole.Assistant) {
+              const userMsg = messages.find((x) => x.id === m.parentId);
+              nextMsgId = userMsg?.parentId!;
+              msgs = messages.filter((x) => x.id !== userMsg?.id);
+            } else if (m.role === ChatRole.User) nextMsgId = m.parentId;
+          }
+        }
+      });
+    });
+
+    const leafId = findLastLeafId(msgs, nextMsgId);
+    await deleteMessage(messageId, leafId);
+    const selectedMsgs = findSelectedMessageByLeafId(msgs, leafId);
+    messageDispatch(setSelectedMessages(selectedMsgs));
+    messageDispatch(setMessages(msgs));
+  };
+
   return (
     <div className="relative flex-1">
       <div
@@ -480,9 +610,12 @@ const Chat = memo(() => {
           models={models}
           messagesEndRef={messagesEndRef}
           onChangeChatLeafMessageId={handleChangeChatLeafMessageId}
-          onEditMessageSend={handleEditMessageSend}
+          onEditAndSendMessage={handleEditAndSendMessage}
           onRegenerate={handleRegenerate}
           onReactionMessage={handleReactionMessage}
+          onEditResponseMessage={handleUpdateResponseMessage}
+          onEditUserMessage={handleUpdateUserMessage}
+          onDeleteMessage={handleDeleteMessage}
         />
       </div>
       {hasModel() && selectedChat && (
