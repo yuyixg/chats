@@ -41,7 +41,7 @@ interface Props {
   onChangeMessage?: (messageId: string) => void;
   onRegenerate?: (messageId: string, modelId: number) => void;
   onReactionMessage?: (type: ReactionMessageType, messageId: string) => void;
-  onDeleteResponseMessage?: (messageId: string) => void;
+  onDeleteMessage?: (messageId: string) => void;
 }
 
 const ResponseMessageActions = (props: Props) => {
@@ -54,7 +54,7 @@ const ResponseMessageActions = (props: Props) => {
     onChangeMessage,
     onRegenerate,
     onReactionMessage,
-    onDeleteResponseMessage,
+    onDeleteMessage,
   } = props;
 
   const { id: messageId, siblingIds, modelId, modelName, parentId } = message;
@@ -80,20 +80,20 @@ const ResponseMessageActions = (props: Props) => {
           />
           <div className="visible flex gap-0 items-center">
             <EditAction
-              visible
               onToggleEditing={() => {
                 onToggleEditingMessage && onToggleEditingMessage(messageId);
               }}
             />
+
             <CopyAction text={message.content.text} />
-            {/* {siblingIds.length > 1 && (
-              <DeleteAction
-                visible
-                onDelete={() => {
-                  onDeleteMessage && onDeleteMessage(messageId);
-                }}
-              />
-            )} */}
+
+            <DeleteAction
+              hidden={siblingIds.length <= 1}
+              onDelete={() => {
+                onDeleteMessage && onDeleteMessage(messageId);
+              }}
+            />
+
             <GenerateInformationAction
               hidden={message.edited}
               message={message}

@@ -38,7 +38,7 @@ interface Props {
     content: Content,
     isCopy?: boolean,
   ) => void;
-  onDeleteResponseMessage?: (messageId: string) => void;
+  onDeleteMessage?: (messageId: string) => void;
 }
 
 const ResponseMessage = (props: Props) => {
@@ -50,7 +50,7 @@ const ResponseMessage = (props: Props) => {
     onRegenerate,
     onReactionMessage,
     onEditResponseMessage,
-    onDeleteResponseMessage,
+    onDeleteMessage,
   } = props;
   const { t } = useTranslation();
 
@@ -234,7 +234,7 @@ const ResponseMessage = (props: Props) => {
         onRegenerate={(messageId: string, modelId: number) => {
           onRegenerate && onRegenerate(message.spanId!, messageId, modelId);
         }}
-        onDeleteResponseMessage={onDeleteResponseMessage}
+        onDeleteMessage={onDeleteMessage}
       />
     </>
   );

@@ -382,3 +382,8 @@ export const putResponseMessageEditInPlace = (
     body: params.content,
   });
 };
+
+export const deleteMessage = (messageId: string) => {
+  const fetchServer = useFetch();
+  return fetchServer.delete(`/api/messages/${messageId}?recursive=true`);
+};

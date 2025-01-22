@@ -32,7 +32,7 @@ interface Props {
   onChangeMessage?: (messageId: string) => void;
   onEditAndSendMessage?: (editedMessage: Message, parentId?: string) => void;
   onEditUserMessage?: (messageId: string, content: Content) => void;
-  onDeleteUserMessage?: (messageId: string) => void;
+  onDeleteMessage?: (messageId: string) => void;
 }
 
 const UserMessage = (props: Props) => {
@@ -44,7 +44,7 @@ const UserMessage = (props: Props) => {
     onChangeMessage,
     onEditAndSendMessage,
     onEditUserMessage,
-    onDeleteUserMessage,
+    onDeleteMessage,
   } = props;
   const [isTyping, setIsTyping] = useState<boolean>(false);
   const [isEditing, setIsEditing] = useState<boolean>(false);
@@ -194,6 +194,7 @@ const UserMessage = (props: Props) => {
         {!isEditing && (
           <>
             <EditAction
+              isHoverVisible
               disabled={chatStatus === ChatSpanStatus.Chatting}
               onToggleEditing={handleToggleEditing}
             />
@@ -202,8 +203,12 @@ const UserMessage = (props: Props) => {
               text={content.text}
             />
             <DeleteAction
+              hidden={
+                !(message.parentId !== null || message?.siblingIds?.length > 1)
+              }
+              isHoverVisible
               onDelete={() => {
-                onDeleteUserMessage && onDeleteUserMessage(messageId);
+                onDeleteMessage && onDeleteMessage(messageId);
               }}
             />
             <PaginationAction

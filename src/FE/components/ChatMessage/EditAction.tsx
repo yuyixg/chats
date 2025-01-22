@@ -8,12 +8,12 @@ import { cn } from '@/lib/utils';
 
 interface Props {
   disabled?: boolean;
-  visible?: boolean;
+  isHoverVisible?: boolean;
   onToggleEditing: () => void;
 }
 
 const EditAction = (props: Props) => {
-  const { onToggleEditing, disabled, visible } = props;
+  const { onToggleEditing, disabled, isHoverVisible } = props;
   const { t } = useTranslation();
 
   return (
@@ -24,7 +24,7 @@ const EditAction = (props: Props) => {
           variant="ghost"
           disabled={disabled}
           className={cn(
-            visible ? 'visible' : 'invisible',
+            isHoverVisible ? 'invisible' : 'visible',
             'p-1 m-0 h-auto group-hover:visible focus:visible',
           )}
           onClick={(e) => {

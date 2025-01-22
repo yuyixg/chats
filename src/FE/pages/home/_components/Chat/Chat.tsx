@@ -56,6 +56,7 @@ import ChatMessageMemoized from './MemoizedChatMessage';
 import NoModel from './NoModel';
 
 import {
+  deleteMessage,
   putChats,
   putMessageReactionClear,
   putMessageReactionUp,
@@ -565,34 +566,31 @@ const Chat = memo(() => {
     messageDispatch(setSelectedMessages(selectedMsgs));
   };
 
-  const handleDeleteResponseMessage = (messageId: string) => {
-    let nextMessageId = '';
-    const msg = messages.find((x) => x.id === messageId);
-    let msgs = messages.filter((x) => {
-      if (x.id === messageId) {
-        if (msg?.role === ChatRole.User) {
-          nextMessageId = x.parentId!;
-        } else if (msg?.role === ChatRole.Assistant) {
-          const siblingMsgs = messages.filter(
-            (x) =>
-              x.spanId === msg.spanId &&
-              x.parentId === msg.parentId &&
-              x.id !== msg.id,
-          );
-          nextMessageId = siblingMsgs[siblingMsgs.length - 1].id;
+  const handleDeleteMessage = async (messageId: string) => {
+    await deleteMessage(messageId);
+    let nextMsgId = '';
+    let msgs = messages.filter((x) => x.id !== messageId);
+    selectedMessages.forEach((msg) => {
+      msg.forEach((m) => {
+        if (m.id === messageId) {
+          if (m?.siblingIds?.length > 1) {
+            const siblingIds = m.siblingIds.filter((id) => id !== m.id);
+            nextMsgId = siblingIds[siblingIds.length - 1];
+          } else if (m.parentId !== null) {
+            if (m.role === ChatRole.Assistant) {
+              const userMsg = messages.find((x) => x.id === m.parentId);
+              nextMsgId = userMsg?.parentId!;
+              msgs = messages.filter((x) => x.id !== userMsg?.id);
+            } else if (m.role === ChatRole.User) nextMsgId = m.parentId;
+          }
         }
-      }
-      return x.id !== messageId;
+      });
     });
 
-    const leafId = findLastLeafId(msgs, nextMessageId);
-    const selectedMsgs = findSelectedMessageByLeafId(messages, leafId);
+    const leafId = findLastLeafId(msgs, nextMsgId);
+    const selectedMsgs = findSelectedMessageByLeafId(msgs, leafId);
     messageDispatch(setSelectedMessages(selectedMsgs));
     messageDispatch(setMessages(msgs));
-  };
-
-  const handleDeleteUserMessage = (messageId: string) => {
-    
   };
 
   return (
@@ -617,8 +615,7 @@ const Chat = memo(() => {
           onReactionMessage={handleReactionMessage}
           onEditResponseMessage={handleUpdateResponseMessage}
           onEditUserMessage={handleUpdateUserMessage}
-          onDeleteResponseMessage={handleDeleteResponseMessage}
-          onDeleteUserMessage={handleDeleteUserMessage}
+          onDeleteMessage={handleDeleteMessage}
         />
       </div>
       {hasModel() && selectedChat && (

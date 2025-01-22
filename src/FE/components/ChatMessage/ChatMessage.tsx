@@ -26,8 +26,7 @@ export interface Props {
     isCopy?: boolean,
   ) => void;
   onEditUserMessage?: (messageId: string, content: Content) => void;
-  onDeleteResponseMessage?: (messageId: string) => void;
-  onDeleteUserMessage?: (messageId: string) => void;
+  onDeleteMessage?: (messageId: string) => void;
 }
 
 export const ChatMessage: FC<Props> = memo(
@@ -43,8 +42,7 @@ export const ChatMessage: FC<Props> = memo(
     onReactionMessage,
     onEditResponseMessage,
     onEditUserMessage,
-    onDeleteResponseMessage,
-    onDeleteUserMessage,
+    onDeleteMessage,
   }) => {
     const hasMultipleSpan = selectedMessages.find((x) => x.length > 1);
     return (
@@ -81,7 +79,7 @@ export const ChatMessage: FC<Props> = memo(
                           onChangeMessage={onChangeChatLeafMessageId}
                           onEditAndSendMessage={onEditAndSendMessage}
                           onEditUserMessage={onEditUserMessage}
-                          onDeleteUserMessage={onDeleteUserMessage}
+                          onDeleteMessage={onDeleteMessage}
                         />
                       </div>
                     )}
@@ -119,7 +117,7 @@ export const ChatMessage: FC<Props> = memo(
                             onChangeChatLeafMessageId={
                               onChangeChatLeafMessageId
                             }
-                            onDeleteResponseMessage={onDeleteResponseMessage}
+                            onDeleteMessage={onDeleteMessage}
                           />
                         </div>
                       </div>
