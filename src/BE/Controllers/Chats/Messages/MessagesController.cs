@@ -155,6 +155,9 @@ public class MessagesController(ChatsDB db, CurrentUser currentUser, IUrlEncrypt
         Message? message = await db.Messages
             .Include(x => x.Chat)
             .Include(x => x.Usage)
+            .Include(x => x.Usage!.UserModel)
+            .Include(x => x.Usage!.UserModel.Model)
+            .Include(x => x.Usage!.UserModel.Model.ModelKey)
             .FirstOrDefaultAsync(x => x.Id == messageId, cancellationToken);
         if (message == null)
         {
@@ -181,6 +184,7 @@ public class MessagesController(ChatsDB db, CurrentUser currentUser, IUrlEncrypt
             newMessage.Usage = new UserModelUsage()
             {
                 UserModelId = message.Usage.UserModelId,
+                UserModel = message.Usage.UserModel,
                 FinishReasonId = (byte)DBFinishReason.Success,
                 SegmentCount = 1,
                 InputTokens = message.Usage.InputTokens,
