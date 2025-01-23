@@ -37,13 +37,13 @@ const ChatActions = ({
           <IconFolderPlus size={18} />
           {t('New Group')}
         </DropdownMenuItem>
-        <DropdownMenuItem
+        {/* <DropdownMenuItem
           className="flex justify-start gap-3"
           onClick={onBatchArchive}
         >
           <IconArchive size={18} />
           {t('Batch Archive')}
-        </DropdownMenuItem>
+        </DropdownMenuItem> */}
         <DropdownMenuItem
           className="flex justify-start gap-3"
           onClick={onBatchDelete}

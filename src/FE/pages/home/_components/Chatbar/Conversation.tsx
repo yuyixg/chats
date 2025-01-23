@@ -291,13 +291,13 @@ const ConversationComponent = ({ chat, onDragItemStart }: Props) => {
                 <IconShare size={18} />
                 {t('Share')}
               </DropdownMenuItem>
-              <DropdownMenuItem
+              {/* <DropdownMenuItem
                 className="flex justify-start gap-3"
                 onClick={handleOpenArchiveModal}
               >
                 <IconArchive size={18} />
                 {t('Archive')}
-              </DropdownMenuItem>
+              </DropdownMenuItem> */}
               <DropdownMenuItem
                 className="flex justify-start gap-3"
                 onClick={handleOpenDeleteModal}
