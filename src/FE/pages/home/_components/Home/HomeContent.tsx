@@ -92,7 +92,7 @@ const HomeContent = () => {
     promptInitialState,
   );
 
-  const { chats, selectedChat, chatPaging, stopIds } = chatState;
+  const { chats, chatPaging, stopIds } = chatState;
   const { models } = modelState;
   const { showPromptBar } = settingState;
   const [isPageLoading, setIsPageLoading] = useState(true);
@@ -199,9 +199,9 @@ const HomeContent = () => {
     chatDispatch(setChats(chatList));
   };
 
-  const handleDeleteChat = (id: string) => {
+  const handleDeleteChat = (ids: string[]) => {
     const chatList = chats.filter((x) => {
-      return x.id !== id;
+      return !ids.includes(x.id);
     });
     chatDispatch(setChats(chatList));
 
