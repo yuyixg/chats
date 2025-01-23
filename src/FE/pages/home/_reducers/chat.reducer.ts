@@ -1,4 +1,4 @@
-import { IChat, IChatPaging } from '@/types/chat';
+import { CHATS_SELECT_TYPE, IChat, IChatPaging } from '@/types/chat';
 import { IChatGroup } from '@/types/group';
 
 export type SetChatsType = IChat[];
@@ -8,6 +8,7 @@ export type SetChatsPagingType = IChatPaging[];
 export type SetIsChatsLoadingType = boolean;
 export type SetStopIdsType = string[];
 export type SetChatGroupType = IChatGroup[];
+export type SetChatsSelectType = CHATS_SELECT_TYPE;
 
 interface ChatInitialState {
   chats: SetChatsType;
@@ -16,6 +17,7 @@ interface ChatInitialState {
   isChatsLoading: SetIsChatsLoadingType;
   stopIds: SetStopIdsType;
   chatGroups: SetChatGroupType;
+  chatsSelectType: SetChatsSelectType;
 }
 
 export const chatInitialState: ChatInitialState = {
@@ -25,6 +27,7 @@ export const chatInitialState: ChatInitialState = {
   isChatsLoading: false,
   stopIds: [],
   chatGroups: [],
+  chatsSelectType: CHATS_SELECT_TYPE.NONE,
 };
 
 export enum ChatActionTypes {
@@ -36,6 +39,7 @@ export enum ChatActionTypes {
   SET_IS_CHATS_LOADING = 'SET_IS_CHATS_LOADING',
   SET_STOP_IDS = 'SET_STOP_IDS',
   SET_CHAT_GROUP = 'SET_CHAT_GROUP',
+  SET_IS_CHATS_DELETE_MODE = 'SET_IS_CHATS_DELETE_MODE',
 }
 
 export type ChatAction =
@@ -48,7 +52,11 @@ export type ChatAction =
       payload: SetIsChatsLoadingType;
     }
   | { type: ChatActionTypes.SET_STOP_IDS; payload: SetStopIdsType }
-  | { type: ChatActionTypes.SET_CHAT_GROUP; payload: SetChatGroupType };
+  | { type: ChatActionTypes.SET_CHAT_GROUP; payload: SetChatGroupType }
+  | {
+      type: ChatActionTypes.SET_IS_CHATS_DELETE_MODE;
+      payload: SetChatsSelectType;
+    };
 
 export default function chatReducer(
   state: ChatInitialState,
@@ -67,6 +75,8 @@ export default function chatReducer(
       return { ...state, stopIds: action.payload };
     case ChatActionTypes.SET_CHAT_GROUP:
       return { ...state, chatGroups: action.payload };
+    case ChatActionTypes.SET_IS_CHATS_DELETE_MODE:
+      return { ...state, chatsSelectType: action.payload };
     default:
       return state;
   }

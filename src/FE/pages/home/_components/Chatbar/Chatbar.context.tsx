@@ -8,7 +8,7 @@ import { ChatResult } from '@/types/clientApis';
 export interface ChatbarContextProps {
   state: ChatbarInitialState;
   dispatch: Dispatch<ActionType<ChatbarInitialState>>;
-  handleDeleteChat: (chatId: string) => void;
+  handleDeleteChat: (chatIds: string[]) => void;
 }
 export interface ChatbarInitialState {
   searchTerm: string;

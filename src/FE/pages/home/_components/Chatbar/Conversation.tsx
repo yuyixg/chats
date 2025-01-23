@@ -12,7 +12,7 @@ import useTranslation from '@/hooks/useTranslation';
 
 import { currentISODateString } from '@/utils/date';
 
-import { ChatStatus, IChat } from '@/types/chat';
+import { CHATS_SELECT_TYPE, ChatStatus, IChat } from '@/types/chat';
 
 import SidebarActionButton from '@/components/Button/SidebarActionButton';
 import ChatIcon from '@/components/ChatIcon/ChatIcon';
@@ -26,6 +26,7 @@ import {
   IconTrash,
   IconX,
 } from '@/components/Icons/index';
+import { Checkbox } from '@/components/ui/checkbox';
 import {
   DropdownMenu,
   DropdownMenuContent,
@@ -55,6 +56,7 @@ const ConversationComponent = ({ chat, onDragItemStart }: Props) => {
         status: undefined,
       },
       chats,
+      chatsSelectType,
     },
     chatDispatch,
     handleSelectChat,
@@ -96,7 +98,7 @@ const ConversationComponent = ({ chat, onDragItemStart }: Props) => {
     e.stopPropagation();
     if (isDeleting) {
       deleteChats(chat.id).then(() => {
-        handleDeleteChat(chat.id);
+        handleDeleteChat([chat.id]);
         toast.success(t('Delete successful'));
       });
     } else if (isChanging) {
@@ -143,6 +145,13 @@ const ConversationComponent = ({ chat, onDragItemStart }: Props) => {
     });
   };
 
+  const handleSelectByDeleteChat = (checked: boolean) => {
+    const chatList = chats.map((c) =>
+      c.id === chat.id ? { ...c, selected: checked } : { ...c },
+    );
+    chatDispatch(setChats(chatList));
+  };
+
   useEffect(() => {
     if (isChanging) {
       setIsDeleting(false);
@@ -180,13 +189,26 @@ const ConversationComponent = ({ chat, onDragItemStart }: Props) => {
             )}
           >
             <div className="flex overflow-hidden">
-              {chat.spans.map((span) => (
-                <ChatIcon
-                  className="border border-muted"
-                  key={'chat-icon-' + span.spanId}
-                  providerId={span.modelProviderId}
+              {chatsSelectType !== CHATS_SELECT_TYPE.NONE ? (
+                <Checkbox
+                  key={'chats-batch-delete-' + chat.id}
+                  defaultChecked={!!chat?.selected}
+                  onCheckedChange={(checked: boolean) => {
+                    handleSelectByDeleteChat(checked);
+                  }}
+                  onClick={(e) => {
+                    e.stopPropagation();
+                  }}
                 />
-              ))}
+              ) : (
+                chat.spans.map((span) => (
+                  <ChatIcon
+                    className="border border-muted"
+                    key={'chat-icon-' + span.spanId}
+                    providerId={span.modelProviderId}
+                  />
+                ))
+              )}
             </div>
           </div>
 

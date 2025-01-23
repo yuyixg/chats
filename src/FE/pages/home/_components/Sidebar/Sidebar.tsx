@@ -3,11 +3,12 @@ import { ReactNode } from 'react';
 import useTranslation from '@/hooks/useTranslation';
 
 import {
-  IconFolderPlus,
+  IconCheck,
   IconLayoutSidebar,
   IconLayoutSidebarRight,
   IconSearch,
   IconSquarePlus,
+  IconX,
 } from '@/components/Icons/index';
 import Search from '@/components/Search/Search';
 import Tips from '@/components/Tips/Tips';
@@ -26,14 +27,14 @@ interface Props<T> {
   itemComponent?: ReactNode;
   folderComponent?: ReactNode;
   footerComponent?: ReactNode;
+  actionComponent?: ReactNode;
+  actionConfirmComponent?: ReactNode;
   searchTerm: string;
   messageIsStreaming?: boolean;
   handleSearchTerm: (searchTerm: string) => void;
   toggleOpen: () => void;
   handleCreateItem: () => void;
   hasModel: () => boolean;
-  onDrop?: (e: any) => void;
-  onAddFolder?: () => void;
 }
 
 const Sidebar = <T,>({
@@ -46,13 +47,14 @@ const Sidebar = <T,>({
   itemComponent,
   folderComponent,
   footerComponent,
+  actionComponent,
+  actionConfirmComponent,
   searchTerm,
   messageIsStreaming,
   handleSearchTerm,
   toggleOpen,
   handleCreateItem,
   hasModel,
-  onAddFolder,
 }: Props<T>) => {
   const { t } = useTranslation();
   const NoDataRender = () =>
@@ -114,7 +116,7 @@ const Sidebar = <T,>({
           <div
             className={cn(
               'pr-1.5 h-16',
-              onAddFolder && 'flex items-center gap-x-1',
+              actionComponent && 'flex items-center gap-x-1',
             )}
           >
             <Search
@@ -122,16 +124,9 @@ const Sidebar = <T,>({
               searchTerm={searchTerm}
               onSearch={handleSearchTerm}
             />
-            {onAddFolder && (
-              <Button
-                variant="ghost"
-                className="h-auto p-1"
-                onClick={onAddFolder}
-              >
-                <IconFolderPlus size={25} />
-              </Button>
-            )}
+            {actionComponent}
           </div>
+          {actionConfirmComponent}
         </div>
 
         {isLoading && (
