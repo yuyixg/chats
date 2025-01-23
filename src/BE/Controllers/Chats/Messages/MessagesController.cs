@@ -206,7 +206,7 @@ public class MessagesController(ChatsDB db, CurrentUser currentUser, IUrlEncrypt
         db.Messages.Add(newMessage);
         message.Chat.UpdatedAt = DateTime.UtcNow;
         await db.SaveChangesAsync(cancellationToken);
-        ChatMessageTemp temp = ChatMessageTemp.FromDB(message);
+        ChatMessageTemp temp = ChatMessageTemp.FromDB(newMessage);
         return Ok(temp.ToDto(urlEncryption, fup));
     }
 
