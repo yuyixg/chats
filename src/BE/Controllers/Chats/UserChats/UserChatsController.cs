@@ -57,6 +57,35 @@ public class UserChatsController(ChatsDB db, CurrentUser currentUser, IUrlEncryp
         return Ok(result);
     }
 
+    [HttpGet("archived")]
+    public async Task<ActionResult<PagedResult<ChatsResponse>>> ListArchived(PagingRequest request, CancellationToken cancellationToken)
+    {
+        PagedResult<ChatsResponse> result = await PagedResult.FromQuery(db.Chats
+            .Where(x => x.UserId == currentUser.Id && x.IsArchived)
+            .Select(x => new ChatsResponse()
+            {
+                Id = idEncryption.EncryptChatId(x.Id),
+                Title = x.Title,
+                IsTopMost = x.IsTopMost,
+                IsShared = x.ChatShares.Any(),
+                GroupId = idEncryption.EncryptChatGroupId(x.ChatGroupId),
+                Tags = x.ChatTags.Select(x => x.Name).ToArray(),
+                Spans = x.ChatSpans.Select(s => new ChatSpanDto
+                {
+                    SpanId = s.SpanId,
+                    ModelId = s.ModelId,
+                    ModelName = s.Model.Name,
+                    ModelProviderId = s.Model.ModelKey.ModelProviderId,
+                    Temperature = s.Temperature,
+                    EnableSearch = s.EnableSearch,
+                }).ToArray(),
+                LeafMessageId = idEncryption.EncryptMessageId(x.LeafMessageId),
+                UpdatedAt = x.UpdatedAt,
+            })
+            .OrderByDescending(x => x.Id), request, cancellationToken);
+        return Ok(result);
+    }
+
     internal static async Task<PagedResult<ChatsResponse>> GetChatsForGroupAsync(ChatsDB db, CurrentUser currentUser, IUrlEncryptionService idEncryption, ChatsQuery request, CancellationToken cancellationToken)
     {
         int? chatGroupId = request.GroupId != null ? idEncryption.DecryptChatGroupId(request.GroupId) : null;
@@ -197,35 +226,6 @@ public class UserChatsController(ChatsDB db, CurrentUser currentUser, IUrlEncryp
             .ExecuteDeleteAsync(cancellationToken);
 
         return NoContent();
-    }
-
-    [HttpGet("archived")]
-    public async Task<ActionResult<ChatsResponse>> ListArchived(CancellationToken cancellationToken)
-    {
-        List<ChatsResponse> result = await db.Chats
-            .Where(x => x.UserId == currentUser.Id && x.IsArchived)
-            .Select(x => new ChatsResponse()
-            {
-                Id = idEncryption.EncryptChatId(x.Id),
-                Title = x.Title,
-                IsTopMost = x.IsTopMost,
-                IsShared = x.ChatShares.Any(),
-                GroupId = idEncryption.EncryptChatGroupId(x.ChatGroupId),
-                Tags = x.ChatTags.Select(x => x.Name).ToArray(),
-                Spans = x.ChatSpans.Select(s => new ChatSpanDto
-                {
-                    SpanId = s.SpanId,
-                    ModelId = s.ModelId,
-                    ModelName = s.Model.Name,
-                    ModelProviderId = s.Model.ModelKey.ModelProviderId,
-                    Temperature = s.Temperature,
-                    EnableSearch = s.EnableSearch,
-                }).ToArray(),
-                LeafMessageId = idEncryption.EncryptMessageId(x.LeafMessageId),
-                UpdatedAt = x.UpdatedAt,
-            })
-            .ToListAsync(cancellationToken);
-        return Ok(result);
     }
 
     [HttpPut("{encryptedChatId}")]
