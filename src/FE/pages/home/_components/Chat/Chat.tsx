@@ -491,8 +491,8 @@ const Chat = memo(() => {
     let copyMsg: IChatMessage;
 
     let msgs = messages.map((x) => {
-      if (x.id === messageId && x.role === ChatRole.Assistant && !isCopy) {
-        return { ...x, content };
+      if (x.id === messageId && !isCopy) {
+        return { ...x, content, edited: true };
       }
       return x;
     });
@@ -501,7 +501,7 @@ const Chat = memo(() => {
       msgIndex = 0;
     let selectedMsgs = selectedMessages.map((msg, groupIndex) => {
       return msg.map((m, i) => {
-        if (m.id === messageId && m.role === ChatRole.Assistant) {
+        if (m.id === messageId) {
           msgGroupIndex = groupIndex;
           msgIndex = i;
           const msgSiblingIds = isCopy
@@ -511,12 +511,14 @@ const Chat = memo(() => {
             ...m,
             id: data?.id,
             content,
+            edited: true,
             siblingIds: msgSiblingIds,
           };
 
           return {
             ...m,
             content: isCopy ? m.content : content,
+            edited: true,
             siblingIds: msgSiblingIds,
           };
         }
