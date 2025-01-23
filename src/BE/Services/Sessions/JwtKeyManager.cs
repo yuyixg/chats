@@ -6,15 +6,15 @@ public class JwtKeyManager(IConfiguration configuration)
 {
     public string GetOrCreateSecretKey()
     {
-        string? secretKey = configuration["JWT_SECRET_KEY"];
-        if (secretKey != null)
+        string? secretKey = configuration["JwtSecretKey"];
+        if (!string.IsNullOrEmpty(secretKey))
         {
             return secretKey;
         }
         else
         {
             string generated = Guid.NewGuid().ToString();
-            configuration["JWT_SECRET_KEY"] = generated;
+            configuration["JwtSecretKey"] = generated;
             return generated;
         }
     }
