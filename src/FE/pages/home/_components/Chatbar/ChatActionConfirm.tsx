@@ -1,15 +1,15 @@
-import { ReactNode } from 'react';
-
 import useTranslation from '@/hooks/useTranslation';
 
 import { IconCheck, IconX } from '@/components/Icons';
 import { Button } from '@/components/ui/button';
 
 const ChatActionConfirm = ({
+  confirming = false,
   selectedCount = 0,
   onCancel,
   onConfirm,
 }: {
+  confirming: boolean;
   selectedCount: number;
   onCancel: () => void;
   onConfirm: () => void;
@@ -23,10 +23,16 @@ const ChatActionConfirm = ({
         {t('Selected')}
       </div>
       <div>
-        <Button variant="ghost" className="gap-x-2 h-8 px-2" onClick={onCancel}>
+        <Button
+          disabled={confirming}
+          variant="ghost"
+          className="gap-x-2 h-8 px-2"
+          onClick={onCancel}
+        >
           <IconX size={16} />
         </Button>
         <Button
+          disabled={confirming}
           variant="ghost"
           className="gap-x-2 h-8 px-2"
           onClick={onConfirm}

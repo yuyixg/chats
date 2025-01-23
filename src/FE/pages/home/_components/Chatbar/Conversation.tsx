@@ -17,6 +17,7 @@ import { CHATS_SELECT_TYPE, ChatStatus, IChat } from '@/types/chat';
 import SidebarActionButton from '@/components/Button/SidebarActionButton';
 import ChatIcon from '@/components/ChatIcon/ChatIcon';
 import {
+  IconArchive,
   IconCheck,
   IconDots,
   IconPencil,
@@ -67,10 +68,11 @@ const ConversationComponent = ({ chat, onDragItemStart }: Props) => {
 
   const { handleDeleteChat } = useContext(ChatbarContext);
 
+  const [title, setTitle] = useState('');
   const [isDeleting, setIsDeleting] = useState(false);
   const [isChanging, setTitleChanging] = useState(false);
-  const [title, setTitle] = useState('');
   const [isShare, setIsShare] = useState(false);
+  const [isArchive, setIsArchive] = useState(false);
 
   const handleEnterDown = (e: KeyboardEvent<HTMLDivElement>) => {
     if (e.key === 'Enter') {
@@ -99,19 +101,24 @@ const ConversationComponent = ({ chat, onDragItemStart }: Props) => {
     if (isDeleting) {
       deleteChats(chat.id).then(() => {
         handleDeleteChat([chat.id]);
-        toast.success(t('Delete successful'));
       });
     } else if (isChanging) {
       handleChangeTitle(chat.id);
+    } else if (isArchive) {
+      putChats(chat.id, { isArchived: true }).then(() => {
+        handleDeleteChat([chat.id]);
+      });
     }
     setIsDeleting(false);
     setTitleChanging(false);
+    setIsArchive(false);
   };
 
   const handleCancel: MouseEventHandler<HTMLButtonElement> = (e) => {
     e.stopPropagation();
     setIsDeleting(false);
     setTitleChanging(false);
+    setIsArchive(false);
   };
 
   const handleOpenChangeTitleModal: MouseEventHandler<HTMLDivElement> = (e) => {
@@ -130,6 +137,11 @@ const ConversationComponent = ({ chat, onDragItemStart }: Props) => {
 
   const handleSharedMessage = (isShared: boolean) => {
     handleUpdateChat(chats, selectChatId!, { isShared });
+  };
+
+  const handleOpenArchiveModal: MouseEventHandler<HTMLDivElement> = (e) => {
+    e.stopPropagation();
+    setIsArchive(true);
   };
 
   const handleChangeChatPin = (chatId: string, isPin: boolean = false) => {
@@ -222,7 +234,7 @@ const ConversationComponent = ({ chat, onDragItemStart }: Props) => {
         </button>
       )}
 
-      {(isDeleting || isChanging) && selectChatId === chat.id && (
+      {(isDeleting || isChanging || isArchive) && selectChatId === chat.id && (
         <div className="absolute right-1 z-10 flex text-gray-300">
           <SidebarActionButton handleClick={handleConfirm}>
             <IconCheck size={18} />
@@ -233,7 +245,7 @@ const ConversationComponent = ({ chat, onDragItemStart }: Props) => {
         </div>
       )}
 
-      {selectChatId === chat.id && !isDeleting && !isChanging && (
+      {selectChatId === chat.id && !isDeleting && !isChanging && !isArchive && (
         <div className="absolute right-[0.6rem] z-10 flex text-gray-300">
           <DropdownMenu>
             <DropdownMenuTrigger
@@ -278,6 +290,13 @@ const ConversationComponent = ({ chat, onDragItemStart }: Props) => {
               >
                 <IconShare size={18} />
                 {t('Share')}
+              </DropdownMenuItem>
+              <DropdownMenuItem
+                className="flex justify-start gap-3"
+                onClick={handleOpenArchiveModal}
+              >
+                <IconArchive size={18} />
+                {t('Archive')}
               </DropdownMenuItem>
               <DropdownMenuItem
                 className="flex justify-start gap-3"

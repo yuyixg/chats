@@ -24,7 +24,7 @@ import ChatbarContext from './Chatbar.context';
 import { ChatbarInitialState, initialState } from './Chatbar.context';
 import ChatBarSettings from './ChatbarSettings';
 
-import { deleteChats, postChatGroup } from '@/apis/clientApis';
+import { deleteChats, postChatGroup, putChats } from '@/apis/clientApis';
 
 const Chatbar = () => {
   const { t } = useTranslation();
@@ -57,6 +57,7 @@ const Chatbar = () => {
     dispatch,
   } = chatBarContextValue;
   const [searchTerm, setSearchTerm] = useState('');
+  const [actionConfirming, setActionConfirming] = useState(false);
 
   const handleToggleChatbar = () => {
     settingDispatch(setShowChatBar(!showChatBar));
@@ -90,13 +91,21 @@ const Chatbar = () => {
 
   const handleActionConfirm = async () => {
     const selectedChatIds = chats.filter((c) => c.selected).map((c) => c.id);
+    setActionConfirming(true);
     if (chatsSelectType === CHATS_SELECT_TYPE.DELETE) {
       for (const id of selectedChatIds) {
         await deleteChats(id);
       }
       handleDeleteChat(selectedChatIds);
       chatDispatch(setChatsSelectType(CHATS_SELECT_TYPE.NONE));
+    } else if (chatsSelectType === CHATS_SELECT_TYPE.ARCHIVE) {
+      for (const id of selectedChatIds) {
+        await putChats(id, { isArchived: true });
+      }
+      handleDeleteChat(selectedChatIds);
+      chatDispatch(setChatsSelectType(CHATS_SELECT_TYPE.NONE));
     }
+    setActionConfirming(false);
   };
 
   const handleShowMore = (groupId: string | null) => {
@@ -144,6 +153,9 @@ const Chatbar = () => {
         actionComponent={
           <ChatActions
             onAddGroup={handleAddGroup}
+            onBatchArchive={() => {
+              handleChangeChatsSelectType(CHATS_SELECT_TYPE.ARCHIVE);
+            }}
             onBatchDelete={() => {
               handleChangeChatsSelectType(CHATS_SELECT_TYPE.DELETE);
             }}
@@ -152,6 +164,7 @@ const Chatbar = () => {
         actionConfirmComponent={
           chatsSelectType !== CHATS_SELECT_TYPE.NONE && (
             <ChatActionConfirm
+              confirming={actionConfirming}
               selectedCount={chats.filter((c) => c.selected).length}
               onCancel={handleActionCancel}
               onConfirm={handleActionConfirm}

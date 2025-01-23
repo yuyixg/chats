@@ -1,6 +1,11 @@
 import useTranslation from '@/hooks/useTranslation';
 
-import { IconDots, IconFolderPlus, IconTrash } from '@/components/Icons';
+import {
+  IconArchive,
+  IconDots,
+  IconFolderPlus,
+  IconTrash,
+} from '@/components/Icons';
 import {
   DropdownMenu,
   DropdownMenuContent,
@@ -10,9 +15,11 @@ import {
 
 const ChatActions = ({
   onAddGroup,
+  onBatchArchive,
   onBatchDelete,
 }: {
   onAddGroup: () => void;
+  onBatchArchive: () => void;
   onBatchDelete: () => void;
 }) => {
   const { t } = useTranslation();
@@ -29,6 +36,13 @@ const ChatActions = ({
         >
           <IconFolderPlus size={18} />
           {t('New Group')}
+        </DropdownMenuItem>
+        <DropdownMenuItem
+          className="flex justify-start gap-3"
+          onClick={onBatchArchive}
+        >
+          <IconArchive size={18} />
+          {t('Batch Archive')}
         </DropdownMenuItem>
         <DropdownMenuItem
           className="flex justify-start gap-3"
