@@ -115,6 +115,7 @@ html {
 
 .prose {
   max-width: 100% !important;
+  width: 344px;
 }
 
 .prose pre {
