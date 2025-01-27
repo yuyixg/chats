@@ -265,6 +265,7 @@ jobs:
           echo "AWS_ACCESS_KEY_ID=${{ secrets.MINIO_KEY }}" >> $GITHUB_ENV
           echo "AWS_SECRET_ACCESS_KEY=${{ secrets.MINIO_SECRET }}" >> $GITHUB_ENV
           echo "AWS_DEFAULT_REGION=us-east-1" >> $GITHUB_ENV
+          aws configure set default.s3.multipart_threshold 5GB
 
       - name: Upload to Minio
         run: |
