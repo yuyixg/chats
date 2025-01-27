@@ -21,6 +21,7 @@ export enum DBModelProvider {
   GoogleAI = 13,
   Ollama = 14,
   MiniMax = 15,
+  Doubao = 16,
 }
 
 export type FEModelProvider = {
@@ -46,6 +47,7 @@ export const feModelProviders: FEModelProvider[] = [
   { id: DBModelProvider.GoogleAI, name: 'Google AI', icon: '/logos/google-ai.svg' },
   { id: DBModelProvider.Ollama, name: 'Ollama', icon: '/logos/ollama.svg' },
   { id: DBModelProvider.MiniMax, name: 'MiniMax', icon: '/logos/minimax.svg' },
+  { id: DBModelProvider.Doubao, name: 'Doubao', icon: '/logos/doubao.svg' },
 ];
 
 export interface ChatModelFileConfig {

@@ -1,5 +1,5 @@
 import { AdminModelDto } from '@/types/adminApis';
-import { IChat } from '@/types/chat';
+import { CHATS_SELECT_TYPE, IChat } from '@/types/chat';
 import { ChatSpanDto } from '@/types/clientApis';
 
 import {
@@ -68,6 +68,11 @@ export const setStopIds = (stopIds: SetStopIdsType): ChatAction => ({
 export const setChatGroup = (group: SetChatGroupType): ChatAction => ({
   type: ChatActionTypes.SET_CHAT_GROUP,
   payload: group,
+});
+
+export const setChatsSelectType = (type: CHATS_SELECT_TYPE): ChatAction => ({
+  type: ChatActionTypes.SET_IS_CHATS_DELETE_MODE,
+  payload: type,
 });
 
 export default function () {}

@@ -96,7 +96,7 @@ export const ChatMessage: FC<Props> = memo(
                           hasMultipleSpan &&
                             message.isActive &&
                             'border-primary/50',
-                          hasMultipleSpan && 'p-4',
+                          hasMultipleSpan && 'p-0 md:p-4',
                           !hasMultipleSpan && 'border-none',
                         )}
                       >

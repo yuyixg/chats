@@ -5,19 +5,26 @@ import useTranslation from '@/hooks/useTranslation';
 
 import { getNextName } from '@/utils/common';
 
-import { ChatStatus, DefaultChatPaging } from '@/types/chat';
+import { CHATS_SELECT_TYPE, ChatStatus, DefaultChatPaging } from '@/types/chat';
 import { ChatResult } from '@/types/clientApis';
 
-import { setChatGroup, setChatPaging } from '../../_actions/chat.actions';
+import {
+  setChatGroup,
+  setChatPaging,
+  setChats,
+  setChatsSelectType,
+} from '../../_actions/chat.actions';
 import { setShowChatBar } from '../../_actions/setting.actions';
 import HomeContext from '../../_contexts/home.context';
 import Sidebar from '../Sidebar/Sidebar';
+import ChatActionConfirm from './ChatActionConfirm';
+import ChatActions from './ChatActions';
 import ChatGroups from './ChatGroups';
 import ChatbarContext from './Chatbar.context';
 import { ChatbarInitialState, initialState } from './Chatbar.context';
 import ChatBarSettings from './ChatbarSettings';
 
-import { postChatGroup } from '@/apis/clientApis';
+import { deleteChats, postChatGroup, putChats } from '@/apis/clientApis';
 
 const Chatbar = () => {
   const { t } = useTranslation();
@@ -34,6 +41,7 @@ const Chatbar = () => {
       showChatBar,
       selectedChat,
       isChatsLoading,
+      chatsSelectType,
     },
     chatDispatch,
     settingDispatch,
@@ -49,6 +57,7 @@ const Chatbar = () => {
     dispatch,
   } = chatBarContextValue;
   const [searchTerm, setSearchTerm] = useState('');
+  const [actionConfirming, setActionConfirming] = useState(false);
 
   const handleToggleChatbar = () => {
     settingDispatch(setShowChatBar(!showChatBar));
@@ -65,6 +74,47 @@ const Chatbar = () => {
           { ...DefaultChatPaging, count: 0, groupId: data.id },
         ]),
       );
+    });
+  };
+
+  const handleChangeChatsSelectType = (
+    type: CHATS_SELECT_TYPE = CHATS_SELECT_TYPE.NONE,
+  ) => {
+    chatDispatch(setChatsSelectType(type));
+  };
+
+  const handleActionCancel = () => {
+    const chatList = chats.map((x) => ({ ...x, selected: false }));
+    chatDispatch(setChats(chatList));
+    handleChangeChatsSelectType(CHATS_SELECT_TYPE.NONE);
+  };
+
+  const handleActionConfirm = async () => {
+    const selectedChatIds = chats.filter((c) => c.selected).map((c) => c.id);
+    setActionConfirming(true);
+    if (chatsSelectType === CHATS_SELECT_TYPE.DELETE) {
+      for (const id of selectedChatIds) {
+        await deleteChats(id);
+      }
+      handleDeleteChat(selectedChatIds);
+      chatDispatch(setChatsSelectType(CHATS_SELECT_TYPE.NONE));
+    } else if (chatsSelectType === CHATS_SELECT_TYPE.ARCHIVE) {
+      for (const id of selectedChatIds) {
+        await putChats(id, { isArchived: true });
+      }
+      handleDeleteChat(selectedChatIds);
+      chatDispatch(setChatsSelectType(CHATS_SELECT_TYPE.NONE));
+    }
+    setActionConfirming(false);
+  };
+
+  const handleShowMore = (groupId: string | null) => {
+    const { page, pageSize } = chatPaging.find((x) => x.groupId === groupId)!;
+    getChatsByGroup({
+      groupId,
+      page: page + 1,
+      pageSize: pageSize,
+      query: searchTerm,
     });
   };
 
@@ -85,16 +135,6 @@ const Chatbar = () => {
     }
   }, [searchTerm, chats]);
 
-  const handleShowMore = (groupId: string | null) => {
-    const { page, pageSize } = chatPaging.find((x) => x.groupId === groupId)!;
-    getChatsByGroup({
-      groupId,
-      page: page + 1,
-      pageSize: pageSize,
-      query: searchTerm,
-    });
-  };
-
   return (
     <ChatbarContext.Provider
       value={{
@@ -109,8 +149,28 @@ const Chatbar = () => {
         isOpen={showChatBar}
         addItemButtonTitle={t('New chat')}
         hasModel={hasModel}
-        onAddFolder={handleAddGroup}
         folderComponent={<ChatGroups onShowMore={handleShowMore} />}
+        actionComponent={
+          <ChatActions
+            onAddGroup={handleAddGroup}
+            onBatchArchive={() => {
+              handleChangeChatsSelectType(CHATS_SELECT_TYPE.ARCHIVE);
+            }}
+            onBatchDelete={() => {
+              handleChangeChatsSelectType(CHATS_SELECT_TYPE.DELETE);
+            }}
+          />
+        }
+        actionConfirmComponent={
+          chatsSelectType !== CHATS_SELECT_TYPE.NONE && (
+            <ChatActionConfirm
+              confirming={actionConfirming}
+              selectedCount={chats.filter((c) => c.selected).length}
+              onCancel={handleActionCancel}
+              onConfirm={handleActionConfirm}
+            />
+          )
+        }
         items={filteredChats}
         searchTerm={searchTerm}
         handleSearchTerm={(value: string) => {
@@ -119,7 +179,6 @@ const Chatbar = () => {
         }}
         toggleOpen={handleToggleChatbar}
         handleCreateItem={handleNewChat}
-        onDrop={() => {}}
         footerComponent={<ChatBarSettings />}
       />
     </ChatbarContext.Provider>

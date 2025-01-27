@@ -12,11 +12,12 @@ import useTranslation from '@/hooks/useTranslation';
 
 import { currentISODateString } from '@/utils/date';
 
-import { ChatStatus, IChat } from '@/types/chat';
+import { CHATS_SELECT_TYPE, ChatStatus, IChat } from '@/types/chat';
 
 import SidebarActionButton from '@/components/Button/SidebarActionButton';
 import ChatIcon from '@/components/ChatIcon/ChatIcon';
 import {
+  IconArchive,
   IconCheck,
   IconDots,
   IconPencil,
@@ -26,6 +27,7 @@ import {
   IconTrash,
   IconX,
 } from '@/components/Icons/index';
+import { Checkbox } from '@/components/ui/checkbox';
 import {
   DropdownMenu,
   DropdownMenuContent,
@@ -55,6 +57,7 @@ const ConversationComponent = ({ chat, onDragItemStart }: Props) => {
         status: undefined,
       },
       chats,
+      chatsSelectType,
     },
     chatDispatch,
     handleSelectChat,
@@ -65,10 +68,11 @@ const ConversationComponent = ({ chat, onDragItemStart }: Props) => {
 
   const { handleDeleteChat } = useContext(ChatbarContext);
 
+  const [title, setTitle] = useState('');
   const [isDeleting, setIsDeleting] = useState(false);
   const [isChanging, setTitleChanging] = useState(false);
-  const [title, setTitle] = useState('');
   const [isShare, setIsShare] = useState(false);
+  const [isArchive, setIsArchive] = useState(false);
 
   const handleEnterDown = (e: KeyboardEvent<HTMLDivElement>) => {
     if (e.key === 'Enter') {
@@ -96,20 +100,25 @@ const ConversationComponent = ({ chat, onDragItemStart }: Props) => {
     e.stopPropagation();
     if (isDeleting) {
       deleteChats(chat.id).then(() => {
-        handleDeleteChat(chat.id);
-        toast.success(t('Delete successful'));
+        handleDeleteChat([chat.id]);
       });
     } else if (isChanging) {
       handleChangeTitle(chat.id);
+    } else if (isArchive) {
+      putChats(chat.id, { isArchived: true }).then(() => {
+        handleDeleteChat([chat.id]);
+      });
     }
     setIsDeleting(false);
     setTitleChanging(false);
+    setIsArchive(false);
   };
 
   const handleCancel: MouseEventHandler<HTMLButtonElement> = (e) => {
     e.stopPropagation();
     setIsDeleting(false);
     setTitleChanging(false);
+    setIsArchive(false);
   };
 
   const handleOpenChangeTitleModal: MouseEventHandler<HTMLDivElement> = (e) => {
@@ -130,6 +139,11 @@ const ConversationComponent = ({ chat, onDragItemStart }: Props) => {
     handleUpdateChat(chats, selectChatId!, { isShared });
   };
 
+  const handleOpenArchiveModal: MouseEventHandler<HTMLDivElement> = (e) => {
+    e.stopPropagation();
+    setIsArchive(true);
+  };
+
   const handleChangeChatPin = (chatId: string, isPin: boolean = false) => {
     putChats(chatId, { isTopMost: isPin }).then(() => {
       chats.map((x) => {
@@ -141,6 +155,13 @@ const ConversationComponent = ({ chat, onDragItemStart }: Props) => {
       });
       chatDispatch(setChats(chats));
     });
+  };
+
+  const handleSelectByDeleteChat = (checked: boolean) => {
+    const chatList = chats.map((c) =>
+      c.id === chat.id ? { ...c, selected: checked } : { ...c },
+    );
+    chatDispatch(setChats(chatList));
   };
 
   useEffect(() => {
@@ -180,13 +201,26 @@ const ConversationComponent = ({ chat, onDragItemStart }: Props) => {
             )}
           >
             <div className="flex overflow-hidden">
-              {chat.spans.map((span) => (
-                <ChatIcon
-                  className="border border-muted"
-                  key={'chat-icon-' + span.spanId}
-                  providerId={span.modelProviderId}
+              {chatsSelectType !== CHATS_SELECT_TYPE.NONE ? (
+                <Checkbox
+                  key={'chats-batch-delete-' + chat.id}
+                  defaultChecked={!!chat?.selected}
+                  onCheckedChange={(checked: boolean) => {
+                    handleSelectByDeleteChat(checked);
+                  }}
+                  onClick={(e) => {
+                    e.stopPropagation();
+                  }}
                 />
-              ))}
+              ) : (
+                chat.spans.map((span) => (
+                  <ChatIcon
+                    className="border border-muted"
+                    key={'chat-icon-' + span.spanId}
+                    providerId={span.modelProviderId}
+                  />
+                ))
+              )}
             </div>
           </div>
 
@@ -200,7 +234,7 @@ const ConversationComponent = ({ chat, onDragItemStart }: Props) => {
         </button>
       )}
 
-      {(isDeleting || isChanging) && selectChatId === chat.id && (
+      {(isDeleting || isChanging || isArchive) && selectChatId === chat.id && (
         <div className="absolute right-1 z-10 flex text-gray-300">
           <SidebarActionButton handleClick={handleConfirm}>
             <IconCheck size={18} />
@@ -211,7 +245,7 @@ const ConversationComponent = ({ chat, onDragItemStart }: Props) => {
         </div>
       )}
 
-      {selectChatId === chat.id && !isDeleting && !isChanging && (
+      {selectChatId === chat.id && !isDeleting && !isChanging && !isArchive && (
         <div className="absolute right-[0.6rem] z-10 flex text-gray-300">
           <DropdownMenu>
             <DropdownMenuTrigger
@@ -257,6 +291,13 @@ const ConversationComponent = ({ chat, onDragItemStart }: Props) => {
                 <IconShare size={18} />
                 {t('Share')}
               </DropdownMenuItem>
+              {/* <DropdownMenuItem
+                className="flex justify-start gap-3"
+                onClick={handleOpenArchiveModal}
+              >
+                <IconArchive size={18} />
+                {t('Archive')}
+              </DropdownMenuItem> */}
               <DropdownMenuItem
                 className="flex justify-start gap-3"
                 onClick={handleOpenDeleteModal}

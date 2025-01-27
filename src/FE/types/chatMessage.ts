@@ -80,6 +80,7 @@ export interface IChatMessage {
   duration?: number;
   firstTokenLatency?: number;
   reaction?: boolean | null;
+  edited?: boolean;
 }
 
 export interface MessageNode {

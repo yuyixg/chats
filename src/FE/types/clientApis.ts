@@ -97,6 +97,7 @@ export interface PutChatParams {
   isTopMost?: boolean;
   groupId?: string;
   setsGroupId?: boolean;
+  isArchived?: boolean;
 }
 
 export interface PostUserPassword {

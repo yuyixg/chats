@@ -60,6 +60,7 @@ export interface IChat {
   groupId: string | null;
   tags: string[];
   updatedAt: string;
+  selected?: boolean;
 }
 
 export interface IGroupedChat {
@@ -86,4 +87,10 @@ export interface IChatPaging {
   count: number;
   page: number;
   pageSize: number;
+}
+
+export enum CHATS_SELECT_TYPE {
+  NONE = 1,
+  DELETE = 2,
+  ARCHIVE = 3,
 }

@@ -80,6 +80,7 @@ const ResponseMessageActions = (props: Props) => {
           />
           <div className="visible flex gap-0 items-center">
             <EditAction
+              hovered={message.edited}
               onToggleEditing={() => {
                 onToggleEditingMessage && onToggleEditingMessage(messageId);
               }}

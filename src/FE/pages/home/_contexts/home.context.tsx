@@ -2,7 +2,7 @@ import { Dispatch, createContext } from 'react';
 
 import { ActionType } from '@/hooks/useCreateReducer';
 
-import { IChat } from '@/types/chat';
+import { CHATS_SELECT_TYPE, IChat } from '@/types/chat';
 import { GetChatsParams } from '@/types/clientApis';
 
 import {
@@ -43,6 +43,7 @@ export interface HomeInitialState {
   selectedChat: IChat;
   chatPaging: SetChatsPagingType;
   isChatsLoading: boolean;
+  chatsSelectType: CHATS_SELECT_TYPE;
 
   models: SetModelsType;
   modelMap: SetModelMapType;
@@ -59,10 +60,11 @@ export const initialState: HomeInitialState = {
   selectedMessages: [],
 
   chats: [],
+  chatGroups: [],
   selectedChat: {} as IChat,
   chatPaging: [],
   isChatsLoading: false,
-  chatGroups: [],
+  chatsSelectType: CHATS_SELECT_TYPE.NONE,
 
   models: [],
   modelMap: {},
@@ -86,7 +88,7 @@ export interface HomeContextProps {
 
   hasModel: () => boolean;
   handleNewChat: (groupId?: string | null) => void;
-  handleDeleteChat: (id: string) => void;
+  handleDeleteChat: (ids: string[]) => void;
   handleSelectChat: (chat: IChat) => void;
   handleUpdateChat: (
     chats: IChat[],

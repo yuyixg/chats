@@ -7,11 +7,11 @@ using System.Security.Cryptography;
 
 namespace Chats.BE.Services.Sessions;
 
-public class SessionManager(JwtKeyManager jwtKeyManager)
+public class SessionManager(JwtKeyManager jwtKeyManager, IConfiguration configuration)
 {
     private const string ValidIssuer = "chats";
     private const string ValidAudience = "chats";
-    private static readonly TimeSpan ValidPeriod = TimeSpan.FromHours(8);
+    public TimeSpan TokenValidPeriod => configuration.GetValue("JwtValidPeriod", TimeSpan.FromHours(8));
 
     public Task<SessionEntry> GetCachedUserInfoBySession(string jwt, CancellationToken _ = default)
     {
@@ -68,7 +68,7 @@ public class SessionManager(JwtKeyManager jwtKeyManager)
             issuer: ValidIssuer,
             audience: ValidAudience,
             claims: sessionEntry.ToClaims(),
-            expires: DateTime.UtcNow.Add(ValidPeriod),
+            expires: DateTime.UtcNow.Add(TokenValidPeriod),
             signingCredentials: cred);
 
         string jwt = new JwtSecurityTokenHandler().WriteToken(token);
