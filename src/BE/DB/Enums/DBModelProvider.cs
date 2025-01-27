@@ -18,4 +18,5 @@ public enum DBModelProvider
     GoogleAI = 13,
     Ollama = 14,
     MiniMax = 15,
+    Doubao = 16, 
 }
