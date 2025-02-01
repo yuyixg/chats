@@ -86,7 +86,7 @@ const ChatModelSetting = () => {
                   modelId={span.modelId}
                   modelName={span.modelName}
                 />
-                {modelMap[span.modelId].allowSystemPrompt && (
+                {modelMap[span.modelId]?.allowSystemPrompt && (
                   <SystemPrompt
                     currentPrompt={defaultPrompt?.content || null}
                     prompts={prompts}
@@ -103,7 +103,7 @@ const ChatModelSetting = () => {
                     }}
                   />
                 )}
-                {modelMap[span.modelId].allowTemperature && (
+                {modelMap[span.modelId]?.allowTemperature && (
                   <TemperatureSlider
                     label={t('Temperature')}
                     min={0}
@@ -114,7 +114,7 @@ const ChatModelSetting = () => {
                     }}
                   />
                 )}
-                {modelMap[span.modelId].allowSearch && (
+                {modelMap[span.modelId]?.allowSearch && (
                   <EnableNetworkSearch
                     label={t('Internet Search')}
                     enable={span.enableSearch}
