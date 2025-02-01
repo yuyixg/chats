@@ -78,7 +78,7 @@ public class PromptsController(ChatsDB db, CurrentUser currentUser) : Controller
     {
         Prompt? userDefault = await db.Prompts
                 .OrderByDescending(x => x.UpdatedAt)
-                .Where(x => x.IsDefault && x.CreateUserId == currentUser.Id)
+                .Where(x => !x.IsSystem && x.IsDefault && x.CreateUserId == currentUser.Id)
                 .FirstOrDefaultAsync(cancellationToken);
         Prompt? systemDefault = await db.Prompts
                 .OrderByDescending(x => x.UpdatedAt)
