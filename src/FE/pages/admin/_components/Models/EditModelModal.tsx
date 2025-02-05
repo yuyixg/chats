@@ -32,6 +32,7 @@ import {
 import {
   deleteModels,
   getModelProviderModels,
+  getModelReference,
   putModels,
 } from '@/apis/adminApis';
 import { zodResolver } from '@hookform/resolvers/zod';
@@ -151,6 +152,13 @@ const EditModelModal = (props: IProps) => {
     }
   }, [isOpen]);
 
+  const onModelReferenceChanged = async (modelReferenceId: number) => {
+    getModelReference(modelReferenceId).then((data) => {
+      form.setValue('inputPrice1M', data.promptTokenPrice1M);
+      form.setValue('outputPrice1M', data.responseTokenPrice1M);
+    });
+  };
+
   useEffect(() => {
     const subscription = form.watch(async (value, { name, type }) => {
       if (name === 'modelKeyId' && type === 'change') {
@@ -159,6 +167,11 @@ const EditModelModal = (props: IProps) => {
           ?.modelProviderId!;
         const possibleModels = await getModelProviderModels(modelProviderId);
         setModelVersions(possibleModels);
+      }
+
+      if (name === 'modelReferenceId' && type === 'change') {
+        const modelReferenceId = +value.modelReferenceId!;
+        onModelReferenceChanged(modelReferenceId);
       }
     });
     return () => subscription?.unsubscribe();
