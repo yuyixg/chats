@@ -4,7 +4,11 @@ import useTranslation from '@/hooks/useTranslation';
 
 import { formatNumberAsMoney } from '@/utils/common';
 
-import { AdminModelDto, GetModelKeysResult } from '@/types/adminApis';
+import {
+  AdminModelDto,
+  GetModelKeysResult,
+  SimpleModelReferenceDto,
+} from '@/types/adminApis';
 import { feModelProviders } from '@/types/model';
 
 import { Button } from '@/components/ui/button';
@@ -21,7 +25,11 @@ import {
 import AddModelModal from '../_components/Models/AddModelModal';
 import EditModelModal from '../_components/Models/EditModelModal';
 
-import { getModelKeys, getModels } from '@/apis/adminApis';
+import {
+  getModelKeys,
+  getModelProviderModels,
+  getModels,
+} from '@/apis/adminApis';
 
 export default function Models() {
   const { t } = useTranslation();
@@ -30,6 +38,9 @@ export default function Models() {
   const [models, setModels] = useState<AdminModelDto[]>([]);
   const [loading, setLoading] = useState(true);
   const [modelKeys, setModelKeys] = useState<GetModelKeysResult[]>([]);
+  const [modelVersions, setModelVersions] = useState<SimpleModelReferenceDto[]>(
+    [],
+  );
 
   useEffect(() => {
     init();
@@ -48,8 +59,11 @@ export default function Models() {
   };
 
   const showEditDialog = (item: AdminModelDto) => {
-    setSelectedModel(item);
-    setIsOpen({ ...isOpen, edit: true });
+    getModelProviderModels(item.modelProviderId).then((possibleModels) => {
+      setModelVersions(possibleModels);
+      setSelectedModel(item);
+      setIsOpen({ ...isOpen, edit: true });
+    });
   };
 
   const showCreateDialog = () => {
@@ -123,6 +137,7 @@ export default function Models() {
         <EditModelModal
           selected={selectedModel!}
           modelKeys={modelKeys}
+          modelVersionList={modelVersions}
           isOpen={isOpen.edit}
           onClose={handleClose}
           onSuccessful={init}

@@ -1,4 +1,4 @@
-import React, { useEffect } from 'react';
+import React, { useEffect, useState } from 'react';
 import { useForm } from 'react-hook-form';
 import toast from 'react-hot-toast';
 
@@ -7,6 +7,7 @@ import useTranslation from '@/hooks/useTranslation';
 import {
   AdminModelDto,
   GetModelKeysResult,
+  SimpleModelReferenceDto,
   UpdateModelDto,
 } from '@/types/adminApis';
 
@@ -28,7 +29,11 @@ import {
   PopoverTrigger,
 } from '@/components/ui/popover';
 
-import { deleteModels, putModels } from '@/apis/adminApis';
+import {
+  deleteModels,
+  getModelProviderModels,
+  putModels,
+} from '@/apis/adminApis';
 import { zodResolver } from '@hookform/resolvers/zod';
 import { z } from 'zod';
 
@@ -36,6 +41,7 @@ interface IProps {
   isOpen: boolean;
   selected: AdminModelDto;
   modelKeys: GetModelKeysResult[];
+  modelVersionList?: SimpleModelReferenceDto[];
   onClose: () => void;
   onSuccessful: () => void;
   saveLoading?: boolean;
@@ -43,10 +49,21 @@ interface IProps {
 
 const EditModelModal = (props: IProps) => {
   const { t } = useTranslation();
-  const { isOpen, onClose, selected, onSuccessful, modelKeys } = props;
+  const {
+    isOpen,
+    onClose,
+    selected,
+    onSuccessful,
+    modelKeys,
+    modelVersionList,
+  } = props;
+
+  const [modelVersions, setModelVersions] = useState<SimpleModelReferenceDto[]>(
+    modelVersionList || [],
+  );
 
   const formSchema = z.object({
-    modelReferenceName: z.string(),
+    modelReferenceId: z.string(),
     name: z
       .string()
       .min(1, `${t('This field is require')}`)
@@ -62,7 +79,7 @@ const EditModelModal = (props: IProps) => {
   const form = useForm<z.infer<typeof formSchema>>({
     resolver: zodResolver(formSchema),
     defaultValues: {
-      modelReferenceName: '',
+      modelReferenceId: '',
       name: '',
       modelId: '',
       enabled: true,
@@ -81,7 +98,7 @@ const EditModelModal = (props: IProps) => {
       inputTokenPrice1M: values.inputPrice1M,
       outputTokenPrice1M: values.outputPrice1M,
       modelKeyId: parseInt(values.modelKeyId!),
-      modelReferenceId: selected.modelReferenceId,
+      modelReferenceId: parseInt(values.modelReferenceId),
       name: values.name!,
     };
     putModels(values.modelId!, dto).then(() => {
@@ -116,7 +133,7 @@ const EditModelModal = (props: IProps) => {
       const {
         name,
         modelId,
-        modelReferenceName,
+        modelReferenceId,
         enabled,
         modelKeyId,
         deploymentName,
@@ -130,9 +147,22 @@ const EditModelModal = (props: IProps) => {
       form.setValue('deploymentName', deploymentName || '');
       form.setValue('inputPrice1M', inputTokenPrice1M);
       form.setValue('outputPrice1M', outputTokenPrice1M);
-      form.setValue('modelReferenceName', modelReferenceName);
+      form.setValue('modelReferenceId', modelReferenceId.toString());
     }
   }, [isOpen]);
+
+  useEffect(() => {
+    const subscription = form.watch(async (value, { name, type }) => {
+      if (name === 'modelKeyId' && type === 'change') {
+        const modelKeyId = value.modelKeyId;
+        const modelProviderId = modelKeys.find((x) => x.id === +modelKeyId!)
+          ?.modelProviderId!;
+        const possibleModels = await getModelProviderModels(modelProviderId);
+        setModelVersions(possibleModels);
+      }
+    });
+    return () => subscription?.unsubscribe();
+  }, [form.watch]);
 
   return (
     <Dialog open={isOpen} onOpenChange={onClose}>
@@ -205,14 +235,18 @@ const EditModelModal = (props: IProps) => {
             </div>
             <div className="grid grid-cols-2 gap-4">
               <FormField
-                key="modelReferenceName"
+                key="modelReferenceId"
                 control={form.control}
-                name="modelReferenceName"
+                name="modelReferenceId"
                 render={({ field }) => {
                   return (
-                    <FormInput
+                    <FormSelect
                       field={field}
                       label={t('Model Version')!}
+                      items={modelVersions.map((key) => ({
+                        name: key.name,
+                        value: key.id.toString(),
+                      }))}
                     />
                   );
                 }}
