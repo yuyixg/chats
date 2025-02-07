@@ -28,6 +28,16 @@ public record SseResponseLine
         };
     }
 
+    public static SseResponseLine ThinkSegment(byte spanId, string segment)
+    {
+        return new SseResponseLine
+        {
+            SpanId = spanId,
+            Result = segment,
+            Kind = SseResponseKind.ThinkSegment,
+        };
+    }
+
     public static SseResponseLine Error(byte spanId, string error)
     {
         return new SseResponseLine
