@@ -6,6 +6,7 @@ using System.ClientModel;
 using Chats.BE.DB;
 using System.ClientModel.Primitives;
 using System.Text.Json;
+using Chats.BE.Services.UrlEncryption;
 
 namespace Chats.BE.Services.Models.ChatServices.OpenAI;
 
@@ -29,15 +30,32 @@ public partial class OpenAIChatService : ChatService
         _chatClient = chatClient;
     }
 
+    static IEnumerable ChoicesAccessor()
+    {
+        //IEnumerable choices = delta.Uncapsulate().Choices;
+        //Dictionary<string, BinaryData>? sad = choices.Cast<object>().FirstOrDefault()?.Uncapsulate().Delta.SerializedAdditionalRawData;
+        //if (sad != null && sad.Any() && sad.TryGetValue("reasoning_content", out BinaryData? rc))
+        //{
+        //    string? think = rc.ToObjectFromJson<string>();
+        //    if (think != null)
+        //    {
+        //        Console.Write(Util.WithStyle(rc.ToObjectFromJson<string>(), "color: green"));
+        //    }
+        //}
+    }
+
     public override async IAsyncEnumerable<ChatSegment> ChatStreamed(IReadOnlyList<ChatMessage> messages, ChatCompletionOptions options, [EnumeratorCancellation] CancellationToken cancellationToken)
     {
         await foreach (StreamingChatCompletionUpdate delta in _chatClient.CompleteChatStreamingAsync(messages, options, cancellationToken))
         {
             if (delta.ContentUpdate.Count == 0 && delta.Usage == null) continue;
 
+            string? segment = delta.ContentUpdate.FirstOrDefault()?.Text;
+            string? reasoningSegment = 
+
             yield return new ChatSegment
             {
-                TextSegment = delta.ContentUpdate.FirstOrDefault()?.Text ?? "",
+                Segment =  segment,
                 FinishReason = delta.FinishReason,
                 Usage = delta.Usage != null ? new Dtos.ChatTokenUsage()
                 {
@@ -65,7 +83,7 @@ public partial class OpenAIChatService : ChatService
         ChatCompletion delta = cc.Value;
         return new ChatSegment
         {
-            TextSegment = delta.Content[0].Text,
+            Segment = delta.Content[0].Text,
             FinishReason = delta.FinishReason,
             Usage = delta.Usage != null ? GetUsage(delta.Usage) : null,
         };

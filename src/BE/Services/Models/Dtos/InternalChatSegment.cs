@@ -7,7 +7,9 @@ public record InternalChatSegment
 {
     public required ChatFinishReason? FinishReason { get; init; }
 
-    public required string TextSegment { get; init; }
+    public required string? Segment { get; init; }
+
+    public required string? ReasoningSegment { get; init; }
 
     public required ChatTokenUsage Usage { get; init; }
 
@@ -19,7 +21,8 @@ public record InternalChatSegment
     {
         Usage = ChatTokenUsage.Zero,
         FinishReason = null,
-        TextSegment = string.Empty,
+        Segment = null,
+        ReasoningSegment = null,
         IsUsageReliable = false, 
         IsFromUpstream = false,
     };
@@ -84,7 +87,7 @@ public record InternalChatSegment
             [
                 new DeltaChoice
                 {
-                    Delta = new Delta { Content = TextSegment },
+                    Delta = new Delta { Content = Segment, ReasoningContent = ReasoningSegment },
                     FinishReason = GetFinishReasonText(),
                     Index = 0,
                     Logprobs = null,
@@ -110,7 +113,8 @@ public record InternalChatSegment
                     Message = new ResponseMessage
                     {
                         Role = "system",
-                        Content = TextSegment,
+                        Content = Segment,
+                        ReasoningContent = ReasoningSegment,
                         Refusal = null,
                     }
                 }

@@ -31,7 +31,7 @@ public abstract partial class ChatService
                 yield return seg.ToInternal(() => new Dtos.ChatTokenUsage
                 {
                     InputTokens = inputTokens,
-                    OutputTokens = outputTokens += Tokenizer.CountTokens(seg.TextSegment),
+                    OutputTokens = outputTokens += Tokenizer.CountTokens(seg.Segment),
                     ReasoningTokens = 0
                 });
             }
@@ -42,7 +42,7 @@ public abstract partial class ChatService
             yield return seg.ToInternal(() => new Dtos.ChatTokenUsage()
             {
                 InputTokens = inputTokens,
-                OutputTokens = outputTokens += Tokenizer.CountTokens(seg.TextSegment),
+                OutputTokens = outputTokens += Tokenizer.CountTokens(seg.Segment),
                 ReasoningTokens = 0
             });
         }

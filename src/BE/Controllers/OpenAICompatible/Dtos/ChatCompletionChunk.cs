@@ -5,7 +5,10 @@ namespace Chats.BE.Controllers.OpenAICompatible.Dtos;
 public record Delta
 {
     [JsonPropertyName("content")]
-    public required string Content { get; init; }
+    public required string? Content { get; init; }
+
+    [JsonPropertyName("reasoning_content"), JsonIgnore(Condition = JsonIgnoreCondition.WhenWritingNull)]
+    public required string? ReasoningContent { get; init; }
 }
 
 public record DeltaChoice

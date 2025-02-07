@@ -402,8 +402,8 @@ public class ChatController(ChatStopService stopService) : ControllerBase
             using ChatService s = chatFactory.CreateChatService(userModel.Model);
             await foreach (InternalChatSegment seg in icc.Run(userBalance.Balance, userModel, s.ChatStreamedFEProcessed(messageToSend, cco, extraDetails, cancellationToken)))
             {
-                if (seg.TextSegment == string.Empty) continue;
-                await writer.WriteAsync(SseResponseLine.Segment(span.Id, seg.TextSegment), cancellationToken);
+                if (seg.Segment == string.Empty) continue;
+                await writer.WriteAsync(SseResponseLine.Segment(span.Id, seg.Segment), cancellationToken);
 
                 if (cancellationToken.IsCancellationRequested)
                 {
@@ -448,7 +448,7 @@ public class ChatController(ChatStopService stopService) : ControllerBase
             ChatRoleId = (byte)DBChatRole.Assistant,
             MessageContents =
             [
-                MessageContent.FromText(icc.FullResponse.TextSegment),
+                MessageContent.FromText(icc.FullResponse.Segment),
             ],
             SpanId = span.Id,
             CreatedAt = DateTime.UtcNow,

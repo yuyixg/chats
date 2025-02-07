@@ -51,7 +51,7 @@ public class InChatContext(long firstTick)
                     if (_firstResponseTick == 0) _firstResponseTick = Stopwatch.GetTimestamp();
                 }
                 _lastSegment = seg;
-                _fullResult.Append(seg.TextSegment);
+                _fullResult.Append(seg.Segment);
 
                 UserModelBalanceCost currentCost = calculator.GetNewBalance(seg.Usage.InputTokens, seg.Usage.OutputTokens, priceConfig);
                 if (!currentCost.IsSufficient)
@@ -71,7 +71,7 @@ public class InChatContext(long firstTick)
         }
     }
 
-    public InternalChatSegment FullResponse => _lastSegment with { TextSegment = _fullResult.ToString() };
+    public InternalChatSegment FullResponse => _lastSegment with { Segment = _fullResult.ToString() };
 
     public UserModelUsage ToUserModelUsage(int userId, ClientInfo clientInfo, bool isApi)
     {

@@ -45,7 +45,7 @@ public class QianFanChatService : ChatService
         {
             yield return new ChatSegment
             {
-                TextSegment = chatResponse.Result,
+                Segment = chatResponse.Result,
                 FinishReason = ToFinishReason(chatResponse.FinishReason),
                 Usage = new Dtos.ChatTokenUsage
                 {

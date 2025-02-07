@@ -38,14 +38,14 @@ public abstract partial class ChatService : IDisposable
         await foreach (ChatSegment seg in ChatStreamed(messages, options, cancellationToken))
         {
             lastSegment = seg;
-            result.Append(seg.TextSegment);
+            result.Append(seg.Segment);
         }
 
         return new ChatSegment()
         {
             Usage = lastSegment?.Usage,
             FinishReason = lastSegment?.FinishReason,
-            TextSegment = result.ToString(),
+            Segment = result.ToString(),
         };
     }
 
