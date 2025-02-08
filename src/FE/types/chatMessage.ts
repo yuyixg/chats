@@ -86,6 +86,7 @@ export interface IChatMessage {
   inputTokens?: number;
   outputTokens?: number;
   reasoningTokens?: number;
+  reasoningDuration?: number;
   duration?: number;
   firstTokenLatency?: number;
   reaction?: boolean | null;

@@ -12,6 +12,7 @@ export enum ChatSpanStatus {
   None = 1,
   Chatting = 2,
   Failed = 3,
+  Thinking = 4,
 }
 
 export enum ChatStatus {
@@ -33,6 +34,7 @@ export interface ImageDef {
 export interface Content {
   error?: string;
   text?: string;
+  think?: string;
   fileIds?: ImageDef[];
 }
 
