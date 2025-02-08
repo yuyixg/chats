@@ -73,6 +73,8 @@ public partial class ChatsDB : DbContext
 
     public virtual DbSet<Prompt> Prompts { get; set; }
 
+    public virtual DbSet<ReasoningResponseKind> ReasoningResponseKinds { get; set; }
+
     public virtual DbSet<SmsAttempt> SmsAttempts { get; set; }
 
     public virtual DbSet<SmsRecord> SmsRecords { get; set; }
@@ -329,6 +331,10 @@ public partial class ChatsDB : DbContext
             entity.HasOne(d => d.Provider).WithMany(p => p.ModelReferences)
                 .OnDelete(DeleteBehavior.ClientSetNull)
                 .HasConstraintName("FK_ModelSetting_ModelProvider");
+
+            entity.HasOne(d => d.ReasoningResponseKind).WithMany(p => p.ModelReferences)
+                .OnDelete(DeleteBehavior.ClientSetNull)
+                .HasConstraintName("FK_ModelReference_ReasoningResponseKind");
 
             entity.HasOne(d => d.Tokenizer).WithMany(p => p.ModelReferences).HasConstraintName("FK_ModelReference_Tokenizer");
         });

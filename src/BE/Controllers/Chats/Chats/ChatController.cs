@@ -428,6 +428,12 @@ public class ChatController(ChatStopService stopService) : ControllerBase
             errorText = e.Message;
             logger.LogError(e, "Upstream error: {userMessageId}", req.MessageId);
         }
+        catch (AggregateException e) when (e.InnerException is TaskCanceledException)
+        {
+            // do nothing if cancelled
+            icc.FinishReason = DBFinishReason.Cancelled;
+            errorText = e.InnerException.ToString();
+        }
         catch (TaskCanceledException)
         {
             // do nothing if cancelled

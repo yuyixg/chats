@@ -38,6 +38,8 @@ public partial class ModelReference
 
     public bool AllowStreaming { get; set; }
 
+    public byte ReasoningResponseKindId { get; set; }
+
     public int ContextWindow { get; set; }
 
     public int MaxResponseTokens { get; set; }
@@ -64,6 +66,10 @@ public partial class ModelReference
     [ForeignKey("ProviderId")]
     [InverseProperty("ModelReferences")]
     public virtual ModelProvider Provider { get; set; } = null!;
+
+    [ForeignKey("ReasoningResponseKindId")]
+    [InverseProperty("ModelReferences")]
+    public virtual ReasoningResponseKind ReasoningResponseKind { get; set; } = null!;
 
     [ForeignKey("TokenizerId")]
     [InverseProperty("ModelReferences")]
