@@ -19,4 +19,5 @@ public enum DBModelProvider
     Ollama = 14,
     MiniMax = 15,
     Doubao = 16, 
+    SiliconFlow = 17, 
 }
