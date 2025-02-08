@@ -3,8 +3,6 @@ import toast from 'react-hot-toast';
 
 import useTranslation from '@/hooks/useTranslation';
 
-import { DBModelProvider } from '@/types/model';
-
 import { IconInfo } from '@/components/Icons';
 import Spinner from '@/components/Spinner/Spinner';
 import Tips from '@/components/Tips/Tips';
@@ -53,7 +51,7 @@ export interface PossibleModel {
 
 const ConfigModelModal = (props: IProps) => {
   const { t } = useTranslation();
-  const { modelKeyId, modelProverId, isOpen, onClose } = props;
+  const { modelKeyId, isOpen, onClose } = props;
   const [models, setModels] = useState<PossibleModel[]>([]);
   const [loading, setLoading] = React.useState(false);
   const onSave = async (index: number) => {
@@ -68,6 +66,7 @@ const ConfigModelModal = (props: IProps) => {
   useEffect(() => {
     if (isOpen) {
       setLoading(true);
+      setModels([]);
       getModelKeyPossibleModels(modelKeyId).then((data) => {
         setModels(
           data.map((x) => ({
@@ -128,10 +127,6 @@ const ConfigModelModal = (props: IProps) => {
     setModels(modelList);
   }
 
-  function needDeploymentName(modelProviderId: DBModelProvider) {
-    return modelProviderId === DBModelProvider.AzureOpenAI || modelProviderId === DBModelProvider.Ollama;
-  }
-
   return (
     <Dialog open={isOpen} onOpenChange={onClose}>
       <DialogContent className="min-w-[375px] w-3/5">
@@ -142,9 +137,7 @@ const ConfigModelModal = (props: IProps) => {
           <Table>
             <TableHeader>
               <TableRow className="pointer-events-none">
-                {needDeploymentName(modelProverId) && (
-                  <TableHead>{t('Deployment Name')}</TableHead>
-                )}
+                <TableHead>{t('Deployment Name')}</TableHead>
                 <TableHead>{t('Model Reference Name')}</TableHead>
                 <TableHead className="w-20">{t('Actions')}</TableHead>
               </TableRow>
@@ -152,18 +145,16 @@ const ConfigModelModal = (props: IProps) => {
             <TableBody>
               {models.map((model, index) => (
                 <TableRow key={model.modelReferenceId}>
-                  {needDeploymentName(modelProverId) && (
-                    <TableCell>
-                      <Input
-                        className="max-w-[200px]"
-                        disabled={model.isExists}
-                        value={model.deploymentName || ''}
-                        onChange={(e) => {
-                          handleChangeDeploymentName(index, e.target.value);
-                        }}
-                      />
-                    </TableCell>
-                  )}
+                  <TableCell>
+                    <Input
+                      className="max-w-[200px]"
+                      disabled={model.isExists}
+                      value={model.deploymentName || ''}
+                      onChange={(e) => {
+                        handleChangeDeploymentName(index, e.target.value);
+                      }}
+                    />
+                  </TableCell>
                   <TableCell>
                     {model.referenceName}
                     {model.isExists && (
@@ -228,10 +219,8 @@ const ConfigModelModal = (props: IProps) => {
           <div
             className={`fixed top-0 left-0 bottom-0 right-0 bg-background z-50 text-center text-[12.5px]`}
           >
-            <div className="fixed w-screen h-screen top-1/2">
-              <div className="flex justify-center">
-                <Spinner className="text-gray-500 dark:text-gray-50" />
-              </div>
+            <div className="flex justify-center items-center h-16">
+              <Spinner className="text-gray-500 dark:text-gray-50" />
             </div>
           </div>
         )}
