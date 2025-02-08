@@ -6,8 +6,16 @@ import useTranslation from '@/hooks/useTranslation';
 import { GetModelKeysResult } from '@/types/adminApis';
 import { feModelProviders } from '@/types/model';
 
+import ChatIcon from '@/components/ChatIcon/ChatIcon';
 import { Button } from '@/components/ui/button';
 import { Card } from '@/components/ui/card';
+import {
+  Select,
+  SelectContent,
+  SelectItem,
+  SelectTrigger,
+  SelectValue,
+} from '@/components/ui/select';
 import {
   Table,
   TableBody,
@@ -22,6 +30,11 @@ import ModelKeysModal from '../_components/ModelKeys/ModelKeysModal';
 
 import { getModelKeys } from '@/apis/adminApis';
 
+interface IQuery {
+  modelProviderId: string;
+  modelKeyId: string;
+}
+
 export default function ModelKeys() {
   const { t } = useTranslation();
   const [isOpen, setIsOpen] = useState(false);
@@ -29,7 +42,15 @@ export default function ModelKeys() {
   const [modelKeyId, setModelKeyId] = useState<number>();
   const [selected, setSelected] = useState<GetModelKeysResult | null>(null);
   const [services, setServices] = useState<GetModelKeysResult[]>([]);
+  const [filteredServices, setFilteredServices] = useState<
+    GetModelKeysResult[]
+  >([]);
   const [loading, setLoading] = useState(true);
+
+  const [query, setQuery] = useState<IQuery>({
+    modelProviderId: '',
+    modelKeyId: '',
+  });
 
   useEffect(() => {
     init();
@@ -54,9 +75,72 @@ export default function ModelKeys() {
     setSelected(null);
   };
 
+  const handleQuery = (params: IQuery) => {
+    const { modelProviderId, modelKeyId } = params;
+    let serviceList = [...services];
+    if (modelProviderId) {
+      serviceList = serviceList.filter(
+        (x) => x.modelProviderId.toString() === modelProviderId,
+      );
+    }
+    if (modelKeyId) {
+      serviceList = serviceList.filter((x) => x.id.toString() === modelKeyId);
+    }
+    setQuery(params);
+    setFilteredServices(serviceList);
+  };
+
   return (
     <>
-      <div className="flex flex-col gap-4 mb-4">
+      <div className="flex gap-4 mb-4 justify-between">
+        <div className="flex gap-3">
+          <Select
+            value={query.modelProviderId}
+            onValueChange={(value) => {
+              const params = { ...query, modelProviderId: value };
+              handleQuery(params);
+            }}
+          >
+            <SelectTrigger
+              className="w-48"
+              value={query.modelProviderId}
+              onReset={() => {
+                const params = { ...query, modelProviderId: '' };
+                handleQuery(params);
+              }}
+            >
+              <SelectValue placeholder={t('Select an Model Provider')} />
+            </SelectTrigger>
+            <SelectContent>
+              {feModelProviders.map((m) => (
+                <SelectItem value={m.id.toString()}>{m.name}</SelectItem>
+              ))}
+            </SelectContent>
+          </Select>
+          <Select
+            value={query.modelKeyId}
+            onValueChange={(value) => {
+              const params = { ...query, modelKeyId: value };
+              handleQuery(params);
+            }}
+          >
+            <SelectTrigger
+              value={query.modelKeyId}
+              className="w-48"
+              onReset={() => {
+                const params = { ...query, modelKeyId: '' };
+                handleQuery(params);
+              }}
+            >
+              <SelectValue placeholder={t('Select an Model Key')} />
+            </SelectTrigger>
+            <SelectContent>
+              {services.map((m) => (
+                <SelectItem value={m.id.toString()}>{m.name}</SelectItem>
+              ))}
+            </SelectContent>
+          </Select>
+        </div>
         <div className="flex justify-end gap-3 items-center">
           <Button
             onClick={() => {
@@ -78,8 +162,11 @@ export default function ModelKeys() {
               <TableHead>{t('Created Time')}</TableHead>
             </TableRow>
           </TableHeader>
-          <TableBody isLoading={loading} isEmpty={services.length === 0}>
-            {services.map((item) => (
+          <TableBody
+            isLoading={loading}
+            isEmpty={filteredServices.length === 0}
+          >
+            {filteredServices.map((item) => (
               <TableRow
                 className="cursor-pointer"
                 key={item.id}
@@ -91,7 +178,13 @@ export default function ModelKeys() {
                   {item.name}
                 </TableCell>
                 <TableCell>
-                  {t(feModelProviders[item.modelProviderId].name)}
+                  <div className='flex gap-1'>
+                    <ChatIcon
+                      className="inline"
+                      providerId={item.modelProviderId}
+                    />
+                    {t(feModelProviders[item.modelProviderId].name)}
+                  </div>
                 </TableCell>
                 <TableCell>
                   {item.enabledModelCount === item.totalModelCount

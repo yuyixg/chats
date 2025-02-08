@@ -11,8 +11,16 @@ import {
 } from '@/types/adminApis';
 import { feModelProviders } from '@/types/model';
 
+import ChatIcon from '@/components/ChatIcon/ChatIcon';
 import { Button } from '@/components/ui/button';
 import { Card } from '@/components/ui/card';
+import {
+  Select,
+  SelectContent,
+  SelectItem,
+  SelectTrigger,
+  SelectValue,
+} from '@/components/ui/select';
 import {
   Table,
   TableBody,
@@ -30,17 +38,30 @@ import {
   getModelProviderModels,
   getModels,
 } from '@/apis/adminApis';
+import { cn } from '@/lib/utils';
+
+interface IQuery {
+  modelProviderId: string;
+  modelKeyId: string;
+  enabled: string;
+}
 
 export default function Models() {
   const { t } = useTranslation();
   const [isOpen, setIsOpen] = useState({ add: false, edit: false });
   const [selectedModel, setSelectedModel] = useState<AdminModelDto>();
   const [models, setModels] = useState<AdminModelDto[]>([]);
+  const [filteredModels, setFilteredModels] = useState<AdminModelDto[]>([]);
   const [loading, setLoading] = useState(true);
   const [modelKeys, setModelKeys] = useState<GetModelKeysResult[]>([]);
   const [modelVersions, setModelVersions] = useState<SimpleModelReferenceDto[]>(
     [],
   );
+  const [query, setQuery] = useState<IQuery>({
+    modelProviderId: '',
+    modelKeyId: '',
+    enabled: '',
+  });
 
   useEffect(() => {
     init();
@@ -49,6 +70,7 @@ export default function Models() {
   const init = () => {
     getModels().then((data) => {
       setModels(data);
+      setFilteredModels(data);
       setIsOpen({ add: false, edit: false });
       setSelectedModel(undefined);
       setLoading(false);
@@ -75,9 +97,99 @@ export default function Models() {
     setSelectedModel(undefined);
   };
 
+  const handleQuery = (params: IQuery) => {
+    const { modelProviderId, modelKeyId, enabled } = params;
+    let modelList = [...models];
+    if (modelProviderId) {
+      modelList = modelList.filter(
+        (x) => x.modelProviderId.toString() === modelProviderId,
+      );
+    }
+    if (modelKeyId) {
+      modelList = modelList.filter(
+        (x) => x.modelKeyId.toString() === modelKeyId,
+      );
+    }
+    if (enabled !== '') {
+      modelList = modelList.filter((x) => x.enabled.toString() === enabled);
+    }
+    setQuery(params);
+    setFilteredModels(modelList);
+  };
+
   return (
     <>
-      <div className="flex flex-col gap-4 mb-4">
+      <div className="flex gap-4 mb-4 justify-between">
+        <div className="flex gap-3">
+          <Select
+            value={query.modelProviderId}
+            onValueChange={(value) => {
+              const params = { ...query, modelProviderId: value };
+              handleQuery(params);
+            }}
+          >
+            <SelectTrigger
+              className="w-48"
+              value={query.modelProviderId}
+              onReset={() => {
+                const params = { ...query, modelProviderId: '' };
+                handleQuery(params);
+              }}
+            >
+              <SelectValue placeholder={t('Select an Model Provider')} />
+            </SelectTrigger>
+            <SelectContent>
+              {feModelProviders.map((m) => (
+                <SelectItem value={m.id.toString()}>{m.name}</SelectItem>
+              ))}
+            </SelectContent>
+          </Select>
+          <Select
+            value={query.modelKeyId}
+            onValueChange={(value) => {
+              const params = { ...query, modelKeyId: value };
+              handleQuery(params);
+            }}
+          >
+            <SelectTrigger
+              value={query.modelKeyId}
+              className="w-48"
+              onReset={() => {
+                const params = { ...query, modelKeyId: '' };
+                handleQuery(params);
+              }}
+            >
+              <SelectValue placeholder={t('Select an Model Key')} />
+            </SelectTrigger>
+            <SelectContent>
+              {modelKeys.map((m) => (
+                <SelectItem value={m.id.toString()}>{m.name}</SelectItem>
+              ))}
+            </SelectContent>
+          </Select>
+          <Select
+            value={query.enabled}
+            onValueChange={(value) => {
+              const params = { ...query, enabled: value };
+              handleQuery(params);
+            }}
+          >
+            <SelectTrigger
+              value={query.enabled}
+              className="w-48"
+              onReset={() => {
+                const params = { ...query, enabled: '' };
+                handleQuery(params);
+              }}
+            >
+              <SelectValue placeholder={t('Is it enabled')} />
+            </SelectTrigger>
+            <SelectContent>
+              <SelectItem value={'true'}>{t('Yes')}</SelectItem>
+              <SelectItem value={'false'}>{t('No')}</SelectItem>
+            </SelectContent>
+          </Select>
+        </div>
         <div className="flex justify-end gap-3 items-center">
           <Button
             onClick={() => {
@@ -100,8 +212,8 @@ export default function Models() {
               <TableHead>{t('Token Price')}</TableHead>
             </TableRow>
           </TableHeader>
-          <TableBody isLoading={loading} isEmpty={models.length === 0}>
-            {models.map((item) => (
+          <TableBody isLoading={loading} isEmpty={filteredModels.length === 0}>
+            {filteredModels.map((item) => (
               <TableRow
                 className="cursor-pointer"
                 key={item.modelId}
@@ -109,12 +221,18 @@ export default function Models() {
               >
                 <TableCell>{item.rank}</TableCell>
                 <TableCell>
-                  <div className="flex items-center gap-1 ">
+                  <div className="flex items-center gap-1">
                     <div
-                      className={`w-2 h-2 rounded-full ${
-                        item.enabled ? 'bg-green-400' : 'bg-gray-400'
-                      }`}
-                    ></div>
+                      className={cn(
+                        'border-2 rounded-full',
+                        item.enabled ? 'border-green-500' : 'border-gray-400',
+                      )}
+                    >
+                      <ChatIcon
+                        className="h-6 w-6 p-0.5"
+                        providerId={item.modelProviderId}
+                      />
+                    </div>
                     {item.name}
                   </div>
                 </TableCell>
