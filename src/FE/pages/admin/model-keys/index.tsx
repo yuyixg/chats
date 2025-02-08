@@ -59,6 +59,7 @@ export default function ModelKeys() {
   const init = () => {
     getModelKeys().then((data) => {
       setServices(data);
+      setFilteredServices(data);
       setIsOpen(false);
       setLoading(false);
     });
