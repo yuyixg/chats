@@ -37,7 +37,7 @@ public abstract partial class ChatService
         int reasoningTokens = 0;
         yield return InternalChatSegment.InputOnly(inputTokens);
 
-        Func<ChatSegment, Dtos.ChatTokenUsage> usageAccessor = (seg) => new Dtos.ChatTokenUsage()
+        Dtos.ChatTokenUsage usageAccessor(ChatSegment seg) => new()
         {
             InputTokens = inputTokens,
             OutputTokens = outputTokens += Tokenizer.CountTokens(seg.Segment!),
