@@ -28,13 +28,13 @@ public record SseResponseLine
         };
     }
 
-    public static SseResponseLine ThinkSegment(byte spanId, string segment)
+    public static SseResponseLine ReasoningSegment(byte spanId, string segment)
     {
         return new SseResponseLine
         {
             SpanId = spanId,
             Result = segment,
-            Kind = SseResponseKind.ThinkSegment,
+            Kind = SseResponseKind.ReasoningSegment,
         };
     }
 

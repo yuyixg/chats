@@ -36,7 +36,7 @@ public record MessageLiteDto
                 .SelectAwait(async c => await c.ToOpenAI(fup, cancellationToken))
                 .ToArrayAsync(cancellationToken)),
             DBChatRole.Assistant => new AssistantChatMessage(await Content
-                .Where(x => x.ContentTypeId != (byte)DBMessageContentType.Error && x.ContentTypeId != (byte)DBMessageContentType.Think)
+                .Where(x => x.ContentTypeId != (byte)DBMessageContentType.Error && x.ContentTypeId != (byte)DBMessageContentType.Reasoning)
                 .ToAsyncEnumerable()
                 .SelectAwait(async x => await x.ToOpenAI(fup, cancellationToken))
                 .ToArrayAsync(cancellationToken)),

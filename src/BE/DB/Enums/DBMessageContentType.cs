@@ -22,5 +22,5 @@ public enum DBMessageContentType : byte
 
     /// <summary>
     /// Reasoning content type, stored in MessageContentText table
-    Think = 3,
+    Reasoning = 3,
 }

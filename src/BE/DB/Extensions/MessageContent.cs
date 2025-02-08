@@ -23,7 +23,7 @@ public partial class MessageContent
         {
             DBMessageContentType.Text => MessageContentText!.Content,
             DBMessageContentType.Error => MessageContentText!.Content,
-            DBMessageContentType.Think => MessageContentText!.Content,
+            DBMessageContentType.Reasoning => MessageContentText!.Content,
             //DBMessageContentType.FileId => MessageContentUtil.ReadFileId(Content).ToString(), // not supported
             _ => throw new NotSupportedException(),
         };
@@ -36,7 +36,7 @@ public partial class MessageContent
 
     public static MessageContent FromReasoningContent(string text)
     {
-        return new MessageContent { MessageContentText = new() { Content = text }, ContentTypeId = (byte)DBMessageContentType.Think };
+        return new MessageContent { MessageContentText = new() { Content = text }, ContentTypeId = (byte)DBMessageContentType.Reasoning };
     }
 
     public static MessageContent FromFile(int fileId, File file)
