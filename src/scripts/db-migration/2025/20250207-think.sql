@@ -570,3 +570,219 @@ INSERT INTO [ModelReference]([Id], [ProviderId], [Name], [DisplayName], [Publish
 VALUES (@p0, @p1, @p2, @p3, @p4, @p5, @p6, @p7, @p8, @p9, @p10, @p11, @p12, @p13, @p14, @p15, @p16, @p17)
 GO
 
+
+/* 为了防止任何可能出现的数据丢失问题，您应该先仔细检查此脚本，然后再在数据库设计器的上下文之外运行此脚本。*/
+BEGIN TRANSACTION
+SET QUOTED_IDENTIFIER ON
+SET ARITHABORT ON
+SET NUMERIC_ROUNDABORT OFF
+SET CONCAT_NULL_YIELDS_NULL ON
+SET ANSI_NULLS ON
+SET ANSI_PADDING ON
+SET ANSI_WARNINGS ON
+COMMIT
+BEGIN TRANSACTION
+GO
+ALTER TABLE dbo.UserModelUsage
+	DROP CONSTRAINT FK_ModelUsage_TransactionLog
+GO
+ALTER TABLE dbo.BalanceTransaction SET (LOCK_ESCALATION = TABLE)
+GO
+COMMIT
+BEGIN TRANSACTION
+GO
+ALTER TABLE dbo.UserModelUsage
+	DROP CONSTRAINT FK_ModelUsage_UserModel2
+GO
+ALTER TABLE dbo.UserModel SET (LOCK_ESCALATION = TABLE)
+GO
+COMMIT
+BEGIN TRANSACTION
+GO
+ALTER TABLE dbo.UserModelUsage
+	DROP CONSTRAINT FK_ModelUsage_UsageTransactionLog
+GO
+ALTER TABLE dbo.UsageTransaction SET (LOCK_ESCALATION = TABLE)
+GO
+COMMIT
+BEGIN TRANSACTION
+GO
+ALTER TABLE dbo.UserModelUsage
+	DROP CONSTRAINT FK_UserModelUsage_FinishReason
+GO
+ALTER TABLE dbo.FinishReason SET (LOCK_ESCALATION = TABLE)
+GO
+COMMIT
+BEGIN TRANSACTION
+GO
+ALTER TABLE dbo.UserModelUsage
+	DROP CONSTRAINT FK_ModelUsage_ClientInfo
+GO
+ALTER TABLE dbo.ClientInfo SET (LOCK_ESCALATION = TABLE)
+GO
+COMMIT
+BEGIN TRANSACTION
+GO
+CREATE TABLE dbo.Tmp_UserModelUsage
+	(
+	Id bigint NOT NULL IDENTITY (1, 1),
+	UserModelId int NOT NULL,
+	FinishReasonId tinyint NOT NULL,
+	SegmentCount smallint NOT NULL,
+	InputTokens int NOT NULL,
+	OutputTokens int NOT NULL,
+	ReasoningTokens int NOT NULL,
+	IsUsageReliable bit NOT NULL,
+	PreprocessDurationMs int NOT NULL,
+	ReasoningDurationMs int NOT NULL,
+	FirstResponseDurationMs int NOT NULL,
+	PostprocessDurationMs int NOT NULL,
+	TotalDurationMs int NOT NULL,
+	InputCost decimal(14, 8) NOT NULL,
+	OutputCost decimal(14, 8) NOT NULL,
+	BalanceTransactionId bigint NULL,
+	UsageTransactionId bigint NULL,
+	ClientInfoId int NOT NULL,
+	CreatedAt datetime2(7) NOT NULL
+	)  ON [PRIMARY]
+GO
+ALTER TABLE dbo.Tmp_UserModelUsage SET (LOCK_ESCALATION = TABLE)
+GO
+ALTER TABLE dbo.Tmp_UserModelUsage ADD CONSTRAINT
+	DF_UserModelUsage_ReasoningDurationMs DEFAULT 0 FOR ReasoningDurationMs
+GO
+SET IDENTITY_INSERT dbo.Tmp_UserModelUsage ON
+GO
+IF EXISTS(SELECT * FROM dbo.UserModelUsage)
+	 EXEC('INSERT INTO dbo.Tmp_UserModelUsage (Id, UserModelId, FinishReasonId, SegmentCount, InputTokens, OutputTokens, ReasoningTokens, IsUsageReliable, PreprocessDurationMs, FirstResponseDurationMs, PostprocessDurationMs, TotalDurationMs, InputCost, OutputCost, BalanceTransactionId, UsageTransactionId, ClientInfoId, CreatedAt)
+		SELECT Id, UserModelId, FinishReasonId, SegmentCount, InputTokens, OutputTokens, ReasoningTokens, IsUsageReliable, PreprocessDurationMs, FirstResponseDurationMs, PostprocessDurationMs, TotalDurationMs, InputCost, OutputCost, BalanceTransactionId, UsageTransactionId, ClientInfoId, CreatedAt FROM dbo.UserModelUsage WITH (HOLDLOCK TABLOCKX)')
+GO
+SET IDENTITY_INSERT dbo.Tmp_UserModelUsage OFF
+GO
+ALTER TABLE dbo.UserApiUsage
+	DROP CONSTRAINT FK_UserApiUsage_UserModelUsage
+GO
+ALTER TABLE dbo.Message
+	DROP CONSTRAINT FK_Message_UserModelUsage
+GO
+DROP TABLE dbo.UserModelUsage
+GO
+EXECUTE sp_rename N'dbo.Tmp_UserModelUsage', N'UserModelUsage', 'OBJECT' 
+GO
+ALTER TABLE dbo.UserModelUsage ADD CONSTRAINT
+	PK_ModelUsage PRIMARY KEY CLUSTERED 
+	(
+	Id
+	) WITH( STATISTICS_NORECOMPUTE = OFF, IGNORE_DUP_KEY = OFF, ALLOW_ROW_LOCKS = ON, ALLOW_PAGE_LOCKS = ON) ON [PRIMARY]
+
+GO
+CREATE NONCLUSTERED INDEX IX_ModelUsage_UserModelId ON dbo.UserModelUsage
+	(
+	UserModelId
+	) WITH( STATISTICS_NORECOMPUTE = OFF, IGNORE_DUP_KEY = OFF, ALLOW_ROW_LOCKS = ON, ALLOW_PAGE_LOCKS = ON) ON [PRIMARY]
+GO
+CREATE UNIQUE NONCLUSTERED INDEX IX_ModelUsage_BalanceTransaction ON dbo.UserModelUsage
+	(
+	BalanceTransactionId
+	) WHERE ([BalanceTransactionId] IS NOT NULL)
+ WITH( STATISTICS_NORECOMPUTE = OFF, IGNORE_DUP_KEY = OFF, ALLOW_ROW_LOCKS = ON, ALLOW_PAGE_LOCKS = ON) ON [PRIMARY]
+GO
+CREATE UNIQUE NONCLUSTERED INDEX IX_ModelUsage_UsageTransaction ON dbo.UserModelUsage
+	(
+	UsageTransactionId
+	) WHERE ([UsageTransactionId] IS NOT NULL)
+ WITH( STATISTICS_NORECOMPUTE = OFF, IGNORE_DUP_KEY = OFF, ALLOW_ROW_LOCKS = ON, ALLOW_PAGE_LOCKS = ON) ON [PRIMARY]
+GO
+CREATE NONCLUSTERED INDEX IX_ModelUsage_CreatedAt ON dbo.UserModelUsage
+	(
+	CreatedAt
+	) WITH( STATISTICS_NORECOMPUTE = OFF, IGNORE_DUP_KEY = OFF, ALLOW_ROW_LOCKS = ON, ALLOW_PAGE_LOCKS = ON) ON [PRIMARY]
+GO
+ALTER TABLE dbo.UserModelUsage ADD CONSTRAINT
+	FK_ModelUsage_ClientInfo FOREIGN KEY
+	(
+	ClientInfoId
+	) REFERENCES dbo.ClientInfo
+	(
+	Id
+	) ON UPDATE  NO ACTION 
+	 ON DELETE  NO ACTION 
+	
+GO
+ALTER TABLE dbo.UserModelUsage ADD CONSTRAINT
+	FK_UserModelUsage_FinishReason FOREIGN KEY
+	(
+	FinishReasonId
+	) REFERENCES dbo.FinishReason
+	(
+	Id
+	) ON UPDATE  NO ACTION 
+	 ON DELETE  NO ACTION 
+	
+GO
+ALTER TABLE dbo.UserModelUsage ADD CONSTRAINT
+	FK_ModelUsage_UsageTransactionLog FOREIGN KEY
+	(
+	UsageTransactionId
+	) REFERENCES dbo.UsageTransaction
+	(
+	Id
+	) ON UPDATE  NO ACTION 
+	 ON DELETE  NO ACTION 
+	
+GO
+ALTER TABLE dbo.UserModelUsage ADD CONSTRAINT
+	FK_ModelUsage_UserModel2 FOREIGN KEY
+	(
+	UserModelId
+	) REFERENCES dbo.UserModel
+	(
+	Id
+	) ON UPDATE  NO ACTION 
+	 ON DELETE  NO ACTION 
+	
+GO
+ALTER TABLE dbo.UserModelUsage ADD CONSTRAINT
+	FK_ModelUsage_TransactionLog FOREIGN KEY
+	(
+	BalanceTransactionId
+	) REFERENCES dbo.BalanceTransaction
+	(
+	Id
+	) ON UPDATE  NO ACTION 
+	 ON DELETE  NO ACTION 
+	
+GO
+COMMIT
+BEGIN TRANSACTION
+GO
+ALTER TABLE dbo.Message ADD CONSTRAINT
+	FK_Message_UserModelUsage FOREIGN KEY
+	(
+	UsageId
+	) REFERENCES dbo.UserModelUsage
+	(
+	Id
+	) ON UPDATE  NO ACTION 
+	 ON DELETE  NO ACTION 
+	
+GO
+ALTER TABLE dbo.Message SET (LOCK_ESCALATION = TABLE)
+GO
+COMMIT
+BEGIN TRANSACTION
+GO
+ALTER TABLE dbo.UserApiUsage ADD CONSTRAINT
+	FK_UserApiUsage_UserModelUsage FOREIGN KEY
+	(
+	UsageId
+	) REFERENCES dbo.UserModelUsage
+	(
+	Id
+	) ON UPDATE  NO ACTION 
+	 ON DELETE  NO ACTION 
+	
+GO
+ALTER TABLE dbo.UserApiUsage SET (LOCK_ESCALATION = TABLE)
+GO
+COMMIT

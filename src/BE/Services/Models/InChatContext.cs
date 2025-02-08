@@ -94,7 +94,7 @@ public class InChatContext(long firstTick)
 
     public UserModelUsage ToUserModelUsage(int userId, ClientInfo clientInfo, bool isApi)
     {
-        if (_finishTick == 0) _finishTick = Stopwatch.GetTimestamp();
+        if (_finishTick == _preprocessTick) _finishTick = Stopwatch.GetTimestamp();
 
         UserModelUsage usage = new()
         {
