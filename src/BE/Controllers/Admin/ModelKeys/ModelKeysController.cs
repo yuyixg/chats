@@ -149,7 +149,8 @@ public class ModelKeysController(ChatsDB db) : ControllerBase
                 {
                     bool isVision = model.Contains("qvq", StringComparison.OrdinalIgnoreCase) ||
                         model.Contains("vision", StringComparison.OrdinalIgnoreCase);
-                    short modelReferenceId = isVision ? (short)1401 : (short)1400;
+                    bool isDeepSeek = model.Contains("deepseek", StringComparison.OrdinalIgnoreCase);
+                    short modelReferenceId = isDeepSeek ? (short)1402 : isVision ? (short)1401 : (short)1400;
                     return new PossibleModelDto()
                     {
                         DeploymentName = model,
