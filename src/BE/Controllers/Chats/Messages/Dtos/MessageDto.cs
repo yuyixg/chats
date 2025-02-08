@@ -113,6 +113,9 @@ public record MessageContentResponse
     [JsonPropertyName("text")]
     public required string Text { get; init; }
 
+    [JsonPropertyName("think"), JsonIgnore(Condition = JsonIgnoreCondition.WhenWritingNull)]
+    public required string? Think { get; init; }
+
     [JsonPropertyName("fileIds"), JsonIgnore(Condition = JsonIgnoreCondition.WhenWritingNull)]
     public required FileDto[]? FileIds { get; init; }
 
@@ -132,6 +135,7 @@ public record MessageContentResponse
         return new MessageContentResponse()
         {
             Text = string.Join("\n", groups[DBMessageContentType.Text].Select(x => x.ToString())),
+            Think = string.Join("\n", groups[DBMessageContentType.Reasoning].Select(x => x.ToString())) switch { "" => null, var x => x },
             FileIds = groups[DBMessageContentType.FileId]
                 .Select(x => fup.CreateFileDto(x.MessageContentFile!.File))
                 .ToArray() switch 
