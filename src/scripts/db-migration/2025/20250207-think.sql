@@ -277,3 +277,296 @@ GO
 ALTER TABLE dbo.Model SET (LOCK_ESCALATION = TABLE)
 GO
 COMMIT
+
+
+-- Region Parameters
+DECLARE @p0 SmallInt = 1001
+DECLARE @p1 TinyInt = 1
+-- EndRegion
+UPDATE [ModelReference]
+SET [ReasoningResponseKindId] = @p1
+WHERE [Id] = @p0
+GO
+
+-- Region Parameters
+DECLARE @p0 SmallInt = 1222
+DECLARE @p1 TinyInt = 2
+-- EndRegion
+UPDATE [ModelReference]
+SET [ReasoningResponseKindId] = @p1
+WHERE [Id] = @p0
+GO
+
+-- Region Parameters
+DECLARE @p0 SmallInt = 1000
+DECLARE @p1 Decimal(6,5) = 2
+DECLARE @p2 Decimal(6,5) = 8
+-- EndRegion
+UPDATE [ModelReference]
+SET [InputTokenPrice1M] = @p1, [OutputTokenPrice1M] = @p2
+WHERE [Id] = @p0
+GO
+
+-- Region Parameters
+DECLARE @p0 SmallInt = 1700
+DECLARE @p1 SmallInt = 17
+DECLARE @p2 NVarChar(1000) = 'deepseek-ai/DeepSeek-R1'
+DECLARE @p3 NVarChar(1000) = 'DeepSeek-R1'
+DECLARE @p4 Date = '2025-01-21'
+DECLARE @p5 Decimal(3,2) = 1
+DECLARE @p6 Decimal(3,2) = 1
+DECLARE @p7 Bit = 0
+DECLARE @p8 Bit = 0
+DECLARE @p9 Bit = 1
+DECLARE @p10 Bit = 1
+DECLARE @p11 TinyInt = 1
+DECLARE @p12 Int = 64000
+DECLARE @p13 Int = 8192
+DECLARE @p14 SmallInt = null
+DECLARE @p15 Decimal(6,5) = 4
+DECLARE @p16 Decimal(7,5) = 16
+DECLARE @p17 Char(3) = 'RMB'
+-- EndRegion
+INSERT INTO [ModelReference]([Id], [ProviderId], [Name], [DisplayName], [PublishDate], [MinTemperature], [MaxTemperature], [AllowSearch], [AllowVision], [AllowSystemPrompt], [AllowStreaming], [ReasoningResponseKindId], [ContextWindow], [MaxResponseTokens], [TokenizerId], [InputTokenPrice1M], [OutputTokenPrice1M], [CurrencyCode])
+VALUES (@p0, @p1, @p2, @p3, @p4, @p5, @p6, @p7, @p8, @p9, @p10, @p11, @p12, @p13, @p14, @p15, @p16, @p17)
+GO
+
+-- Region Parameters
+DECLARE @p0 SmallInt = 1701
+DECLARE @p1 SmallInt = 17
+DECLARE @p2 NVarChar(1000) = 'Pro/deepseek-ai/DeepSeek-R1'
+DECLARE @p3 NVarChar(1000) = 'DeepSeek-R1'
+DECLARE @p4 Date = '2025-01-21'
+DECLARE @p5 Decimal(3,2) = 1
+DECLARE @p6 Decimal(3,2) = 1
+DECLARE @p7 Bit = 0
+DECLARE @p8 Bit = 0
+DECLARE @p9 Bit = 1
+DECLARE @p10 Bit = 1
+DECLARE @p11 TinyInt = 1
+DECLARE @p12 Int = 64000
+DECLARE @p13 Int = 8192
+DECLARE @p14 SmallInt = null
+DECLARE @p15 Decimal(6,5) = 4
+DECLARE @p16 Decimal(7,5) = 16
+DECLARE @p17 Char(3) = 'RMB'
+-- EndRegion
+INSERT INTO [ModelReference]([Id], [ProviderId], [Name], [DisplayName], [PublishDate], [MinTemperature], [MaxTemperature], [AllowSearch], [AllowVision], [AllowSystemPrompt], [AllowStreaming], [ReasoningResponseKindId], [ContextWindow], [MaxResponseTokens], [TokenizerId], [InputTokenPrice1M], [OutputTokenPrice1M], [CurrencyCode])
+VALUES (@p0, @p1, @p2, @p3, @p4, @p5, @p6, @p7, @p8, @p9, @p10, @p11, @p12, @p13, @p14, @p15, @p16, @p17)
+GO
+
+-- Region Parameters
+DECLARE @p0 SmallInt = 1702
+DECLARE @p1 SmallInt = 17
+DECLARE @p2 NVarChar(1000) = 'deepseek-ai/DeepSeek-V3'
+DECLARE @p3 NVarChar(1000) = 'DeepSeek-V3'
+DECLARE @p4 Date = '2025-12-16'
+DECLARE @p5 Decimal(3,2) = 0
+DECLARE @p6 Decimal(3,2) = 2
+DECLARE @p7 Bit = 0
+DECLARE @p8 Bit = 0
+DECLARE @p9 Bit = 1
+DECLARE @p10 Bit = 1
+DECLARE @p11 TinyInt = 0
+DECLARE @p12 Int = 64000
+DECLARE @p13 Int = 8192
+DECLARE @p14 SmallInt = null
+DECLARE @p15 Decimal(6,5) = 2
+DECLARE @p16 Decimal(6,5) = 8
+DECLARE @p17 Char(3) = 'RMB'
+-- EndRegion
+INSERT INTO [ModelReference]([Id], [ProviderId], [Name], [DisplayName], [PublishDate], [MinTemperature], [MaxTemperature], [AllowSearch], [AllowVision], [AllowSystemPrompt], [AllowStreaming], [ReasoningResponseKindId], [ContextWindow], [MaxResponseTokens], [TokenizerId], [InputTokenPrice1M], [OutputTokenPrice1M], [CurrencyCode])
+VALUES (@p0, @p1, @p2, @p3, @p4, @p5, @p6, @p7, @p8, @p9, @p10, @p11, @p12, @p13, @p14, @p15, @p16, @p17)
+GO
+
+-- Region Parameters
+DECLARE @p0 SmallInt = 1703
+DECLARE @p1 SmallInt = 17
+DECLARE @p2 NVarChar(1000) = 'Pro/deepseek-ai/DeepSeek-V3'
+DECLARE @p3 NVarChar(1000) = 'DeepSeek-V3'
+DECLARE @p4 Date = '2024-12-16'
+DECLARE @p5 Decimal(3,2) = 0
+DECLARE @p6 Decimal(3,2) = 2
+DECLARE @p7 Bit = 0
+DECLARE @p8 Bit = 0
+DECLARE @p9 Bit = 1
+DECLARE @p10 Bit = 1
+DECLARE @p11 TinyInt = 0
+DECLARE @p12 Int = 64000
+DECLARE @p13 Int = 8192
+DECLARE @p14 SmallInt = null
+DECLARE @p15 Decimal(6,5) = 2
+DECLARE @p16 Decimal(6,5) = 8
+DECLARE @p17 Char(3) = 'RMB'
+-- EndRegion
+INSERT INTO [ModelReference]([Id], [ProviderId], [Name], [DisplayName], [PublishDate], [MinTemperature], [MaxTemperature], [AllowSearch], [AllowVision], [AllowSystemPrompt], [AllowStreaming], [ReasoningResponseKindId], [ContextWindow], [MaxResponseTokens], [TokenizerId], [InputTokenPrice1M], [OutputTokenPrice1M], [CurrencyCode])
+VALUES (@p0, @p1, @p2, @p3, @p4, @p5, @p6, @p7, @p8, @p9, @p10, @p11, @p12, @p13, @p14, @p15, @p16, @p17)
+GO
+
+-- Region Parameters
+DECLARE @p0 SmallInt = 1704
+DECLARE @p1 SmallInt = 17
+DECLARE @p2 NVarChar(1000) = 'deepseek-ai/DeepSeek-R1-Distill-Llama-70B'
+DECLARE @p3 NVarChar(1000) = 'DeepSeek-R1'
+DECLARE @p4 Date = '2025-01-20'
+DECLARE @p5 Decimal(3,2) = 0
+DECLARE @p6 Decimal(3,2) = 2
+DECLARE @p7 Bit = 0
+DECLARE @p8 Bit = 0
+DECLARE @p9 Bit = 1
+DECLARE @p10 Bit = 1
+DECLARE @p11 TinyInt = 1
+DECLARE @p12 Int = 32000
+DECLARE @p13 Int = 16000
+DECLARE @p14 SmallInt = null
+DECLARE @p15 Decimal(9,5) = 4.13
+DECLARE @p16 Decimal(9,5) = 4.13
+DECLARE @p17 Char(3) = 'RMB'
+-- EndRegion
+INSERT INTO [ModelReference]([Id], [ProviderId], [Name], [DisplayName], [PublishDate], [MinTemperature], [MaxTemperature], [AllowSearch], [AllowVision], [AllowSystemPrompt], [AllowStreaming], [ReasoningResponseKindId], [ContextWindow], [MaxResponseTokens], [TokenizerId], [InputTokenPrice1M], [OutputTokenPrice1M], [CurrencyCode])
+VALUES (@p0, @p1, @p2, @p3, @p4, @p5, @p6, @p7, @p8, @p9, @p10, @p11, @p12, @p13, @p14, @p15, @p16, @p17)
+GO
+
+-- Region Parameters
+DECLARE @p0 SmallInt = 1705
+DECLARE @p1 SmallInt = 17
+DECLARE @p2 NVarChar(1000) = 'deepseek-ai/DeepSeek-R1-Distill-Qwen-32B'
+DECLARE @p3 NVarChar(1000) = 'DeepSeek-R1'
+DECLARE @p4 Date = '2025-01-20'
+DECLARE @p5 Decimal(3,2) = 0
+DECLARE @p6 Decimal(3,2) = 2
+DECLARE @p7 Bit = 0
+DECLARE @p8 Bit = 0
+DECLARE @p9 Bit = 1
+DECLARE @p10 Bit = 1
+DECLARE @p11 TinyInt = 1
+DECLARE @p12 Int = 32000
+DECLARE @p13 Int = 16000
+DECLARE @p14 SmallInt = null
+DECLARE @p15 Decimal(9,5) = 1.26
+DECLARE @p16 Decimal(9,5) = 1.26
+DECLARE @p17 Char(3) = 'RMB'
+-- EndRegion
+INSERT INTO [ModelReference]([Id], [ProviderId], [Name], [DisplayName], [PublishDate], [MinTemperature], [MaxTemperature], [AllowSearch], [AllowVision], [AllowSystemPrompt], [AllowStreaming], [ReasoningResponseKindId], [ContextWindow], [MaxResponseTokens], [TokenizerId], [InputTokenPrice1M], [OutputTokenPrice1M], [CurrencyCode])
+VALUES (@p0, @p1, @p2, @p3, @p4, @p5, @p6, @p7, @p8, @p9, @p10, @p11, @p12, @p13, @p14, @p15, @p16, @p17)
+
+-- Region Parameters
+DECLARE @p0 SmallInt = 1706
+DECLARE @p1 SmallInt = 17
+DECLARE @p2 NVarChar(1000) = 'deepseek-ai/DeepSeek-R1-Distill-Qwen-14B'
+DECLARE @p3 NVarChar(1000) = 'DeepSeek-R1'
+DECLARE @p4 Date = '2025-01-20'
+DECLARE @p5 Decimal(3,2) = 0
+DECLARE @p6 Decimal(3,2) = 2
+DECLARE @p7 Bit = 0
+DECLARE @p8 Bit = 0
+DECLARE @p9 Bit = 1
+DECLARE @p10 Bit = 1
+DECLARE @p11 TinyInt = 1
+DECLARE @p12 Int = 32000
+DECLARE @p13 Int = 16000
+DECLARE @p14 SmallInt = null
+DECLARE @p15 Decimal(8,5) = 0.7
+DECLARE @p16 Decimal(8,5) = 0.7
+DECLARE @p17 Char(3) = 'RMB'
+-- EndRegion
+INSERT INTO [ModelReference]([Id], [ProviderId], [Name], [DisplayName], [PublishDate], [MinTemperature], [MaxTemperature], [AllowSearch], [AllowVision], [AllowSystemPrompt], [AllowStreaming], [ReasoningResponseKindId], [ContextWindow], [MaxResponseTokens], [TokenizerId], [InputTokenPrice1M], [OutputTokenPrice1M], [CurrencyCode])
+VALUES (@p0, @p1, @p2, @p3, @p4, @p5, @p6, @p7, @p8, @p9, @p10, @p11, @p12, @p13, @p14, @p15, @p16, @p17)
+GO
+
+-- Region Parameters
+DECLARE @p0 SmallInt = 1707
+DECLARE @p1 SmallInt = 17
+DECLARE @p2 NVarChar(1000) = 'deepseek-ai/DeepSeek-R1-Distill-Llama-8B'
+DECLARE @p3 NVarChar(1000) = 'DeepSeek-R1'
+DECLARE @p4 Date = '2025-01-20'
+DECLARE @p5 Decimal(3,2) = 0
+DECLARE @p6 Decimal(3,2) = 2
+DECLARE @p7 Bit = 0
+DECLARE @p8 Bit = 0
+DECLARE @p9 Bit = 1
+DECLARE @p10 Bit = 1
+DECLARE @p11 TinyInt = 1
+DECLARE @p12 Int = 32000
+DECLARE @p13 Int = 16000
+DECLARE @p14 SmallInt = null
+DECLARE @p15 Decimal(6,5) = 0
+DECLARE @p16 Decimal(6,5) = 0
+DECLARE @p17 Char(3) = 'RMB'
+-- EndRegion
+INSERT INTO [ModelReference]([Id], [ProviderId], [Name], [DisplayName], [PublishDate], [MinTemperature], [MaxTemperature], [AllowSearch], [AllowVision], [AllowSystemPrompt], [AllowStreaming], [ReasoningResponseKindId], [ContextWindow], [MaxResponseTokens], [TokenizerId], [InputTokenPrice1M], [OutputTokenPrice1M], [CurrencyCode])
+VALUES (@p0, @p1, @p2, @p3, @p4, @p5, @p6, @p7, @p8, @p9, @p10, @p11, @p12, @p13, @p14, @p15, @p16, @p17)
+GO
+
+-- Region Parameters
+DECLARE @p0 SmallInt = 1708
+DECLARE @p1 SmallInt = 17
+DECLARE @p2 NVarChar(1000) = 'deepseek-ai/DeepSeek-R1-Distill-Qwen-7B'
+DECLARE @p3 NVarChar(1000) = 'DeepSeek-R1'
+DECLARE @p4 Date = '2025-01-20'
+DECLARE @p5 Decimal(3,2) = 0
+DECLARE @p6 Decimal(3,2) = 2
+DECLARE @p7 Bit = 0
+DECLARE @p8 Bit = 0
+DECLARE @p9 Bit = 1
+DECLARE @p10 Bit = 1
+DECLARE @p11 TinyInt = 1
+DECLARE @p12 Int = 32000
+DECLARE @p13 Int = 16000
+DECLARE @p14 SmallInt = null
+DECLARE @p15 Decimal(6,5) = 0
+DECLARE @p16 Decimal(6,5) = 0
+DECLARE @p17 Char(3) = 'RMB'
+-- EndRegion
+INSERT INTO [ModelReference]([Id], [ProviderId], [Name], [DisplayName], [PublishDate], [MinTemperature], [MaxTemperature], [AllowSearch], [AllowVision], [AllowSystemPrompt], [AllowStreaming], [ReasoningResponseKindId], [ContextWindow], [MaxResponseTokens], [TokenizerId], [InputTokenPrice1M], [OutputTokenPrice1M], [CurrencyCode])
+VALUES (@p0, @p1, @p2, @p3, @p4, @p5, @p6, @p7, @p8, @p9, @p10, @p11, @p12, @p13, @p14, @p15, @p16, @p17)
+GO
+
+-- Region Parameters
+DECLARE @p0 SmallInt = 1709
+DECLARE @p1 SmallInt = 17
+DECLARE @p2 NVarChar(1000) = 'deepseek-ai/DeepSeek-R1-Distill-Qwen-1.5B'
+DECLARE @p3 NVarChar(1000) = 'DeepSeek-R1'
+DECLARE @p4 Date = '2025-01-20'
+DECLARE @p5 Decimal(3,2) = 0
+DECLARE @p6 Decimal(3,2) = 0
+DECLARE @p7 Bit = 0
+DECLARE @p8 Bit = 0
+DECLARE @p9 Bit = 1
+DECLARE @p10 Bit = 1
+DECLARE @p11 TinyInt = 1
+DECLARE @p12 Int = 32000
+DECLARE @p13 Int = 16000
+DECLARE @p14 SmallInt = null
+DECLARE @p15 Decimal(6,5) = 0
+DECLARE @p16 Decimal(6,5) = 0
+DECLARE @p17 Char(3) = 'RMB'
+-- EndRegion
+INSERT INTO [ModelReference]([Id], [ProviderId], [Name], [DisplayName], [PublishDate], [MinTemperature], [MaxTemperature], [AllowSearch], [AllowVision], [AllowSystemPrompt], [AllowStreaming], [ReasoningResponseKindId], [ContextWindow], [MaxResponseTokens], [TokenizerId], [InputTokenPrice1M], [OutputTokenPrice1M], [CurrencyCode])
+VALUES (@p0, @p1, @p2, @p3, @p4, @p5, @p6, @p7, @p8, @p9, @p10, @p11, @p12, @p13, @p14, @p15, @p16, @p17)
+GO
+
+-- Region Parameters
+DECLARE @p0 SmallInt = 1402
+DECLARE @p1 SmallInt = 14
+DECLARE @p2 NVarChar(1000) = 'deepseek-r1'
+DECLARE @p3 NVarChar(1000) = null
+DECLARE @p4 Date = null
+DECLARE @p5 Decimal(3,2) = 0
+DECLARE @p6 Decimal(3,2) = 2
+DECLARE @p7 Bit = 0
+DECLARE @p8 Bit = 0
+DECLARE @p9 Bit = 1
+DECLARE @p10 Bit = 1
+DECLARE @p11 TinyInt = 2
+DECLARE @p12 Int = 128000
+DECLARE @p13 Int = 8000
+DECLARE @p14 SmallInt = null
+DECLARE @p15 Decimal(6,5) = 0
+DECLARE @p16 Decimal(6,5) = 0
+DECLARE @p17 Char(3) = 'RMB'
+-- EndRegion
+INSERT INTO [ModelReference]([Id], [ProviderId], [Name], [DisplayName], [PublishDate], [MinTemperature], [MaxTemperature], [AllowSearch], [AllowVision], [AllowSystemPrompt], [AllowStreaming], [ReasoningResponseKindId], [ContextWindow], [MaxResponseTokens], [TokenizerId], [InputTokenPrice1M], [OutputTokenPrice1M], [CurrencyCode])
+VALUES (@p0, @p1, @p2, @p3, @p4, @p5, @p6, @p7, @p8, @p9, @p10, @p11, @p12, @p13, @p14, @p15, @p16, @p17)
+GO
+
