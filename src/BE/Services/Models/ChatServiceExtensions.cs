@@ -14,10 +14,26 @@ public abstract partial class ChatService
 
         if (Model.ModelReference.ReasoningResponseKindId == (byte)DBReasoningResponseKind.ThinkTag)
         {
-            // todo here
-            await foreach (InternalChatSegment seg in ChatStreamedSimulated(suggestedStreaming: true, filteredMessage, options, cancellationToken))
+            InternalChatSegment current = null!;
+            async IAsyncEnumerable<string> TokenYielder()
             {
-                yield return seg;
+                await foreach (InternalChatSegment seg in ChatStreamedSimulated(suggestedStreaming: true, filteredMessage, options, cancellationToken))
+                {
+                    current = seg;
+                    if (!string.IsNullOrEmpty(seg.Segment))
+                    {
+                        yield return seg.Segment;
+                    }
+                }
+            }
+
+            await foreach (ThinkAndResponseSegment seg in ThinkTagParser.Parse(TokenYielder(), cancellationToken))
+            {
+                yield return current with
+                {
+                    Segment = seg.Response,
+                    ReasoningSegment = seg.Think,
+                };
             }
         }
         else

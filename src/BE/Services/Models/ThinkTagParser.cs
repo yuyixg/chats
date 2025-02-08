@@ -2,6 +2,12 @@
 
 namespace Chats.BE.Services.Models;
 
+public record ThinkAndResponseSegment // Think/Response 可以同时存在（但不会同时不存在）
+{
+    public string? Think { get; init; }
+    public string? Response { get; init; }
+}
+
 public static class ThinkTagParser
 {
     public static async IAsyncEnumerable<ThinkAndResponseSegment> Parse(
@@ -18,7 +24,7 @@ public static class ThinkTagParser
         var enumerator = tokenYielder.GetAsyncEnumerator(cancellationToken);
 
         // 用于在开始时做预读，决定是否开头就是 think 模式
-        string preBuffer = "";
+        string? preBuffer = "";
 
         bool modeDecided = false;
         bool thinkMode = false;   // 是否从开头就进入 Think 模式
@@ -49,7 +55,7 @@ public static class ThinkTagParser
                 if (preBuffer.StartsWith(startThinkTag, StringComparison.Ordinal))
                 {
                     // 切去 <think>\n
-                    preBuffer = preBuffer.Substring(startThinkTag.Length);
+                    preBuffer = preBuffer[startThinkTag.Length..];
                     thinkMode = true;
                 }
                 modeDecided = true;
@@ -61,7 +67,6 @@ public static class ThinkTagParser
             // 已确定：开头是 think 模式
             // currentBuffer 用来累积 think 内容或处理拼接
             string currentBuffer = preBuffer;
-            preBuffer = null; // 不再用
 
             // 不同于原先那种“先 yield think，再 yield response”，  
             // 我们在找到结束标记后，会把本次 think + 与结束标记在同一缓冲里紧随的文本 合并到一次返回
@@ -74,14 +79,14 @@ public static class ThinkTagParser
                 {
                     // 找到结束标记：把它前面的是 think 内容
                     string thinkContent = index > 0
-                        ? currentBuffer.Substring(0, index)
+                        ? currentBuffer[..index]
                         : string.Empty;
 
                     // 跳过结束标记
                     int afterEnd = index + endThinkTag.Length;
                     // 在本次缓冲中，结束标记后剩余的就是 response 内容（如果有的话）
                     string leftover = afterEnd < currentBuffer.Length
-                        ? currentBuffer.Substring(afterEnd)
+                        ? currentBuffer[afterEnd..]
                         : string.Empty;
 
                     // 合并一次返回
@@ -102,7 +107,7 @@ public static class ThinkTagParser
                     if (emitLength > 0)
                     {
                         // emitLength 这部分肯定是纯 think 内容，且不会匹配结束标记了
-                        string sureThinkPart = currentBuffer.Substring(0, emitLength);
+                        string sureThinkPart = currentBuffer[..emitLength];
                         yield return new ThinkAndResponseSegment
                         {
                             Think = sureThinkPart,
@@ -111,7 +116,7 @@ public static class ThinkTagParser
                     }
 
                     // 更新 currentBuffer，留下与 endThinkTag 有部分重叠的后缀
-                    currentBuffer = currentBuffer.Substring(emitLength);
+                    currentBuffer = currentBuffer[emitLength..];
 
                     // 继续读下一个 token
                     if (!await enumerator.MoveNextAsync())
@@ -171,7 +176,7 @@ public static class ThinkTagParser
             int maxOverlap = Math.Min(s.Length, pattern.Length);
             for (int len = maxOverlap; len > 0; len--)
             {
-                if (s.Substring(s.Length - len).Equals(pattern.Substring(0, len), StringComparison.Ordinal))
+                if (s[^len..].Equals(pattern[..len], StringComparison.Ordinal))
                 {
                     return len;
                 }
@@ -179,10 +184,4 @@ public static class ThinkTagParser
             return 0;
         }
     }
-}
-
-public record ThinkAndResponseSegment
-{
-    public string? Think { get; init; }
-    public string? Response { get; init; }
 }
