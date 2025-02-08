@@ -1,1 +1,1 @@
-INSERT INTO [MessageContentType] VALUES(3, 'think');
+INSERT INTO [MessageContentType] VALUES(3, 'reasoning');

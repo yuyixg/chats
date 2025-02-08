@@ -9,6 +9,8 @@ export enum SseResponseKind {
   UpdateTitle = 4,
   TitleSegment = 5,
   ResponseMessage = 6,
+  ChatLeafMessageId = 7,
+  ReasoningSegment = 8,
 }
 
 // Discriminated unions for SseResponseLine
@@ -50,6 +52,12 @@ interface SseResponseLineTitleSegment {
   r: string; // Result is a string
 }
 
+interface SseResponseLineReasoningSegment {
+  i: number; // SpanId is required for Segment
+  k: SseResponseKind.ReasoningSegment; // Kind is ReasoningSegment
+  r: string; // Result is a string
+}
+
 // Combined type for SseResponseLine
 export type SseResponseLine =
   | SseResponseLineStopId
@@ -58,7 +66,8 @@ export type SseResponseLine =
   | SseResponseLineUserMessage
   | SseResponseLineResponseMessage
   | SseResponseLineUpdateTitle
-  | SseResponseLineTitleSegment;
+  | SseResponseLineTitleSegment
+  | SseResponseLineReasoningSegment;
 
 export interface IChatMessage {
   id: string;

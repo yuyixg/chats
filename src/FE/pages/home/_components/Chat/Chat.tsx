@@ -351,6 +351,9 @@ const Chat = memo(() => {
         changeChatTitle(value.r);
       } else if (value.k === SseResponseKind.TitleSegment) {
         changeChatTitle(value.r, true);
+      } else if (value.k === SseResponseKind.ReasoningSegment) {
+        const { r: msg, i: spanId } = value;
+        console.log('ReasoningSegment', msg, spanId);
       }
     }
 
