@@ -122,7 +122,6 @@ export default function Models() {
       <div className="flex gap-4 mb-4 justify-between">
         <div className="flex gap-3">
           <Select
-            key="select-model-provider"
             value={query.modelProviderId}
             onValueChange={(value) => {
               const params = { ...query, modelProviderId: value };
@@ -141,12 +140,13 @@ export default function Models() {
             </SelectTrigger>
             <SelectContent>
               {feModelProviders.map((m) => (
-                <SelectItem value={m.id.toString()}>{m.name}</SelectItem>
+                <SelectItem key={m.id} value={m.id.toString()}>
+                  {m.name}
+                </SelectItem>
               ))}
             </SelectContent>
           </Select>
           <Select
-            key="select-model-key"
             value={query.modelKeyId}
             onValueChange={(value) => {
               const params = { ...query, modelKeyId: value };
@@ -165,12 +165,13 @@ export default function Models() {
             </SelectTrigger>
             <SelectContent>
               {modelKeys.map((m) => (
-                <SelectItem value={m.id.toString()}>{m.name}</SelectItem>
+                <SelectItem key={m.id} value={m.id.toString()}>
+                  {m.name}
+                </SelectItem>
               ))}
             </SelectContent>
           </Select>
           <Select
-            key="select-enabled"
             value={query.enabled}
             onValueChange={(value) => {
               const params = { ...query, enabled: value };
@@ -188,8 +189,12 @@ export default function Models() {
               <SelectValue placeholder={t('Is it enabled')} />
             </SelectTrigger>
             <SelectContent>
-              <SelectItem value={'true'}>{t('Yes')}</SelectItem>
-              <SelectItem value={'false'}>{t('No')}</SelectItem>
+              <SelectItem key="enabled-true" value={'true'}>
+                {t('Yes')}
+              </SelectItem>
+              <SelectItem key="enabled-false" value={'false'}>
+                {t('No')}
+              </SelectItem>
             </SelectContent>
           </Select>
         </div>

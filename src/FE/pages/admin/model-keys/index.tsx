@@ -95,7 +95,6 @@ export default function ModelKeys() {
       <div className="flex gap-4 mb-4 justify-between">
         <div className="flex gap-3">
           <Select
-            key="select-model-provider"
             value={query.modelProviderId}
             onValueChange={(value) => {
               const params = { ...query, modelProviderId: value };
@@ -114,12 +113,13 @@ export default function ModelKeys() {
             </SelectTrigger>
             <SelectContent>
               {feModelProviders.map((m) => (
-                <SelectItem value={m.id.toString()}>{m.name}</SelectItem>
+                <SelectItem key={m.id} value={m.id.toString()}>
+                  {m.name}
+                </SelectItem>
               ))}
             </SelectContent>
           </Select>
           <Select
-            key="select-model-key"
             value={query.modelKeyId}
             onValueChange={(value) => {
               const params = { ...query, modelKeyId: value };
@@ -138,7 +138,9 @@ export default function ModelKeys() {
             </SelectTrigger>
             <SelectContent>
               {services.map((m) => (
-                <SelectItem value={m.id.toString()}>{m.name}</SelectItem>
+                <SelectItem key={m.id} value={m.id.toString()}>
+                  {m.name}
+                </SelectItem>
               ))}
             </SelectContent>
           </Select>
