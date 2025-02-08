@@ -71,6 +71,9 @@ public record ResponseMessageDto : MessageDto
     [JsonPropertyName("duration")]
     public required int Duration { get; init; }
 
+    [JsonPropertyName("reasoningDuration")]
+    public required int ReasoningDuration { get; init; }
+
     [JsonPropertyName("firstTokenLatency")]
     public required int FirstTokenLatency { get; init; }
 
@@ -99,7 +102,7 @@ public record MessageContentRequest
     {
         return
         [
-            MessageContent.FromText(Text),
+            MessageContent.FromContent(Text),
             ..(await (FileIds ?? [])
                 .ToAsyncEnumerable()
                 .SelectAwait(async fileId => await fup.CreateFileContent(fileId, cancellationToken))
@@ -112,6 +115,9 @@ public record MessageContentResponse
 {
     [JsonPropertyName("text")]
     public required string Text { get; init; }
+
+    [JsonPropertyName("think"), JsonIgnore(Condition = JsonIgnoreCondition.WhenWritingNull)]
+    public required string? Think { get; init; }
 
     [JsonPropertyName("fileIds"), JsonIgnore(Condition = JsonIgnoreCondition.WhenWritingNull)]
     public required FileDto[]? FileIds { get; init; }
@@ -132,6 +138,7 @@ public record MessageContentResponse
         return new MessageContentResponse()
         {
             Text = string.Join("\n", groups[DBMessageContentType.Text].Select(x => x.ToString())),
+            Think = string.Join("\n", groups[DBMessageContentType.Reasoning].Select(x => x.ToString())) switch { "" => null, var x => x },
             FileIds = groups[DBMessageContentType.FileId]
                 .Select(x => fup.CreateFileDto(x.MessageContentFile!.File))
                 .ToArray() switch 
@@ -156,6 +163,7 @@ public record FileDto
 public record ChatMessageTempUsage
 {
     public required int Duration { get; init; }
+    public required int ReasoningDuration { get; init; }
     public required int FirstTokenLatency { get; init; }
     public required decimal InputPrice { get; init; }
     public required int InputTokens { get; init; }
@@ -213,6 +221,7 @@ public record ChatMessageTemp
                 OutputPrice = Usage.OutputPrice,
                 ReasoningTokens = Usage.ReasoningTokens,
                 Duration = Usage.Duration,
+                ReasoningDuration = Usage.ReasoningDuration,
                 FirstTokenLatency = Usage.FirstTokenLatency,
                 ModelId = Usage.ModelId,
                 ModelName = Usage.ModelName,
@@ -240,6 +249,7 @@ public record ChatMessageTemp
                 Usage = assistantMessage.Usage == null ? null : new ChatMessageTempUsage()
                 {
                     Duration = assistantMessage.Usage.TotalDurationMs - assistantMessage.Usage.PreprocessDurationMs,
+                    ReasoningDuration = assistantMessage.Usage.ReasoningDurationMs,
                     FirstTokenLatency = assistantMessage.Usage.FirstResponseDurationMs,
                     InputPrice = assistantMessage.Usage.InputCost,
                     InputTokens = assistantMessage.Usage.InputTokens,

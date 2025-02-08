@@ -333,6 +333,7 @@
   "Zhipu AI": "智谱AI",
   "Google AI": "谷歌AI",
   "Doubao": "豆包",
+  "SiliconFlow": "硅基流动",
   "Invalid JSON config": "无效的JSON配置",
   "Invalid host": "无效的host",
   "Invalid secret": "无效的secret",
@@ -379,5 +380,8 @@
   "All chats": "所有对话",
   "Group name already exists": "组名已存在",
   "Like": "赞",
-  "Dislike": "踩"
+  "Dislike": "踩",
+  "Reasoning...": "推理中...",
+  "Reasoning complete": "推理完成"
+
 }

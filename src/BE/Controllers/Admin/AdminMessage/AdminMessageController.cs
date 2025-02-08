@@ -109,6 +109,7 @@ public class AdminMessageController(ChatsDB db, CurrentUser currentUser, IUrlEnc
                     OutputPrice = x.Usage.OutputCost,
                     ReasoningTokens = x.Usage.ReasoningTokens,
                     Duration = x.Usage.TotalDurationMs - x.Usage.PreprocessDurationMs,
+                    ReasoningDuration = x.Usage.ReasoningDurationMs,
                     FirstTokenLatency = x.Usage.FirstResponseDurationMs,
                     ModelId = x.Usage.UserModel.ModelId,
                     ModelName = x.Usage.UserModel.Model.Name,

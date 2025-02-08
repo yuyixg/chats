@@ -32,6 +32,8 @@ public partial class UserModelUsage
 
     public int PreprocessDurationMs { get; set; }
 
+    public int ReasoningDurationMs { get; set; }
+
     public int FirstResponseDurationMs { get; set; }
 
     public int PostprocessDurationMs { get; set; }

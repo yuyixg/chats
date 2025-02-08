@@ -6,6 +6,7 @@ using System.ClientModel;
 using Chats.BE.DB;
 using System.ClientModel.Primitives;
 using System.Text.Json;
+using Chats.BE.Services.Models.ChatServices.OpenAI.ReasoningContents;
 
 namespace Chats.BE.Services.Models.ChatServices.OpenAI;
 
@@ -29,15 +30,22 @@ public partial class OpenAIChatService : ChatService
         _chatClient = chatClient;
     }
 
+    static Func<StreamingChatCompletionUpdate, string?> StreamingReasoningContentAccessor { get; } = ReasoningContentFactory.CreateStreamingReasoningContentAccessor();
+    static Func<ChatCompletion, string?> ReasoningContentAccessor { get; } = ReasoningContentFactory.CreateReasoningContentAccessor();
+
     public override async IAsyncEnumerable<ChatSegment> ChatStreamed(IReadOnlyList<ChatMessage> messages, ChatCompletionOptions options, [EnumeratorCancellation] CancellationToken cancellationToken)
     {
         await foreach (StreamingChatCompletionUpdate delta in _chatClient.CompleteChatStreamingAsync(messages, options, cancellationToken))
         {
             if (delta.ContentUpdate.Count == 0 && delta.Usage == null) continue;
 
+            string? segment = delta.ContentUpdate.FirstOrDefault()?.Text;
+            string? reasoningSegment = StreamingReasoningContentAccessor(delta);
+
             yield return new ChatSegment
             {
-                TextSegment = delta.ContentUpdate.FirstOrDefault()?.Text ?? "",
+                Segment =  segment,
+                ReasoningSegment = reasoningSegment,
                 FinishReason = delta.FinishReason,
                 Usage = delta.Usage != null ? new Dtos.ChatTokenUsage()
                 {
@@ -65,7 +73,8 @@ public partial class OpenAIChatService : ChatService
         ChatCompletion delta = cc.Value;
         return new ChatSegment
         {
-            TextSegment = delta.Content[0].Text,
+            Segment = delta.Content[0].Text,
+            ReasoningSegment = ReasoningContentAccessor(delta),
             FinishReason = delta.FinishReason,
             Usage = delta.Usage != null ? GetUsage(delta.Usage) : null,
         };

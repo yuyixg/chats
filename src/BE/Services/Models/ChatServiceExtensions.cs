@@ -1,4 +1,5 @@
-﻿using Chats.BE.Services.Models.Dtos;
+﻿using Chats.BE.DB.Enums;
+using Chats.BE.Services.Models.Dtos;
 using Chats.BE.Services.Models.Extensions;
 using OpenAI.Chat;
 using System.Runtime.CompilerServices;
@@ -11,9 +12,36 @@ public abstract partial class ChatService
     {
         ChatMessage[] filteredMessage = await FEPreprocess(messages, options, feOptions, cancellationToken);
 
-        await foreach (InternalChatSegment seg in ChatStreamedSimulated(suggestedStreaming: true, filteredMessage, options, cancellationToken))
+        if (Model.ModelReference.ReasoningResponseKindId == (byte)DBReasoningResponseKind.ThinkTag)
         {
-            yield return seg;
+            InternalChatSegment current = null!;
+            async IAsyncEnumerable<string> TokenYielder()
+            {
+                await foreach (InternalChatSegment seg in ChatStreamedSimulated(suggestedStreaming: true, filteredMessage, options, cancellationToken))
+                {
+                    current = seg;
+                    if (!string.IsNullOrEmpty(seg.Segment))
+                    {
+                        yield return seg.Segment;
+                    }
+                }
+            }
+
+            await foreach (ThinkAndResponseSegment seg in ThinkTagParser.Parse(TokenYielder(), cancellationToken))
+            {
+                yield return current with
+                {
+                    Segment = seg.Response,
+                    ReasoningSegment = seg.Think,
+                };
+            }
+        }
+        else
+        {
+            await foreach (InternalChatSegment seg in ChatStreamedSimulated(suggestedStreaming: true, filteredMessage, options, cancellationToken))
+            {
+                yield return seg;
+            }
         }
     }
 
@@ -22,29 +50,27 @@ public abstract partial class ChatService
         // notify inputTokenCount first to better support price calculation
         int inputTokens = GetPromptTokenCount(messages);
         int outputTokens = 0;
+        int reasoningTokens = 0;
         yield return InternalChatSegment.InputOnly(inputTokens);
+
+        Dtos.ChatTokenUsage usageAccessor(ChatSegment seg) => new()
+        {
+            InputTokens = inputTokens,
+            OutputTokens = outputTokens += Tokenizer.CountTokens(seg.Segment!),
+            ReasoningTokens = reasoningTokens += Tokenizer.CountTokens(seg.ReasoningSegment!),
+        };
 
         if (suggestedStreaming && Model.ModelReference.AllowStreaming)
         {
             await foreach (ChatSegment seg in ChatStreamed(messages, options, cancellationToken))
             {
-                yield return seg.ToInternal(() => new Dtos.ChatTokenUsage
-                {
-                    InputTokens = inputTokens,
-                    OutputTokens = outputTokens += Tokenizer.CountTokens(seg.TextSegment),
-                    ReasoningTokens = 0
-                });
+                yield return seg.ToInternal(() => usageAccessor(seg));
             }
         }
         else
         {
             ChatSegment seg = await Chat(messages, options, cancellationToken);
-            yield return seg.ToInternal(() => new Dtos.ChatTokenUsage()
-            {
-                InputTokens = inputTokens,
-                OutputTokens = outputTokens += Tokenizer.CountTokens(seg.TextSegment),
-                ReasoningTokens = 0
-            });
+            yield return seg.ToInternal(() => usageAccessor(seg));
         }
     }
 
@@ -122,7 +148,7 @@ public abstract partial class ChatService
                     .ToAsyncEnumerable()
                     .SelectAwait(async c => c switch
                     {
-                        { Kind: ChatMessageContentPartKind.Image, ImageUri: not null }  => await DownloadImagePart(http, c.ImageUri, cancellationToken),
+                        { Kind: ChatMessageContentPartKind.Image, ImageUri: not null } => await DownloadImagePart(http, c.ImageUri, cancellationToken),
                         _ => c,
                     })
                     .ToArrayAsync(cancellationToken)),

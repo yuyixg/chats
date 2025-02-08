@@ -144,9 +144,16 @@ function groupBy<T>(array: T[], key: keyof T): T[][] {
 export function generateResponseMessages(
   selectedChat: IChat,
   parentId?: string,
+  status = ChatSpanStatus.Chatting,
 ) {
   return selectedChat.spans.map((x) => {
-    return generateResponseMessage(x.spanId, parentId, x.modelId, x.modelName);
+    return generateResponseMessage(
+      x.spanId,
+      parentId,
+      x.modelId,
+      x.modelName,
+      status,
+    );
   });
 }
 
@@ -155,16 +162,17 @@ export function generateResponseMessage(
   parentId?: string,
   modelId?: number,
   modelName?: string,
+  status = ChatSpanStatus.Chatting,
 ) {
   return {
     spanId: spanId,
     id: `${ResponseMessageTempId}-${spanId}`,
     role: ChatRole.Assistant,
     parentId: parentId,
-    status: ChatSpanStatus.Chatting,
+    status,
     siblingIds: [],
     isActive: false,
-    content: { text: '', error: undefined, fileIds: [] },
+    content: { text: '', think: '', error: undefined, fileIds: [] },
     inputTokens: 0,
     outputTokens: 0,
     inputPrice: 0,

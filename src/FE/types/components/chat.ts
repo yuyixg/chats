@@ -7,6 +7,7 @@ export interface PropsMessage {
   inputTokens: number;
   outputTokens: number;
   reasoningTokens: number;
+  reasoningDuration: number;
   inputPrice: number;
   outputPrice: number;
   duration: number;

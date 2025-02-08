@@ -46,7 +46,8 @@ public class DashScopeChatService : ChatService
             {
                 yield return new ChatSegment
                 {
-                    TextSegment = resp.Output,
+                    ReasoningSegment = null,
+                    Segment = resp.Output,
                     FinishReason = null,
                     Usage = resp.Usage != null ? new Dtos.ChatTokenUsage
                     {
@@ -64,7 +65,8 @@ public class DashScopeChatService : ChatService
             {
                 yield return new ChatSegment
                 {
-                    TextSegment = resp.Output.Choices[0].Message.Content,
+                    ReasoningSegment = null,
+                    Segment = resp.Output.Choices[0].Message.Content,
                     FinishReason = ToFinishReason(resp.Output.Choices[0].FinishReason),
                     Usage = resp.Usage != null ? new Dtos.ChatTokenUsage
                     {

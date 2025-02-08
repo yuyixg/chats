@@ -11,17 +11,19 @@ namespace Chats.BE.Services.Models;
 
 public class InChatContext(long firstTick)
 {
-    private long _preprocessTick, _firstResponseTick, _endResponseTick, _finishTick;
+    private long _preprocessTick, _firstReasoningTick, _firstResponseTick, _endResponseTick, _finishTick;
     private short _segmentCount;
     public UserModelBalanceCost Cost { get; private set; } = UserModelBalanceCost.Empty;
     private UserModel _userModel = null!;
     private InternalChatSegment _lastSegment = InternalChatSegment.Empty;
-    private readonly StringBuilder _fullResult = new();
+    private readonly StringBuilder _fullContent = new();
+    private readonly StringBuilder _fullReasoningContent = new();
+
     public DBFinishReason FinishReason { get; set; } = DBFinishReason.Success;
 
     public async IAsyncEnumerable<InternalChatSegment> Run(decimal userBalance, UserModel userModel, IAsyncEnumerable<InternalChatSegment> segments)
     {
-        _preprocessTick = Stopwatch.GetTimestamp(); // ensure _preprocessTick is not 0
+        _preprocessTick = _firstReasoningTick = _firstResponseTick = _endResponseTick = _finishTick = Stopwatch.GetTimestamp();
         _userModel = userModel;
         if (userModel.ExpiresAt.IsExpired())
         {
@@ -42,16 +44,29 @@ public class InChatContext(long firstTick)
 
         try
         {
-            _preprocessTick = Stopwatch.GetTimestamp();
             await foreach (InternalChatSegment seg in segments)
             {
                 if (seg.IsFromUpstream)
                 {
                     _segmentCount++;
-                    if (_firstResponseTick == 0) _firstResponseTick = Stopwatch.GetTimestamp();
+                    if (seg.ReasoningSegment != null)
+                    {
+                        if (_firstReasoningTick == _preprocessTick) // never reasoning
+                        {
+                            _firstReasoningTick = Stopwatch.GetTimestamp();
+                        }
+                    }
+                    if (seg.Segment != null)
+                    {
+                        if (_firstResponseTick == _preprocessTick) // never response
+                        {
+                            _firstResponseTick = Stopwatch.GetTimestamp();
+                        }
+                    }
                 }
                 _lastSegment = seg;
-                _fullResult.Append(seg.TextSegment);
+                _fullContent.Append(seg.Segment);
+                _fullReasoningContent.Append(seg.ReasoningSegment);
 
                 UserModelBalanceCost currentCost = calculator.GetNewBalance(seg.Usage.InputTokens, seg.Usage.OutputTokens, priceConfig);
                 if (!currentCost.IsSufficient)
@@ -71,11 +86,17 @@ public class InChatContext(long firstTick)
         }
     }
 
-    public InternalChatSegment FullResponse => _lastSegment with { TextSegment = _fullResult.ToString() };
+    public InternalChatSegment FullResponse => _lastSegment with 
+    { 
+        Segment = _fullContent.ToString(), 
+        ReasoningSegment = _fullReasoningContent.ToString() 
+    };
+
+    public int ReasoningDurationMs => (int)Stopwatch.GetElapsedTime(_firstReasoningTick, _firstResponseTick).TotalMilliseconds;
 
     public UserModelUsage ToUserModelUsage(int userId, ClientInfo clientInfo, bool isApi)
     {
-        if (_finishTick == 0) _finishTick = Stopwatch.GetTimestamp();
+        if (_finishTick == _preprocessTick) _finishTick = Stopwatch.GetTimestamp();
 
         UserModelUsage usage = new()
         {
@@ -85,7 +106,8 @@ public class InChatContext(long firstTick)
             FinishReasonId = (byte)FinishReason,
             SegmentCount = _segmentCount,
             PreprocessDurationMs = (int)Stopwatch.GetElapsedTime(firstTick, _preprocessTick).TotalMilliseconds,
-            FirstResponseDurationMs = (int)Stopwatch.GetElapsedTime(_preprocessTick, _firstResponseTick).TotalMilliseconds,
+            ReasoningDurationMs = ReasoningDurationMs,
+            FirstResponseDurationMs = (int)Stopwatch.GetElapsedTime(_preprocessTick, _firstReasoningTick != _preprocessTick ? _firstReasoningTick : _firstResponseTick).TotalMilliseconds,
             PostprocessDurationMs = (int)Stopwatch.GetElapsedTime(_endResponseTick, _finishTick).TotalMilliseconds,
             TotalDurationMs = (int)Stopwatch.GetElapsedTime(firstTick, _finishTick).TotalMilliseconds,
             InputTokens = _lastSegment.Usage.InputTokens,

@@ -14,6 +14,7 @@ import { MemoizedReactMarkdown } from '@/components/Markdown/MemoizedReactMarkdo
 import ChatError from '../ChatError/ChatError';
 import { Button } from '../ui/button';
 import ResponseMessageActions from './ResponseMessageActions';
+import ThinkingMessage from './ThinkingMessage';
 
 import rehypeKatex from 'rehype-katex';
 import remarkGfm from 'remark-gfm';
@@ -24,6 +25,7 @@ export interface ResponseMessage {
   content: Content;
   status: ChatSpanStatus;
   spanId: number | null;
+  reasoningDuration?: number;
 }
 
 interface Props {
@@ -159,6 +161,7 @@ const ResponseMessage = (props: Props) => {
     </div>
   ) : (
     <>
+      {message.content.think && <ThinkingMessage message={message} />}
       <MemoizedReactMarkdown
         remarkPlugins={[remarkMath, remarkGfm]}
         rehypePlugins={[rehypeKatex as any]}
