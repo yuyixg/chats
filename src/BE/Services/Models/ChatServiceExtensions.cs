@@ -34,29 +34,27 @@ public abstract partial class ChatService
         // notify inputTokenCount first to better support price calculation
         int inputTokens = GetPromptTokenCount(messages);
         int outputTokens = 0;
+        int reasoningTokens = 0;
         yield return InternalChatSegment.InputOnly(inputTokens);
+
+        Func<ChatSegment, Dtos.ChatTokenUsage> usageAccessor = (seg) => new Dtos.ChatTokenUsage()
+        {
+            InputTokens = inputTokens,
+            OutputTokens = outputTokens += Tokenizer.CountTokens(seg.Segment!),
+            ReasoningTokens = reasoningTokens += Tokenizer.CountTokens(seg.ReasoningSegment!),
+        };
 
         if (suggestedStreaming && Model.ModelReference.AllowStreaming)
         {
             await foreach (ChatSegment seg in ChatStreamed(messages, options, cancellationToken))
             {
-                yield return seg.ToInternal(() => new Dtos.ChatTokenUsage
-                {
-                    InputTokens = inputTokens,
-                    OutputTokens = outputTokens += Tokenizer.CountTokens(seg.Segment),
-                    ReasoningTokens = 0
-                });
+                yield return seg.ToInternal(() => usageAccessor(seg));
             }
         }
         else
         {
             ChatSegment seg = await Chat(messages, options, cancellationToken);
-            yield return seg.ToInternal(() => new Dtos.ChatTokenUsage()
-            {
-                InputTokens = inputTokens,
-                OutputTokens = outputTokens += Tokenizer.CountTokens(seg.Segment),
-                ReasoningTokens = 0
-            });
+            yield return seg.ToInternal(() => usageAccessor(seg));
         }
     }
 
@@ -134,7 +132,7 @@ public abstract partial class ChatService
                     .ToAsyncEnumerable()
                     .SelectAwait(async c => c switch
                     {
-                        { Kind: ChatMessageContentPartKind.Image, ImageUri: not null }  => await DownloadImagePart(http, c.ImageUri, cancellationToken),
+                        { Kind: ChatMessageContentPartKind.Image, ImageUri: not null } => await DownloadImagePart(http, c.ImageUri, cancellationToken),
                         _ => c,
                     })
                     .ToArrayAsync(cancellationToken)),
