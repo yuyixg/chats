@@ -276,6 +276,8 @@
   "File Configs": "文件配置",
   "Select an Model": "选择一个模型",
   "Select an Role": "选择一个角色",
+  "Select an Model Provider": "选择一个模型提供商",
+  "Select an Model Key": "选择一个模型密钥",
   "Enabled": "已启用",
   "Disabled": "已禁用",
   "Eg: ": "例如: ",

@@ -40,7 +40,7 @@ export default function DeletePopover(props: Props) {
           {t('Delete')}
         </Button>
       </PopoverTrigger>
-      <PopoverContent className="w-48">
+      <PopoverContent className="w-48 pointer-events-auto">
         <div className="pb-2">{t('Are you sure you want to delete it?')}</div>
         <div className="flex justify-end gap-2">
           <Button size="sm" onClick={handleCancel} variant="outline">

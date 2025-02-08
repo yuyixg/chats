@@ -91,6 +91,7 @@ const AddModelModal = (props: IProps) => {
       modelKeyId: parseInt(values.modelKeyId!),
       name: values.name!,
       modelReferenceId: +values.modelReferenceId!,
+      rank: null,
     };
     postModels(dto).then(() => {
       onSuccessful();

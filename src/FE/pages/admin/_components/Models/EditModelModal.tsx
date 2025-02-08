@@ -75,6 +75,7 @@ const EditModelModal = (props: IProps) => {
     modelKeyId: z.string().nullable().default(null),
     inputPrice1M: z.coerce.number(),
     outputPrice1M: z.coerce.number(),
+    rank: z.coerce.number().nullable().default(null),
   });
 
   const form = useForm<z.infer<typeof formSchema>>({
@@ -88,6 +89,7 @@ const EditModelModal = (props: IProps) => {
       modelKeyId: '',
       inputPrice1M: 0,
       outputPrice1M: 0,
+      rank: null,
     },
   });
 
@@ -101,6 +103,7 @@ const EditModelModal = (props: IProps) => {
       modelKeyId: parseInt(values.modelKeyId!),
       modelReferenceId: parseInt(values.modelReferenceId),
       name: values.name!,
+      rank: values.rank,
     };
     putModels(values.modelId!, dto).then(() => {
       onSuccessful();
@@ -140,6 +143,7 @@ const EditModelModal = (props: IProps) => {
         deploymentName,
         inputTokenPrice1M,
         outputTokenPrice1M,
+        rank,
       } = selected;
       form.setValue('name', name);
       form.setValue('modelId', modelId.toString());
@@ -149,6 +153,7 @@ const EditModelModal = (props: IProps) => {
       form.setValue('inputPrice1M', inputTokenPrice1M);
       form.setValue('outputPrice1M', outputTokenPrice1M);
       form.setValue('modelReferenceId', modelReferenceId.toString());
+      form.setValue('rank', rank);
     }
   }, [isOpen]);
 
@@ -307,6 +312,14 @@ const EditModelModal = (props: IProps) => {
             </div>
             <div className="grid grid-cols-2 gap-4">
               <div className="flex gap-4">
+                <FormField
+                  key="rank"
+                  control={form.control}
+                  name="rank"
+                  render={({ field }) => {
+                    return <FormInput label={t('Rank')} field={field} />;
+                  }}
+                ></FormField>
                 <FormField
                   key={'enabled'}
                   control={form.control}
