@@ -1,4 +1,5 @@
-﻿using Chats.BE.Services.Models.Dtos;
+﻿using Chats.BE.DB.Enums;
+using Chats.BE.Services.Models.Dtos;
 using Chats.BE.Services.Models.Extensions;
 using OpenAI.Chat;
 using System.Runtime.CompilerServices;
@@ -11,9 +12,20 @@ public abstract partial class ChatService
     {
         ChatMessage[] filteredMessage = await FEPreprocess(messages, options, feOptions, cancellationToken);
 
-        await foreach (InternalChatSegment seg in ChatStreamedSimulated(suggestedStreaming: true, filteredMessage, options, cancellationToken))
+        if (Model.ModelReference.ReasoningResponseKindId == (byte)DBReasoningResponseKind.ThinkTag)
         {
-            yield return seg;
+            // todo here
+            await foreach (InternalChatSegment seg in ChatStreamedSimulated(suggestedStreaming: true, filteredMessage, options, cancellationToken))
+            {
+                yield return seg;
+            }
+        }
+        else
+        {
+            await foreach (InternalChatSegment seg in ChatStreamedSimulated(suggestedStreaming: true, filteredMessage, options, cancellationToken))
+            {
+                yield return seg;
+            }
         }
     }
 
