@@ -31,7 +31,7 @@ interface Props {
 const ThinkingMessage = (props: Props) => {
   const { message } = props;
   const { t } = useTranslation();
-  const { status: chatStatus, reasoningDuration } = message;
+  const { status: chatStatus } = message;
 
   const [isOpen, setIsOpen] = useState(true);
   return (
