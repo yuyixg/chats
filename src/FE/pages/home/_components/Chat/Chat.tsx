@@ -392,6 +392,8 @@ const Chat = memo(() => {
         changeChatTitle(value.r);
       } else if (value.k === SseResponseKind.TitleSegment) {
         changeChatTitle(value.r, true);
+      } else {
+        console.log('Unknown message', value);
       }
     }
 

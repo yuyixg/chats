@@ -400,14 +400,25 @@ public class ChatController(ChatStopService stopService) : ControllerBase
         try
         {
             using ChatService s = chatFactory.CreateChatService(userModel.Model);
+            bool responseStated = false, reasoningStarted = false;
             await foreach (InternalChatSegment seg in icc.Run(userBalance.Balance, userModel, s.ChatStreamedFEProcessed(messageToSend, cco, extraDetails, cancellationToken)))
             {
                 if (!string.IsNullOrEmpty(seg.ReasoningSegment))
                 {
+                    if (!reasoningStarted)
+                    {
+                        await writer.WriteAsync(SseResponseLine.StartReasoning(span.Id), cancellationToken);
+                        reasoningStarted = true;
+                    }
                     await writer.WriteAsync(SseResponseLine.ReasoningSegment(span.Id, seg.ReasoningSegment), cancellationToken);
                 }
                 if (!string.IsNullOrEmpty(seg.Segment))
                 {
+                    if (!responseStated)
+                    {
+                        await writer.WriteAsync(SseResponseLine.StartResponse(span.Id, icc.ReasoningDurationMs), cancellationToken);
+                        responseStated = true;
+                    }
                     await writer.WriteAsync(SseResponseLine.Segment(span.Id, seg.Segment), cancellationToken);
                 }
 

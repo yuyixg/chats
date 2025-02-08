@@ -92,6 +92,8 @@ public class InChatContext(long firstTick)
         ReasoningSegment = _fullReasoningContent.ToString() 
     };
 
+    public int ReasoningDurationMs => (int)Stopwatch.GetElapsedTime(_firstReasoningTick, _firstResponseTick).TotalMilliseconds;
+
     public UserModelUsage ToUserModelUsage(int userId, ClientInfo clientInfo, bool isApi)
     {
         if (_finishTick == _preprocessTick) _finishTick = Stopwatch.GetTimestamp();
@@ -104,7 +106,7 @@ public class InChatContext(long firstTick)
             FinishReasonId = (byte)FinishReason,
             SegmentCount = _segmentCount,
             PreprocessDurationMs = (int)Stopwatch.GetElapsedTime(firstTick, _preprocessTick).TotalMilliseconds,
-            ReasoningDurationMs = (int)Stopwatch.GetElapsedTime(_firstReasoningTick, _firstResponseTick).TotalMilliseconds,
+            ReasoningDurationMs = ReasoningDurationMs,
             FirstResponseDurationMs = (int)Stopwatch.GetElapsedTime(_preprocessTick, _firstReasoningTick != _preprocessTick ? _firstReasoningTick : _firstResponseTick).TotalMilliseconds,
             PostprocessDurationMs = (int)Stopwatch.GetElapsedTime(_endResponseTick, _finishTick).TotalMilliseconds,
             TotalDurationMs = (int)Stopwatch.GetElapsedTime(firstTick, _finishTick).TotalMilliseconds,
