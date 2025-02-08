@@ -44,8 +44,6 @@ public class InChatContext(long firstTick)
 
         try
         {
-            _preprocessTick = Stopwatch.GetTimestamp();
-            bool everThink = false, everRespond = false;
             await foreach (InternalChatSegment seg in segments)
             {
                 if (seg.IsFromUpstream)
@@ -53,18 +51,16 @@ public class InChatContext(long firstTick)
                     _segmentCount++;
                     if (seg.ReasoningSegment != null)
                     {
-                        if (!everThink)
+                        if (_firstReasoningTick == _preprocessTick) // never reasoning
                         {
                             _firstReasoningTick = Stopwatch.GetTimestamp();
-                            everThink = true;
                         }
                     }
                     if (seg.Segment != null)
                     {
-                        if (!everRespond)
+                        if (_firstResponseTick == _preprocessTick) // never response
                         {
                             _firstResponseTick = Stopwatch.GetTimestamp();
-                            everRespond = true;
                         }
                     }
                 }
@@ -109,7 +105,7 @@ public class InChatContext(long firstTick)
             SegmentCount = _segmentCount,
             PreprocessDurationMs = (int)Stopwatch.GetElapsedTime(firstTick, _preprocessTick).TotalMilliseconds,
             ReasoningDurationMs = (int)Stopwatch.GetElapsedTime(_firstReasoningTick, _firstResponseTick).TotalMilliseconds,
-            FirstResponseDurationMs = (int)Stopwatch.GetElapsedTime(_preprocessTick, _firstResponseTick).TotalMilliseconds,
+            FirstResponseDurationMs = (int)Stopwatch.GetElapsedTime(_preprocessTick, _firstReasoningTick != _preprocessTick ? _firstReasoningTick : _firstResponseTick).TotalMilliseconds,
             PostprocessDurationMs = (int)Stopwatch.GetElapsedTime(_endResponseTick, _finishTick).TotalMilliseconds,
             TotalDurationMs = (int)Stopwatch.GetElapsedTime(firstTick, _finishTick).TotalMilliseconds,
             InputTokens = _lastSegment.Usage.InputTokens,
