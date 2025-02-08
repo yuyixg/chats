@@ -71,6 +71,9 @@ public record ResponseMessageDto : MessageDto
     [JsonPropertyName("duration")]
     public required int Duration { get; init; }
 
+    [JsonPropertyName("reasoningDuration")]
+    public required int ReasoningDuration { get; init; }
+
     [JsonPropertyName("firstTokenLatency")]
     public required int FirstTokenLatency { get; init; }
 
@@ -160,6 +163,7 @@ public record FileDto
 public record ChatMessageTempUsage
 {
     public required int Duration { get; init; }
+    public required int ReasoningDuration { get; init; }
     public required int FirstTokenLatency { get; init; }
     public required decimal InputPrice { get; init; }
     public required int InputTokens { get; init; }
@@ -217,6 +221,7 @@ public record ChatMessageTemp
                 OutputPrice = Usage.OutputPrice,
                 ReasoningTokens = Usage.ReasoningTokens,
                 Duration = Usage.Duration,
+                ReasoningDuration = Usage.ReasoningDuration,
                 FirstTokenLatency = Usage.FirstTokenLatency,
                 ModelId = Usage.ModelId,
                 ModelName = Usage.ModelName,
@@ -244,6 +249,7 @@ public record ChatMessageTemp
                 Usage = assistantMessage.Usage == null ? null : new ChatMessageTempUsage()
                 {
                     Duration = assistantMessage.Usage.TotalDurationMs - assistantMessage.Usage.PreprocessDurationMs,
+                    ReasoningDuration = assistantMessage.Usage.ReasoningDurationMs,
                     FirstTokenLatency = assistantMessage.Usage.FirstResponseDurationMs,
                     InputPrice = assistantMessage.Usage.InputCost,
                     InputTokens = assistantMessage.Usage.InputTokens,

@@ -11,7 +11,7 @@ namespace Chats.BE.Services.Models;
 
 public class InChatContext(long firstTick)
 {
-    private long _preprocessTick, _firstResponseTick, _endResponseTick, _finishTick;
+    private long _preprocessTick, _firstReasoningTick, _firstResponseTick, _endResponseTick, _finishTick;
     private short _segmentCount;
     public UserModelBalanceCost Cost { get; private set; } = UserModelBalanceCost.Empty;
     private UserModel _userModel = null!;
@@ -23,7 +23,7 @@ public class InChatContext(long firstTick)
 
     public async IAsyncEnumerable<InternalChatSegment> Run(decimal userBalance, UserModel userModel, IAsyncEnumerable<InternalChatSegment> segments)
     {
-        _preprocessTick = Stopwatch.GetTimestamp(); // ensure _preprocessTick is not 0
+        _preprocessTick = _firstReasoningTick = _firstResponseTick = _endResponseTick = _finishTick = Stopwatch.GetTimestamp();
         _userModel = userModel;
         if (userModel.ExpiresAt.IsExpired())
         {
@@ -45,12 +45,28 @@ public class InChatContext(long firstTick)
         try
         {
             _preprocessTick = Stopwatch.GetTimestamp();
+            bool everThink = false, everRespond = false;
             await foreach (InternalChatSegment seg in segments)
             {
                 if (seg.IsFromUpstream)
                 {
                     _segmentCount++;
-                    if (_firstResponseTick == 0) _firstResponseTick = Stopwatch.GetTimestamp();
+                    if (seg.ReasoningSegment != null)
+                    {
+                        if (!everThink)
+                        {
+                            _firstReasoningTick = Stopwatch.GetTimestamp();
+                            everThink = true;
+                        }
+                    }
+                    if (seg.Segment != null)
+                    {
+                        if (!everRespond)
+                        {
+                            _firstResponseTick = Stopwatch.GetTimestamp();
+                            everRespond = true;
+                        }
+                    }
                 }
                 _lastSegment = seg;
                 _fullContent.Append(seg.Segment);
@@ -92,6 +108,7 @@ public class InChatContext(long firstTick)
             FinishReasonId = (byte)FinishReason,
             SegmentCount = _segmentCount,
             PreprocessDurationMs = (int)Stopwatch.GetElapsedTime(firstTick, _preprocessTick).TotalMilliseconds,
+            ReasoningDurationMs = (int)Stopwatch.GetElapsedTime(_firstReasoningTick, _firstResponseTick).TotalMilliseconds,
             FirstResponseDurationMs = (int)Stopwatch.GetElapsedTime(_preprocessTick, _firstResponseTick).TotalMilliseconds,
             PostprocessDurationMs = (int)Stopwatch.GetElapsedTime(_endResponseTick, _finishTick).TotalMilliseconds,
             TotalDurationMs = (int)Stopwatch.GetElapsedTime(firstTick, _finishTick).TotalMilliseconds,
