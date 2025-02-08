@@ -140,7 +140,9 @@ export default function Models() {
             </SelectTrigger>
             <SelectContent>
               {feModelProviders.map((m) => (
-                <SelectItem value={m.id.toString()}>{m.name}</SelectItem>
+                <SelectItem key={m.id} value={m.id.toString()}>
+                  {m.name}
+                </SelectItem>
               ))}
             </SelectContent>
           </Select>
@@ -163,7 +165,9 @@ export default function Models() {
             </SelectTrigger>
             <SelectContent>
               {modelKeys.map((m) => (
-                <SelectItem value={m.id.toString()}>{m.name}</SelectItem>
+                <SelectItem key={m.id} value={m.id.toString()}>
+                  {m.name}
+                </SelectItem>
               ))}
             </SelectContent>
           </Select>
@@ -185,8 +189,12 @@ export default function Models() {
               <SelectValue placeholder={t('Is it enabled')} />
             </SelectTrigger>
             <SelectContent>
-              <SelectItem value={'true'}>{t('Yes')}</SelectItem>
-              <SelectItem value={'false'}>{t('No')}</SelectItem>
+              <SelectItem key="enabled-true" value={'true'}>
+                {t('Yes')}
+              </SelectItem>
+              <SelectItem key="enabled-false" value={'false'}>
+                {t('No')}
+              </SelectItem>
             </SelectContent>
           </Select>
         </div>

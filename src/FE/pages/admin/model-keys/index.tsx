@@ -113,7 +113,9 @@ export default function ModelKeys() {
             </SelectTrigger>
             <SelectContent>
               {feModelProviders.map((m) => (
-                <SelectItem value={m.id.toString()}>{m.name}</SelectItem>
+                <SelectItem key={m.id} value={m.id.toString()}>
+                  {m.name}
+                </SelectItem>
               ))}
             </SelectContent>
           </Select>
@@ -136,7 +138,9 @@ export default function ModelKeys() {
             </SelectTrigger>
             <SelectContent>
               {services.map((m) => (
-                <SelectItem value={m.id.toString()}>{m.name}</SelectItem>
+                <SelectItem key={m.id} value={m.id.toString()}>
+                  {m.name}
+                </SelectItem>
               ))}
             </SelectContent>
           </Select>
@@ -178,7 +182,7 @@ export default function ModelKeys() {
                   {item.name}
                 </TableCell>
                 <TableCell>
-                  <div className='flex gap-1'>
+                  <div className="flex gap-1">
                     <ChatIcon
                       className="inline"
                       providerId={item.modelProviderId}
