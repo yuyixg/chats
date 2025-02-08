@@ -161,7 +161,7 @@ const ResponseMessage = (props: Props) => {
     </div>
   ) : (
     <>
-      <ThinkingMessage message={message} />
+      {message.content.think && <ThinkingMessage message={message} />}
       <MemoizedReactMarkdown
         remarkPlugins={[remarkMath, remarkGfm]}
         rehypePlugins={[rehypeKatex as any]}
