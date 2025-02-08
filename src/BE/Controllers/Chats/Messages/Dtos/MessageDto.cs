@@ -99,7 +99,7 @@ public record MessageContentRequest
     {
         return
         [
-            MessageContent.FromText(Text),
+            MessageContent.FromContent(Text),
             ..(await (FileIds ?? [])
                 .ToAsyncEnumerable()
                 .SelectAwait(async fileId => await fup.CreateFileContent(fileId, cancellationToken))

@@ -16,7 +16,9 @@ public class InChatContext(long firstTick)
     public UserModelBalanceCost Cost { get; private set; } = UserModelBalanceCost.Empty;
     private UserModel _userModel = null!;
     private InternalChatSegment _lastSegment = InternalChatSegment.Empty;
-    private readonly StringBuilder _fullResult = new();
+    private readonly StringBuilder _fullContent = new();
+    private readonly StringBuilder _fullReasoningContent = new();
+
     public DBFinishReason FinishReason { get; set; } = DBFinishReason.Success;
 
     public async IAsyncEnumerable<InternalChatSegment> Run(decimal userBalance, UserModel userModel, IAsyncEnumerable<InternalChatSegment> segments)
@@ -51,7 +53,8 @@ public class InChatContext(long firstTick)
                     if (_firstResponseTick == 0) _firstResponseTick = Stopwatch.GetTimestamp();
                 }
                 _lastSegment = seg;
-                _fullResult.Append(seg.Segment);
+                _fullContent.Append(seg.Segment);
+                _fullReasoningContent.Append(seg.ReasoningSegment);
 
                 UserModelBalanceCost currentCost = calculator.GetNewBalance(seg.Usage.InputTokens, seg.Usage.OutputTokens, priceConfig);
                 if (!currentCost.IsSufficient)
@@ -71,7 +74,11 @@ public class InChatContext(long firstTick)
         }
     }
 
-    public InternalChatSegment FullResponse => _lastSegment with { Segment = _fullResult.ToString() };
+    public InternalChatSegment FullResponse => _lastSegment with 
+    { 
+        Segment = _fullContent.ToString(), 
+        ReasoningSegment = _fullReasoningContent.ToString() 
+    };
 
     public UserModelUsage ToUserModelUsage(int userId, ClientInfo clientInfo, bool isApi)
     {

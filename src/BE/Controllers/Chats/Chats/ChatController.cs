@@ -402,8 +402,14 @@ public class ChatController(ChatStopService stopService) : ControllerBase
             using ChatService s = chatFactory.CreateChatService(userModel.Model);
             await foreach (InternalChatSegment seg in icc.Run(userBalance.Balance, userModel, s.ChatStreamedFEProcessed(messageToSend, cco, extraDetails, cancellationToken)))
             {
-                if (seg.Segment == string.Empty) continue;
-                await writer.WriteAsync(SseResponseLine.Segment(span.Id, seg.Segment), cancellationToken);
+                if (!string.IsNullOrEmpty(seg.ReasoningSegment))
+                {
+                    await writer.WriteAsync(SseResponseLine.Segment(span.Id, seg.ReasoningSegment), cancellationToken);
+                }
+                if (!string.IsNullOrEmpty(seg.Segment))
+                {
+                    await writer.WriteAsync(SseResponseLine.Segment(span.Id, seg.Segment), cancellationToken);
+                }
 
                 if (cancellationToken.IsCancellationRequested)
                 {
@@ -446,10 +452,6 @@ public class ChatController(ChatStopService stopService) : ControllerBase
         {
             ChatId = chat.Id,
             ChatRoleId = (byte)DBChatRole.Assistant,
-            MessageContents =
-            [
-                MessageContent.FromText(icc.FullResponse.Segment),
-            ],
             SpanId = span.Id,
             CreatedAt = DateTime.UtcNow,
         };
@@ -461,10 +463,13 @@ public class ChatController(ChatStopService stopService) : ControllerBase
         {
             dbAssistantMessage.ParentId = req.MessageId;
         }
+        foreach (MessageContent mc in MessageContent.FromFullResponse(icc.FullResponse, errorText))
+        {
+            dbAssistantMessage.MessageContents.Add(mc);
+        }
 
         if (errorText != null)
         {
-            dbAssistantMessage.MessageContents.Add(MessageContent.FromError(errorText));
             await writer.WriteAsync(SseResponseLine.Error(span.Id, errorText), cancellationToken);
         }
         dbAssistantMessage.Usage = icc.ToUserModelUsage(currentUser.Id, await clientInfoTask, isApi: false);
@@ -490,7 +495,7 @@ public class ChatController(ChatStopService stopService) : ControllerBase
             ChatRoleId = (byte)DBChatRole.System,
             MessageContents =
             [
-                MessageContent.FromText(span.SystemPrompt!)
+                MessageContent.FromContent(span.SystemPrompt!)
             ],
             CreatedAt = DateTime.UtcNow,
             SpanId = specifiedSpanId,

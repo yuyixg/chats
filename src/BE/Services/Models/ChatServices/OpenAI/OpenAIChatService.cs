@@ -6,7 +6,7 @@ using System.ClientModel;
 using Chats.BE.DB;
 using System.ClientModel.Primitives;
 using System.Text.Json;
-using Chats.BE.Services.UrlEncryption;
+using Chats.BE.Services.Models.ChatServices.OpenAI.ReasoningContents;
 
 namespace Chats.BE.Services.Models.ChatServices.OpenAI;
 
@@ -30,19 +30,8 @@ public partial class OpenAIChatService : ChatService
         _chatClient = chatClient;
     }
 
-    static IEnumerable ChoicesAccessor()
-    {
-        //IEnumerable choices = delta.Uncapsulate().Choices;
-        //Dictionary<string, BinaryData>? sad = choices.Cast<object>().FirstOrDefault()?.Uncapsulate().Delta.SerializedAdditionalRawData;
-        //if (sad != null && sad.Any() && sad.TryGetValue("reasoning_content", out BinaryData? rc))
-        //{
-        //    string? think = rc.ToObjectFromJson<string>();
-        //    if (think != null)
-        //    {
-        //        Console.Write(Util.WithStyle(rc.ToObjectFromJson<string>(), "color: green"));
-        //    }
-        //}
-    }
+    static Func<StreamingChatCompletionUpdate, string?> StreamingReasoningContentAccessor { get; } = ReasoningContentFactory.CreateStreamingReasoningContentAccessor();
+    static Func<ChatCompletion, string?> ReasoningContentAccessor { get; } = ReasoningContentFactory.CreateReasoningContentAccessor();
 
     public override async IAsyncEnumerable<ChatSegment> ChatStreamed(IReadOnlyList<ChatMessage> messages, ChatCompletionOptions options, [EnumeratorCancellation] CancellationToken cancellationToken)
     {
@@ -51,11 +40,12 @@ public partial class OpenAIChatService : ChatService
             if (delta.ContentUpdate.Count == 0 && delta.Usage == null) continue;
 
             string? segment = delta.ContentUpdate.FirstOrDefault()?.Text;
-            string? reasoningSegment = 
+            string? reasoningSegment = StreamingReasoningContentAccessor(delta);
 
             yield return new ChatSegment
             {
                 Segment =  segment,
+                ReasoningSegment = reasoningSegment,
                 FinishReason = delta.FinishReason,
                 Usage = delta.Usage != null ? new Dtos.ChatTokenUsage()
                 {
@@ -84,6 +74,7 @@ public partial class OpenAIChatService : ChatService
         return new ChatSegment
         {
             Segment = delta.Content[0].Text,
+            ReasoningSegment = ReasoningContentAccessor(delta),
             FinishReason = delta.FinishReason,
             Usage = delta.Usage != null ? GetUsage(delta.Usage) : null,
         };

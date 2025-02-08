@@ -52,6 +52,7 @@ public class HunyuanChatService : ChatService
 
             yield return new ChatSegment
             {
+                ReasoningSegment = null,
                 Segment = seg.Choices[0].Delta.Content,
                 FinishReason = ToFinishReason(seg.Choices[0].FinishReason),
                 Usage = new Dtos.ChatTokenUsage
