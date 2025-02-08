@@ -404,7 +404,7 @@ public class ChatController(ChatStopService stopService) : ControllerBase
             {
                 if (!string.IsNullOrEmpty(seg.ReasoningSegment))
                 {
-                    await writer.WriteAsync(SseResponseLine.Segment(span.Id, seg.ReasoningSegment), cancellationToken);
+                    await writer.WriteAsync(SseResponseLine.ReasoningSegment(span.Id, seg.ReasoningSegment), cancellationToken);
                 }
                 if (!string.IsNullOrEmpty(seg.Segment))
                 {
