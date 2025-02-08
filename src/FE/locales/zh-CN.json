@@ -378,5 +378,8 @@
   "All chats": "所有对话",
   "Group name already exists": "组名已存在",
   "Like": "赞",
-  "Dislike": "踩"
+  "Dislike": "踩",
+  "Reasoning...": "推理中...",
+  "Reasoning complete": "推理完成"
+
 }

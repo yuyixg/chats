@@ -195,7 +195,7 @@ const UserMessage = (props: Props) => {
           <>
             <EditAction
               isHoverVisible
-              disabled={chatStatus === ChatSpanStatus.Chatting}
+              disabled={chatStatus === ChatSpanStatus.Chatting || chatStatus === ChatSpanStatus.Thinking}
               onToggleEditing={handleToggleEditing}
             />
             <CopyAction
@@ -215,11 +215,13 @@ const UserMessage = (props: Props) => {
               hidden={siblingIds.length <= 1}
               disabledPrev={
                 currentMessageIndex === 0 ||
-                chatStatus === ChatSpanStatus.Chatting
+                chatStatus === ChatSpanStatus.Chatting || 
+                chatStatus === ChatSpanStatus.Thinking
               }
               disabledNext={
                 currentMessageIndex === siblingIds.length - 1 ||
-                chatStatus === ChatSpanStatus.Chatting
+                chatStatus === ChatSpanStatus.Chatting || 
+                chatStatus === ChatSpanStatus.Thinking
               }
               currentSelectIndex={currentMessageIndex}
               messageIds={siblingIds}

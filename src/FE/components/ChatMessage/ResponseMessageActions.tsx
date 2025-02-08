@@ -21,6 +21,7 @@ export interface ResponseMessage {
   inputTokens: number;
   outputTokens: number;
   reasoningTokens: number;
+  reasoningDuration: number;
   inputPrice: number;
   outputPrice: number;
   duration: number;
@@ -66,7 +67,8 @@ const ResponseMessageActions = (props: Props) => {
 
   return (
     <>
-      {chatStatus === ChatSpanStatus.Chatting ? (
+      {chatStatus === ChatSpanStatus.Chatting ||
+      chatStatus === ChatSpanStatus.Thinking ? (
         <div className="h-9"></div>
       ) : (
         <div className="flex gap-1 flex-wrap mt-1">
