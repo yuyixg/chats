@@ -95,6 +95,7 @@ export default function ModelKeys() {
       <div className="flex gap-4 mb-4 justify-between">
         <div className="flex gap-3">
           <Select
+            key="select-model-provider"
             value={query.modelProviderId}
             onValueChange={(value) => {
               const params = { ...query, modelProviderId: value };
@@ -118,6 +119,7 @@ export default function ModelKeys() {
             </SelectContent>
           </Select>
           <Select
+            key="select-model-key"
             value={query.modelKeyId}
             onValueChange={(value) => {
               const params = { ...query, modelKeyId: value };
@@ -178,7 +180,7 @@ export default function ModelKeys() {
                   {item.name}
                 </TableCell>
                 <TableCell>
-                  <div className='flex gap-1'>
+                  <div className="flex gap-1">
                     <ChatIcon
                       className="inline"
                       providerId={item.modelProviderId}

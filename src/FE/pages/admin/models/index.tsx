@@ -122,6 +122,7 @@ export default function Models() {
       <div className="flex gap-4 mb-4 justify-between">
         <div className="flex gap-3">
           <Select
+            key="select-model-provider"
             value={query.modelProviderId}
             onValueChange={(value) => {
               const params = { ...query, modelProviderId: value };
@@ -145,6 +146,7 @@ export default function Models() {
             </SelectContent>
           </Select>
           <Select
+            key="select-model-key"
             value={query.modelKeyId}
             onValueChange={(value) => {
               const params = { ...query, modelKeyId: value };
@@ -168,6 +170,7 @@ export default function Models() {
             </SelectContent>
           </Select>
           <Select
+            key="select-enabled"
             value={query.enabled}
             onValueChange={(value) => {
               const params = { ...query, enabled: value };
