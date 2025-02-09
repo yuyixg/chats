@@ -149,7 +149,8 @@ public class ModelKeysController(ChatsDB db) : ControllerBase
                 {
                     bool isVision = model.Contains("qvq", StringComparison.OrdinalIgnoreCase) ||
                         model.Contains("vision", StringComparison.OrdinalIgnoreCase);
-                    short modelReferenceId = isVision ? (short)1401 : (short)1400;
+                    bool isDeepSeek = model.Contains("deepseek", StringComparison.OrdinalIgnoreCase);
+                    short modelReferenceId = isDeepSeek ? (short)1402 : isVision ? (short)1401 : (short)1400;
                     return new PossibleModelDto()
                     {
                         DeploymentName = model,
@@ -196,7 +197,7 @@ public class ModelKeysController(ChatsDB db) : ControllerBase
                     DeploymentName = x.Models.FirstOrDefault(m => m.ModelKeyId == modelKeyId)!.DeploymentName,
                     ReferenceId = x.Id,
                     ReferenceName = x.Name,
-                    IsLegacy = x.PublishDate == null || x.PublishDate < new DateOnly(2024, 7, 1),
+                    IsLegacy = x.PublishDate != null && x.PublishDate < new DateOnly(2024, 7, 1),
                     IsExists = x.Models.Any(m => m.ModelKeyId == modelKeyId),
                 })
                 .OrderBy(x => (x.IsLegacy ? 1 : 0) + (x.IsExists ? 2 : 0))

@@ -28,6 +28,36 @@ public record SseResponseLine
         };
     }
 
+    public static SseResponseLine ReasoningSegment(byte spanId, string segment)
+    {
+        return new SseResponseLine
+        {
+            SpanId = spanId,
+            Result = segment,
+            Kind = SseResponseKind.ReasoningSegment,
+        };
+    }
+
+    public static SseResponseLine StartResponse(byte spanId, int reasoningTimeMs)
+    {
+        return new SseResponseLine
+        {
+            SpanId = spanId,
+            Result = reasoningTimeMs,
+            Kind = SseResponseKind.StartResponse,
+        };
+    }
+
+    public static SseResponseLine StartReasoning(byte spanId)
+    {
+        return new SseResponseLine
+        {
+            SpanId = spanId,
+            Result = null!,
+            Kind = SseResponseKind.StartReasoning,
+        };
+    }
+
     public static SseResponseLine Error(byte spanId, string error)
     {
         return new SseResponseLine

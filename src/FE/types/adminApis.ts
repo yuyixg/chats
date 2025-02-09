@@ -45,6 +45,7 @@ export interface UpdateModelDto {
   modelKeyId: number;
   inputTokenPrice1M: number;
   outputTokenPrice1M: number;
+  rank: number | null;
 }
 
 export interface PostUserParams {

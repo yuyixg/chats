@@ -6,7 +6,9 @@ public record ChatSegment
 {
     public required ChatFinishReason? FinishReason { get; init; }
 
-    public required string TextSegment { get; init; }
+    public required string? Segment { get; init; }
+
+    public required string? ReasoningSegment { get; init; }
 
     public required ChatTokenUsage? Usage { get; init; }
 
@@ -18,7 +20,8 @@ public record ChatSegment
             {
                 Usage = Usage,
                 FinishReason = FinishReason,
-                TextSegment = TextSegment,
+                Segment = Segment,
+                ReasoningSegment = ReasoningSegment,
                 IsUsageReliable = true,
                 IsFromUpstream = true, 
             };
@@ -29,7 +32,8 @@ public record ChatSegment
             {
                 Usage = Usage ?? usageCalculator(),
                 FinishReason = FinishReason,
-                TextSegment = TextSegment,
+                Segment = Segment,
+                ReasoningSegment = ReasoningSegment,
                 IsUsageReliable = false,
                 IsFromUpstream = true,
             };

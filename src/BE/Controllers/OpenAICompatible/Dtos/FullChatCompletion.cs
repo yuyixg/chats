@@ -47,7 +47,10 @@ public record ResponseMessage
     public required string Role { get; init; }
 
     [JsonPropertyName("content")]
-    public required string Content { get; init; }
+    public required string? Content { get; init; }
+
+    [JsonPropertyName("reasoning_content"), JsonIgnore(Condition = JsonIgnoreCondition.WhenWritingNull)]
+    public required string? ReasoningContent { get; init; }
 
     [JsonPropertyName("refusal")]
     public object? Refusal { get; init; }

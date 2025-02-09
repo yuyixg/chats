@@ -22,6 +22,7 @@ export enum DBModelProvider {
   Ollama = 14,
   MiniMax = 15,
   Doubao = 16,
+  SiliconFlow = 17, 
 }
 
 export type FEModelProvider = {
@@ -48,6 +49,7 @@ export const feModelProviders: FEModelProvider[] = [
   { id: DBModelProvider.Ollama, name: 'Ollama', icon: '/logos/ollama.svg' },
   { id: DBModelProvider.MiniMax, name: 'MiniMax', icon: '/logos/minimax.svg' },
   { id: DBModelProvider.Doubao, name: 'Doubao', icon: '/logos/doubao.svg' },
+  { id: DBModelProvider.SiliconFlow, name: 'SiliconFlow', icon: '/logos/siliconflow.svg' },
 ];
 
 export interface ChatModelFileConfig {

@@ -11,4 +11,7 @@ public enum SseResponseKind
     TitleSegment = 5,
     ResponseMessage = 6,
     ChatLeafMessageId = 7,
+    ReasoningSegment = 8,
+    StartResponse = 9,
+    StartReasoning = 10,
 }

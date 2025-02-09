@@ -145,6 +145,33 @@ const Chat = memo(() => {
     messageDispatch(setSelectedMessages(selectedMsgs));
   };
 
+  const changeSelectedResponseReason = (
+    selectedMsgs: IChatMessage[][],
+    messageId: string,
+    text: string,
+    status?: ChatSpanStatus,
+    finalMessageId?: string,
+  ) => {
+    const messageCount = selectedMsgs.length - 1;
+    let messageList = selectedMsgs[messageCount];
+    messageList.map((x) => {
+      if (x.id === messageId) {
+        x.content.think += text;
+        if (status) {
+          x.status = status;
+          status === ChatSpanStatus.Failed && (x.content.error = text);
+          if (status === ChatSpanStatus.None) {
+            x.siblingIds.push(messageId);
+            x.id = finalMessageId!;
+          }
+        }
+      }
+      return x;
+    });
+    selectedMsgs.splice(messageCount, 1, messageList);
+    messageDispatch(setSelectedMessages(selectedMsgs));
+  };
+
   const handleSend = useCallback(
     async (message: Message, messageId?: string) => {
       startChat();
@@ -322,10 +349,24 @@ const Chat = memo(() => {
       const value: SseResponseLine = JSON.parse(message);
       if (value.k === SseResponseKind.StopId) {
         chatDispatch(setStopIds([value.r]));
+      } else if (value.k === SseResponseKind.ReasoningSegment) {
+        const { r: msg, i: spanId } = value;
+        const msgId = `${ResponseMessageTempId}-${spanId}`;
+        changeSelectedResponseReason(
+          selectedMessageList,
+          msgId,
+          msg,
+          ChatSpanStatus.Thinking,
+        );
       } else if (value.k === SseResponseKind.Segment) {
         const { r: msg, i: spanId } = value;
         const msgId = `${ResponseMessageTempId}-${spanId}`;
-        changeSelectedResponseMessage(selectedMessageList, msgId, msg);
+        changeSelectedResponseMessage(
+          selectedMessageList,
+          msgId,
+          msg,
+          ChatSpanStatus.Chatting,
+        );
       } else if (value.k === SseResponseKind.Error) {
         const { r: msg, i: spanId } = value;
         const msgId = `${ResponseMessageTempId}-${spanId}`;
@@ -351,6 +392,8 @@ const Chat = memo(() => {
         changeChatTitle(value.r);
       } else if (value.k === SseResponseKind.TitleSegment) {
         changeChatTitle(value.r, true);
+      } else {
+        console.log('Unknown message', value);
       }
     }
 

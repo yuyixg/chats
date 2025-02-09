@@ -400,10 +400,27 @@ public class ChatController(ChatStopService stopService) : ControllerBase
         try
         {
             using ChatService s = chatFactory.CreateChatService(userModel.Model);
+            bool responseStated = false, reasoningStarted = false;
             await foreach (InternalChatSegment seg in icc.Run(userBalance.Balance, userModel, s.ChatStreamedFEProcessed(messageToSend, cco, extraDetails, cancellationToken)))
             {
-                if (seg.TextSegment == string.Empty) continue;
-                await writer.WriteAsync(SseResponseLine.Segment(span.Id, seg.TextSegment), cancellationToken);
+                if (!string.IsNullOrEmpty(seg.ReasoningSegment))
+                {
+                    if (!reasoningStarted)
+                    {
+                        await writer.WriteAsync(SseResponseLine.StartReasoning(span.Id), cancellationToken);
+                        reasoningStarted = true;
+                    }
+                    await writer.WriteAsync(SseResponseLine.ReasoningSegment(span.Id, seg.ReasoningSegment), cancellationToken);
+                }
+                if (!string.IsNullOrEmpty(seg.Segment))
+                {
+                    if (!responseStated)
+                    {
+                        await writer.WriteAsync(SseResponseLine.StartResponse(span.Id, icc.ReasoningDurationMs), cancellationToken);
+                        responseStated = true;
+                    }
+                    await writer.WriteAsync(SseResponseLine.Segment(span.Id, seg.Segment), cancellationToken);
+                }
 
                 if (cancellationToken.IsCancellationRequested)
                 {
@@ -421,6 +438,12 @@ public class ChatController(ChatStopService stopService) : ControllerBase
             icc.FinishReason = DBFinishReason.UpstreamError;
             errorText = e.Message;
             logger.LogError(e, "Upstream error: {userMessageId}", req.MessageId);
+        }
+        catch (AggregateException e) when (e.InnerException is TaskCanceledException)
+        {
+            // do nothing if cancelled
+            icc.FinishReason = DBFinishReason.Cancelled;
+            errorText = e.InnerException.ToString();
         }
         catch (TaskCanceledException)
         {
@@ -446,10 +469,6 @@ public class ChatController(ChatStopService stopService) : ControllerBase
         {
             ChatId = chat.Id,
             ChatRoleId = (byte)DBChatRole.Assistant,
-            MessageContents =
-            [
-                MessageContent.FromText(icc.FullResponse.TextSegment),
-            ],
             SpanId = span.Id,
             CreatedAt = DateTime.UtcNow,
         };
@@ -461,10 +480,13 @@ public class ChatController(ChatStopService stopService) : ControllerBase
         {
             dbAssistantMessage.ParentId = req.MessageId;
         }
+        foreach (MessageContent mc in MessageContent.FromFullResponse(icc.FullResponse, errorText))
+        {
+            dbAssistantMessage.MessageContents.Add(mc);
+        }
 
         if (errorText != null)
         {
-            dbAssistantMessage.MessageContents.Add(MessageContent.FromError(errorText));
             await writer.WriteAsync(SseResponseLine.Error(span.Id, errorText), cancellationToken);
         }
         dbAssistantMessage.Usage = icc.ToUserModelUsage(currentUser.Id, await clientInfoTask, isApi: false);
@@ -490,7 +512,7 @@ public class ChatController(ChatStopService stopService) : ControllerBase
             ChatRoleId = (byte)DBChatRole.System,
             MessageContents =
             [
-                MessageContent.FromText(span.SystemPrompt!)
+                MessageContent.FromContent(span.SystemPrompt!)
             ],
             CreatedAt = DateTime.UtcNow,
             SpanId = specifiedSpanId,

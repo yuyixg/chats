@@ -50,7 +50,6 @@ const AddModelModal = (props: IProps) => {
   const [modelVersions, setModelVersions] = useState<SimpleModelReferenceDto[]>(
     [],
   );
-  const [modelReference, setModelReference] = useState<ModelReferenceDto>();
   const { isOpen, onClose, onSuccessful, modelKeys } = props;
 
   const formSchema = z.object({
@@ -92,6 +91,7 @@ const AddModelModal = (props: IProps) => {
       modelKeyId: parseInt(values.modelKeyId!),
       name: values.name!,
       modelReferenceId: +values.modelReferenceId!,
+      rank: null,
     };
     postModels(dto).then(() => {
       onSuccessful();
@@ -108,7 +108,6 @@ const AddModelModal = (props: IProps) => {
 
   const onModelReferenceChanged = async (modelReferenceId: number) => {
     getModelReference(modelReferenceId).then((data) => {
-      setModelReference(data);
       form.setValue('inputPrice1M', data.promptTokenPrice1M);
       form.setValue('outputPrice1M', data.responseTokenPrice1M);
     });
