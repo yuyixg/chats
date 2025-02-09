@@ -22,8 +22,9 @@ void Main()
 		"MessageContentType",
 		"Tokenizer",
 		"TransactionType",
+		"ReasoningResponseKind",
+		"ModelProvider",
 		"ModelReference",
-		"ModelProvider"
 	}
 	.Select(tableName => TableDef.FromContextTableDef(this, tableName))
 	.ToArray();
