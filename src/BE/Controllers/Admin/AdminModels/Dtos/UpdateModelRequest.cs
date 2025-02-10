@@ -26,6 +26,9 @@ public record UpdateModelRequest
     [JsonPropertyName("outputTokenPrice1M")]
     public required decimal OutputTokenPrice1M { get; init; }
 
+    [JsonPropertyName("rank")]
+    public short? Rank { get; init; }
+
     public void ApplyTo(Model cm)
     {
         cm.ModelReferenceId = ModelReferenceId;
@@ -35,5 +38,9 @@ public record UpdateModelRequest
         cm.InputTokenPrice1M = InputTokenPrice1M;
         cm.OutputTokenPrice1M = OutputTokenPrice1M;
         cm.DeploymentName = DeploymentName;
+        if (Rank.HasValue)
+        {
+            cm.Order = Rank.Value;
+        }
     }
 }
