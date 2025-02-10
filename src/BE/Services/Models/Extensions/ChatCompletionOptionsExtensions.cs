@@ -54,6 +54,17 @@ public static class ChatCompletionOptionsExtensions
         return null;
     }
 
+    public static void SetMaxTokens(this ChatCompletionOptions options, int value)
+    {
+        IDictionary<string, BinaryData>? rawData = GetSerializedAdditionalRawData(options);
+        if (rawData == null)
+        {
+            rawData = new Dictionary<string, BinaryData>();
+            SetSerializedAdditionalRawData(options, rawData);
+        }
+        rawData["max_tokens"] = BinaryData.FromObjectAsJson(value);
+    }
+
     [UnsafeAccessor(UnsafeAccessorKind.Method, Name = "get_SerializedAdditionalRawData")]
     private extern static IDictionary<string, BinaryData>? GetSerializedAdditionalRawData(ChatCompletionOptions @this);
 
