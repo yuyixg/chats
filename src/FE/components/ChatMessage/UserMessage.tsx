@@ -81,7 +81,6 @@ const UserMessage = (props: Props) => {
       fileIds: content.fileIds,
     });
     if (textareaRef.current) {
-      textareaRef.current.style.height = 'inherit';
       textareaRef.current.style.height = `${textareaRef.current.scrollHeight}px`;
     }
   };
