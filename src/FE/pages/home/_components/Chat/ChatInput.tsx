@@ -51,7 +51,7 @@ const ChatInput = ({
   const { t } = useTranslation();
 
   const {
-    state: { prompts, selectedChat },
+    state: { prompts, selectedChat, modelMap },
     handleStopChats,
   } = useContext(HomeContext);
 
@@ -201,7 +201,7 @@ const ChatInput = ({
 
   const canUploadFile = () => {
     return (
-      !uploading && (content?.fileIds?.length ?? 0) <= defaultFileConfig.count
+      !uploading && (content?.fileIds?.length ?? 0) <= defaultFileConfig.count && selectedChat.spans.filter(x => modelMap[x.modelId].allowVision).length > 0
     );
   };
 
