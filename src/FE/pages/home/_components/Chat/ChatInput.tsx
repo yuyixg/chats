@@ -201,7 +201,7 @@ const ChatInput = ({
 
   const canUploadFile = () => {
     return (
-      !uploading && (content?.fileIds?.length ?? 0) <= defaultFileConfig.count && selectedChat.spans.filter(x => modelMap[x.modelId].allowVision).length > 0
+      !uploading && (content?.fileIds?.length ?? 0) <= defaultFileConfig.count && selectedChat.spans.filter(x => modelMap[x.modelId]?.allowVision).length > 0
     );
   };
 
