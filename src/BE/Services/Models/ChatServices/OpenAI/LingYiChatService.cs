@@ -5,11 +5,21 @@ using System.ClientModel;
 using System.ClientModel.Primitives;
 using System.Runtime.InteropServices;
 using System.Text;
+using Chats.BE.Services.Models.Extensions;
 
 namespace Chats.BE.Services.Models.ChatServices.OpenAI;
 
 public class LingYiChatService(Model model) : OpenAIChatService(model, CreateChatClient(model))
 {
+    protected override Task<ChatMessage[]> FEPreprocess(IReadOnlyList<ChatMessage> messages, ChatCompletionOptions options, ChatExtraDetails feOptions, CancellationToken cancellationToken)
+    {
+        if (Model.ModelReference.Name == "yi-lightning")
+        {
+            options.SetMaxTokens(Model.ModelReference.MaxResponseTokens);
+        }
+        return base.FEPreprocess(messages, options, feOptions, cancellationToken);
+    }
+
     static ChatClient CreateChatClient(Model model)
     {
         ArgumentException.ThrowIfNullOrWhiteSpace(model.ModelKey.Secret, nameof(model.ModelKey.Secret));

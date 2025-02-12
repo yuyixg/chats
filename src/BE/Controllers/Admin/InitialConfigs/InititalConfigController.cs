@@ -63,8 +63,13 @@ public class InititalConfigController(ChatsDB db) : ControllerBase
     }
 
     [HttpPost]
-    public async Task CreateInitialConfig([FromBody] UserInitialConfigCreateRequest req, CancellationToken cancellationToken)
+    public async Task<IActionResult> CreateInitialConfig([FromBody] UserInitialConfigCreateRequest req, CancellationToken cancellationToken)
     {
+        if (!ModelState.IsValid)
+        {
+            return BadRequest(ModelState);
+        }
+
         UserInitialConfig newOne = new()
         {
             CreatedAt = DateTime.UtcNow, 
@@ -74,5 +79,6 @@ public class InititalConfigController(ChatsDB db) : ControllerBase
         req.ApplyTo(newOne);
         await db.UserInitialConfigs.AddAsync(newOne, cancellationToken);
         await db.SaveChangesAsync(cancellationToken);
+        return Ok();
     }
 }

@@ -31,3 +31,7 @@ WHERE `Id` = 308;
 UPDATE `ModelReference`
 SET `Name` = 'yi-vision-v2'
 WHERE `Id` = 303;
+
+UPDATE `ModelReference`
+SET `MaxResponseTokens` = 4096
+WHERE `Id` = 303;
