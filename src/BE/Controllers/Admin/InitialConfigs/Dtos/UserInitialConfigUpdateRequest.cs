@@ -47,7 +47,7 @@ public class UserInitialConfigCreateRequest
     public required JsonTokenBalance[] Models { get; init; }
 
     [JsonPropertyName("price")]
-    public required string Price { get; init; }
+    public required decimal Price { get; init; }
 
     [JsonPropertyName("invitationCodeId")]
     public required int? InvitationCodeId { get; init; }
@@ -57,7 +57,7 @@ public class UserInitialConfigCreateRequest
         config.Name = Name;
         config.LoginType = LoginType;
         config.Models = JsonSerializer.Serialize(Models);
-        config.Price = decimal.Parse(Price);
+        config.Price = Price;
         config.InvitationCodeId = InvitationCodeId;
     }
 }
