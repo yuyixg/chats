@@ -1,4 +1,4 @@
-name: Build Container
+name: Deploy Release Webhook
 on:
   push:
     branches:
@@ -47,6 +47,6 @@ jobs:
             cd chats-release-webhook
       
             echo "Deploying non-feature branch: ${{ github.ref_name }}"
-            sed -i "s/^TAG=.*/TAG=r${{ github.run_number }}-linux-x64/" ~/chats/env.env
-            docker compose --env-file=./dev.env --project-name chats-release-webhook up -d --remove-orphans
+            sed -i "s/^TAG=.*/TAG=r${{ github.run_number }}-linux-x64/" ~/chats-release-webhook/docker-compose.yml
+            docker compose up -d --remove-orphans
           EOF
