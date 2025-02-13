@@ -21,6 +21,10 @@ Project("{2150E333-8FDC-42A3-9474-1A3956D46DE8}") = "github-actions", "github-ac
 EndProject
 Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "scripts", "src\scripts\scripts.csproj", "{1AE54C98-13A3-408B-B428-1FD975C02AF2}"
 EndProject
+Project("{2150E333-8FDC-42A3-9474-1A3956D46DE8}") = "eng", "eng", "{BB4E62F3-F7F2-43BD-968A-CCCCB26017DB}"
+EndProject
+Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "ReleaseWebhook", "eng\ReleaseWebhook\ReleaseWebhook.csproj", "{0F444B2A-D877-453E-9347-D59F4252609A}"
+EndProject
 Global
 	GlobalSection(SolutionConfigurationPlatforms) = preSolution
 		Debug|Any CPU = Debug|Any CPU
@@ -39,12 +43,17 @@ Global
 		{1AE54C98-13A3-408B-B428-1FD975C02AF2}.Debug|Any CPU.Build.0 = Debug|Any CPU
 		{1AE54C98-13A3-408B-B428-1FD975C02AF2}.Release|Any CPU.ActiveCfg = Release|Any CPU
 		{1AE54C98-13A3-408B-B428-1FD975C02AF2}.Release|Any CPU.Build.0 = Release|Any CPU
+		{0F444B2A-D877-453E-9347-D59F4252609A}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
+		{0F444B2A-D877-453E-9347-D59F4252609A}.Debug|Any CPU.Build.0 = Debug|Any CPU
+		{0F444B2A-D877-453E-9347-D59F4252609A}.Release|Any CPU.ActiveCfg = Release|Any CPU
+		{0F444B2A-D877-453E-9347-D59F4252609A}.Release|Any CPU.Build.0 = Release|Any CPU
 	EndGlobalSection
 	GlobalSection(SolutionProperties) = preSolution
 		HideSolutionNode = FALSE
 	EndGlobalSection
 	GlobalSection(NestedProjects) = preSolution
 		{29CC0F58-0B4E-4F4F-A084-7C461F7A4E60} = {6C78A2EB-D01E-4634-BBA7-85F12BF86232}
+		{0F444B2A-D877-453E-9347-D59F4252609A} = {BB4E62F3-F7F2-43BD-968A-CCCCB26017DB}
 	EndGlobalSection
 	GlobalSection(ExtensibilityGlobals) = postSolution
 		SolutionGuid = {95C9C38D-AE58-4010-8FEF-0134C15F36B6}
