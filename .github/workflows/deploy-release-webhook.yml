@@ -3,6 +3,7 @@ on:
   push:
     branches:
       - main
+      - dev
     paths:
       - 'src/eng/ReleaseWebhook/**'
       - '.github/workflows/deploy-release-webhook.yml'
@@ -46,7 +47,7 @@ jobs:
             docker pull ${{ vars.DOCKER_REGISTRY }}/${{ vars.DOCKER_NAMESPACE }}/chats-release-webhook:r${{ github.run_number }}
             cd chats-release-webhook
       
-            echo "Deploying non-feature branch: ${{ github.ref_name }}"
-            sed -i "s/^TAG=.*/TAG=r${{ github.run_number }}-linux-x64/" ~/chats-release-webhook/docker-compose.yml
+            echo "Deploying chats release webhook: ${{ github.ref_name }}"
+            sed -i "s/chats-release-webhook:r*/chats-release-webhook:r${{ github.run_number }}/" ~/chats-release-webhook/docker-compose.yml
             docker compose up -d --remove-orphans
           EOF
