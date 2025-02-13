@@ -52,34 +52,17 @@ jobs:
           name: chats-fe
           path: ./src/FE/out
 
+      - name: Set IS_RELEASE
+        run: echo "IS_RELEASE=$(if [[ ${{ github.ref }} == 'refs/heads/main' ]]; then echo true; else echo false; fi)" >> $GITHUB_ENV
+
   upload-fe-to-minio:
-    strategy:
-      matrix:
-        include:
-          - asset: chats-fe
     needs: build-fe
     runs-on: ubuntu-latest
     steps:
-      - name: Download build artifacts
-        uses: actions/download-artifact@v4
-        with:
-          name: ${{ matrix.asset }}
-          path: ${{ matrix.asset }}
-  
-      - name: Compress artifacts into 7z
+      - name: Trigger Sync
         run: |
-          7z a ${{ matrix.asset }}.7z ${{ matrix.asset }}
-        shell: bash
-
-      - name: Configure MINIO Credentials
-        run: |
-          echo "AWS_ACCESS_KEY_ID=${{ secrets.MINIO_KEY }}" >> $GITHUB_ENV
-          echo "AWS_SECRET_ACCESS_KEY=${{ secrets.MINIO_SECRET }}" >> $GITHUB_ENV
-          echo "AWS_DEFAULT_REGION=us-east-1" >> $GITHUB_ENV
-
-      - name: Upload to Minio
-        run: |
-          aws --endpoint-url ${{ vars.MINIO_URL }} s3 cp ${{ matrix.asset }}.7z s3://chats/r${{ github.run_number }}/${{ matrix.asset }}.7z
+          curl -X POST "https://chats-release-webhook.starworks.cc:88/sync/${{ github.run_number }}?isRelease=$IS_RELEASE" \
+            -H "Authorization: Basic $(echo -n "${{ secrets.CHATS_RELEASE_WEBHOOK_CREDENTIAL }}" | openssl base64)"
 
   build-primary-container:
     needs: build-fe
@@ -256,21 +239,6 @@ jobs:
           name: ${{ matrix.id }}
           path: ./Publish
 
-      - name: Compress artifacts into 7z
-        run: |
-          7z a ${{ matrix.id }}.7z ./Publish
-
-      - name: Configure MINIO Credentials
-        run: |
-          echo "AWS_ACCESS_KEY_ID=${{ secrets.MINIO_KEY }}" >> $GITHUB_ENV
-          echo "AWS_SECRET_ACCESS_KEY=${{ secrets.MINIO_SECRET }}" >> $GITHUB_ENV
-          echo "AWS_DEFAULT_REGION=us-east-1" >> $GITHUB_ENV
-          aws configure set default.s3.multipart_threshold 5GB
-
-      - name: Upload to Minio
-        run: |
-          aws --endpoint-url ${{ vars.MINIO_URL }} s3 cp ${{ matrix.id }}.7z s3://chats/r${{ github.run_number }}/${{ matrix.id }}.7z
-
   create-release:
     if: github.ref == 'refs/heads/main'
     needs: [docker-manifest, build-binaries, upload-minio-latest]
@@ -409,16 +377,10 @@ jobs:
     needs: [build-binaries, upload-fe-to-minio]
     runs-on: ubuntu-latest
     steps:
-      - name: Configure MINIO Credentials
-        run: |
-          echo "AWS_ACCESS_KEY_ID=${{ secrets.MINIO_KEY }}" >> $GITHUB_ENV
-          echo "AWS_SECRET_ACCESS_KEY=${{ secrets.MINIO_SECRET }}" >> $GITHUB_ENV
-          echo "AWS_DEFAULT_REGION=us-east-1" >> $GITHUB_ENV
-
       - name: Update latest files
         run: |
-          aws --endpoint-url ${{ vars.MINIO_URL }} s3 rm s3://chats/latest --recursive
-          aws --endpoint-url ${{ vars.MINIO_URL }} s3 cp s3://chats/r${{ github.run_number }} s3://chats/latest --recursive
+          curl -X POST "https://chats-release-webhook.starworks.cc:88/sync/${{ github.run_number }}?isRelease=$IS_RELEASE" \
+            -H "Authorization: Basic $(echo -n "${{ secrets.CHATS_RELEASE_WEBHOOK_CREDENTIAL }}" | openssl base64)"
       
   deploy:
     runs-on: ubuntu-latest
