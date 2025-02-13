@@ -271,6 +271,7 @@ jobs:
 
       - name: sha256sum
         run: |
+          ls -l
           sha256sum chats*.zip > sha256sum.txt
 
       - name: Get changes
