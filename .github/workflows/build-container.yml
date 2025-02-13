@@ -308,7 +308,7 @@ jobs:
           Commits between \`$PREVIOUS_REV\` and \`$CURRENT_REV\`:
           END
           git log ${PREVIOUS_REV}..${CURRENT_REV} --pretty=format:'* [%s](https://github.com/${{ github.repository }}/commit/%H)' >> RELEASE.md
-          cat RELEASE.md
+          ls
 
       - name: Publish Release
         uses: ncipollo/release-action@v1
