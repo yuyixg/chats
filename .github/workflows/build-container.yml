@@ -248,7 +248,7 @@ jobs:
           path: ./Publish
 
   create-release:
-    if: needs.build-fe.outputs.is_release == 'true'
+    if: github.ref == 'refs/heads/main'
     needs: [docker-manifest, build-binaries, upload-minio-latest]
     runs-on: ubuntu-latest
     outputs:
