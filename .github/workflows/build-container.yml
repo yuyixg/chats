@@ -107,7 +107,7 @@ jobs:
           docker push ${{ vars.DOCKER_REGISTRY }}/${{ vars.DOCKER_NAMESPACE }}/chats:r${{ github.run_number }}-linux-x64
 
   build-containers:
-    if: github.ref == 'refs/heads/main'
+    if: needs.build-fe.outputs.is_release == 'true'
     needs: build-fe
     strategy:
       matrix:
@@ -159,7 +159,7 @@ jobs:
           docker push ${{ vars.DOCKER_REGISTRY }}/${{ vars.DOCKER_NAMESPACE }}/chats:${{ matrix.tag }}
 
   docker-manifest:
-    if: github.ref == 'refs/heads/main'
+    if: needs.build-fe.outputs.is_release == 'true'
     needs: [build-primary-container, build-containers]
     runs-on: ubuntu-latest
     steps:
@@ -199,7 +199,7 @@ jobs:
           docker manifest push ${{ vars.DOCKER_REGISTRY }}/${{ vars.DOCKER_NAMESPACE }}/chats:latest
 
   build-binaries:
-    if: github.ref == 'refs/heads/main'
+    if: needs.build-fe.outputs.is_release == 'true'
     needs: build-fe
     strategy:
       matrix:
@@ -248,7 +248,7 @@ jobs:
           path: ./Publish
 
   create-release:
-    if: github.ref == 'refs/heads/main'
+    if: needs.build-fe.outputs.is_release == 'true'
     needs: [docker-manifest, build-binaries, upload-minio-latest]
     runs-on: ubuntu-latest
     outputs:
@@ -325,7 +325,7 @@ jobs:
           GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
 
   upload-release-assets:
-    if: github.ref == 'refs/heads/main'
+    if: needs.build-fe.outputs.is_release == 'true'
     strategy:
       matrix:
         include:
@@ -376,7 +376,7 @@ jobs:
           GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
 
   upload-minio-latest:
-    if: github.ref == 'refs/heads/main'
+    if: needs.build-fe.outputs.is_release == 'true'
     needs: [build-binaries, upload-fe-to-minio]
     runs-on: ubuntu-latest
     steps:
