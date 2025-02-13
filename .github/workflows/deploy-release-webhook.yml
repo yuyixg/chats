@@ -1,4 +1,4 @@
-name: Deploy Release Webhook
+﻿name: Deploy Release Webhook
 on:
   push:
     branches:
@@ -48,6 +48,6 @@ jobs:
             cd chats-release-webhook
       
             echo "Deploying chats release webhook: ${{ github.ref_name }}"
-            sed -i "s/chats-release-webhook:r*/chats-release-webhook:r${{ github.run_number }}/" ~/chats-release-webhook/docker-compose.yml
+            sed -i "s/chats-release-webhook:r.*/chats-release-webhook:r${{ github.run_number }}/" ~/chats-release-webhook/docker-compose.yml
             docker compose up -d --remove-orphans
           EOF
