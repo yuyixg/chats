@@ -69,7 +69,7 @@ jobs:
     steps:
       - name: Trigger Sync
         run: |
-          curl -X POST "https://chats-release-webhook.starworks.cc:88/sync/${{ github.run_id }}/chats-fe" \
+          curl -X POST "https://chats-release-webhook.starworks.cc:88/sync/${{ github.run_id }}/chats-fe" -N \
             -H "Authorization: Basic $(echo -n "${{ secrets.CHATS_RELEASE_WEBHOOK_CREDENTIAL }}" | openssl base64)"
 
   build-primary-container:
@@ -249,11 +249,11 @@ jobs:
 
       - name: Upload to Minio
         run: |
-          curl -X POST "https://chats-release-webhook.starworks.cc:88/sync/${{ github.run_id }}/${{ matrix.id }}" \
+          curl -X POST "https://chats-release-webhook.starworks.cc:88/sync/${{ github.run_id }}/${{ matrix.id }}" -N \
             -H "Authorization: Basic $(echo -n "${{ secrets.CHATS_RELEASE_WEBHOOK_CREDENTIAL }}" | openssl base64)"
 
   create-release:
-    if: github.ref == 'refs/heads/main'
+    if: needs.build-fe.outputs.is_release == 'true'
     needs: [docker-manifest, build-binaries, upload-minio-latest]
     runs-on: ubuntu-latest
     outputs:
@@ -277,7 +277,52 @@ jobs:
         env:
           GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
 
+      - name: Get changes
+        run: |
+          CURRENT_REV=${{ github.event.inputs.branch }}
+          PREVIOUS_REV=$(curl --silent "https://api.github.com/repos/${{ github.repository }}/releases/latest" | jq -r ".tag_name")
+          git clone -b "${{ github.event.inputs.branch }}" https://github.com/${{ github.repository }}
+          cat <<END >> RELEASE.md
+          <details>
+    
+          ### Docker
+          | Description                   | Docker Image                                                                                                 |
+          | ----------------------------- | ------------------------------------------------------------------------------------------------------------ |
+          | r${{ github.run_number }}     | ${{ vars.DOCKER_REGISTRY }}/${{ vars.DOCKER_NAMESPACE }}/chats:r${{ github.run_number }}                     |
+          | Linux x64                     | ${{ vars.DOCKER_REGISTRY }}/${{ vars.DOCKER_NAMESPACE }}/chats:r${{ github.run_number }}-linux-x64           |
+          | Linux ARM64                   | ${{ vars.DOCKER_REGISTRY }}/${{ vars.DOCKER_NAMESPACE }}/chats:r${{ github.run_number }}-linux-arm64         |
+          | Windows Nano Server 1809      | ${{ vars.DOCKER_REGISTRY }}/${{ vars.DOCKER_NAMESPACE }}/chats:r${{ github.run_number }}-nanoserver-1809     |
+          | Windows Nano Server LTSC 2022 | ${{ vars.DOCKER_REGISTRY }}/${{ vars.DOCKER_NAMESPACE }}/chats:r${{ github.run_number }}-nanoserver-ltsc2022 |
+          | Latest                        | ${{ vars.DOCKER_REGISTRY }}/${{ vars.DOCKER_NAMESPACE }}/chats:latest                                        |
+    
+          ### Alternative binaries download links that may faster than GitHub(for China users)
+          | Artifact                  | Download Link                                                                   |
+          | ------------------------- | ------------------------------------------------------------------------------- |
+          | chats-win-x64.7z          | ${{ vars.MINIO_URL }}/chats/r${{ github.run_number }}/chats-win-x64.7z          |
+          | chats-linux-x64.7z        | ${{ vars.MINIO_URL }}/chats/r${{ github.run_number }}/chats-linux-x64.7z        |
+          | chats-linux-arm64.7z      | ${{ vars.MINIO_URL }}/chats/r${{ github.run_number }}/chats-linux-arm64.7z      |
+          | chats-linux-musl-x64.7z   | ${{ vars.MINIO_URL }}/chats/r${{ github.run_number }}/chats-linux-musl-x64.7z   |
+          | chats-linux-musl-arm64.7z | ${{ vars.MINIO_URL }}/chats/r${{ github.run_number }}/chats-linux-musl-arm64.7z |
+          | chats-osx-arm64.7z        | ${{ vars.MINIO_URL }}/chats/r${{ github.run_number }}/chats-osx-arm64.7z        |
+          | chats-osx-x64.7z          | ${{ vars.MINIO_URL }}/chats/r${{ github.run_number }}/chats-osx-x64.7z          |
+          | chats-fe.7z               | ${{ vars.MINIO_URL }}/chats/r${{ github.run_number }}/chats-fe.7z               |
+          | chats.7z                  | ${{ vars.MINIO_URL }}/chats/r${{ github.run_number }}/chats.7z                  |
+    
+          **NOTE**: 
+          Replace \`r${{ github.run_number }}\` with \`latest\` in the download link to get the latest version, for example: \`${{ vars.MINIO_URL }}/chats/latest/chats-win-x64.7z\`
+
+          </details>
+
+          ### Full Changelogs
+          https://github.com/sdcb/chats/compare/$PREVIOUS_REV...r-${{ github.run_number }}
+
+          Commits between \`$PREVIOUS_REV\` and \`$CURRENT_REV\`:
+          END
+          git log ${PREVIOUS_REV}..${CURRENT_REV} --pretty=format:'* [%s](https://github.com/${{ github.repository }}/commit/%H)' >> RELEASE.md
+          cat RELEASE.md
+
       - name: Create Release
+        if: github.ref == 'refs/heads/main'
         id: create_release
         uses: actions/github-script@v7
         with:
@@ -329,57 +374,6 @@ jobs:
         env:
           GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
 
-  upload-release-assets:
-    if: needs.build-fe.outputs.is_release == 'true'
-    strategy:
-      matrix:
-        include:
-          - asset: chats
-          - asset: chats-fe
-          - asset: chats-win-x64
-          - asset: chats-linux-x64
-          - asset: chats-linux-arm64
-          - asset: chats-linux-musl-x64
-          - asset: chats-linux-musl-arm64
-          - asset: chats-osx-arm64
-          - asset: chats-osx-x64
-    needs: create-release
-    runs-on: ubuntu-latest
-    steps:
-      - name: Download build artifacts
-        uses: actions/download-artifact@v4
-        with:
-          name: ${{ matrix.asset }}
-          path: ${{ matrix.asset }}
-  
-      - name: Compress artifacts
-        run: |
-          7z a ${{ matrix.asset }}.7z ${{ matrix.asset }}
-          zip -r ${{ matrix.asset }}.zip ${{ matrix.asset }}
-        shell: bash
-  
-      - name: Upload Asset
-        uses: actions/github-script@v7
-        with:
-          script: |
-            const fs = require('fs');
-            const assetNames = [ '${{ matrix.asset }}.7z', '${{ matrix.asset }}.zip' ];
-            const releaseId = "${{ needs.create-release.outputs.release_id }}";
-
-            const promises = assetNames.map(assetName => {
-              const asset = fs.readFileSync('./' + assetName);
-              return github.rest.repos.uploadReleaseAsset({
-                owner: context.repo.owner,
-                repo: context.repo.repo,
-                release_id: releaseId,
-                name: assetName,
-                data: asset,
-              });
-            });
-            await Promise.all(promises);
-        env:
-          GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
-
   upload-minio-latest:
     if: needs.build-fe.outputs.is_release == 'true'
     needs: [build-binaries, upload-fe-to-minio]
@@ -387,7 +381,7 @@ jobs:
     steps:
       - name: Update latest files
         run: |
-          curl -X POST "https://chats-release-webhook.starworks.cc:88/sync/latest/${{ github.run_number }}" \
+          curl -X POST "https://chats-release-webhook.starworks.cc:88/sync/latest/${{ github.run_number }}" -N \
             -H "Authorization: Basic $(echo -n "${{ secrets.CHATS_RELEASE_WEBHOOK_CREDENTIAL }}" | openssl base64)"
       
   deploy:
