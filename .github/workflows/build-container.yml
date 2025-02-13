@@ -1,4 +1,4 @@
-name: Build Container
+﻿name: Build Container
 on:
   push:
     branches:
@@ -254,7 +254,7 @@ jobs:
 
   create-release:
     if: needs.build-fe.outputs.is_release == 'true'
-    needs: [docker-manifest, build-binaries, upload-minio-latest]
+    needs: [build-binaries, build-primary-container]
     runs-on: ubuntu-latest
     outputs:
       release_id: ${{ steps.create_release.outputs.release_id }}
@@ -310,58 +310,15 @@ jobs:
           git log ${PREVIOUS_REV}..${CURRENT_REV} --pretty=format:'* [%s](https://github.com/${{ github.repository }}/commit/%H)' >> RELEASE.md
           cat RELEASE.md
 
-      - name: Create Release
-        if: github.ref == 'refs/heads/main'
-        id: create_release
-        uses: actions/github-script@v7
+      - name: Publish Release
+        uses: ncipollo/release-action@v1
         with:
-          script: |
-            const latestTag = "${{ steps.get_latest_tag.outputs.latestTag }}";
-            const response = await github.rest.repos.createRelease({
-              owner: context.repo.owner,
-              repo: context.repo.repo,
-              tag_name: `r-${{ github.run_number }}`,
-              name: `r-${{ github.run_number }}`,
-              target_commitish: '${{ github.sha }}',
-              body: `### Full Changelogs
-            https://github.com/sdcb/chats/compare/${latestTag}...r-${{ github.run_number }}
-
-            <details>
-    
-            ### Docker
-            | Description                   | Docker Image                                                                                                 |
-            | ----------------------------- | ------------------------------------------------------------------------------------------------------------ |
-            | r${{ github.run_number }}     | ${{ vars.DOCKER_REGISTRY }}/${{ vars.DOCKER_NAMESPACE }}/chats:r${{ github.run_number }}                     |
-            | Linux x64                     | ${{ vars.DOCKER_REGISTRY }}/${{ vars.DOCKER_NAMESPACE }}/chats:r${{ github.run_number }}-linux-x64           |
-            | Linux ARM64                   | ${{ vars.DOCKER_REGISTRY }}/${{ vars.DOCKER_NAMESPACE }}/chats:r${{ github.run_number }}-linux-arm64         |
-            | Windows Nano Server 1809      | ${{ vars.DOCKER_REGISTRY }}/${{ vars.DOCKER_NAMESPACE }}/chats:r${{ github.run_number }}-nanoserver-1809     |
-            | Windows Nano Server LTSC 2022 | ${{ vars.DOCKER_REGISTRY }}/${{ vars.DOCKER_NAMESPACE }}/chats:r${{ github.run_number }}-nanoserver-ltsc2022 |
-            | Latest                        | ${{ vars.DOCKER_REGISTRY }}/${{ vars.DOCKER_NAMESPACE }}/chats:latest                                        |
-    
-            ### Alternative binaries download links that may faster than GitHub(for China users)
-            | Artifact                  | Download Link                                                                   |
-            | ------------------------- | ------------------------------------------------------------------------------- |
-            | chats-win-x64.7z          | ${{ vars.MINIO_URL }}/chats/r${{ github.run_number }}/chats-win-x64.7z          |
-            | chats-linux-x64.7z        | ${{ vars.MINIO_URL }}/chats/r${{ github.run_number }}/chats-linux-x64.7z        |
-            | chats-linux-arm64.7z      | ${{ vars.MINIO_URL }}/chats/r${{ github.run_number }}/chats-linux-arm64.7z      |
-            | chats-linux-musl-x64.7z   | ${{ vars.MINIO_URL }}/chats/r${{ github.run_number }}/chats-linux-musl-x64.7z   |
-            | chats-linux-musl-arm64.7z | ${{ vars.MINIO_URL }}/chats/r${{ github.run_number }}/chats-linux-musl-arm64.7z |
-            | chats-osx-arm64.7z        | ${{ vars.MINIO_URL }}/chats/r${{ github.run_number }}/chats-osx-arm64.7z        |
-            | chats-osx-x64.7z          | ${{ vars.MINIO_URL }}/chats/r${{ github.run_number }}/chats-osx-x64.7z          |
-            | chats-fe.7z               | ${{ vars.MINIO_URL }}/chats/r${{ github.run_number }}/chats-fe.7z               |
-            | chats.7z                  | ${{ vars.MINIO_URL }}/chats/r${{ github.run_number }}/chats.7z                  |
-    
-            **NOTE**: 
-            Replace \`r${{ github.run_number }}\` with \`latest\` in the download link to get the latest version, for example: \`${{ vars.MINIO_URL }}/chats/latest/chats-win-x64.7z\`
-
-            </details>
-            `,
-              draft: false,
-              prerelease: false,
-            });
-            core.setOutput('release_id', response.data.id);
-        env:
-          GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+          bodyFile: RELEASE.md
+          token: ${{ secrets.GITHUB_TOKEN }}
+          name: r-${{ github.run_number }}
+          tag: r-${{ github.run_number }}
+          artifacts: chats*
+          draft: true
 
   upload-minio-latest:
     if: needs.build-fe.outputs.is_release == 'true'
