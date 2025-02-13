@@ -129,6 +129,11 @@ jobs:
             os: win
             arch: x64
             args: /p:ContainerBaseImage=mcr.microsoft.com/dotnet/aspnet:8.0-nanoserver-ltsc2022
+          - tag: r${{ github.run_number }}-nanoserver-ltsc2025
+            runs-on: windows-latest
+            os: win
+            arch: x64
+            args: /p:ContainerBaseImage=mcr.microsoft.com/dotnet/aspnet:8.0-nanoserver-ltsc2025
           - tag: r${{ github.run_number }}-linux-arm64
             runs-on: ubuntu-latest
             os: linux
@@ -170,12 +175,14 @@ jobs:
             ${{ vars.DOCKER_REGISTRY }}/${{ vars.DOCKER_NAMESPACE }}/chats:r${{ github.run_number }}-linux-x64 \
             ${{ vars.DOCKER_REGISTRY }}/${{ vars.DOCKER_NAMESPACE }}/chats:r${{ github.run_number }}-linux-arm64 \
             ${{ vars.DOCKER_REGISTRY }}/${{ vars.DOCKER_NAMESPACE }}/chats:r${{ github.run_number }}-nanoserver-1809 \
-            ${{ vars.DOCKER_REGISTRY }}/${{ vars.DOCKER_NAMESPACE }}/chats:r${{ github.run_number }}-nanoserver-ltsc2022
+            ${{ vars.DOCKER_REGISTRY }}/${{ vars.DOCKER_NAMESPACE }}/chats:r${{ github.run_number }}-nanoserver-ltsc2022 \
+            ${{ vars.DOCKER_REGISTRY }}/${{ vars.DOCKER_NAMESPACE }}/chats:r${{ github.run_number }}-nanoserver-ltsc2025
 
       - name: Annotation
         run: |
           docker manifest annotate ${{ vars.DOCKER_REGISTRY }}/${{ vars.DOCKER_NAMESPACE }}/chats:r${{ github.run_number }} ${{ vars.DOCKER_REGISTRY }}/${{ vars.DOCKER_NAMESPACE }}/chats:r${{ github.run_number }}-nanoserver-1809 --os-version 10.0.17763.6532
           docker manifest annotate ${{ vars.DOCKER_REGISTRY }}/${{ vars.DOCKER_NAMESPACE }}/chats:r${{ github.run_number }} ${{ vars.DOCKER_REGISTRY }}/${{ vars.DOCKER_NAMESPACE }}/chats:r${{ github.run_number }}-nanoserver-ltsc2022 --os-version 10.0.20348.2849
+          docker manifest annotate ${{ vars.DOCKER_REGISTRY }}/${{ vars.DOCKER_NAMESPACE }}/chats:r${{ github.run_number }} ${{ vars.DOCKER_REGISTRY }}/${{ vars.DOCKER_NAMESPACE }}/chats:r${{ github.run_number }}-nanoserver-ltsc2025 --os-version 10.0.26100.3194
           docker manifest inspect ${{ vars.DOCKER_REGISTRY }}/${{ vars.DOCKER_NAMESPACE }}/chats:r${{ github.run_number }}
 
       - name: Create latest manifest
@@ -184,12 +191,14 @@ jobs:
             ${{ vars.DOCKER_REGISTRY }}/${{ vars.DOCKER_NAMESPACE }}/chats:r${{ github.run_number }}-linux-x64 \
             ${{ vars.DOCKER_REGISTRY }}/${{ vars.DOCKER_NAMESPACE }}/chats:r${{ github.run_number }}-linux-arm64 \
             ${{ vars.DOCKER_REGISTRY }}/${{ vars.DOCKER_NAMESPACE }}/chats:r${{ github.run_number }}-nanoserver-1809 \
-            ${{ vars.DOCKER_REGISTRY }}/${{ vars.DOCKER_NAMESPACE }}/chats:r${{ github.run_number }}-nanoserver-ltsc2022
+            ${{ vars.DOCKER_REGISTRY }}/${{ vars.DOCKER_NAMESPACE }}/chats:r${{ github.run_number }}-nanoserver-ltsc2022 \
+            ${{ vars.DOCKER_REGISTRY }}/${{ vars.DOCKER_NAMESPACE }}/chats:r${{ github.run_number }}-nanoserver-ltsc2025
 
       - name: Annotate latest manifest
         run: |
           docker manifest annotate ${{ vars.DOCKER_REGISTRY }}/${{ vars.DOCKER_NAMESPACE }}/chats:latest ${{ vars.DOCKER_REGISTRY }}/${{ vars.DOCKER_NAMESPACE }}/chats:r${{ github.run_number }}-nanoserver-1809 --os-version 10.0.17763.6532
           docker manifest annotate ${{ vars.DOCKER_REGISTRY }}/${{ vars.DOCKER_NAMESPACE }}/chats:latest ${{ vars.DOCKER_REGISTRY }}/${{ vars.DOCKER_NAMESPACE }}/chats:r${{ github.run_number }}-nanoserver-ltsc2022 --os-version 10.0.20348.2849
+          docker manifest annotate ${{ vars.DOCKER_REGISTRY }}/${{ vars.DOCKER_NAMESPACE }}/chats:latest ${{ vars.DOCKER_REGISTRY }}/${{ vars.DOCKER_NAMESPACE }}/chats:r${{ github.run_number }}-nanoserver-ltsc2025 --os-version 10.0.26100.3194
 
       - name: Push manifest
         run: |
