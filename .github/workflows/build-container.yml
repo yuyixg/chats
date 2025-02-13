@@ -102,6 +102,7 @@ jobs:
 
       - name: Build container
         run: |
+          ls -al
           dotnet publish ./src/BE/Chats.BE.csproj -c Release --os linux --arch x64 /t:PublishContainer /p:ContainerRepository=chats
 
       - name: Tag container with run number
