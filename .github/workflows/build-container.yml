@@ -47,12 +47,28 @@ jobs:
         if: steps.fe_build_cache.outputs.cache-hit != 'true'
         working-directory: ./src/FE
         run: npm run build
+
+      - name: sed version
+        run: |
+          # file: ./src/BE/Controllers/Admin/GlobalConfigs/VersionController.cs
+          # const int buildVersion = 0; -> const int buildVersion = github.run_number;
+          sed -i "s/const int buildVersion = 0;/const int buildVersion = ${{ github.run_number }};/" ./src/BE/Controllers/Admin/GlobalConfigs/VersionController.cs
+
+      - name: Zip FE build artifacts
+        run: |
+          zip -r chats-fe.zip ./src/FE/out
         
       - name: Upload FE build artifacts
         uses: actions/upload-artifact@v4
         with:
           name: chats-fe
-          path: ./src/FE/out
+          path: chats-fe.zip
+
+      - name: Upload src folder
+        uses: actions/upload-artifact@v4
+        with:
+          name: src
+          path: ./src
 
       - name: Set IS_RELEASE output
         id: set_is_release
@@ -79,20 +95,10 @@ jobs:
       - name: Login container
         run: echo ${{ secrets.DOCKER_PASSWORD }} | docker login -u ${{ vars.DOCKER_USERNAME }} ${{ vars.DOCKER_REGISTRY }} --password-stdin
 
-      - name: Checkout code
-        uses: actions/checkout@v4
-
-      - name: Download FE build artifacts
+      - name: Download src folder
         uses: actions/download-artifact@v4
         with:
-          name: chats-fe
-          path: ./src/BE/wwwroot
-
-      - name: sed version
-        run: |
-          # file: ./src/BE/Controllers/Admin/GlobalConfigs/VersionController.cs
-          # const int buildVersion = 0; -> const int buildVersion = github.run_number;
-          sed -i "s/const int buildVersion = 0;/const int buildVersion = ${{ github.run_number }};/" ./src/BE/Controllers/Admin/GlobalConfigs/VersionController.cs
+          name: src
 
       - name: Build container
         run: |
@@ -131,20 +137,10 @@ jobs:
       - name: Login container
         run: echo ${{ secrets.DOCKER_PASSWORD }} | docker login -u ${{ vars.DOCKER_USERNAME }} ${{ vars.DOCKER_REGISTRY }} --password-stdin
 
-      - name: Checkout code
-        uses: actions/checkout@v4
-
-      - name: Download FE build artifacts
+      - name: Download src folder
         uses: actions/download-artifact@v4
         with:
-          name: chats-fe
-          path: ./src/BE/wwwroot
-
-      - name: sed version
-        run: |
-          # file: ./src/BE/Controllers/Admin/GlobalConfigs/VersionController.cs
-          # const int buildVersion = 0; -> const int buildVersion = github.run_number;
-          sed -i "s/const int buildVersion = 0;/const int buildVersion = ${{ github.run_number }};/" ./src/BE/Controllers/Admin/GlobalConfigs/VersionController.cs
+          name: src
 
       - name: Build container
         run: |
@@ -222,30 +218,24 @@ jobs:
 
     runs-on: ubuntu-latest
     steps:
-      - name: Checkout code
-        uses: actions/checkout@v4
-
-      - name: Download FE build artifacts
+      - name: Download src folder
         uses: actions/download-artifact@v4
         with:
-          name: chats-fe
-          path: ./src/BE/wwwroot
-
-      - name: sed version
-        run: |
-          # file: ./src/BE/Controllers/Admin/GlobalConfigs/VersionController.cs
-          # const int buildVersion = 0; -> const int buildVersion = github.run_number;
-          sed -i "s/const int buildVersion = 0;/const int buildVersion = ${{ github.run_number }};/" ./src/BE/Controllers/Admin/GlobalConfigs/VersionController.cs
+          name: src
 
       - name: build binary
         run: |
           dotnet publish ./src/BE/Chats.BE.csproj -c Release -o ./Publish ${{ matrix.args }} /p:DeleteExistingFiles=True
+
+      - name: zip binary
+        run: |
+          zip -r ${{ matrix.id }}.zip ./Publish/*
   
       - name: Upload artifacts
         uses: actions/upload-artifact@v4
         with:
           name: ${{ matrix.id }}
-          path: ./Publish
+          path: ${{ matrix.id }}.zip
 
       - name: Upload to Minio
         run: |
@@ -267,14 +257,8 @@ jobs:
       - name: Download artifacts
         uses: actions/download-artifact@v4
 
-      - name: zip chats artifacts
+      - name: sha256sum
         run: |
-          for dir in chats*; do
-            if [ -d "$dir" ]; then
-              echo "Zipping $dir"
-              zip -r "${dir}.zip" "$dir"
-            fi
-          done
           sha256sum chats*.zip > sha256sum.txt
 
       - name: Get changes
