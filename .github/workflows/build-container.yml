@@ -61,7 +61,7 @@ jobs:
     steps:
       - name: Trigger Sync
         run: |
-          curl -X POST "https://chats-release-webhook.starworks.cc:88/sync/${{ github.run_number }}?isRelease=$IS_RELEASE" \
+          curl -X POST "https://chats-release-webhook.starworks.cc:88/sync/${{ github.run_number }}?isRelease=${{ env.IS_RELEASE }}" \
             -H "Authorization: Basic $(echo -n "${{ secrets.CHATS_RELEASE_WEBHOOK_CREDENTIAL }}" | openssl base64)"
 
   build-primary-container:
@@ -374,7 +374,7 @@ jobs:
     steps:
       - name: Update latest files
         run: |
-          curl -X POST "https://chats-release-webhook.starworks.cc:88/sync/${{ github.run_number }}?isRelease=$IS_RELEASE" \
+          curl -X POST "https://chats-release-webhook.starworks.cc:88/sync/${{ github.run_number }}?isRelease=${{ env.IS_RELEASE }}" \
             -H "Authorization: Basic $(echo -n "${{ secrets.CHATS_RELEASE_WEBHOOK_CREDENTIAL }}" | openssl base64)"
       
   deploy:
