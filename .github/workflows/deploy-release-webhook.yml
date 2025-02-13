@@ -5,7 +5,7 @@ on:
       - main
       - dev
     paths:
-      - 'src/eng/ReleaseWebhook/**'
+      - 'eng/ReleaseWebhook/**'
       - '.github/workflows/deploy-release-webhook.yml'
   workflow_dispatch:
 
