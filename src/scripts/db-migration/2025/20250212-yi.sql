@@ -79,3 +79,7 @@ UPDATE [ModelReference]
 SET [MaxResponseTokens] = @p1
 WHERE [Id] = @p0
 GO
+
+UPDATE "ModelReference"
+SET "MaxResponseTokens" = 4096
+WHERE "Id" = 300;
