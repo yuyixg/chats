@@ -267,6 +267,16 @@ jobs:
       - name: Download artifacts
         uses: actions/download-artifact@v4
 
+      - name: zip chats artifacts
+        run: |
+          for dir in chats*; do
+            if [ -d "$dir" ]; then
+              echo "Zipping $dir"
+              zip -r "${dir}.zip" "$dir"
+            fi
+          done
+          sha256sum chats*.zip > sha256sum.txt
+
       - name: Get changes
         run: |
           CURRENT_REV=$(git rev-parse HEAD)
@@ -317,7 +327,7 @@ jobs:
           token: ${{ secrets.GITHUB_TOKEN }}
           name: r-${{ github.run_number }}
           tag: r-${{ github.run_number }}
-          artifacts: chats*
+          artifacts: "chats*.zip, sha256sum.txt"
           draft: true
 
   upload-minio-latest:
