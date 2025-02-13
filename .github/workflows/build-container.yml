@@ -99,10 +99,10 @@ jobs:
         uses: actions/download-artifact@v4
         with:
           name: src
+          path: ./src
 
       - name: Build container
         run: |
-          ls -al
           dotnet publish ./src/BE/Chats.BE.csproj -c Release --os linux --arch x64 /t:PublishContainer /p:ContainerRepository=chats
 
       - name: Tag container with run number
@@ -142,6 +142,7 @@ jobs:
         uses: actions/download-artifact@v4
         with:
           name: src
+          path: ./src
 
       - name: Build container
         run: |
@@ -223,6 +224,7 @@ jobs:
         uses: actions/download-artifact@v4
         with:
           name: src
+          path: ./src
 
       - name: build binary
         run: |
