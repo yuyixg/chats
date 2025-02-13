@@ -367,11 +367,6 @@ jobs:
         env:
           GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
 
-      - name: Delete build artifacts
-        uses: geekyeggo/delete-artifact@v5
-        with:
-            name: ${{ matrix.asset }}
-
   upload-minio-latest:
     if: github.ref == 'refs/heads/main'
     needs: [build-binaries, upload-fe-to-minio]
