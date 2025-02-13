@@ -58,9 +58,9 @@ jobs:
         id: set_is_release
         run: |
           if [[ "${{ github.ref_name }}" == "main" ]]; then
-            echo "::set-output name=is_release::true"
+            echo "is_release=true"  >> $GITHUB_OUTPUT
           else
-            echo "::set-output name=is_release::false"
+            echo "is_release=false" >> $GITHUB_OUTPUT
           fi
 
   upload-fe-to-minio:
@@ -69,7 +69,7 @@ jobs:
     steps:
       - name: Trigger Sync
         run: |
-          curl -X POST "https://chats-release-webhook.starworks.cc:88/sync/${{ github.run_number }}?isRelease=${{ needs.build-fe.outputs.is_release }}" \
+          curl -X POST "https://chats-release-webhook.starworks.cc:88/sync/${{ github.run_id }}?isRelease=${{ needs.build-fe.outputs.is_release }}" \
             -H "Authorization: Basic $(echo -n "${{ secrets.CHATS_RELEASE_WEBHOOK_CREDENTIAL }}" | openssl base64)"
 
   build-primary-container:
@@ -382,7 +382,7 @@ jobs:
     steps:
       - name: Update latest files
         run: |
-          curl -X POST "https://chats-release-webhook.starworks.cc:88/sync/${{ github.run_number }}?isRelease=${{ needs.build-fe.outputs.is_release }}" \
+          curl -X POST "https://chats-release-webhook.starworks.cc:88/sync/${{ github.run_id }}?isRelease=${{ needs.build-fe.outputs.is_release }}" \
             -H "Authorization: Basic $(echo -n "${{ secrets.CHATS_RELEASE_WEBHOOK_CREDENTIAL }}" | openssl base64)"
       
   deploy:
