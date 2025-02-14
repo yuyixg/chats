@@ -293,6 +293,7 @@ jobs:
           | Linux ARM64                   | ${{ vars.DOCKER_REGISTRY }}/${{ vars.DOCKER_NAMESPACE }}/chats:r${{ github.run_number }}-linux-arm64         |
           | Windows Nano Server 1809      | ${{ vars.DOCKER_REGISTRY }}/${{ vars.DOCKER_NAMESPACE }}/chats:r${{ github.run_number }}-nanoserver-1809     |
           | Windows Nano Server LTSC 2022 | ${{ vars.DOCKER_REGISTRY }}/${{ vars.DOCKER_NAMESPACE }}/chats:r${{ github.run_number }}-nanoserver-ltsc2022 |
+          | Windows Nano Server LTSC 2025 | ${{ vars.DOCKER_REGISTRY }}/${{ vars.DOCKER_NAMESPACE }}/chats:r${{ github.run_number }}-nanoserver-ltsc2025 |
           | Latest                        | ${{ vars.DOCKER_REGISTRY }}/${{ vars.DOCKER_NAMESPACE }}/chats:latest                                        |
     
           ### Alternative binaries download links that may faster than GitHub(for China users)
@@ -314,7 +315,7 @@ jobs:
           </details>
 
           ### Full Changelogs
-          https://github.com/sdcb/chats/compare/$PREVIOUS_REV...r-${{ github.run_number }}
+          https://github.com/sdcb/chats/compare/$PREVIOUS_REV...$CURRENT_REV
 
           Commits between \`$PREVIOUS_REV\` and \`$CURRENT_REV\`:
           END
