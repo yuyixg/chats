@@ -104,6 +104,7 @@
   "Operation failed, Please try again later, or contact technical personnel": "操作失败，请稍后再试，或联系技术人员",
   "Internal server error, Please try again later": "内部服务器错误，请稍后再试",
   "Resource denial of authorized access": "资源拒绝授权访问",
+  "Session has expired": "会话已过期",
   "Created successful": "创建成功",
   "Updated successful": "修改成功",
   "Deleted successful": "删除成功",
@@ -385,5 +386,4 @@
   "Dislike": "踩",
   "Reasoning...": "推理中...",
   "Reasoning complete": "推理完成"
-
 }
