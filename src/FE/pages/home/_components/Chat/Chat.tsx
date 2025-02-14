@@ -36,7 +36,10 @@ import {
   SseResponseKind,
   SseResponseLine,
 } from '@/types/chatMessage';
-import { PutResponseMessageEditAndSaveNewResult } from '@/types/clientApis';
+import {
+  ChatSpanDto,
+  PutResponseMessageEditAndSaveNewResult,
+} from '@/types/clientApis';
 import { Prompt } from '@/types/prompt';
 
 import {
@@ -172,8 +175,23 @@ const Chat = memo(() => {
     messageDispatch(setSelectedMessages(selectedMsgs));
   };
 
+  const checkSelectChatModelIsExist = (spans: ChatSpanDto[]) => {
+    const modelList = spans
+      .filter((x) => !models.find((m) => m.modelId === x.modelId))
+      .map((x) => x.modelName);
+    const count = modelList.length;
+    count > 0 &&
+      toast.error(
+        t('The model {{modelName}} does not exist', {
+          modelName: modelList.join(' '),
+        }),
+      );
+    return count === 0;
+  };
+
   const handleSend = useCallback(
     async (message: Message, messageId?: string) => {
+      if (!checkSelectChatModelIsExist(selectedChat.spans)) return;
       startChat();
       let { id: chatId, spans: chatSpans } = selectedChat;
       let selectedMessageList = [...selectedMessages];
@@ -222,6 +240,7 @@ const Chat = memo(() => {
     messageId: string,
     modelId: number,
   ) => {
+    if (!checkSelectChatModelIsExist(selectedChat.spans)) return;
     startChat();
     let { id: chatId } = selectedChat;
     let selectedMessageList = [...selectedMessages];
@@ -268,6 +287,7 @@ const Chat = memo(() => {
     message: Message,
     messageId?: string,
   ) => {
+    if (!checkSelectChatModelIsExist(selectedChat.spans)) return;
     startChat();
     let { id: chatId, spans: chatSpans } = selectedChat;
     let index = selectedMessages.findIndex(
@@ -313,8 +333,8 @@ const Chat = memo(() => {
     const data = response.body;
     if (!response.ok) {
       handleChatError();
-      const result = await response.json();
-      toast.error(t(result?.message) || response.statusText);
+      const errMsg = await response.text();
+      toast.error(t(errMsg) || response.statusText);
       return;
     }
     if (!data) {
