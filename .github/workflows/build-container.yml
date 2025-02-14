@@ -18,7 +18,7 @@ jobs:
   build-fe:
     runs-on: ubuntu-latest
     outputs:
-      is_release: ${{ github.ref_name == 'main' && 'true' || 'true' }}
+      is_release: ${{ github.ref_name == 'main' && 'true' || 'false' }}
     steps:
       - name: Checkout code
         uses: actions/checkout@v4
@@ -76,9 +76,11 @@ jobs:
     needs: build-fe
     runs-on: ubuntu-latest
     steps:
-      - name: Trigger Sync
+      - name: Trigger Sync chats-fe & be-src
         run: |
-          curl -X POST "https://chats-release-webhook.starworks.cc:88/sync/${{ github.run_id }}/chats-fe/async" -N \
+          curl -s -i -X POST "https://chats-release-webhook.starworks.cc:88/sync/${{ github.run_id }}/chats-fe" -N \
+            -H "Authorization: Basic $(echo -n "${{ secrets.CHATS_RELEASE_WEBHOOK_CREDENTIAL }}" | openssl base64)"
+          curl -s -i -X POST "https://chats-release-webhook.starworks.cc:88/sync/${{ github.run_id }}/be-src" -N \
             -H "Authorization: Basic $(echo -n "${{ secrets.CHATS_RELEASE_WEBHOOK_CREDENTIAL }}" | openssl base64)"
 
   build-primary-container:
@@ -155,7 +157,6 @@ jobs:
           docker push ${{ vars.DOCKER_REGISTRY }}/${{ vars.DOCKER_NAMESPACE }}/chats:${{ matrix.tag }}
 
   docker-manifest:
-    if: needs.build-fe.outputs.is_release == 'true'
     needs: [build-primary-container, build-containers]
     runs-on: ubuntu-latest
     steps:
@@ -199,7 +200,6 @@ jobs:
           docker manifest push ${{ vars.DOCKER_REGISTRY }}/${{ vars.DOCKER_NAMESPACE }}/chats:latest
 
   build-binaries:
-    if: needs.build-fe.outputs.is_release == 'true'
     needs: build-fe
     strategy:
       matrix:
@@ -303,6 +303,7 @@ jobs:
           | chats-osx-x64.zip         | ${{ vars.MINIO_URL }}/chats/r${{ github.run_number }}/chats-osx-x64.zip         |
           | chats-fe.zip              | ${{ vars.MINIO_URL }}/chats/r${{ github.run_number }}/chats-fe.zip              |
           | chats.zip                 | ${{ vars.MINIO_URL }}/chats/r${{ github.run_number }}/chats.zip                 |
+          | be-src.zip                | ${{ vars.MINIO_URL }}/chats/r${{ github.run_number }}/be-src.zip                |
     
           **NOTE**: 
           Replace \`r${{ github.run_number }}\` with \`latest\` in the download link to get the latest version, for example: \`${{ vars.MINIO_URL }}/chats/latest/chats-win-x64.zip\`
@@ -315,7 +316,6 @@ jobs:
           Commits between \`$PREVIOUS_REV\` and \`$CURRENT_REV\`:
           END
           git log ${PREVIOUS_REV}..${CURRENT_REV} --pretty=format:'* [%s](https://github.com/${{ github.repository }}/commit/%H)' >> RELEASE.md
-          ls
 
       - name: Publish Release
         uses: ncipollo/release-action@v1
@@ -324,7 +324,7 @@ jobs:
           token: ${{ secrets.GITHUB_TOKEN }}
           name: r-${{ github.run_number }}
           tag: r-${{ github.run_number }}
-          artifacts: "chats*.zip, sha256sum.txt"
+          artifacts: "*.zip, sha256sum.txt"
           draft: true
 
   upload-minio-latest:
