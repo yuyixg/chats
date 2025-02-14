@@ -249,7 +249,7 @@ jobs:
           
           done=false
           for i in $(seq 1 10); do
-            if grep -q "HTTP/1.1 200" ./curl-logs.out; then
+            if grep -q "HTTP/2 200" ./curl-logs.out; then
               echo "Got 200, stopping wait..."
               done=true
               break
