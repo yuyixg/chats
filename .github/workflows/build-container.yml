@@ -240,27 +240,31 @@ jobs:
 
       - name: Upload to Minio
         run: |
-          OUTPUT_LOG="curl_output.log"
+          nohup bash -c 'curl -i -X POST "https://chats-release-webhook.starworks.cc:88/sync/${{ github.run_id }}/${{ matrix.id }}" \
+            -H "Authorization: Basic $(echo -n "${{ secrets.CHATS_RELEASE_WEBHOOK_CREDENTIAL }}" | openssl base64)" \
+            -N 2>&1 | tee ./curl-logs.out' &
           
-          echo "Triggering webhook, running in the background..."
-          touch "$OUTPUT_LOG"  # Ensure the log file is created
-          nohup bash -c "curl -X POST \"https://chats-release-webhook.starworks.cc:88/sync/${GITHUB_RUN_ID}/${MATRIX_ID}\" -N -H \"Authorization: Basic \$(echo -n '${CREDENTIAL}' | openssl base64)\" | tee -a ${OUTPUT_LOG}" &
-          CURL_PID=$!
+          pid=$!
+          echo "Curl started with PID: $pid"
           
-          # Wait for a maximum of 10 seconds to detect a response
-          RESPONSE_OK=0
+          done=false
           for i in $(seq 1 10); do
-            echo "Waiting for response... (${i}/10)"
-            if grep -q "开始同步..." "$OUTPUT_LOG"; then
-              echo "Response detected, assuming status code is 200. Exiting wait."
-              RESPONSE_OK=1
+            if grep -q "HTTP/1.1 200" ./curl-logs.out; then
+              echo "Got 200, stopping wait..."
+              done=true
               break
             fi
+            echo "Wait for 1 second..."
             sleep 1
           done
           
-          if [ $RESPONSE_OK -ne 1 ]; then
-            echo "Timeout: Did not detect expected response within 10 seconds."
+          if [ "$done" = "true" ]; then
+            kill $pid || true
+            echo "HTTP 200 detected, step succeeded."
+            exit 0
+          else
+            echo "Didn't see HTTP 200 in 10 seconds, fail the step."
+            kill $pid || true
             exit 1
           fi
 
