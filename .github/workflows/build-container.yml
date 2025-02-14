@@ -53,22 +53,20 @@ jobs:
           # file: ./src/BE/Controllers/Admin/GlobalConfigs/VersionController.cs
           # const int buildVersion = 0; -> const int buildVersion = github.run_number;
           sed -i "s/const int buildVersion = 0;/const int buildVersion = ${{ github.run_number }};/" ./src/BE/Controllers/Admin/GlobalConfigs/VersionController.cs
-
-      - name: Zip FE build artifacts
-        run: |
-          zip -r chats-fe.zip ./src/FE/out
         
       - name: Upload FE build artifacts
         uses: actions/upload-artifact@v4
         with:
           name: chats-fe
-          path: chats-fe.zip
+          path: ./src/FE/out
 
       - name: Upload src folder
         uses: actions/upload-artifact@v4
         with:
           name: src
-          path: ./src
+          path: |
+            ./src/BE
+            ./src/FE
 
       - name: Set IS_RELEASE output
         id: set_is_release
@@ -238,16 +236,12 @@ jobs:
       - name: build binary
         run: |
           dotnet publish ./src/BE/Chats.BE.csproj -c Release -o ./Publish ${{ matrix.args }} /p:DeleteExistingFiles=True
-
-      - name: zip binary
-        run: |
-          zip -r ${{ matrix.id }}.zip ./Publish/*
   
       - name: Upload artifacts
         uses: actions/upload-artifact@v4
         with:
           name: ${{ matrix.id }}
-          path: ${{ matrix.id }}.zip
+          path: ./Publish
 
       - name: Upload to Minio
         run: |
@@ -266,13 +260,23 @@ jobs:
         with:
           fetch-depth: 0
 
-      - name: Download artifacts
-        uses: actions/download-artifact@v4
+      - name: Download all artifacts as zip
+        run: |   
+          API_URL="https://api.github.com/repos/${{ github.repository }}/actions/runs/${{ github.run_id }}/artifacts"
+          echo "Fetching artifacts from: ${API_URL}"
+          curl -s -H "Authorization: token ${{ secrets.GITHUB_TOKEN }}" "${API_URL}" | \
+            jq -c '.artifacts[]' | while read artifact; do
+              ID=$(echo "$artifact" | jq -r '.id')
+              NAME=$(echo "$artifact" | jq -r '.name')
+              echo "Downloading artifact '${NAME}' (ID: ${ID})"
+              curl -L -H "Authorization: token ${{ secrets.GITHUB_TOKEN }}" \
+                -o "${NAME}.zip" "https://api.github.com/repos/${{ github.repository }}/actions/artifacts/${ID}/zip?archive_format=zip"
+            done
+          ls -lh *.zip
 
       - name: sha256sum
         run: |
-          ls -l
-          sha256sum chats*.zip > sha256sum.txt
+          sha256sum *.zip > sha256sum.txt
 
       - name: Get changes
         run: |
