@@ -240,33 +240,8 @@ jobs:
 
       - name: Upload to Minio
         run: |
-          nohup bash -c 'curl -i -X POST "https://chats-release-webhook.starworks.cc:88/sync/${{ github.run_id }}/${{ matrix.id }}" \
-            -H "Authorization: Basic $(echo -n "${{ secrets.CHATS_RELEASE_WEBHOOK_CREDENTIAL }}" | openssl base64)" \
-            -N 2>&1 | tee ./curl-logs.out' &
-          
-          pid=$!
-          echo "Curl started with PID: $pid"
-          
-          done=false
-          for i in $(seq 1 10); do
-            if grep -q "HTTP/2 200" ./curl-logs.out; then
-              echo "Got 200, stopping wait..."
-              done=true
-              break
-            fi
-            echo "Wait for 1 second..."
-            sleep 1
-          done
-          
-          if [ "$done" = "true" ]; then
-            kill $pid || true
-            echo "HTTP 200 detected, step succeeded."
-            exit 0
-          else
-            echo "Didn't see HTTP 200 in 10 seconds, fail the step."
-            kill $pid || true
-            exit 1
-          fi
+          curl -X POST "https://chats-release-webhook.starworks.cc:88/sync/${{ github.run_id }}/${{ matrix.id }}/async" -N \
+            -H "Authorization: Basic $(echo -n "${{ secrets.CHATS_RELEASE_WEBHOOK_CREDENTIAL }}" | openssl base64)"
 
   create-release:
     if: needs.build-fe.outputs.is_release == 'true'
