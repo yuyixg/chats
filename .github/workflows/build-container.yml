@@ -206,19 +206,19 @@ jobs:
         include:
           - id: chats
           - id: chats-win-x64
-            args: -r win-x64 --self-contained true /p:PublishReadyToRun=true /p:PublishSingleFile=true
+            args: -r win-x64 --self-contained true /p:PublishReadyToRun=false /p:PublishSingleFile=false
           - id: chats-linux-x64
-            args: -r linux-x64 --self-contained true /p:PublishReadyToRun=true /p:PublishSingleFile=true
+            args: -r linux-x64 --self-contained true /p:PublishReadyToRun=false /p:PublishSingleFile=false
           - id: chats-linux-arm64
-            args: -r linux-arm64 --self-contained true /p:PublishReadyToRun=true /p:PublishSingleFile=true
+            args: -r linux-arm64 --self-contained true /p:PublishReadyToRun=false /p:PublishSingleFile=false
           - id: chats-linux-musl-x64
-            args: -r linux-musl-x64 --self-contained true /p:PublishReadyToRun=true /p:PublishSingleFile=true
+            args: -r linux-musl-x64 --self-contained true /p:PublishReadyToRun=false /p:PublishSingleFile=false
           - id: chats-linux-musl-arm64
-            args: -r linux-musl-arm64 --self-contained true /p:PublishReadyToRun=true /p:PublishSingleFile=true
+            args: -r linux-musl-arm64 --self-contained true /p:PublishReadyToRun=false /p:PublishSingleFile=false
           - id: chats-osx-arm64
-            args: -r osx-arm64 --self-contained true /p:PublishReadyToRun=true /p:PublishSingleFile=true
+            args: -r osx-arm64 --self-contained true /p:PublishReadyToRun=false /p:PublishSingleFile=false
           - id: chats-osx-x64
-            args: -r osx-x64 --self-contained true /p:PublishReadyToRun=true /p:PublishSingleFile=true
+            args: -r osx-x64 --self-contained true /p:PublishReadyToRun=false /p:PublishSingleFile=false
 
     runs-on: ubuntu-latest
     steps:
