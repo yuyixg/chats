@@ -100,8 +100,8 @@ public class SyncController(
         await ResponseLine($"Uploaded Artifact {artifact.Name} => {s3Key}");
     }
 
-    [HttpPost("sync/{runId:long}/{artifactName}/async")]
-    [HttpGet("sync/{runId:long}/{artifactName}/async")]
+    [HttpPost("async/{runId:long}/{artifactName}")]
+    [HttpGet("async/{runId:long}/{artifactName}")]
     public async Task SyncOneAsync(long runId, string artifactName)
     {
         await PrepareResponse();

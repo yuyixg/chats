@@ -78,7 +78,7 @@ jobs:
     steps:
       - name: Trigger Sync
         run: |
-          curl -X POST "https://chats-release-webhook.starworks.cc:88/sync/${{ github.run_id }}/chats-fe" -N \
+          curl -X POST "https://chats-release-webhook.starworks.cc:88/async/${{ github.run_id }}/chats-fe" -N \
             -H "Authorization: Basic $(echo -n "${{ secrets.CHATS_RELEASE_WEBHOOK_CREDENTIAL }}" | openssl base64)"
 
   build-primary-container:
