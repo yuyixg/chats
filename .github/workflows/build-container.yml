@@ -18,7 +18,7 @@ jobs:
   build-fe:
     runs-on: ubuntu-latest
     outputs:
-      is_release: ${{ steps.set_is_release.outputs.is_release }}
+      is_release: ${{ github.ref_name == 'main' && 'true' || 'true' }}
     steps:
       - name: Checkout code
         uses: actions/checkout@v4
@@ -53,6 +53,11 @@ jobs:
           # file: ./src/BE/Controllers/Admin/GlobalConfigs/VersionController.cs
           # const int buildVersion = 0; -> const int buildVersion = github.run_number;
           sed -i "s/const int buildVersion = 0;/const int buildVersion = ${{ github.run_number }};/" ./src/BE/Controllers/Admin/GlobalConfigs/VersionController.cs
+
+      - name: Copy FE build artifacts
+        run: |
+          mkdir -p ./src/BE/wwwroot
+          cp -r ./src/FE/out/* ./src/BE/wwwroot
         
       - name: Upload FE build artifacts
         uses: actions/upload-artifact@v4
@@ -60,22 +65,12 @@ jobs:
           name: chats-fe
           path: ./src/FE/out
 
-      - name: Upload src folder
+      - name: Upload BE src folder
         uses: actions/upload-artifact@v4
         with:
-          name: src
+          name: be-src
           path: |
             ./src/BE
-            ./src/FE
-
-      - name: Set IS_RELEASE output
-        id: set_is_release
-        run: |
-          if [[ "${{ github.ref_name }}" == "main" ]]; then
-            echo "is_release=true"  >> $GITHUB_OUTPUT
-          else
-            echo "is_release=true" >> $GITHUB_OUTPUT
-          fi
 
   upload-fe-to-minio:
     needs: build-fe
@@ -93,15 +88,15 @@ jobs:
       - name: Login container
         run: echo ${{ secrets.DOCKER_PASSWORD }} | docker login -u ${{ vars.DOCKER_USERNAME }} ${{ vars.DOCKER_REGISTRY }} --password-stdin
 
-      - name: Download src folder
+      - name: Download BE src folder
         uses: actions/download-artifact@v4
         with:
-          name: src
-          path: ./src
+          name: be-src
+          path: ./be-src
 
       - name: Build container
         run: |
-          dotnet publish ./src/BE/Chats.BE.csproj -c Release --os linux --arch x64 /t:PublishContainer /p:ContainerRepository=chats
+          dotnet publish ./be-src/Chats.BE.csproj -c Release --os linux --arch x64 /t:PublishContainer /p:ContainerRepository=chats
 
       - name: Tag container with run number
         run: |
@@ -141,15 +136,15 @@ jobs:
       - name: Login container
         run: echo ${{ secrets.DOCKER_PASSWORD }} | docker login -u ${{ vars.DOCKER_USERNAME }} ${{ vars.DOCKER_REGISTRY }} --password-stdin
 
-      - name: Download src folder
+      - name: Download BE src folder
         uses: actions/download-artifact@v4
         with:
-          name: src
-          path: ./src
+          name: be-src
+          path: ./be-src
 
       - name: Build container
         run: |
-          dotnet publish ./src/BE/Chats.BE.csproj -c Release --os ${{ matrix.os }} --arch ${{ matrix.arch }} /t:PublishContainer /p:ContainerRepository=chats ${{ matrix.args }}
+          dotnet publish ./be-src/Chats.BE.csproj -c Release --os ${{ matrix.os }} --arch ${{ matrix.arch }} /t:PublishContainer /p:ContainerRepository=chats ${{ matrix.args }}
 
       - name: Tag container with run number
         run: |
@@ -227,15 +222,15 @@ jobs:
 
     runs-on: ubuntu-latest
     steps:
-      - name: Download src folder
+      - name: Download BE src folder
         uses: actions/download-artifact@v4
         with:
-          name: src
-          path: ./src
+          name: be-src
+          path: ./be-src
 
       - name: build binary
         run: |
-          dotnet publish ./src/BE/Chats.BE.csproj -c Release -o ./Publish ${{ matrix.args }} /p:DeleteExistingFiles=True
+          dotnet publish ./be-src/Chats.BE.csproj -c Release -o ./Publish ${{ matrix.args }} /p:DeleteExistingFiles=True
   
       - name: Upload artifacts
         uses: actions/upload-artifact@v4
