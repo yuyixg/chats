@@ -28,7 +28,7 @@ public class SyncController(
     {
         Response.StatusCode = 200;
         Response.ContentType = "text/plain; charset=utf-8";
-        await Response.BodyWriter.WriteAsync(Encoding.UTF8.GetBytes("开始同步...\n"));
+        await Response.BodyWriter.WriteAsync(Encoding.UTF8.GetBytes("Starting synchronization...\n"));
         await Response.BodyWriter.FlushAsync();
     }
 
@@ -42,11 +42,10 @@ public class SyncController(
 
         if (string.IsNullOrWhiteSpace(ghSettings.Owner) || string.IsNullOrWhiteSpace(ghSettings.Repo))
         {
-            await ResponseLine("GitHub Owner 或 Repo 未配置！");
+            await ResponseLine("GitHub Owner or Repo is not configured!");
             return;
         }
 
-        // 1. 通过 Octokit 获取 Workflow Run 信息，取 run_number
         WorkflowRun run;
         try
         {
@@ -54,22 +53,20 @@ public class SyncController(
         }
         catch (NotFoundException)
         {
-            await ResponseLine($"Run {runId} 不存在");
+            await ResponseLine($"Run {runId} does not exist");
             return;
         }
 
         long runNumber = run.RunNumber;
-        await ResponseLine($"Run {runId} 的 Run Number: {runNumber}");
+        await ResponseLine($"Run {runId} Run Number: {runNumber}");
 
-        // 2. 获取该 Run 下的所有 artifacts
         ListArtifactsResponse artifactsResp = await ghClient.Actions.Artifacts.ListWorkflowArtifacts(ghSettings.Owner, ghSettings.Repo, runId);
         if (artifactsResp.Artifacts.Count == 0)
         {
-            await ResponseLine($"Run {runId} 无 Artifacts");
+            await ResponseLine($"Run {runId} has no Artifacts");
             return;
         }
 
-        // 3. 使用 HttpClient 下载 artifact ZIP 文件（注意：这里下载需要附带 GitHub Token）
         HttpClient httpClient = httpClientFactory.CreateClient();
         httpClient.DefaultRequestHeaders.UserAgent.ParseAdd("Sdcb-Chats-Sync/1.0");
         httpClient.DefaultRequestHeaders.Authorization = new AuthenticationHeaderValue("Bearer", ghSettings.Token);
@@ -77,23 +74,21 @@ public class SyncController(
         Artifact? artifact = artifactsResp.Artifacts.FirstOrDefault(a => a.Name == artifactName);
         if (artifact == null)
         {
-            await ResponseLine($"Artifact {artifactName} 不存在");
+            await ResponseLine($"Artifact {artifactName} does not exist");
             return;
         }
 
-        await ResponseLine($"开始下载 Artifact {artifact.Name}...");
-        // 获取 Artifact archive 下载地址
+        await ResponseLine($"Downloading Artifact {artifact.Name}...");
         HttpResponseMessage response = await httpClient.GetAsync(artifact.ArchiveDownloadUrl);
         if (!response.IsSuccessStatusCode)
         {
-            await ResponseLine($"下载 Artifact {artifact.Name} 失败: {response.StatusCode}");
+            await ResponseLine($"Failed to download Artifact {artifact.Name}: {response.StatusCode}");
             return;
         }
 
         using Stream zipStream = await response.Content.ReadAsStreamAsync();
-        await ResponseLine($"已下载 Artifact {artifact.Name}, 大小: {zipStream.Length}");
+        await ResponseLine($"Downloaded Artifact {artifact.Name}, size: {zipStream.Length}");
 
-        // 上传到 MinIO 文件夹：存放在 "r{runNumber}/{artifactName}.zip"
         string s3Key = $"r{runNumber}/{artifact.Name}.zip";
         PutObjectRequest putRequest = new()
         {
@@ -102,7 +97,7 @@ public class SyncController(
             InputStream = zipStream
         };
         await s3Client.PutObjectAsync(putRequest);
-        await ResponseLine($"已上传 Artifact {artifact.Name} => {s3Key}");
+        await ResponseLine($"Uploaded Artifact {artifact.Name} => {s3Key}");
     }
 
     [HttpPost("latest/{runNumber:long}")]
@@ -115,12 +110,10 @@ public class SyncController(
 
         if (string.IsNullOrWhiteSpace(ghSettings.Owner) || string.IsNullOrWhiteSpace(ghSettings.Repo))
         {
-            await ResponseLine("GitHub Owner 或 Repo 未配置！");
+            await ResponseLine("GitHub Owner or Repo is not configured!");
             return;
         }
 
-        // 4. 删除 latest 文件夹中的所有对象
-        List<KeyVersion> keysToDelete = [];
         ListObjectsV2Request listRequest = new()
         {
             BucketName = minio.BucketName,
@@ -136,10 +129,9 @@ public class SyncController(
                 Key = s3Obj.Key
             };
             await s3Client.DeleteObjectAsync(deleteRequest);
-            await ResponseLine($"已删除 {s3Obj.Key}");
+            await ResponseLine($"Deleted {s3Obj.Key}");
         }
 
-        // 5. 将 "r{runNumber}" 文件夹内的对象复制到 "latest" 文件夹
         string copySrcPrefix = $"r{runNumber}/";
         ListObjectsV2Request copyListRequest = new()
         {
@@ -149,7 +141,7 @@ public class SyncController(
         ListObjectsV2Response copyListResponse = await s3Client.ListObjectsV2Async(copyListRequest);
         foreach (S3Object s3Obj in copyListResponse.S3Objects)
         {
-            string relativeKey = s3Obj.Key[copySrcPrefix.Length..]; // 提取 artifactName.zip
+            string relativeKey = s3Obj.Key[copySrcPrefix.Length..];
             string destKey = $"latest/{relativeKey}";
             CopyObjectRequest copyRequest = new()
             {
@@ -159,7 +151,7 @@ public class SyncController(
                 DestinationKey = destKey
             };
             await s3Client.CopyObjectAsync(copyRequest);
-            await ResponseLine($"已复制 {s3Obj.Key} => {destKey}");
+            await ResponseLine($"Copied {s3Obj.Key} => {destKey}");
         }
     }
 }
