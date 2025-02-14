@@ -243,6 +243,7 @@ jobs:
           OUTPUT_LOG="curl_output.log"
           
           echo "Triggering webhook, running in the background..."
+          touch "$OUTPUT_LOG"  # Ensure the log file is created
           nohup bash -c "curl -X POST \"https://chats-release-webhook.starworks.cc:88/sync/${GITHUB_RUN_ID}/${MATRIX_ID}\" -N -H \"Authorization: Basic \$(echo -n '${CREDENTIAL}' | openssl base64)\" | tee -a ${OUTPUT_LOG}" &
           CURL_PID=$!
           
