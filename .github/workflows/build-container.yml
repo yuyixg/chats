@@ -294,18 +294,18 @@ jobs:
           ### Alternative binaries download links that may faster than GitHub(for China users)
           | Artifact                  | Download Link                                                                   |
           | ------------------------- | ------------------------------------------------------------------------------- |
-          | chats-win-x64.7z          | ${{ vars.MINIO_URL }}/chats/r${{ github.run_number }}/chats-win-x64.7z          |
-          | chats-linux-x64.7z        | ${{ vars.MINIO_URL }}/chats/r${{ github.run_number }}/chats-linux-x64.7z        |
-          | chats-linux-arm64.7z      | ${{ vars.MINIO_URL }}/chats/r${{ github.run_number }}/chats-linux-arm64.7z      |
-          | chats-linux-musl-x64.7z   | ${{ vars.MINIO_URL }}/chats/r${{ github.run_number }}/chats-linux-musl-x64.7z   |
-          | chats-linux-musl-arm64.7z | ${{ vars.MINIO_URL }}/chats/r${{ github.run_number }}/chats-linux-musl-arm64.7z |
-          | chats-osx-arm64.7z        | ${{ vars.MINIO_URL }}/chats/r${{ github.run_number }}/chats-osx-arm64.7z        |
-          | chats-osx-x64.7z          | ${{ vars.MINIO_URL }}/chats/r${{ github.run_number }}/chats-osx-x64.7z          |
-          | chats-fe.7z               | ${{ vars.MINIO_URL }}/chats/r${{ github.run_number }}/chats-fe.7z               |
-          | chats.7z                  | ${{ vars.MINIO_URL }}/chats/r${{ github.run_number }}/chats.7z                  |
+          | chats-win-x64.zip         | ${{ vars.MINIO_URL }}/chats/r${{ github.run_number }}/chats-win-x64.zip         |
+          | chats-linux-x64.zip       | ${{ vars.MINIO_URL }}/chats/r${{ github.run_number }}/chats-linux-x64.zip       |
+          | chats-linux-arm64.zip     | ${{ vars.MINIO_URL }}/chats/r${{ github.run_number }}/chats-linux-arm64.zip     |
+          | chats-linux-musl-x64.zip  | ${{ vars.MINIO_URL }}/chats/r${{ github.run_number }}/chats-linux-musl-x64.zip  |
+          | chats-linux-musl-arm64.zip| ${{ vars.MINIO_URL }}/chats/r${{ github.run_number }}/chats-linux-musl-arm64.zip|
+          | chats-osx-arm64.zip       | ${{ vars.MINIO_URL }}/chats/r${{ github.run_number }}/chats-osx-arm64.zip       |
+          | chats-osx-x64.zip         | ${{ vars.MINIO_URL }}/chats/r${{ github.run_number }}/chats-osx-x64.zip         |
+          | chats-fe.zip              | ${{ vars.MINIO_URL }}/chats/r${{ github.run_number }}/chats-fe.zip              |
+          | chats.zip                 | ${{ vars.MINIO_URL }}/chats/r${{ github.run_number }}/chats.zip                 |
     
           **NOTE**: 
-          Replace \`r${{ github.run_number }}\` with \`latest\` in the download link to get the latest version, for example: \`${{ vars.MINIO_URL }}/chats/latest/chats-win-x64.7z\`
+          Replace \`r${{ github.run_number }}\` with \`latest\` in the download link to get the latest version, for example: \`${{ vars.MINIO_URL }}/chats/latest/chats-win-x64.zip\`
 
           </details>
 
