@@ -325,7 +325,6 @@ jobs:
           name: r-${{ github.run_number }}
           tag: r-${{ github.run_number }}
           artifacts: "*.zip, sha256sum.txt"
-          draft: true
 
   upload-minio-latest:
     if: needs.build-fe.outputs.is_release == 'true'
