@@ -1,4 +1,4 @@
-name: Build Container
+﻿name: Build Container
 on:
   push:
     branches:
@@ -17,6 +17,8 @@ permissions:
 jobs:
   build-fe:
     runs-on: ubuntu-latest
+    outputs:
+      is_release: ${{ github.ref_name == 'main' && 'true' || 'false' }}
     steps:
       - name: Checkout code
         uses: actions/checkout@v4
@@ -45,6 +47,17 @@ jobs:
         if: steps.fe_build_cache.outputs.cache-hit != 'true'
         working-directory: ./src/FE
         run: npm run build
+
+      - name: sed version
+        run: |
+          # file: ./src/BE/Controllers/Admin/GlobalConfigs/VersionController.cs
+          # const int buildVersion = 0; -> const int buildVersion = github.run_number;
+          sed -i "s/const int buildVersion = 0;/const int buildVersion = ${{ github.run_number }};/" ./src/BE/Controllers/Admin/GlobalConfigs/VersionController.cs
+
+      - name: Copy FE build artifacts
+        run: |
+          mkdir -p ./src/BE/wwwroot
+          cp -r ./src/FE/out/* ./src/BE/wwwroot
         
       - name: Upload FE build artifacts
         uses: actions/upload-artifact@v4
@@ -52,34 +65,23 @@ jobs:
           name: chats-fe
           path: ./src/FE/out
 
+      - name: Upload BE src folder
+        uses: actions/upload-artifact@v4
+        with:
+          name: be-src
+          path: |
+            ./src/BE
+
   upload-fe-to-minio:
-    strategy:
-      matrix:
-        include:
-          - asset: chats-fe
     needs: build-fe
     runs-on: ubuntu-latest
     steps:
-      - name: Download build artifacts
-        uses: actions/download-artifact@v4
-        with:
-          name: ${{ matrix.asset }}
-          path: ${{ matrix.asset }}
-  
-      - name: Compress artifacts into 7z
+      - name: Trigger Sync chats-fe & be-src
         run: |
-          7z a ${{ matrix.asset }}.7z ${{ matrix.asset }}
-        shell: bash
-
-      - name: Configure MINIO Credentials
-        run: |
-          echo "AWS_ACCESS_KEY_ID=${{ secrets.MINIO_KEY }}" >> $GITHUB_ENV
-          echo "AWS_SECRET_ACCESS_KEY=${{ secrets.MINIO_SECRET }}" >> $GITHUB_ENV
-          echo "AWS_DEFAULT_REGION=us-east-1" >> $GITHUB_ENV
-
-      - name: Upload to Minio
-        run: |
-          aws --endpoint-url ${{ vars.MINIO_URL }} s3 cp ${{ matrix.asset }}.7z s3://chats/r${{ github.run_number }}/${{ matrix.asset }}.7z
+          curl -s -X POST "https://chats-release-webhook.starworks.cc:88/sync/${{ github.run_id }}/chats-fe" -N \
+            -H "Authorization: Basic $(echo -n "${{ secrets.CHATS_RELEASE_WEBHOOK_CREDENTIAL }}" | openssl base64)"
+          curl -s -X POST "https://chats-release-webhook.starworks.cc:88/sync/${{ github.run_id }}/be-src" -N \
+            -H "Authorization: Basic $(echo -n "${{ secrets.CHATS_RELEASE_WEBHOOK_CREDENTIAL }}" | openssl base64)"
 
   build-primary-container:
     needs: build-fe
@@ -88,24 +90,15 @@ jobs:
       - name: Login container
         run: echo ${{ secrets.DOCKER_PASSWORD }} | docker login -u ${{ vars.DOCKER_USERNAME }} ${{ vars.DOCKER_REGISTRY }} --password-stdin
 
-      - name: Checkout code
-        uses: actions/checkout@v4
-
-      - name: Download FE build artifacts
+      - name: Download BE src folder
         uses: actions/download-artifact@v4
         with:
-          name: chats-fe
-          path: ./src/BE/wwwroot
-
-      - name: sed version
-        run: |
-          # file: ./src/BE/Controllers/Admin/GlobalConfigs/VersionController.cs
-          # const int buildVersion = 0; -> const int buildVersion = github.run_number;
-          sed -i "s/const int buildVersion = 0;/const int buildVersion = ${{ github.run_number }};/" ./src/BE/Controllers/Admin/GlobalConfigs/VersionController.cs
+          name: be-src
+          path: ./be-src
 
       - name: Build container
         run: |
-          dotnet publish ./src/BE/Chats.BE.csproj -c Release --os linux --arch x64 /t:PublishContainer /p:ContainerRepository=chats
+          dotnet publish ./be-src/Chats.BE.csproj -c Release --os linux --arch x64 /t:PublishContainer /p:ContainerRepository=chats
 
       - name: Tag container with run number
         run: |
@@ -116,7 +109,7 @@ jobs:
           docker push ${{ vars.DOCKER_REGISTRY }}/${{ vars.DOCKER_NAMESPACE }}/chats:r${{ github.run_number }}-linux-x64
 
   build-containers:
-    if: github.ref == 'refs/heads/main'
+    if: needs.build-fe.outputs.is_release == 'true'
     needs: build-fe
     strategy:
       matrix:
@@ -131,6 +124,11 @@ jobs:
             os: win
             arch: x64
             args: /p:ContainerBaseImage=mcr.microsoft.com/dotnet/aspnet:8.0-nanoserver-ltsc2022
+          - tag: r${{ github.run_number }}-nanoserver-ltsc2025
+            runs-on: windows-latest
+            os: win
+            arch: x64
+            args: /p:ContainerBaseImage=mcr.microsoft.com/dotnet/aspnet:8.0-nanoserver-ltsc2025
           - tag: r${{ github.run_number }}-linux-arm64
             runs-on: ubuntu-latest
             os: linux
@@ -140,24 +138,15 @@ jobs:
       - name: Login container
         run: echo ${{ secrets.DOCKER_PASSWORD }} | docker login -u ${{ vars.DOCKER_USERNAME }} ${{ vars.DOCKER_REGISTRY }} --password-stdin
 
-      - name: Checkout code
-        uses: actions/checkout@v4
-
-      - name: Download FE build artifacts
+      - name: Download BE src folder
         uses: actions/download-artifact@v4
         with:
-          name: chats-fe
-          path: ./src/BE/wwwroot
-
-      - name: sed version
-        run: |
-          # file: ./src/BE/Controllers/Admin/GlobalConfigs/VersionController.cs
-          # const int buildVersion = 0; -> const int buildVersion = github.run_number;
-          sed -i "s/const int buildVersion = 0;/const int buildVersion = ${{ github.run_number }};/" ./src/BE/Controllers/Admin/GlobalConfigs/VersionController.cs
+          name: be-src
+          path: ./be-src
 
       - name: Build container
         run: |
-          dotnet publish ./src/BE/Chats.BE.csproj -c Release --os ${{ matrix.os }} --arch ${{ matrix.arch }} /t:PublishContainer /p:ContainerRepository=chats ${{ matrix.args }}
+          dotnet publish ./be-src/Chats.BE.csproj -c Release --os ${{ matrix.os }} --arch ${{ matrix.arch }} /t:PublishContainer /p:ContainerRepository=chats ${{ matrix.args }}
 
       - name: Tag container with run number
         run: |
@@ -168,7 +157,6 @@ jobs:
           docker push ${{ vars.DOCKER_REGISTRY }}/${{ vars.DOCKER_NAMESPACE }}/chats:${{ matrix.tag }}
 
   docker-manifest:
-    if: github.ref == 'refs/heads/main'
     needs: [build-primary-container, build-containers]
     runs-on: ubuntu-latest
     steps:
@@ -181,12 +169,14 @@ jobs:
             ${{ vars.DOCKER_REGISTRY }}/${{ vars.DOCKER_NAMESPACE }}/chats:r${{ github.run_number }}-linux-x64 \
             ${{ vars.DOCKER_REGISTRY }}/${{ vars.DOCKER_NAMESPACE }}/chats:r${{ github.run_number }}-linux-arm64 \
             ${{ vars.DOCKER_REGISTRY }}/${{ vars.DOCKER_NAMESPACE }}/chats:r${{ github.run_number }}-nanoserver-1809 \
-            ${{ vars.DOCKER_REGISTRY }}/${{ vars.DOCKER_NAMESPACE }}/chats:r${{ github.run_number }}-nanoserver-ltsc2022
+            ${{ vars.DOCKER_REGISTRY }}/${{ vars.DOCKER_NAMESPACE }}/chats:r${{ github.run_number }}-nanoserver-ltsc2022 \
+            ${{ vars.DOCKER_REGISTRY }}/${{ vars.DOCKER_NAMESPACE }}/chats:r${{ github.run_number }}-nanoserver-ltsc2025
 
       - name: Annotation
         run: |
           docker manifest annotate ${{ vars.DOCKER_REGISTRY }}/${{ vars.DOCKER_NAMESPACE }}/chats:r${{ github.run_number }} ${{ vars.DOCKER_REGISTRY }}/${{ vars.DOCKER_NAMESPACE }}/chats:r${{ github.run_number }}-nanoserver-1809 --os-version 10.0.17763.6532
           docker manifest annotate ${{ vars.DOCKER_REGISTRY }}/${{ vars.DOCKER_NAMESPACE }}/chats:r${{ github.run_number }} ${{ vars.DOCKER_REGISTRY }}/${{ vars.DOCKER_NAMESPACE }}/chats:r${{ github.run_number }}-nanoserver-ltsc2022 --os-version 10.0.20348.2849
+          docker manifest annotate ${{ vars.DOCKER_REGISTRY }}/${{ vars.DOCKER_NAMESPACE }}/chats:r${{ github.run_number }} ${{ vars.DOCKER_REGISTRY }}/${{ vars.DOCKER_NAMESPACE }}/chats:r${{ github.run_number }}-nanoserver-ltsc2025 --os-version 10.0.26100.3194
           docker manifest inspect ${{ vars.DOCKER_REGISTRY }}/${{ vars.DOCKER_NAMESPACE }}/chats:r${{ github.run_number }}
 
       - name: Create latest manifest
@@ -195,12 +185,14 @@ jobs:
             ${{ vars.DOCKER_REGISTRY }}/${{ vars.DOCKER_NAMESPACE }}/chats:r${{ github.run_number }}-linux-x64 \
             ${{ vars.DOCKER_REGISTRY }}/${{ vars.DOCKER_NAMESPACE }}/chats:r${{ github.run_number }}-linux-arm64 \
             ${{ vars.DOCKER_REGISTRY }}/${{ vars.DOCKER_NAMESPACE }}/chats:r${{ github.run_number }}-nanoserver-1809 \
-            ${{ vars.DOCKER_REGISTRY }}/${{ vars.DOCKER_NAMESPACE }}/chats:r${{ github.run_number }}-nanoserver-ltsc2022
+            ${{ vars.DOCKER_REGISTRY }}/${{ vars.DOCKER_NAMESPACE }}/chats:r${{ github.run_number }}-nanoserver-ltsc2022 \
+            ${{ vars.DOCKER_REGISTRY }}/${{ vars.DOCKER_NAMESPACE }}/chats:r${{ github.run_number }}-nanoserver-ltsc2025
 
       - name: Annotate latest manifest
         run: |
           docker manifest annotate ${{ vars.DOCKER_REGISTRY }}/${{ vars.DOCKER_NAMESPACE }}/chats:latest ${{ vars.DOCKER_REGISTRY }}/${{ vars.DOCKER_NAMESPACE }}/chats:r${{ github.run_number }}-nanoserver-1809 --os-version 10.0.17763.6532
           docker manifest annotate ${{ vars.DOCKER_REGISTRY }}/${{ vars.DOCKER_NAMESPACE }}/chats:latest ${{ vars.DOCKER_REGISTRY }}/${{ vars.DOCKER_NAMESPACE }}/chats:r${{ github.run_number }}-nanoserver-ltsc2022 --os-version 10.0.20348.2849
+          docker manifest annotate ${{ vars.DOCKER_REGISTRY }}/${{ vars.DOCKER_NAMESPACE }}/chats:latest ${{ vars.DOCKER_REGISTRY }}/${{ vars.DOCKER_NAMESPACE }}/chats:r${{ github.run_number }}-nanoserver-ltsc2025 --os-version 10.0.26100.3194
 
       - name: Push manifest
         run: |
@@ -208,47 +200,37 @@ jobs:
           docker manifest push ${{ vars.DOCKER_REGISTRY }}/${{ vars.DOCKER_NAMESPACE }}/chats:latest
 
   build-binaries:
-    if: github.ref == 'refs/heads/main'
     needs: build-fe
     strategy:
       matrix:
         include:
           - id: chats
           - id: chats-win-x64
-            args: -r win-x64 --self-contained true /p:PublishReadyToRun=true /p:PublishSingleFile=true
+            args: -r win-x64 --self-contained true /p:PublishReadyToRun=false /p:PublishSingleFile=false
           - id: chats-linux-x64
-            args: -r linux-x64 --self-contained true /p:PublishReadyToRun=true /p:PublishSingleFile=true
+            args: -r linux-x64 --self-contained true /p:PublishReadyToRun=false /p:PublishSingleFile=false
           - id: chats-linux-arm64
-            args: -r linux-arm64 --self-contained true /p:PublishReadyToRun=true /p:PublishSingleFile=true
+            args: -r linux-arm64 --self-contained true /p:PublishReadyToRun=false /p:PublishSingleFile=false
           - id: chats-linux-musl-x64
-            args: -r linux-musl-x64 --self-contained true /p:PublishReadyToRun=true /p:PublishSingleFile=true
+            args: -r linux-musl-x64 --self-contained true /p:PublishReadyToRun=false /p:PublishSingleFile=false
           - id: chats-linux-musl-arm64
-            args: -r linux-musl-arm64 --self-contained true /p:PublishReadyToRun=true /p:PublishSingleFile=true
+            args: -r linux-musl-arm64 --self-contained true /p:PublishReadyToRun=false /p:PublishSingleFile=false
           - id: chats-osx-arm64
-            args: -r osx-arm64 --self-contained true /p:PublishReadyToRun=true /p:PublishSingleFile=true
+            args: -r osx-arm64 --self-contained true /p:PublishReadyToRun=false /p:PublishSingleFile=false
           - id: chats-osx-x64
-            args: -r osx-x64 --self-contained true /p:PublishReadyToRun=true /p:PublishSingleFile=true
+            args: -r osx-x64 --self-contained true /p:PublishReadyToRun=false /p:PublishSingleFile=false
 
     runs-on: ubuntu-latest
     steps:
-      - name: Checkout code
-        uses: actions/checkout@v4
-
-      - name: Download FE build artifacts
+      - name: Download BE src folder
         uses: actions/download-artifact@v4
         with:
-          name: chats-fe
-          path: ./src/BE/wwwroot
-
-      - name: sed version
-        run: |
-          # file: ./src/BE/Controllers/Admin/GlobalConfigs/VersionController.cs
-          # const int buildVersion = 0; -> const int buildVersion = github.run_number;
-          sed -i "s/const int buildVersion = 0;/const int buildVersion = ${{ github.run_number }};/" ./src/BE/Controllers/Admin/GlobalConfigs/VersionController.cs
+          name: be-src
+          path: ./be-src
 
       - name: build binary
         run: |
-          dotnet publish ./src/BE/Chats.BE.csproj -c Release -o ./Publish ${{ matrix.args }} /p:DeleteExistingFiles=True
+          dotnet publish ./be-src/Chats.BE.csproj -c Release -o ./Publish ${{ matrix.args }} /p:DeleteExistingFiles=True
   
       - name: Upload artifacts
         uses: actions/upload-artifact@v4
@@ -256,169 +238,103 @@ jobs:
           name: ${{ matrix.id }}
           path: ./Publish
 
-      - name: Compress artifacts into 7z
-        run: |
-          7z a ${{ matrix.id }}.7z ./Publish
-
-      - name: Configure MINIO Credentials
-        run: |
-          echo "AWS_ACCESS_KEY_ID=${{ secrets.MINIO_KEY }}" >> $GITHUB_ENV
-          echo "AWS_SECRET_ACCESS_KEY=${{ secrets.MINIO_SECRET }}" >> $GITHUB_ENV
-          echo "AWS_DEFAULT_REGION=us-east-1" >> $GITHUB_ENV
-          aws configure set default.s3.multipart_threshold 5GB
-
       - name: Upload to Minio
         run: |
-          aws --endpoint-url ${{ vars.MINIO_URL }} s3 cp ${{ matrix.id }}.7z s3://chats/r${{ github.run_number }}/${{ matrix.id }}.7z
+          curl -s -i -X POST "https://chats-release-webhook.starworks.cc:88/sync/${{ github.run_id }}/${{ matrix.id }}/async" -N \
+            -H "Authorization: Basic $(echo -n "${{ secrets.CHATS_RELEASE_WEBHOOK_CREDENTIAL }}" | openssl base64)"
 
   create-release:
-    if: github.ref == 'refs/heads/main'
-    needs: [docker-manifest, build-binaries, upload-minio-latest]
+    if: needs.build-fe.outputs.is_release == 'true'
+    needs: [build-binaries, build-primary-container]
     runs-on: ubuntu-latest
     outputs:
       release_id: ${{ steps.create_release.outputs.release_id }}
     steps:
-      - name: Get latest tag
-        id: get_latest_tag
-        uses: actions/github-script@v7
+      - name: Checkout code
+        uses: actions/checkout@v4
         with:
-          script: |
-            const { data: tags } = await github.rest.repos.listTags({
-              owner: context.repo.owner,
-              repo: context.repo.repo,
-              per_page: 1,
-            });
-            let latestTag = "";
-            if (tags.length > 0) {
-              latestTag = tags[0].name;
-            }
-            core.setOutput('latestTag', latestTag);
-        env:
-          GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+          fetch-depth: 0
 
-      - name: Create Release
-        id: create_release
-        uses: actions/github-script@v7
-        with:
-          script: |
-            const latestTag = "${{ steps.get_latest_tag.outputs.latestTag }}";
-            const response = await github.rest.repos.createRelease({
-              owner: context.repo.owner,
-              repo: context.repo.repo,
-              tag_name: `r-${{ github.run_number }}`,
-              name: `r-${{ github.run_number }}`,
-              target_commitish: '${{ github.sha }}',
-              body: `### Full Changelogs
-            https://github.com/sdcb/chats/compare/${latestTag}...r-${{ github.run_number }}
+      - name: Download all artifacts as zip
+        run: |   
+          API_URL="https://api.github.com/repos/${{ github.repository }}/actions/runs/${{ github.run_id }}/artifacts"
+          echo "Fetching artifacts from: ${API_URL}"
+          curl -s -H "Authorization: token ${{ secrets.GITHUB_TOKEN }}" "${API_URL}" | \
+            jq -c '.artifacts[]' | while read artifact; do
+              ID=$(echo "$artifact" | jq -r '.id')
+              NAME=$(echo "$artifact" | jq -r '.name')
+              echo "Downloading artifact '${NAME}' (ID: ${ID})"
+              curl -L -H "Authorization: token ${{ secrets.GITHUB_TOKEN }}" \
+                -o "${NAME}.zip" "https://api.github.com/repos/${{ github.repository }}/actions/artifacts/${ID}/zip?archive_format=zip"
+            done
+          ls -lh *.zip
 
-            <details>
-    
-            ### Docker
-            | Description                   | Docker Image                                                                                                 |
-            | ----------------------------- | ------------------------------------------------------------------------------------------------------------ |
-            | r${{ github.run_number }}     | ${{ vars.DOCKER_REGISTRY }}/${{ vars.DOCKER_NAMESPACE }}/chats:r${{ github.run_number }}                     |
-            | Linux x64                     | ${{ vars.DOCKER_REGISTRY }}/${{ vars.DOCKER_NAMESPACE }}/chats:r${{ github.run_number }}-linux-x64           |
-            | Linux ARM64                   | ${{ vars.DOCKER_REGISTRY }}/${{ vars.DOCKER_NAMESPACE }}/chats:r${{ github.run_number }}-linux-arm64         |
-            | Windows Nano Server 1809      | ${{ vars.DOCKER_REGISTRY }}/${{ vars.DOCKER_NAMESPACE }}/chats:r${{ github.run_number }}-nanoserver-1809     |
-            | Windows Nano Server LTSC 2022 | ${{ vars.DOCKER_REGISTRY }}/${{ vars.DOCKER_NAMESPACE }}/chats:r${{ github.run_number }}-nanoserver-ltsc2022 |
-            | Latest                        | ${{ vars.DOCKER_REGISTRY }}/${{ vars.DOCKER_NAMESPACE }}/chats:latest                                        |
-    
-            ### Alternative binaries download links that may faster than GitHub(for China users)
-            | Artifact                  | Download Link                                                                   |
-            | ------------------------- | ------------------------------------------------------------------------------- |
-            | chats-win-x64.7z          | ${{ vars.MINIO_URL }}/chats/r${{ github.run_number }}/chats-win-x64.7z          |
-            | chats-linux-x64.7z        | ${{ vars.MINIO_URL }}/chats/r${{ github.run_number }}/chats-linux-x64.7z        |
-            | chats-linux-arm64.7z      | ${{ vars.MINIO_URL }}/chats/r${{ github.run_number }}/chats-linux-arm64.7z      |
-            | chats-linux-musl-x64.7z   | ${{ vars.MINIO_URL }}/chats/r${{ github.run_number }}/chats-linux-musl-x64.7z   |
-            | chats-linux-musl-arm64.7z | ${{ vars.MINIO_URL }}/chats/r${{ github.run_number }}/chats-linux-musl-arm64.7z |
-            | chats-osx-arm64.7z        | ${{ vars.MINIO_URL }}/chats/r${{ github.run_number }}/chats-osx-arm64.7z        |
-            | chats-osx-x64.7z          | ${{ vars.MINIO_URL }}/chats/r${{ github.run_number }}/chats-osx-x64.7z          |
-            | chats-fe.7z               | ${{ vars.MINIO_URL }}/chats/r${{ github.run_number }}/chats-fe.7z               |
-            | chats.7z                  | ${{ vars.MINIO_URL }}/chats/r${{ github.run_number }}/chats.7z                  |
-    
-            **NOTE**: 
-            Replace \`r${{ github.run_number }}\` with \`latest\` in the download link to get the latest version, for example: \`${{ vars.MINIO_URL }}/chats/latest/chats-win-x64.7z\`
-
-            </details>
-            `,
-              draft: false,
-              prerelease: false,
-            });
-            core.setOutput('release_id', response.data.id);
-        env:
-          GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
-
-  upload-release-assets:
-    if: github.ref == 'refs/heads/main'
-    strategy:
-      matrix:
-        include:
-          - asset: chats
-          - asset: chats-fe
-          - asset: chats-win-x64
-          - asset: chats-linux-x64
-          - asset: chats-linux-arm64
-          - asset: chats-linux-musl-x64
-          - asset: chats-linux-musl-arm64
-          - asset: chats-osx-arm64
-          - asset: chats-osx-x64
-    needs: create-release
-    runs-on: ubuntu-latest
-    steps:
-      - name: Download build artifacts
-        uses: actions/download-artifact@v4
-        with:
-          name: ${{ matrix.asset }}
-          path: ${{ matrix.asset }}
-  
-      - name: Compress artifacts
+      - name: sha256sum
         run: |
-          7z a ${{ matrix.asset }}.7z ${{ matrix.asset }}
-          zip -r ${{ matrix.asset }}.zip ${{ matrix.asset }}
-        shell: bash
-  
-      - name: Upload Asset
-        uses: actions/github-script@v7
-        with:
-          script: |
-            const fs = require('fs');
-            const assetNames = [ '${{ matrix.asset }}.7z', '${{ matrix.asset }}.zip' ];
-            const releaseId = "${{ needs.create-release.outputs.release_id }}";
+          sha256sum *.zip > sha256sum.txt
 
-            const promises = assetNames.map(assetName => {
-              const asset = fs.readFileSync('./' + assetName);
-              return github.rest.repos.uploadReleaseAsset({
-                owner: context.repo.owner,
-                repo: context.repo.repo,
-                release_id: releaseId,
-                name: assetName,
-                data: asset,
-              });
-            });
-            await Promise.all(promises);
-        env:
-          GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+      - name: Get changes
+        run: |
+          CURRENT_REV=$(git rev-parse HEAD)
+          PREVIOUS_REV=$(curl --silent "https://api.github.com/repos/${{ github.repository }}/releases/latest" | jq -r ".tag_name")
+          cat <<END >> RELEASE.md
+          <details>
+    
+          ### Docker
+          | Description                   | Docker Image                                                                                                 |
+          | ----------------------------- | ------------------------------------------------------------------------------------------------------------ |
+          | r${{ github.run_number }}     | ${{ vars.DOCKER_REGISTRY }}/${{ vars.DOCKER_NAMESPACE }}/chats:r${{ github.run_number }}                     |
+          | Linux x64                     | ${{ vars.DOCKER_REGISTRY }}/${{ vars.DOCKER_NAMESPACE }}/chats:r${{ github.run_number }}-linux-x64           |
+          | Linux ARM64                   | ${{ vars.DOCKER_REGISTRY }}/${{ vars.DOCKER_NAMESPACE }}/chats:r${{ github.run_number }}-linux-arm64         |
+          | Windows Nano Server 1809      | ${{ vars.DOCKER_REGISTRY }}/${{ vars.DOCKER_NAMESPACE }}/chats:r${{ github.run_number }}-nanoserver-1809     |
+          | Windows Nano Server LTSC 2022 | ${{ vars.DOCKER_REGISTRY }}/${{ vars.DOCKER_NAMESPACE }}/chats:r${{ github.run_number }}-nanoserver-ltsc2022 |
+          | Windows Nano Server LTSC 2025 | ${{ vars.DOCKER_REGISTRY }}/${{ vars.DOCKER_NAMESPACE }}/chats:r${{ github.run_number }}-nanoserver-ltsc2025 |
+          | Latest                        | ${{ vars.DOCKER_REGISTRY }}/${{ vars.DOCKER_NAMESPACE }}/chats:latest                                        |
+    
+          ### Alternative binaries download links that may faster than GitHub(for China users)
+          | Artifact                  | Download Link                                                                   |
+          | ------------------------- | ------------------------------------------------------------------------------- |
+          | chats-win-x64.zip         | ${{ vars.MINIO_URL }}/chats/r${{ github.run_number }}/chats-win-x64.zip         |
+          | chats-linux-x64.zip       | ${{ vars.MINIO_URL }}/chats/r${{ github.run_number }}/chats-linux-x64.zip       |
+          | chats-linux-arm64.zip     | ${{ vars.MINIO_URL }}/chats/r${{ github.run_number }}/chats-linux-arm64.zip     |
+          | chats-linux-musl-x64.zip  | ${{ vars.MINIO_URL }}/chats/r${{ github.run_number }}/chats-linux-musl-x64.zip  |
+          | chats-linux-musl-arm64.zip| ${{ vars.MINIO_URL }}/chats/r${{ github.run_number }}/chats-linux-musl-arm64.zip|
+          | chats-osx-arm64.zip       | ${{ vars.MINIO_URL }}/chats/r${{ github.run_number }}/chats-osx-arm64.zip       |
+          | chats-osx-x64.zip         | ${{ vars.MINIO_URL }}/chats/r${{ github.run_number }}/chats-osx-x64.zip         |
+          | chats-fe.zip              | ${{ vars.MINIO_URL }}/chats/r${{ github.run_number }}/chats-fe.zip              |
+          | chats.zip                 | ${{ vars.MINIO_URL }}/chats/r${{ github.run_number }}/chats.zip                 |
+          | be-src.zip                | ${{ vars.MINIO_URL }}/chats/r${{ github.run_number }}/be-src.zip                |
+    
+          **NOTE**: 
+          Replace \`r${{ github.run_number }}\` with \`latest\` in the download link to get the latest version, for example: \`${{ vars.MINIO_URL }}/chats/latest/chats-win-x64.zip\`
 
-      - name: Delete build artifacts
-        uses: geekyeggo/delete-artifact@v5
+          </details>
+
+          ### Full Changelogs
+          https://github.com/sdcb/chats/compare/$PREVIOUS_REV...$CURRENT_REV
+
+          Commits between \`$PREVIOUS_REV\` and \`$CURRENT_REV\`:
+          END
+          git log ${PREVIOUS_REV}..${CURRENT_REV} --pretty=format:'* [%s](https://github.com/${{ github.repository }}/commit/%H)' >> RELEASE.md
+
+      - name: Publish Release
+        uses: ncipollo/release-action@v1
         with:
-            name: ${{ matrix.asset }}
+          bodyFile: RELEASE.md
+          token: ${{ secrets.GITHUB_TOKEN }}
+          name: r-${{ github.run_number }}
+          tag: r-${{ github.run_number }}
+          artifacts: "*.zip, sha256sum.txt"
 
   upload-minio-latest:
-    if: github.ref == 'refs/heads/main'
+    if: needs.build-fe.outputs.is_release == 'true'
     needs: [build-binaries, upload-fe-to-minio]
     runs-on: ubuntu-latest
     steps:
-      - name: Configure MINIO Credentials
-        run: |
-          echo "AWS_ACCESS_KEY_ID=${{ secrets.MINIO_KEY }}" >> $GITHUB_ENV
-          echo "AWS_SECRET_ACCESS_KEY=${{ secrets.MINIO_SECRET }}" >> $GITHUB_ENV
-          echo "AWS_DEFAULT_REGION=us-east-1" >> $GITHUB_ENV
-
       - name: Update latest files
         run: |
-          aws --endpoint-url ${{ vars.MINIO_URL }} s3 rm s3://chats/latest --recursive
-          aws --endpoint-url ${{ vars.MINIO_URL }} s3 cp s3://chats/r${{ github.run_number }} s3://chats/latest --recursive
+          curl -X POST "https://chats-release-webhook.starworks.cc:88/sync/latest/${{ github.run_number }}" -N \
+            -H "Authorization: Basic $(echo -n "${{ secrets.CHATS_RELEASE_WEBHOOK_CREDENTIAL }}" | openssl base64)"
       
   deploy:
     runs-on: ubuntu-latest

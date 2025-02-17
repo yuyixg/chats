@@ -52,8 +52,9 @@ const handleErrorResponse = async (err: Response) => {
       message = 'Internal server error, Please try again later';
       break;
     case 401:
+      message = 'Session has expired';
       redirectToLoginPage();
-      return;
+      break;
     case 403:
       message = 'Resource denial of authorized access';
       redirectToHomePage(1000);
@@ -66,8 +67,8 @@ const handleErrorResponse = async (err: Response) => {
           ? message
           : 'Operation failed, Please try again later, or contact technical personnel';
   }
-
-  toast.error(t(message));
+  const tMsg = t(message);
+  tMsg && toast.error(tMsg);
   throw error;
 };
 
