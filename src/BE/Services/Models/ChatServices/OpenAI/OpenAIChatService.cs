@@ -37,10 +37,13 @@ public partial class OpenAIChatService : ChatService
     {
         await foreach (StreamingChatCompletionUpdate delta in _chatClient.CompleteChatStreamingAsync(messages, options, cancellationToken))
         {
-            if (delta.ContentUpdate.Count == 0 && delta.Usage == null) continue;
-
             string? segment = delta.ContentUpdate.FirstOrDefault()?.Text;
             string? reasoningSegment = StreamingReasoningContentAccessor(delta);
+
+            if (segment == null && reasoningSegment == null && delta.Usage == null)
+            {
+                continue;
+            }
 
             yield return new ChatSegment
             {
