@@ -26,6 +26,10 @@ public static class DBConfigure
         {
             dbContextOptionsBuilder.UseNpgsql(connectionString);
         }
+        else if (dbType.Equals("mysql", StringComparison.OrdinalIgnoreCase))
+        {
+          dbContextOptionsBuilder.UseMySql(connectionString, ServerVersion.AutoDetect(connectionString));
+        }
         else
         {
             throw new Exception("Unknown DBType: " + dbType);
